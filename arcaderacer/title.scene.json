@@ -1,0 +1,42 @@
+{
+  "world": {
+    "loader": {
+      "assets": {
+        "arcaderacer": {
+          "type": "json",
+          "url": "/games/arcaderacer/assets/arcaderacer.json",
+          "preload": true
+        }
+      }
+    },
+    "shipped": {
+      "plugins": ["match"]
+    }
+  },
+  "plugins": [
+    "loader",
+    "scenemanager",
+    "ui",
+    "shipped"
+  ],
+  "prefabs": {
+    "scenemanager": {
+      "out": {}
+    },
+    "titlecard": {}
+  },
+  "actors": [
+    {
+      "is": "scenemanager"
+    },
+    {
+      "is": "loader"
+    },
+    {
+      "is": "titlecard"
+    },
+    {
+      "is": "match"
+    }
+  ]
+}
