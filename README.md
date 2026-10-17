@@ -19,5 +19,7 @@ what it needs).
 
 - **arcaderacer**: an arcade racer of three courses, Cascade Forest, Tokyo Bayside and Paris Dusk,
   against seven rivals, with a lobby for several players.
+- **demo_audiodaw**: a music studio on the audiodaw plugin: a rack, a mixer, a piano roll and an
+  arrangement, and the jungle song generator arcaderacer's music is made with.
 
 MIT, Outside Data.

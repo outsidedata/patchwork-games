@@ -3,4 +3,6 @@
 !/README.md
 !/LICENSE
 !/arcaderacer/
+!/demo_audiodaw/
 __pycache__/
+.DS_Store
