@@ -1,10 +1,11 @@
-// The browser half of chamber: draws the `chamber` row's pieces on render3d's scene, the first frame
+// The browser half of chamber: draws the pieces of the `chamber` row's level on render3d's scene, the first frame
 // the row is there. Each box a box of its `colour`, its top lined every `lines` metres in `line` when it
 // gives one; each ramp a wedge of its `colour`. Every material is dressed and lit by the scene's lights.
 // `close` takes them off and disposes them.
 import type * as THREE from 'three'
 import type { Plugins } from '#engine/browser.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
+import { levelOf } from './chamber.sim.ts'
 
 type Piece = { min: number[]; max: number[]; colour: string; lines?: number; line?: string; toward?: [number, number] }
 
@@ -16,7 +17,7 @@ export function chamber() {
       if (made) return
       const row = plugins.wire.rows.find(r => r.kind === 'chamber')
       if (!row) return
-      const { boxes, ramps } = def(plugins.wire, row.kind) as { boxes: Piece[]; ramps: Piece[] }
+      const { boxes, ramps } = levelOf(row, def(plugins.wire, row.kind)) as unknown as { boxes: Piece[]; ramps: Piece[] }
       const three = plugins.render3d.THREE as typeof THREE
       const lit = (colour: string) => plugins.render3d.dress(new three.MeshStandardMaterial({ color: colour, roughness: 0.8 }))
       made = []

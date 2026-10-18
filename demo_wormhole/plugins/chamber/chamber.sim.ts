@@ -1,11 +1,11 @@
 // chamber, demo_wormhole's own: the level, the pieces the walker stands on and a portal is put on,
 // read off the definition of the `chamber` row (one `actors` entry) in `assets/demo_wormhole.json`:
+// `below`, metres, the ground's height where no piece stands, and `levels`, each level by name:
 //   boxes   { min, max, colour, lines?, line? }: a solid box from `min` to `max` [x, y, z], metres.
 //   ramps   { min, max, toward, colour }: a wedge over the box from `min` to `max`, its top rising
 //           from `min`'s y at the edge `toward` points away from to `max`'s y at the edge it points
 //           at; `toward` is [x, z], one of the four axes.
-//   below   metres: the ground's height where no piece stands.
-// Its row has no fields: the pieces never change.
+// The row's `level` names the level its scene stands in; it never changes.
 //
 // `heightAt(w, x, z)` is the top of the highest piece over (x, z), as the walker stands on it
 // (`chamber.walker.ts`), with every portal's opening let in (the `portal` rows): a portal on a box's
@@ -16,7 +16,9 @@
 // `ray(w, from, dir)` is where a line from `from` along `dir` first meets a piece: `{ t, point,
 // normal, box }`, the outward normal of the face it meets and the index of the box it is on, or
 // `box` -1 for a ramp; undefined where it meets none. `bounds(w)` is the floor plan every piece
-// covers, [[x0, z0], [x1, z1]], which the walker is kept inside.
+// covers, [[x0, z0], [x1, z1]], which the walker is kept inside. `piecesOf(w)` is the row's level's
+// `boxes` and `ramps`, with the definition's `below`, and `levelOf(chamber, defs)` the same for a
+// chamber row and its definition, for a page.
 import type { Kind, Row, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
@@ -28,7 +30,12 @@ type Box = { min: V3; max: V3 }
 type Ramp = { min: V3; max: V3; toward: [number, number] }
 type Plane = { n: V3; d: number }
 
-const piecesOf = (w: W) => def(w, w.find('chamber').kind) as { boxes: Box[]; ramps: Ramp[]; below: number }
+type Pieces = { boxes: Box[]; ramps: Ramp[]; below: number }
+export const levelOf = (row: Row, d: { below: number; levels: Record<string, { boxes: Box[]; ramps: Ramp[] }> }): Pieces => ({ ...d.levels[row.data.level], below: d.below })
+export const piecesOf = (w: W): Pieces => {
+  const row = w.find('chamber')
+  return levelOf(row, def(w, row.kind))
+}
 const dot = (a: number[], b: number[]) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 const within = (p: { min: V3; max: V3 }, x: number, z: number) => x >= p.min[0] && x <= p.max[0] && z >= p.min[2] && z <= p.max[2]
 

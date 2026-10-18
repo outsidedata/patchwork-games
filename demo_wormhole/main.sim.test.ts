@@ -20,8 +20,8 @@ const here = new URL('./', import.meta.url).href
 const DT = file.prefabs.engine.dt
 const body = shared.world.walker.kinds.player
 const { speed, eye, sens, portals: [orange, blue] } = defs.player
-const [, wall, ledge] = defs.chamber.boxes
-const ramp = defs.chamber.ramps[0]
+const [, wall, ledge] = defs.chamber.levels.main.boxes
+const ramp = defs.chamber.levels.main.ramps[0]
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a))
 
 // Down the middle of the ramp, along the ledge's middle line, and its far (low x) edge.

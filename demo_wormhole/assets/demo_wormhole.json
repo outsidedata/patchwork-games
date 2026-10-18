@@ -13,18 +13,40 @@
     "height": 2,
     "post": 0.08,
     "pit": 20,
-    "colours": { "orange": "#ff7a1a", "blue": "#2a8cff" }
+    "colours": { "orange": "#ff7a1a", "blue": "#2a8cff" },
+    "takes": ["crate", "ball"],
+    "room": 3,
+    "edge": 1,
+    "gravity": [0, -20, 0],
+    "subSteps": 4
   },
   "crate": { "size": 0.5, "density": 1, "friction": 0.6, "restitution": 0.1, "colour": "#c98b4a" },
+  "ball": { "radius": 0.14, "density": 1, "friction": 0.4, "restitution": 0.2, "rolling": 0.1, "colour": "#e8d34a" },
+  "hopper": { "count": [6, 6, 8], "spacing": 0.4, "lift": 0.4, "jitter": 0.06 },
   "chamber": {
     "below": -100,
-    "boxes": [
-      { "min": [-25, -1, -25], "max": [25, 0, 25], "colour": "#141822", "lines": 1, "line": "#2c3446" },
-      { "min": [-12, 0, -20.5], "max": [12, 8, -20], "colour": "#3a4258" },
-      { "min": [6, 0, -8], "max": [12, 5, -2], "colour": "#5a5f6e" }
-    ],
-    "ramps": [
-      { "min": [6, 0, -2], "max": [12, 5, 10], "toward": [0, -1], "colour": "#6b5a4a" }
-    ]
+    "levels": {
+      "main": {
+        "boxes": [
+          { "min": [-25, -1, -25], "max": [25, 0, 25], "colour": "#141822", "lines": 1, "line": "#2c3446" },
+          { "min": [-12, 0, -20.5], "max": [12, 8, -20], "colour": "#3a4258" },
+          { "min": [6, 0, -8], "max": [12, 5, -2], "colour": "#5a5f6e" }
+        ],
+        "ramps": [
+          { "min": [6, 0, -2], "max": [12, 5, 10], "toward": [0, -1], "colour": "#6b5a4a" }
+        ]
+      },
+      "pour": {
+        "boxes": [
+          { "min": [-25, -1, -25], "max": [25, 0, 25], "colour": "#141822", "lines": 1, "line": "#2c3446" },
+          { "min": [-12, 0, -20.5], "max": [12, 8, -20], "colour": "#3a4258" },
+          { "min": [-1.4, 0, -1.8], "max": [-1.2, 2.5, 1.8], "colour": "#5a5f6e" },
+          { "min": [1.2, 0, -1.8], "max": [1.4, 2.5, 1.8], "colour": "#5a5f6e" },
+          { "min": [-1.2, 0, -1.8], "max": [1.2, 2.5, -1.6], "colour": "#5a5f6e" },
+          { "min": [-1.2, 0, 1.6], "max": [1.2, 2.5, 1.8], "colour": "#5a5f6e" }
+        ],
+        "ramps": []
+      }
+    }
   }
 }

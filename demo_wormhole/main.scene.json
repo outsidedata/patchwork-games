@@ -11,6 +11,7 @@
   ],
   "seats": 1,
   "actors": [
-    { "is": "start", "slot": 0, "pos": [0, 0, 12], "yaw": 3.141592653589793 }
+    { "is": "start", "slot": 0, "pos": [0, 0, 12], "yaw": 3.141592653589793 },
+    { "is": "chamber", "level": "main" }
   ]
 }

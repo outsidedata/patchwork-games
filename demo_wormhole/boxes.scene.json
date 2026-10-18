@@ -1,14 +1,5 @@
 {
   "extends": "demo_wormhole.partial_scene.json",
-  "world": {
-    "box3d": {
-      "subStepCount": 4,
-      "gravity": [0, -20, 0],
-      "static": [],
-      "kinds": {},
-      "mods": { "ground": "chamber", "kinds": "chamber" }
-    }
-  },
   "plugins": [
     "loader",
     "scenemanager",
@@ -19,24 +10,9 @@
     "ui"
   ],
   "seats": 1,
-  "prefabs": {
-    "box3d": {
-      "ground": [[0, 0]]
-    },
-    "crate": {
-      "pos": [0, 0, 0],
-      "rot": [0, 0, 0, 1],
-      "vel": [0, 0, 0],
-      "spin": [0, 0, 0],
-      "awake": true,
-      "enabled": true,
-      "drift": null,
-      "inside": null,
-      "jumps": 0
-    }
-  },
   "actors": [
     { "is": "start", "slot": 0, "pos": [0, 0, 12], "yaw": 3.141592653589793, "throws": "crate" },
+    { "is": "chamber", "level": "main" },
     { "is": "box3d" },
     { "is": "crate", "pos": [0, 4, 6], "rot": [0.2, 0.3, 0.1, 0.9273618495495703] }
   ]

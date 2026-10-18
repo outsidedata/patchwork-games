@@ -14,4 +14,5 @@ import file from './boxes.scene.json' with { type: 'json' }
 
 export const sim: Sim = { scenemanager, loader, box3d, player, start, chamber, portal, crate }
 
-export const scene = file as Scene
+// The file holds only what boxes adds to the partial it extends, which the scenemanager merges in.
+export const scene = file as unknown as Scene

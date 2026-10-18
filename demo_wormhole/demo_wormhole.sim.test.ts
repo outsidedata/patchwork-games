@@ -31,7 +31,7 @@ test('a portal on the floor and one on the wall: a body dropped into the floor o
   }
   const portal = (name: string) => room.rows.find(r => r.kind === 'portal' && r.data.name === name)!
   const [orange, blue] = defs.player.portals
-  const wall = defs.chamber.boxes[1]
+  const wall = defs.chamber.levels.main.boxes[1]
   const { eye, sens } = defs.player
 
   // Facing the wall: the second portal on its face, at eye height, facing back.
