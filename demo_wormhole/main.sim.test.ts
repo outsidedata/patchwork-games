@@ -13,12 +13,12 @@ import { possessed, type Think } from '#addons/player/player.addon.ts'
 import { simulate, type FrameRecord, type StepRecord } from '#addons/simulator/simulator.addon.ts'
 import { sim } from './demo_wormhole.sim.ts'
 import file from './demo_wormhole.scene.json' with { type: 'json' }
-import main from './main.scene.json' with { type: 'json' }
+import shared from './demo_wormhole.partial_scene.json' with { type: 'json' }
 import defs from './assets/demo_wormhole.json' with { type: 'json' }
 
 const here = new URL('./', import.meta.url).href
 const DT = file.prefabs.engine.dt
-const body = main.world.walker.kinds.player
+const body = shared.world.walker.kinds.player
 const { speed, eye, sens, portals: [orange, blue] } = defs.player
 const [, wall, ledge] = defs.chamber.boxes
 const ramp = defs.chamber.ramps[0]

@@ -13,4 +13,5 @@ import file from './main.scene.json' with { type: 'json' }
 
 export const sim: Sim = { scenemanager, loader, player, start, chamber, portal }
 
-export const scene = file as Scene
+// The file holds only what main adds to the partial it extends, which the scenemanager merges in.
+export const scene = file as unknown as Scene

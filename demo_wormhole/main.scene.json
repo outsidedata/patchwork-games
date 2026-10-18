@@ -1,31 +1,5 @@
 {
-  "world": {
-    "defs": "demo_wormhole",
-    "loader": {
-      "assets": {
-        "demo_wormhole": {
-          "type": "json",
-          "url": "/games/demo_wormhole/assets/demo_wormhole.json",
-          "preload": true
-        }
-      }
-    },
-    "predict": { "epsilon": 0.000001, "cutoff": 60, "halflife": 100, "snap": 0.5, "below": 0.0001 },
-    "shipped": { "plugins": ["chamber"] },
-    "walker": {
-      "kinds": {
-        "player": {
-          "radius": 0.35, "height": 1.7, "accel": 14, "airAccel": 0, "turnRate": 30, "gravity": 20, "jumpH": 1.2,
-          "step": 0.4, "maxSlope": 0.7, "slopeBand": 0.05, "slide": 2, "wade": 0, "span": 0.35, "probe": 1, "seekSpeed": 1
-        }
-      },
-      "mods": { "height": "chamber" }
-    },
-    "ui": {
-      "panels": { "reticle": { "anchor": "center", "size": [16, 16] } },
-      "styles": {}
-    }
-  },
+  "extends": "demo_wormhole.partial_scene.json",
   "plugins": [
     "loader",
     "scenemanager",
@@ -35,65 +9,5 @@
     "render3d",
     "ui"
   ],
-  "seats": 1,
-  "prefabs": {
-    "engine": {
-      "dt": 0.016666666666666666,
-      "width": 960,
-      "height": 540
-    },
-    "scenemanager": {
-      "out": {}
-    },
-    "loader": {},
-    "render3d": {
-      "camera": { "fov": 75, "near": 0.05, "far": 400, "at": [0, 1.6, 12], "look": [0, 1.6, 0] },
-      "tone": "neutral",
-      "exposure": 1,
-      "background": "#0b0d12",
-      "pixelRatio": 2
-    },
-    "environment3d": {
-      "sun": { "at": [30, 50, 20], "color": "#fff4e0", "power": 2.2 },
-      "sky": { "color": "#b9c8ff", "ground": "#1a1d28", "power": 1.1 }
-    },
-    "player": {
-      "seat": 0,
-      "placed": false,
-      "pos": [0, 0, 0],
-      "yaw": 0,
-      "vel": [0, 0, 0],
-      "grounded": true,
-      "sliding": false,
-      "speed": 0,
-      "want": [0, 0],
-      "face": null,
-      "jump": false,
-      "side": 0,
-      "turned": 0,
-      "view": [0, 0],
-      "move": [0, 0],
-      "jumps": 0
-    },
-    "start": {
-      "slot": 0,
-      "pos": [0, 0, 0],
-      "yaw": 0
-    },
-    "chamber": {},
-    "portal": {
-      "name": "",
-      "to": "",
-      "pos": [0, 0, 0],
-      "normal": [0, 0, 1],
-      "up": [0, 1, 0],
-      "on": 0
-    }
-  },
-  "actors": [
-    { "is": "scenemanager" },
-    { "is": "loader" },
-    { "is": "start", "slot": 0, "pos": [0, 0, 12], "yaw": 3.141592653589793 },
-    { "is": "chamber" }
-  ]
+  "seats": 1
 }

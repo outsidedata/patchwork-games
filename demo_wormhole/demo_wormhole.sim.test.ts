@@ -8,7 +8,7 @@ import { connection, load, manager, type Down } from '#addons/scenemanager/scene
 import { possessed } from '#addons/player/player.addon.ts'
 import { sim } from './demo_wormhole.sim.ts'
 import file from './demo_wormhole.scene.json' with { type: 'json' }
-import scene from './main.scene.json' with { type: 'json' }
+import shared from './demo_wormhole.partial_scene.json' with { type: 'json' }
 import defs from './assets/demo_wormhole.json' with { type: 'json' }
 
 const DT = file.prefabs.engine.dt
@@ -61,7 +61,7 @@ test('a portal on the floor and one on the wall: a body dropped into the floor o
   expect(out.pos[2]).toBeGreaterThan(wall.max[2])
   expect(out.vel[2]).toBeGreaterThan(10)
   // The step it went through, it fell one step more under gravity first.
-  expect(out.vel[2]).toBeCloseTo(-(falling - scene.world.walker.kinds.player.gravity * DT), 6)
+  expect(out.vel[2]).toBeCloseTo(-(falling - shared.world.walker.kinds.player.gravity * DT), 6)
   expect(Math.abs(out.vel[0])).toBeLessThan(1e-9)
 
   // Through the air it keeps that speed, until it lands.
