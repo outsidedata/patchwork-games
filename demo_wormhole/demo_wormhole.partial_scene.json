@@ -7,11 +7,21 @@
           "type": "json",
           "url": "/games/demo_wormhole/assets/demo_wormhole.json",
           "preload": true
-        }
+        },
+        "gloss-colour": { "type": "texture", "url": "/games/demo_wormhole/assets/surfaces/gloss/colour.webp", "wrap": "repeat", "anisotropy": 8, "preload": true },
+        "gloss-normal": { "type": "texture", "url": "/games/demo_wormhole/assets/surfaces/gloss/normal.webp", "space": "linear", "wrap": "repeat", "anisotropy": 8, "preload": true },
+        "gloss-roughness": { "type": "texture", "url": "/games/demo_wormhole/assets/surfaces/gloss/roughness.webp", "space": "linear", "wrap": "repeat", "anisotropy": 8, "preload": true },
+        "matte-colour": { "type": "texture", "url": "/games/demo_wormhole/assets/surfaces/matte/colour.webp", "wrap": "repeat", "anisotropy": 8, "preload": true },
+        "matte-normal": { "type": "texture", "url": "/games/demo_wormhole/assets/surfaces/matte/normal.webp", "space": "linear", "wrap": "repeat", "anisotropy": 8, "preload": true },
+        "matte-roughness": { "type": "texture", "url": "/games/demo_wormhole/assets/surfaces/matte/roughness.webp", "space": "linear", "wrap": "repeat", "anisotropy": 8, "preload": true },
+        "crate-colour": { "type": "texture", "url": "/games/demo_wormhole/assets/surfaces/crate/colour.webp", "anisotropy": 4, "preload": true },
+        "crate-normal": { "type": "texture", "url": "/games/demo_wormhole/assets/surfaces/crate/normal.webp", "space": "linear", "anisotropy": 4, "preload": true },
+        "crate-roughness": { "type": "texture", "url": "/games/demo_wormhole/assets/surfaces/crate/roughness.webp", "space": "linear", "anisotropy": 4, "preload": true },
+        "crate-glow": { "type": "texture", "url": "/games/demo_wormhole/assets/surfaces/crate/glow.webp", "anisotropy": 4, "preload": true }
       }
     },
     "predict": { "epsilon": 0.000001, "cutoff": 60, "halflife": 100, "snap": 0.5, "below": 0.0001 },
-    "shipped": { "plugins": ["chamber"] },
+    "shipped": { "plugins": ["chamber", "portal"] },
     "walker": {
       "kinds": {
         "player": {
@@ -52,12 +62,17 @@
       "camera": { "fov": 75, "near": 0.05, "far": 400, "at": [0, 1.6, 12], "look": [0, 1.6, 0] },
       "tone": "neutral",
       "exposure": 1,
-      "background": "#0b0d12",
+      "background": "#050608",
+      "shadows": "soft",
+      "bloom": { "strength": 0.12, "radius": 0.15, "threshold": 1 },
       "pixelRatio": 2
     },
     "environment3d": {
-      "sun": { "at": [30, 50, 20], "color": "#fff4e0", "power": 2.2 },
-      "sky": { "color": "#b9c8ff", "ground": "#1a1d28", "power": 1.1 }
+      "sun": {
+        "at": [8, 40, 14], "color": "#dfe6f5", "power": 2.2,
+        "shadow": { "map": 2048, "half": 28, "near": 1, "far": 120, "distance": 60, "bias": -0.0004, "normalBias": 0.02 }
+      },
+      "sky": { "color": "#8e9ab3", "ground": "#101116", "power": 0.9 }
     },
     "player": {
       "seat": 0,

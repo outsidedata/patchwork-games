@@ -1,5 +1,5 @@
 // A field, drawn: the box of its definition's `size` round `pos`, see-through in `colour` at `opacity`,
-// unlit, seen from both sides.
+// unlit, seen from both sides, writing no depth so what stands behind it shows through.
 import type * as THREE from 'three'
 import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'

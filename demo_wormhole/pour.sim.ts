@@ -1,5 +1,5 @@
 // The kinds of pour, the pouring experiment's scene, and the pour.scene.json file next to this one: a
-// bin of four walls on the floor round the orange portal, the blue portal up on the far wall, and a
+// bin of four walls on the floor round the red portal, the white portal up on the far wall, and a
 // `hopper` that fills the bin with balls on the first step, which pour through the floor and out of the
 // wall.
 import type { Scene, Sim } from '#engine/engine.ts'

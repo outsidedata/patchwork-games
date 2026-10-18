@@ -30,23 +30,23 @@ test('a portal on the floor and one on the wall: a body dropped into the floor o
     truth.step(DT)
   }
   const portal = (name: string) => room.rows.find(r => r.kind === 'portal' && r.data.name === name)!
-  const [orange, blue] = defs.player.portals
+  const [red, white] = defs.player.portals
   const wall = defs.chamber.levels.main.boxes[1]
   const { eye, sens } = defs.player
 
   // Facing the wall: the second portal on its face, at eye height, facing back.
   press('place', 1)
-  near(portal(blue).data.pos, [body().data.pos[0], eye, wall.max[2]])
-  near(portal(blue).data.normal, [0, 0, 1])
-  near(portal(blue).data.up, [0, 1, 0])
+  near(portal(white).data.pos, [body().data.pos[0], eye, wall.max[2]])
+  near(portal(white).data.normal, [0, 0, 1])
+  near(portal(white).data.up, [0, 1, 0])
 
   // Looking down: the first portal on the floor ahead of its feet.
   press('look', 0, 1.2 / sens)
   press('place', 0)
-  const a = portal(orange).data
+  const a = portal(red).data
   expect(a.pos[1]).toBeCloseTo(0, 9)
   near(a.normal, [0, 1, 0])
-  expect(a.to).toBe(blue)
+  expect(a.to).toBe(white)
 
   // Dropped from 6 m over the floor portal.
   Object.assign(body().data, { pos: [a.pos[0], 6, a.pos[2]], vel: [0, 0, 0], grounded: false })

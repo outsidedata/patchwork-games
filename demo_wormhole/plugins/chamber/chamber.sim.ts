@@ -1,12 +1,16 @@
 // chamber, demo_wormhole's own: the level, the pieces the walker stands on and a portal is put on,
 // read off the definition of the `chamber` row (one `actors` entry) in `assets/demo_wormhole.json`:
 // `below`, metres, the ground's height where no piece stands, and `levels`, each level by name:
-//   boxes   { min, max, colour, lines?, line?, dark?, bounce? }: a solid box from `min` to `max`
-//           [x, y, z], metres; `dark`, a portal is never put on it; `bounce`, its top throws back
-//           up that share of the speed a body lands on it at.
-//   ramps   { min, max, toward, colour }: a wedge over the box from `min` to `max`, its top rising
+//   boxes   { min, max, surface, dark?, bounce? }: a solid box from `min` to `max` [x, y, z],
+//           metres, drawn in the chamber's `surface` of that name (`chamber.plugin.ts`); `dark`, a
+//           portal is never put on it; `bounce`, its top throws back up that share of the speed a
+//           body lands on it at.
+//   ramps   { min, max, toward, surface }: a wedge over the box from `min` to `max`, its top rising
 //           from `min`'s y at the edge `toward` points away from to `max`'s y at the edge it points
 //           at; `toward` is [x, z], one of the four axes.
+//   strips  { min, max }: the level's light strips, drawn and nothing else: nothing stands on them,
+//           meets them or is kept inside them.
+//   probe   [x, y, z]: where the level's reflection is seen from (`chamber.plugin.ts`).
 // The row's `level` names the level its scene stands in; it never changes.
 //
 // `heightAt(w, x, z)` is the top of the highest piece over (x, z), as the walker stands on it

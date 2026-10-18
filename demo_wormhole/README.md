@@ -1,7 +1,7 @@
 # demo_wormhole
 
-A first-person portal game. The player walks a test chamber and puts down two linked portals, an
-orange one and a blue one, on its walls and floors. Whatever goes in at the front of one comes out of
+A first-person portal game. The player walks a test chamber and puts down two linked portals, a
+red one and a white one, on its walls and floors. Whatever goes in at the front of one comes out of
 the front of the other, keeping its speed: the walker, physics bodies (crates, balls, prisms), laser
 beams, and the view through the opening. Around that core are the pieces of a test chamber: lasers
 and the catchers they light, floor buttons, doors those open, a redirection prism, a barrier field,
@@ -32,6 +32,15 @@ The tests, from the repo's root:
 ```
 yarn vitest run games/demo_wormhole/demo_wormhole.sim.test.ts
 yarn vitest run games/demo_wormhole/main.sim.test.ts
+yarn vitest run games/demo_wormhole/plugins/chamber/chamber.plugin.test.ts
+yarn vitest run games/demo_wormhole/portal.client.test.ts
+```
+
+The baked surfaces, from the repo's root (`yarn health` first checks Blender, the library, gltfpack
+and ImageMagick):
+
+```
+yarn bake demo_wormhole
 ```
 
 ## Controls
@@ -41,8 +50,8 @@ yarn vitest run games/demo_wormhole/main.sim.test.ts
 | WASD, arrows | `move` | Walk, relative to the view. |
 | Mouse (under pointer lock) | `look` | Turn the view; pitch is held within `player.pitch` of level. |
 | Space | `jump` | Jump `walker.kinds.player.jumpH` metres. |
-| Left click | `place 0` | Put the orange portal where the reticle points. |
-| Right click | `place 1` | Put the blue portal where the reticle points. |
+| Left click | `place 0` | Put the red portal where the reticle points. |
+| Right click | `place 1` | Put the white portal where the reticle points. |
 | E down, E up | `charge`, `throw` | Throw a new body of the start's `throws` kind, or the carried one. Held longer, it leaves faster. |
 | F | `grab` | Pick up the body under the reticle, or let go of the one carried. |
 
@@ -86,9 +95,10 @@ something through a portal uses those three functions and no other.
 ### The chamber: `plugins/chamber/`
 
 The level. The `chamber` row names a level in its definition's `levels`. A level is `boxes`
-(axis-aligned solids, each with a `colour` and optionally `lines` on its top, `dark` to refuse
-portals, or `bounce` to throw what lands on it back up) and `ramps` (wedges rising toward
-`toward`). The one level description feeds every consumer:
+(axis-aligned solids, each drawn in a `surface`, optionally `dark` to refuse portals, or `bounce` to
+throw what lands on it back up), `ramps` (wedges rising toward `toward`, each in a `surface`),
+`strips` (the light strips, drawn and nothing else) and a `probe` (where its reflection is seen
+from). The one level description feeds every consumer:
 
 - `chamber.sim.ts`: `heightAt(w, x, z)` is the ground the walker stands on: the highest piece over a
   point, with each portal's opening cut in (a pit `pit` metres deep under a floor portal; a wall
@@ -100,10 +110,42 @@ portals, or `bounce` to throw what lands on it back up) and `ramps` (wedges risi
 - `chamber.box3d.ts`: box3d's `ground` mod, the whole level as one fixed body (boxes as boxes,
   ramps as hulls, a `bounce` as restitution), and its `kinds` mod, the bodies of crates, prisms and
   balls (dynamic) and of doors and lifts (kinematic), each made from its definition.
-- `chamber.plugin.ts`: draws the level, once, on the first frame its row is there.
+- `chamber.plugin.ts`: draws the level, once, on the first frame its row is there, and the light it
+  is seen by (The look, below). Its `surfaced`, `panelled` and `glowing` are how every kind's look
+  draws in the chamber's surfaces.
 
-The game's plugins are loaded by the `shipped` plugin (`world.shipped.plugins`), since the engine
-loads only top-level plugins by name.
+The game's plugins are loaded by the `shipped` plugin (`world.shipped.plugins`: `chamber`, then
+`portal`), since the engine loads only top-level plugins by name.
+
+### The look
+
+Shiny black metal in a void, lit by strips, with red as the one accent. Every number is the
+chamber's definition and the kinds' own in `assets/demo_wormhole.json`, and render3d's and
+environment3d's prefabs in `demo_wormhole.partial_scene.json`.
+
+- **Surfaces** (`chamber.surfaces`). A baked surface is 0.5 m panels with a bevelled seam round
+  each, baked in Blender by `assets/surfaces/panels.py` from a CC0 set kept in the library
+  (`PATCHWORK_LIBRARY`, `textures/<set>/<set>.jpg`, `.normal.jpg`, `.roughness.jpg`, fetched by
+  `assets/surfaces/fetch.ts`) and cut to WebP by `assets/demo_wormhole.bake.ts`, which writes each map
+  where the catalogue's entry reads it. Only the WebP maps are in the game. `gloss`, glossy black, is
+  what a portal takes; `matte`, rough charcoal, is a `dark` box and the ramps; `crate` is one panel to
+  a face with a line of light inset round it. Each panel varies a little in brightness and roughness
+  and reads its own place in the set, so neighbours never repeat. The plain surfaces are a colour and
+  a roughness: `gunmetal` (doors, lifts, the laser's housing, catchers, buttons, the dropper, prisms),
+  `ceramic` (balls), `lamp` and `pad` (what glows white). A baked surface's panels are laid on the
+  world (`panelled`), so a seam runs on from one box to the next.
+- **Strips** (`chamber.strip`, each level's `strips`): thin bars shining white past 1, the room's
+  light, at the walls' feet and tops and the ledge's edges.
+- **Reflection** (`chamber.env`): the level seen from its `probe`, its walls dim and its strips
+  shining, made once render3d has a renderer and laid on the scene's environment, so the black
+  panels reflect the strips round them.
+- **Haze** (`chamber.haze`): the scene's fog. **Key light**: environment3d's cool overhead sun with a
+  soft shadow, and a dim sky. **Bloom**: render3d's, low, on what shines past 1 alone. Tone mapping
+  is `neutral`.
+- **Portals**: a thin rim shining its `rims` glow, a halo inward from the opening's edge, a film of
+  its glow while it has no partner, and its own light in front of it.
+- **Red** is what is live or dangerous: the red portal, the laser's beam, a lit catcher, a pressed
+  button, the field.
 
 ### The seat: `player.sim.ts`, `player.client.ts`
 
@@ -158,11 +200,18 @@ it ends on the first box3d body or fixed shape it meets (`castRayClosest`) or on
 `marks` kind, and where it enters an opening it continues from the matching point of the other
 opening.
 
+**The portals' lights** (`portal.plugin.ts`, `portal`). One point light for each portal the
+definition's `rims` names, made dark on the plugin's first tick and lit while its portal stands, so
+the scene's light count never changes and placing a portal never rebuilds every lit material's
+program on the frame it lands.
+
 **The view through a portal** (`portal.client.ts`). Each opening is a pane drawing a texture. Each
 frame, just before the pane is drawn, a second camera stands where the main camera would be had it
 gone through this portal, its near plane laid on the other portal's plane (an oblique projection), and
 draws the scene into a texture the size of the drawing buffer; the pane samples it at its own screen
-pixel. All panes are hidden during that draw, so the view is one level deep.
+pixel. All panes are hidden during that draw, so the view is one level deep. The programs that draw
+into that texture are built in the background as soon as a portal stands, so the frame a pair first
+opens does not stall on them.
 
 **Bodies drawn on both sides** (`portal.plugin.ts`, `seen`). A crate or ball `inside` a portal is
 drawn twice: where it is, cut away behind this portal's plane, and carried through to the other
@@ -209,17 +258,22 @@ whole time.
 
 | Path | What it is |
 | --- | --- |
-| `assets/demo_wormhole.json` | Every kind's definition, and the chamber's levels. |
+| `assets/demo_wormhole.json` | Every kind's definition, the chamber's levels, surfaces, strips, reflection and haze. |
+| `assets/demo_wormhole.bake.ts` | `yarn bake demo_wormhole`: every baked surface, from the library to WebP where the catalogue reads it. |
+| `assets/surfaces/panels.py`, `assets/surfaces/fetch.ts` | The Blender bake of a surface's panels, and the library sets it reads. |
+| `assets/surfaces/<surface>/` | The baked maps the game reads. |
 | `demo_wormhole.scene.json`, `demo_wormhole.sim.ts` | The manager. |
 | `demo_wormhole.partial_scene.json` | What every scene shares. |
 | `<scene>.scene.json`, `<scene>.sim.ts` | A scene: its actors and the kinds it runs. |
 | `<kind>.sim.ts` | A kind's rule. |
 | `<kind>.client.ts` | A kind's drawing (and, for `player`, the keys and camera). |
-| `plugins/chamber/` | The level: ground, rays, box3d bodies, drawing. |
-| `plugins/portal/` | Portals: going through, portal worlds, beams, two-sided drawing. |
+| `plugins/chamber/` | The level: ground, rays, box3d bodies, drawing, surfaces, strips, reflection, haze. |
+| `plugins/portal/` | Portals: going through, portal worlds, beams, two-sided drawing, their lights. |
 | `demo_wormhole.server.ts` | The socket server `client.html` dials. |
 | `index.html`, `client.html`, `dev.html` | The pages. |
 | `demo_wormhole.sim.test.ts` | A body dropped into a floor portal flies out of a wall portal at the speed it fell. |
 | `main.sim.test.ts` | A bot on a predicting page climbs the ramp, places both portals, runs off the ledge, and comes out of the wall at the speed it fell; the camera is never drawn between the portals. |
+| `plugins/chamber/chamber.plugin.test.ts` | Every box and ramp is drawn in its surface, its maps the loader's and laid on the world; strips shine and cast no shadow; the fog is the haze; every ramp face faces out. |
+| `portal.client.test.ts` | One dark light per portal from the start; a placed portal lights its own in front of it, its rim shines its glow, both openings open; a portal taken out darkens its light. |
 
 Each file's header says what it does in full. Read it before changing the file.

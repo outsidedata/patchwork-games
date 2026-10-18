@@ -17,8 +17,8 @@
     { "is": "start", "slot": 0, "pos": [3, 0, 8], "yaw": 3.141592653589793, "throws": "crate" },
     { "is": "chamber", "level": "pour" },
     { "is": "box3d" },
-    { "is": "portal", "name": "orange", "to": "blue", "pos": [0, 0, 0], "normal": [0, 1, 0], "up": [0, 0, -1], "on": 0 },
-    { "is": "portal", "name": "blue", "to": "orange", "pos": [6, 3, -20], "normal": [0, 0, 1], "up": [0, 1, 0], "on": 1 },
+    { "is": "portal", "name": "red", "to": "white", "pos": [0, 0, 0], "normal": [0, 1, 0], "up": [0, 0, -1], "on": 0 },
+    { "is": "portal", "name": "white", "to": "red", "pos": [6, 3, -20], "normal": [0, 0, 1], "up": [0, 1, 0], "on": 1 },
     { "is": "hopper", "pos": [0, 0, 0] }
   ]
 }

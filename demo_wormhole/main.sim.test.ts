@@ -19,7 +19,7 @@ import defs from './assets/demo_wormhole.json' with { type: 'json' }
 const here = new URL('./', import.meta.url).href
 const DT = file.prefabs.engine.dt
 const body = shared.world.walker.kinds.player
-const { speed, eye, sens, portals: [orange, blue] } = defs.player
+const { speed, eye, sens, portals: [red, white] } = defs.player
 const [, wall, ledge] = defs.chamber.levels.main.boxes
 const ramp = defs.chamber.levels.main.ramps[0]
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a))
@@ -68,14 +68,14 @@ function bot(): Think {
       return ['place', which] as [string, number]
     }
     switch (stage) {
-      case 0: return put(1, blue)
+      case 0: return put(1, white)
       case 1: return go(across, ramp.max[2] + 1)
       case 2: return go(across, lane)
       case 3: return go(ledge.min[0] + 0.8, lane)
       case 4: {
         const from = [d.pos[0], d.pos[1] + eye, d.pos[2]]
         const look = aim(Math.atan2(lands[0] - from[0], lands[2] - from[2]), Math.atan2(lands[1] - from[1], Math.hypot(lands[0] - from[0], lands[2] - from[2])))
-        return look ?? put(0, orange)
+        return look ?? put(0, red)
       }
       case 5: return go(ledge.max[0] - 1.5, lane)
       case 6: {
@@ -108,10 +108,10 @@ test('a bot walks up the ramp, puts a portal on the floor and one on the wall, r
   // Both portals stand: the second on the wall's face, the first on the floor.
   const end = steps[steps.length - 1]
   const named = (name: string) => of(end, 'portal').find(p => p.name === name)!
-  expect(named(blue).normal.map((v: number) => Math.round(v))).toEqual([0, 0, 1])
-  expect(named(blue).pos[2]).toBeCloseTo(wall.max[2], 9)
-  expect(named(orange).normal.map((v: number) => Math.round(v))).toEqual([0, 1, 0])
-  expect(named(orange).pos[1]).toBeCloseTo(ledge.min[1], 9)
+  expect(named(white).normal.map((v: number) => Math.round(v))).toEqual([0, 0, 1])
+  expect(named(white).pos[2]).toBeCloseTo(wall.max[2], 9)
+  expect(named(red).normal.map((v: number) => Math.round(v))).toEqual([0, 1, 0])
+  expect(named(red).pos[1]).toBeCloseTo(ledge.min[1], 9)
 
   // It walked up the ramp onto the ledge.
   expect(Math.max(...steps.map(s => walker(s).pos[1]))).toBeCloseTo(ledge.max[1], 9)
@@ -128,7 +128,7 @@ test('a bot walks up the ramp, puts a portal on the floor and one on the wall, r
   // Its fall, one more step of gravity, comes out of the wall along the wall portal's normal; its run,
   // along the floor portal's up (the way it looked), comes out along the wall portal's up.
   expect(after.vel[2]).toBeCloseTo(-(before.vel[1] - body.gravity * DT), 9)
-  const up: number[] = named(orange).up
+  const up: number[] = named(red).up
   expect(after.vel[1]).toBeCloseTo(before.vel[0] * up[0] + before.vel[2] * up[2], 6)
   expect(after.vel[2]).toBeGreaterThan(10)
 
@@ -146,6 +146,6 @@ test('a bot walks up the ramp, puts a portal on the floor and one on the wall, r
   const far = moves.filter(m => Math.hypot(m.to[0] - m.from[0], m.to[1] - m.from[1], m.to[2] - m.from[2]) > fastest)
   expect(far).toHaveLength(1)
   const by = (p: number[], c: number[]) => Math.hypot(c[0] - p[0], c[2] - p[2])
-  expect(by(named(orange).pos, far[0].from)).toBeLessThan(defs.portal.height)
-  expect(by(named(blue).pos, far[0].to)).toBeLessThan(defs.portal.height)
+  expect(by(named(red).pos, far[0].from)).toBeLessThan(defs.portal.height)
+  expect(by(named(white).pos, far[0].to)).toBeLessThan(defs.portal.height)
 })
