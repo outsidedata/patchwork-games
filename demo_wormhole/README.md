@@ -124,9 +124,10 @@ chamber's definition and the kinds' own in `assets/demo_wormhole.json`, and rend
 environment3d's prefabs in `demo_wormhole.partial_scene.json`.
 
 - **Surfaces** (`chamber.surfaces`). A baked surface is 0.5 m panels with a bevelled seam round
-  each, baked in Blender by `assets/surfaces/panels.py` from a CC0 set kept in the library
-  (`PATCHWORK_LIBRARY`, `textures/<set>/<set>.jpg`, `.normal.jpg`, `.roughness.jpg`, fetched by
-  `assets/surfaces/fetch.ts`) and cut to WebP by `assets/demo_wormhole.bake.ts`, which writes each map
+  each, baked in Blender by `assets/surfaces/panels.py` from a cc0-textures set (the surface's `set`,
+  `Metal029_4K-JPG` or `Metal027_4K-JPG`), whose maps the bake's `texture` takes from the library
+  (`PATCHWORK_LIBRARY`), downloading the set first when it is not there, and cut to WebP by
+  `assets/demo_wormhole.bake.ts`, which writes each map
   where the catalogue's entry reads it. Only the WebP maps are in the game. `gloss`, glossy black, is
   what a portal takes; `matte`, rough charcoal, is a `dark` box and the ramps; `crate` is one panel to
   a face with a line of light inset round it. Each panel varies a little in brightness and roughness
@@ -260,7 +261,7 @@ whole time.
 | --- | --- |
 | `assets/demo_wormhole.json` | Every kind's definition, the chamber's levels, surfaces, strips, reflection and haze. |
 | `assets/demo_wormhole.bake.ts` | `yarn bake demo_wormhole`: every baked surface, from the library to WebP where the catalogue reads it. |
-| `assets/surfaces/panels.py`, `assets/surfaces/fetch.ts` | The Blender bake of a surface's panels, and the library sets it reads. |
+| `assets/surfaces/panels.py` | The Blender bake of a surface's panels from its cc0-textures set's maps. |
 | `assets/surfaces/<surface>/` | The baked maps the game reads. |
 | `demo_wormhole.scene.json`, `demo_wormhole.sim.ts` | The manager. |
 | `demo_wormhole.partial_scene.json` | What every scene shares. |

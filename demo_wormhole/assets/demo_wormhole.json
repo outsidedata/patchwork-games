@@ -52,21 +52,21 @@
     "below": -100,
     "surfaces": {
       "gloss": {
-        "set": "metal029", "size": 2048, "tile": 4, "panel": 0.5, "seam": 0.006, "bevel": 0.002, "depth": 0.004,
+        "set": "Metal029_4K-JPG", "size": 2048, "tile": 4, "panel": 0.5, "seam": 0.006, "bevel": 0.002, "depth": 0.004,
         "scale": 1.5, "saturation": 0.15, "tint": "#ffffff", "gain": 1.7, "vary": 0.06, "rough": [0.12, 0.2], "roughVary": 0.03, "normal": 0.15,
         "groove": { "dark": 0.25, "rough": 0.7 },
         "maps": { "colour": "gloss-colour", "normal": "gloss-normal", "roughness": "gloss-roughness" },
         "metalness": 0.15, "reflect": 1
       },
       "matte": {
-        "set": "metal027", "size": 2048, "tile": 4, "panel": 0.5, "seam": 0.006, "bevel": 0.002, "depth": 0.004,
+        "set": "Metal027_4K-JPG", "size": 2048, "tile": 4, "panel": 0.5, "seam": 0.006, "bevel": 0.002, "depth": 0.004,
         "scale": 1.5, "saturation": 0.15, "tint": "#a9aab0", "gain": 3.2, "vary": 0.05, "rough": [0.62, 0.8], "roughVary": 0.03, "normal": 0.4,
         "groove": { "dark": 0.4, "rough": 0.9 },
         "maps": { "colour": "matte-colour", "normal": "matte-normal", "roughness": "matte-roughness" },
         "metalness": 0, "reflect": 0.6
       },
       "crate": {
-        "set": "metal029", "size": 512, "tile": 0.5, "panel": 0.5, "seam": 0.024, "bevel": 0.008, "depth": 0.006,
+        "set": "Metal029_4K-JPG", "size": 512, "tile": 0.5, "panel": 0.5, "seam": 0.024, "bevel": 0.008, "depth": 0.006,
         "scale": 0.75, "saturation": 0.15, "tint": "#c4c8d0", "gain": 1.6, "vary": 0, "rough": [0.22, 0.36], "roughVary": 0, "normal": 0.3,
         "groove": { "dark": 0.3, "rough": 0.6 },
         "glow": { "inset": 0.05, "line": 0.008, "soft": 0.002, "map": "crate-glow", "colour": "#eef2ff", "power": 1.5 },

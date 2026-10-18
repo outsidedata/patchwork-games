@@ -41,60 +41,60 @@
         },
         "concrete.colour": {
           "type": "texture",
-          "url": "/games/arcaderacer/assets/surfaces/concrete/colour.webp",
+          "url": "/games/arcaderacer/assets/surfaces/concrete-color-1024.webp",
           "wrap": "repeat",
           "anisotropy": 8
         },
         "concrete.normal": {
           "type": "texture",
-          "url": "/games/arcaderacer/assets/surfaces/concrete/normal.webp",
+          "url": "/games/arcaderacer/assets/surfaces/concrete-normal-1024.webp",
           "space": "linear",
           "wrap": "repeat",
           "anisotropy": 8
         },
         "concrete.roughness": {
           "type": "texture",
-          "url": "/games/arcaderacer/assets/surfaces/concrete/roughness.webp",
+          "url": "/games/arcaderacer/assets/surfaces/concrete-roughness-1024.webp",
           "space": "linear",
           "wrap": "repeat",
           "anisotropy": 8
         },
         "lawn.colour": {
           "type": "texture",
-          "url": "/games/arcaderacer/assets/surfaces/lawn/colour.webp",
+          "url": "/games/arcaderacer/assets/surfaces/lawn-color-1024.webp",
           "wrap": "repeat",
           "anisotropy": 8
         },
         "lawn.normal": {
           "type": "texture",
-          "url": "/games/arcaderacer/assets/surfaces/lawn/normal.webp",
+          "url": "/games/arcaderacer/assets/surfaces/lawn-normal-1024.webp",
           "space": "linear",
           "wrap": "repeat",
           "anisotropy": 8
         },
         "lawn.roughness": {
           "type": "texture",
-          "url": "/games/arcaderacer/assets/surfaces/lawn/roughness.webp",
+          "url": "/games/arcaderacer/assets/surfaces/lawn-roughness-1024.webp",
           "space": "linear",
           "wrap": "repeat",
           "anisotropy": 8
         },
         "asphalt.colour": {
           "type": "texture",
-          "url": "/games/arcaderacer/assets/surfaces/asphalt/colour.webp",
+          "url": "/games/arcaderacer/assets/surfaces/asphalt-color-1024.webp",
           "wrap": "repeat",
           "anisotropy": 8
         },
         "asphalt.normal": {
           "type": "texture",
-          "url": "/games/arcaderacer/assets/surfaces/asphalt/normal.webp",
+          "url": "/games/arcaderacer/assets/surfaces/asphalt-normal-1024.webp",
           "space": "linear",
           "wrap": "repeat",
           "anisotropy": 8
         },
         "asphalt.roughness": {
           "type": "texture",
-          "url": "/games/arcaderacer/assets/surfaces/asphalt/roughness.webp",
+          "url": "/games/arcaderacer/assets/surfaces/asphalt-roughness-1024.webp",
           "space": "linear",
           "wrap": "repeat",
           "anisotropy": 8

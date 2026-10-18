@@ -1,0 +1,3 @@
+# The ground maps `yarn bake demo_terrain3d` cuts from the cc0-textures sets assets/cc0-textures.json
+# names: made on each machine, never committed.
+assets/ground/*.webp

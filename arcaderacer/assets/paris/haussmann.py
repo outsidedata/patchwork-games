@@ -33,10 +33,11 @@
 #           six stripes, and the courtyard side and its dormers are the mid level's. Mid and far are
 #           high's.
 #   /Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup \
-#       --python games/arcaderacer/assets/paris/haussmann.py [-- high|medium [out.glb]]
-# The limestone and zinc are read from the library's `textures/` (`PATCHWORK_LIBRARY`, else
-# ~/patchwork-library). It writes the plain glb Blender exports; `yarn bake arcaderacer` packs it into
-# the game (`arcaderacer.bake.ts`).
+#       --python games/arcaderacer/assets/paris/haussmann.py -- <high|medium> <out.glb> \
+#       <limestone colour> <limestone roughness> <zinc colour> <zinc normal> <zinc roughness>
+# The limestone and zinc are the cc0-textures sets `limestone_1-4K` and `metal_roof-4K`, whose maps
+# `yarn bake arcaderacer` (`arcaderacer.bake.ts`) takes from the library with its `texture` tool and
+# hands over. It writes the plain glb Blender exports, which the bake packs into the game.
 import math
 import os
 import random
@@ -52,10 +53,15 @@ from kit import (UP, WHITE, Build, Frame, arc, box_uv, dot, export, image, lin, 
                  strokes_to_maps, texture, textured, vertex_tinted)
 
 ARGS = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
-QUALITY = ARGS[0] if ARGS else 'high'
+if len(ARGS) != 7:
+    raise SystemExit('haussmann.py: -- <high|medium> <out.glb> <limestone colour> <limestone roughness> '
+                     '<zinc colour> <zinc normal> <zinc roughness>')
+QUALITY, OUT = ARGS[0], ARGS[1]
 if QUALITY not in ('high', 'medium'):
     raise SystemExit(f'haussmann.py: quality {QUALITY} is not high or medium')
-OUT = ARGS[1] if len(ARGS) > 1 else os.path.join(HERE, 'haussmann.glb' if QUALITY == 'high' else 'haussmann_medium.glb')
+# the cc0-textures sets' maps, as the bake's texture() hands them over: limestone_1-4K's and metal_roof-4K's
+LIMESTONE = {'colour': ARGS[2], 'roughness': ARGS[3]}
+ZINC = {'colour': ARGS[4], 'normal': ARGS[5], 'roughness': ARGS[6]}
 
 
 def fine(lod):
@@ -67,11 +73,6 @@ def shape(lod):
     """The level a profile or a segment count is taken at: medium's near takes mid's."""
     return 'mid' if lod == 'near' and QUALITY == 'medium' else lod
 
-
-# the library's textures: `PATCHWORK_LIBRARY`, else ~/patchwork-library
-TEXTURES = os.path.join(os.path.expanduser(os.environ.get('PATCHWORK_LIBRARY') or '~/patchwork-library'), 'textures')
-LIMESTONE = os.path.join(TEXTURES, 'limestone_1-4K/limestone_1-4K/Limestone_1_{}-4K.png')
-ZINC = os.path.join(TEXTURES, 'metal_roof-4K/metal_roof-4K/4K-metal_roof_{}.jpeg')
 
 BAY = 3.0          # metres a bay
 DEPTH = 12.0       # a lot's depth
@@ -116,8 +117,8 @@ def ashlar():
     N = 1024
     PX = N / STONE_TILE
     rng = np.random.default_rng(11)
-    src = load(LIMESTONE.format('basecolor'), 1024)[..., :3]
-    rough_src = load(LIMESTONE.format('roughness'), 1024)[..., 0]
+    src = load(LIMESTONE['colour'], 1024)[..., :3]
+    rough_src = load(LIMESTONE['roughness'], 1024)[..., 0]
     # the source is sixteen tiles 256 px square with joints between; each block borrows the grain
     # of the inside of one of them
     CROP0, CROP = 6, 244
@@ -185,9 +186,9 @@ def zinc():
     """The mansards' zinc: `metal_roof`'s standing seams, cut to 1024 and kept for a tint."""
     N = 1024
     one = np.ones((N, N, 1))
-    col = load(ZINC.format('baseColor'), N)[..., :3]
-    nrm = load(ZINC.format('normal'), N)[..., :3]
-    rough = load(ZINC.format('roughness'), N)[..., :1]
+    col = load(ZINC['colour'], N)[..., :3]
+    nrm = load(ZINC['normal'], N)[..., :3]
+    rough = load(ZINC['roughness'], N)[..., :1]
     return (image('zinc.colour', np.concatenate([col, one], -1)),
             image('zinc.normal', np.concatenate([nrm, one], -1), colour=False),
             image('zinc.roughness', np.concatenate([np.repeat(rough, 3, -1), one], -1), colour=False))
