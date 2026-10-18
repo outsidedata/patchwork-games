@@ -35,11 +35,12 @@
 // whether the line from `from` to `to` goes in at `a`'s front inside its opening, the opening's sides
 // drawn in by `across` metres and its top and bottom by `up`. `over(w, a, p)` is whether point p
 // stands over `a`'s opening, in front of it or behind. `ahead(a, p)` is how far point p stands in front of `a`'s plane.
-// `rotate(q, v)` is v turned by the quaternion q [x, y, z, w].
+// `rotate(q, v)` is v turned by the quaternion q [x, y, z, w]. `trace(w, from, dir, far, passes,
+// marks)` is a line through the portals, as a laser's beam goes (below).
 import type { Kind, Row, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
-import { b3, type Quat, type Vec3 } from '#plugins/box3d/box3d.sim.ts'
+import { b3, castRayClosest, type Quat, type Vec3 } from '#plugins/box3d/box3d.sim.ts'
 import { piecesOf } from '../chamber/chamber.sim.ts'
 
 export const portal: Kind = {
@@ -83,6 +84,62 @@ export const portal: Kind = {
       release(r)
     }
   },
+}
+
+// A line through the portals, as a beam goes: from `from` along the unit `dir` for `far` metres in
+// all. It ends at the first thing it meets: a body or a fixed thing of box3d's world (`castRayClosest`,
+// whose row id is `hit`, 0 for the level), or a row of a kind in `marks`, each a sphere of its kind's
+// definition's `radius` round its `pos` (`hit` its id). Where it meets a portal's opening from the
+// front, while the other portal stands, it goes on from the matching point of the other's opening the
+// matching way (`point`, `vector`), at most `passes` times. `points` is where it starts, each place it
+// goes in and comes out of a portal, and where it ends.
+export function trace(w: W, from: V, dir: V, far: number, passes: number, marks: string[]) {
+  const points: V[] = [from]
+  let at = from, way = dir, left = far, through = passes
+  for (;;) {
+    let t = left, hit: number | null = null, via: Row | undefined
+    const ray = castRayClosest(w, at as Vec3, [way[0] * left, way[1] * left, way[2] * left])
+    if (ray) { t = ray.fraction * left; hit = ray.id }
+    for (const k of marks) for (const r of w.all(k)) {
+      const { radius } = def(w, r.kind)
+      const s = sphere(at, way, r.data.pos, radius)
+      if (s !== undefined && s < t) { t = s; hit = r.id }
+    }
+    if (through > 0) for (const p of w.all('portal')) {
+      if (!other(w, p)) continue
+      const toward = -dot(way, p.data.normal)
+      if (toward <= 0) continue
+      const s = ahead(p, at) / toward
+      // A portal lies on the face of what it stands on, so it is met where that face is: just short of
+      // the hit counts.
+      if (s < 0 || s > t + 1e-4) continue
+      const meets = [0, 1, 2].map(i => at[i] + way[i] * s)
+      if (!over(w, p, meets)) continue
+      t = s
+      via = p
+    }
+    const end = [0, 1, 2].map(i => at[i] + way[i] * t)
+    points.push(end)
+    if (!via) return { points, hit }
+    const q = other(w, via)!
+    way = vector(via, q, way)
+    at = point(via, q, end)
+    points.push(at)
+    // Out a hair in front of the other portal, so its own face is not met again.
+    at = [0, 1, 2].map(i => at[i] + way[i] * 1e-3)
+    left -= t
+    through -= 1
+  }
+}
+
+// Where the line from `at` along unit `way` first meets the sphere of `radius` round `c`, or undefined.
+function sphere(at: V, way: V, c: V, radius: number) {
+  const d = minus(at, c)
+  const b = dot(d, way), q = dot(d, d) - radius * radius
+  const disc = b * b - q
+  if (disc < 0) return undefined
+  const s = -b - Math.sqrt(disc)
+  return s >= 0 ? s : undefined
 }
 
 // A body put back in box3d's world, moving as it drifted.

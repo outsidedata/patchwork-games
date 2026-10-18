@@ -11,7 +11,9 @@
 // (`chamber.walker.ts`), with every portal's opening let in (the `portal` rows): a portal on a box's
 // top makes a pit `pit` metres deep across its opening, so a body walks or falls into it; a portal
 // on a box's side lowers the box, through its depth and across the opening's width, to the opening's
-// bottom edge, so a body passes the face inside the opening and nowhere else.
+// bottom edge, so a body passes the face inside the opening and nowhere else. Every `door` row stands
+// on it too, a box of its definition's `size` round its `pos`, so a closed door is a wall and a sunk
+// one is floor.
 //
 // `ray(w, from, dir)` is where a line from `from` along `dir` first meets a piece: `{ t, point,
 // normal, box }`, the outward normal of the face it meets and the index of the box it is on, or
@@ -59,6 +61,11 @@ export function heightAt(w: W, x: number, z: number): number {
     top = Math.max(top, h)
   })
   for (const r of ramps) if (within(r, x, z)) top = Math.max(top, rampTop(r, x, z))
+  for (const d of w.all('door')) {
+    const [sx, sy, sz] = def(w, d.kind).size
+    const [dx, dy, dz] = d.data.pos
+    if (Math.abs(x - dx) <= sx / 2 && Math.abs(z - dz) <= sz / 2) top = Math.max(top, dy + sy / 2)
+  }
   return top
 }
 

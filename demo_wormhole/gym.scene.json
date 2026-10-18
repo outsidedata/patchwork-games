@@ -1,0 +1,31 @@
+{
+  "extends": "demo_wormhole.partial_scene.json",
+  "plugins": [
+    "loader",
+    "scenemanager",
+    "player",
+    "shipped",
+    "environment3d",
+    "render3d",
+    "ui"
+  ],
+  "seats": 1,
+  "world": {
+    "seed": 11
+  },
+  "actors": [
+    { "is": "start", "slot": 0, "pos": [0, 0, 18], "yaw": 3.141592653589793, "throws": "crate" },
+    { "is": "chamber", "level": "gym" },
+    { "is": "box3d" },
+    { "is": "hopper", "pos": [-6, 0, 0] },
+    { "is": "crate", "pos": [-2, 0.25, 8] },
+    { "is": "crate", "pos": [-1.2, 0.25, 8.3] },
+    { "is": "crate", "pos": [-1.6, 0.75, 8.15] },
+    { "is": "prism", "pos": [-4, 0.25, 8] },
+    { "is": "laser", "pos": [-11.6, 1.2, -14], "dir": [1, 0, 0] },
+    { "is": "catcher", "name": "A", "pos": [-11.6, 1.2, 13] },
+    { "is": "door", "by": ["A"], "base": [-9, 1.5, 6], "pos": [-9, 1.5, 6] },
+    { "is": "button", "name": "B", "pos": [3, 0, 8] },
+    { "is": "door", "by": ["B"], "base": [3, 1.5, 3], "pos": [3, 1.5, 3] }
+  ]
+}

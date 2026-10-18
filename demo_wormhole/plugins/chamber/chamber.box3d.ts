@@ -1,8 +1,9 @@
 // chamber's pieces for box3d. `ground(w, key)` hands back the whole level as one fixed body, whatever
 // chunk is asked for: each box a box shape, each ramp the hull of its wedge's six corners; the `box3d`
-// row lists the one chunk, [0, 0]. `kinds(w)` makes the `crate` and `ball` kinds' bodies out of their
-// definitions: a box `size` metres a side, a sphere of `radius` rolling against its `rolling`
-// (Box3D's rollingResistance), each of `density`, `friction` and `restitution`. Named by
+// row lists the one chunk, [0, 0]. `kinds(w)` makes the bodies of the game's kinds out of their
+// definitions: a `crate` or a `prism` a box `size` metres a side, a `ball` a sphere of `radius` rolling
+// against its `rolling` (Box3D's rollingResistance), each of `density`, `friction` and `restitution`;
+// a `door` a kinematic box of its `size`. Named by
 // `world.box3d.mods: { ground: 'chamber', kinds: 'chamber' }`.
 import type { Row, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
@@ -39,6 +40,14 @@ export function kinds(w: W): Kinds {
       crate: (row: Row): Body => {
         const { size, density, friction, restitution } = def(w, row.kind)
         return { type: 'dynamic', shapes: [{ box: [size / 2, size / 2, size / 2], density, baseMaterial: { friction, restitution } }] }
+      },
+      prism: (row: Row): Body => {
+        const { size, density, friction, restitution } = def(w, row.kind)
+        return { type: 'dynamic', shapes: [{ box: [size / 2, size / 2, size / 2], density, baseMaterial: { friction, restitution } }] }
+      },
+      door: (row: Row): Body => {
+        const { size } = def(w, row.kind)
+        return { type: 'kinematic', shapes: [{ box: [size[0] / 2, size[1] / 2, size[2] / 2] }] }
       },
       ball: (row: Row): Body => {
         const { radius, density, friction, restitution, rolling } = def(w, row.kind)

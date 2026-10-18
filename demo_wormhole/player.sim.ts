@@ -19,6 +19,17 @@
 // turned to the view's yaw, moving along the view at `throw.speed` on top of the body's own `vel`. A
 // row that throws nothing does nothing.
 //
+// Carrying. `grab` takes the first body box3d's world holds along the view, within `grab.reach` of
+// the eye, of a kind the scene's portals take (`portal`'s `takes`), keeping its id in `carry`; `grab`
+// again lets go. Each step a carried body is pulled toward the point `grab.hold` metres along the view
+// from the eye: its `vel` set to the way there times `grab.pull` a second, no faster than `grab.most`,
+// its spin let go of, so it still meets walls and other bodies. `throw` while carrying throws the
+// carried body along the view at `throw.speed` on top of the body's own `vel` and lets go of it,
+// instead of spawning one. A body a portal has taken, or one gone, is let go of.
+//
+// Hurt. `zap`, only from a rule (a laser's beam), throws it: its `vel` the push it is handed and up by
+// the lift, lifted a tenth of its walker `step` off the ground so the walker flies it.
+//
 // Going through. The step the line its body's centre (`pos` raised half the walker's `height`)
 // travelled goes in at a portal's front, inside its opening, while the other portal stands, the body
 // is put where it would be had it gone through: its centre, its `vel` (all three axes) and its view,
@@ -31,6 +42,7 @@ import type { Kind, Row, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
 import { groundOf, numbers, relative, walk } from '#plugins/walker/walker.sim.ts'
+import { castRayClosest } from '#plugins/box3d/box3d.sim.ts'
 import { bounds, ray } from './plugins/chamber/chamber.sim.ts'
 import { ahead, crossed, other, point, vector } from './plugins/portal/portal.sim.ts'
 
@@ -60,6 +72,7 @@ export const player: Kind = {
     const from = me.data.pos
     walk(me, w, dt, groundOf(w))
     through(me, w, from)
+    carry(me, w)
     const [[x0, z0], [x1, z1]] = bounds(w)
     const [x, y, z] = me.data.pos
     me.data.pos = [Math.min(x1, Math.max(x0, x)), y, Math.min(z1, Math.max(z0, z))]
@@ -85,6 +98,12 @@ export const player: Kind = {
       if (!me.data.throws) return
       const { eye, throw: { ahead, speed } } = def(w, me.kind)
       const dir = looking(me.data.view)
+      const held = carried(me, w)
+      if (held) {
+        held.data.vel = [0, 1, 2].map(i => me.data.vel[i] + dir[i] * speed)
+        me.data.carry = null
+        return
+      }
       const half = me.data.view[0] / 2
       w.spawn(me.data.throws, {
         pos: [0, 1, 2].map(i => me.data.pos[i] + (i === 1 ? eye : 0) + dir[i] * ahead),
@@ -93,6 +112,26 @@ export const player: Kind = {
         spin: [0, 0, 0],
         awake: true,
       })
+    },
+    grab(me, w) {
+      if (!me.data.throws) return
+      if (me.data.carry !== null) {
+        me.data.carry = null
+        return
+      }
+      const { eye, grab: { reach } } = def(w, me.kind)
+      const dir = looking(me.data.view)
+      const hit = castRayClosest(w, [me.data.pos[0], me.data.pos[1] + eye, me.data.pos[2]], [dir[0] * reach, dir[1] * reach, dir[2] * reach])
+      const row = hit && takeable(w).find(r => r.id === hit.id)
+      if (row) me.data.carry = row.id
+    },
+    zap(me, w, seat, x: number, y: number, z: number, lift: number) {
+      if (seat >= 0) return
+      me.data.vel = [x, y + lift, z]
+      // Off the ground by more than a step's fall, so the walker flies it rather than standing it.
+      const [px, py, pz] = me.data.pos
+      me.data.pos = [px, py + numbers(me, w).step / 10, pz]
+      me.data.grounded = false
     },
     // Which portal to put where the reticle points: 0 or 1, an index into its definition's `portals`.
     place(me, w, _seat, which: unknown) {
@@ -112,6 +151,31 @@ export const player: Kind = {
       Object.assign(portal.data, at)
     },
   },
+}
+
+// The rows of every kind a portal takes, which are what can be carried.
+const takeable = (w: W) => (def(w, 'portal').takes as string[]).flatMap(k => w.all(k))
+
+// The body `me` carries, while there is one and no portal has it.
+function carried(me: Row, w: W) {
+  if (me.data.carry === null) return undefined
+  const row = takeable(w).find(r => r.id === me.data.carry)
+  if (row && row.data.inside === null) return row
+  me.data.carry = null
+  return undefined
+}
+
+// A carried body pulled toward the point ahead of the eye.
+function carry(me: Row, w: W) {
+  const held = carried(me, w)
+  if (!held) return
+  const { eye, grab: { hold, pull, most } } = def(w, me.kind)
+  const dir = looking(me.data.view)
+  const goal = [me.data.pos[0] + dir[0] * hold, me.data.pos[1] + eye + dir[1] * hold, me.data.pos[2] + dir[2] * hold]
+  const v = [0, 1, 2].map(i => (goal[i] - held.data.pos[i]) * pull)
+  const speed = math.hypot(v[0], v[1], v[2])
+  held.data.vel = speed > most ? v.map(x => (x / speed) * most) : v
+  held.data.spin = [0, 0, 0]
 }
 
 // The step's crossing, if the body's centre went in at a portal's front: the body put through.

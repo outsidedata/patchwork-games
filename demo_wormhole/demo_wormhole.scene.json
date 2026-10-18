@@ -17,6 +17,10 @@
         "pour": {
           "file": "pour.scene.json",
           "suspend": true
+        },
+        "gym": {
+          "file": "gym.scene.json",
+          "suspend": true
         }
       },
       "dt": 0.016666666666666666,

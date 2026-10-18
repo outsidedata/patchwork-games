@@ -71,7 +71,8 @@
       "view": [0, 0],
       "move": [0, 0],
       "jumps": 0,
-      "throws": null
+      "throws": null,
+      "carry": null
     },
     "start": {
       "slot": 0,
@@ -107,9 +108,47 @@
       "inside": null,
       "jumps": 0
     },
+    "prism": {
+      "pos": [0, 0, 0],
+      "rot": [0, 0, 0, 1],
+      "vel": [0, 0, 0],
+      "spin": [0, 0, 0],
+      "awake": true,
+      "enabled": true,
+      "drift": null,
+      "inside": null,
+      "jumps": 0
+    },
     "hopper": {
       "pos": [0, 0, 0],
       "filled": false
+    },
+    "laser": {
+      "pos": [0, 0, 0],
+      "dir": [1, 0, 0],
+      "beam": [],
+      "hit": null
+    },
+    "catcher": {
+      "name": "",
+      "pos": [0, 0, 0],
+      "on": false
+    },
+    "button": {
+      "name": "",
+      "pos": [0, 0, 0],
+      "on": false
+    },
+    "door": {
+      "by": [],
+      "base": [0, 0, 0],
+      "pos": [0, 0, 0],
+      "rot": [0, 0, 0, 1],
+      "vel": [0, 0, 0],
+      "spin": [0, 0, 0],
+      "awake": true,
+      "target": null,
+      "open": false
     },
     "portal": {
       "name": "",

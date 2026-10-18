@@ -6,15 +6,31 @@
     "pitch": 1.5,
     "portals": ["orange", "blue"],
     "reticle": { "radius": 3, "colour": "#ffffff" },
-    "throw": { "ahead": 1, "speed": 10 }
+    "throw": { "ahead": 1, "speed": 10 },
+    "grab": { "reach": 4, "hold": 1.8, "pull": 12, "most": 20 }
   },
+  "laser": {
+    "reach": 80,
+    "passes": 4,
+    "marks": ["catcher"],
+    "bends": { "kinds": ["prism"], "most": 4 },
+    "hurt": { "radius": 0.4, "height": 1.7, "push": 6, "lift": 4 },
+    "size": 0.4,
+    "width": 0.03,
+    "colour": "#5a5f6e",
+    "beam": "#ff3b30"
+  },
+  "catcher": { "radius": 0.35, "colour": "#5a2a2a", "lit": "#ff5a4a" },
+  "button": { "radius": 0.6, "reach": 1.9, "pressedBy": ["crate", "ball", "prism", "player"], "height": 0.08, "colour": "#3a4a6a", "lit": "#6ad1ff" },
+  "door": { "size": [2.4, 3, 0.3], "speed": 3, "colour": "#7a6a5a" },
+  "prism": { "size": 0.5, "density": 1, "friction": 0.6, "restitution": 0.1, "colour": "#9fd0ff" },
   "portal": {
     "width": 1.2,
     "height": 2,
     "post": 0.08,
     "pit": 20,
     "colours": { "orange": "#ff7a1a", "blue": "#2a8cff" },
-    "takes": ["crate", "ball"],
+    "takes": ["crate", "ball", "prism"],
     "room": 3,
     "edge": 1,
     "gravity": [0, -20, 0],
@@ -31,6 +47,21 @@
           { "min": [-25, -1, -25], "max": [25, 0, 25], "colour": "#141822", "lines": 1, "line": "#2c3446" },
           { "min": [-12, 0, -20.5], "max": [12, 8, -20], "colour": "#3a4258" },
           { "min": [6, 0, -8], "max": [12, 5, -2], "colour": "#5a5f6e" }
+        ],
+        "ramps": [
+          { "min": [6, 0, -2], "max": [12, 5, 10], "toward": [0, -1], "colour": "#6b5a4a" }
+        ]
+      },
+      "gym": {
+        "boxes": [
+          { "min": [-25, -1, -25], "max": [25, 0, 25], "colour": "#141822", "lines": 1, "line": "#2c3446" },
+          { "min": [-12, 0, -20.5], "max": [12, 8, -20], "colour": "#3a4258" },
+          { "min": [12, 0, -20.5], "max": [12.5, 8, 14], "colour": "#343c52" },
+          { "min": [6, 0, -8], "max": [12, 5, -2], "colour": "#5a5f6e" },
+          { "min": [-7.4, 0, -1.8], "max": [-7.2, 2.5, 1.8], "colour": "#5a5f6e" },
+          { "min": [-4.8, 0, -1.8], "max": [-4.6, 2.5, 1.8], "colour": "#5a5f6e" },
+          { "min": [-7.2, 0, -1.8], "max": [-4.8, 2.5, -1.6], "colour": "#5a5f6e" },
+          { "min": [-7.2, 0, 1.6], "max": [-4.8, 2.5, 1.8], "colour": "#5a5f6e" }
         ],
         "ramps": [
           { "min": [6, 0, -2], "max": [12, 5, 10], "toward": [0, -1], "colour": "#6b5a4a" }
