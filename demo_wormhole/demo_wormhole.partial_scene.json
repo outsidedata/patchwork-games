@@ -63,12 +63,14 @@
       "turned": 0,
       "view": [0, 0],
       "move": [0, 0],
-      "jumps": 0
+      "jumps": 0,
+      "throws": null
     },
     "start": {
       "slot": 0,
       "pos": [0, 0, 0],
-      "yaw": 0
+      "yaw": 0,
+      "throws": null
     },
     "chamber": {},
     "portal": {
@@ -83,7 +85,6 @@
   "actors": [
     { "is": "scenemanager" },
     { "is": "loader" },
-    { "is": "start", "slot": 0, "pos": [0, 0, 12], "yaw": 3.141592653589793 },
     { "is": "chamber" }
   ]
 }

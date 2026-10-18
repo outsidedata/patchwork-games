@@ -5,7 +5,8 @@
     "sens": 0.0025,
     "pitch": 1.5,
     "portals": ["orange", "blue"],
-    "reticle": { "radius": 3, "colour": "#ffffff" }
+    "reticle": { "radius": 3, "colour": "#ffffff" },
+    "throw": { "ahead": 1, "speed": 10 }
   },
   "portal": {
     "width": 1.2,

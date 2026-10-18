@@ -14,6 +14,11 @@
 // time it spawns the portal, naming the other in `to`; after that it moves it. A line that meets a
 // ramp first, or nothing, puts nothing down.
 //
+// Throwing. A start may name a kind in `throws`, which the row takes when it stands there; `throw`
+// then spawns a row of that kind its definition's `throw.ahead` metres along the view from its eye,
+// turned to the view's yaw, moving along the view at `throw.speed` on top of the body's own `vel`. A
+// row that throws nothing does nothing.
+//
 // Going through. The step the line its body's centre (`pos` raised half the walker's `height`)
 // travelled goes in at a portal's front, inside its opening, while the other portal stands, the body
 // is put where it would be had it gone through: its centre, its `vel` (all three axes) and its view,
@@ -51,6 +56,7 @@ export const player: Kind = {
     me.data.pos = [...start.data.pos]
     me.data.yaw = start.data.yaw
     me.data.view = [start.data.yaw, 0]
+    me.data.throws = start.data.throws
     me.data.placed = true
   },
   tick(me, dt, w) {
@@ -82,6 +88,19 @@ export const player: Kind = {
     },
     jump(me) {
       me.data.jump = true
+    },
+    throw(me, w) {
+      if (!me.data.throws) return
+      const { eye, throw: { ahead, speed } } = def(w, me.kind)
+      const dir = looking(me.data.view)
+      const half = me.data.view[0] / 2
+      w.spawn(me.data.throws, {
+        pos: [0, 1, 2].map(i => me.data.pos[i] + (i === 1 ? eye : 0) + dir[i] * ahead),
+        rot: [0, math.sin(half), 0, math.cos(half)],
+        vel: [0, 1, 2].map(i => me.data.vel[i] + dir[i] * speed),
+        spin: [0, 0, 0],
+        awake: true,
+      })
     },
     // Which portal to put where the reticle points: 0 or 1, an index into its definition's `portals`.
     place(me, w, _seat, which: unknown) {
