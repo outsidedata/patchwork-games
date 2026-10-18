@@ -72,7 +72,8 @@
       "move": [0, 0],
       "jumps": 0,
       "throws": null,
-      "carry": null
+      "carry": null,
+      "charge": null
     },
     "start": {
       "slot": 0,
@@ -138,6 +139,17 @@
       "name": "",
       "pos": [0, 0, 0],
       "on": false
+    },
+    "field": {
+      "pos": [0, 0, 0]
+    },
+    "plate": {
+      "pos": [0, 0, 0],
+      "launch": [0, 10, 0]
+    },
+    "dropper": {
+      "pos": [0, 0, 0],
+      "made": null
     },
     "door": {
       "by": [],

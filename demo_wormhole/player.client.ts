@@ -4,7 +4,8 @@
 // a portal, so the camera's `userData.teleport` is up for that frame and render3d draws it at the
 // other portal, never between (`guide-to-smooth-gameplay`). A dot of the definition's `reticle`
 // `radius` and `colour` stands in the middle of the ui's `reticle` panel. WASD and the arrows are a
-// stick sent as `move`, y growing back; Space is `jump`; E is `throw`; F is `grab`; a click takes the pointer lock, the mouse's
+// stick sent as `move`, y growing back; Space is `jump`; E going down is `charge` and coming up `throw`,
+// so a longer hold throws harder; F is `grab`; a click takes the pointer lock, the mouse's
 // pixels are sent as `look`, and under the lock the left button puts the first portal where the
 // reticle points and the right button the second (`place` 0 and 1).
 import type * as THREE from 'three'
@@ -29,7 +30,8 @@ export function setup(row: Row, plugins: Plugins) {
       { keys: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'], send: move },
     ],
     pointer: (dx, dy) => ['look', dx, dy],
-    press: { ' ': ['jump'], e: ['throw'], f: ['grab'], Mouse0: ['place', 0], Mouse2: ['place', 1] },
+    press: { ' ': ['jump'], e: ['charge'], f: ['grab'], Mouse0: ['place', 0], Mouse2: ['place', 1] },
+    release: { e: () => { plugins.wire.send(row.id, 'throw') } },
     locked: ['Mouse0', 'Mouse2'],
   } satisfies Binds)
 }

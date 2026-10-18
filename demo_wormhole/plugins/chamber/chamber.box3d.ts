@@ -1,5 +1,6 @@
 // chamber's pieces for box3d. `ground(w, key)` hands back the whole level as one fixed body, whatever
-// chunk is asked for: each box a box shape, each ramp the hull of its wedge's six corners; the `box3d`
+// chunk is asked for: each box a box shape (a box's `bounce` its restitution), each ramp the hull of
+// its wedge's six corners; the `box3d`
 // row lists the one chunk, [0, 0]. `kinds(w)` makes the bodies of the game's kinds out of their
 // definitions: a `crate` or a `prism` a box `size` metres a side, a `ball` a sphere of `radius` rolling
 // against its `rolling` (Box3D's rollingResistance), each of `density`, `friction` and `restitution`;
@@ -11,13 +12,14 @@ import type { Body, Kinds, Shape, Static } from '#plugins/box3d/box3d.sim.ts'
 import { piecesOf } from './chamber.sim.ts'
 
 type V3 = [number, number, number]
-type Piece = { min: V3; max: V3; toward?: [number, number] }
+type Piece = { min: V3; max: V3; toward?: [number, number]; bounce?: number }
 
 export function ground(w: W, _key: number[]): Static {
   const { boxes, ramps } = piecesOf(w) as unknown as { boxes: Piece[]; ramps: Piece[] }
   const shapes: Shape[] = boxes.map(b => ({
     box: [0, 1, 2].map(i => (b.max[i] - b.min[i]) / 2) as V3,
     pos: [0, 1, 2].map(i => (b.min[i] + b.max[i]) / 2) as V3,
+    ...(b.bounce === undefined ? {} : { baseMaterial: { restitution: b.bounce } }),
   }))
   for (const r of ramps) {
     const [tx, tz] = r.toward!

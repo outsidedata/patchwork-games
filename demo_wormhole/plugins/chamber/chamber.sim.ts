@@ -1,7 +1,9 @@
 // chamber, demo_wormhole's own: the level, the pieces the walker stands on and a portal is put on,
 // read off the definition of the `chamber` row (one `actors` entry) in `assets/demo_wormhole.json`:
 // `below`, metres, the ground's height where no piece stands, and `levels`, each level by name:
-//   boxes   { min, max, colour, lines?, line? }: a solid box from `min` to `max` [x, y, z], metres.
+//   boxes   { min, max, colour, lines?, line?, dark?, bounce? }: a solid box from `min` to `max`
+//           [x, y, z], metres; `dark`, a portal is never put on it; `bounce`, its top throws back
+//           up that share of the speed a body lands on it at.
 //   ramps   { min, max, toward, colour }: a wedge over the box from `min` to `max`, its top rising
 //           from `min`'s y at the edge `toward` points away from to `max`'s y at the edge it points
 //           at; `toward` is [x, z], one of the four axes.
@@ -28,7 +30,7 @@ import * as math from '#plugins/math/math.sim.ts'
 export const chamber: Kind = {}
 
 type V3 = [number, number, number]
-type Box = { min: V3; max: V3 }
+type Box = { min: V3; max: V3; dark?: boolean; bounce?: number }
 type Ramp = { min: V3; max: V3; toward: [number, number] }
 type Plane = { n: V3; d: number }
 

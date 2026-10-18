@@ -12,7 +12,8 @@
 // meets one of the chamber's boxes puts that portal: centred where it hit, its front the face's
 // normal, its top straight up on a wall and, on a floor, the way the view looks, flattened. The first
 // time it spawns the portal, naming the other in `to`; after that it moves it. A line that meets a
-// ramp first, or nothing, puts nothing down.
+// ramp first, a box the level marks `dark`, or nothing, or that passes through a `field`, puts
+// nothing down.
 //
 // Throwing. A start may name a kind in `throws`, which the row takes when it stands there; `throw`
 // then spawns a row of that kind its definition's `throw.ahead` metres along the view from its eye,
@@ -26,6 +27,12 @@
 // its spin let go of, so it still meets walls and other bodies. `throw` while carrying throws the
 // carried body along the view at `throw.speed` on top of the body's own `vel` and lets go of it,
 // instead of spawning one. A body a portal has taken, or one gone, is let go of.
+//
+// Throwing hard. `charge` (E going down) starts `charge` counting seconds; the `throw` that follows
+// (E coming up) leaves at `throw.speed`, rising to `throw.most` over `throw.full` seconds held.
+//
+// Bounce and respawn. Landing on a box the level gives a `bounce` throws it back up at that share of the
+// speed it fell at. Below its definition's `fall` metres it is stood back on its start, still.
 //
 // Hurt. `zap`, only from a rule (a laser's beam), throws it: its `vel` the push it is handed and up by
 // the lift, lifted a tenth of its walker `step` off the ground so the walker flies it.
@@ -43,7 +50,8 @@ import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
 import { groundOf, numbers, relative, walk } from '#plugins/walker/walker.sim.ts'
 import { castRayClosest } from '#plugins/box3d/box3d.sim.ts'
-import { bounds, ray } from './plugins/chamber/chamber.sim.ts'
+import { bounds, piecesOf, ray } from './plugins/chamber/chamber.sim.ts'
+import { across } from './field.sim.ts'
 import { ahead, crossed, other, point, vector } from './plugins/portal/portal.sim.ts'
 
 const unit = (v: number[]) => {
@@ -70,12 +78,19 @@ export const player: Kind = {
     me.data.want = [ahead[0] * speed, ahead[1] * speed]
     me.data.face = me.data.view[0]
     const from = me.data.pos
+    const falling = me.data.grounded ? 0 : me.data.vel[1]
     walk(me, w, dt, groundOf(w))
     through(me, w, from)
+    bounce(me, w, falling)
     carry(me, w)
+    if (me.data.charge !== null) me.data.charge += dt
     const [[x0, z0], [x1, z1]] = bounds(w)
     const [x, y, z] = me.data.pos
     me.data.pos = [Math.min(x1, Math.max(x0, x)), y, Math.min(z1, Math.max(z0, z))]
+    if (y < def(w, me.kind).fall) {
+      const start = w.find('start', s => s.data.slot === me.data.seat)
+      Object.assign(me.data, { pos: [...start.data.pos], vel: [0, 0, 0], view: [start.data.yaw, 0], yaw: start.data.yaw, carry: null })
+    }
   },
   acts: {
     // The way the keys point, from the page: x to the right, y back, kept to a unit's length at most.
@@ -94,9 +109,17 @@ export const player: Kind = {
     jump(me) {
       me.data.jump = true
     },
+    // E going down: the throw starts winding up.
+    charge(me) {
+      if (me.data.throws) me.data.charge = 0
+    },
     throw(me, w) {
       if (!me.data.throws) return
-      const { eye, throw: { ahead, speed } } = def(w, me.kind)
+      const { eye, throw: t } = def(w, me.kind)
+      const { ahead } = t
+      const wound = me.data.charge === null ? 0 : Math.min(1, me.data.charge / t.full)
+      const speed = t.speed + (t.most - t.speed) * wound
+      me.data.charge = null
       const dir = looking(me.data.view)
       const held = carried(me, w)
       if (held) {
@@ -139,7 +162,9 @@ export const player: Kind = {
       const { eye, portals } = def(w, me.kind)
       const dir = looking(me.data.view)
       const hit = ray(w, [me.data.pos[0], me.data.pos[1] + eye, me.data.pos[2]], dir)
-      if (!hit || hit.box < 0) return
+      if (!hit || hit.box < 0 || piecesOf(w).boxes[hit.box].dark) return
+      const from = [me.data.pos[0], me.data.pos[1] + eye, me.data.pos[2]]
+      if (w.all('field').some(f => across(from, hit.point, f, def(w, f.kind).size))) return
       const normal = hit.normal
       const up = Math.abs(normal[1]) > 0.5 ? unit([dir[0], 0, dir[2]]) : unit([-normal[1] * normal[0], 1 - normal[1] * normal[1], -normal[1] * normal[2]])
       const at = { pos: hit.point, normal, up, on: hit.box }
@@ -151,6 +176,17 @@ export const player: Kind = {
       Object.assign(portal.data, at)
     },
   },
+}
+
+// Landing on a box the level gives a `bounce`: thrown back up at that share of the speed it fell at.
+function bounce(me: Row, w: W, falling: number) {
+  if (!me.data.grounded || falling >= 0) return
+  const [x, y, z] = me.data.pos
+  const pad = piecesOf(w).boxes.find(b => b.bounce && x >= b.min[0] && x <= b.max[0] && z >= b.min[2] && z <= b.max[2] && Math.abs(b.max[1] - y) < 0.05)
+  if (!pad) return
+  me.data.vel = [me.data.vel[0], -falling * pad.bounce!, me.data.vel[2]]
+  me.data.pos = [x, y + numbers(me, w).step / 10, z]
+  me.data.grounded = false
 }
 
 // The rows of every kind a portal takes, which are what can be carried.
