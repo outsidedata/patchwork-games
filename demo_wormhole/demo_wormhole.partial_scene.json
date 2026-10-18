@@ -71,9 +71,7 @@
       "view": [0, 0],
       "move": [0, 0],
       "jumps": 0,
-      "throws": null,
-      "threw": null,
-      "took": null
+      "throws": null
     },
     "start": {
       "slot": 0,

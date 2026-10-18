@@ -17,8 +17,7 @@
 // Throwing. A start may name a kind in `throws`, which the row takes when it stands there; `throw`
 // then spawns a row of that kind its definition's `throw.ahead` metres along the view from its eye,
 // turned to the view's yaw, moving along the view at `throw.speed` on top of the body's own `vel`. A
-// row that throws nothing does nothing. The row it threw last is kept in `threw`. `take` takes that row
-// out of box3d's world (its `out`), keeping its id in `took`; `take` again puts it back (`in`).
+// row that throws nothing does nothing.
 //
 // Going through. The step the line its body's centre (`pos` raised half the walker's `height`)
 // travelled goes in at a portal's front, inside its opening, while the other portal stands, the body
@@ -87,26 +86,13 @@ export const player: Kind = {
       const { eye, throw: { ahead, speed } } = def(w, me.kind)
       const dir = looking(me.data.view)
       const half = me.data.view[0] / 2
-      me.data.threw = w.spawn(me.data.throws, {
+      w.spawn(me.data.throws, {
         pos: [0, 1, 2].map(i => me.data.pos[i] + (i === 1 ? eye : 0) + dir[i] * ahead),
         rot: [0, math.sin(half), 0, math.cos(half)],
         vel: [0, 1, 2].map(i => me.data.vel[i] + dir[i] * speed),
         spin: [0, 0, 0],
         awake: true,
-      }).id
-    },
-    take(me, w, seat) {
-      if (!me.data.throws) return
-      const held = me.data.took === null ? undefined : w.all(me.data.throws).find(r => r.id === me.data.took)
-      if (held) {
-        w.call(held, 'in', seat)
-        me.data.took = null
-        return
-      }
-      const row = w.all(me.data.throws).find(r => r.id === me.data.threw)
-      if (!row) return
-      w.call(row, 'out', seat)
-      me.data.took = row.id
+      })
     },
     // Which portal to put where the reticle points: 0 or 1, an index into its definition's `portals`.
     place(me, w, _seat, which: unknown) {
