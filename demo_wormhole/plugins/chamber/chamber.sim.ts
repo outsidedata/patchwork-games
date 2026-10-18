@@ -13,16 +13,16 @@
 // (`chamber.walker.ts`), with every portal's opening let in (the `portal` rows): a portal on a box's
 // top makes a pit `pit` metres deep across its opening, so a body walks or falls into it; a portal
 // on a box's side lowers the box, through its depth and across the opening's width, to the opening's
-// bottom edge, so a body passes the face inside the opening and nowhere else. Every `door` row stands
-// on it too, a box of its definition's `size` round its `pos`, so a closed door is a wall and a sunk
-// one is floor.
+// bottom edge, so a body passes the face inside the opening and nowhere else. Every `door` and `lift`
+// row stands on it too, a box of its definition's `size` round its `pos`, so a closed door is a wall, a
+// sunk one floor, and a lift a floor that rides.
 //
 // `ray(w, from, dir)` is where a line from `from` along `dir` first meets a piece: `{ t, point,
 // normal, box }`, the outward normal of the face it meets and the index of the box it is on, or
 // `box` -1 for a ramp; undefined where it meets none. `bounds(w)` is the floor plan every piece
 // covers, [[x0, z0], [x1, z1]], which the walker is kept inside. `piecesOf(w)` is the row's level's
 // `boxes` and `ramps`, with the definition's `below`, and `levelOf(chamber, defs)` the same for a
-// chamber row and its definition, for a page.
+// chamber row and its definition, for a page. `corners(ramp)` is a ramp's wedge as its six corners.
 import type { Kind, Row, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
@@ -63,7 +63,7 @@ export function heightAt(w: W, x: number, z: number): number {
     top = Math.max(top, h)
   })
   for (const r of ramps) if (within(r, x, z)) top = Math.max(top, rampTop(r, x, z))
-  for (const d of w.all('door')) {
+  for (const d of [...w.all('door'), ...w.all('lift')]) {
     const [sx, sy, sz] = def(w, d.kind).size
     const [dx, dy, dz] = d.data.pos
     if (Math.abs(x - dx) <= sx / 2 && Math.abs(z - dz) <= sz / 2) top = Math.max(top, dy + sy / 2)
@@ -133,6 +133,19 @@ export function ray(w: W, from: number[], dir: number[]) {
   if (!best) return undefined
   const { t } = best
   return { ...best, point: [from[0] + dir[0] * t, from[1] + dir[1] * t, from[2] + dir[2] * t] as V3 }
+}
+
+// A ramp's wedge as its corners, flat [x, y, z, …]: the base's four, and over the high edge two more.
+export function corners(r: Ramp): number[] {
+  const [tx, tz] = r.toward
+  const [x0, y0, z0] = r.min, [x1, y1, z1] = r.max
+  const high = (x: number, z: number) => (x - (tx + tz > 0 ? x0 : x1)) * tx + (z - (tx + tz > 0 ? z0 : z1)) * tz > 0
+  const points: number[] = []
+  for (const [x, z] of [[x0, z0], [x1, z0], [x1, z1], [x0, z1]]) {
+    points.push(x, y0, z)
+    if (high(x, z)) points.push(x, y1, z)
+  }
+  return points
 }
 
 export function bounds(w: W): [[number, number], [number, number]] {

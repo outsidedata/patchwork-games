@@ -24,7 +24,8 @@
 // plane (its reach along P's normal past it) is carried through to Q, its place, turn, speed and spin
 // (`point`, `turned`, `vector`), and put back in box3d's world there moving so, its `jumps` one up; a
 // body that leaves the space in front of P is put back in box3d's world where it is. With the other
-// portal gone, every body inside P is put back where it is. Ramps are not in a portal's world.
+// portal gone, every body inside P is put back where it is. A ramp is in it whole, here or carried
+// through, when its middle stands in front of a portal and it reaches within reach of that portal.
 //
 // Through. A thing that goes in at a portal's front comes out of the other's front: a point, a
 // direction or a turn taken from this portal's frame into that one's, turned half a turn about up,
@@ -41,7 +42,7 @@ import type { Kind, Row, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
 import { b3, castRayClosest, type Quat, type Vec3 } from '#plugins/box3d/box3d.sim.ts'
-import { piecesOf } from '../chamber/chamber.sim.ts'
+import { corners as wedge, piecesOf } from '../chamber/chamber.sim.ts'
 
 export const portal: Kind = {
   tick(me, dt, w) {
@@ -200,13 +201,27 @@ function spaceOf(w: W, a: Row, b: Row): Space {
     b3.b3DestroyHull(hull)
   }
   const reach = room + height / 2 + edge
-  const { boxes } = piecesOf(w)
+  const { boxes, ramps } = piecesOf(w)
   // The level on a's side of a, and on b's side of b carried through to stand behind a.
   for (const piece of boxes) {
     const here = clipped(piece, a, reach)
     if (here) box(mid(here), half(here), [0, 0, 0, 1])
     const there = clipped(piece, b, reach)
     if (there) box(point(b, a, mid(there)), half(there), turned(b, a, [0, 0, 0, 1]))
+  }
+  // Each ramp whole, where its middle stands on a portal's side of it and it reaches within reach of it.
+  const hullOf = (points: number[]) => {
+    const hull = b3.b3CreateHull(points)
+    b3.b3CreateTransformedHullShape(fixed, shape, hull, { position: [0, 0, 0], quaternion: [0, 0, 0, 1] }, [1, 1, 1])
+    b3.b3DestroyHull(hull)
+  }
+  for (const r of ramps) {
+    const flat = wedge(r)
+    const points: V[] = []
+    for (let i = 0; i < flat.length; i += 3) points.push([flat[i], flat[i + 1], flat[i + 2]])
+    const near = (p: Row) => ahead(p, mid(r)) > 0 && clipped(r, p, reach) !== undefined
+    if (near(a)) hullOf(points.flat())
+    if (near(b)) hullOf(points.flatMap(p => point(b, a, p)))
   }
   // The surface round a's opening, behind its plane.
   const W2 = width / 2, H2 = height / 2

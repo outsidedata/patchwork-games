@@ -24,6 +24,7 @@
   "catcher": { "radius": 0.35, "colour": "#5a2a2a", "lit": "#ff5a4a" },
   "button": { "radius": 0.6, "reach": 1.9, "pressedBy": ["crate", "ball", "prism", "player"], "height": 0.08, "colour": "#3a4a6a", "lit": "#6ad1ff" },
   "door": { "size": [2.4, 3, 0.3], "speed": 3, "colour": "#7a6a5a" },
+  "lift": { "size": [2, 0.3, 2], "speed": 1.5, "wait": 2, "colour": "#6a7a9a" },
   "field": { "size": [0.1, 3, 6], "colour": "#5ad1ff", "opacity": 0.25 },
   "plate": { "radius": 0.7, "reach": 0.5, "height": 0.08, "colour": "#e8a33a" },
   "dropper": { "kind": "crate", "radius": 0.45, "height": 1.2, "colour": "#4a5068" },

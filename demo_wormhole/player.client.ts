@@ -3,7 +3,8 @@
 // has it), set whole as a quaternion every frame; on the frame `jumps` changes, the body went through
 // a portal, so the camera's `userData.teleport` is up for that frame and render3d draws it at the
 // other portal, never between (`guide-to-smooth-gameplay`). A dot of the definition's `reticle`
-// `radius` and `colour` stands in the middle of the ui's `reticle` panel. WASD and the arrows are a
+// `radius` and `colour` stands in the middle of the ui's `reticle` panel, and the ui's `hud` panel says
+// which of the two `portals` are placed, and whether it is carrying something. WASD and the arrows are a
 // stick sent as `move`, y growing back; Space is `jump`; E going down is `charge` and coming up `throw`,
 // so a longer hold throws harder; F is `grab`; a click takes the pointer lock, the mouse's
 // pixels are sent as `look`, and under the lock the left button puts the first portal where the
@@ -42,6 +43,11 @@ export function tick(row: Row, plugins: Plugins) {
   const ui = plugins.ui
   const box = ui.panel('reticle').boundsArea
   ui.show('reticle', 'dot', () => new ui.PIXI.Graphics().circle(box.width / 2, box.height / 2, reticle.radius).fill(reticle.colour))
+  const placed = (name: string) => plugins.wire.rows.some(r => r.kind === 'portal' && r.data.name === name)
+  const [first, second] = def(plugins.wire, row.kind).portals as string[]
+  const line = `${first} ${placed(first) ? '●' : '○'}  ${second} ${placed(second) ? '●' : '○'}${row.data.carry !== null ? '   carrying' : ''}`
+  const text = ui.show('hud', 'state', () => new ui.PIXI.Text({ text: line, style: ui.style('hud') }))
+  if (text.text !== line) text.text = line
   const camera: THREE.PerspectiveCamera | undefined = plugins.render3d.camera
   if (!camera) return
   camera.userData.teleport = row.data.jumps !== jumps

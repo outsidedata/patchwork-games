@@ -22,8 +22,13 @@
       "mods": { "height": "chamber" }
     },
     "ui": {
-      "panels": { "reticle": { "anchor": "center", "size": [16, 16] } },
-      "styles": {}
+      "panels": {
+        "reticle": { "anchor": "center", "size": [16, 16] },
+        "hud": { "anchor": "top-left", "at": [12, 10], "size": [320, 40] }
+      },
+      "styles": {
+        "hud": { "fontFamily": "monospace", "fontSize": 14, "fill": "#e6e9f0" }
+      }
     },
     "box3d": {
       "subStepCount": 4,
@@ -142,6 +147,18 @@
     },
     "field": {
       "pos": [0, 0, 0]
+    },
+    "lift": {
+      "a": [0, 0, 0],
+      "b": [0, 0, 0],
+      "pos": [0, 0, 0],
+      "rot": [0, 0, 0, 1],
+      "vel": [0, 0, 0],
+      "spin": [0, 0, 0],
+      "awake": true,
+      "target": null,
+      "going": "b",
+      "rest": 0
     },
     "plate": {
       "pos": [0, 0, 0],

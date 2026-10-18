@@ -4,12 +4,12 @@
 // row lists the one chunk, [0, 0]. `kinds(w)` makes the bodies of the game's kinds out of their
 // definitions: a `crate` or a `prism` a box `size` metres a side, a `ball` a sphere of `radius` rolling
 // against its `rolling` (Box3D's rollingResistance), each of `density`, `friction` and `restitution`;
-// a `door` a kinematic box of its `size`. Named by
+// a `door` or a `lift` a kinematic box of its `size`. Named by
 // `world.box3d.mods: { ground: 'chamber', kinds: 'chamber' }`.
 import type { Row, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import type { Body, Kinds, Shape, Static } from '#plugins/box3d/box3d.sim.ts'
-import { piecesOf } from './chamber.sim.ts'
+import { corners, piecesOf } from './chamber.sim.ts'
 
 type V3 = [number, number, number]
 type Piece = { min: V3; max: V3; toward?: [number, number]; bounce?: number }
@@ -21,18 +21,7 @@ export function ground(w: W, _key: number[]): Static {
     pos: [0, 1, 2].map(i => (b.min[i] + b.max[i]) / 2) as V3,
     ...(b.bounce === undefined ? {} : { baseMaterial: { restitution: b.bounce } }),
   }))
-  for (const r of ramps) {
-    const [tx, tz] = r.toward!
-    const [x0, y0, z0] = r.min, [x1, y1, z1] = r.max
-    // The corners on the high side, the side `toward` points at, rise to the top.
-    const high = (x: number, z: number) => (x - (tx + tz > 0 ? x0 : x1)) * tx + (z - (tx + tz > 0 ? z0 : z1)) * tz > 0
-    const points: number[] = []
-    for (const [x, z] of [[x0, z0], [x1, z0], [x1, z1], [x0, z1]]) {
-      points.push(x, y0, z)
-      if (high(x, z)) points.push(x, y1, z)
-    }
-    shapes.push({ hull: { points } })
-  }
+  for (const r of ramps) shapes.push({ hull: { points: corners(r as Parameters<typeof corners>[0]) } })
   return { pos: [0, 0, 0], rot: [0, 0, 0, 1], shapes }
 }
 
@@ -48,6 +37,10 @@ export function kinds(w: W): Kinds {
         return { type: 'dynamic', shapes: [{ box: [size / 2, size / 2, size / 2], density, baseMaterial: { friction, restitution } }] }
       },
       door: (row: Row): Body => {
+        const { size } = def(w, row.kind)
+        return { type: 'kinematic', shapes: [{ box: [size[0] / 2, size[1] / 2, size[2] / 2] }] }
+      },
+      lift: (row: Row): Body => {
         const { size } = def(w, row.kind)
         return { type: 'kinematic', shapes: [{ box: [size[0] / 2, size[1] / 2, size[2] / 2] }] }
       },
