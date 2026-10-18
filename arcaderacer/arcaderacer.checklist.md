@@ -87,6 +87,24 @@ starts over for each race (the match plugin's `reset`), not on entering.
 - [x] proven in node: every row of the transition table on the server
       (`addons/match/match.addon.test.ts`), and the pages (`plugins/match/match.plugin.test.ts`)
 
+## Phase 5 — the intro and the title
+
+- [x] the title in 3D on Tokyo's circuit and land, eight rivals racing behind it for as long as it runs
+- [x] the intro: core's cutscene filming the title's real race, written from the race by
+      `assets/intro.ts` (grid, launch, sweep, slide, chase, the bay bridge, the hangers, the title);
+      every frame of every shot checked: the car on screen inside the bars, in reach, nothing between,
+      the camera above the ground and in no building
+- [x] the `curtain`: black until the car and Tokyo's textures are in (or `wait`), then the intro and
+      the race's `flag` in one step; any key or click skips
+- [x] the `rival` a cutscene cast member (`name`, `advance`), the race's closed `flag`
+- [x] the title's words in 3D, `assets/title/title.py` (Orbitron Black, leaning forward), baked, drawn
+      by the title card in render3d's overlay with an environment of its own: ARCADE RACER in chrome
+      on candy red, and the course select as PORTLAND (green), TOKYO (blue) and PARIS (sunset), each a
+      gradient up its face on chrome sides, the ui's buttons laid over them as the camera draws them
+- [x] the intro's frame check knows the corridor as land draws it (walls, retaining walls, banks,
+      rails, bores): the launch camera, which stood inside the bank, stands over it
+- [x] tests: `title.sim.test.ts`; the match page test skips the intro and finds the words' buttons
+
 ## Done
 
 - [x] every kind and plugin has its test beside it, each run alone (14 files, 85 tests)

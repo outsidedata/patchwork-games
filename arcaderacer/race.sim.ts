@@ -12,6 +12,11 @@
 // race's length; `countdown`, the seconds counted down; `hold`, the seconds on the grid before the
 // count; and `hud`, where its readouts stand (the dash plugin). The match plugin starts the course over
 // for each race, this row with it.
+//
+// Its act `flag`, which is closed so only a rule calls it, starts the count at once from the grid, with
+// no seat's car there: the title's race of rivals alone, which its `curtain` flags off on the step the
+// intro starts, so the intro's cue clock and the race's run together. It does nothing once the race has
+// left the grid.
 import type { Kind, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import { racers } from './plugins/drive/drive.sim.ts'
@@ -51,5 +56,12 @@ export const race: Kind = {
     const d = me.data
     d.order = ordered(w)
     if (d.phase === 'go' && (leaderCar(w)?.data.done ?? -1) >= 0) d.phase = 'results'
+  },
+  acts: {
+    flag(me, w) {
+      if (me.data.phase !== 'grid') return
+      me.data.phase = 'count'
+      me.data.count = def(w, me.kind).countdown
+    },
   },
 }

@@ -2,7 +2,8 @@
 // header of `match.sim.ts`), loaded by `shipped`, which is listed after `ui`. Every word, place and
 // number is the `match` definition's.
 //
-// In the lobby, the title, on the `title` panel:
+// In the lobby, the title, on the `title` panel, once the title's intro (its `cutscene` row) is done,
+// and nothing while it plays:
 //   message    the row's `message` worded by `messages`, in { at, anchor, style }: "waiting for match
 //              to finish" while a match runs, and that the leader disconnected.
 //   lobby      { at, anchor, text, style }, while the match is in the lobby, to every seat but the
@@ -79,6 +80,8 @@ export function match() {
 
   function lobby(p: Plugins, m: Row) {
     const { wire } = p
+    const intro = wire.rows.find(r => r.kind === 'cutscene')
+    if (intro && !intro.data.done) return
     const T = p.ui.PIXI as typeof PIXI
     const D = def(wire, m.kind)
     if (m.data.message) {

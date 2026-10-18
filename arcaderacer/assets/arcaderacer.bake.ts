@@ -7,6 +7,7 @@
 //   paris/haussmann.glb                haussmann.py, high, its limestone and zinc from the library's `textures/`
 //   paris/haussmann_medium.glb         haussmann.py, medium
 //   paris/eiffel.glb, paris/lamp.glb   eiffel.py and lamp.py, from nothing
+//   title/title.glb                    title.py, the title's words in 3D, from the Orbitron font beside it
 //   supercar/supercar.glb              supercar.py builds the car and saves its scene; export_glb.py
 //                                      exports the car from it, in a Blender of its own
 //   surfaces/<set>/<map>.webp          the sets of surfaces/fetch.ts, fetched into the library when it lacks them
@@ -37,6 +38,7 @@ export default async ({ blender, pack, webp, scratch, library }: Tools) => {
     glb('paris/haussmann_medium.glb', python('paris/haussmann.py', 'medium')),
     glb('paris/eiffel.glb', python('paris/eiffel.py')),
     glb('paris/lamp.glb', python('paris/lamp.py')),
+    glb('title/title.glb', python('title/title.py')),
     glb('supercar/supercar.glb', async raw => {
       const scene = scratch('supercar.blend')
       await blender(['--factory-startup', '--python', script('supercar/supercar.py'), '--', scene])

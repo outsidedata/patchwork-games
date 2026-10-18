@@ -306,6 +306,26 @@
             720
           ],
           "modal": true
+        },
+        "cutscene.top": {
+          "anchor": "top",
+          "size": [1280, 96],
+          "layer": 2
+        },
+        "cutscene.bottom": {
+          "anchor": "bottom",
+          "size": [1280, 96],
+          "layer": 2
+        },
+        "cutscene.veil": {
+          "anchor": "center",
+          "size": [1280, 720],
+          "layer": 3
+        },
+        "curtain": {
+          "anchor": "center",
+          "size": [1280, 720],
+          "layer": 4
         }
       },
       "keys": {
@@ -425,19 +445,6 @@
             "color": 16737792
           }
         },
-        "logo": {
-          "fontFamily": "Arial Black, Arial, sans-serif",
-          "fontSize": 96,
-          "fontStyle": "italic",
-          "padding": 24,
-          "fontWeight": "900",
-          "fill": 16769280,
-          "stroke": {
-            "color": 1118481,
-            "width": 10,
-            "join": "round"
-          }
-        },
         "tagline": {
           "fontFamily": "Arial, sans-serif",
           "fontSize": 24,
@@ -451,15 +458,15 @@
             "join": "round"
           }
         },
-        "blurb": {
-          "fontFamily": "Arial, sans-serif",
-          "fontSize": 18,
-          "padding": 8,
-          "fill": 13421772,
-          "wordWrap": true,
-          "wordWrapWidth": 340,
-          "align": "center"
+        "word": {
+          "size": [1, 1],
+          "fill": { "color": 0, "alpha": 0 },
+          "focus": { "color": 0, "alpha": 0 },
+          "text": {}
         },
+        "cutscene.bars": { "color": 0 },
+        "cutscene.veil": { "color": 0 },
+        "curtain.cover": { "color": 0 },
         "hint": {
           "fontFamily": "Arial, sans-serif",
           "fontSize": 18,
@@ -581,6 +588,8 @@
     "circuit": {},
     "scenery": {},
     "rival": {
+      "name": "",
+      "direct": null,
       "grid": 0,
       "steer": 0,
       "throttle": 0,

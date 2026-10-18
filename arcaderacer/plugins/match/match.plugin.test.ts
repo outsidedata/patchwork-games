@@ -1,6 +1,6 @@
 // The match as the pages show it, each page made as `index.html` makes it, on a loopback to the game's
-// match addon, in node with no canvas: the page's key listeners kept and fired by hand. The leader's
-// title shows the course select and another seat's the line saying the leader picks; the leader's
+// match addon, in node with no canvas: the page's key listeners kept and fired by hand. The title shows
+// no lobby while its intro plays, and a key skips the intro; then the leader's title shows the course select and another seat's the line saying the leader picks; the leader's
 // course button takes both seats to the course as racers, and the keys drive the seat's own car; a
 // page that joins mid-race is told to wait and offered to spectate, and spectating it is shown the free
 // camera and each active car to follow, its camera following the car it picks; once the leader's car
@@ -76,12 +76,27 @@ test('the lobby, the race, a spectator and the results, as each page shows them'
   const tap = (c: PIXI.Container | null) => c!.emit('pointertap', {} as never)
   const matchRow = (p: Page) => p.client!.plugins.wire.rows.find((r: Row) => r.kind === 'match') as Row | undefined
 
-  // the lobby: the leader picks a course, the other seat is told the leader picks
+  // the title's intro, which shows no lobby while it plays, skipped with a key once it runs
   const a = open(), b = open()
   await until(() => !!a.client && !!b.client && (matchRow(a)?.data.roster.length ?? 0) === 2 && (matchRow(b)?.data.roster.length ?? 0) === 2)
-  await frame()
+  const intro = (p: Page) => p.client!.plugins.wire.rows.find((r: Row) => r.kind === 'cutscene')?.data
+  await until(() => !!intro(a)?.running, 900)
+  expect(shown(a, 'title', 'course.0')).toBeNull()
+  expect(shown(b, 'title', 'match.lobby')).toBeNull()
+  key('keydown', 'x')
+  key('keyup', 'x')
+  await until(() => !!intro(a)?.done && !!intro(b)?.done)
+  // the lobby: the leader picks a course, the other seat is told the leader picks
+  await until(() => !!shown(a, 'title', 'course.0') && !!shown(b, 'title', 'match.lobby'), 600)
   expect(a.name).toBe(entry)
-  expect(label(shown(a, 'title', 'course.0'))).toBe(defs.titlecard.courses[0].label)
+  // each course's word is a button laid over the word as the camera draws it, left to right in order
+  await until(() => defs.titlecard.courses.every((_, i) => ((shown(a, 'title', `course.${i}`)?.hitArea as PIXI.Rectangle | undefined)?.width ?? 0) > 1), 900)
+  const boxes = defs.titlecard.courses.map((_, i) => shown(a, 'title', `course.${i}`)!)
+  for (const [i, b] of boxes.entries()) {
+    const area = b.hitArea as PIXI.Rectangle
+    expect(area.width).toBeGreaterThan(area.height)
+    if (i) expect(b.position.x).toBeGreaterThan(boxes[i - 1].position.x + (boxes[i - 1].hitArea as PIXI.Rectangle).width)
+  }
   expect(shown(a, 'title', 'match.lobby')).toBeNull()
   expect(shown(b, 'title', 'course.0')).toBeNull()
   expect(words(shown(b, 'title', 'match.lobby'))).toBe(D.lobby.text)
@@ -141,8 +156,7 @@ test('the lobby, the race, a spectator and the results, as each page shows them'
   key('keyup', 'Enter')
   await until(() => [a, b, c].every(p => p.name === entry))
   await until(() => [a, b, c].every(p => matchRow(p)?.data.match === 'lobby'))
-  await frame()
-  expect(label(shown(a, 'title', 'course.0'))).toBe(defs.titlecard.courses[0].label)
+  await until(() => !!shown(a, 'title', 'course.0') && !!shown(c, 'title', 'match.lobby'), 600)
   expect(words(shown(c, 'title', 'match.lobby'))).toBe(D.lobby.text)
 })
 
@@ -208,7 +222,12 @@ test('pages that run the course ahead never differ from the server through the m
 
   ps.push(open(1), open(2))
   const [a, b] = ps
-  await until(() => roster(a).length === 2 && roster(b).length === 2 && !!shown(a, 'title', 'course.0'))
+  // the title's intro skipped with a key once it runs, and then the lobby
+  const intro = (p: ReturnType<typeof predict>) => p.client?.plugins.wire.rows.find((r: Row) => r.kind === 'cutscene')?.data
+  await until(() => roster(a).length === 2 && roster(b).length === 2 && !!intro(a)?.running, 900)
+  key('keydown', 'x')
+  key('keyup', 'x')
+  await until(() => !!shown(a, 'title', 'course.0'))
   const course = defs.titlecard.courses[0].scene
   tap(shown(a, 'title', 'course.0'))
   const own = (p: ReturnType<typeof predict>) => possessed(p.client?.plugins.wire.rows ?? [])
