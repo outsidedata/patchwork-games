@@ -7,7 +7,7 @@ import { scenemanager } from '#plugins/scenemanager/scenemanager.sim.ts'
 import { loader } from '#plugins/loader/loader.sim.ts'
 import { player } from './player.sim.ts'
 import { start } from './start.sim.ts'
-import { portal } from './portal.sim.ts'
+import { portal } from './plugins/portal/portal.sim.ts'
 import { chamber } from './plugins/chamber/chamber.sim.ts'
 import file from './main.scene.json' with { type: 'json' }
 

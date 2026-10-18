@@ -17,7 +17,8 @@
 // Throwing. A start may name a kind in `throws`, which the row takes when it stands there; `throw`
 // then spawns a row of that kind its definition's `throw.ahead` metres along the view from its eye,
 // turned to the view's yaw, moving along the view at `throw.speed` on top of the body's own `vel`. A
-// row that throws nothing does nothing.
+// row that throws nothing does nothing. The row it threw last is kept in `threw`. `take` takes that row
+// out of box3d's world (its `out`), keeping its id in `took`; `take` again puts it back (`in`).
 //
 // Going through. The step the line its body's centre (`pos` raised half the walker's `height`)
 // travelled goes in at a portal's front, inside its opening, while the other portal stands, the body
@@ -31,23 +32,15 @@ import type { Kind, Row, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
 import { groundOf, numbers, relative, walk } from '#plugins/walker/walker.sim.ts'
-import { bounds, cross, ray } from './plugins/chamber/chamber.sim.ts'
+import { bounds, ray } from './plugins/chamber/chamber.sim.ts'
+import { ahead, crossed, other, point, vector } from './plugins/portal/portal.sim.ts'
 
-const dot = (a: number[], b: number[]) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 const unit = (v: number[]) => {
   const m = math.hypot(v[0], v[1], v[2])
   return [v[0] / m, v[1] / m, v[2] / m]
 }
 // Where a view [yaw, pitch] looks.
 const looking = ([yaw, pitch]: number[]) => [math.sin(yaw) * math.cos(pitch), math.sin(pitch), math.cos(yaw) * math.cos(pitch)]
-
-// A vector in portal a's frame carried into portal b's, turned half a turn about up: right and normal
-// reversed, up kept.
-function carried(a: Row, b: Row, v: number[]) {
-  const ar = cross(a.data.up, a.data.normal), br = cross(b.data.up, b.data.normal)
-  const x = dot(v, ar), y = dot(v, a.data.up), z = dot(v, a.data.normal)
-  return [0, 1, 2].map(i => -x * br[i] + y * b.data.up[i] - z * b.data.normal[i])
-}
 
 export const player: Kind = {
   before(me, _dt, w) {
@@ -94,13 +87,26 @@ export const player: Kind = {
       const { eye, throw: { ahead, speed } } = def(w, me.kind)
       const dir = looking(me.data.view)
       const half = me.data.view[0] / 2
-      w.spawn(me.data.throws, {
+      me.data.threw = w.spawn(me.data.throws, {
         pos: [0, 1, 2].map(i => me.data.pos[i] + (i === 1 ? eye : 0) + dir[i] * ahead),
         rot: [0, math.sin(half), 0, math.cos(half)],
         vel: [0, 1, 2].map(i => me.data.vel[i] + dir[i] * speed),
         spin: [0, 0, 0],
         awake: true,
-      })
+      }).id
+    },
+    take(me, w, seat) {
+      if (!me.data.throws) return
+      const held = me.data.took === null ? undefined : w.all(me.data.throws).find(r => r.id === me.data.took)
+      if (held) {
+        w.call(held, 'in', seat)
+        me.data.took = null
+        return
+      }
+      const row = w.all(me.data.throws).find(r => r.id === me.data.threw)
+      if (!row) return
+      w.call(row, 'out', seat)
+      me.data.took = row.id
     },
     // Which portal to put where the reticle points: 0 or 1, an index into its definition's `portals`.
     place(me, w, _seat, which: unknown) {
@@ -127,29 +133,20 @@ function through(me: Row, w: W, from: number[]) {
   const half = numbers(me, w).height / 2
   const c0 = [from[0], from[1] + half, from[2]]
   const c1 = [me.data.pos[0], me.data.pos[1] + half, me.data.pos[2]]
-  const portals = w.all('portal')
-  for (const a of portals) {
-    const b = portals.find(p => p.data.name === a.data.to)
-    if (!b) continue
-    const { width, height } = def(w, a.kind)
-    const n: number[] = a.data.normal, p: number[] = a.data.pos
-    const t0 = dot([c0[0] - p[0], c0[1] - p[1], c0[2] - p[2]], n)
-    const t1 = dot([c1[0] - p[0], c1[1] - p[1], c1[2] - p[2]], n)
-    if (!(t0 > 0 && t1 <= 0)) continue
-    const f = t0 / (t0 - t1)
-    const hit = [0, 1, 2].map(i => c0[i] + (c1[i] - c0[i]) * f - p[i])
-    if (Math.abs(dot(hit, cross(a.data.up, n))) >= width / 2 || Math.abs(dot(hit, a.data.up)) >= height / 2) continue
-    const centre = carried(a, b, [c1[0] - p[0], c1[1] - p[1], c1[2] - p[2]])
+  for (const a of w.all('portal')) {
+    const b = other(w, a)
+    if (!b || !crossed(w, a, c0, c1, 0, 0)) continue
+    const centre = point(a, b, c1)
     // Out of a portal in a wall, the footprint's corners clear of the wall's face, so no foot stands
     // on the wall the opening is cut through.
     const nb: number[] = b.data.normal
     if (Math.abs(nb[1]) <= 0.5) {
-      const clear = numbers(me, w).span * Math.SQRT1_2 - dot(centre, nb)
+      const clear = numbers(me, w).span * Math.SQRT1_2 - ahead(b, centre)
       if (clear > 0) for (const i of [0, 1, 2]) centre[i] += nb[i] * clear
     }
-    me.data.pos = [b.data.pos[0] + centre[0], b.data.pos[1] + centre[1] - half, b.data.pos[2] + centre[2]]
-    me.data.vel = carried(a, b, me.data.vel)
-    const look = carried(a, b, looking(me.data.view))
+    me.data.pos = [centre[0], centre[1] - half, centre[2]]
+    me.data.vel = vector(a, b, me.data.vel)
+    const look = vector(a, b, looking(me.data.view))
     const { pitch } = def(w, me.kind)
     const yaw = math.atan2(look[0], look[2])
     me.data.view = [yaw, Math.min(pitch, Math.max(-pitch, math.asin(Math.max(-1, Math.min(1, look[1])))))]

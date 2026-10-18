@@ -15,7 +15,7 @@
     "pit": 20,
     "colours": { "orange": "#ff7a1a", "blue": "#2a8cff" }
   },
-  "crate": { "size": 1, "density": 1, "friction": 0.6, "restitution": 0.1, "colour": "#c98b4a" },
+  "crate": { "size": 0.5, "density": 1, "friction": 0.6, "restitution": 0.1, "colour": "#c98b4a" },
   "chamber": {
     "below": -100,
     "boxes": [
