@@ -249,6 +249,9 @@
       "cell": 50,
       "tile": 500
     },
+    "player": {
+      "deadzone": 0.3
+    },
     "particle3d": {
       "effects": "effects"
     },
@@ -535,7 +538,6 @@
     "loader": {},
     "player": {
       "seat": 0,
-      "deadzone": 0.3,
       "conn": -1,
       "held": null,
       "watch": null
