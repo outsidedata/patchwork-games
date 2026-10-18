@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demo_wormhole dev</title>
+    <style>
+      body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      canvas { grid-area: 1 / 1 }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      // index.html, with the page on `window.page` and every frame's drawn camera, the step it was
+      // drawn on and the walker's `jumps` kept in `window.drawn`, so a run through a door can be read
+      // back frame by frame.
+      import { boot } from '#engine/engine.ts'
+      import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
+      import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import { possessed } from '#plugins/player/player.plugin.ts'
+      import { sim } from './demo_wormhole.sim.ts'
+      import file from './demo_wormhole.scene.json'
+
+      const dt = file.prefabs.engine.dt
+      const truth = boot(file, sim)
+      await load(truth, import.meta.url)
+      window.drawn = []
+      const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+        for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
+          if (!surface) continue
+          const canvas = document.createElement('canvas')
+          canvas.width = scene.prefabs.engine.width
+          canvas.height = scene.prefabs.engine.height
+          document.body.appendChild(canvas)
+          surface.mount(canvas)
+        }
+        me.plugins.render3d.drew(d => {
+          const w = me.plugins.wire
+          window.drawn.push({ n: w.n, between: w.between, camera: d.camera, jumps: possessed(w.rows)?.data.jumps })
+        })
+      })
+      window.page = page
+
+      let last = performance.now(), owed = 0
+      const loop = async now => {
+        owed += Math.min((now - last) / 1000, 0.25)
+        last = now
+        page.input()
+        while (owed >= dt) { truth.step(dt); owed -= dt }
+        await page.frame(owed / dt)
+        requestAnimationFrame(loop)
+      }
+      requestAnimationFrame(loop)
+    </script>
+  </body>
+</html>

@@ -1,0 +1,84 @@
+{
+  "world": {
+    "defs": "demo_wormhole",
+    "loader": {
+      "assets": {
+        "demo_wormhole": {
+          "type": "json",
+          "url": "/games/demo_wormhole/assets/demo_wormhole.json",
+          "preload": true
+        }
+      }
+    },
+    "predict": { "epsilon": 0.000001, "cutoff": 60, "halflife": 100, "snap": 0.5, "below": 0.0001 }
+  },
+  "plugins": [
+    "loader",
+    "scenemanager",
+    "player",
+    "environment3d",
+    "render3d"
+  ],
+  "seats": 1,
+  "prefabs": {
+    "engine": {
+      "dt": 0.016666666666666666,
+      "width": 960,
+      "height": 540
+    },
+    "scenemanager": {
+      "out": {}
+    },
+    "loader": {},
+    "render3d": {
+      "camera": { "fov": 75, "near": 0.05, "far": 400, "at": [0, 1.7, 10], "look": [0, 1.7, 0] },
+      "tone": "neutral",
+      "exposure": 1,
+      "background": "#0b0d12",
+      "pixelRatio": 2
+    },
+    "environment3d": {
+      "sun": { "at": [30, 50, 20], "color": "#fff4e0", "power": 2.2 },
+      "sky": { "color": "#b9c8ff", "ground": "#1a1d28", "power": 1.1 }
+    },
+    "player": {
+      "seat": 0,
+      "placed": false,
+      "pos": [0, 0, 0],
+      "yaw": 0,
+      "pitch": 0,
+      "move": [0, 0],
+      "vel": [0, 0],
+      "jumps": 0
+    },
+    "start": {
+      "slot": 0,
+      "pos": [0, 0, 0],
+      "yaw": 0
+    },
+    "floor": {},
+    "prop": {
+      "look": "red cube",
+      "pos": [0, 0, 0]
+    },
+    "door": {
+      "name": "",
+      "to": "",
+      "pos": [0, 0, 0],
+      "yaw": 0
+    }
+  },
+  "actors": [
+    { "is": "scenemanager" },
+    { "is": "loader" },
+    { "is": "start", "slot": 0, "pos": [0, 0, 10], "yaw": 0 },
+    { "is": "floor" },
+    { "is": "prop", "look": "red cube", "pos": [-3, 0, 4] },
+    { "is": "prop", "look": "yellow ball", "pos": [2.5, 0, -4] },
+    { "is": "prop", "look": "white cube", "pos": [-4, 0, -9] },
+    { "is": "prop", "look": "green cube", "pos": [36, 0, -27.5] },
+    { "is": "prop", "look": "purple ball", "pos": [40, 0, -22] },
+    { "is": "prop", "look": "pink cube", "pos": [48, 0, -25] },
+    { "is": "prop", "look": "cyan ball", "pos": [26, 0, -23] }
+  ]
+}

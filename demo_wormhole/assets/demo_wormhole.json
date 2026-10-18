@@ -1,0 +1,21 @@
+{
+  "player": { "accel": 60, "friction": 10, "eye": 1.7, "sens": 0.0025, "pitch": 1.5, "reach": 4, "portals": ["orange", "blue"] },
+  "floor": { "size": 120, "cell": 1, "major": 10, "colour": "#141822", "line": "#2c3446", "bold": "#4f5b7a" },
+  "door": {
+    "width": 2,
+    "height": 3,
+    "post": 0.2,
+    "colours": { "orange": "#ff7a1a", "blue": "#2a8cff" }
+  },
+  "prop": {
+    "looks": {
+      "red cube": { "shape": "box", "size": 1, "colour": "#e04848" },
+      "yellow ball": { "shape": "ball", "size": 1.2, "colour": "#f2c84b" },
+      "white cube": { "shape": "box", "size": 2, "colour": "#e8e8ee" },
+      "green cube": { "shape": "box", "size": 1, "colour": "#4cc46a" },
+      "purple ball": { "shape": "ball", "size": 1.4, "colour": "#a061e8" },
+      "pink cube": { "shape": "box", "size": 2.5, "colour": "#ff6fb5" },
+      "cyan ball": { "shape": "ball", "size": 1, "colour": "#3fd6e0" }
+    }
+  }
+}
