@@ -1,0 +1,20 @@
+{
+  "program": {
+    "world": 2000,
+    "hscale": 1,
+    "sea": 0.5,
+    "flood": false,
+    "out": "flat",
+    "nodes": [{ "id": "flat", "op": "const", "value": 0 }]
+  },
+  "analysis": {
+    "slopeStep": 1, "curveStep": 3, "positionRadius": 12, "occlusionRadius": 20, "occlusionSteps": 5,
+    "cliffProbe": 6, "cliffSlope": 0.5, "cliffDrop": 3, "flatAngle": 0.03, "records": 50000
+  },
+  "ground": {
+    "roughness": 0.95,
+    "layers": [{ "name": "dust", "map": "dry", "normal": "dryNormal", "scale": 6 }]
+  },
+  "surfaces": {},
+  "layers": []
+}

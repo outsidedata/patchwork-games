@@ -1,0 +1,12 @@
+{
+  "player": {
+    "walk": 2,
+    "run": 6,
+    "look": { "turn": 0.004, "pitch": [-0.35, 1.2] }
+  },
+  "colossus": {
+    "notice": 120,
+    "near": 14,
+    "pace": 5
+  }
+}
