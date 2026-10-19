@@ -10,10 +10,12 @@
 // The holder's hands are on the limb's surface there: the segment's `radius` out from its line, in the
 // held kind's definition, `segments.<segment>.radius` metres. Its body faces the limb, upright, turned
 // by yaw alone, its root set back from the hands by where its own hands are in its `hold` clip's first
-// frame (its own `ends`, so a body of any proportions hangs by its own hands).
+// frame (its own `ends`, so a body of any proportions hangs by its own hands), and out from the limb by
+// its `climb.off` metres more, so its body clears the limb's surface.
 //
 // The numbers, off the definitions of the kinds whose rows it is handed:
-//   holder `climb`: `reach` metres, how far from a limb's surface its hands take hold; `up` and
+//   holder `climb`: `reach` metres, how far from a limb's surface its hands take hold; `off` metres,
+//          how far its body stands out from the surface past its hands; `up` and
 //          `side` m/s, how fast it climbs along a limb and round it; `clips`, the clip it plays to
 //          hold still (`hold`), climb up, climb down, go left and go right.
 //   held   `segments`: `{ <segment>: { radius, up } }`, each limb that can be held, its radius, and the
@@ -23,12 +25,19 @@
 // `reach` of its hands, and returns whether it did. `hang(me, w, dt, stick)` moves the hold by the stick
 // (x round to the right, y down the limb) and puts the holder there, playing the clip of the way it
 // moves; past a limb's upper end it goes on to the limb its `up` names, and past its lower end to the
-// limb whose `up` is this one and whose lower joint it is nearest. `place(me, w)` puts the holder where
-// its hold is now, and `release(me, w)` lets go: the body is in the air where it was, falling.
+// limb whose `up` is this one and whose lower joint it is nearest; a move that would put its feet
+// under the ground (walker's) is not made. `spot(from, held, at)` is a place `{ segment, along,
+// around }` on a held row's limb in the world now, `{ at, out }`, the point on its surface and the way
+// out of it there, off the server's `w` or the page's wire. `place(me, w)` puts the holder where its hold is now,
+// `apart(w, hold, at)` is how far another place `{ segment, along, around }` on the hold's limb is
+// from it over the limb's surface, metres, and `release(me, w)` lets go: the body is in the air where
+// it was, falling.
 import type { Row, W } from '#engine/engine.ts'
+import type { Wire } from '#engine/browser.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import { ends, play, stop } from '#plugins/anim/anim.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
+import { groundOf, numbers, stand } from '#plugins/walker/walker.sim.ts'
 
 export type Hold = { on: number; segment: string; along: number; around: number }
 type V = number[]
@@ -48,7 +57,7 @@ const world = (pos: V, yaw: number, p: V) => {
 }
 
 // A held row's segment now, its two joints in the world.
-function line(w: W, held: Row, segment: string): [V, V] {
+function line(w: W | Wire, held: Row, segment: string): [V, V] {
   const e = ends(w, held, segment)
   const { pos, yaw } = held.data
   return [world(pos, yaw, e.slice(0, 3)), world(pos, yaw, e.slice(3))]
@@ -66,14 +75,18 @@ function round(a: V, b: V, facing: V): [V, V] {
 
 const facingOf = (held: Row) => [math.sin(held.data.yaw), 0, math.cos(held.data.yaw)]
 
-// Where the hold puts the hands, and the way out of the limb there.
-function surface(w: W, me: Row, h: Hold): { hands: V; out: V } {
-  const held = w.get(h.on)!
-  const [a, b] = line(w, held, h.segment)
+export function spot(from: W | Wire, held: Row, at: { segment: string; along: number; around: number }): { at: V; out: V } {
+  const [a, b] = line(from, held, at.segment)
   const [side, over] = round(a, b, facingOf(held))
-  const out = add(mul(side, math.cos(h.around)), mul(over, math.sin(h.around)))
-  const r = def(w, held.kind).segments[h.segment].radius
-  return { hands: add(add(a, mul(sub(b, a), h.along)), mul(out, r)), out }
+  const out = add(mul(side, math.cos(at.around)), mul(over, math.sin(at.around)))
+  const r = def(from, held.kind).segments[at.segment].radius
+  return { at: add(add(a, mul(sub(b, a), at.along)), mul(out, r)), out }
+}
+
+// Where the hold puts the hands, and the way out of the limb there.
+function surface(w: W, _me: Row, h: Hold): { hands: V; out: V } {
+  const { at, out } = spot(w, w.get(h.on)!, h)
+  return { hands: at, out }
 }
 
 // The holder's own hands in its frame on its `hold` clip's first frame, midway between them.
@@ -89,7 +102,7 @@ export function place(me: Row, w: W) {
   // Facing the limb: the way into it, laid flat.
   const yaw = math.atan2(-out[0], -out[2])
   const g = grip(w, me)
-  const root = sub(hands, sub(world([0, 0, 0], yaw, g), [0, 0, 0]))
+  const root = add(sub(hands, world([0, 0, 0], yaw, g)), mul(out, def(w, me.kind).climb.off))
   Object.assign(d, { pos: root, yaw, vel: [0, 0, 0], want: [0, 0], face: null, grounded: true, sliding: false, speed: 0 })
 }
 
@@ -118,7 +131,7 @@ export function grab(me: Row, w: W, kinds: string[]): boolean {
 
 // The segment past an end of the hold's: past the upper end the one its `up` names, past the lower the
 // one whose `up` is this one and whose own upper end is nearest; and where on it the hold goes on.
-function next(w: W, me: Row, h: Hold, upward: boolean): Hold | undefined {
+function next(w: W, h: Hold, upward: boolean): Hold | undefined {
   const held = w.get(h.on)!
   const segs = def(w, held.kind).segments as Record<string, { up?: string }>
   const [a, b] = line(w, held, h.segment)
@@ -151,14 +164,30 @@ export function hang(me: Row, w: W, dt: number, stick: V) {
   h.around -= across * k.side * dt / r
   if (h.along > 1 || h.along < 0) {
     const upward = (h.along > 1) === (rising > 0)
-    const on = next(w, me, h, upward)
+    const on = next(w, h, upward)
     if (on) Object.assign(h, on)
     else h.along = Math.max(0, Math.min(1, h.along))
   }
+  const was = d.hold
   d.hold = h
+  place(me, w)
+  // A hold that would put the feet under the ground is not taken: the holder stays where it was.
+  const [x, y, z] = d.pos
+  if (y < stand(numbers(me, w), groundOf(w), x, z)) {
+    d.hold = was
+    place(me, w)
+  }
   const clip = climb > 0.1 ? k.clips.up : climb < -0.1 ? k.clips.down : across > 0.1 ? k.clips.right : across < -0.1 ? k.clips.left : k.clips.hold
   if (d.clip !== clip) play(me, clip)
-  place(me, w)
+}
+
+// How far apart two places on one limb of the held row are, over its surface: along it, and round it.
+export function apart(w: W, h: Hold, at: { segment: string; along: number; around: number }): number {
+  const held = w.get(h.on)!
+  const [a, b] = line(w, held, h.segment)
+  const r = def(w, held.kind).segments[h.segment].radius
+  const turn = Math.abs(math.atan2(math.sin(at.around - h.around), math.cos(at.around - h.around)))
+  return math.hypot((at.along - h.along) * len(sub(b, a)), turn * r)
 }
 
 export function release(me: Row, w: W) {

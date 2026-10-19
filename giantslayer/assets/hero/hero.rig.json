@@ -13,6 +13,7 @@
  "stances": {
   "stand": {}
  },
+ "mask": "Spine1",
  "clips": {
   "idle": {
    "file": "packs/Action Adventure Pack 30FPS/idle.fbx",
@@ -61,7 +62,10 @@
   },
   "top": "packs/mixamo-motions/Climbing To Top.fbx",
   "drop": "packs/mixamo-motions/Braced Hang Drop.fbx",
-  "stab": "packs/mixamo-motions/Stabbing.fbx",
+  "stab": {
+   "file": "packs/mixamo-motions/Stabbing.fbx",
+   "markers": { "hit": "peak" }
+  },
   "stab2": "packs/mixamo-motions/Stabbing (2).fbx",
   "stab3": "packs/mixamo-motions/Stabbing (3).fbx",
   "thrown": "packs/mixamo-motions/Getting Thrown.fbx",

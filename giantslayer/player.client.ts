@@ -1,6 +1,7 @@
 // The hero's keys and camera, for the seat's own row alone; anim draws the body of every seat's.
 // w a s d are the stick, sent as `move`; shift held runs; space jumps; e or the right button held
-// grips (`grip`). A click takes the pointer, and
+// grips (`grip`); f or the left button held charges a stab and let go strikes (`attack`). A click
+// takes the pointer, and
 // the mouse moved under it turns the camera (`look`), which chasecamera3d sits on.
 import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
@@ -14,7 +15,11 @@ export function setup(row: Row, plugins: Plugins) {
   plugins.chasecamera3d.follow(row.id)
   plugins.player.bind({
     stick: [{ keys: ['a', 'd', 'w', 's'], send: (x, y) => ['move', x, y] }],
-    hold: [{ keys: ['Shift'], send: v => ['run', v] }, { keys: ['e', 'Mouse2'], send: v => ['grip', v] }],
+    hold: [
+      { keys: ['Shift'], send: v => ['run', v] },
+      { keys: ['e', 'Mouse2'], send: v => ['grip', v] },
+      { keys: ['f', 'Mouse0'], send: v => ['attack', v] },
+    ],
     press: { ' ': ['jump'] },
     pointer: (dx, dy) => ['look', dx, dy],
   } satisfies Binds)

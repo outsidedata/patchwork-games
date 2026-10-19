@@ -2,9 +2,15 @@
   "player": {
     "walk": 2,
     "run": 6,
+    "hp": 4,
+    "hurt": 1,
+    "down": 4,
     "look": { "turn": 0.004, "pitch": [-0.35, 1.2], "follow": 2.5, "dist": 7, "climb": 15 },
+    "grip": { "drain": 0.03, "shaken": 0.1, "refill": 0.4, "least": 0.25 },
+    "stab": { "charge": 1.2, "least": 0.25, "reach": 2.5 },
     "climb": {
       "reach": 1.2,
+      "off": 0.45,
       "up": 0.65,
       "side": 0.5,
       "clips": { "hold": "dangle", "up": "climbUp", "down": "climbDown", "left": "shimmyR", "right": "shimmyL" }
@@ -12,19 +18,26 @@
   },
   "colossus": {
     "notice": 120,
-    "near": 14,
+    "near": 13,
     "pace": 5,
+    "shake": 10,
+    "attack": { "clip": "stomp", "reach": 19, "cool": 4, "hit": 2.2, "at": 0.9, "limbs": ["footR", "legR"] },
     "segments": {
-      "legL": { "radius": 1.0, "up": "uplegL" },
-      "legR": { "radius": 1.0, "up": "uplegR" },
-      "uplegL": { "radius": 1.4, "up": "torso" },
-      "uplegR": { "radius": 1.4, "up": "torso" },
-      "torso": { "radius": 2.4, "up": "head" },
-      "head": { "radius": 1.6 },
-      "armL": { "radius": 0.9, "up": "torso" },
-      "armR": { "radius": 0.9, "up": "torso" },
-      "forearmL": { "radius": 0.8, "up": "armL" },
-      "forearmR": { "radius": 0.8, "up": "armR" }
+      "legL": { "radius": 1.8, "up": "uplegL" },
+      "legR": { "radius": 1.7, "up": "uplegR" },
+      "uplegL": { "radius": 1.8, "up": "torso" },
+      "uplegR": { "radius": 1.8, "up": "torso" },
+      "torso": { "radius": 2.1, "up": "head" },
+      "head": { "radius": 1.35 },
+      "armL": { "radius": 1.35, "up": "torso" },
+      "armR": { "radius": 1.3, "up": "torso" },
+      "forearmL": { "radius": 1.4, "up": "armL" },
+      "forearmR": { "radius": 1.25, "up": "armR" }
     }
+  },
+  "weakpoint": {
+    "hp": 1,
+    "size": 0.9,
+    "colour": "#7fe6ff"
   }
 }
