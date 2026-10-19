@@ -7,8 +7,9 @@
 //   woods.glb    grown the same way from `woods.trees.json`: eight trees of the library's species (a
 //                douglas fir, a pine, a birch, an aspen, a maple, a japanese maple, a weeping willow and
 //                a bottlebrush) at four levels of detail, named for a scatter3d pack as firs.glb is
-//   clumps.glb   clumps.py, from the library's `props/lod-grass`: scatter3d's clumps pack, the
-//                grasses, dry grasses, flowers and reeds at their two levels of detail
+//   clumps.glb   made by the library's `foliage/foliage.py` from `clumps.foliage.json`: scatter3d's
+//                clumps pack, the nine clumps of the library's `props/lod-grass` (grasses, dry grasses,
+//                flowers and reeds) at their two levels of detail
 // The ground's maps, `ground/<name>-<map>-<size>.webp`, are cut by the bake itself from the cc0-textures
 // sets `cc0-textures.json` names, before this runs, and never committed.
 import path from 'node:path'
@@ -27,7 +28,7 @@ export default async ({ blender, pack, scratch, library, texture }: Tools) => {
   const make: Record<string, (raw: string) => Promise<unknown>> = {
     firs: trees('firs.trees.json'),
     woods: trees('woods.trees.json'),
-    clumps: raw => blender(['--factory-startup', '--python', path.join(here, 'clumps.py'), '--', raw]),
+    clumps: raw => blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(library, 'foliage', 'foliage.py'), '--', path.join(here, 'clumps.foliage.json'), raw]),
   }
   await Promise.all(Object.entries(make).map(async ([name, build]) => {
     const raw = scratch(`${name}.glb`)
