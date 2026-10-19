@@ -107,7 +107,8 @@
       "roof": "#5e6266"
     },
     "things": {
-      "zelkova": { "trunk": "#5a4634", "leaves": ["#4f7d3a", "#5f8d45", "#6a9a4c"], "crown": 0.6, "width": 0.75, "lumps": 9, "variants": 4 }
+      "zelkova": { "model": "trees", "lods": [{ "node": "zelkova_near", "within": 160 }, { "node": "zelkova_mid", "within": 450 }, { "node": "zelkova_far" }],
+        "leaves": ["#ffffff", "#eef4e6", "#e2ecdc"], "girth": [0.85, 1.15], "sink": 0.2 }
     },
     "along": {
       "lamp": { "height": 9, "colour": "#9ea4ab", "head": "#fff5dc", "glow": 0.6 },

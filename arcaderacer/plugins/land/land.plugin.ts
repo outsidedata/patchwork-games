@@ -84,10 +84,9 @@
 //              stands first, the last node beyond them all; a node a metre tall with its foot at the
 //              origin, scaled to the
 //              thing's size and `girth` [least, most] as wide, sunk `sink` into the ground, tinted
-//              one of `leaves`. Otherwise `fern` { leaves }, `rock` { colours }, and a broadleaf for
-//              any other name { trunk, leaves, crown, width, lumps, variants }: a trunk and limbs, and
-//              a crown of `lumps` clumps round `crown` of its height, `width` across, in `variants`
-//              shapes.
+//              one of `leaves`. Every tree is such a model, grown by the library's `trees/trees.py`
+//              (`assets/trees/trees.trees.json`). Otherwise `fern` { leaves } and `rock` { colours };
+//              any other name with no `model` throws.
 //   along      by name: `marker` { height, colour, band } (a post at the road's edge); `lamp`
 //              { height, colour, head, glow, light? } (a street lamp leaning over the road, its head
 //              glowing; when the lights are on, with `light` { intensity, distance, decay }, every
@@ -121,8 +120,7 @@
 // A landmark's numbers beside its look's are on its `landmarks` entry in the course file. Each piece
 // it adds to the scene is named `land.<piece>`: `ground`, `plain`, `sea`, `walls`, `skirt`,
 // `tunnel.lights`, `piers`, `bridge.tower`, `bridge.cable`, `bridge.hangers`, `things.<name>` (each
-// thing, a broadleaf's trunk), `things.<name>.crown` (a broadleaf's crowns, a mesh a variant),
-// `things.<name>.<node>` (a model's trees at that level), `blocks` (the towers),
+// fern or rock), `things.<name>.<node>` (a model's trees at that level), `blocks` (the towers),
 // `blocks.<lot>.<node>` (a model's lots of one kind at that level), `neon`, `along.<name>`,
 // `landmark.<name>`, and `lamplights` and `tunnel.lamplights`, groups of the real lights; every tile
 // of `ground`, `walls`, `skirt` and `blocks` is named as its piece. Nothing it
@@ -279,63 +277,6 @@ class Shell {
     g.setAttribute('aStyle', new T.Float32BufferAttribute(this.sty, 1))
     return g
   }
-}
-
-// Foliage: triangles with a shade per vertex and a normal leaning out from the crown, so a tree
-// shades as one mass and not as its facets.
-class Leaves {
-  pos: number[] = []
-  nor: number[] = []
-  col: number[] = []
-  out: (p: V) => V
-  constructor(out: (p: V) => V) { this.out = out }
-  tri(a: V, b: V, c: V, sa: number, sb: number, sc: number) {
-    for (const [p, s] of [[a, sa], [b, sb], [c, sc]] as [V, number][]) {
-      const n = this.out(p)
-      const l = Math.hypot(n[0], n[1], n[2]) || 1
-      this.pos.push(...p)
-      this.nor.push(n[0] / l, n[1] / l, n[2] / l)
-      this.col.push(s, s, s)
-    }
-  }
-  geometry(T: typeof THREE) {
-    const g = new T.BufferGeometry()
-    g.setAttribute('position', new T.Float32BufferAttribute(this.pos, 3))
-    g.setAttribute('normal', new T.Float32BufferAttribute(this.nor, 3))
-    g.setAttribute('color', new T.Float32BufferAttribute(this.col, 3))
-    return g
-  }
-}
-
-// A broadleaf crown a unit tall, its foot at 0: `lumps` clumps of foliage, each a roughened ball,
-// heaped round the crown's middle at `crown` of its height, `width` across. Lighter on top.
-function broadleaf(T: typeof THREE, look: any, die: () => number): THREE.BufferGeometry {
-  const mid = look.crown, half = look.width / 2
-  const leaves = new Leaves(p => [p[0], (p[1] - mid) * 1.2 + 0.08, p[2]])
-  for (let k = 0; k < look.lumps; k++) {
-    const a = die() * Math.PI * 2, r = half * 0.55 * Math.sqrt(die())
-    const c: V = [Math.cos(a) * r, mid + (die() - 0.35) * half * 0.6, Math.sin(a) * r]
-    const size = half * (0.45 + 0.25 * die())
-    // three's polyhedra are already a list of triangles, three corners each
-    const ball = new T.IcosahedronGeometry(1, 1)
-    const p = ball.getAttribute('position')
-    // each corner pushed in or out by its own roll, the same roll wherever the corner repeats
-    const rough = new Map<string, number>()
-    const pt = (i: number): V => {
-      const x = p.getX(i), y = p.getY(i), z = p.getZ(i)
-      const key = `${x.toFixed(3)},${y.toFixed(3)},${z.toFixed(3)}`
-      if (!rough.has(key)) rough.set(key, 0.8 + 0.35 * die())
-      const s = size * rough.get(key)!
-      return [c[0] + x * s, c[1] + y * s * 0.8, c[2] + z * s]
-    }
-    for (let i = 0; i < p.count; i += 3) {
-      const tri = [pt(i), pt(i + 1), pt(i + 2)]
-      const shade = (q: V) => 0.42 + 0.7 * Math.max(0, Math.min(1, (q[1] - (mid - half * 0.7)) / (half * 1.6)))
-      leaves.tri(tri[0], tri[1], tri[2], shade(tri[0]), shade(tri[1]), shade(tri[2]))
-    }
-    ball.dispose()
-  }
-  return leaves.geometry(T)
 }
 
 // The uniforms a set of textures is bound to as the loader hands each one over, `on` turned to 1 once
@@ -882,19 +823,6 @@ export function land() {
         copies(geometry, material, matrices, cast, `things.${name}`, tint && list.map((_, k) => tint(k)))
       }
       const tints = list.map(() => colour(pick(look.leaves ?? look.colours)))
-      // each tree a little wider or narrower than its height says, so no two stand alike
-      const girth = list.map(() => 0.85 + 0.3 * die())
-      const sized = (k: number) => new T.Vector3(list[k].size * girth[k], list[k].size, list[k].size * girth[k])
-      // `variants` crowns of a kind, each tree drawn with one of them, round again
-      const crowns = (make: (die: () => number) => THREE.BufferGeometry, cast = true) => {
-        const material = render3d.dress(new T.MeshStandardMaterial({ color: '#ffffff', vertexColors: true, roughness: 0.92, metalness: 0, side: T.DoubleSide }))
-        for (let v = 0; v < look.variants; v++) {
-          const some = list.map((_, k) => k).filter(k => k % look.variants === v)
-          if (!some.length) continue
-          const matrices = some.map(k => new T.Matrix4().compose(new T.Vector3(list[k].x, list[k].y - 0.2, list[k].z), new T.Quaternion().setFromAxisAngle(yAxis, list[k].yaw), sized(k)))
-          copies(make(seeded(seed ^ (0x7a11 + v * 131) ^ name.length)), material, matrices, cast, `things.${name}.crown`, some.map(k => tints[k]))
-        }
-      }
       if (name === 'fern') {
         const fronds: THREE.BufferGeometry[] = []
         for (let k = 0; k < 6; k++) fronds.push(new T.PlaneGeometry(0.35, 1.1).translate(0, 0.55, 0).rotateX(-0.9).rotateY((k / 6) * Math.PI * 2))
@@ -902,15 +830,7 @@ export function land() {
       } else if (name === 'rock') {
         placeAll(new T.DodecahedronGeometry(0.5, 0), plain('#ffffff', { roughness: 1, flatShading: true }), k => new T.Vector3(list[k].size * 1.2, list[k].size * 0.7, list[k].size), k => tints[k])
       } else {
-        // a trunk forking into limbs up into the crown
-        const wood: THREE.BufferGeometry[] = [new T.CylinderGeometry(0.022, 0.04, look.crown, 7).translate(0, look.crown / 2, 0)]
-        for (let k = 0; k < 4; k++) {
-          const limb = new T.CylinderGeometry(0.008, 0.018, look.width * 0.45, 5).translate(0, look.width * 0.225, 0)
-          limb.rotateZ(0.55 + k * 0.08).rotateY((k / 4) * Math.PI * 2 + 0.4).translate(0, look.crown * 0.8, 0)
-          wood.push(limb)
-        }
-        placeAll(merge(T, wood), plain(look.trunk), sized)
-        crowns(d => broadleaf(T, look, d))
+        throw new Error(`land: things.${name} has no model, and only fern and rock are drawn without one`)
       }
     }
 

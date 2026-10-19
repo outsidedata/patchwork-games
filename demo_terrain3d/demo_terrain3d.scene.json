@@ -13,6 +13,7 @@
         "tour": { "type": "json", "url": "/games/demo_terrain3d/assets/tour.json", "preload": true },
         "helvetiker": { "type": "json", "url": "/games/demo_terrain3d/assets/helvetiker_bold.typeface.json", "preload": true },
         "firs": { "type": "model", "url": "/games/demo_terrain3d/assets/firs.glb" },
+        "woods": { "type": "model", "url": "/games/demo_terrain3d/assets/woods.glb" },
         "clumps": { "type": "model", "url": "/games/demo_terrain3d/assets/clumps.glb" },
         "meadow-color-2048": { "type": "texture", "url": "/games/demo_terrain3d/assets/ground/meadow-color-2048.webp", "wrap": "repeat" },
         "meadow-normal-2048": { "type": "texture", "url": "/games/demo_terrain3d/assets/ground/meadow-normal-2048.webp", "space": "linear", "wrap": "repeat" },

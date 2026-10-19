@@ -1,21 +1,37 @@
 // demo_terrain3d's bake, `yarn bake demo_terrain3d` (core's `scripts/bake.ts`): every glb the scene's
-// catalogue names, made by a Blender script beside it from the library's raw props, packed by gltfpack
-// (meshopt geometry, WebP textures) and written where the catalogue reads it.
-//   firs.glb     firs.py, from the library's `props/fir-trees`: scatter3d's trees pack, the tall, mid
-//                and small firs at their four levels of detail
+// catalogue names, packed by gltfpack (meshopt geometry, WebP textures) and written where the catalogue
+// reads it.
+//   firs.glb     grown by the library's `trees/trees.py` (Blender's Sapling Tree Gen) from
+//                `firs.trees.json`: scatter3d's trees pack, the tall, mid and small spruces at their four
+//                levels of detail
+//   woods.glb    grown the same way from `woods.trees.json`: eight trees of the library's species (a
+//                douglas fir, a pine, a birch, an aspen, a maple, a japanese maple, a weeping willow and
+//                a bottlebrush) at four levels of detail, named for a scatter3d pack as firs.glb is
 //   clumps.glb   clumps.py, from the library's `props/lod-grass`: scatter3d's clumps pack, the
 //                grasses, dry grasses, flowers and reeds at their two levels of detail
 // The ground's maps, `ground/<name>-<map>-<size>.webp`, are cut by the bake itself from the cc0-textures
 // sets `cc0-textures.json` names, before this runs, and never committed.
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 import type { Tools } from '#scripts/bake.ts'
 
 const here = import.meta.dirname
 
-export default async ({ blender, pack, scratch }: Tools) => {
-  await Promise.all(['firs', 'clumps'].map(async name => {
+export default async ({ blender, pack, scratch, library, texture }: Tools) => {
+  const { leafSets } = await import(pathToFileURL(path.join(library, 'trees', 'trees.mjs')).href)
+  // a spec's leaf sets downloaded into the library first, then the trees grown from it
+  const trees = (spec: string) => async (raw: string) => {
+    for (const zip of leafSets(path.join(here, spec)) as string[]) await texture(zip)
+    return blender(['--factory-startup', '--python', path.join(library, 'trees', 'trees.py'), '--', path.join(here, spec), raw])
+  }
+  const make: Record<string, (raw: string) => Promise<unknown>> = {
+    firs: trees('firs.trees.json'),
+    woods: trees('woods.trees.json'),
+    clumps: raw => blender(['--factory-startup', '--python', path.join(here, 'clumps.py'), '--', raw]),
+  }
+  await Promise.all(Object.entries(make).map(async ([name, build]) => {
     const raw = scratch(`${name}.glb`)
-    await blender(['--factory-startup', '--python', path.join(here, `${name}.py`), '--', raw])
+    await build(raw)
     const out = path.join(here, `${name}.glb`)
     await pack(raw, out)
     console.log('wrote', path.relative(path.join(here, '..', '..', '..'), out))

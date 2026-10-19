@@ -1,7 +1,10 @@
 // arcaderacer's bake, `yarn bake arcaderacer` (core's `scripts/bake.ts`): every glb the scene's
 // catalogue names that a Blender script beside it makes, written where the catalogue reads it. Each glb
 // is exported plain by its script and packed by gltfpack (meshopt geometry, WebP textures).
-//   trees/firs.glb                     firs.py, from the library's `props/fir-trees`
+//   trees/trees.glb                    grown by the library's `trees/trees.py` (Blender's Sapling Tree
+//                                      Gen) from `trees/trees.trees.json`: the forest's fir and cedar
+//                                      (the library's spruce and spruce-mid) and Tokyo's zelkova, near,
+//                                      mid and far, each a metre tall, their leaves the species' leaf sets
 //   paris/haussmann.glb                haussmann.py, high, its limestone and zinc the cc0-textures sets
 //                                      limestone_1-4K and metal_roof-4K, through `texture`
 //   paris/haussmann_medium.glb         haussmann.py, medium
@@ -14,12 +17,13 @@
 // sheet (`fx/fx.mjs`) and the songs (`music/jungle.song.ts`) read nothing from the library and are
 // written by their own scripts.
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 import type { Tools } from '#scripts/bake.ts'
 
 const here = import.meta.dirname
 const script = (file: string) => path.join(here, file)
 
-export default async ({ blender, pack, scratch, texture }: Tools) => {
+export default async ({ blender, pack, scratch, texture, library }: Tools) => {
   const made = (file: string) => console.log('wrote', path.relative(path.join(here, '..', '..', '..'), file))
 
   const glb = async (out: string, make: (raw: string) => Promise<unknown>) => {
@@ -37,7 +41,12 @@ export default async ({ blender, pack, scratch, texture }: Tools) => {
     blender(['--factory-startup', '--python', script('paris/haussmann.py'), '--', quality, raw, ...sets])
 
   await Promise.all([
-    glb('trees/firs.glb', python('trees/firs.py')),
+    glb('trees/trees.glb', async raw => {
+      // the spec's leaf sets downloaded into the library first, then the trees grown from it
+      const { leafSets } = await import(pathToFileURL(path.join(library, 'trees', 'trees.mjs')).href)
+      for (const zip of leafSets(script('trees/trees.trees.json')) as string[]) await texture(zip)
+      await blender(['--factory-startup', '--python', path.join(library, 'trees', 'trees.py'), '--', script('trees/trees.trees.json'), raw])
+    }),
     glb('paris/haussmann.glb', haussmann('high')),
     glb('paris/haussmann_medium.glb', haussmann('medium')),
     glb('paris/eiffel.glb', python('paris/eiffel.py')),

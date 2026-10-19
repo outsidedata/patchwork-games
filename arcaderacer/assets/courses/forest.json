@@ -90,9 +90,9 @@
     "tunnel": { "height": 7, "colour": "#9a9b96", "ceiling": "#6e6f6b", "lights": "#ffd9a0", "every": 14, "portal": "#a7a59c", "glow": 3 },
     "elevated": { "deck": 2.2, "colour": "#a9aaa5", "piers": 30, "pier": 2.2 },
     "things": {
-      "fir": { "model": "firs", "lods": [{ "node": "firtall_near", "within": 160 }, { "node": "firtall_mid", "within": 450 }, { "node": "firtall_far" }],
+      "fir": { "model": "trees", "lods": [{ "node": "fir_near", "within": 160 }, { "node": "fir_mid", "within": 450 }, { "node": "fir_far" }],
         "leaves": ["#ffffff", "#eef4e6", "#e2ecdc", "#f6f2e4"], "girth": [0.85, 1.15], "sink": 0.3 },
-      "cedar": { "model": "firs", "lods": [{ "node": "firmid_near", "within": 160 }, { "node": "firmid_mid", "within": 450 }, { "node": "firmid_far" }],
+      "cedar": { "model": "trees", "lods": [{ "node": "cedar_near", "within": 160 }, { "node": "cedar_mid", "within": 450 }, { "node": "cedar_far" }],
         "leaves": ["#ffffff", "#f0f6e8", "#e6eedd"], "girth": [1.0, 1.35], "sink": 0.3 },
       "fern": { "leaves": ["#4c7a2e", "#5c8a36", "#3f6a28"] },
       "rock": { "colours": ["#6f726b", "#7b7c70", "#5f6b4f"] }

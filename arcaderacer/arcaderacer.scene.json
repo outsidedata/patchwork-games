@@ -23,9 +23,9 @@
           "url": "/games/arcaderacer/assets/supercar/supercar.glb",
           "preload": true
         },
-        "firs": {
+        "trees": {
           "type": "model",
-          "url": "/games/arcaderacer/assets/trees/firs.glb"
+          "url": "/games/arcaderacer/assets/trees/trees.glb"
         },
         "forest": {
           "type": "json",
