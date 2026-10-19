@@ -1,0 +1,78 @@
+{
+ "frames": [
+  {
+   "filename": "manure/0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 8
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 8
+   },
+   "sourceSize": {
+    "w": 12,
+    "h": 8
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.875
+   }
+  },
+  {
+   "filename": "bug/0",
+   "frame": {
+    "x": 12,
+    "y": 0,
+    "w": 1,
+    "h": 1
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1,
+    "h": 1
+   },
+   "sourceSize": {
+    "w": 1,
+    "h": 1
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  }
+ ],
+ "meta": {
+  "app": "games/farm2d/assets/make.mjs",
+  "image": "bits.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 13,
+   "h": 8
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "manure",
+    "from": 0,
+    "to": 0,
+    "direction": "forward"
+   },
+   {
+    "name": "bug",
+    "from": 1,
+    "to": 1,
+    "direction": "forward"
+   }
+  ]
+ }
+}

@@ -1,0 +1,47 @@
+{
+ "frames": [
+  {
+   "filename": "house/0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 95
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 95
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 95
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.9052631578947369
+   }
+  }
+ ],
+ "meta": {
+  "app": "games/farm2d/assets/make.mjs",
+  "image": "house.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 72,
+   "h": 95
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "house",
+    "from": 0,
+    "to": 0,
+    "direction": "forward"
+   }
+  ]
+ }
+}

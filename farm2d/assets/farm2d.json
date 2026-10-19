@@ -1,0 +1,135 @@
+{
+ "audio": {
+  "project": "farmtune",
+  "music": ["lead", "chords", "bass", "drums"],
+  "sounds": { "pick": "pick", "put": "put", "cluck": "cluck", "moo": "moo", "plop": "plop", "peck": "peck", "nibble": "nibble" },
+  "levels": { "music": "music", "effects": "effects", "muted": "muted" }
+ },
+ "player": {
+  "roles": {
+   "farmer": { "name": "the farmer", "help": "Arrows or WASD walk. Space picks up and puts down." },
+   "cow": { "name": "a cow", "help": "Arrows or WASD walk. Space eats grass." },
+   "chicken": { "name": "a chicken", "help": "Arrows or WASD walk. Space pecks." }
+  },
+  "air": { "effect": "petals", "at": [12, 7.5] },
+  "mark": { "mine": "#ffe066", "other": "#ffffff", "edge": "#4a2f1b", "size": [7, 5], "bob": 1.5, "rate": 3 },
+  "hud": {
+   "role": { "text": "You are {name}", "at": [6, 4] },
+   "help": { "at": [6, 18] },
+   "status": { "text": "Harvest {harvest}   Bugs {bugs}   Manure {manure}", "at": [6, 226] },
+   "sound": { "label": "♪", "at": [332, 4], "opens": "settings" },
+   "leave": { "label": "⌂", "at": [358, 4], "to": "title" }
+  }
+ },
+ "farmer": {
+  "speed": 4,
+  "radius": 0.3,
+  "reach": 0.9,
+  "faces": 4,
+  "bounds": [[0.4, 0.6], [23.6, 14.7]],
+  "soil": { "layer": "ground", "type": "soil" },
+  "nav": { "sub": 2, "window": 48, "clear": 0.45 },
+  "rest": [1, 3],
+  "sounds": { "pick": "pick", "put": "put" },
+  "sow": "sow",
+  "effects": { "lift": "lift", "drop": "plop", "stash": "stash" },
+  "mark": { "lift": 30 },
+  "dust": { "effect": "dust", "every": 0.2 },
+  "carry": { "lift": 27, "after": 0.5, "manure": { "sheet": "bits", "clip": "manure" }, "produce": "produce" }
+ },
+ "cow": {
+  "speed": 1.6,
+  "radius": 0.45,
+  "reach": 0.7,
+  "faces": 4,
+  "bounds": [[1.5, 9.5], [8.5, 13.6]],
+  "sheets": ["cow", "bull"],
+  "chew": 3,
+  "rest": [8, 16],
+  "sounds": { "moo": "moo", "plop": "plop" },
+  "plop": "plop",
+  "graze": "graze",
+  "mark": { "lift": 30 }
+ },
+ "chicken": {
+  "speed": 2.5,
+  "radius": 0.25,
+  "reach": 0.5,
+  "sees": 1.5,
+  "faces": 2,
+  "bounds": [[18.3, 8.4], [22.7, 13.7]],
+  "sheets": ["chicken", "hen"],
+  "peck": 0.36,
+  "rest": [2, 5],
+  "cluck": 0.0025,
+  "sounds": { "cluck": "cluck", "peck": "peck" },
+  "burst": "peck",
+  "mark": { "lift": 17 }
+ },
+ "grass": {
+  "stage": 12
+ },
+ "crop": {
+  "burst": "pick",
+  "types": {
+   "strawberry": { "stage": 40, "pop": "pop-strawberry" },
+   "leek": { "stage": 30, "pop": "pop-leek" },
+   "potato": { "stage": 30, "pop": "pop-potato" },
+   "onion": { "stage": 30, "pop": "pop-onion" }
+  }
+ },
+ "pile": {
+  "sheet": "produce",
+  "layout": [[-6, 2], [0, 3], [6, 2], [-3, -1], [3, -1], [-8, -2], [8, -2], [0, -4], [-5, -5], [5, -5], [-2, -8], [2, -8]],
+  "crumbs": "nibble",
+  "sounds": { "nibble": "nibble" }
+ },
+ "bug": {
+  "speed": 0.9,
+  "reach": 0.4,
+  "nibble": 1,
+  "turn": [0.3, 0.9],
+  "wiggle": 0.8,
+  "around": 0.3
+ },
+ "swarm": {
+  "every": [2, 5],
+  "most": 12,
+  "from": [[[24, 7.5], [24, 14.5]], [[17.5, 15], [23.5, 15]], [[14, 0], [24, 0]]]
+ },
+ "settings": {
+  "panel": "settings",
+  "box": { "size": [200, 132], "radius": 6, "fill": "#fff6d5", "edge": "#4a2f1b", "edgeWidth": 3 },
+  "title": { "text": "Sound", "at": [100, 14] },
+  "steps": 10,
+  "sliders": [
+   { "key": "music", "label": "Music", "labelAt": [12, 28], "barAt": [12, 44], "levelAt": [134, 42], "down": { "text": "-", "at": [140, 38] }, "up": { "text": "+", "at": [166, 38] } },
+   { "key": "effects", "label": "Effects", "labelAt": [12, 62], "barAt": [12, 78], "levelAt": [134, 76], "down": { "text": "-", "at": [140, 72] }, "up": { "text": "+", "at": [166, 72] } }
+  ],
+  "levelText": "{percent}%",
+  "mute": { "key": "muted", "at": [12, 102], "off": "Mute all", "on": "Sound on" },
+  "done": { "text": "Done", "at": [104, 102] }
+ },
+ "titlecard": {
+  "to": "field",
+  "name": "Tiny Harvest",
+  "nameAt": [192, 32],
+  "tagline": "A little farm that never stops. Who will you be?",
+  "taglineAt": [192, 58],
+  "help": "Arrows or WASD walk, Space does your job. Esc: sound",
+  "helpAt": [192, 232],
+  "sheets": { "farmer": "farmer-ui", "cow": "cow-ui", "chicken": "chicken-ui", "crops": "crops-ui" },
+  "sky": ["#9fd8f0", "#7bc35a"],
+  "horizon": 140,
+  "roles": [
+   { "label": "Farmer", "with": "farmer", "at": [62, 76], "size": [76, 22], "figure": { "sheet": "farmer", "clip": "idle", "at": [100, 196], "scale": 2 } },
+   { "label": "Cow", "with": "cow", "at": [154, 76], "size": [76, 22], "figure": { "sheet": "cow", "clip": "eat", "at": [192, 196], "scale": 2 } },
+   { "label": "Chicken", "with": "chicken", "at": [246, 76], "size": [76, 22], "figure": { "sheet": "chicken", "clip": "peck", "at": [284, 196], "scale": 2 } }
+  ],
+  "sound": { "label": "Sound", "at": [162, 106], "size": [60, 18], "opens": "settings" },
+  "full": { "text": "The farm is full. Try again in a moment.", "at": [192, 134], "after": 1 },
+  "crops": { "clips": ["strawberry", "leek", "potato", "onion"], "from": [150, 214], "gap": 28 },
+  "fill": "#e8a042",
+  "focus": "#ffc76a"
+ }
+}

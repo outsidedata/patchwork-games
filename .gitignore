@@ -7,5 +7,6 @@
 !/demo_terrain3d/
 !/demo_trees/
 !/demo_wormhole/
+!/farm2d/
 __pycache__/
 .DS_Store

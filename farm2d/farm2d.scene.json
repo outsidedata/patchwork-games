@@ -1,0 +1,123 @@
+{
+  "world": {
+    "defs": "farm2d",
+    "render2d": {
+      "ground": [[16, 0], [0, 16]],
+      "up": [0, -16],
+      "zoom": 1,
+      "fit": "integer",
+      "look": [12, 7.5],
+      "background": "#7bc35a",
+      "layers": ["ground", "lying", { "name": "sprites", "sort": true }, "air"]
+    },
+    "ui": {
+      "panels": {
+        "hud": { "anchor": "top-left", "size": [384, 240], "layer": 0 },
+        "title": { "anchor": "top-left", "size": [384, 240], "layer": 0, "modal": true },
+        "settings": { "anchor": "center", "size": [200, 132], "layer": 2, "modal": true, "key": "Escape", "backdrop": { "color": "#000000", "alpha": 0.45 } }
+      },
+      "keys": {
+        "up": ["ArrowUp", "w"],
+        "down": ["ArrowDown", "s"],
+        "left": ["ArrowLeft", "a"],
+        "right": ["ArrowRight", "d"],
+        "press": ["Enter", " "],
+        "back": ["Escape"]
+      },
+      "styles": {
+        "score": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 10, "fontWeight": "bold", "fill": "#fff6d5", "stroke": { "color": "#4a2f1b", "width": 3, "join": "round" } },
+        "name": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 30, "fontWeight": "bold", "fill": "#fff6d5", "stroke": { "color": "#4a2f1b", "width": 5, "join": "round" } },
+        "tagline": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 9, "fontWeight": "bold", "fill": "#4a2f1b" },
+        "full": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 9, "fontWeight": "bold", "fill": "#8a2b1b" },
+        "help": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 8, "fill": "#fff6d5", "stroke": { "color": "#4a2f1b", "width": 2, "join": "round" } },
+        "cardTitle": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 16, "fontWeight": "bold", "fill": "#4a2f1b" },
+        "button": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 10, "fontWeight": "bold", "fill": "#4a2f1b" },
+        "label": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 9, "fontWeight": "bold", "fill": "#4a2f1b" },
+        "level": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 9, "fill": "#6d604c" },
+        "volume": { "size": [88, 10], "edge": 1, "frame": { "color": "#4a2f1b" }, "track": { "color": "#e8dcc0" }, "fill": { "color": "#7bc35a" }, "muted": { "color": "#a99d86" } },
+        "small": { "size": [22, 20], "radius": 3, "fill": "#7bc35a", "focus": "#a6e07c", "text": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 12, "fontWeight": "bold", "fill": "#4a2f1b" } },
+        "wide": { "size": [84, 20], "radius": 3, "fill": "#7bc35a", "focus": "#a6e07c", "text": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 10, "fontWeight": "bold", "fill": "#4a2f1b" } },
+        "chip": { "size": [22, 18], "radius": 3, "fill": "#fff6d5", "focus": "#ffe7a3", "text": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 10, "fontWeight": "bold", "fill": "#4a2f1b" } }
+      }
+    },
+    "shipped": { "plugins": ["jukebox", "roles"] },
+    "loader": {
+      "wads": ["/games/farm2d/assets/farm2d.wad"],
+      "assets": {
+        "farm2d": { "type": "json", "url": "/games/farm2d/assets/farm2d.json", "preload": true },
+        "field": { "type": "tilemap", "url": "/games/farm2d/assets/field.tmj", "preload": true, "nearest": true },
+        "farmer": { "type": "sheet", "url": "/games/farm2d/assets/farmer.json", "preload": true, "nearest": true, "facing": { "first": -0.25, "step": 0.25, "mirror": true } },
+        "cow": { "type": "sheet", "url": "/games/farm2d/assets/cow.json", "preload": true, "nearest": true, "facing": { "first": -0.25, "step": 0.25, "mirror": true } },
+        "bull": { "type": "sheet", "url": "/games/farm2d/assets/bull.json", "preload": true, "nearest": true, "facing": { "first": -0.25, "step": 0.25, "mirror": true } },
+        "chicken": { "type": "sheet", "url": "/games/farm2d/assets/chicken.json", "preload": true, "nearest": true, "facing": { "first": 0, "step": 0.5 } },
+        "hen": { "type": "sheet", "url": "/games/farm2d/assets/hen.json", "preload": true, "nearest": true, "facing": { "first": 0, "step": 0.5 } },
+        "crops": { "type": "sheet", "url": "/games/farm2d/assets/crops.json", "preload": true, "nearest": true },
+        "grass": { "type": "sheet", "url": "/games/farm2d/assets/grass.json", "preload": true, "nearest": true },
+        "tree": { "type": "sheet", "url": "/games/farm2d/assets/tree.json", "preload": true, "nearest": true },
+        "house": { "type": "sheet", "url": "/games/farm2d/assets/house.json", "preload": true, "nearest": true },
+        "produce": { "type": "sheet", "url": "/games/farm2d/assets/produce.json", "preload": true, "nearest": true },
+        "bits": { "type": "sheet", "url": "/games/farm2d/assets/bits.json", "preload": true, "nearest": true },
+        "motes": { "type": "sheet", "url": "/games/farm2d/assets/motes.json", "preload": true, "nearest": true },
+        "effects": { "type": "json", "url": "/games/farm2d/assets/effects.json", "preload": true },
+        "farmtune": { "type": "json", "url": "/games/farm2d/assets/farmtune.json", "preload": true },
+        "farmer-ui": { "type": "sheet", "url": "/games/farm2d/assets/farmer.json", "preload": true, "nearest": true, "for": "ui", "facing": { "first": -0.25, "step": 0.25, "mirror": true } },
+        "cow-ui": { "type": "sheet", "url": "/games/farm2d/assets/cow.json", "preload": true, "nearest": true, "for": "ui", "facing": { "first": -0.25, "step": 0.25, "mirror": true } },
+        "chicken-ui": { "type": "sheet", "url": "/games/farm2d/assets/chicken.json", "preload": true, "nearest": true, "for": "ui", "facing": { "first": 0, "step": 0.5 } },
+        "crops-ui": { "type": "sheet", "url": "/games/farm2d/assets/crops.json", "preload": true, "nearest": true, "for": "ui" }
+      }
+    },
+    "sprite2d": {
+      "kinds": {
+        "grass": { "layer": "lying", "turn": 1, "sheet": "grass", "clip": "grass", "facing": 0 },
+        "manure": { "layer": "lying", "turn": 1, "sheet": "bits", "clip": "manure", "facing": 0 },
+        "produce": { "layer": "lying", "turn": 1, "sheet": "produce", "facing": 0 },
+        "house": { "layer": "sprites", "turn": 1, "sheet": "house", "clip": "house", "facing": 0 },
+        "tree": { "layer": "sprites", "turn": 1, "sheet": "tree", "clip": "maple", "facing": 0 },
+        "crop": { "layer": "sprites", "turn": 1, "sheet": "crops", "facing": 0 },
+        "bug": { "layer": "sprites", "turn": 1, "sheet": "bits", "clip": "bug", "facing": 0 },
+        "chicken": { "layer": "sprites", "turn": 1 },
+        "cow": { "layer": "sprites", "turn": 1 },
+        "farmer": { "layer": "sprites", "turn": 1, "sheet": "farmer" }
+      }
+    },
+    "particle2d": { "effects": "effects", "hold": 0.25 },
+    "audio": { "hold": 0.25 },
+    "synthaudio": { "projects": ["farmtune"] }
+  },
+  "plugins": ["scenemanager"],
+  "seats": 1,
+  "prefabs": {
+    "engine": { "dt": 0.016666666666666666 },
+    "scenemanager": {
+      "scenes": {
+        "title": { "file": "title.scene.json", "suspend": true },
+        "field": { "file": "field.scene.json", "suspend": false }
+      },
+      "dt": 0.016666666666666666,
+      "entry": "title",
+      "port": 9121
+    },
+    "loader": {},
+    "store": { "music": 0.6, "effects": 0.8, "muted": false },
+    "tilemap": { "edits": {} },
+    "particle2d": { "next": 1, "live": [] },
+    "audio": { "step": 0, "next": 1, "live": [] },
+    "player": { "seat": 0, "conn": -1, "role": null, "held": null },
+    "start": { "role": "farmer", "slot": 0, "pos": [0, 0] },
+    "farmer": { "pos": [0, 0], "move": [0, 0], "facing": 0.75, "clip": "idle", "frame": 0, "ft": 0, "carry": null, "goal": 0, "to": null, "wait": 0 },
+    "cow": { "pos": [0, 0], "sheet": "cow", "move": [0, 0], "facing": 0.75, "clip": "stand", "frame": 0, "ft": 0, "chew": 0, "goal": 0, "to": null, "wait": 0 },
+    "chicken": { "pos": [0, 0], "sheet": "chicken", "move": [0, 0], "facing": 0, "clip": "stand", "frame": 0, "ft": 0, "peck": 0, "goal": 0, "to": null, "wait": 0 },
+    "grass": { "pos": [0, 0], "frame": 0, "grow": 0, "grown": false, "sown": false },
+    "crop": { "pos": [0, 0], "clip": "leek", "frame": 0, "grow": 0, "ripe": false },
+    "manure": { "pos": [0, 0] },
+    "produce": { "pos": [0, 0], "clip": "leek" },
+    "pile": { "pos": [0, 0], "items": [] },
+    "bug": { "pos": [0, 0], "way": [0, 0], "turn": 0, "nib": 0 },
+    "swarm": { "next": 0 },
+    "house": { "pos": [0, 0] },
+    "tree": { "pos": [0, 0], "frame": 3 },
+    "titlecard": {},
+    "settings": {}
+  },
+  "actors": [{ "is": "scenemanager" }]
+}

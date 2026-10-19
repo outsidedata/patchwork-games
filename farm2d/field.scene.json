@@ -1,0 +1,23 @@
+{
+  "world": {
+    "seed": 7,
+    "tilemap": { "file": "field" },
+    "predict": { "epsilon": 0.000001, "cutoff": 60, "halflife": 100, "snap": 2, "below": 0.01 }
+  },
+  "plugins": ["loader", "scenemanager", "store", "player", "tilemap", "sprite2d", "particle2d", "render2d", "ui", "synthaudio", "shipped"],
+  "seats": 8,
+  "actorsFile": "assets/field.actors.json",
+  "prefabs": {
+    "engine": { "dt": 0.016666666666666666, "width": 384, "height": 240 },
+    "scenemanager": { "out": {} }
+  },
+  "actors": [
+    { "is": "scenemanager" },
+    { "is": "loader" },
+    { "is": "tilemap" },
+    { "is": "audio" },
+    { "is": "particle2d" },
+    { "is": "settings" },
+    { "is": "swarm" }
+  ]
+}

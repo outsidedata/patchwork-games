@@ -21,5 +21,9 @@ what it needs).
   against seven rivals, with a lobby for several players.
 - **demo_audiodaw**: a music studio on the audiodaw plugin: a rack, a mixer, a piano roll and an
   arrangement, and the jungle song generator arcaderacer's music is made with.
+- **farm2d**: Tiny Harvest, a pixel farm that never stops: play the farmer, a cow or a chicken, and
+  the computer plays every one nobody does.
 
-MIT, Outside Data.
+MIT, Outside Data, but for art a game credits to someone else under its own licence. farm2d's art
+is maevedevs' Farm RPG FREE 16x16 (https://maevedevs.itch.io/farm-rpg), shipped sealed in
+`farm2d/assets/farm2d.wad`, which the loader opens in memory; the pack itself is not in this repo.
