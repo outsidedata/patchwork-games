@@ -1,43 +1,110 @@
 {
- "cap": 600,
+ "cap": 1200,
  "layer": "sprites",
  "ppm": 1,
  "effects": {
   "pick": [
    { "n": [6, 9], "life": [0.35, 0.6], "sheet": "motes", "clip": "leaf", "size": [0.5, 1], "dir": [0, -1], "spread": 1.3, "speed": [30, 70], "g": 160, "drag": 1, "spin": 8, "a1": 0, "fade": 0.2 },
-   { "n": [5, 8], "life": [0.3, 0.5], "sheet": "motes", "clip": "dirt", "size": [0.5, 0.75], "dir": [0, -1], "spread": 1.1, "speed": [20, 50], "g": 200, "a1": 0, "fade": 0.15 }
+   { "n": [5, 8], "life": [0.3, 0.5], "sheet": "motes", "clip": "dirt", "size": [0.5, 0.75], "dir": [0, -1], "spread": 1.1, "speed": [20, 50], "g": 200, "a1": 0, "fade": 0.15 },
+   { "effect": "sparkle" }
   ],
   "pop-strawberry": [{ "life": [0.8, 0.8], "sheet": "produce", "clip": "strawberry", "dir": [0, -1], "spread": 0, "speed": [34, 34], "drag": 2.2, "a1": 0, "fade": 0.35, "grow": 1.2 }],
   "pop-leek": [{ "life": [0.8, 0.8], "sheet": "produce", "clip": "leek", "dir": [0, -1], "spread": 0, "speed": [34, 34], "drag": 2.2, "a1": 0, "fade": 0.35, "grow": 1.2 }],
   "pop-potato": [{ "life": [0.8, 0.8], "sheet": "produce", "clip": "potato", "dir": [0, -1], "spread": 0, "speed": [34, 34], "drag": 2.2, "a1": 0, "fade": 0.35, "grow": 1.2 }],
   "pop-onion": [{ "life": [0.8, 0.8], "sheet": "produce", "clip": "onion", "dir": [0, -1], "spread": 0, "speed": [34, 34], "drag": 2.2, "a1": 0, "fade": 0.35, "grow": 1.2 }],
   "sow": [
-   { "n": [6, 9], "life": [0.3, 0.5], "sheet": "motes", "clip": "dirt", "size": [0.5, 0.75], "dir": [0, -1], "spread": 1.4, "speed": [18, 40], "g": 200, "a1": 0, "fade": 0.15 }
+   { "n": [6, 9], "life": [0.3, 0.5], "sheet": "motes", "clip": "dirt", "size": [0.5, 0.75], "dir": [0, -1], "spread": 1.4, "speed": [18, 40], "g": 200, "a1": 0, "fade": 0.15 },
+   { "n": [4, 6], "life": [0.4, 0.6], "sheet": "motes", "clip": "dust", "size": [0.5, 0.8], "grow": 2, "dir": [1, 0], "spread": 0.4, "speed": [18, 36], "drag": 4, "g": -6, "a0": 0.8, "a1": 0 },
+   { "n": [4, 6], "life": [0.4, 0.6], "sheet": "motes", "clip": "dust", "size": [0.5, 0.8], "grow": 2, "dir": [-1, 0], "spread": 0.4, "speed": [18, 36], "drag": 4, "g": -6, "a0": 0.8, "a1": 0 },
+   { "after": 0.15, "n": [3, 4], "life": [0.4, 0.6], "sheet": "motes", "clip": "leaf", "size": [0.25, 0.5], "dir": [0, -1], "spread": 0.6, "speed": [14, 26], "g": 50, "spin": 5, "a1": 0, "fade": 0.2 }
   ],
   "plop": [
-   { "n": [3, 5], "life": [0.25, 0.4], "sheet": "motes", "clip": "dirt", "size": [0.4, 0.6], "dir": [0, -1], "spread": 1.5, "speed": [10, 24], "g": 160, "a1": 0, "fade": 0.1 }
+   { "n": [5, 7], "life": [0.4, 0.65], "sheet": "motes", "clip": "dust", "size": [0.5, 0.9], "grow": 2.2, "dir": [1, 0], "spread": 0.35, "speed": [25, 55], "drag": 4, "g": -8, "a0": 0.9, "a1": 0 },
+   { "n": [5, 7], "life": [0.4, 0.65], "sheet": "motes", "clip": "dust", "size": [0.5, 0.9], "grow": 2.2, "dir": [-1, 0], "spread": 0.35, "speed": [25, 55], "drag": 4, "g": -8, "a0": 0.9, "a1": 0 },
+   { "n": [4, 6], "life": [0.25, 0.4], "sheet": "motes", "clip": "dirt", "size": [0.4, 0.6], "dir": [0, -1], "spread": 1, "speed": [16, 36], "g": 220, "a1": 0, "fade": 0.1 }
+  ],
+  "fart": [
+   { "after": 0.65, "every": 0.03, "n": [1, 2], "life": [0.6, 0.95], "sheet": "motes", "clip": "feather", "tint": 12179034, "size": [0.5, 0.75], "grow": 1.9, "spread": 0.55, "speed": [35, 60], "drag": 2.6, "g": -10, "a1": 0, "fade": 0.45 },
+   { "after": 0.65, "every": 0.06, "life": [0.35, 0.55], "sheet": "motes", "clip": "feather", "tint": 9416762, "size": [0.25, 0.5], "spread": 0.3, "speed": [55, 85], "drag": 3, "g": -6, "a1": 0, "fade": 0.25 },
+   { "effect": "blown", "at": [0, 11] },
+   { "after": 2.6, "n": [12, 16], "life": [0.5, 0.9], "sheet": "motes", "clip": "feather", "tint": 12179034, "size": [0.6, 1], "grow": 1.8, "spread": 0.9, "speed": [50, 95], "drag": 3, "g": -10, "a1": 0, "fade": 0.4 }
+  ],
+  "blown": [
+   { "after": 0.8, "every": 0.12, "n": [1, 2], "life": [0.4, 0.7], "sheet": "motes", "clip": "leaf", "size": [0.5, 0.8], "spread": 0.7, "speed": [40, 80], "g": 120, "drag": 1, "spin": 10, "a1": 0, "fade": 0.2 }
+  ],
+  "stink": [
+   { "every": 0.12, "life": [1.1, 1.4], "sheet": "motes", "clip": "feather", "tint": 12179034, "size": [0.5, 0.5], "box": [-3, -6, -3, -6], "dir": [0, -1], "spread": 0.3, "speed": [8, 10], "a1": 0, "fade": 0.6 },
+   { "after": 0.4, "every": 0.14, "life": [1, 1.3], "sheet": "motes", "clip": "feather", "tint": 12179034, "size": [0.5, 0.5], "box": [3, -7, 3, -7], "dir": [0, -1], "spread": 0.3, "speed": [8, 10], "a1": 0, "fade": 0.6 },
+   { "n": [2, 3], "lasts": true, "sheet": "motes", "clip": "dust", "tint": 2827810, "size": [0.25, 0.25], "box": [-5, -12, 5, -7], "speed": [22, 30], "pull": 120 }
   ],
   "lift": [
-   { "n": [5, 7], "life": [0.3, 0.45], "sheet": "motes", "clip": "dust", "size": [0.5, 0.8], "grow": 1.6, "dir": [0, -1], "spread": 2.2, "speed": [14, 30], "drag": 2.5, "a0": 0.9, "a1": 0 }
+   { "n": [5, 7], "life": [0.3, 0.45], "sheet": "motes", "clip": "dust", "size": [0.5, 0.8], "grow": 1.6, "dir": [0, -1], "spread": 2.2, "speed": [14, 30], "drag": 2.5, "a0": 0.9, "a1": 0 },
+   { "n": [3, 5], "life": [0.25, 0.4], "sheet": "motes", "clip": "dirt", "size": [0.25, 0.5], "dir": [0, -1], "spread": 1.2, "speed": [18, 34], "g": 200, "a1": 0, "fade": 0.1 }
   ],
   "stash": [
    { "n": [8, 11], "life": [0.45, 0.7], "sheet": "motes", "clip": "petal", "size": [0.6, 1], "dir": [0, -1], "spread": 1.2, "speed": [30, 60], "g": 140, "drag": 1, "spin": 6, "a1": 0, "fade": 0.2 },
-   { "n": [4, 6], "life": [0.35, 0.5], "sheet": "motes", "clip": "leaf", "size": [0.5, 0.8], "dir": [0, -1], "spread": 1.6, "speed": [20, 45], "g": 160, "spin": 8, "a1": 0, "fade": 0.15 }
+   { "n": [4, 6], "life": [0.35, 0.5], "sheet": "motes", "clip": "leaf", "size": [0.5, 0.8], "dir": [0, -1], "spread": 1.6, "speed": [20, 45], "g": 160, "spin": 8, "a1": 0, "fade": 0.15 },
+   { "effect": "sparkle" },
+   { "effect": "sparkle", "at": [0, -6] }
   ],
   "graze": [
-   { "n": [6, 9], "life": [0.4, 0.65], "sheet": "motes", "clip": "leaf", "size": [0.5, 0.9], "dir": [0, -1], "spread": 1.6, "speed": [16, 36], "g": 120, "drag": 1.2, "spin": 7, "a1": 0, "fade": 0.2 }
+   { "n": [8, 12], "life": [0.4, 0.65], "sheet": "motes", "clip": "leaf", "size": [0.5, 0.9], "dir": [0, -1], "spread": 1.6, "speed": [16, 40], "g": 120, "drag": 1.2, "spin": 7, "a1": 0, "fade": 0.2 },
+   { "n": [3, 5], "life": [0.3, 0.45], "sheet": "motes", "clip": "dirt", "size": [0.25, 0.5], "dir": [0, -1], "spread": 1.2, "speed": [12, 26], "g": 200, "a1": 0, "fade": 0.1 }
+  ],
+  "munch": [
+   { "n": [1, 2], "life": [0.3, 0.5], "sheet": "motes", "clip": "leaf", "size": [0.25, 0.5], "dir": [0, 1], "spread": 0.9, "speed": [8, 18], "g": 140, "spin": 6, "a1": 0, "fade": 0.15 }
   ],
   "nibble": [
-   { "n": [2, 4], "life": [0.25, 0.45], "sheet": "motes", "clip": "crumb", "size": [0.25, 0.5], "dir": [0, -1], "spread": 1.6, "speed": [8, 20], "g": 120, "a1": 0, "fade": 0.1 }
+   { "n": [3, 5], "life": [0.25, 0.45], "sheet": "motes", "clip": "crumb", "size": [0.25, 0.5], "dir": [0, -1], "spread": 1.6, "speed": [10, 24], "g": 140, "a1": 0, "fade": 0.1 },
+   { "n": [1, 2], "life": [0.3, 0.5], "sheet": "motes", "clip": "leaf", "size": [0.25, 0.5], "dir": [0, -1], "spread": 1.4, "speed": [10, 22], "g": 140, "spin": 6, "a1": 0, "fade": 0.1 }
   ],
   "peck": [
-   { "n": [6, 9], "life": [0.3, 0.5], "sheet": "motes", "clip": "dirt", "size": [0.5, 0.75], "dir": [0, -1], "spread": 1.5, "speed": [16, 36], "g": 200, "a1": 0, "fade": 0.15 }
+   { "n": [6, 9], "life": [0.3, 0.5], "sheet": "motes", "clip": "dirt", "size": [0.5, 0.75], "dir": [0, -1], "spread": 1.5, "speed": [16, 36], "g": 200, "a1": 0, "fade": 0.15 },
+   { "n": [5, 7], "life": [0.3, 0.5], "sheet": "motes", "clip": "dust", "tint": 6969512, "size": [0.25, 0.5], "dir": [0, -1], "spread": 1.6, "speed": [24, 48], "g": 240, "spin": 9, "a1": 0, "fade": 0.1 },
+   { "n": [1, 2], "life": [0.6, 0.9], "sheet": "motes", "clip": "feather", "size": [0.5, 0.7], "dir": [0, -1], "spread": 1.2, "speed": [20, 40], "g": 40, "drag": 2, "spin": 5, "a1": 0, "fade": 0.3 },
+   { "effect": "sparkle" }
+  ],
+  "scratch": [
+   { "n": [2, 3], "life": [0.2, 0.35], "sheet": "motes", "clip": "dirt", "size": [0.25, 0.5], "dir": [0, -1], "spread": 1.2, "speed": [12, 26], "g": 220, "a1": 0 }
   ],
   "dust": [
-   { "n": [1, 2], "life": [0.3, 0.45], "sheet": "motes", "clip": "dust", "size": [0.4, 0.7], "grow": 1.8, "jitter": [3, 1], "dir": [0, -1], "spread": 1.2, "speed": [4, 10], "drag": 2, "a0": 0.8, "a1": 0 }
+   { "every": 0.2, "n": [1, 2], "life": [0.3, 0.45], "sheet": "motes", "clip": "dust", "size": [0.4, 0.7], "grow": 1.8, "jitter": [3, 1], "dir": [0, -1], "spread": 1.2, "speed": [4, 10], "drag": 2, "a0": 0.8, "a1": 0 }
+  ],
+  "sparkle": [
+   { "n": [5, 7], "life": [0.4, 0.7], "sheet": "motes", "clip": "feather", "tint": 16769658, "add": true, "size": [0.25, 0.5], "dir": [0, -1], "spread": 1.5, "speed": [20, 45], "drag": 2.5, "spin": 4, "a1": 0, "fade": 0.25 }
+  ],
+  "sprout": [
+   { "n": [3, 4], "life": [0.3, 0.5], "sheet": "motes", "clip": "leaf", "size": [0.4, 0.6], "dir": [0, -1], "spread": 1, "speed": [15, 30], "g": 120, "spin": 6, "a1": 0, "fade": 0.15 }
+  ],
+  "ripen": [
+   { "n": [9, 12], "life": [0.5, 0.8], "sheet": "motes", "clip": "feather", "tint": 16769658, "add": true, "size": [0.25, 0.5], "box": [-4, -10, 4, -4], "dir": [0, -1], "spread": 1.6, "speed": [20, 45], "drag": 2, "spin": 4, "a1": 0, "fade": 0.3 },
+   { "n": [4, 6], "life": [0.35, 0.55], "sheet": "motes", "clip": "leaf", "size": [0.4, 0.6], "dir": [0, -1], "spread": 1.3, "speed": [16, 30], "g": 120, "spin": 6, "a1": 0, "fade": 0.15 }
+  ],
+  "glint": [
+   { "every": 0.7, "life": [0.3, 0.45], "sheet": "motes", "clip": "feather", "tint": 16769658, "add": true, "size": [0.25, 0.5], "box": [-7, -15, 7, -4], "speed": [0, 2], "a1": 0, "skip": 0.3 }
+  ],
+  "shine": [
+   { "every": 0.45, "life": [0.3, 0.45], "sheet": "motes", "clip": "feather", "tint": 16769658, "add": true, "size": [0.25, 0.5], "box": [-9, -10, 9, 2], "speed": [0, 2], "a1": 0, "skip": 0.3 }
+  ],
+  "regrow": [
+   { "n": [1, 2], "life": [0.25, 0.4], "sheet": "motes", "clip": "leaf", "size": [0.25, 0.5], "dir": [0, -1], "spread": 0.8, "speed": [8, 16], "g": 60, "a1": 0 }
+  ],
+  "grown": [
+   { "n": [2, 3], "life": [0.3, 0.5], "sheet": "motes", "clip": "leaf", "size": [0.25, 0.5], "dir": [0, -1], "spread": 1, "speed": [10, 22], "g": 60, "spin": 4, "a1": 0 }
+  ],
+  "smoke": [
+   { "every": 0.35, "life": [2.2, 3], "sheet": "motes", "clip": "dust", "tint": 14275532, "size": [0.6, 0.9], "grow": 2.5, "dir": [0.3, -1], "spread": 0.2, "speed": [8, 14], "drag": 0.3, "g": -2, "spin": 1, "a0": 0.7, "a1": 0, "skip": 1 }
+  ],
+  "chimney": [{ "effect": "smoke", "at": [-25, -78] }],
+  "leaves": [
+   { "every": 1.8, "life": [2.4, 3.4], "sheet": "motes", "clip": "leaf", "size": [0.5, 0.75], "box": [-14, -38, 14, -22], "dir": [1, 0.4], "spread": 1.2, "speed": [4, 10], "g": 9, "drag": 0.5, "spin": 3, "a1": 0, "fade": 0.6, "skip": 1.5 }
   ],
   "petals": [
    { "n": [1, 1], "every": 0.35, "life": [7, 10], "sheet": "motes", "clip": "petal", "size": [0.75, 1], "box": [-210, -130, 170, 110], "dir": [1, 0.35], "spread": 0.4, "speed": [8, 16], "g": 1, "spin": 2, "a0": 0.9, "a1": 0, "fade": 1.5, "skip": 6 }
-  ]
+  ],
+  "pollen": [
+   { "every": 0.25, "life": [4, 6], "sheet": "motes", "clip": "crumb", "size": [0.25, 0.25], "box": [-200, -125, 200, 125], "dir": [0, -1], "spread": 3, "speed": [2, 5], "a0": 0.7, "a1": 0, "fade": 2, "skip": 4 }
+  ],
+  "air": [{ "effect": "petals" }, { "effect": "pollen" }]
  }
 }

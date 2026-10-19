@@ -26,6 +26,7 @@ import { chance, sound } from '#plugins/audio/audio.sim.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import { emit } from '#plugins/particle2d/particle2d.sim.ts'
 import { holderOf } from '#plugins/player/player.sim.ts'
+import { inYard, prey } from './plugins/chores/chores.sim.ts'
 import { animate, apart, between, head, nearest, roam, steer, stride } from './plugins/walk/walk.sim.ts'
 
 function peck(w: W, me: Row) {
@@ -33,7 +34,7 @@ function peck(w: W, me: Row) {
   if (d.peck > 0) return
   d.peck = k.peck
   sound(w, k.sounds.peck, undefined, me.id)
-  const bug = nearest(me, w.all('bug').filter(b => apart(b.data.pos, d.pos) <= k.reach))
+  const bug = prey(kind => w.all(kind), d.pos, k.reach)
   if (!bug) return
   if (bug.data.pos[0] !== d.pos[0]) d.facing = bug.data.pos[0] > d.pos[0] ? 0 : 0.5
   emit(w, k.burst, bug.data.pos)
@@ -41,18 +42,12 @@ function peck(w: W, me: Row) {
   d.goal = 0
 }
 
-// Whether a bug is in this chicken's yard: inside its bounds, or within its reach of them.
-function inYard(k: any, pos: number[]): boolean {
-  const [[left, top], [right, bottom]] = k.bounds
-  return pos[0] >= left - k.reach && pos[0] <= right + k.reach && pos[1] >= top - k.reach && pos[1] <= bottom + k.reach
-}
-
 // The brain: whether it means to move this step.
 function think(w: W, me: Row, dt: number): boolean {
   const d = me.data, k = def(w, me.kind)
   d.move = [0, 0]
   const claimed = new Set(w.all('chicken').filter(c => c !== me).map(c => c.data.goal))
-  const open = w.all('bug').filter(b => inYard(k, b.data.pos) && apart(d.pos, b.data.pos) <= k.sees && !claimed.has(b.id))
+  const open = w.all('bug').filter(b => inYard(k.bounds, k.reach, b.data.pos) && apart(d.pos, b.data.pos) <= k.sees && !claimed.has(b.id))
   const bug = open.find(b => b.id === d.goal) ?? nearest(me, open)
   if (bug) {
     d.goal = bug.id

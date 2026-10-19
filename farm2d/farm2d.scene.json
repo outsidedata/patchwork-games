@@ -25,7 +25,11 @@
         "back": ["Escape"]
       },
       "styles": {
-        "score": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 10, "fontWeight": "bold", "fill": "#fff6d5", "stroke": { "color": "#4a2f1b", "width": 3, "join": "round" } },
+        "roleName": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 11, "fontWeight": "bold", "fill": "#4a2f1b" },
+        "task": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 8, "fill": "#6d4a2a" },
+        "count": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 9, "fontWeight": "bold", "fill": "#4a2f1b" },
+        "verb": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 8, "fontWeight": "bold", "fill": "#4a2f1b" },
+        "key": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 6, "fontWeight": "bold", "fill": "#fff6d5" },
         "name": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 30, "fontWeight": "bold", "fill": "#fff6d5", "stroke": { "color": "#4a2f1b", "width": 5, "join": "round" } },
         "tagline": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 9, "fontWeight": "bold", "fill": "#4a2f1b" },
         "full": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 9, "fontWeight": "bold", "fill": "#8a2b1b" },
@@ -37,10 +41,10 @@
         "volume": { "size": [88, 10], "edge": 1, "frame": { "color": "#4a2f1b" }, "track": { "color": "#e8dcc0" }, "fill": { "color": "#7bc35a" }, "muted": { "color": "#a99d86" } },
         "small": { "size": [22, 20], "radius": 3, "fill": "#7bc35a", "focus": "#a6e07c", "text": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 12, "fontWeight": "bold", "fill": "#4a2f1b" } },
         "wide": { "size": [84, 20], "radius": 3, "fill": "#7bc35a", "focus": "#a6e07c", "text": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 10, "fontWeight": "bold", "fill": "#4a2f1b" } },
-        "chip": { "size": [22, 18], "radius": 3, "fill": "#fff6d5", "focus": "#ffe7a3", "text": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 10, "fontWeight": "bold", "fill": "#4a2f1b" } }
+        "chip": { "size": [18, 18], "radius": 3, "fill": "#f0deb0", "focus": "#ffd77a", "text": { "fontFamily": "Pixelify Sans, monospace", "fontSize": 11, "fontWeight": "bold", "fill": "#4a2f1b" } }
       }
     },
-    "shipped": { "plugins": ["jukebox", "roles"] },
+    "shipped": { "plugins": ["jukebox", "roles", "hud"] },
     "loader": {
       "wads": ["/games/farm2d/assets/farm2d.wad"],
       "assets": {
@@ -57,24 +61,30 @@
         "house": { "type": "sheet", "url": "/games/farm2d/assets/house.json", "preload": true, "nearest": true },
         "produce": { "type": "sheet", "url": "/games/farm2d/assets/produce.json", "preload": true, "nearest": true },
         "bits": { "type": "sheet", "url": "/games/farm2d/assets/bits.json", "preload": true, "nearest": true },
+        "bug": { "type": "sheet", "url": "/games/farm2d/assets/bug.json", "preload": true, "nearest": true, "facing": { "first": 0, "step": 0.25 } },
         "motes": { "type": "sheet", "url": "/games/farm2d/assets/motes.json", "preload": true, "nearest": true },
         "effects": { "type": "json", "url": "/games/farm2d/assets/effects.json", "preload": true },
         "farmtune": { "type": "json", "url": "/games/farm2d/assets/farmtune.json", "preload": true },
         "farmer-ui": { "type": "sheet", "url": "/games/farm2d/assets/farmer.json", "preload": true, "nearest": true, "for": "ui", "facing": { "first": -0.25, "step": 0.25, "mirror": true } },
         "cow-ui": { "type": "sheet", "url": "/games/farm2d/assets/cow.json", "preload": true, "nearest": true, "for": "ui", "facing": { "first": -0.25, "step": 0.25, "mirror": true } },
         "chicken-ui": { "type": "sheet", "url": "/games/farm2d/assets/chicken.json", "preload": true, "nearest": true, "for": "ui", "facing": { "first": 0, "step": 0.5 } },
-        "crops-ui": { "type": "sheet", "url": "/games/farm2d/assets/crops.json", "preload": true, "nearest": true, "for": "ui" }
+        "crops-ui": { "type": "sheet", "url": "/games/farm2d/assets/crops.json", "preload": true, "nearest": true, "for": "ui" },
+        "bull-ui": { "type": "sheet", "url": "/games/farm2d/assets/bull.json", "preload": true, "nearest": true, "for": "ui", "facing": { "first": -0.25, "step": 0.25, "mirror": true } },
+        "hen-ui": { "type": "sheet", "url": "/games/farm2d/assets/hen.json", "preload": true, "nearest": true, "for": "ui", "facing": { "first": 0, "step": 0.5 } },
+        "produce-ui": { "type": "sheet", "url": "/games/farm2d/assets/produce.json", "preload": true, "nearest": true, "for": "ui" },
+        "bits-ui": { "type": "sheet", "url": "/games/farm2d/assets/bits.json", "preload": true, "nearest": true, "for": "ui" },
+        "bug-ui": { "type": "sheet", "url": "/games/farm2d/assets/bug.json", "preload": true, "nearest": true, "for": "ui", "facing": { "first": 0, "step": 0.25 } }
       }
     },
     "sprite2d": {
       "kinds": {
         "grass": { "layer": "lying", "turn": 1, "sheet": "grass", "clip": "grass", "facing": 0 },
-        "manure": { "layer": "lying", "turn": 1, "sheet": "bits", "clip": "manure", "facing": 0 },
+        "manure": { "layer": "sprites", "turn": 1, "sheet": "bits", "clip": "manure", "facing": 0 },
         "produce": { "layer": "lying", "turn": 1, "sheet": "produce", "facing": 0 },
         "house": { "layer": "sprites", "turn": 1, "sheet": "house", "clip": "house", "facing": 0 },
         "tree": { "layer": "sprites", "turn": 1, "sheet": "tree", "clip": "maple", "facing": 0 },
         "crop": { "layer": "sprites", "turn": 1, "sheet": "crops", "facing": 0 },
-        "bug": { "layer": "sprites", "turn": 1, "sheet": "bits", "clip": "bug", "facing": 0 },
+        "bug": { "layer": "sprites", "turn": 1, "sheet": "bug" },
         "chicken": { "layer": "sprites", "turn": 1 },
         "cow": { "layer": "sprites", "turn": 1 },
         "farmer": { "layer": "sprites", "turn": 1, "sheet": "farmer" }
@@ -112,7 +122,7 @@
     "manure": { "pos": [0, 0] },
     "produce": { "pos": [0, 0], "clip": "leek" },
     "pile": { "pos": [0, 0], "items": [] },
-    "bug": { "pos": [0, 0], "way": [0, 0], "turn": 0, "nib": 0 },
+    "bug": { "pos": [0, 0], "way": [0, 0], "turn": 0, "nib": 0, "facing": 0, "clip": "walk", "frame": 0, "ft": 0 },
     "swarm": { "next": 0 },
     "house": { "pos": [0, 0] },
     "tree": { "pos": [0, 0], "frame": 3 },

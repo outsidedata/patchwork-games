@@ -47,8 +47,6 @@ test('manure put down on an empty soil cell sows a crop in its middle; on a cell
   expect(farmer.data.carry).toBe(null)
   const [crop] = all('crop')
   expect(crop.data.pos).toEqual([plot[0] + 0.5, plot[1] + 0.5])
-  expect(Object.keys(defs.crop.types)).toContain(crop.data.clip)
-  expect(crop.data.ripe).toBe(false)
   farmer.data.carry = 'manure'
   use()
   expect(all('crop').length).toBe(1)

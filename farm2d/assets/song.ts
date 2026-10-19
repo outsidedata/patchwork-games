@@ -9,7 +9,8 @@
 // raises it: `pick` two bright square blips a fifth apart, a thing picked up; `put` a soft low triangle
 // thump falling a fourth, a thing put down; `cluck` an FM squawk falling a fourth; `moo` a long low
 // sawtooth lowing that slides down; `plop` a round sine drop falling an octave; `peck` a short sharp
-// FM tick; `nibble` two tiny high square crunches.
+// FM tick; `nibble` two tiny high square crunches; `fart` a cow's long sputtering one, timed to the
+// gas of the effect of that name.
 import { writeFileSync } from 'node:fs'
 import { check, type Instrument, type Note, type Params, type Project } from '#plugins/synthaudio/synthaudio.sim.ts'
 
@@ -108,6 +109,13 @@ const project: Project = {
     nibble: sound(instrument('synth', { wave: 'square', attack: 0.001, decay: 0.025, sustain: 0, release: 0.02, echo: 0, room: 0, gain: 0.12, pan: 0 }), [
       [0, 'F7', 1, 0.7],
       [1, 'D7', 1, 0.6],
+    ]),
+    // A cow's long fart: after a held breath, a low raspy FM sputter wobbling about D2 and sagging, a
+    // long low blat, and a last squeak.
+    fart: sound(instrument('fmsynth', { wave: 'square', attack: 0.01, decay: 0.08, sustain: 0.85, release: 0.05, harmonicity: 0.5, modulation: 9, echo: 0, room: 0.05, gain: 0.42, pan: 0 }), [
+      ...(['D2', 'C#2', 'D#2', 'D2', 'C2', 'D2', 'B1', 'C#2', 'C2', 'A#1', 'C2', 'A1'] as const).map((note, i): Note => [5 + i, note, 1, i % 2 ? 0.7 : 0.95]),
+      [17, 'G#1', 3, 0.9],
+      [20, 'E3', 1, 0.6],
     ]),
   },
 }

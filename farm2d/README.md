@@ -13,7 +13,9 @@ living in the field; if people play every one of them, a new one comes in for yo
 the one you played goes back to the computer and carries on. There are no rounds, no timer and no
 score.
 
-Arrows or WASD walk, Space does your role's one verb, Escape opens the sound menu.
+Arrows or WASD walk, Space does your role's one verb, Escape opens the sound menu. The card at the
+top left says who you are and what to do now, an arrow points at where that is, and over your head
+a prompt says what Space would do there.
 
 ## Playing it
 
@@ -34,7 +36,8 @@ node --experimental-strip-types games/farm2d/assets/song.ts     # the song and t
 `make.mjs` reads the pack from the library, `vendor/maevedevs-farm-rpg/` under `PATCHWORK_LIBRARY`
 (else `~/patchwork-library`), where it is kept as downloaded and never committed. Every picture it
 makes is sealed into `assets/farm2d.wad`, which the scene names in `world.loader.wads`, so the pack's
-pixels are never in the repo as themselves.
+pixels are never in the repo as themselves; but for the bug's sheet, `assets/bug.png`, which is the
+game's own and kept beside the wad as a plain file, so the scene loads pictures from both.
 
 ## Credit
 

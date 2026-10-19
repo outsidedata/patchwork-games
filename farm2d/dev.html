@@ -19,7 +19,9 @@
       // the state of every AudioContext a node was connected in or a sound decoded on; and how each
       // decode of a sound went; `struck`, every note synthaudio was asked to strike, [track, note];
       // `levels`, every track's level as the jukebox last set it; and `store`, the page's music,
-      // effects and muted.
+      // effects and muted. `?probe` puts the running truths, by scene, and the page on `window.probe`,
+      // so a look can be put through its paces from the console: a cow stood by grown grass, a crop
+      // grown ripe.
       import { boot } from '#engine/engine.ts'
       import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
       import { loopback } from '#addons/loopback/loopback.addon.ts'
@@ -85,7 +87,7 @@
 
       const dt = file.prefabs.engine.dt
       const truth = boot(file, sim)
-      await load(truth, import.meta.url)
+      const truths = await load(truth, import.meta.url)
       const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
         listen(me)
         for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
@@ -97,6 +99,8 @@
           surface.mount(canvas)
         }
       })
+
+      if (ask.has('probe')) window.probe = { truths, page }
 
       let last = performance.now(), owed = 0
       const loop = async now => {

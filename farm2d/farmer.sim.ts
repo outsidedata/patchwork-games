@@ -38,29 +38,19 @@ import { sound } from '#plugins/audio/audio.sim.ts'
 import { def, tiled } from '#plugins/loader/loader.sim.ts'
 import { emit } from '#plugins/particle2d/particle2d.sim.ts'
 import { holderOf } from '#plugins/player/player.sim.ts'
-import { tileAt } from '#plugins/tilemap/tilemap.sim.ts'
+import { cellOf, closest, free as freeOn, middle, pileWithin, same, things as thingsOf, within, type Cell } from './plugins/chores/chores.sim.ts'
 import { animate, apart, between, head, nearest, route, steer, stride } from './plugins/walk/walk.sim.ts'
 
-type Cell = [number, number]
+// Whether a cell is tilled soil with no crop growing in it (`plugins/chores`).
+const free = (w: W, k: any, cell: Cell) => freeOn(tiled(w, w.world.tilemap.file), k.soil, kind => w.all(kind), cell)
 
-const cellOf = (pos: readonly number[]): Cell => [Math.floor(pos[0]), Math.floor(pos[1])]
-const middle = ([c, r]: Cell) => [c + 0.5, r + 0.5]
-const same = (a: Cell, b: Cell) => a[0] === b[0] && a[1] === b[1]
-
-// Whether a cell is tilled soil with no crop growing in it.
-function free(w: W, k: any, cell: Cell): boolean {
-  const map = tiled(w, w.world.tilemap.file)
-  const gid = tileAt(map, undefined, k.soil.layer, cell[0], cell[1])
-  return map.tiles[gid]?.type === k.soil.type && !w.all('crop').some(c => same(cellOf(c.data.pos), cell))
-}
-
-// What the farmer can pick up: ripe crops, loose produce and manure.
-const things = (w: W) => [...w.all('crop').filter(c => c.data.ripe), ...w.all('produce'), ...w.all('manure')]
+// What the farmer can pick up: ripe crops, loose produce and manure (`plugins/chores`).
+const things = (w: W) => thingsOf(kind => w.all(kind))
 
 function use(w: W, me: Row) {
   const d = me.data, k = def(w, me.kind)
   if (d.carry === null) {
-    const it = nearest(me, things(w).filter(r => apart(r.data.pos, d.pos) <= k.reach))
+    const it = closest(d.pos, within(d.pos, things(w), k.reach))
     if (!it) return
     d.carry = it.kind === 'manure' ? 'manure' : it.data.clip
     if (it.kind === 'crop') w.call(it, 'pick', -1)
@@ -82,7 +72,7 @@ function use(w: W, me: Row) {
     d.carry = null
     sound(w, k.sounds.put, undefined, me.id)
   } else {
-    const pile = w.all('pile').find(p => apart(p.data.pos, d.pos) <= k.reach)
+    const pile = pileWithin(kind => w.all(kind), d.pos, k.reach)
     if (pile) {
       w.call(pile, 'add', -1, d.carry)
       emit(w, k.effects.stash, pile.data.pos)

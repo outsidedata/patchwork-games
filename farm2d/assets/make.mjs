@@ -3,7 +3,7 @@
 // pack is kept in the library, `vendor/maevedevs-farm-rpg/` under `PATCHWORK_LIBRARY` (else
 // `~/patchwork-library`), and never in the game; every picture made here is sealed into `farm2d.wad`
 // (`seal`, core's `plugins/loader/loader.sim.ts`), which the scene's `world.loader.wads` names, so none
-// is in the repo as itself, and the loader hands each one out at its own path, `farmer.png` say, from the
+// of the pack's is in the repo as itself, and the loader hands each one out at its own path, `farmer.png` say, from the
 // wad. The sheets, the tilesets and the field are written beside it as they are.
 // `node games/farm2d/assets/make.mjs`, from the repo's root (ImageMagick's `magick` on the path).
 //
@@ -34,7 +34,10 @@
 //   untimed clip `grass`: eaten bare to a patch of dirt, sprouting, short, and grown tall. Each frame
 //   stands on its middle, as a cell's patch.
 // - `bits.png` and `bits.json`: what the pack has none of, drawn here: `manure`, a little brown
-//   pile, standing on its foot, and `bug`, one dark pixel.
+//   pile, standing on its foot.
+// - `bug.png` and `bug.json`: the bug, a beetle drawn here, below. It is the one picture kept as
+//   itself beside the wad, not sealed in it: it is this game's own, and the loader fetches a path no
+//   wad holds as ever, so the scene loads pictures from the wad and from plain files side by side.
 // - `motes.png` and `motes.json`: particle2d's motes, 4-pixel squares cut in code: `leaf`, `dirt`,
 //   `dust`, `petal`, `crumb`, `feather`.
 // - `spring.png` and `spring.tsj`: the pack's Spring tileset, 16-pixel tiles, as a Tiled tileset;
@@ -235,7 +238,7 @@ STAGES.forEach((s, k) => {
 draw('grass.png', 16 * STAGES.length, 16, grass)
 sheet('grass', 'grass.png', [16 * STAGES.length, 16], [16, 16], [0.5, 0.5], { grass: { runs: [row(0, STAGES.length)] } })
 
-// The manure, 12 × 8, and the bug, one pixel beside it.
+// The manure, 12 × 8.
 const MANURE = [
   '.....oo.....',
   '....oMMo....',
@@ -245,11 +248,57 @@ const MANURE = [
   'oMMMMMMMMMMo',
   '.oooooooooo.',
 ]
-const BUG = '#1d1712'
-draw('bits.png', 13, 8, [...art(MANURE, { o: '#4a2e16', M: '#75502c', h: '#9b6c3c' }), [12, 0, BUG]])
+draw('bits.png', 12, 8, art(MANURE, { o: '#4a2e16', M: '#75502c', h: '#9b6c3c' }))
 json('bits.json', {
-  frames: [frame('manure/0', 0, 0, 12, 8, [0.5, 7 / 8]), frame('bug/0', 12, 0, 1, 1, [0.5, 0.5])],
-  meta: meta('bits.png', [13, 8], [{ name: 'manure', from: 0, to: 0, direction: 'forward' }, { name: 'bug', from: 1, to: 1, direction: 'forward' }]),
+  frames: [frame('manure/0', 0, 0, 12, 8, [0.5, 7 / 8])],
+  meta: meta('bits.png', [12, 8], [{ name: 'manure', from: 0, to: 0, direction: 'forward' }]),
+})
+
+// The bug, drawn here and kept as itself, `bug.png` beside the wad and not in it: a beetle seen from
+// above, 11 pixels square, its shell split down the middle with a shine on its left wing, six legs
+// and two feelers. Its clip `walk` is two frames, the legs stepping in turn, and has four runs, the
+// beetle facing right, up, left and down, each the one facing up turned a quarter more; the catalogue
+// entry's `facing` turns them to a quarter turn apart from facing right. Each frame stands on its
+// middle.
+const BEETLE = [
+  [
+    '...k...k...',
+    '....k.k....',
+    '....kkk....',
+    'k..kkkkk..k',
+    '.kkSsmSSkk.',
+    '..kSsmSSk..',
+    'kkkSSmSSkkk',
+    '..kSSmSSk..',
+    '.kkSSmSSkk.',
+    'k..kkkkk..k',
+    '...........',
+  ],
+  [
+    '...k...k...',
+    '....k.k....',
+    '....kkk....',
+    '...kkkkk...',
+    'kkkSsmSSkkk',
+    '..kSsmSSk..',
+    '.kkSSmSSkk.',
+    'k.kSSmSSk.k',
+    'kkkSSmSSkkk',
+    '...kkkkk...',
+    '...........',
+  ],
+]
+const BEETLE_KEY = { k: '#1d1712', S: '#4a3a78', s: '#9a88d6', m: '#2a2148' }
+const BUG = 11
+// A point of the beetle facing up, turned `q` quarter turns clockwise in its square.
+const quarter = ([x, y, c], q) => (q === 0 ? [x, y, c] : quarter([BUG - 1 - y, x, c], q - 1))
+// The runs facing right, up, left and down: the one facing up turned 1, 0, 3 and 2 quarters clockwise.
+const TURNS = [1, 0, 3, 2]
+const bugPoints = TURNS.flatMap((q, r) => BEETLE.flatMap((lines, f) =>
+  art(lines, BEETLE_KEY).map(p => quarter(p, q)).map(([x, y, c]) => [f * BUG + x, r * BUG + y, c])))
+execFileSync('magick', ['-size', `${2 * BUG}x${4 * BUG}`, 'xc:none', ...bugPoints.flatMap(([x, y, c]) => ['-fill', c, '-draw', `point ${x},${y}`]), join(here, 'bug.png')])
+sheet('bug', 'bug.png', [2 * BUG, 4 * BUG], [BUG, BUG], [0.5, 0.5], {
+  walk: { duration: 110, runs: TURNS.map((_, r) => row(r, 2)) },
 })
 
 // The motes: 4-pixel squares, a leaf green, a clod of soil, a puff of dust, a pink petal, a crumb of

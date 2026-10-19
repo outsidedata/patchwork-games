@@ -31,13 +31,14 @@ const send = (type: string, k: string) => {
   const e = { key: k, code: keyCode(k), repeat: false, target: null, preventDefault() {} }
   for (const capture of [true, false]) for (const o of listening.filter(o => o.type === type && o.capture === capture)) o.f(e)
 }
-// Every picture is in the scene's wad, and the loader reads it from there in node, pixel for pixel: a
-// picture asked of PixiJS's `Assets` would be one fetched past the wad.
+// The scene loads pictures from its wad and from plain files beside it. The loader reads a picture the
+// wad holds from there in node, pixel for pixel; one it does not is fetched past it, asked of PixiJS's
+// `Assets`, which node cannot decode, so a texture stands in for each.
 const asked: string[] = []
 PIXI.DOMAdapter.set({ ...PIXI.DOMAdapter.get(), createCanvas: () => ({ getContext: () => null }) as any })
 vi.spyOn(PIXI.Assets, 'load').mockImplementation((async (url: string) => {
   asked.push(url)
-  throw new Error(`${url} was asked of PixiJS`)
+  return new PIXI.Texture()
 }) as unknown as typeof PIXI.Assets.load)
 const DT = file.prefabs.engine.dt
 const here = new URL('./', import.meta.url).href
@@ -83,7 +84,15 @@ test('the title card draws its words, a button for each role and the farm where 
     const sealed = decodePng(wad[data.pages[0].split('/').pop()!])
     expect([pages[0].source.width, pages[0].source.height, [...pages[0].source.resource]]).toEqual([sealed.width, sealed.height, [...sealed.data]])
   }
-  expect(asked).toEqual([])
+  // Every sheet the catalogue names lands; those whose picture the wad holds never reach PixiJS, and
+  // the rest, a plain file each, are fetched past it. The scene has both.
+  const sheets = Object.entries(file.world.loader.assets).filter(([, e]) => e.type === 'sheet')
+  const picture = (url: string) => JSON.parse(readFileSync(join(process.cwd(), url), 'utf8')).meta.image as string
+  const plain = sheets.filter(([, e]) => !wad[picture(e.url)])
+  expect(plain.length).toBeGreaterThan(0)
+  expect(plain.length).toBeLessThan(sheets.length)
+  for (const [name] of sheets) expect(plugins().loader.ready(name)).toBe(true)
+  expect(new Set(asked)).toEqual(new Set(plain.map(([, e]) => new URL(picture(e.url), new URL(e.url, 'file:///')).pathname)))
   expect(plugins().ui.focused(panel.getChildByLabel(`role-${k.roles[0].with}`)!)).toBe(true)
   expect(panel.getChildByLabel('full')).toBeNull()
 })

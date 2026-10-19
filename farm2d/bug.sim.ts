@@ -1,5 +1,7 @@
-// A bug, one dark pixel, creeping in to the harvest pile: the `bits` sheet's `bug` clip, drawn by
-// sprite2d. It walks through fences and everything else, too small for any to stop it.
+// A bug, a beetle creeping in to the harvest pile: the `bug` sheet's `walk` clip, drawn by sprite2d,
+// facing the nearer of right, up, left and down as it creeps (`facing`, a quarter turn apart), its
+// legs stepping as it goes (`frame` and `ft`). It walks through fences and everything else, too small
+// for any to stop it.
 //
 // Each step it creeps `speed` cells a second, along the way to the pile with a wiggle added: `way`, a
 // way the die picks again every `turn` [least, most] seconds of its definition (`turn` on its row
@@ -10,7 +12,7 @@
 import type { Kind } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
-import { apart, between } from './plugins/walk/walk.sim.ts'
+import { animate, apart, between } from './plugins/walk/walk.sim.ts'
 
 export const bug: Kind = {
   tick(me, dt, w) {
@@ -36,5 +38,7 @@ export const bug: Kind = {
     if (len === 0) return
     const step = k.speed * dt
     d.pos = [d.pos[0] + (x / len) * step, d.pos[1] + (y / len) * step]
+    d.facing = Math.abs(x) >= Math.abs(y) ? (x > 0 ? 0 : 0.5) : y < 0 ? 0.25 : 0.75
+    animate(w, me, 'walk', dt)
   },
 }

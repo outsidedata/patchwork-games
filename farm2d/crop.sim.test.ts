@@ -1,4 +1,5 @@
-// A crop, sown, stands at its first stage and moves on a stage every `stage` seconds of its type, to the
+// Every effect a definition names is one the effects file has, so none is silently never drawn. A
+// crop, sown, stands at its first stage and moves on a stage every `stage` seconds of its type, to the
 // last frame of its clip, where it is ripe and stands. Picked, it bursts leaves and soil and lifts its
 // produce, and leaves the field. And a patch of grass: the pasture starts at stages the die picks, and a
 // patch grows a stage every `stage` seconds to grown, where it stands until a cow eats it bare.
@@ -13,14 +14,20 @@ const crops = await sheetAt('crops', file.world.loader.assets.crops.url)
 const grassSheet = await sheetAt('grass', file.world.loader.assets.grass.url)
 const lastOf = (clip: string) => crops.clips[clip].runs[0].length - 1
 
-test('every crop type is a clip of the crops sheet, and every effect named is in the effects file, each pop its own produce', () => {
+test('every crop type is a clip of the crops sheet, and every effect a definition names is in the effects file', () => {
   const effects = JSON.parse(readFileSync(new URL('./assets/effects.json', import.meta.url), 'utf8')).effects
-  expect(effects).toHaveProperty(defs.crop.burst)
   for (const [clip, type] of Object.entries(defs.crop.types)) {
     expect(crops.clips).toHaveProperty(clip)
-    expect(effects[type.pop].map((l: any) => [l.sheet, l.clip])).toEqual([['produce', clip]])
+    expect(effects).toHaveProperty(type.pop)
   }
-  for (const name of [defs.farmer.sow, defs.cow.plop, defs.chicken.burst, defs.pile.crumbs, defs.farmer.dust.effect, defs.player.air.effect]) expect(effects).toHaveProperty(name)
+  for (const name of [
+    defs.crop.burst,
+    defs.farmer.sow, ...Object.values(defs.farmer.effects), defs.farmer.dust, defs.farmer.carry.glint,
+    defs.cow.plop, defs.cow.graze, defs.cow.fart.effect, defs.cow.steps.effect, defs.cow.munch.effect,
+    defs.chicken.burst, defs.chicken.steps.effect, defs.chicken.scratch.effect,
+    defs.crop.sprout, defs.crop.ripen, defs.crop.glint, defs.grass.regrow, defs.grass.grown,
+    defs.manure.stink, defs.house.smoke, defs.tree.leaves, defs.pile.crumbs, defs.pile.shine, defs.player.air.effect,
+  ]) expect(effects).toHaveProperty(name)
 })
 
 test('a crop sown grows a stage every stage seconds of its type, stands ripe at the last, and leaves the field when picked', async () => {

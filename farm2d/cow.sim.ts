@@ -9,6 +9,11 @@
 // whatever its keys say (they are kept, and walk it on once it has done). Its chewing done, it drops a pile of manure where it stands, with the
 // `sounds.plop` sound and the effect `plop`, and means to wander to a point of its pasture
 // (`roam`). It eats nothing while it chews.
+// As it eats it starts its fart, which the chewing hides the start of and the manure ends: the effect
+// `fart.effect` for the `chew` seconds, thrown from its back end, the one of `fart.rear` for the way
+// it faces (right, up, left and down, each [x, y, h] cells off its feet), along that one of
+// `fart.away`, and the `sounds.fart` sound from the cow. When the gas comes and goes inside those
+// seconds is the effect's own.
 //
 // The brain, while no seat holds it, each step:
 //   - Standing a while: `wait` seconds, `rest` [least, most] of its definition, after a wander.
@@ -25,18 +30,22 @@ import { sound } from '#plugins/audio/audio.sim.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import { emit } from '#plugins/particle2d/particle2d.sim.ts'
 import { holderOf } from '#plugins/player/player.sim.ts'
+import { grazing } from './plugins/chores/chores.sim.ts'
 import { animate, apart, between, head, nearest, roam, steer, stride } from './plugins/walk/walk.sim.ts'
 
 function eat(w: W, me: Row) {
   const d = me.data, k = def(w, me.kind)
   if (d.chew > 0) return
-  const grass = nearest(me, w.all('grass').filter(g => g.data.grown && apart(g.data.pos, d.pos) <= k.reach))
+  const grass = grazing(kind => w.all(kind), d.pos, k.reach)
   if (!grass) return
   w.call(grass, 'eat', -1)
   emit(w, k.graze, grass.data.pos)
   d.chew = k.chew
   d.goal = 0
   sound(w, k.sounds.moo, undefined, me.id)
+  const q = Math.round(d.facing * 4) % 4, [dx, dy, h] = k.fart.rear[q]
+  emit(w, k.fart.effect, [d.pos[0] + dx, d.pos[1] + dy, h], { dir: k.fart.away[q], life: k.chew })
+  sound(w, k.sounds.fart, undefined, me.id)
 }
 
 // The brain: whether it means to move this step.

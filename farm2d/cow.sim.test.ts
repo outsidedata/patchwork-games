@@ -1,5 +1,5 @@
 // A cow's `use`, sent by the seat that plays it: of the grass grown tall within reach, the nearest is
-// eaten bare and the cow chews, standing whatever its keys say and eating nothing more, then drops a
+// eaten bare and the cow farts and chews, standing whatever its keys say and eating nothing more, then drops a
 // pile of manure where it stands. Grass not grown is not eaten. With nobody playing it, its brain
 // grazes and wanders inside its pasture.
 import { expect, test } from 'vitest'
@@ -26,8 +26,8 @@ test('grass not grown is not eaten', async () => {
   expect(all('manure')).toEqual([])
 })
 
-test('the cow eats the grown patch, chews standing, eats nothing more, and drops manure where it stands', async () => {
-  const { seat, cow, patch, steps, all } = await played()
+test('the cow eats the grown patch, farts, chews standing, eats nothing more, and drops manure where it stands', async () => {
+  const { seat, cow, patch, steps, all, one } = await played()
   patch.data.frame = 3
   patch.data.grown = true
   const other = all('grass')[1]
@@ -41,6 +41,9 @@ test('the cow eats the grown patch, chews standing, eats nothing more, and drops
   expect(other.data.grown).toBe(true)
   expect(cow.data.chew).toBeGreaterThan(0)
   expect(cow.data.clip).toBe('eat')
+  // Every page sees and hears the fart its chewing ends in.
+  expect(one('particle2d').data.live.map((e: any) => e.effect)).toContain(defs.cow.fart.effect)
+  expect(one('audio').data.live.map((e: any) => e.cue)).toContain(defs.cow.sounds.fart)
   const at = [...cow.data.pos]
   seat.send('move', 1, 0)
   seat.send('use')

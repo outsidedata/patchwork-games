@@ -30,6 +30,9 @@ const send = (type: string, k: string) => {
   for (const capture of [true, false]) for (const o of listening.filter(o => o.type === type && o.capture === capture)) o.f(e)
 }
 PIXI.DOMAdapter.set({ ...PIXI.DOMAdapter.get(), createCanvas: () => ({ getContext: () => null }) as any })
+// Node decodes the pictures the wad holds and no other: the bug's sheet, a plain file beside it, is
+// stood in for.
+vi.spyOn(PIXI.Assets, 'load').mockImplementation((async () => new PIXI.Texture()) as typeof PIXI.Assets.load)
 const DT = file.prefabs.engine.dt
 const here = new URL('./', import.meta.url).href
 const moment = () => new Promise(done => setTimeout(done, 5))
