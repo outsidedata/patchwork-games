@@ -12,7 +12,9 @@
     <script type="module">
       // The testbed: index.html with these before the boot. `?scene=<name>` enters that scene (the
       // gym when none is given); `?body=<model>` plays the hero as that body of its rig (xbot, ybot);
-      // `?watch=x,y,z` holds render3d's camera there, looking at the colossus, in place of the chase.
+      // `?watch=x,y,z` holds render3d's camera there, looking at the colossus, in place of the chase;
+      // `?bot` names the playtester in the gym's copy and hands it the think of `giantslayer.think.ts`,
+      // so the seat plays the whole loop itself.
       // After the boot, `window.__scenes` holds the truths (`__scenes.get('gym').rows`), and an error
       // in a step or a frame is shown over the page and kept on `window.__error`, and `window.__client`
       // is the page's client of the scene the seat is on (`__client.plugins`).
@@ -21,11 +23,14 @@
       import { loopback } from '#addons/loopback/loopback.addon.ts'
       import { sim } from './giantslayer.sim.ts'
       import { scene as gym } from './gym.sim.ts'
+      import { think } from './giantslayer.think.ts'
       import file from './giantslayer.scene.json'
 
       const query = new URLSearchParams(location.search)
       file.prefabs.scenemanager.entry = query.get('scene') ?? 'gym'
       if (query.get('body')) gym.prefabs.player.as = query.get('body')
+      const bot = query.has('bot')
+      if (bot) gym.plugins.push('playtester')
       const watch = query.get('watch')?.split(',').map(Number)
 
       const dt = file.prefabs.engine.dt
@@ -46,13 +51,18 @@
       const shown = document.createElement('pre')
       shown.style.cssText = 'position:fixed;left:8px;top:8px;margin:0;color:#ff8a80;font:12px monospace;white-space:pre-wrap;max-width:90vw;z-index:9'
       document.body.appendChild(shown)
-      let last = performance.now(), owed = 0
+      let last = performance.now(), owed = 0, played
       const loop = async now => {
         try {
           owed += Math.min((now - last) / 1000, 0.25)
           last = now
           page.input()
           while (owed >= dt) { truth.step(dt); owed -= dt }
+          // The bot's think, handed to each new client once it holds the seat's rows.
+          if (bot && window.__client && window.__client !== played && __client.plugins.playtester && __client.plugins.wire.rows.some(r => r.kind === 'player' && r.data.mine)) {
+            __client.plugins.playtester.play(__client.plugins.player, think(__client.plugins.wire))
+            played = window.__client
+          }
           if (watch && window.__client) {
             const r3 = __client.plugins.render3d
             const giant = __client.plugins.wire.rows.find(r => r.kind === 'colossus')

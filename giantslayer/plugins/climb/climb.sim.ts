@@ -15,9 +15,12 @@
 //
 // The numbers, off the definitions of the kinds whose rows it is handed:
 //   holder `climb`: `reach` metres, how far from a limb's surface its hands take hold; `off` metres,
-//          how far its body stands out from the surface past its hands; `up` and
-//          `side` m/s, how fast it climbs along a limb and round it; `clips`, the clip it plays to
-//          hold still (`hold`), climb up, climb down, go left and go right.
+//          how far its body stands out from the surface past its hands; `rate`, how fast its climbing
+//          clips play; `clips`, the clip it plays to hold still (`hold`), climb up, climb down, go left
+//          and go right. It climbs along a limb as fast as its `up` clip raises its hips (the rig's
+//          measured `rise` over the clip's length) and round it as fast as its `right` clip carries
+//          them sideways (`left` over its length), each times `rate`, so the hold moves as the clip's
+//          body does at any rate.
 //   held   `segments`: `{ <segment>: { radius, up } }`, each limb that can be held, its radius, and the
 //          segment it leads on to past its upper end, if any.
 //
@@ -35,7 +38,7 @@
 import type { Row, W } from '#engine/engine.ts'
 import type { Wire } from '#engine/browser.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
-import { ends, play, stop } from '#plugins/anim/anim.sim.ts'
+import { animKind, clipOf, ends, play, rigOf, stop } from '#plugins/anim/anim.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
 import { groundOf, numbers, stand } from '#plugins/walker/walker.sim.ts'
 
@@ -158,10 +161,13 @@ export function hang(me: Row, w: W, dt: number, stick: V) {
   // Up the limb is toward whichever joint stands higher now.
   const rising = b[1] >= a[1] ? 1 : -1
   const climb = -stick[1], across = stick[0]
-  h.along += (climb * k.up * dt / length) * rising
+  // The speeds the clips carry the hips at, as they were measured (anim's table), at the clips' rate.
+  const rig = rigOf(w, animKind(me))
+  const up = clipOf(rig, k.clips.up).measure, side = clipOf(rig, k.clips.right).measure
+  h.along += (climb * (up.rise / up.dur) * k.rate * dt / length) * rising
   const r = def(w, held.kind).segments[h.segment].radius
   // Round to the right, as the holder faces the limb, is round it the negative way.
-  h.around -= across * k.side * dt / r
+  h.around -= across * (Math.abs(side.left) / side.dur) * k.rate * dt / r
   if (h.along > 1 || h.along < 0) {
     const upward = (h.along > 1) === (rising > 0)
     const on = next(w, h, upward)
@@ -178,7 +184,7 @@ export function hang(me: Row, w: W, dt: number, stick: V) {
     place(me, w)
   }
   const clip = climb > 0.1 ? k.clips.up : climb < -0.1 ? k.clips.down : across > 0.1 ? k.clips.right : across < -0.1 ? k.clips.left : k.clips.hold
-  if (d.clip !== clip) play(me, clip)
+  if (d.clip !== clip) play(me, clip, { rate: clip === k.clips.hold ? 1 : k.rate })
 }
 
 // How far apart two places on one limb of the held row are, over its surface: along it, and round it.
