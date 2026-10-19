@@ -85,7 +85,7 @@
       "placed": false,
       "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "grounded": true, "limp": false,
       "want": [0, 0], "face": null, "jump": false, "sliding": false, "speed": 0, "side": 0, "turned": 0,
-      "stick": [0, 0], "run": false,
+      "stick": [0, 0], "run": false, "gripping": false, "hold": null,
       "look": { "yaw": 0, "pitch": 0.25, "dist": 7 }, "lift": 1.4,
       "rig": "stand"
     },

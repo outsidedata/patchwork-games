@@ -2,11 +2,29 @@
   "player": {
     "walk": 2,
     "run": 6,
-    "look": { "turn": 0.004, "pitch": [-0.35, 1.2] }
+    "look": { "turn": 0.004, "pitch": [-0.35, 1.2], "follow": 2.5, "dist": 7, "climb": 15 },
+    "climb": {
+      "reach": 1.2,
+      "up": 0.65,
+      "side": 0.5,
+      "clips": { "hold": "dangle", "up": "climbUp", "down": "climbDown", "left": "shimmyR", "right": "shimmyL" }
+    }
   },
   "colossus": {
     "notice": 120,
     "near": 14,
-    "pace": 5
+    "pace": 5,
+    "segments": {
+      "legL": { "radius": 1.0, "up": "uplegL" },
+      "legR": { "radius": 1.0, "up": "uplegR" },
+      "uplegL": { "radius": 1.4, "up": "torso" },
+      "uplegR": { "radius": 1.4, "up": "torso" },
+      "torso": { "radius": 2.4, "up": "head" },
+      "head": { "radius": 1.6 },
+      "armL": { "radius": 0.9, "up": "torso" },
+      "armR": { "radius": 0.9, "up": "torso" },
+      "forearmL": { "radius": 0.8, "up": "armL" },
+      "forearmR": { "radius": 0.8, "up": "armR" }
+    }
   }
 }

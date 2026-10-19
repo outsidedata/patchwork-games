@@ -11,9 +11,11 @@
   <body>
     <script type="module">
       // The testbed: index.html with these before the boot. `?scene=<name>` enters that scene (the
-      // gym when none is given); `?body=<model>` plays the hero as that body of its rig (xbot, ybot).
+      // gym when none is given); `?body=<model>` plays the hero as that body of its rig (xbot, ybot);
+      // `?watch=x,y,z` holds render3d's camera there, looking at the colossus, in place of the chase.
       // After the boot, `window.__scenes` holds the truths (`__scenes.get('gym').rows`), and an error
-      // in a step or a frame is shown over the page and kept on `window.__error`.
+      // in a step or a frame is shown over the page and kept on `window.__error`, and `window.__client`
+      // is the page's client of the scene the seat is on (`__client.plugins`).
       import { boot } from '#engine/engine.ts'
       import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
       import { loopback } from '#addons/loopback/loopback.addon.ts'
@@ -24,11 +26,13 @@
       const query = new URLSearchParams(location.search)
       file.prefabs.scenemanager.entry = query.get('scene') ?? 'gym'
       if (query.get('body')) gym.prefabs.player.as = query.get('body')
+      const watch = query.get('watch')?.split(',').map(Number)
 
       const dt = file.prefabs.engine.dt
       const truth = boot(file, sim)
       window.__scenes = await load(truth, import.meta.url)
       const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+        window.__client = me
         for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
           if (!surface) continue
           const canvas = document.createElement('canvas')
@@ -49,6 +53,15 @@
           last = now
           page.input()
           while (owed >= dt) { truth.step(dt); owed -= dt }
+          if (watch && window.__client) {
+            const r3 = __client.plugins.render3d
+            const giant = __client.plugins.wire.rows.find(r => r.kind === 'colossus')
+            if (r3?.camera && giant && r3.claim('watch')) {
+              r3.camera.position.set(...watch)
+              r3.camera.up.set(0, 1, 0)
+              r3.camera.lookAt(giant.data.pos[0], giant.data.pos[1] + 9, giant.data.pos[2])
+            }
+          }
           await page.frame(owed / dt)
         } catch (e) { window.__error = e; shown.textContent = String(e?.stack ?? e); owed = 0 }
         requestAnimationFrame(loop)
