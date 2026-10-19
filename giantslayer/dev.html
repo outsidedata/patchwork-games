@@ -11,11 +11,14 @@
   <body>
     <script type="module">
       // The testbed: index.html with these before the boot. `?scene=<name>` enters that scene (the
-      // gym when none is given); `?body=<model>` plays the hero as that body of its rig (xbot, ybot);
-      // `?watch=x,y,z` holds render3d's camera there, looking at the colossus, in place of the chase;
+      // gym when none is given, `arena` the game's fight); `?body=<model>` plays the hero as that body
+      // of its rig (xbot, ybot);
+      // `?watch=x,y,z` holds render3d's camera at x, z and y metres above the colossus's feet, looking at
+      // the colossus, in place of the chase;
       // `?bot` names the playtester in the gym's copy and hands it the think of `giantslayer.think.ts`,
       // so the seat plays the whole loop itself.
-      // After the boot, `window.__scenes` holds the truths (`__scenes.get('gym').rows`), and an error
+      // After the boot, `window.__scenes` holds the truths (`__scenes.get('gym').rows`), `window.__entered`
+      // the name of the one entered, and an error
       // in a step or a frame is shown over the page and kept on `window.__error`, and `window.__client`
       // is the page's client of the scene the seat is on (`__client.plugins`).
       import { boot } from '#engine/engine.ts'
@@ -23,19 +26,22 @@
       import { loopback } from '#addons/loopback/loopback.addon.ts'
       import { sim } from './giantslayer.sim.ts'
       import { scene as gym } from './gym.sim.ts'
+      import { scene as arena } from './arena.sim.ts'
       import { think } from './giantslayer.think.ts'
       import file from './giantslayer.scene.json'
 
       const query = new URLSearchParams(location.search)
-      file.prefabs.scenemanager.entry = query.get('scene') ?? 'gym'
-      if (query.get('body')) gym.prefabs.player.as = query.get('body')
+      const entered = query.get('scene') ?? 'gym'
+      file.prefabs.scenemanager.entry = entered
+      if (query.get('body')) file.prefabs.player.as = query.get('body')
       const bot = query.has('bot')
-      if (bot) gym.plugins.push('playtester')
+      if (bot) ({ gym, arena })[entered].plugins.push('playtester')
       const watch = query.get('watch')?.split(',').map(Number)
 
       const dt = file.prefabs.engine.dt
       const truth = boot(file, sim)
       window.__scenes = await load(truth, import.meta.url)
+      window.__entered = entered
       const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
         window.__client = me
         for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
@@ -67,7 +73,7 @@
             const r3 = __client.plugins.render3d
             const giant = __client.plugins.wire.rows.find(r => r.kind === 'colossus')
             if (r3?.camera && giant && r3.claim('watch')) {
-              r3.camera.position.set(...watch)
+              r3.camera.position.set(watch[0], giant.data.pos[1] + watch[1], watch[2])
               r3.camera.up.set(0, 1, 0)
               r3.camera.lookAt(giant.data.pos[0], giant.data.pos[1] + 9, giant.data.pos[2])
             }

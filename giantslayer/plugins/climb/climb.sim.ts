@@ -164,7 +164,7 @@ export function hang(me: Row, w: W, dt: number, stick: V) {
   // The speeds the clips carry the hips at, as they were measured (anim's table), at the clips' rate.
   const rig = rigOf(w, animKind(me))
   const up = clipOf(rig, k.clips.up).measure, side = clipOf(rig, k.clips.right).measure
-  h.along += (climb * (up.rise / up.dur) * k.rate * dt / length) * rising
+  h.along += (climb * (up.rise! / up.dur) * k.rate * dt / length) * rising
   const r = def(w, held.kind).segments[h.segment].radius
   // Round to the right, as the holder faces the limb, is round it the negative way.
   h.around -= across * (Math.abs(side.left) / side.dur) * k.rate * dt / r

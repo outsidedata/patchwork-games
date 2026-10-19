@@ -1,0 +1,32 @@
+{
+  "world": {
+    "terrain3d": {
+      "field": "arena",
+      "rings": [
+        { "reach": 300, "seg": 300 },
+        { "reach": 1500, "seg": 150 },
+        { "reach": 4000, "seg": 80 }
+      ],
+      "shadowReach": 300,
+      "budget": 6,
+      "seabed": false,
+      "static": true
+    }
+  },
+  "plugins": ["loader", "scenemanager", "player", "terrain3d", "skydome3d", "anim", "render3d", "chasecamera3d", "ui"],
+  "seats": 1,
+  "prefabs": {
+    "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
+    "scenemanager": { "out": {} }
+  },
+  "actors": [
+    { "is": "scenemanager" },
+    { "is": "loader" },
+    { "is": "skydome3d" },
+    { "is": "start", "slot": 0, "pos": [0, 0, 90], "yaw": 3.14159 },
+    { "is": "colossus", "pos": [0, 0, 0], "yaw": 0 },
+    { "is": "weakpoint", "of": 0, "segment": "legR", "along": 0.4, "around": 3.14159 },
+    { "is": "weakpoint", "of": 0, "segment": "torso", "along": 0.75, "around": 3.14159 },
+    { "is": "weakpoint", "of": 0, "segment": "head", "along": 0.55, "around": 3.14159 }
+  ]
+}
