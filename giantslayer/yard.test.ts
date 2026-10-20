@@ -6,6 +6,8 @@ import { boot, type Scene } from '#engine/engine.ts'
 import { accept, link, load, manager, view } from '#addons/scenemanager/scenemanager.addon.ts'
 import { loopback } from '#addons/loopback/loopback.addon.ts'
 import { prepared } from '#plugins/loader/loader.sim.ts'
+import { ends } from '#plugins/anim/anim.sim.ts'
+import { keyCode } from '#plugins/player/player.plugin.ts'
 import { box, linked, netOf, netOn, spotOn } from './plugins/climb/climb.sim.ts'
 import { sim } from './giantslayer.sim.ts'
 import file from './giantslayer.scene.json'
@@ -26,6 +28,11 @@ vi.stubGlobal('removeEventListener', (type: string, f: (e: unknown) => void, o?:
   if (i >= 0) listening.splice(i, 1)
 })
 vi.stubGlobal('navigator', { getGamepads: () => [] })
+// A key pressed or let go, as a browser hands it to the page's listeners.
+const key = (type: 'keydown' | 'keyup', k: string) => {
+  const e = { code: keyCode(k), key: k, repeat: false, target: null, preventDefault() {} }
+  for (const capture of [true, false]) for (const o of listening.filter(o => o.type === type && o.capture === capture)) o.f(e)
+}
 
 // What render3d draws on and the UI listens through: no renderer is made in node.
 const surface = (s: Scene) => ({ addEventListener: () => {}, removeEventListener: () => {}, style: {} as any, width: s.prefabs.engine.width, height: s.prefabs.engine.height, remove() {} })
@@ -171,7 +178,7 @@ function putOn(g: Game, want: number[]) {
 // The hero's skin as the page draws it, against the wall: each vertex's distance from the wall's
 // surface (negative inside), each hand's nearest to it, and the deepest any vertex is inside and the
 // bone it is bound to most; and the deepest of the vertices bound most to a shin, a foot or a toe, and
-// of all the others but the hands, whose touch is their own.
+// of all the others but the hands, whose touch is their own; and the height of his lowest vertex.
 function against(g: Game) {
   const plugins = g.p.client!.plugins
   const T = plugins.render3d.THREE as typeof THREE
@@ -183,6 +190,7 @@ function against(g: Game) {
   const c = Math.cos(wall.data.yaw), s = Math.sin(wall.data.yaw)
   const hands: Record<'L' | 'R', number> = { L: Infinity, R: Infinity }
   let deepest = { depth: 0, bone: '' }, feet = { depth: 0, bone: '' }, rest = { depth: 0, bone: '' }
+  let lowest = Infinity
   const v = new T.Vector3()
   root.traverse(o => {
     const mesh = o as THREE.SkinnedMesh
@@ -190,6 +198,7 @@ function against(g: Game) {
     const si = mesh.geometry.getAttribute('skinIndex'), sw = mesh.geometry.getAttribute('skinWeight')
     for (let i = 0; i < mesh.geometry.getAttribute('position').count; i++) {
       mesh.getVertexPosition(i, v).applyMatrix4(mesh.matrixWorld)
+      lowest = Math.min(lowest, v.y)
       // Into the wall's own frame.
       const dx = v.x - x, dz = v.z - z
       const d = fromSurface([dx * c - dz * s, v.y - y, dx * s + dz * c])
@@ -202,7 +211,7 @@ function against(g: Game) {
       else if (!/(Left|Right)Hand/.test(bone) && -d > rest.depth) rest = { depth: -d, bone }
     }
   })
-  return { hands, deepest, feet, rest }
+  return { hands, deepest, feet, rest, lowest }
 }
 
 test('1c: the hero put on a spot of the wall stays on it, still, not falling, upright and facing straight into the wall', async () => {
@@ -260,4 +269,93 @@ test('1e: held still, nothing of him above the knees but his touching hands is i
   console.log('1e', JSON.stringify(seen))
   expect(seen.rest.depth).toBe(0)
   expect(seen.feet.depth).toBeLessThanOrEqual(0.05)
+})
+
+// The middle of the hero's palms in the world, standing at `pos` facing `yaw`, as they are in his still
+// clip's first frame.
+function palmsAt(g: Game, hero: { kind: string; data: any }, pos: number[], yaw: number) {
+  const wire = g.p.client!.plugins.wire
+  const clip = defs.player.climb.clips.still
+  const l = ends(wire, hero as any, 'handL', { clip, clipT: 0 }), r = ends(wire, hero as any, 'handR', { clip, clipT: 0 })
+  const p = [0, 1, 2].map(k => (l[k] + l[k + 3] + r[k] + r[k + 3]) / 4)
+  return [pos[0] + p[0] * Math.cos(yaw) + p[2] * Math.sin(yaw), pos[1] + p[1], pos[2] - p[0] * Math.sin(yaw) + p[2] * Math.cos(yaw)]
+}
+
+test('1f: walking at the wall holding grip, he takes hold the first step a point of its net is within his reach, of the point nearest his palms, and his palms are then on its face', async () => {
+  const g = await start()
+  await g.frames(30)
+  const wall = g.yard.rows.find(r => r.kind === 'wall')!
+  const hero = g.yard.rows.find(r => r.kind === 'player')!
+  const net = netOf(g.p.client!.plugins.wire, wall)
+  const point = (i: number) => [0, 1, 2].map(k => net.at[i * 3 + k] + wall.data.pos[k])
+  // The net's points by how far they are from a place, nearest first.
+  const nearest = (to: number[]) => {
+    let best = 0, far = Infinity
+    for (let i = 0; i < net.points; i++) {
+      const p = point(i), d = Math.hypot(p[0] - to[0], p[1] - to[1], p[2] - to[2])
+      if (d < far) { far = d; best = i }
+    }
+    return { best, far }
+  }
+  key('keydown', 'e')
+  key('keydown', 'w')
+  let before = { pos: [...hero.data.pos], yaw: hero.data.yaw }
+  let steps = 0
+  while (!hero.data.hold && steps < 600) {
+    before = { pos: [...hero.data.pos], yaw: hero.data.yaw }
+    await g.frames(1)
+    steps++
+    // Not yet holding: no point was within reach of his palms where he stood.
+    if (!hero.data.hold) expect(nearest(palmsAt(g, hero, before.pos, before.yaw)).far).toBeGreaterThan(defs.player.climb.reach)
+  }
+  key('keyup', 'w')
+  expect(hero.data.hold).not.toBeNull()
+  expect(hero.data.hold.on).toBe(wall.id)
+  // The point he took is the one nearest his palms where he stood the step he took hold, within reach.
+  const took = nearest(palmsAt(g, hero, before.pos, before.yaw))
+  expect(hero.data.hold.a).toBe(took.best)
+  expect(took.far).toBeLessThanOrEqual(defs.player.climb.reach)
+  expect(hero.data.hold.t).toBe(0)
+  // On the face: settled, each hand's nearest skin within 1 cm of it.
+  await g.frames(60)
+  const m = against(g)
+  expect(Math.abs(m.hands.L)).toBeLessThanOrEqual(0.01)
+  expect(Math.abs(m.hands.R)).toBeLessThanOrEqual(0.01)
+  // Not under the ground: his root, and the lowest of his skin, at or over the ground the wall stands on.
+  expect(hero.data.pos[1]).toBeGreaterThanOrEqual(wall.data.pos[1])
+  expect(m.lowest).toBeGreaterThanOrEqual(wall.data.pos[1])
+  key('keyup', 'e')
+})
+
+test('1g: holding the wall 4 m up, he lets go of grip, drops off it, and lands on his feet on the ground beside it, upright, nothing of him in it', async () => {
+  const g = await start()
+  await g.frames(30)
+  const { wall, hero } = putOn(g, [0, 4, defs.wall.size[2] / 2])
+  await g.frames(60)
+  const high = hero.data.pos[1]
+  // Grip let go: the hold is dropped on the next step, and he falls.
+  hero.data.gripping = false
+  await g.frames(1)
+  expect(hero.data.hold).toBeNull()
+  let fell = false
+  for (let i = 0; i < 600 && !(fell && hero.data.grounded); i++) {
+    await g.frames(1)
+    if (!hero.data.grounded) fell = true
+  }
+  expect(fell).toBe(true)
+  expect(hero.data.grounded).toBe(true)
+  // Let the landing play out.
+  await g.frames(120)
+  expect(hero.data.pos[1]).toBeLessThan(high)
+  expect(hero.data.pos[1]).toBeCloseTo(wall.data.pos[1], 6)
+  expect(hero.data.clip).not.toBe(defs.player.climb.clips.still)
+  const T = g.p.client!.plugins.render3d.THREE as typeof THREE
+  const root: THREE.Object3D = g.p.client!.plugins.anim.model(hero.id)
+  expect(new T.Vector3(0, 1, 0).applyQuaternion(root.quaternion).y).toBeCloseTo(1, 9)
+  const m = against(g)
+  console.log('1g', JSON.stringify({ pos: hero.data.pos, clip: hero.data.clip, m }))
+  // On his feet: the lowest of his skin is on the ground, within 2 cm.
+  expect(Math.abs(m.lowest - wall.data.pos[1])).toBeLessThanOrEqual(0.02)
+  // Nothing of him in the wall.
+  expect(m.deepest.depth).toBe(0)
 })

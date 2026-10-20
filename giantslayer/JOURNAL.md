@@ -61,3 +61,19 @@ and each hand's nearest skin is within 1 cm of the face: left 0.78 cm in, right 
 above the knees but the touching hands is in the wall at all (0 m). His shins and feet are: the right
 toes 4.6 cm in, pressed to the wall in the braced pose. They come out when his feet reach the face by IK
 (3d); until then the test holds them to 5 cm.
+Commit: games `67644bc`.
+
+**1f. Grab from the ground.** climb's `grabNet`: the point of a wall's net nearest the middle of his
+palms (as they are in his still pose where he stands), within his `reach` 1.2 m. His rule tries a wall
+before the colossus.
+Proof (`yard.test.ts`, the page's own keys: `w` walks him at the wall, `e` holds grip): every step
+before he took hold, no point was within 1.2 m of his palms; the step he took hold, he took the point
+nearest them (point 262, 2.5 m up the face, 1.17 m off), at its spot; settled, both palms on the face
+within 1 cm, his root 6.8 cm and his lowest skin at or over the ground.
+
+**1g. Let go.** Grip let go, the hold is dropped the next step and he falls. Off a net, `release` first
+moves him back from the surface until the toes of his standing pose (his `still` role's first frame,
+his own `ends`) are `climb.clear` 3 cm off it: without it he landed with a toe 2.7 mm in the wall.
+Proof (`yard.test.ts`): from 4 m up he is off the ground, then lands (`grounded`) at the ground's
+height, standing in `idle`, upright as drawn, his lowest skin 1.2 cm into the ground (his soles on it,
+within 2 cm), and nothing of him in the wall (0 m).

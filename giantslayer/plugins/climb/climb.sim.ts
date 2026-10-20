@@ -52,10 +52,15 @@
 // middle fingertip, in its `clips.still` clip's first frame, its own `ends`) is on the spot, and out
 // along the surface's way out by its `climb.palm` metres, the skin of the palm past that middle;
 // standing, not falling, holding its `clips.still` clip at its first frame (played at rate 0).
+// `grabNet(me, w, kinds)` takes hold of the point of a row of one of `kinds` nearest the middle of the
+// holder's palms, as they are in that clip's first frame where it stands now, within its `climb.reach`,
+// and stays there; it returns whether it did. Letting go of a net (`release`), the body is moved back
+// from the surface, if it must be, until the toes of the body standing (its stance's `still` role's
+// first frame, its own `ends`) are its `climb.clear` metres off it, so it falls and stands clear.
 import type { Row, W } from '#engine/engine.ts'
 import type { Wire } from '#engine/browser.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
-import { animKind, clipOf, ends, play, rigOf, stop } from '#plugins/anim/anim.sim.ts'
+import { animKind, clipOf, ends, momentOf, play, rigOf, stanceOf, stop } from '#plugins/anim/anim.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
 import { groundOf, numbers, stand } from '#plugins/walker/walker.sim.ts'
 
@@ -333,6 +338,23 @@ function palms(w: W, me: Row, clip: string): V {
   return [(l[0] + l[3] + r[0] + r[3]) / 4, (l[1] + l[4] + r[1] + r[4]) / 4, (l[2] + l[5] + r[2] + r[5]) / 4]
 }
 
+export function grabNet(me: Row, w: W, kinds: string[]): boolean {
+  const k = def(w, me.kind).climb
+  const hands = world(me.data.pos, me.data.yaw, palms(w, me, k.clips.still))
+  let best: { on: number; a: number; far: number } | undefined
+  for (const held of kinds.flatMap(kind => w.all(kind))) {
+    const net = netOf(w, held)
+    for (let i = 0; i < net.points; i++) {
+      const far = len(sub(world(held.data.pos, held.data.yaw, [...net.at.subarray(i * 3, i * 3 + 3)]), hands))
+      if (far <= k.reach && (!best || far < best.far)) best = { on: held.id, a: i, far }
+    }
+  }
+  if (!best) return false
+  me.data.hold = { on: best.on, a: best.a, b: linked(netOf(w, w.get(best.on)!), best.a)[0], t: 0 }
+  stay(me, w)
+  return true
+}
+
 export function stay(me: Row, w: W) {
   const d = me.data
   const k = def(w, me.kind).climb
@@ -345,6 +367,16 @@ export function stay(me: Row, w: W) {
 
 export function release(me: Row, w: W) {
   const d = me.data
+  // Off a net: back from the surface until the toes of the body standing (its stance's `still` role's
+  // first frame, its own `ends`) are its `climb.clear` metres off it.
+  if (onNet(d.hold)) {
+    const { at, out } = spotOn(w, w.get(d.hold.on)!, d.hold)
+    const rig = rigOf(w, animKind(me))
+    const still = { clip: momentOf(rig, stanceOf(rig, d), 'still')!, clipT: 0 }
+    const toes = Math.max(ends(w, me, 'footL', still)[5], ends(w, me, 'footR', still)[5])
+    const short = toes + def(w, me.kind).climb.clear - dot(sub(d.pos, at), out)
+    if (short > 0) d.pos = add(d.pos, mul(out, short))
+  }
   d.hold = null
   d.grounded = false
   stop(me, w)

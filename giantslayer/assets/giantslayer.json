@@ -32,6 +32,7 @@
       "reach": 1.2,
       "off": 0.45,
       "palm": 0.0555,
+      "clear": 0.03,
       "rate": 1.6,
       "still": 0.1,
       "clips": { "hold": "dangle", "up": "climbUp", "down": "climbDown", "left": "shimmyR", "right": "shimmyL", "still": "shimmyL" }

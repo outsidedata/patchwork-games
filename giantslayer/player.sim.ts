@@ -11,7 +11,8 @@
 // camera's yaw eases round behind its back and its distance out to `look.climb` metres, at
 // `look.follow` a second, and on the ground back to `look.dist`.
 //
-// While grip is held it takes hold of the colossus's nearest limb within reach of its hands (the
+// While grip is held it takes hold of a wall's net within reach of its hands (climb's `grabNet`), and
+// failing that of the colossus's nearest limb within reach of its hands (the
 // game's `climb` plugin), and holds on until grip is let go or its `grip`, 1 full, runs out: holding,
 // it drains at `grip.drain` a second, `grip.shaken` while the colossus it holds roars, and on the
 // ground it fills at `grip.refill`; it takes hold only with `grip.least` or more. On the limb, the stick climbs it (w up, s down, a and d round it)
@@ -37,7 +38,7 @@ import { def } from '#plugins/loader/loader.sim.ts'
 import { animate, committed, gesture, play, rest, stop } from '#plugins/anim/anim.sim.ts'
 import { carry, groundOf, numbers, relative, stand, walk } from '#plugins/walker/walker.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
-import { apart, grab, hang, onNet, release, stay } from './plugins/climb/climb.sim.ts'
+import { apart, grab, grabNet, hang, onNet, release, stay } from './plugins/climb/climb.sim.ts'
 
 const finite = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
@@ -98,7 +99,7 @@ export const player: Kind = {
       }
     }
     if (d.hold && (!d.gripping || d.grip <= 0)) release(me, w)
-    if (!d.hold && d.gripping && d.hp > 0 && d.grip >= k.grip.least) grab(me, w, ['colossus'])
+    if (!d.hold && d.gripping && d.hp > 0 && d.grip >= k.grip.least && !grabNet(me, w, ['wall'])) grab(me, w, ['colossus'])
     if (d.hold) {
       d.grip = Math.max(0, d.grip - dt * (shaking(w, me) ? k.grip.shaken : k.grip.drain))
       if (onNet(d.hold)) stay(me, w)
