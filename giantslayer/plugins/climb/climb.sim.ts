@@ -40,8 +40,10 @@
 // it was, falling.
 //
 // A mesh to climb. `box(size, cell)` is a box's mesh (`Mesh`, below), the shape a `wall` is drawn by, and
-// `sphere(radius, cell)` a sphere's, a `sphere`'s. `meshOf(k)` is the mesh of a held kind's definition,
-// by the shape it names: `{ shape: "box", size, cell }` or `{ shape: "sphere", radius, cell }`.
+// `sphere(radius, cell)` a sphere's, a `sphere`'s, and `cylinder(radius, length, cell)` a cylinder's,
+// closed at both ends, a `pillar`'s and a `pole`'s. `meshOf(k)` is the mesh of a held kind's definition,
+// by the shape it names: `{ shape: "box", size, cell }`, `{ shape: "sphere", radius, cell }` or
+// `{ shape: "cylinder", radius, length, cell }`.
 // `settle(me, w)` is a held kind's rule: on its first step it stands its row's `pos` that high over the
 // ground under it (walker's), and marks it `placed`.
 // `netOn(mesh)` is the net a body climbs on it (`Net`, below): its vertices the points, its triangles'
@@ -80,7 +82,8 @@
 // its end lying that way; from a point, on to a point whose surface faces within `climb.bend` (a cosine)
 // of the one he leaves, so a sharp edge (a wall's sides and top) stops him, and where his hands fit:
 // each palm, placed as his still pose places it with the middle of his palms on that point and his body
-// framed on the surface there, nearest a point of the net facing within `bend` of it. Of those links, the ones within `climb.fan` (a cosine) of
+// framed on the surface there, nearest a point of the net reached from that point over links each
+// turning within `bend`. Of those links, the ones within `climb.fan` (a cosine) of
 // the way pushed, the one leaving him nearest the straight line he has been pushed along (the hold's
 // `lat`, how far he has drifted to one side of it, and `way`, the way he was pushed, kept while the way
 // stays the same), so a slant between the net's links zigzags along its line; failing those, the link
@@ -308,11 +311,59 @@ export function sphere(radius: number, cell: number): Mesh {
   return { position, index }
 }
 
+// A cylinder of `radius` metres standing on its base, its base's middle at the origin, `length` metres
+// up: round it as many sides as come nearest `cell` metres each, up it as many rows; each end closed by
+// rings in to its middle, as many as come nearest `cell` apart, each of as many sides as its round.
+export function cylinder(radius: number, length: number, cell: number): Mesh {
+  const round = Math.max(3, Math.round((2 * Math.PI * radius) / cell)), rows = Math.max(1, Math.round(length / cell))
+  const rings = Math.max(1, Math.round(radius / cell))
+  const position: number[] = [], index: number[] = []
+  const ring = (r: number, y: number) => {
+    const first = position.length / 3
+    for (let i = 0; i < round; i++) position.push(r * math.sin((2 * Math.PI * i) / round), y, r * math.cos((2 * Math.PI * i) / round))
+    return first
+  }
+  // Two rings of the same round joined, the triangles facing the way that takes from `a` to `b` across
+  // the way round (out of the side, from a lower ring to a higher; on an end, from its outer ring in
+  // for the top, from its inner out for the bottom).
+  const join = (a: number, b: number) => {
+    for (let i = 0; i < round; i++) {
+      const j = (i + 1) % round
+      index.push(a + i, a + j, b + j, a + i, b + j, b + i)
+    }
+  }
+  // The side: rows of rings up it.
+  const side = Array.from({ length: rows + 1 }, (_, n) => ring(radius, (length * n) / rows))
+  for (let n = 0; n < rows; n++) join(side[n], side[n + 1])
+  // An end at height `y` facing `face` (+1 up, −1 down): rings in from the rim, then its middle.
+  const end = (y: number, face: number, rim: number) => {
+    let outer = rim
+    for (let n = rings - 1; n >= 1; n--) {
+      const inner = ring((radius * n) / rings, y)
+      if (face > 0) join(outer, inner)
+      else join(inner, outer)
+      outer = inner
+    }
+    const middle = position.length / 3
+    position.push(0, y, 0)
+    for (let i = 0; i < round; i++) {
+      const j = (i + 1) % round
+      if (face > 0) index.push(middle, outer + i, outer + j)
+      else index.push(middle, outer + j, outer + i)
+    }
+  }
+  end(length, 1, ring(radius, length))
+  end(0, -1, ring(radius, 0))
+  return { position, index }
+}
+
 // The shapes a held kind's definition names as its `shape`, each the mesh it makes of that definition:
-// `box`, of its `size` and `cell`; `sphere`, of its `radius` and `cell`.
+// `box`, of its `size` and `cell`; `sphere`, of its `radius` and `cell`; `cylinder`, of its `radius`,
+// `length` and `cell`.
 const shapes: Record<string, (k: any) => Mesh> = {
   box: k => box(k.size, k.cell),
   sphere: k => sphere(k.radius, k.cell),
+  cylinder: k => cylinder(k.radius, k.length, k.cell),
 }
 export function meshOf(k: { shape: string }): Mesh {
   // A definition comes from the game's data file.
@@ -542,13 +593,13 @@ export function grabNet(me: Row, w: W, kinds: string[]): boolean {
 }
 
 // The point of a net nearest `to`, walking its links from `from` while each step comes nearer, onto
-// points `ok` allows only.
-export function nearestOn(net: Net, place: (i: number) => V, to: V, from: number, ok: (i: number) => boolean = () => true): number {
+// points `ok` allows only (handed the point stepped onto and the one stepped from).
+export function nearestOn(net: Net, place: (i: number) => V, to: V, from: number, ok: (i: number, from: number) => boolean = () => true): number {
   let at = from, far = len(sub(place(from), to))
   for (;;) {
     let next = -1
     for (const o of linked(net, at)) {
-      if (!ok(o)) continue
+      if (!ok(o, at)) continue
       const d = len(sub(place(o), to))
       if (d < far) { far = d; next = o }
     }
@@ -626,14 +677,15 @@ export function climbNet(me: Row, w: W, dt: number, stick: V) {
     const along = add(mul(framed(f, [-1, 0, 0]), x), mul(f.up, y))
     const way = unit(sub(along, mul(out, dot(along, out))))
     // His hands fit at a point when each palm, placed as his still pose places it with the middle of his
-    // palms on that point, his body framed on the surface there, is nearest a point of the net facing
-    // within `bend` of it.
+    // palms on that point, his body framed on the surface there, is nearest a point of the net that is
+    // reached from that point over links each turning within `bend` (so a sharp edge between the two
+    // leaves no fit, and round a pole his palms fit as it curves).
     const [mid, hands] = [palms(w, me, k.clips.still), [palm(w, me, k.clips.still, 'L'), palm(w, me, k.clips.still, 'R')]]
     const fits = (p: number) => {
-      const o = face(p), there = frameOn(o, f.up, d.yaw, 0)
+      const there = frameOn(face(p), f.up, d.yaw, 0)
       return hands.every(hand => {
-        const q = nearestOn(net, place, add(place(p), framed(there, sub(hand, mid))), p)
-        return dot(face(q), o) >= k.bend
+        const to = add(place(p), framed(there, sub(hand, mid)))
+        return nearestOn(net, place, to, p) === nearestOn(net, place, to, p, (o, from) => dot(face(o), face(from)) >= k.bend)
       })
     }
     const to = travel(net, { place, face, way, turn: k.turn, fan: k.fan, bend: k.bend, fits }, d.hold, k.speed * Math.min(1, math.hypot(x, y)) * dt)

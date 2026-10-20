@@ -27,6 +27,8 @@
     { "is": "skydome3d" },
     { "is": "start", "slot": 0, "pos": [0, 0, 6], "yaw": 3.14159 },
     { "is": "wall", "pos": [0, 0, 0], "yaw": 0 },
-    { "is": "sphere", "pos": [12, 6, 0], "yaw": 0 }
+    { "is": "sphere", "pos": [12, 6, 0], "yaw": 0 },
+    { "is": "pillar", "pos": [-10, 0, 0], "yaw": 0 },
+    { "is": "pole", "pos": [-16, 0, 0], "yaw": 0 }
   ]
 }

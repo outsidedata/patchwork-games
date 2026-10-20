@@ -11,7 +11,7 @@
 // camera's yaw eases round behind its back and its distance out to `look.climb` metres, at
 // `look.follow` a second, and on the ground back to `look.dist`.
 //
-// While grip is held it takes hold of a wall's or a sphere's net within reach of its hands (climb's `grabNet`), and
+// While grip is held it takes hold of a wall's, a sphere's, a pillar's or a pole's net within reach of its hands (climb's `grabNet`), and
 // failing that of the colossus's nearest limb within reach of its hands (the
 // game's `climb` plugin), and holds on until grip is let go or its `grip`, 1 full, runs out: holding,
 // it drains at `grip.drain` a second, `grip.shaken` while the colossus it holds roars, and on the
@@ -99,7 +99,7 @@ export const player: Kind = {
       }
     }
     if (d.hold && (!d.gripping || d.grip <= 0)) release(me, w)
-    if (!d.hold && d.gripping && d.hp > 0 && d.grip >= k.grip.least && !grabNet(me, w, ['wall', 'sphere'])) grab(me, w, ['colossus'])
+    if (!d.hold && d.gripping && d.hp > 0 && d.grip >= k.grip.least && !grabNet(me, w, ['wall', 'sphere', 'pillar', 'pole'])) grab(me, w, ['colossus'])
     if (d.hold) {
       d.grip = Math.max(0, d.grip - dt * (shaking(w, me) ? k.grip.shaken : k.grip.drain))
       if (onNet(d.hold)) climbNet(me, w, dt, d.stick)

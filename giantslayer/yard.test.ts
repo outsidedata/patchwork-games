@@ -8,7 +8,7 @@ import { loopback } from '#addons/loopback/loopback.addon.ts'
 import { prepared } from '#plugins/loader/loader.sim.ts'
 import { ends } from '#plugins/anim/anim.sim.ts'
 import { keyCode } from '#plugins/player/player.plugin.ts'
-import { box, heldPoint, heldWay, linked, meshOf, netOf, netOn, sphere, spotOn } from './plugins/climb/climb.sim.ts'
+import { box, cylinder, heldPoint, heldWay, linked, meshOf, netOf, netOn, sphere, spotOn } from './plugins/climb/climb.sim.ts'
 import { sim } from './giantslayer.sim.ts'
 import file from './giantslayer.scene.json'
 import defs from './assets/giantslayer.json'
@@ -266,7 +266,7 @@ test('1b: the wall\'s net is a point on its surface for every corner of its mesh
 test('1a: the yard holds one wall, standing on the ground the hero stands on, drawn as a box of its definition\'s size from the ground up', async () => {
   const { yard, p, frames } = await start()
   await frames(30)
-  expect([...new Set(yard.rows.map(r => r.kind))].sort()).toEqual(['loader', 'player', 'scenemanager', 'skydome3d', 'sphere', 'start', 'wall'])
+  expect([...new Set(yard.rows.map(r => r.kind))].sort()).toEqual(['loader', 'pillar', 'player', 'pole', 'scenemanager', 'skydome3d', 'sphere', 'start', 'wall'])
   const wall = yard.rows.filter(r => r.kind === 'wall')
   expect(wall).toHaveLength(1)
   const hero = yard.rows.find(r => r.kind === 'player')!
@@ -1244,4 +1244,138 @@ test('7c: pushed right under the sphere, he climbs across under it, his hands an
   expect(across).toBeGreaterThan(going(357) * defs.player.climb.fan * (2 / Math.PI))
   // Under it all the way: the surface where he holds faces down.
   expect(highest).toBeLessThan(0)
+})
+
+// The cylinders: the pillar, thick, and the pole, thin.
+const CYLINDERS = ['pillar', 'pole'] as const
+
+test('8a, 8c: each cylinder\'s net, the pillar\'s and the pole\'s, is a point on its surface for every corner of its mesh and a link for every edge, closed all round, drawn over it while shown', async () => {
+  const { yard, p, frames, shared } = await start()
+  await frames(30)
+  for (const kind of CYLINDERS) {
+    const k = defs[kind]
+    const shape = cylinder(k.radius, k.length, k.cell)
+    const net = netOn(shape)
+    const measure = signedTo(shape, k.cell)
+    const key = (q: ArrayLike<number>) => [q[0], q[1], q[2]].map(v => String(Math.round(v * 1e4))).join(',')
+    const places = new Set<string>()
+    for (let i = 0; i < shape.position.length; i += 3) places.add(key(shape.position.slice(i, i + 3)))
+    expect(net.points).toBe(places.size)
+    // ON it: every point on its round side (its radius from the axis, between its ends) or on an end (at
+    // 0 or its length, within its radius), and 0 from its mesh; each point's way out leaves it.
+    let off = 0, onMesh = 0
+    for (let i = 0; i < net.points; i++) {
+      const q = [...net.at.subarray(i * 3, i * 3 + 3)], o = [...net.out.subarray(i * 3, i * 3 + 3)]
+      const fromAxis = Math.hypot(q[0], q[2])
+      const onSide = Math.abs(fromAxis - k.radius) < 1e-5 && q[1] > -1e-5 && q[1] < k.length + 1e-5
+      const onEnd = (Math.abs(q[1]) < 1e-5 || Math.abs(q[1] - k.length) < 1e-5) && fromAxis < k.radius + 1e-5
+      expect(onSide || onEnd).toBe(true)
+      off = Math.max(off, onSide ? Math.abs(fromAxis - k.radius) : 0)
+      onMesh = Math.max(onMesh, Math.abs(measure(q)))
+      expect(vlen(o)).toBeCloseTo(1, 6)
+      expect(measure(q.map((v, j) => v + o[j] * 0.01))).toBeGreaterThan(0)
+      expect(measure(q.map((v, j) => v - o[j] * 0.01))).toBeLessThan(0)
+    }
+    expect(onMesh).toBeLessThan(1e-5)
+    // Every link is a triangle's edge, both ways; closed all round, points less links plus triangles 2.
+    const edges = new Set<string>()
+    for (let t = 0; t < shape.index.length; t += 3) {
+      const c = [0, 1, 2].map(j => key(shape.position.slice(shape.index[t + j] * 3, shape.index[t + j] * 3 + 3)))
+      for (const [a, b] of [[c[0], c[1]], [c[1], c[2]], [c[2], c[0]]]) edges.add([a, b].sort().join(' '))
+    }
+    let links = 0
+    for (let i = 0; i < net.points; i++) {
+      for (const o of linked(net, i)) {
+        expect([...linked(net, o)]).toContain(i)
+        if (o < i) continue
+        links++
+        expect(edges.has([key(net.at.subarray(i * 3, i * 3 + 3)), key(net.at.subarray(o * 3, o * 3 + 3))].sort().join(' '))).toBe(true)
+      }
+    }
+    expect(links).toBe(edges.size)
+    expect(net.points - links + shape.index.length / 3).toBe(2)
+    console.log('8a net', kind, JSON.stringify({ points: net.points, links, triangles: shape.index.length / 3, off, onMesh }))
+
+    // Drawn standing on the ground: as far each way round its row as its corners go, and its net
+    // hidden, then shown, a line for each link, each end at its point.
+    const row = yard.rows.find(r => r.kind === kind)!
+    expect(row.data.placed).toBe(true)
+    let mesh: THREE.Mesh | undefined, lines: THREE.LineSegments | undefined
+    p.client!.plugins.render3d.scene.traverse((x: THREE.Object3D) => {
+      if (x.name === kind) mesh = x as THREE.Mesh
+      if (x.name === `${kind} net`) lines = x as THREE.LineSegments
+    })
+    const T = p.client!.plugins.render3d.THREE as typeof THREE
+    mesh!.updateMatrixWorld(true)
+    const b = new T.Box3().setFromObject(mesh!)
+    const corners = [0, 1, 2].map(j => shape.position.filter((_, i) => i % 3 === j))
+    expect(b.min.toArray()).toEqual([0, 1, 2].map(j => expect.closeTo(row.data.pos[j] + Math.min(...corners[j]), 5)))
+    expect(b.max.toArray()).toEqual([0, 1, 2].map(j => expect.closeTo(row.data.pos[j] + Math.max(...corners[j]), 5)))
+    expect(row.data.pos[1]).toBeCloseTo(yard.rows.find(r => r.kind === 'wall')!.data.pos[1], 6)
+    expect(lines!.visible).toBe(false)
+    ;(shared as any)[kind].shown = true
+    await frames(1)
+    expect(lines!.visible).toBe(true)
+    expect(lines!.geometry.getAttribute('position').count).toBe(links * 2)
+    ;(shared as any)[kind].shown = false
+  }
+})
+
+// A cylinder laid on its back along the ground, its axis `high` metres over its base's old place (its
+// pitch a quarter turn: its own front, +z, faces up, and its length runs away along −z).
+async function laid(kind: string, high: number) {
+  const g = await start()
+  await g.frames(30)
+  const row = g.yard.rows.find(r => r.kind === kind)!
+  row.data.pitch = Math.PI / 2
+  row.data.pos = [row.data.pos[0], row.data.pos[1] + high, row.data.pos[2]]
+  return g
+}
+// How far round the axis of a cylinder a place in its own frame is, and how far along it.
+const roundOf = (at: number[]) => Math.atan2(at[0], at[2])
+
+test('8a, 8c: standing, on the pillar and on the pole he hangs still on its side; pushed up he climbs up it and pushed right he climbs round it, stepping in pairs, never sliding, nothing of him in it', async () => {
+  for (const kind of CYLINDERS) {
+    const k = defs[kind]
+    const side = [0, 4, k.radius]
+    const { seen } = await heldOn(await start(), side, kind)
+    console.log('8a held', kind, JSON.stringify(seen))
+    for (const keys of [['w'], ['d']]) {
+      const g = await start()
+      const net = netOf(g.p.client!.plugins.wire, g.yard.rows.find(r => r.kind === kind)!)
+      const r = await climbing(g, side, keys, 180, kind)
+      const turned = onTheShape(r)
+      const well = climbedWell(r, net, `${kind} ${keys}`)
+      const last = r.seen[r.seen.length - 1].at
+      const up = last[1] - r.from[1], round = Math.abs(roundOf(last) - roundOf(r.from)) * k.radius
+      console.log('8a', kind, keys.join(''), JSON.stringify({ up, round, turned, ...well }))
+      // At least `fan` of his speed the way pushed.
+      if (keys[0] === 'w') expect(up).toBeGreaterThan(going(177) * defs.player.climb.fan)
+      else expect(round).toBeGreaterThan(going(177) * defs.player.climb.fan * (2 / Math.PI))
+    }
+  }
+})
+
+test('8b, 8c: lying, on the pillar and on the pole he hangs still on its top, its side and underneath; on its top pushed up he climbs along it and pushed right he climbs round it, stepping in pairs, never sliding, nothing of him in it', async () => {
+  for (const kind of CYLINDERS) {
+    const k = defs[kind]
+    const high = k.radius + 3
+    const middle = k.length / 2
+    for (const [where, at] of [['top', [0, middle, k.radius]], ['side', [k.radius, middle, 0]], ['under', [0, middle, -k.radius]]] as const) {
+      const { seen } = await heldOn(await laid(kind, high), [...at], kind)
+      console.log('8b held', kind, where, JSON.stringify(seen))
+    }
+    for (const keys of [['w'], ['d']]) {
+      const g = await laid(kind, high)
+      const net = netOf(g.p.client!.plugins.wire, g.yard.rows.find(r => r.kind === kind)!)
+      const r = await climbing(g, [0, middle, k.radius], keys, 180, kind)
+      const turned = onTheShape(r)
+      const well = climbedWell(r, net, `${kind} laid ${keys}`)
+      const last = r.seen[r.seen.length - 1].at
+      const along = Math.abs(last[1] - r.from[1]), round = Math.abs(roundOf(last) - roundOf(r.from)) * k.radius
+      console.log('8b', kind, keys.join(''), JSON.stringify({ along, round, turned, ...well }))
+      if (keys[0] === 'w') expect(along).toBeGreaterThan(going(177) * defs.player.climb.fan)
+      else expect(round).toBeGreaterThan(going(177) * defs.player.climb.fan * (2 / Math.PI))
+    }
+  }
 })

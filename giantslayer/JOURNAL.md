@@ -300,3 +300,30 @@ degree; his up turns from one frame to the next by no more than the surface turn
 All 30 tests of `yard.test.ts` pass (567 s), steps 1–6 among them. A full run before this one stopped
 after 1g with no output for 32 minutes; it was stopped, and run again it passed; what stopped it is not
 known.
+Commit: games `3575a84`.
+
+**8. Cylinders.** A new shape, climb's `cylinder(radius, length, cell)`: a round side of rows of rings,
+closed at each end by rings in to its middle. Two kinds share it: the `pillar`, radius 1.5 m, and the
+`pole`, radius 0.5 m, both 8 m long, standing in the yard 10 m and 16 m to the wall's other side. Lying
+is the same row tipped onto its back by its `pitch`. Found and fixed, each by numbers:
+- on the pole he could not move at all. With 0.25 m cells its round has 13 sides, so each link round
+  it turns 27.7°, more than `bend` (25.8°), and the net read it as edges all round. A pole of radius
+  0.5 needs at least 14 sides to climb round, cells of 0.22 m or less; its `cell` is 0.2 m: 16 sides,
+  22.5° a link.
+- the sim's check that his hands fit at a point asked whether each palm's nearest point faced within
+  `bend` of the point; round a pole his palms sit 36° round it. It now asks whether that nearest point
+  is reached from the point over links each turning within `bend`, the page's rule for which points a
+  limb may take. On a flat face and at a box's edge it answers as before (steps 1–5 all pass).
+Proof (`yard.test.ts`):
+- both nets: a point for each vertex place, every point on the round side (its radius from the axis to
+  0.06 µm) or on an end, and on the mesh; each way out leaves it; every link a triangle's edge, both
+  ways; points − links + triangles = 2, closed. Drawn standing on the ground as far each way as its
+  corners go, the net line for line when shown.
+- standing, the pillar and the pole: held still on the side, hands and feet within 4 µm of it, nothing
+  of him in it; pushed up 3 s he climbs 1.05 m up it, pushed right 1.05 m round it.
+- lying 3.5 m (pillar 4.5 m) up: held still on the top, the side and underneath, hands and feet within
+  7 µm, nothing of him in it; from the top pushed up he climbs 1.05 m along it, pushed right 1.05 m
+  round it.
+- every climb, every frame: everything step 4 and step 7 check (planted on their points and touching,
+  not sliding; stepping reached, never in; pairs; framed on the surface; nothing of him in it).
+All 33 tests of `yard.test.ts` pass (859 s).

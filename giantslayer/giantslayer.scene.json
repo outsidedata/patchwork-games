@@ -157,7 +157,9 @@
     },
     "weakpoint": { "of": 0, "on": null, "segment": "torso", "along": 0.5, "around": 0, "hp": 1, "broken": false },
     "wall": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false },
-    "sphere": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false }
+    "sphere": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false },
+    "pillar": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false },
+    "pole": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false }
   },
   "actors": [
     {

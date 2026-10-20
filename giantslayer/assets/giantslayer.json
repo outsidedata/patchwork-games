@@ -87,5 +87,19 @@
     "radius": 3,
     "cell": 0.25,
     "colour": "#8f8a7e"
+  },
+  "pillar": {
+    "shape": "cylinder",
+    "radius": 1.5,
+    "length": 8,
+    "cell": 0.25,
+    "colour": "#958f84"
+  },
+  "pole": {
+    "shape": "cylinder",
+    "radius": 0.5,
+    "length": 8,
+    "cell": 0.2,
+    "colour": "#8a8579"
   }
 }
