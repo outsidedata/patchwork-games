@@ -31,19 +31,20 @@
     "climb": {
       "reach": 1.2,
       "off": 0.45,
-      "brace": 0.0555,
+      "brace": -0.12,
       "clear": 0.03,
-      "speed": 0.8,
+      "speed": 0.35,
       "turn": 0.5,
       "fan": 0.7,
       "bend": 0.9,
       "near": 4,
+      "step": { "far": 0.3, "slack": 0.05, "time": 0.3, "lift": 0.06, "ahead": 2.4 },
       "ik": ["handL", "handR", "footL", "footR"],
       "limbs": {
-        "handL": { "bones": ["LeftArm", "LeftForeArm", "LeftHand"], "touch": ["LeftHand", "LeftHandMiddle4"], "skin": 0.0274, "across": ["LeftHandIndex1", "LeftHandPinky1"], "side": 1, "bend": [30, 178] },
-        "handR": { "bones": ["RightArm", "RightForeArm", "RightHand"], "touch": ["RightHand", "RightHandMiddle4"], "skin": 0.0274, "across": ["RightHandIndex1", "RightHandPinky1"], "side": -1, "bend": [30, 178] },
-        "footL": { "bones": ["LeftUpLeg", "LeftLeg", "LeftFoot"], "touch": ["LeftToeBase", "LeftToe_End"], "skin": 0.0355, "bend": [30, 179] },
-        "footR": { "bones": ["RightUpLeg", "RightLeg", "RightFoot"], "touch": ["RightToeBase", "RightToe_End"], "skin": 0.0327, "bend": [30, 179] }
+        "handL": { "bones": ["LeftArm", "LeftForeArm", "LeftHand"], "touch": ["LeftHand", "LeftHandMiddle4"], "skin": 0.0274, "across": ["LeftHandIndex1", "LeftHandPinky1"], "side": 1, "bend": [30, 178], "group": 0, "out": 0.3 },
+        "handR": { "bones": ["RightArm", "RightForeArm", "RightHand"], "touch": ["RightHand", "RightHandMiddle4"], "skin": 0.0274, "across": ["RightHandIndex1", "RightHandPinky1"], "side": -1, "bend": [30, 178], "group": 1, "out": 0.3 },
+        "footL": { "bones": ["LeftUpLeg", "LeftLeg", "LeftFoot"], "touch": ["LeftToeBase", "LeftToe_End"], "skin": 0.0355, "bend": [30, 179], "group": 1, "out": 0 },
+        "footR": { "bones": ["RightUpLeg", "RightLeg", "RightFoot"], "touch": ["RightToeBase", "RightToe_End"], "skin": 0.0327, "bend": [30, 179], "group": 0, "out": 0 }
       },
       "rate": 1.6,
       "still": 0.1,

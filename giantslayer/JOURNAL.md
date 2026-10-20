@@ -172,3 +172,30 @@ knee is within its limits (121°, 125°, 57°, 38°) and bends to the side its c
 line has a positive dot with the clip's, read by ik3d's `unbend`); and the limit bites: with the left
 elbow's least raised to 140° the elbow opens to 140.0° and no less, and the hand falls 3.8 cm short of
 its point. ik3d's own tests were not run.
+Commit: core `15c4fe3`, games `cfddf02`.
+
+**4. Stepping as he climbs.** The page now reaches while he climbs too. Each limb's touch is a point it
+is planted on, held while the body moves; it steps to another, lifted `step.lift` 6 cm off the surface at
+the middle, over `step.time` 0.3 s; the diagonal pairs step together, one group at a time. Found and
+fixed, each by numbers:
+- a step started from a point the limb could no longer reach and the toes poked in: a step now begins
+  where the end bone really was (kept as an offset from its old point).
+- "reach" ignored ik3d's knee limit, so a foot planted where its knee could not straighten fell short:
+  reach is now the span the `bend` limits allow.
+- the steps could not keep up. Measured: in the braced pose his shoulders stood 47 cm off the wall with
+  55 cm arms, so a hand had at most 8 cm of room anywhere on the face. The body now stands in nearer
+  (`brace` −0.12, from +0.0555): shoulders 32 cm off, thighs and hips still clear; and the forearms,
+  laid along the wall, are kept off it by giving each elbow at least `out` 0.3 of its bend away from the
+  surface (a forearm had sunk 1.9 mm).
+- `climb.speed` 0.8 m/s was mine and too fast for two pairs of 0.3 s steps; it is 0.35 m/s.
+- which point to step to: nearest where the clip has the limb, or nearest where it will be, both failed
+  (the feet, already bent, flipped up and down between two points). A limb now wants, of the points
+  round where its clip has it, the one it could hold longest if his body went on as it is going
+  (`step.ahead` 2.4 s, looked at in eighths, with `step.slack` 5 cm of room); it is behind with less than
+  two steps' time left; the group with least time left goes first; partners go together.
+Proof (`yard.test.ts`, 3 s each way: up, down, left, right and the four slants, every frame): a planted
+hand or foot is on its point, its skin out, within 1 mm, and reached (ik3d short under 1 mm); it does not
+move between frames (1 mm); every limb steps (1 to 4 times) and lifts 6 cm doing it, never more than the
+lift and 1 cm off the face nor into it, and lands on the point it stepped to; never two groups at once;
+none ever gives up its point; and every frame he is on the face with nothing of him in the wall deeper
+than touching skin, 1 mm. All of steps 1–3 pass with it.

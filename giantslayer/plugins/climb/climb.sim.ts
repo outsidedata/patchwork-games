@@ -52,8 +52,8 @@
 // `{ at, out }`. `stay(me, w)` puts the holder where its hold is: facing into the surface there, turned
 // by yaw alone, its root set back so the middle of its palms (each midway between its wrist and its
 // middle fingertip, in its `clips.still` clip's first frame, its own `ends`) is on the spot, and out
-// along the surface's way out by its `climb.brace` metres, the skin of the hands, as that clip turns
-// them, past that middle;
+// along the surface's way out by its `climb.brace` metres (under 0, in: his body stands nearer the
+// surface than that clip holds it from its hands, whose real hands reach the surface by IK on the page);
 // standing, not falling, holding its `clips.still` clip at its first frame (played at rate 0).
 // `grabNet(me, w, kinds)` takes hold of the point of a row of one of `kinds` nearest the middle of the
 // holder's palms, as they are in that clip's first frame where it stands now, within its `climb.reach`,
