@@ -4,7 +4,7 @@
 // ik3d, which bends the limbs this hands it (`climb.ik3d.ts`, the `limbs` mod) in its own.
 //
 // Each frame, for each row holding a net (climb's `NetHold`) where it held it last frame, each limb its
-// definition's `climb.ik` names (one of `climb.limbs`, `{ bones, touch, skin, across, side }`: the three
+// definition's `climb.ik` names (one of `climb.limbs`, `{ bones, touch, skin, across, side, bend }`: the three
 // bones ik3d bends, the last the hand or the foot; `touch`, two bone suffixes whose places mixed by half
 // are where it touches, the middle of a hand or the ball of a foot to its toe tip; `skin`, metres, how
 // far its skin is past that middle toward what it touches) reaches the point of the held row's net
@@ -21,7 +21,8 @@
 // way its clip bends it but never into the surface: the pole ik3d is handed is where the clip has the
 // elbow or knee, off the line from the limb's first bone to its target, with what of it points into the
 // surface where he holds taken off (a knee the clip bends toward the wall swings out to the side), in
-// the body's frame.
+// the body's frame. Its `bend`, the least and most angle at its elbow or knee (degrees, 180 straight),
+// is ik3d's limit for it.
 //
 // A hold that moved since last frame reaches with nothing: the body is drawn as its clip draws it while
 // it climbs.
@@ -35,7 +36,7 @@ import type { Handed } from '#plugins/ik3d/ik3d.plugin.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import { linked, nearestOn, netOf, onNet, spotOn } from './climb.sim.ts'
 
-type Limb = { bones: [string, string, string]; touch: [string, string]; skin: number; across?: [string, string]; side?: number }
+type Limb = { bones: [string, string, string]; touch: [string, string]; skin: number; across?: [string, string]; side?: number; bend: number[] }
 
 export function climb() {
   // Each holder's limbs this frame, by row id.
@@ -138,7 +139,7 @@ export function climb() {
           const across = facing.clone().sub(line.clone().multiplyScalar(facing.dot(line)))
           if (off.dot(across) < 0 && across.lengthSq() > 1e-12) off.sub(across.clone().multiplyScalar(off.dot(across) / across.lengthSq()))
           const pole = off.applyQuaternion(root.getWorldQuaternion(new T.Quaternion()).invert()).normalize()
-          limbs.push({ bones: limb.bones, pole: pole.toArray(), target })
+          limbs.push({ bones: limb.bones, pole: pole.toArray(), target, bend: limb.bend })
         }
         reaching.set(r.id, limbs)
       }

@@ -159,3 +159,16 @@ on its point its skin out within 1 mm and its skin 0.03 mm from the face; each e
 wall and bent with nothing toward the face (to 0.01 mm: a joint bent along the wall is 0 to the
 arithmetic's grain); every limb reached (ik3d short under 0.1 mm); nothing of him in the wall but touching
 skin, 1 mm (above the knees 0; 1e's toes, 4.6 cm in on the clip alone, are now 0.03 mm).
+Commit: games `30dfc15`.
+
+**3f. Joint limits.** Core: ik3d's limbs (a kind's, and those a mod hands) take `bend` `[least, most]`
+degrees, the angle at the elbow or knee (180 straight), and the solve cuts the reach to what those angles
+span. climb hands each limb its `bend`: elbows 30–178°, knees 30–179°. A wrist limit was tried too and
+taken out: it was not on the list, its number was mine, and it counted from wherever the clip's hand sat
+on its forearm; with it at 80° the palms could not lie flat, since flat needs about 100° of turn from the
+clip's hand, nearly all bend, little roll (measured).
+Proof (`yard.test.ts`): held still with all four reaching, every frame for half a second, each elbow and
+knee is within its limits (121°, 125°, 57°, 38°) and bends to the side its clip bends it (the bend off its
+line has a positive dot with the clip's, read by ik3d's `unbend`); and the limit bites: with the left
+elbow's least raised to 140° the elbow opens to 140.0° and no less, and the hand falls 3.8 cm short of
+its point. ik3d's own tests were not run.

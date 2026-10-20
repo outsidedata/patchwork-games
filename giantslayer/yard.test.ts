@@ -654,3 +654,59 @@ test('3e: held still with both hands and both feet reaching, each elbow and knee
     expect(Math.abs(m.soles.R)).toBeLessThanOrEqual(0.001)
   }
 })
+
+test('3f: held still with all four reaching, each elbow and knee is within its limits and bends to the side its clip bends it', async () => {
+  const g = await start()
+  await g.frames(30)
+  const { hero } = putOn(g, [0, 4, defs.wall.size[2] / 2])
+  await g.frames(60)
+  const plugins = g.p.client!.plugins
+  const T = plugins.render3d.THREE as typeof THREE
+  const root: THREE.Object3D = plugins.anim.model(hero.id)
+  const boneOf = (suffix: string) => {
+    let found: THREE.Object3D | undefined
+    root.traverse(o => { if (!found && (o as THREE.Bone).isBone && o.name.endsWith(suffix)) found = o })
+    return found!
+  }
+  const place = (o: THREE.Object3D) => new T.Vector3().setFromMatrixPosition(o.matrixWorld)
+  const limbs = defs.player.climb.limbs as Record<string, { bones: string[]; bend: number[] }>
+  // Each limb: its middle joint's angle, and the way it bends off its line.
+  const read = () => {
+    root.updateMatrixWorld(true)
+    return Object.fromEntries(Object.entries(limbs).map(([name, l]) => {
+      const [pa, pb, pc] = l.bones.map(boneOf).map(place)
+      const angle = pa.clone().sub(pb).angleTo(pc.clone().sub(pb)) * 180 / Math.PI
+      const line = pc.clone().sub(pa).normalize()
+      const off = pb.clone().sub(pa)
+      off.sub(line.multiplyScalar(off.dot(line)))
+      return [name, { angle, off: off.normalize() }]
+    }))
+  }
+  for (let i = 0; i < 30; i++) {
+    await g.frames(1)
+    const solved = read()
+    // The clip's own: the reach taken off; the next frame reaches from there again.
+    plugins.ik3d.unbend(hero.id)
+    const clip = read()
+    for (const [name, l] of Object.entries(limbs)) {
+      expect(solved[name].angle).toBeGreaterThanOrEqual(l.bend[0] - 0.01)
+      expect(solved[name].angle).toBeLessThanOrEqual(l.bend[1] + 0.01)
+      expect(solved[name].off.dot(clip[name].off)).toBeGreaterThan(0)
+    }
+    if (i === 0) console.log('3f', JSON.stringify(Object.fromEntries(Object.entries(limbs).map(([n]) => [n, { angle: +solved[n].angle.toFixed(1), clipAngle: +clip[n].angle.toFixed(1), side: +solved[n].off.dot(clip[n].off).toFixed(3) }]))))
+  }
+  // The limit bites: the left elbow's least angle raised over the 121° it bends to, it opens to that
+  // angle and no less, and the hand falls short of its point by what that costs.
+  const shared = g.shared.player.climb.limbs.handL
+  const was = shared.bend
+  shared.bend = [140, 178]
+  for (let i = 0; i < 10; i++) {
+    await g.frames(1)
+    const solved = read()
+    expect(solved.handL.angle).toBeGreaterThanOrEqual(140 - 0.01)
+    expect(solved.handL.angle).toBeLessThan(140 + 0.5)
+    expect(plugins.ik3d.short(hero.id)[0]).toBeGreaterThan(0.01)
+  }
+  console.log('3f bitten', JSON.stringify({ angle: read().handL.angle, short: plugins.ik3d.short(hero.id)[0] }))
+  shared.bend = was
+})
