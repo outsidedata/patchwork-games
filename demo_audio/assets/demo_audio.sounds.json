@@ -28,7 +28,6 @@
     "bigblast": { "species": "big-blast" },
     "shellhit": { "species": "shell-hit" },
     "dirt": { "species": "bullet-dirt" },
-    "ricochet": { "species": "bullet-ricochet" },
     "scorch": { "species": "plasma-hit" }
   }
 }
