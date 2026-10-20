@@ -37,6 +37,7 @@
       "turn": 0.5,
       "fan": 0.7,
       "bend": 0.9,
+      "upright": 0.3,
       "near": 4,
       "step": { "far": 0.3, "slack": 0.05, "time": 0.3, "lift": 0.06, "ahead": 2.4 },
       "ik": ["handL", "handR", "footL", "footR"],

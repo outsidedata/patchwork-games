@@ -261,3 +261,42 @@ Proof (`yard.test.ts`):
 Not checked: the sword in his right hand is not skinned, so no measure reads it. Nothing has been looked
 at in a browser.
 All 27 tests of `yard.test.ts` pass (291 s).
+Commit: games `ae63a61`.
+
+**7. Climb over the sphere.** Found and fixed, each by numbers:
+- his up was the world's up laid on the surface, so past a ball's top it would point back at the top: a
+  flip, and `w` would take him back up. His up is now the one he had, carried over the surface as he
+  goes. Where the world's up laid on the surface is more than a little and within a quarter turn of
+  his, he turns toward it at `climb.upright` radians a second. At 1.5 rad/s that swung his feet, 1.2 m
+  from his hands, at about 1.5 m/s, faster than steps can follow, and a foot ran out of reach and let
+  go. It is 0.3 rad/s, so his feet swing no faster than he climbs (0.35 m/s).
+- a step went in a straight line between its two points. Over a curve that line dips under the surface,
+  and a foot's middle rose only 2 cm of its 6 cm lift. A step now rests the limb on the surface under
+  the line at every moment, by its own skin, as a planted limb rests, and lifts it from there.
+- over the dome a foot stepped from behind his hip to past it, its hip-to-foot distance falling from
+  0.70 m to 0.15 m, under the knee's least bend (0.21 m). The leg could not fold that far, and the foot
+  fell 6 cm short. A limb now wants only points it can step to within reach the whole way, measured
+  from where his hip will be during the step. The check looks at sixteenths of the step, and at where
+  the step's line comes nearest the hip.
+- how long a point would hold was judged from the hold's speed, not the limb's root's. It is now the
+  speed his body's own move and turn give each first bone. Counting the clip's last moment of fading in
+  too made both feet plant on one point and shuffle apart for 1.4 s. So the clip's own motion is left
+  out.
+- the lift of a step gives way to reach: over a ball's top the way out points at his body, and lifting
+  6 cm took the foot 3.5 cm nearer his hip than the leg folds.
+Proof (`yard.test.ts`; every frame, as well as everything step 4 checks of a climb: planted limbs on the
+line out of their points and their own skin on the surface within 1 mm, not sliding; stepping limbs
+reached to 1 mm, their skin never in the surface; pairs; every limb stepping and lifting): his hold is on
+the surface; as drawn, his front points into it within a degree and his up lies along it within a
+degree; his up turns from one frame to the next by no more than the surface turned under him plus
+`upright` for a step; nothing of him is in the ball deeper than touching skin, 1 mm.
+- 7a: pushed right from its side for 6 s, he goes 1.81 m round its middle, at most 15 cm off it, his
+  up turning 20° in all; each limb steps 4 to 6 times, lifting 6 cm.
+- 7b: pushed up from its side, he goes up, over the top (his hold within 5 cm of it) and down the far
+  side to its middle in 1,756 frames; his up turns 200° in all, never flipping; each limb steps 21 to
+  23 times.
+- 7c: pushed right under it for 6 s, he goes 2.0 m across, the surface facing down all the way (at
+  least 0.80 down); each limb steps 3 to 4 times.
+All 30 tests of `yard.test.ts` pass (567 s), steps 1–6 among them. A full run before this one stopped
+after 1g with no output for 32 minutes; it was stopped, and run again it passed; what stopped it is not
+known.

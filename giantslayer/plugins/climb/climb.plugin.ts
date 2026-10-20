@@ -13,16 +13,19 @@
 // diagonals) wants a point of the held row's net. A limb reaches a point when its end bone, placed for
 // it, is no further from its first bone than its two bones' lengths less ik3d's millimetre, nor than the
 // most angle of its `bend` spans, and no nearer than the least spans. How long it could hold a point is
-// how long it would go on reaching it with `climb.step.slack` metres of room to spare if his body went
-// on as his hold is going over the surface, its first bone carried along: the first of
-// `climb.step.ahead` seconds, looked at in eighths, at which it would not, or all of them. Of the points
-// out to `climb.near` links from the one nearest where it touches as its clip puts it this frame
-// (ik3d's `unbend` first takes off last frame's reach), of the surface he holds (those reached from his
-// hold's point over links each turning within `climb.bend`, no further from his hold than a limb reaches
-// from its first bone: so a hand by a wall's edge stays on its face, and a foot on a ball goes round it),
-// it wants the one it could hold longest, and of
-// those even, the nearest where its clip puts it. A planted limb holds its point as long as it reaches it
-// at all.
+// how long it would go on reaching it with `climb.step.slack` metres of room to spare if its first bone
+// went on as his body carries it (as his body itself moved and turned when the rows last moved on, not as
+// his clip moves it inside his body): the first of `climb.step.ahead` seconds, looked at in eighths, at which it would not, or all of
+// them. It could step from one point to another when its end bone would be within reach the whole way of
+// its first bone carried along so, looked at in sixteenths of the step as a step goes, unrested, and
+// where the step's straight way comes nearest its first bone.
+// Of the points out to `climb.near` links from the one nearest where it touches as its clip puts it this
+// frame (ik3d's `unbend` first takes off last frame's reach), of the surface he holds (those reached from
+// his hold's point over links each turning within `climb.bend`, no further from his hold than a limb
+// reaches from its first bone: so a hand by a wall's edge stays on its face, and a foot on a ball goes
+// round it), and that it could step to from the point it is planted on or stepping to, it wants the one
+// it could hold longest, and of those even, the nearest where its clip puts it. A planted limb holds its
+// point as long as it reaches it at all.
 //   A limb with `across` and `side` is a hand, laid flat on the surface there: turned the shortest way
 // that takes the way its palm faces (`side` times the cross of the line across its knuckles, `across`,
 // two bone suffixes, and the line from its first `touch` bone to its second) onto the way into the
@@ -50,12 +53,15 @@
 // its own. A group steps together, each of its limbs whose wanted point is not its own, when one of them
 // is behind and no group is stepping; when both groups are behind, the one whose limb has least time
 // left goes, and when even, the one that did not step last. A limb that can no longer reach its point
-// steps at once, out of turn if another group is stepping (`forced`). A step goes from where its end bone was as the last
-// reach left it (kept as how far that was from where its point puts it, `off`, so it begins where the
-// limb really was though it fell short) to the point it wants over `climb.step.time` seconds, its end
-// bone eased in and out between the two, lifted off
-// the surface by `climb.step.lift` metres at the middle (sin of the way through), and turned between the
-// two flat turns. A limb that can neither reach its point nor step lets go of it, and is drawn as its
+// steps at once, out of turn if another group is stepping (`forced`). A step goes from its point to the
+// point it wants over `climb.step.time` seconds, eased in and out: its end bone on the straight way
+// between where the two put it, then resting on the surface under that (as a planted one rests, read
+// round the point of the net nearest where it touches there, moved along the way out between the two
+// points' ways out), so it follows the surface over a curve; lifted off it along that way by
+// `climb.step.lift` metres at the middle (sin of the way through), or as much of that as keeps it within
+// the limb's reach (over a ball's top the way out points at his body); turned between the two turns; and
+// off that by as far as its end bone was from it as the last reach left it (`off`), fading out as it goes,
+// so it begins where the limb really was though it fell short. A limb that can neither reach its point nor step lets go of it, and is drawn as its
 // clip draws it. Time is the steps the rows have gone on since the last frame, each the scene's step, so
 // a page reaches the same however fast it draws. Letting go of the net forgets every touch.
 //
@@ -89,7 +95,7 @@ export function climb() {
   const targets = new Map<string, THREE.Object3D>()
   // Each holder's touches, by row id and limb, the step of the rows it last reached by, and the group
   // that stepped last.
-  const touching = new Map<number, { n: number; touches: Map<string, Touch>; last: number; spot?: THREE.Vector3; going?: THREE.Vector3 }>()
+  const touching = new Map<number, { n: number; touches: Map<string, Touch>; last: number; spot?: THREE.Vector3; going?: THREE.Vector3; body?: THREE.Matrix4; moved?: THREE.Matrix4; span?: number }>()
   // Each holder's model's skin by limb: the vertices of its skinned meshes bound most to the limb's end
   // bone or a bone under it, found once a model.
   const skins = new WeakMap<THREE.Object3D, Map<string, { mesh: THREE.SkinnedMesh; i: number }[]>>()
@@ -202,6 +208,15 @@ export function climb() {
           mine.spot = spot
         }
         const going = mine.going ?? new T.Vector3()
+        // How his body itself moved and turned since the rows last moved on: what takes a place held in
+        // it now back to where that place was then (not what his clip does inside it).
+        if (dt > 0) {
+          const body = root.matrixWorld.clone()
+          mine.moved = mine.body ? mine.body.clone().multiply(body.clone().invert()) : new T.Matrix4()
+          mine.span = dt
+          mine.body = body
+        }
+        const moved = mine.moved ?? new T.Matrix4()
         // The points of the surface he holds: from his hold's point, over links each turning within
         // `climb.bend` (so a wall's sharp edge ends them, and a ball's round is all one), out as far as
         // any limb could reach from its first bone.
@@ -220,7 +235,8 @@ export function climb() {
         }
         // Each limb as its clip has it this frame: where its end bone goes for a point, how much more it
         // could stretch to one, whether it can reach one, and the point it wants.
-        const reach = new Map<string, { limb: Limb; first: THREE.Object3D; middle: THREE.Object3D; end: THREE.Object3D; from: THREE.Vector3; goalOf: (i: number) => THREE.Vector3; flat: (i: number) => THREE.Quaternion; rests: (i: number, goal: THREE.Vector3, turn: THREE.Quaternion) => THREE.Vector3; slack: (i: number) => number; ok: (i: number) => boolean; wants: number; holds: (i: number) => number }>()
+        type Along = (p: number, q: number, e: number) => THREE.Vector3
+        const reach = new Map<string, { limb: Limb; first: THREE.Object3D; middle: THREE.Object3D; end: THREE.Object3D; from: THREE.Vector3; goalOf: (i: number) => THREE.Vector3; turnAt: (p: number, q: number, e: number) => THREE.Quaternion; outAt: Along; pathAt: Along; spare: (goal: THREE.Vector3) => number; slack: (i: number) => number; ok: (i: number) => boolean; wants: number; holds: (i: number) => number }>()
         for (const name of k.ik as string[]) {
           const limb = limbsOf[name]
           const [first, middle, end] = limb.bones.map(b => bone(root, b))
@@ -242,53 +258,96 @@ export function climb() {
           const endAt = end.matrixWorld.clone()
           const skin = skinNow(T, root, k, name, end, endAt)
           const scale = new T.Vector3().setFromMatrixScale(endAt)
-          const rests = (i: number, goal: THREE.Vector3, turn: THREE.Quaternion) => {
+          const rests = (i: number, goal: THREE.Vector3, turn: THREE.Quaternion, o = face(i)) => {
             const m = new T.Matrix4().compose(goal, turn, scale)
-            const o = face(i)
             // The way out in the end bone's frame, so each vertex's height along it is read where it is.
             const along = o.clone().applyQuaternion(turn.clone().invert()).multiply(scale)
             const v = new T.Vector3(), base = goal.dot(o)
             const gap = outOf(net, place, { length: skin.length, at: n => v.copy(skin[n]).applyMatrix4(m).toArray(), height: n => base + skin[n].dot(along) }, o.toArray(), i, 1)
             return gap === undefined ? goal : goal.clone().addScaledVector(o, -gap)
           }
+          // A step `e` of the way (eased) from point `p` to point `q`: its end bone turned between the two
+          // turns of the clip's, and the way out of the surface between the two ways out there; and where
+          // its end bone rests on the surface under the straight way between where each point puts it,
+          // read round the point of the net nearest where it touches there, moved along that way out. So
+          // a step follows the surface, over a ball's curve too, and lands resting on its point.
+          const clipTurn = new T.Quaternion()
+          endAt.decompose(new T.Vector3(), clipTurn, new T.Vector3())
+          const turnAt = (p: number, q: number, e: number) => clipTurn.clone().premultiply(flat(p).slerp(flat(q), e))
+          const outAt = (p: number, q: number, e: number) => face(p).lerp(face(q), e).normalize()
+          const pathAt = (p: number, q: number, e: number) => {
+            const touch = new T.Vector3(...place(p)).lerp(new T.Vector3(...place(q)), e)
+            const near = nearestOn(net, place, touch.toArray(), e < 0.5 ? p : q)
+            return rests(near, goalOf(p).lerp(goalOf(q), e), turnAt(p, q, e), outAt(p, q, e))
+          }
           // How far and how near the limb reaches, as ik3d cuts it: no further than a millimetre short of
           // its two bones' lengths, nor than its `bend`'s most angle spans, and no nearer than its least.
           const l1 = from.distanceTo(at(middle)), l2 = at(middle).distanceTo(wrist)
           const spanAt = (deg: number) => Math.sqrt(Math.max(0, l1 * l1 + l2 * l2 - 2 * l1 * l2 * Math.cos((deg * Math.PI) / 180)))
           const most = Math.min(l1 + l2 - 1e-3, spanAt(limb.bend[1])), least = Math.max(Math.abs(l1 - l2) + 1e-4, spanAt(limb.bend[0]))
-          // How much more the limb could stretch to point `i`: under 0 it cannot reach it.
-          const slack = (i: number) => {
-            const d = goalOf(i).distanceTo(from)
+          // How much more the limb could stretch, or fold, to put its end bone at `goal`, the less of the
+          // two: under 0 it cannot reach it. And to point `i`.
+          const spare = (goal: THREE.Vector3, root = from) => {
+            const d = goal.distanceTo(root)
             return Math.min(most - d, d - least)
           }
+          const slack = (i: number) => spare(goalOf(i))
           const ok = (i: number) => on.has(i) && slack(i) >= 0
-          // How long the limb could hold point `i` if the body went on as his hold is going: the first of
+          // How fast its first bone goes as his body moves and turns, metres a second: from where his body's
+          // last move had it to where it is now, over the time between the rows' last two steps.
+          const rootGoing = mine.span ? from.clone().sub(from.clone().applyMatrix4(moved)).divideScalar(mine.span) : new T.Vector3()
+          // How long the limb could hold point `i` if its first bone went on as it is going: the first of
           // `step.ahead` seconds, looked at in eighths, at which its first bone, carried along, is out of
           // reach of it by `step.slack`; all of them while it stays in reach.
           const holds = (i: number) => {
             const goal = goalOf(i)
             for (let n = 0; n <= 8; n++) {
-              const d = goal.distanceTo(from.clone().addScaledVector(going, (k.step.ahead * n) / 8))
+              const d = goal.distanceTo(from.clone().addScaledVector(rootGoing, (k.step.ahead * n) / 8))
               if (Math.min(most - d, d - least) < k.step.slack) return (k.step.ahead * n) / 8
             }
             return k.step.ahead
           }
+          // Whether it could step from point `p` to point `q`: its end bone within reach the whole way of its
+          // first bone, carried along as his body is going, looked at in sixteenths of the step and where
+          // the straight way between the two comes nearest its first bone (where folding bites hardest),
+          // each on that way (eased) and lifted as a step lifts it. (The point it steps to must hold for a
+          // while to be wanted at all, which is room to spare there; the point it leaves may have next to
+          // none, which is why it steps.)
+          const steps = (p: number, q: number) => {
+            const a = goalOf(p), b = goalOf(q), ab = b.clone().sub(a)
+            const at = (s: number) => {
+              const e = s * s * (3 - 2 * s)
+              const goal = a.clone().addScaledVector(ab, e).addScaledVector(outAt(p, q, e), k.step.lift * Math.sin(Math.PI * s))
+              return spare(goal, from.clone().addScaledVector(rootGoing, s * k.step.time)) >= 0
+            }
+            for (let n = 1; n < 16; n++) if (!at(n / 16)) return false
+            // The way of the step (eased) nearest its first bone, and how far through the step that is.
+            const near = Math.max(0, Math.min(1, from.clone().sub(a).dot(ab) / (ab.lengthSq() || 1)))
+            let lo = 0, hi = 1
+            for (let n = 0; n < 30; n++) {
+              const mid = (lo + hi) / 2
+              if (mid * mid * (3 - 2 * mid) < near) lo = mid
+              else hi = mid
+            }
+            return at(lo)
+          }
           // The point it wants: of the points out to `climb.near` links from the one of the surface he holds
-          // nearest its middle, those of that surface, the one it could hold longest; even, the nearest its
-          // middle.
+          // nearest its middle, those of that surface it could step to from where it is planted (or is
+          // stepping to), the one it could hold longest; even, the nearest its middle.
+          const was = touches.get(name), base = was && (was.step ? was.step.to : was.point)
           const nearest = nearestOn(net, place, mid.toArray(), hold.a, o => on.has(o))
           let wants = -1, best = 0, far = Infinity
           let ring = [nearest]
           const seen = new Set(ring)
           for (let n = 0; n <= k.near && ring.length; n++) {
             for (const o of ring) {
-              if (!on.has(o)) continue
+              if (!on.has(o) || (base !== undefined && o !== base && !steps(base, o))) continue
               const h = holds(o), d = new T.Vector3(...place(o)).distanceTo(mid)
               if (h > best || (h === best && h > 0 && d < far)) { best = h; far = d; wants = o }
             }
             ring = ring.flatMap(p => [...linked(net, p)]).filter(o => !seen.has(o) && (seen.add(o), true))
           }
-          reach.set(name, { limb, first, middle, end, from, goalOf, flat, rests, slack, ok, wants, holds })
+          reach.set(name, { limb, first, middle, end, from, goalOf, turnAt, outAt, pathAt, spare, slack, ok, wants, holds })
           // A limb that touches nothing yet plants on the point it wants, once his clip has faded in to
           // full (anim's `blend`), so it plants where his pose holds it and not where the fade has it.
           if (!touches.has(name) && wants >= 0 && r.data.blend >= 1) touches.set(name, { point: wants })
@@ -324,11 +383,11 @@ export function climb() {
         }
         const groupOf = (name: string) => limbsOf[name].group
         const steppingGroups = new Set([...touches].filter(([, t]) => t.step).map(([name]) => groupOf(name)))
-        // A step begins where its end bone is, kept as how far that is from where its point puts it, so
-        // it begins where the limb really was even when it had fallen short of its point.
+        // A step begins where its end bone is, kept as how far that is from where its step starts (resting
+        // on its point), so it begins where the limb really was even when it had fallen short of its point.
         const begin = (name: string, forced: boolean) => {
           const t = touches.get(name)!
-          const off = reached.get(name)!.clone().sub(reach.get(name)!.goalOf(t.point)).toArray()
+          const off = reached.get(name)!.clone().sub(reach.get(name)!.pathAt(t.point, t.point, 0)).toArray()
           t.step = { from: t.point, to: reach.get(name)!.wants, s: 0, forced, off }
         }
         for (const name of reach.keys()) if (lost(name)) begin(name, [...steppingGroups].some(g => g !== groupOf(name)))
@@ -346,35 +405,35 @@ export function climb() {
         }
         // A limb that can neither reach its point nor step lets go of it.
         for (const [name, t] of [...touches]) if (!t.step && !reach.get(name)?.ok(t.point)) touches.delete(name)
-        for (const [name, t] of touches) {
-          t.room = reach.get(name)?.slack(t.point)
-          t.left = left.get(name)
-        }
+        for (const [name, t] of touches) t.left = left.get(name)
         const limbs: Handed[] = []
-        for (const [name, { limb, middle, end, from, goalOf, flat, rests }] of reach) {
+        for (const [name, { limb, middle, from, turnAt, outAt, pathAt, spare }] of reach) {
           const t = touches.get(name)
           if (!t) continue
-          // Its end bone: resting on its point, or on the way between two, eased in and out from where it
-          // was to resting on the one it steps to and lifted off the surface by `step.lift` at the middle;
-          // turned to the surface it is over.
+          // Its end bone: resting on its point; or on its way between two, eased in and out, resting on the
+          // surface under it and lifted off it by `step.lift` at the middle, with how far it began from
+          // there fading out as it goes, so it starts where the limb was and lands resting on its point.
           const key = `${r.id} ${name}`
           let target = targets.get(key)
           if (!target) targets.set(key, (target = new T.Object3D()))
-          const clipTurn = new T.Quaternion()
-          end.matrixWorld.decompose(new T.Vector3(), clipTurn, new T.Vector3())
-          const turned = (i: number) => clipTurn.clone().premultiply(flat(i))
           if (t.step) {
-            const e = t.step.s * t.step.s * (3 - 2 * t.step.s)
-            const lift = face(t.step.from).lerp(face(t.step.to), e).normalize().multiplyScalar(k.step.lift * Math.sin(Math.PI * t.step.s))
-            const begun = goalOf(t.step.from).add(new T.Vector3(...(t.step.off ?? [0, 0, 0])))
-            target.position.copy(begun.lerp(rests(t.step.to, goalOf(t.step.to), turned(t.step.to)), e).add(lift))
-            target.quaternion.copy(clipTurn).premultiply(flat(t.step.from).slerp(flat(t.step.to), e))
+            const { from: p, to: q, s } = t.step
+            const e = s * s * (3 - 2 * s)
+            target.quaternion.copy(turnAt(p, q, e))
+            const under = pathAt(p, q, e).add(new T.Vector3(...(t.step.off ?? [0, 0, 0])).multiplyScalar(1 - e))
+            // Lifted by `step.lift` at the middle, or as much of that as keeps it within reach, looked at
+            // in sixteenths of the lift.
+            const o = outAt(p, q, e), lift = k.step.lift * Math.sin(Math.PI * s)
+            let by = lift
+            while (by > 0 && spare(under.clone().addScaledVector(o, by)) < 0) by -= lift / 16
+            target.position.copy(under).addScaledVector(o, Math.max(0, by))
           } else {
-            target.quaternion.copy(turned(t.point))
-            target.position.copy(rests(t.point, goalOf(t.point), target.quaternion))
+            target.quaternion.copy(turnAt(t.point, t.point, 0))
+            target.position.copy(pathAt(t.point, t.point, 0))
           }
           target.updateMatrixWorld(true)
           const goal = target.position.clone()
+          t.room = spare(goal)
           // The bend: where the clip has the middle joint, off the line from the first bone to the target,
           // never into the surface: what of it points into the surface is taken off.
           const line = goal.clone().sub(from).normalize()
