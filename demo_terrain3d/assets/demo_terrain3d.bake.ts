@@ -11,7 +11,7 @@
 //                clumps pack, the nine clumps of the library's `props/lod-grass` (grasses, dry grasses,
 //                flowers and reeds) at their two levels of detail
 // The ground's maps, `ground/<name>-<map>-<size>.webp`, are cut by the bake itself from the cc0-textures
-// sets `cc0-textures.json` names, before this runs, and never committed.
+// sets `cc0-textures.json` names, before this runs, and committed with the game.
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import type { Tools } from '#scripts/bake.ts'
