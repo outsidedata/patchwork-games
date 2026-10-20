@@ -41,9 +41,12 @@
 //
 // A mesh to climb. `box(size, cell)` is a box's mesh (`Mesh`, below), the shape a `wall` is drawn by, and
 // `sphere(radius, cell)` a sphere's, a `sphere`'s, and `cylinder(radius, length, cell)` a cylinder's,
-// closed at both ends, a `pillar`'s and a `pole`'s. `meshOf(k)` is the mesh of a held kind's definition,
-// by the shape it names: `{ shape: "box", size, cell }`, `{ shape: "sphere", radius, cell }` or
-// `{ shape: "cylinder", radius, length, cell }`.
+// closed at both ends, a `pillar`'s and a `pole`'s. `prism(xs, zs, inside, height, cell)` is a solid
+// stood up from a footprint of grid cells, and `corner(size, thick, cell)` the one of two walls at a right
+// angle, a `corner`'s. `bowl(radius, thick, cell)` is the back half of a hollow ball, climbed inside, a
+// `bowl`'s. `meshOf(k)` is the mesh of a held kind's definition, by the shape it names:
+// `{ shape: "box", size, cell }`, `{ shape: "sphere", radius, cell }`, `{ shape: "cylinder", radius,
+// length, cell }`, `{ shape: "corner", size, thick, cell }` or `{ shape: "bowl", radius, thick, cell }`.
 // `settle(me, w)` is a held kind's rule: on its first step it stands its row's `pos` that high over the
 // ground under it (walker's), and marks it `placed`.
 // `netOn(mesh)` is the net a body climbs on it (`Net`, below): its vertices the points, its triangles'
@@ -71,7 +74,10 @@
 // midway between its wrist and its middle fingertip, in its `clips.still` clip's first frame, its own
 // `ends`) is on the spot, and out
 // along the surface's way out by its `climb.brace` metres (under 0, in: his body stands nearer the
-// surface than that clip holds it from its hands, whose real hands reach the surface by IK on the page);
+// surface than that clip holds it from its hands, whose real hands reach the surface by IK on the page),
+// and further out as far as the surface comes nearer his body than the flat face through his hold
+// would (inside a bowl), looked at in eighths down the line from the top of his head to his hips (its
+// own `ends`);
 // standing, not falling, holding its `clips.still` clip at its first frame (played at rate 0).
 // `grabNet(me, w, kinds)` takes hold of the point of a row of one of `kinds` nearest the middle of the
 // holder's palms, as they are in that clip's first frame where it stands now, within its `climb.reach`,
@@ -357,13 +363,113 @@ export function cylinder(radius: number, length: number, cell: number): Mesh {
   return { position, index }
 }
 
+// A solid stood up from a footprint on the ground: the cells between the grid lines `xs` (across, x) and
+// `zs` (through, z) that `inside(i, j)` holds, each `height` metres high; its top and bottom a square of
+// two triangles for each cell, and its sides, wherever a held cell meets one not held or the grid's edge,
+// a wall of rows as near `cell` metres high as its height divides into.
+export function prism(xs: number[], zs: number[], inside: (i: number, j: number) => boolean, height: number, cell: number): Mesh {
+  const position: number[] = [], index: number[] = []
+  // Four corners going round, the two triangles they make turned to face `out`.
+  const quad = (a: V, b: V, c: V, d: V, out: V) => {
+    const first = position.length / 3
+    position.push(...a, ...b, ...c, ...d)
+    if (dot(cross(sub(b, a), sub(c, a)), out) > 0) index.push(first, first + 1, first + 2, first, first + 2, first + 3)
+    else index.push(first, first + 2, first + 1, first, first + 3, first + 2)
+  }
+  const rows = Math.max(1, Math.round(height / cell))
+  const held = (i: number, j: number) => i >= 0 && j >= 0 && i < xs.length - 1 && j < zs.length - 1 && inside(i, j)
+  for (let i = 0; i < xs.length - 1; i++) {
+    for (let j = 0; j < zs.length - 1; j++) {
+      if (!held(i, j)) continue
+      const [x0, x1, z0, z1] = [xs[i], xs[i + 1], zs[j], zs[j + 1]]
+      quad([x0, height, z0], [x1, height, z0], [x1, height, z1], [x0, height, z1], [0, 1, 0])
+      quad([x0, 0, z0], [x1, 0, z0], [x1, 0, z1], [x0, 0, z1], [0, -1, 0])
+      // Each side that meets a cell not held: its edge on the ground, and the way out of it.
+      const sides: [V, V, V, boolean][] = [
+        [[x1, 0, z0], [x1, 0, z1], [1, 0, 0], !held(i + 1, j)],
+        [[x0, 0, z0], [x0, 0, z1], [-1, 0, 0], !held(i - 1, j)],
+        [[x0, 0, z1], [x1, 0, z1], [0, 0, 1], !held(i, j + 1)],
+        [[x0, 0, z0], [x1, 0, z0], [0, 0, -1], !held(i, j - 1)],
+      ]
+      for (const [a, b, out, open] of sides) {
+        if (!open) continue
+        for (let n = 0; n < rows; n++) {
+          const y0 = (height * n) / rows, y1 = (height * (n + 1)) / rows
+          quad([a[0], y0, a[2]], [b[0], y0, b[2]], [b[0], y1, b[2]], [a[0], y1, a[2]], out)
+        }
+      }
+    }
+  }
+  return { position, index }
+}
+
+// Grid lines from 0 through each of `marks` in turn, each stretch between two cut into as many as come
+// nearest `cell` metres.
+const lines = (marks: number[], cell: number) => {
+  const out = [0]
+  for (const to of marks) {
+    const from = out[out.length - 1], n = Math.max(1, Math.round((to - from) / cell))
+    for (let k = 1; k <= n; k++) out.push(from + ((to - from) * k) / n)
+  }
+  return out
+}
+
+// An inside corner: two walls `thick` metres thick standing at a right angle, their outer corner's foot
+// at the origin, one running `size[0]` metres along x and the other `size[2]` along z, both `size[1]`
+// high; the faces between them, at x and z `thick`, look in at each other.
+export function corner(size: number[], thick: number, cell: number): Mesh {
+  const [w, h, d] = size
+  const xs = lines([thick, w], cell), zs = lines([thick, d], cell)
+  return prism(xs, zs, (i, j) => xs[i] < thick - 1e-9 || zs[j] < thick - 1e-9, h, cell)
+}
+
+// A bowl: the back half of a hollow ball of inner `radius` metres and `thick` thick, its middle at the
+// origin and its open side looking along +z, its rim on the plane z = 0. Its inner face, the one climbed,
+// looks in at the middle. It is a grid of as many as come nearest `cell` metres each, round the axis along
+// x (whose two ends lie on the rim) and from the rim's one side to its other.
+export function bowl(radius: number, thick: number, cell: number): Mesh {
+  const n = Math.max(2, Math.round((Math.PI * radius) / cell))
+  const position: number[] = [], index: number[] = []
+  // A triangle turned to face `out`; one with two corners at one place is left out.
+  const tri = (a: V, b: V, c: V, out: V) => {
+    const n3 = cross(sub(b, a), sub(c, a))
+    if (len(n3) < 1e-12) return
+    const first = position.length / 3
+    position.push(...a, ...b, ...c)
+    index.push(...(dot(n3, out) > 0 ? [first, first + 1, first + 2] : [first, first + 2, first + 1]))
+  }
+  const quad = (a: V, b: V, c: V, d: V, out: V) => { tri(a, b, c, out); tri(a, c, d, out) }
+  // A place on a ball of `r` about the axis along x: `t` 0 to 1 from its +x end to its −x end, `u` 0 to 1
+  // from the rim's +y side round the back (−z) to its −y side.
+  const on = (r: number, t: number, u: number) => {
+    const th = Math.PI * t, ph = Math.PI + Math.PI * u
+    return [r * math.cos(th), -r * math.sin(th) * math.cos(ph), r * math.sin(th) * math.sin(ph)]
+  }
+  const outer = radius + thick
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      const [t0, t1, u0, u1] = [i / n, (i + 1) / n, j / n, (j + 1) / n]
+      const mid = on(1, (t0 + t1) / 2, (u0 + u1) / 2)
+      // The inner face looks in toward the middle, the outer away from it.
+      quad(on(radius, t0, u0), on(radius, t1, u0), on(radius, t1, u1), on(radius, t0, u1), mul(mid, -1))
+      quad(on(outer, t0, u0), on(outer, t1, u0), on(outer, t1, u1), on(outer, t0, u1), mid)
+    }
+    // The rim, where the two meet on the plane z = 0, looking along +z.
+    for (const u of [0, 1]) quad(on(radius, i / n, u), on(radius, (i + 1) / n, u), on(outer, (i + 1) / n, u), on(outer, i / n, u), [0, 0, 1])
+  }
+  return { position, index }
+}
+
 // The shapes a held kind's definition names as its `shape`, each the mesh it makes of that definition:
 // `box`, of its `size` and `cell`; `sphere`, of its `radius` and `cell`; `cylinder`, of its `radius`,
-// `length` and `cell`.
+// `length` and `cell`; `corner`, of its `size`, `thick` and `cell`; `bowl`, of its `radius`, `thick` and
+// `cell`.
 const shapes: Record<string, (k: any) => Mesh> = {
   box: k => box(k.size, k.cell),
   sphere: k => sphere(k.radius, k.cell),
   cylinder: k => cylinder(k.radius, k.length, k.cell),
+  corner: k => corner(k.size, k.thick, k.cell),
+  bowl: k => bowl(k.radius, k.thick, k.cell),
 }
 export function meshOf(k: { shape: string }): Mesh {
   // A definition comes from the game's data file.
@@ -702,9 +808,26 @@ export function climbNet(me: Row, w: W, dt: number, stick: V) {
 function standing(me: Row, w: W, hold: NetHold, turn: number) {
   const d = me.data
   const k = def(w, me.kind).climb
-  const { at, out } = spotOn(w, w.get(hold.on)!, hold)
+  const held = w.get(hold.on)!
+  const { at, out } = spotOn(w, held, hold)
   const lean = frameOn(out, d.lean?.up, d.yaw, turn)
-  return { lean, root: add(sub(at, framed(lean, palms(w, me, k.clips.still))), mul(out, k.brace)) }
+  const root = add(sub(at, framed(lean, palms(w, me, k.clips.still))), mul(out, k.brace))
+  // Stood out from the surface as far as it comes nearer his body than the flat face through his hold
+  // would: looked at in eighths along the line down his middle, from the top of his head to his hips (his
+  // still clip's first frame, his own `ends`; his legs below keep out by how the page bends them), each
+  // place's way out of the surface under it read off the net (`outOf`) against its way out of that flat
+  // face. A surface curving away (a ball) leaves him where he is.
+  const net = netOf(w, held)
+  const place = (i: number) => heldPoint(held, [...net.at.subarray(i * 3, i * 3 + 3)])
+  const still = { clip: k.clips.still, clipT: 0 }
+  const top = ends(w, me, 'head', still).slice(3), hips = ends(w, me, 'torso', still).slice(0, 3)
+  let more = 0
+  for (let n = 0; n <= 8; n++) {
+    const p = add(root, framed(lean, add(top, mul(sub(hips, top), n / 8))))
+    const there = outOf(net, place, { length: 1, at: () => p, height: () => dot(p, out) }, out, nearestOn(net, place, p, hold.a), 1)
+    if (there !== undefined) more = Math.max(more, dot(sub(p, at), out) - there)
+  }
+  return { lean, root: add(root, mul(out, more)) }
 }
 
 export function stay(me: Row, w: W, turn: number) {

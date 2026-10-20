@@ -327,3 +327,40 @@ Proof (`yard.test.ts`):
 - every climb, every frame: everything step 4 and step 7 check (planted on their points and touching,
   not sliding; stepping reached, never in; pairs; framed on the surface; nothing of him in it).
 All 33 tests of `yard.test.ts` pass (859 s).
+Commit: games `33855ff`.
+
+**9. Concave: an inside corner and a bowl.** Two new shapes. climb's `prism` stands a solid up from a
+footprint of grid cells; `corner` is two walls 1 m thick at a right angle, 6 m along each way and 8 m
+high, their inside faces looking in at each other. `bowl` is the back half of a hollow ball, 3 m inside
+and 0.5 m thick, climbed on its inside. Found and fixed, each by numbers:
+- near the corner his legs went through the other wall: 0.5 m from it his right thigh 2.3 cm and shin
+  5.7 cm in, 0.25 m from it both at least 10 cm in (all the measure reads). A knee bent the way its clip
+  bends it, out from the face he holds only. Now each elbow and knee swings round the line from its first
+  bone to its target, a twenty-fourth of a turn at a time from that way, until both its bones keep out of
+  the surface by their girth (each a round as thick as the furthest of its skin lying alongside it). How
+  far a place is out of the surface is read off the net's nearest point. After: nothing of him in either
+  wall at 0.25, 0.5 or 0.75 m.
+- the same probe showed both his feet planted on one point. A point one limb is planted on or stepping
+  to is now taken: no other limb wants it.
+- in the bowl his hips were 3.2 cm into it: it rises toward his body. He now stands out from the surface
+  as far as it comes nearer his body than the flat face through his hold would. That is read in eighths
+  down the line from the top of his head to his hips, `ends`' `head` and `torso`; his legs below keep
+  out by the knee swing. Read down to his root (his feet) it stood him 37 cm off and his hands lost the
+  bowl.
+- with the taken points his steps over the sphere's top changed, and one foot, 4.8 mm too near his hip
+  to fold, fell short and put its toes 3 mm into the ball. Its plan had cleared by millimetres, and the
+  real step rests the foot by its skin, a few millimetres toward his body over a ball's top. A step now
+  keeps `step.slack` of room against folding at its middle, none at its ends. And the lift that gives way
+  takes the most of it that keeps the foot in reach, or the one that comes nearest.
+Proof (`yard.test.ts`):
+- 9a: the corner's net has a point for each vertex place, all on the mesh, within its two arms; each
+  way out leaves it; every inside face's point looks straight in (1178 of them); points − links +
+  triangles = 2.
+- 9a, 9c: held still 0.25 m from the corner on either face, for a second: framed on the face, hands and
+  feet on it within 6 µm, the four on four points, nothing of him in either wall at all.
+- 9b: the bowl's net: every point on its inner ball, its outer ball or its rim, and on the mesh; each
+  way out leaves it; inside, off the rim, every point looks in at the middle within a degree (1013);
+  points − links + triangles = 2.
+- 9b, 9c: held still at its deepest and 45° above and below it, for a second: framed on it, hands and
+  feet on it within 4 µm, the four on four points, nothing of him in it at all.
+All 37 tests of `yard.test.ts` pass (908 s), steps 1–8 among them.

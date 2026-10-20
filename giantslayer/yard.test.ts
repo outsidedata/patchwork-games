@@ -8,7 +8,7 @@ import { loopback } from '#addons/loopback/loopback.addon.ts'
 import { prepared } from '#plugins/loader/loader.sim.ts'
 import { ends } from '#plugins/anim/anim.sim.ts'
 import { keyCode } from '#plugins/player/player.plugin.ts'
-import { box, cylinder, heldPoint, heldWay, linked, meshOf, netOf, netOn, sphere, spotOn } from './plugins/climb/climb.sim.ts'
+import { bowl, box, corner, cylinder, heldPoint, heldWay, linked, meshOf, netOf, netOn, sphere, spotOn } from './plugins/climb/climb.sim.ts'
 import { sim } from './giantslayer.sim.ts'
 import file from './giantslayer.scene.json'
 import defs from './assets/giantslayer.json'
@@ -266,7 +266,7 @@ test('1b: the wall\'s net is a point on its surface for every corner of its mesh
 test('1a: the yard holds one wall, standing on the ground the hero stands on, drawn as a box of its definition\'s size from the ground up', async () => {
   const { yard, p, frames } = await start()
   await frames(30)
-  expect([...new Set(yard.rows.map(r => r.kind))].sort()).toEqual(['loader', 'pillar', 'player', 'pole', 'scenemanager', 'skydome3d', 'sphere', 'start', 'wall'])
+  expect([...new Set(yard.rows.map(r => r.kind))].sort()).toEqual(['bowl', 'corner', 'loader', 'pillar', 'player', 'pole', 'scenemanager', 'skydome3d', 'sphere', 'start', 'wall'])
   const wall = yard.rows.filter(r => r.kind === 'wall')
   expect(wall).toHaveLength(1)
   const hero = yard.rows.find(r => r.kind === 'player')!
@@ -1377,5 +1377,90 @@ test('8b, 8c: lying, on the pillar and on the pole he hangs still on its top, it
       if (keys[0] === 'w') expect(along).toBeGreaterThan(going(177) * defs.player.climb.fan)
       else expect(round).toBeGreaterThan(going(177) * defs.player.climb.fan * (2 / Math.PI))
     }
+  }
+})
+
+test('9a: the corner\'s net is a point on its surface for every corner of its mesh and a link for every edge, closed all round, its inside faces looking in at each other', () => {
+  const k = defs.corner
+  const shape = corner(k.size, k.thick, k.cell)
+  const net = netOn(shape)
+  const measure = signedTo(shape, k.cell)
+  const key = (q: ArrayLike<number>) => [q[0], q[1], q[2]].map(v => String(Math.round(v * 1e4))).join(',')
+  const places = new Set<string>()
+  for (let i = 0; i < shape.position.length; i += 3) places.add(key(shape.position.slice(i, i + 3)))
+  expect(net.points).toBe(places.size)
+  const [w, h, d] = k.size, t = k.thick
+  let insideFaces = 0
+  for (let i = 0; i < net.points; i++) {
+    const q = [...net.at.subarray(i * 3, i * 3 + 3)], o = [...net.out.subarray(i * 3, i * 3 + 3)]
+    // ON it, 0 from its mesh, and within its two arms.
+    expect(Math.abs(measure(q))).toBeLessThan(1e-5)
+    expect(q[1] > -1e-6 && q[1] < h + 1e-6 && q[0] > -1e-6 && q[0] < w + 1e-6 && q[2] > -1e-6 && q[2] < d + 1e-6 && (q[0] < t + 1e-6 || q[2] < t + 1e-6)).toBe(true)
+    expect(measure(q.map((v, j) => v + o[j] * 0.01))).toBeGreaterThan(0)
+    expect(measure(q.map((v, j) => v - o[j] * 0.01))).toBeLessThan(0)
+    // The inside faces: the face at z `thick` beyond x `thick` looks along +z, the one at x `thick` beyond
+    // z `thick` along +x.
+    if (Math.abs(q[2] - t) < 1e-6 && q[0] > t + 1e-6 && q[0] < w - 1e-6 && q[1] > 1e-6 && q[1] < h - 1e-6) { expect(o[2]).toBeCloseTo(1, 6); insideFaces++ }
+    if (Math.abs(q[0] - t) < 1e-6 && q[2] > t + 1e-6 && q[2] < d - 1e-6 && q[1] > 1e-6 && q[1] < h - 1e-6) { expect(o[0]).toBeCloseTo(1, 6); insideFaces++ }
+  }
+  expect(insideFaces).toBeGreaterThan(0)
+  const edges = new Set<string>()
+  for (let tri = 0; tri < shape.index.length; tri += 3) {
+    const c = [0, 1, 2].map(j => key(shape.position.slice(shape.index[tri + j] * 3, shape.index[tri + j] * 3 + 3)))
+    for (const [a, b] of [[c[0], c[1]], [c[1], c[2]], [c[2], c[0]]]) edges.add([a, b].sort().join(' '))
+  }
+  let links = 0
+  for (let i = 0; i < net.points; i++) for (const o of linked(net, i)) if (o > i) links++
+  expect(links).toBe(edges.size)
+  // Closed all round: a footprint of whole cells meets its neighbours along whole edges, so every
+  // triangle's edge is shared by two.
+  expect(net.points - links + net.tri.length / 3).toBe(2)
+  console.log('9a net', JSON.stringify({ points: net.points, links, triangles: net.tri.length / 3, insideFaces }))
+})
+
+test('9a, 9c: near the inside corner, a quarter of a metre from it on either face, he hangs still, hands and feet on the face he holds, no two on one point, and nothing of him through either wall', async () => {
+  const t = defs.corner.thick
+  for (const at of [[t + 0.25, 4, t], [t, 4, t + 0.25]]) {
+    const { g, hero, seen } = await heldOn(await start(), at, 'corner')
+    const points = [...g.p.client!.plugins.climb.touches(hero)!.values()].map((x: { point: number }) => x.point)
+    expect(new Set(points).size).toBe(4)
+    console.log('9a held', JSON.stringify(at), JSON.stringify(seen))
+  }
+})
+
+test('9b: the bowl\'s net is a point on its surface for every corner of its mesh and a link for every edge, closed all round, its inside looking in at its middle', () => {
+  const k = defs.bowl
+  const shape = bowl(k.radius, k.thick, k.cell)
+  const net = netOn(shape)
+  const measure = signedTo(shape, k.cell)
+  let inside = 0
+  for (let i = 0; i < net.points; i++) {
+    const q = [...net.at.subarray(i * 3, i * 3 + 3)], o = [...net.out.subarray(i * 3, i * 3 + 3)]
+    // ON it: on its inner ball, its outer ball or its rim (on the plane z = 0, between the two), and 0
+    // from its mesh; its way out leaves it.
+    const r = vlen(q)
+    const onBall = (Math.abs(r - k.radius) < 1e-5 || Math.abs(r - k.radius - k.thick) < 1e-5) && q[2] < 1e-5
+    const onRim = Math.abs(q[2]) < 1e-5 && r > k.radius - 1e-5 && r < k.radius + k.thick + 1e-5
+    expect(onBall || onRim).toBe(true)
+    expect(Math.abs(measure(q))).toBeLessThan(1e-5)
+    expect(measure(q.map((v, j) => v + o[j] * 0.01))).toBeGreaterThan(0)
+    expect(measure(q.map((v, j) => v - o[j] * 0.01))).toBeLessThan(0)
+    // Off the rim, a point of the inside looks in at the middle, within a degree.
+    if (Math.abs(r - k.radius) < 1e-5 && q[2] < -0.5) { expect(vdot(o, q.map(v => -v / r))).toBeGreaterThan(Math.cos(Math.PI / 180)); inside++ }
+  }
+  expect(inside).toBeGreaterThan(0)
+  let links = 0
+  for (let i = 0; i < net.points; i++) for (const o of linked(net, i)) if (o > i) links++
+  expect(net.points - links + net.tri.length / 3).toBe(2)
+  console.log('9b net', JSON.stringify({ points: net.points, links, triangles: net.tri.length / 3, inside }))
+})
+
+test('9b, 9c: inside the bowl, at its deepest and 45° above and below it, he hangs still, framed on it, hands and feet on it within 1 mm, no two on one point, nothing of him in it', async () => {
+  const k = defs.bowl, r45 = k.radius * Math.SQRT1_2
+  for (const at of [[0, 0, -k.radius], [0, r45, -r45], [0, -r45, -r45]]) {
+    const { g, hero, seen } = await heldOn(await start(), at, 'bowl')
+    const points = [...g.p.client!.plugins.climb.touches(hero)!.values()].map((x: { point: number }) => x.point)
+    expect(new Set(points).size).toBe(4)
+    console.log('9b held', JSON.stringify(at), JSON.stringify(seen))
   }
 })

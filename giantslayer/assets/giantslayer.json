@@ -101,5 +101,19 @@
     "length": 8,
     "cell": 0.2,
     "colour": "#8a8579"
+  },
+  "corner": {
+    "shape": "corner",
+    "size": [6, 8, 6],
+    "thick": 1,
+    "cell": 0.25,
+    "colour": "#9a9488"
+  },
+  "bowl": {
+    "shape": "bowl",
+    "radius": 3,
+    "thick": 0.5,
+    "cell": 0.25,
+    "colour": "#928c80"
   }
 }
