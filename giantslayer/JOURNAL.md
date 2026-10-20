@@ -221,3 +221,43 @@ wall laid on its back face down 4 m up):
   every limb stepping (1 or 2 times) and lifting 6 cm in diagonal pairs, and nothing of him in it.
   He moves at least as far as his speed takes him in 170 frames.
 All 23 tests of `yard.test.ts` pass (169 s), steps 1–4 among them.
+Commit: games `ba3d69b`.
+
+**6. A sphere: hang still on it.** A new kind, `sphere`, in the yard 12 m beside the wall, its middle
+6 m up: radius 3 m, cells 0.25 m. Its mesh is climb's `sphere`, an icosahedron with each face cut 13 to
+an edge and pushed out onto the ball, so it has no poles and no seam. A held kind's definition now names
+its `shape` (`box` or `sphere`), and the net is made from it (`meshOf`). The wall and the sphere share one
+rule, `settle` (stand that high over the ground), and one look, climb's `show`, drawn from a shape's first
+tick because the game's own plugin is not on the page until then. Found and fixed, each by numbers:
+- a limb took only points facing within `bend` of the hold. On a ball 1.4 m down to the feet the surface
+  has turned about 27°, more than `bend` allows. A limb now takes the points reached from the hold over
+  links that each turn within `bend`: on a flat face that is the same set as before, and on a ball it is
+  all of it.
+- hands stood 4.2–4.5 mm off the ball and toes 6–9.6 mm in. A palm laid flat at a vertex touches a flat
+  wall with its heel and finger pads, but on the faceted ball the surface falls away under them. A foot
+  kept the clip's turn against the hold, not against its own point. Now a foot turns as the surface turns
+  from the hold to its point. And every planted or landing hand and foot is moved along the way out until
+  the nearest vertex of its own skin rests on the net's triangles under it (`outOf`).
+- on the lower half a foot stepped once while he held still: the limbs planted on the first frame, while
+  his clip was still fading in from standing, both feet on one point, then slipped out of reach as the
+  pose settled. A limb now first plants once his clip has faded in to full (anim's `blend`). Probed: both
+  feet plant once, 11 frames in, on two points with 28 and 30 cm of room, and never step.
+- the skin rest cost 13.2 ms a frame (15,562 hand and foot vertices read and tested every frame). The
+  skin is now kept in each end bone's frame and read again only when a bone under it moves. A vertex is
+  tested only if its height, less the highest triangle corner there, could still beat the nearest found.
+  climb's page tick is now 1.18 ms (0.85 ms without the rest), measured over 300 frames on node.
+Proof (`yard.test.ts`):
+- 6a: the net has a point for each vertex place, 1692 (10·13² + 2), every one within 0.12 µm of the
+  radius and of the mesh; each point's way out leaves the ball. Every link is a triangle's edge, both
+  ways, 21.5–30.5 cm long. Points − links + triangles = 2, so it is closed all round. It is drawn round
+  the row as far as its corners go, and its net is drawn line for line when shown. A new measure, the
+  signed distance to any closed mesh, agrees with the box's own at 4000 places to a micrometre.
+- 6b, 6c, 6d (with 6e in each): on its side, its upper half, its lower half and underneath, held still
+  for a second, every frame: his front points into the surface within a degree and his up lies along it
+  within a degree. Each hand's and foot's nearest skin is within 5 µm of the ball's mesh. Nothing else of
+  him is in it at all (0), and no foot more than 5 µm.
+- the wall's tests all still pass, and its hands and feet now rest within 3 µm of the face (0.09 mm
+  before).
+Not checked: the sword in his right hand is not skinned, so no measure reads it. Nothing has been looked
+at in a browser.
+All 27 tests of `yard.test.ts` pass (291 s).

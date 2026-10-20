@@ -76,8 +76,15 @@
     "colour": "#7fe6ff"
   },
   "wall": {
+    "shape": "box",
     "size": [6, 8, 1],
     "cell": 0.25,
     "colour": "#9a9488"
+  },
+  "sphere": {
+    "shape": "sphere",
+    "radius": 3,
+    "cell": 0.25,
+    "colour": "#8f8a7e"
   }
 }

@@ -39,15 +39,21 @@
 // from it over the limb's surface, metres, and `release(me, w)` lets go: the body is in the air where
 // it was, falling.
 //
-// A mesh to climb. `box(size, cell)` is a box's mesh (`Mesh`, below), the shape a `wall` is drawn by.
+// A mesh to climb. `box(size, cell)` is a box's mesh (`Mesh`, below), the shape a `wall` is drawn by, and
+// `sphere(radius, cell)` a sphere's, a `sphere`'s. `meshOf(k)` is the mesh of a held kind's definition,
+// by the shape it names: `{ shape: "box", size, cell }` or `{ shape: "sphere", radius, cell }`.
+// `settle(me, w)` is a held kind's rule: on its first step it stands its row's `pos` that high over the
+// ground under it (walker's), and marks it `placed`.
 // `netOn(mesh)` is the net a body climbs on it (`Net`, below): its vertices the points, its triangles'
-// edges the links. `linked(net, i)` is the points point `i` links to, and `nearestOn(net, place, to,
-// from, ok)` the point nearest a place, walking the links from point `from` while each step comes
-// nearer, onto points `ok` allows only (any, when it is not given).
+// edges the links, and its triangles kept by point. `linked(net, i)` is the points point `i` links to,
+// and `nearestOn(net, place, to, from, ok)` the point nearest a place, walking the links from point
+// `from` while each step comes nearer, onto points `ok` allows only (any, when it is not given).
+// `outOf(net, place, ps, out, near, rings)` is how far the nearest of some places stands out of the
+// surface along a way out, read off the triangles round a point.
 //
 // Holding a net. A hold on a net is `{ on, a, b, t }` (`NetHold`): the held row's id, two linked points
 // of its net, and how far from `a` (0) to `b` (1) the holder's hands are between them; `onNet(hold)`
-// tells one from a hold on a limb. A held row's net is its kind's box (`netOf(from, held)`), placed
+// tells one from a hold on a limb. A held row's net is its kind's mesh (`netOf(from, held)`), placed
 // where the row stands, turned back by its `pitch` (radians, its front faced up that much) about its own
 // x through its base's middle and then by its `yaw` (`heldPoint`, `heldWay`); `spotOn(from, held, h)` is
 // a place on it in the world, `{ at, out }`. The holder's body is framed on the surface (`frameOn(out,
@@ -273,10 +279,59 @@ export function box(size: number[], cell: number): Mesh {
   return { position, index }
 }
 
+// A sphere of `radius` metres about the origin: an icosahedron's twenty faces, each cut into a grid of
+// triangles whose edges divide the face's edge into as many as come nearest `cell` metres long, every
+// corner pushed out onto the sphere.
+export function sphere(radius: number, cell: number): Mesh {
+  const g = (1 + Math.sqrt(5)) / 2
+  const corners = [[-1, g, 0], [1, g, 0], [-1, -g, 0], [1, -g, 0], [0, -1, g], [0, 1, g], [0, -1, -g], [0, 1, -g], [g, 0, -1], [g, 0, 1], [-g, 0, -1], [-g, 0, 1]].map(unit)
+  const faces = [[0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7, 10], [0, 10, 11], [1, 5, 9], [5, 11, 4], [11, 10, 2], [10, 7, 6], [7, 1, 8], [3, 9, 4], [3, 4, 2], [3, 2, 6], [3, 6, 8], [3, 8, 9], [4, 9, 5], [2, 4, 11], [6, 2, 10], [8, 6, 7], [9, 8, 1]]
+  const n = Math.max(1, Math.round((len(sub(corners[0], corners[11])) * radius) / cell))
+  const position: number[] = [], index: number[] = []
+  for (const [i, j, k] of faces) {
+    const [a, b, c] = [corners[i], corners[j], corners[k]]
+    const first = position.length / 3
+    // Row v of the face's grid holds n − v + 1 corners, from the edge a–b toward c.
+    for (let v = 0; v <= n; v++) for (let u = 0; u <= n - v; u++) position.push(...mul(unit(add(a, add(mul(sub(b, a), u / n), mul(sub(c, a), v / n)))), radius))
+    const at = (u: number, v: number) => first + v * (n + 1) - (v * (v - 1)) / 2 + u
+    for (let v = 0; v < n; v++) {
+      for (let u = 0; u < n - v; u++) {
+        index.push(at(u, v), at(u + 1, v), at(u, v + 1))
+        if (u < n - v - 1) index.push(at(u + 1, v), at(u + 1, v + 1), at(u, v + 1))
+      }
+    }
+  }
+  return { position, index }
+}
+
+// The shapes a held kind's definition names as its `shape`, each the mesh it makes of that definition:
+// `box`, of its `size` and `cell`; `sphere`, of its `radius` and `cell`.
+const shapes: Record<string, (k: any) => Mesh> = {
+  box: k => box(k.size, k.cell),
+  sphere: k => sphere(k.radius, k.cell),
+}
+export function meshOf(k: { shape: string }): Mesh {
+  // A definition comes from the game's data file.
+  if (!(k.shape in shapes)) throw new Error(`climb: no shape ${k.shape}; the shapes are ${Object.keys(shapes).join(', ')}`)
+  return shapes[k.shape](k)
+}
+
+// A shape put where its row says: on its first step its `pos` is raised by the height of the ground under
+// it (walker's), so the height its row starts with is how far above the ground it stands; `placed` once
+// it has.
+export function settle(me: Row, w: W) {
+  const d = me.data
+  if (d.placed) return
+  const [x, y, z] = d.pos
+  d.pos = [x, groundOf(w).height(x, z) + y, z]
+  d.placed = true
+}
+
 // A net: `points` points, each one's place (`at`, three numbers) and the way out of the surface there
 // (`out`, three, one long) in the mesh's own frame, and its links: point i links to `to[start[i]]` up to
-// `to[start[i + 1]]`, both ways.
-export type Net = { points: number; at: Float32Array; out: Float32Array; start: Uint32Array; to: Uint32Array }
+// `to[start[i + 1]]`, both ways; and the mesh's triangles, three points each (`tri`), point i's being
+// `round[first[i]]` up to `round[first[i + 1]]`.
+export type Net = { points: number; at: Float32Array; out: Float32Array; start: Uint32Array; to: Uint32Array; tri: Uint32Array; first: Uint32Array; round: Uint32Array }
 
 const SAME = 1e-4 // metres: two vertices this close are one point
 
@@ -301,12 +356,16 @@ export function netOn(mesh: Mesh): Net {
   const points = at.length / 3
   const out = new Array(points * 3).fill(0)
   const links = Array.from({ length: points }, () => new Set<number>())
+  const tri: number[] = []
+  const rounds = Array.from({ length: points }, () => [] as number[])
   for (let t = 0; t < mesh.index.length; t += 3) {
     const [a, b, c] = [of[mesh.index[t]], of[mesh.index[t + 1]], of[mesh.index[t + 2]]]
     const pa = at.slice(a * 3, a * 3 + 3), pb = at.slice(b * 3, b * 3 + 3), pc = at.slice(c * 3, c * 3 + 3)
     const n = cross(sub(pb, pa), sub(pc, pa))
     for (const p of [a, b, c]) for (let k = 0; k < 3; k++) out[p * 3 + k] += n[k]
     for (const [x, y] of [[a, b], [b, c], [c, a]]) if (x !== y) { links[x].add(y); links[y].add(x) }
+    for (const p of new Set([a, b, c])) rounds[p].push(tri.length / 3)
+    tri.push(a, b, c)
   }
   for (let p = 0; p < points; p++) {
     const u = unit(out.slice(p * 3, p * 3 + 3))
@@ -318,11 +377,79 @@ export function netOn(mesh: Mesh): Net {
     to.push(...[...s].sort((x, y) => x - y))
   })
   start[points] = to.length
-  return { points, at: new Float32Array(at), out: new Float32Array(out), start, to: new Uint32Array(to) }
+  const first = new Uint32Array(points + 1), round: number[] = []
+  rounds.forEach((r, p) => {
+    first[p] = round.length
+    round.push(...r)
+  })
+  first[points] = round.length
+  return { points, at: new Float32Array(at), out: new Float32Array(out), start, to: new Uint32Array(to), tri: new Uint32Array(tri), first, round: new Uint32Array(round) }
 }
 
 // The points point `i` links to.
 export const linked = (net: Net, i: number): Uint32Array => net.to.subarray(net.start[i], net.start[i + 1])
+
+// Places asked for one at a time: how many, where the i-th is, and how far it is along a way (the `out`
+// it is handed with: the dot of where it is with it), so most need never be placed.
+export type Places = { length: number; at(i: number): V; height(i: number): number }
+
+// How far the nearest of places `ps` stands out of a net's surface along `out` (a unit way; under 0, in
+// it): of the net's triangles with a corner out to `rings` links from point `near` (each corner placed by
+// `place`), those a line through a place along `out` meets, the least way out from where it meets them,
+// of all the places; undefined when no line meets any of them.
+export function outOf(net: Net, place: (i: number) => V, ps: Places, out: V, near: number, rings: number): number | undefined {
+  let ring = [near]
+  const seen = new Set(ring), tris = new Set<number>()
+  for (let n = 0; n <= rings && ring.length; n++) {
+    for (const q of ring) for (const t of net.round.subarray(net.first[q], net.first[q + 1])) tris.add(t)
+    ring = ring.flatMap(q => [...linked(net, q)]).filter(o => !seen.has(o) && (seen.add(o), true))
+  }
+  // Everything seen down `out`: two ways across it, and how far out along it.
+  const u = unit(cross(out, Math.abs(out[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0])), v = cross(out, u)
+  const flat = (p: V) => [dot(p, u), dot(p, v), dot(p, out)]
+  const corners = [...tris].map(t => [0, 1, 2].map(k => flat(place(net.tri[t * 3 + k]))))
+  // The least way out from the triangles met, of the places `down`.
+  const meet = (down: V[]) => {
+    let least: number | undefined
+    for (const [a, b, c] of corners) {
+      // A triangle lying along `out` is met by no line along it.
+      const area = (b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1])
+      if (Math.abs(area) < 1e-12) continue
+      const lo = [Math.min(a[0], b[0], c[0]) - 1e-9, Math.min(a[1], b[1], c[1]) - 1e-9]
+      const hi = [Math.max(a[0], b[0], c[0]) + 1e-9, Math.max(a[1], b[1], c[1]) + 1e-9]
+      for (const p of down) {
+        if (p[0] < lo[0] || p[0] > hi[0] || p[1] < lo[1] || p[1] > hi[1]) continue
+        // Where the line along `out` through p meets the triangle, by its shares of the corners.
+        const wb = ((p[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (p[1] - a[1])) / area
+        const wc = ((b[0] - a[0]) * (p[1] - a[1]) - (p[0] - a[0]) * (b[1] - a[1])) / area
+        if (wb < -1e-9 || wc < -1e-9 || wb + wc > 1 + 1e-9) continue
+        const s = p[2] - (a[2] + (b[2] - a[2]) * wb + (c[2] - a[2]) * wc)
+        if (least === undefined || s < least) least = s
+      }
+    }
+    return least
+  }
+  if (!corners.length || !ps.length) return undefined
+  // A place stands out of the surface at least its own height less the highest corner's. So, once the
+  // line through the lowest place has met a triangle, a place whose height less the highest corner's is
+  // no nearer than the nearest yet is passed over. If that line meets none, every place is looked at.
+  const heights = new Float64Array(ps.length)
+  let lowest = 0
+  for (let i = 0; i < ps.length; i++) {
+    heights[i] = ps.height(i)
+    if (heights[i] < heights[lowest]) lowest = i
+  }
+  let top = -Infinity
+  for (const c of corners) for (const k of c) top = Math.max(top, k[2])
+  let least = meet([flat(ps.at(lowest))])
+  if (least === undefined) return meet(Array.from({ length: ps.length }, (_, i) => flat(ps.at(i))))
+  for (let i = 0; i < ps.length; i++) {
+    if (heights[i] - top >= least) continue
+    const s = meet([flat(ps.at(i))])
+    if (s !== undefined && s < least) least = s
+  }
+  return least
+}
 
 // ---------------------------------------------------------------- holding a net
 
@@ -352,12 +479,12 @@ export function frameOn(out: V, had: V | null | undefined, yaw: number): { up: V
 const framed = (f: { up: V; ahead: V }, p: V) => add(add(mul(cross(f.up, f.ahead), p[0]), mul(f.up, p[1])), mul(f.ahead, p[2]))
 
 const nets = new WeakMap<object, Net>()
-// The net of a held row: its kind's box, of its definition's `size` and `cell`, made once a definition.
+// The net of a held row: the mesh of its kind's definition (`meshOf`), made once a definition.
 export function netOf(from: W | Wire, held: Row): Net {
   const k = def(from, held.kind)
   let net = nets.get(k)
   if (!net) {
-    net = netOn(box(k.size, k.cell))
+    net = netOn(meshOf(k))
     nets.set(k, net)
   }
   return net

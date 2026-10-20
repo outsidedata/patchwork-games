@@ -8,7 +8,7 @@ import { loopback } from '#addons/loopback/loopback.addon.ts'
 import { prepared } from '#plugins/loader/loader.sim.ts'
 import { ends } from '#plugins/anim/anim.sim.ts'
 import { keyCode } from '#plugins/player/player.plugin.ts'
-import { box, heldPoint, heldWay, linked, netOf, netOn, spotOn } from './plugins/climb/climb.sim.ts'
+import { box, heldPoint, linked, meshOf, netOf, netOn, sphere, spotOn } from './plugins/climb/climb.sim.ts'
 import { sim } from './giantslayer.sim.ts'
 import file from './giantslayer.scene.json'
 import defs from './assets/giantslayer.json'
@@ -76,6 +76,124 @@ function fromSurface(p: ArrayLike<number>) {
   const q = [Math.abs(p[0]) - w / 2, Math.abs(p[1] - h / 2) - h / 2, Math.abs(p[2]) - d / 2]
   const outside = Math.hypot(Math.max(q[0], 0), Math.max(q[1], 0), Math.max(q[2], 0))
   return outside > 0 ? outside : Math.max(q[0], q[1], q[2])
+}
+
+type V3 = number[]
+const vsub = (a: V3, b: V3) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
+const vdot = (a: V3, b: V3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+const vcross = (a: V3, b: V3) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
+const vlen = (a: V3) => Math.hypot(a[0], a[1], a[2])
+
+// How far a point of a mesh's own frame is from the mesh's surface, any closed mesh: 0 on it, negative
+// inside it. It is the distance to the nearest point of the nearest triangle, inside when the point lies
+// behind the way out there: the triangle's own where that nearest point is inside it, and where it is on
+// an edge or a corner, the faces round that edge or corner summed (a corner's each by its angle there),
+// so a point just off a fold is never taken for inside. Triangles are found by a grid of `h`-metre
+// boxes, each holding every triangle that comes within `h` of it; a point with none that near is at
+// least `h` from the surface, and in or out as its box's middle is (a ray from there crossing the
+// surface an odd number of times is inside): ±h is returned for it.
+function signedTo(mesh: { position: number[]; index: number[] }, h: number) {
+  // Corners at one place are one.
+  const ids = new Map<string, number>(), at: V3[] = [], of: number[] = []
+  for (let i = 0; i < mesh.position.length / 3; i++) {
+    const p = mesh.position.slice(i * 3, i * 3 + 3)
+    const key = p.map(v => Math.round(v / 1e-4)).join(',')
+    if (!ids.has(key)) { ids.set(key, at.length); at.push(p) }
+    of.push(ids.get(key)!)
+  }
+  const tris: number[][] = []
+  for (let t = 0; t < mesh.index.length; t += 3) tris.push([of[mesh.index[t]], of[mesh.index[t + 1]], of[mesh.index[t + 2]]])
+  const normal = tris.map(([a, b, c]) => { const n = vcross(vsub(at[b], at[a]), vsub(at[c], at[a])); return n.map(v => v / vlen(n)) })
+  const corner: V3[] = at.map(() => [0, 0, 0])
+  const edge = new Map<string, V3>()
+  const edgeKey = (a: number, b: number) => (a < b ? `${a} ${b}` : `${b} ${a}`)
+  tris.forEach((tri, f) => {
+    for (let k = 0; k < 3; k++) {
+      const a = tri[k], b = tri[(k + 1) % 3], c = tri[(k + 2) % 3]
+      const u = vsub(at[b], at[a]), v = vsub(at[c], at[a])
+      const angle = Math.acos(Math.max(-1, Math.min(1, vdot(u, v) / (vlen(u) * vlen(v)))))
+      corner[a] = corner[a].map((x, i) => x + normal[f][i] * angle)
+      const e = edge.get(edgeKey(a, b)) ?? [0, 0, 0]
+      edge.set(edgeKey(a, b), e.map((x, i) => x + normal[f][i]))
+    }
+  })
+  // The grid.
+  const lo = [0, 1, 2].map(k => Math.min(...at.map(p => p[k])) - 2 * h)
+  const hi = [0, 1, 2].map(k => Math.max(...at.map(p => p[k])) + 2 * h)
+  const n = [0, 1, 2].map(k => Math.ceil((hi[k] - lo[k]) / h))
+  const cellOf = (p: V3) => p.map((v, k) => Math.floor((v - lo[k]) / h))
+  const indexOf = (c: number[]) => (c[2] * n[1] + c[1]) * n[0] + c[0]
+  const boxes = new Map<number, number[]>()
+  tris.forEach((tri, f) => {
+    const from = cellOf([0, 1, 2].map(k => Math.min(...tri.map(i => at[i][k])) - h))
+    const to = cellOf([0, 1, 2].map(k => Math.max(...tri.map(i => at[i][k])) + h))
+    for (let z = from[2]; z <= to[2]; z++) for (let y = from[1]; y <= to[1]; y++) for (let x = from[0]; x <= to[0]; x++) {
+      const i = indexOf([x, y, z])
+      if (!boxes.has(i)) boxes.set(i, [])
+      boxes.get(i)!.push(f)
+    }
+  })
+  // Whether a point is inside: a ray from it, on a way no face lies along, crosses the surface an odd
+  // number of times.
+  const ray = [0.5772, 0.3123, 0.7547].map(v => v / Math.hypot(0.5772, 0.3123, 0.7547))
+  const inside = (p: V3) => {
+    let crossed = 0
+    for (const [a, b, c] of tris) {
+      const e1 = vsub(at[b], at[a]), e2 = vsub(at[c], at[a]), q = vcross(ray, e2), det = vdot(e1, q)
+      if (Math.abs(det) < 1e-12) continue
+      const s = vsub(p, at[a]), u = vdot(s, q) / det
+      if (u < 0 || u > 1) continue
+      const r = vcross(s, e1), v = vdot(ray, r) / det
+      if (v < 0 || u + v > 1) continue
+      if (vdot(e2, r) / det > 0) crossed++
+    }
+    return crossed % 2 === 1
+  }
+  const middles = new Map<number, boolean>()
+  // The nearest point of triangle f to p, and the way out there.
+  const nearest = (p: V3, f: number): { q: V3; out: V3 } => {
+    const [ia, ib, ic] = tris[f], a = at[ia], b = at[ib], c = at[ic]
+    const ab = vsub(b, a), ac = vsub(c, a), ap = vsub(p, a)
+    const d1 = vdot(ab, ap), d2 = vdot(ac, ap)
+    if (d1 <= 0 && d2 <= 0) return { q: a, out: corner[ia] }
+    const bp = vsub(p, b), d3 = vdot(ab, bp), d4 = vdot(ac, bp)
+    if (d3 >= 0 && d4 <= d3) return { q: b, out: corner[ib] }
+    const vc = d1 * d4 - d3 * d2
+    if (vc <= 0 && d1 >= 0 && d3 <= 0) { const v = d1 / (d1 - d3); return { q: a.map((x, k) => x + ab[k] * v), out: edge.get(edgeKey(ia, ib))! } }
+    const cp = vsub(p, c), d5 = vdot(ab, cp), d6 = vdot(ac, cp)
+    if (d6 >= 0 && d5 <= d6) return { q: c, out: corner[ic] }
+    const vb = d5 * d2 - d1 * d6
+    if (vb <= 0 && d2 >= 0 && d6 <= 0) { const w = d2 / (d2 - d6); return { q: a.map((x, k) => x + ac[k] * w), out: edge.get(edgeKey(ia, ic))! } }
+    const va = d3 * d6 - d5 * d4
+    if (va <= 0 && d4 - d3 >= 0 && d5 - d6 >= 0) { const w = (d4 - d3) / (d4 - d3 + (d5 - d6)); return { q: b.map((x, k) => x + (c[k] - b[k]) * w), out: edge.get(edgeKey(ib, ic))! } }
+    const den = 1 / (va + vb + vc), v = vb * den, w = vc * den
+    return { q: a.map((x, k) => x + ab[k] * v + ac[k] * w), out: normal[f] }
+  }
+  return (p: ArrayLike<number>) => {
+    const pt = [p[0], p[1], p[2]]
+    const c = cellOf(pt)
+    if (c.some((v, k) => v < 0 || v >= n[k])) return h
+    const i = indexOf(c)
+    let best = Infinity, sign = 1
+    for (const f of boxes.get(i) ?? []) {
+      const { q, out } = nearest(pt, f)
+      const d = vlen(vsub(pt, q))
+      if (d < best) { best = d; sign = vdot(vsub(pt, q), out) < 0 ? -1 : 1 }
+    }
+    if (best <= h) return sign * best
+    if (!middles.has(i)) middles.set(i, inside(c.map((v, k) => lo[k] + (v + 0.5) * h)))
+    return middles.get(i)! ? -h : h
+  }
+}
+
+// How far a place in the world is from a held row's surface, 0 on it, negative inside it: the wall's
+// box by its own measure, any other shape by its mesh's (`signedTo`, its grid in boxes of its cell).
+const measures = new Map<string, (p: ArrayLike<number>) => number>()
+function fromHeld(held: { kind: string; data: any }, p: number[]) {
+  if (held.kind === 'wall') return fromSurface(localTo(held, p))
+  const k = (defs as any)[held.kind]
+  if (!measures.has(held.kind)) measures.set(held.kind, signedTo(meshOf(k), k.cell))
+  return measures.get(held.kind)!(localTo(held, p))
 }
 
 test('1b: the wall\'s net is a point on its surface for every corner of its mesh and a link for every edge, drawn over it while shown', async () => {
@@ -147,7 +265,7 @@ test('1b: the wall\'s net is a point on its surface for every corner of its mesh
 test('1a: the yard holds one wall, standing on the ground the hero stands on, drawn as a box of its definition\'s size from the ground up', async () => {
   const { yard, p, frames } = await start()
   await frames(30)
-  expect([...new Set(yard.rows.map(r => r.kind))].sort()).toEqual(['loader', 'player', 'scenemanager', 'skydome3d', 'start', 'wall'])
+  expect([...new Set(yard.rows.map(r => r.kind))].sort()).toEqual(['loader', 'player', 'scenemanager', 'skydome3d', 'sphere', 'start', 'wall'])
   const wall = yard.rows.filter(r => r.kind === 'wall')
   expect(wall).toHaveLength(1)
   const hero = yard.rows.find(r => r.kind === 'player')!
@@ -170,10 +288,10 @@ test('1a: the yard holds one wall, standing on the ground the hero stands on, dr
 
 type Game = Awaited<ReturnType<typeof start>>
 
-// The hero put on the point of the wall's net nearest `want` (in the wall's own frame), holding grip,
-// as a hold its rule keeps: from that point toward its first link, at 0.
-function putOn(g: Game, want: number[]) {
-  const wall = g.yard.rows.find(r => r.kind === 'wall')!
+// The hero put on the point of the net of the `kind` (the wall unless named) nearest `want` (in its own
+// frame), holding grip, as a hold its rule keeps: from that point toward its first link, at 0.
+function putOn(g: Game, want: number[], kind = 'wall') {
+  const wall = g.yard.rows.find(r => r.kind === kind)!
   const hero = g.yard.rows.find(r => r.kind === 'player')!
   const net = netOf(g.p.client!.plugins.wire, wall)
   let a = 0, far = Infinity
@@ -185,14 +303,15 @@ function putOn(g: Game, want: number[]) {
   return { wall, hero, a }
 }
 
-// The hero's skin as the page draws it, against the wall: each vertex's distance from the wall's
-// surface (negative inside), each hand's nearest to it, and the deepest any vertex is inside and the
-// bone it is bound to most; and the deepest of the vertices bound most to a shin, a foot or a toe, and
-// of all the others but the hands, whose touch is their own; and the height of his lowest vertex.
-function against(g: Game) {
+// The hero's skin as the page draws it, against the shape of the `kind` (the wall unless named): each
+// vertex's distance from its surface (negative inside), each hand's nearest to it, and the deepest any
+// vertex is inside and the bone it is bound to most; and the deepest of the vertices bound most to a
+// shin, a foot or a toe, and of all the others but the hands, whose touch is their own; and the height of
+// his lowest vertex.
+function against(g: Game, kind = 'wall') {
   const plugins = g.p.client!.plugins
   const T = plugins.render3d.THREE as typeof THREE
-  const wall = g.yard.rows.find(r => r.kind === 'wall')!
+  const wall = g.yard.rows.find(r => r.kind === kind)!
   const hero = g.yard.rows.find(r => r.kind === 'player')!
   const root: THREE.Object3D = plugins.anim.model(hero.id)
   root.updateMatrixWorld(true)
@@ -211,9 +330,9 @@ function against(g: Game) {
     for (let i = 0; i < mesh.geometry.getAttribute('position').count; i++) {
       mesh.getVertexPosition(i, v).applyMatrix4(mesh.matrixWorld)
       lowest = Math.min(lowest, v.y)
-      // Into the wall's own frame.
+      // Into the shape's own frame.
       const local = localTo(wall, [v.x, v.y, v.z])
-      const d = fromSurface(local)
+      const d = fromHeld(wall, [v.x, v.y, v.z])
       let most = 0
       for (let k = 1; k < 4; k++) if (sw.getComponent(i, k) > sw.getComponent(i, most)) most = k
       const bone = mesh.skeleton.bones[si.getComponent(i, most)].name
@@ -826,28 +945,42 @@ const TILTS: { name: string; pitch: number; high: number; at: number[] }[] = [
 // up along it within a degree), each hand and foot on its point with its skin on the face within 1 mm, and
 // nothing of him in the wall deeper than touching skin, 1 mm.
 async function heldOnTilt(t: (typeof TILTS)[number]) {
-  const g = await tilted(t.pitch, t.high)
-  const { wall, hero } = putOn(g, t.at)
+  return heldOn(await tilted(t.pitch, t.high), t.at)
+}
+
+// The hero put on the point of the `kind`'s net nearest `want` (its own frame) and held still there for
+// a second: his body framed on the surface where he holds (his front into it within a degree, his up
+// along it within a degree), each hand and foot with its skin on the surface within 1 mm, and nothing of
+// him in it deeper than touching skin, 1 mm. The nearest each hand and foot came, and the deepest, are
+// returned with the rows.
+async function heldOn(g: Game, want: number[], kind = 'wall') {
+  const { wall, hero } = putOn(g, want, kind)
   await g.frames(60)
   const plugins = g.p.client!.plugins
   const T = plugins.render3d.THREE as typeof THREE
   const root: THREE.Object3D = plugins.anim.model(hero.id)
-  const out = new T.Vector3(...heldWay(wall, [0, 0, 1]))
+  // Each hand's and foot's nearest skin, least and most over the second, and the deepest of the rest.
+  const span = () => [Infinity, -Infinity]
+  const seen = { hands: { L: span(), R: span() }, soles: { L: span(), R: span() }, rest: { depth: 0, bone: '' }, feet: { depth: 0, bone: '' } }
   for (let i = 0; i < 60; i++) {
     await g.frames(1)
+    const out = new T.Vector3(...spotOn(plugins.wire, wall, hero.data.hold).out)
     root.updateMatrixWorld(true)
     const turn = root.getWorldQuaternion(new T.Quaternion())
     expect(new T.Vector3(0, 0, 1).applyQuaternion(turn).angleTo(out.clone().negate())).toBeLessThan(Math.PI / 180)
     expect(Math.abs(new T.Vector3(0, 1, 0).applyQuaternion(turn).dot(out))).toBeLessThan(Math.sin(Math.PI / 180))
-    const m = against(g)
+    const m = against(g, kind)
     for (const side of ['L', 'R'] as const) {
-      expect(Math.abs(m.hands[side])).toBeLessThanOrEqual(0.001)
-      expect(Math.abs(m.soles[side])).toBeLessThanOrEqual(0.001)
+      for (const [into, d] of [[seen.hands, m.hands[side]], [seen.soles, m.soles[side]]] as const) into[side] = [Math.min(into[side][0], d), Math.max(into[side][1], d)]
     }
-    expect(m.rest.depth).toBeLessThanOrEqual(0.001)
-    expect(m.feet.depth).toBeLessThanOrEqual(0.001)
+    if (m.rest.depth > seen.rest.depth) seen.rest = m.rest
+    if (m.feet.depth > seen.feet.depth) seen.feet = m.feet
   }
-  return { g, hero, wall }
+  console.log('held', kind, JSON.stringify(want), JSON.stringify(seen))
+  for (const side of ['L', 'R'] as const) for (const d of [...seen.hands[side], ...seen.soles[side]]) expect(Math.abs(d)).toBeLessThanOrEqual(0.001)
+  expect(seen.rest.depth).toBeLessThanOrEqual(0.001)
+  expect(seen.feet.depth).toBeLessThanOrEqual(0.001)
+  return { g, hero, wall, seen }
 }
 
 test('5a: on a wall leaning back 20°, his body leans with it, hands and feet on its face, nothing of him in it', async () => {
@@ -883,4 +1016,133 @@ test('5d: on the slab, under the overhang and under the ceiling, he climbs every
       }
     }
   }
+})
+
+test('6a: the sphere\'s net is a point on its surface for every corner of its mesh and a link for every edge, closed all round, drawn over it while shown; the measure of any mesh agrees with the box\'s own', async () => {
+  const k = defs.sphere
+  const shape = sphere(k.radius, k.cell)
+  const net = netOn(shape)
+  const measure = signedTo(shape, k.cell)
+  // A point for each place a vertex of the mesh stands (to a tenth of a millimetre), and no other: an
+  // icosahedron's faces cut n to an edge make 10n² + 2.
+  const key = (p: ArrayLike<number>) => [p[0], p[1], p[2]].map(v => String(Math.round(v * 1e4))).join(',')
+  const places = new Set<string>()
+  for (let i = 0; i < shape.position.length; i += 3) places.add(key(shape.position.slice(i, i + 3)))
+  expect(net.points).toBe(places.size)
+  const cut = Math.round((4 / Math.sqrt(10 + 2 * Math.sqrt(5)) * k.radius) / k.cell)
+  expect(net.points).toBe(10 * cut * cut + 2)
+  for (let i = 0; i < net.points; i++) expect(places.has(key(net.at.subarray(i * 3, i * 3 + 3)))).toBe(true)
+  // ON it: every point is the sphere's radius from its middle, and 0 from its mesh.
+  let off = 0, onMesh = 0, turned = 0
+  for (let i = 0; i < net.points; i++) {
+    const p = [...net.at.subarray(i * 3, i * 3 + 3)], o = [...net.out.subarray(i * 3, i * 3 + 3)]
+    off = Math.max(off, Math.abs(vlen(p) - k.radius))
+    onMesh = Math.max(onMesh, Math.abs(measure(p)))
+    // Each point's way out leaves it: a centimetre out along it is outside, a centimetre in is inside.
+    expect(vlen(o)).toBeCloseTo(1, 6)
+    expect(measure(p.map((v, j) => v + o[j] * 0.01))).toBeGreaterThan(0)
+    expect(measure(p.map((v, j) => v - o[j] * 0.01))).toBeLessThan(0)
+    turned = Math.max(turned, Math.acos(Math.min(1, vdot(o, p) / vlen(p))))
+  }
+  expect(off).toBeLessThan(1e-5)
+  expect(onMesh).toBeLessThan(1e-5)
+  // Every link is an edge of a triangle, both ways, no longer than a cell's diagonal.
+  const edges = new Set<string>()
+  for (let t = 0; t < shape.index.length; t += 3) {
+    const c = [0, 1, 2].map(j => key(shape.position.slice(shape.index[t + j] * 3, shape.index[t + j] * 3 + 3)))
+    for (const [a, b] of [[c[0], c[1]], [c[1], c[2]], [c[2], c[0]]]) edges.add([a, b].sort().join(' '))
+  }
+  let links = 0, longest = 0, shortest = Infinity
+  for (let i = 0; i < net.points; i++) {
+    for (const o of linked(net, i)) {
+      expect([...linked(net, o)]).toContain(i)
+      if (o < i) continue
+      links++
+      expect(edges.has([key(net.at.subarray(i * 3, i * 3 + 3)), key(net.at.subarray(o * 3, o * 3 + 3))].sort().join(' '))).toBe(true)
+      const d = vlen(vsub([...net.at.subarray(i * 3, i * 3 + 3)], [...net.at.subarray(o * 3, o * 3 + 3)]))
+      longest = Math.max(longest, d)
+      shortest = Math.min(shortest, d)
+    }
+  }
+  expect(links).toBe(edges.size)
+  expect(longest).toBeLessThanOrEqual(k.cell * Math.SQRT2)
+  // Closed all round, no seam: points less links plus triangles is 2, a sphere's.
+  expect(net.points - links + shape.index.length / 3).toBe(2)
+  console.log('6a', JSON.stringify({ points: net.points, links, triangles: shape.index.length / 3, off, onMesh, turned: (turned * 180) / Math.PI, longest, shortest }))
+
+  // The measure of any mesh, on the wall's box, is the box's own at every one of 4000 places in and
+  // round it, to a micrometre.
+  const boxed = signedTo(box(defs.wall.size, defs.wall.cell), defs.wall.cell)
+  let seed = 7
+  const random = () => ((seed = (seed * 16807) % 2147483647) / 2147483647)
+  let most = 0
+  for (let i = 0; i < 4000; i++) {
+    const p = [(random() - 0.5) * (defs.wall.size[0] + 2), random() * (defs.wall.size[1] + 2) - 1, (random() - 0.5) * (defs.wall.size[2] + 2)]
+    const want = fromSurface(p), got = boxed(p)
+    // Past a box of the grid the measure says only that it is that far, in or out.
+    if (Math.abs(want) > defs.wall.cell) expect(Math.sign(got) * Math.min(Math.abs(got), defs.wall.cell)).toBeCloseTo(Math.sign(want) * defs.wall.cell, 9)
+    else most = Math.max(most, Math.abs(got - want))
+  }
+  expect(most).toBeLessThan(1e-6)
+
+  // Drawn: a mesh named `sphere`, as far each way round its row as its mesh's corners go, and its net
+  // hidden, then shown, a line for each link, each end at its point where the sphere stands.
+  const { yard, p, frames, shared } = await start()
+  await frames(30)
+  const T = p.client!.plugins.render3d.THREE as typeof THREE
+  const ball = yard.rows.find(r => r.kind === 'sphere')!
+  expect(ball.data.placed).toBe(true)
+  const found = (name: string) => {
+    let o: THREE.Object3D | undefined
+    p.client!.plugins.render3d.scene.traverse((x: THREE.Object3D) => { if (x.name === name) o = x })
+    return o!
+  }
+  const mesh = found('sphere') as THREE.Mesh
+  mesh.updateMatrixWorld(true)
+  const b = new T.Box3().setFromObject(mesh)
+  const [x, y, z] = ball.data.pos
+  const corners = [0, 1, 2].map(j => shape.position.filter((_, i) => i % 3 === j))
+  expect(b.min.toArray()).toEqual([0, 1, 2].map(j => expect.closeTo([x, y, z][j] + Math.min(...corners[j]), 5)))
+  expect(b.max.toArray()).toEqual([0, 1, 2].map(j => expect.closeTo([x, y, z][j] + Math.max(...corners[j]), 5)))
+  // Within a centimetre of the sphere's own size: its corners are on it.
+  for (const j of [0, 1, 2]) expect(Math.max(...corners[j])).toBeGreaterThan(k.radius - 0.01)
+  const lines = found('sphere net') as THREE.LineSegments
+  expect(lines.visible).toBe(false)
+  shared.sphere.shown = true
+  await frames(1)
+  expect(lines.visible).toBe(true)
+  const at = lines.geometry.getAttribute('position')
+  expect(at.count).toBe(links * 2)
+  lines.updateMatrixWorld(true)
+  const ours = new Set<string>()
+  for (let i = 0; i < net.points; i++) ours.add([net.at[i * 3] + x, net.at[i * 3 + 1] + y, net.at[i * 3 + 2] + z].map(v => v.toFixed(3)).join(','))
+  for (let i = 0; i < at.count; i++) expect(ours.has(new T.Vector3().fromBufferAttribute(at, i).applyMatrix4(lines.matrixWorld).toArray().map(v => v.toFixed(3)).join(','))).toBe(true)
+  shared.sphere.shown = false
+})
+
+// Places on the sphere, in its own frame: its side facing the hero's start, its upper and lower half 45°
+// up and down from there, and underneath.
+const r45 = defs.sphere.radius * Math.SQRT1_2
+const ROUND = {
+  side: [0, 0, defs.sphere.radius],
+  upper: [0, r45, r45],
+  lower: [0, -r45, r45],
+  under: [0, -defs.sphere.radius, 0],
+}
+
+test('6b, 6e: on the sphere\'s side he hangs still, framed on it, hands and feet on it within 1 mm, nothing of him in it', async () => {
+  const { seen } = await heldOn(await start(), ROUND.side, 'sphere')
+  console.log('6b', JSON.stringify(seen))
+})
+
+test('6c, 6e: on the sphere\'s upper half and on its lower half he hangs still, framed on it, hands and feet on it within 1 mm, nothing of him in it', async () => {
+  for (const half of ['upper', 'lower'] as const) {
+    const { seen } = await heldOn(await start(), ROUND[half], 'sphere')
+    console.log('6c', half, JSON.stringify(seen))
+  }
+})
+
+test('6d, 6e: under the sphere he hangs still, framed on it, hands and feet on it within 1 mm, nothing of him in it', async () => {
+  const { seen } = await heldOn(await start(), ROUND.under, 'sphere')
+  console.log('6d', JSON.stringify(seen))
 })
