@@ -9,5 +9,6 @@
 !/demo_wormhole/
 !/farm2d/
 !/giantslayer/
+!/vehicles/
 __pycache__/
 .DS_Store
