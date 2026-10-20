@@ -1,0 +1,14 @@
+{
+  "rate": 48000,
+  "seed": 1,
+  "sounds": {
+    "kart": { "species": "two-stroke-single" },
+    "hatch": { "species": "inline-four" },
+    "muscle": { "species": "v8-crossplane" },
+    "exotic": { "species": "v8-flatplane" },
+    "grand": { "species": "v12" },
+    "truck": { "species": "straight-six-diesel" },
+    "pickup": { "species": "v8-diesel" },
+    "cart": { "species": "electric-motor" }
+  }
+}

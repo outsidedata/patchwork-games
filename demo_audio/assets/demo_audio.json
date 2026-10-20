@@ -1,0 +1,25 @@
+{
+  "car": {
+    "spawnLift": 0.13
+  },
+  "player": {
+    "camera": { "back": 7, "high": 2.8, "aim": 1.2, "followHz": 4, "riseHz": 1.5, "turnHz": 1 }
+  },
+  "caption": {
+    "title": [0, 0],
+    "lines": [0, 34],
+    "line": 20,
+    "keys": [0, 100],
+    "help": "w/s or triggers: pedal   a/d: steer   space: brake   v/tab: next car   c: car before",
+    "cars": {
+      "kart": { "name": "Kart", "engine": "125 cc two-stroke single" },
+      "hatch": { "name": "Hatch", "engine": "inline four" },
+      "muscle": { "name": "Muscle car", "engine": "cross-plane V8" },
+      "exotic": { "name": "Exotic", "engine": "flat-plane V8" },
+      "grand": { "name": "Grand tourer", "engine": "60° V12" },
+      "truck": { "name": "Truck", "engine": "straight-six diesel" },
+      "pickup": { "name": "Pickup", "engine": "V8 diesel" },
+      "cart": { "name": "Golf cart", "engine": "electric motor" }
+    }
+  }
+}
