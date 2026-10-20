@@ -199,3 +199,25 @@ move between frames (1 mm); every limb steps (1 to 4 times) and lifts 6 cm doing
 lift and 1 cm off the face nor into it, and lands on the point it stepped to; never two groups at once;
 none ever gives up its point; and every frame he is on the face with nothing of him in the wall deeper
 than touching skin, 1 mm. All of steps 1–3 pass with it.
+Commit: games `f779a45`.
+
+**5. Tilted walls: the slab, the overhang, the ceiling.** The wall takes `pitch`, how far it leans back
+about its own x through its base's middle (under 0 it leans out over him). Its net is placed by it
+(climb's `heldPoint` and `heldWay`), and it is drawn the same way. The body is framed on the face: his
+front points into it, and his up is the world's up laid along the face. On a face too near flat for
+that (a ceiling), his up is the one he had, or, the first step, the way he faced when he took hold. That
+frame is kept on his row as `lean` (null off the wall) and the page turns his body by it. The sim reads
+the same frame for which way the stick moves his hold, for which links fit his hands, and for where his
+palms sit. The page needed nothing new but the turn: it plants, steps and reaches in the face's own
+terms already.
+Proof (`yard.test.ts`, on the slab leaning back 20°, the overhang leaning out 20°, and the ceiling, the
+wall laid on its back face down 4 m up):
+- held still, every frame for a second, his front points into the face within a degree, and his up lies
+  along it within a degree; each hand and foot has its skin on the face within 1 mm; nothing of him is in
+  the wall deeper than touching skin, 1 mm (5a, 5b, 5c);
+- under the ceiling he faces straight up, and his up is the way he faced when he took hold (5c);
+- climbing up, down, left and right for 3 s on each (5d): every frame his hold is on the face, and
+  everything 4 checks on the wall holds: planted limbs on their points within 1 mm and not sliding,
+  every limb stepping (1 or 2 times) and lifting 6 cm in diagonal pairs, and nothing of him in it.
+  He moves at least as far as his speed takes him in 170 frames.
+All 23 tests of `yard.test.ts` pass (169 s), steps 1–4 among them.

@@ -8,7 +8,7 @@ import { loopback } from '#addons/loopback/loopback.addon.ts'
 import { prepared } from '#plugins/loader/loader.sim.ts'
 import { ends } from '#plugins/anim/anim.sim.ts'
 import { keyCode } from '#plugins/player/player.plugin.ts'
-import { box, linked, netOf, netOn, spotOn } from './plugins/climb/climb.sim.ts'
+import { box, heldPoint, heldWay, linked, netOf, netOn, spotOn } from './plugins/climb/climb.sim.ts'
 import { sim } from './giantslayer.sim.ts'
 import file from './giantslayer.scene.json'
 import defs from './assets/giantslayer.json'
@@ -58,6 +58,16 @@ async function start() {
     await frames(1)
   }
   return { truth, yard, p, frames, shared }
+}
+
+// A place in the world in a wall's own frame: back from where it stands, back by its yaw, then forward
+// by its pitch (the reverse of climb's `heldPoint`).
+function localTo(wall: { data: any }, v: number[]) {
+  const [x, y, z] = wall.data.pos, c = Math.cos(wall.data.yaw), s = Math.sin(wall.data.yaw)
+  const dx = v[0] - x, dy = v[1] - y, dz = v[2] - z
+  const u = [dx * c - dz * s, dy, dx * s + dz * c]
+  const p = wall.data.pitch, cp = Math.cos(p), sp = Math.sin(p)
+  return [u[0], u[1] * cp - u[2] * sp, u[1] * sp + u[2] * cp]
 }
 
 // How far a point of the wall's own frame is from the box's surface: 0 on it, negative inside it.
@@ -186,8 +196,6 @@ function against(g: Game) {
   const hero = g.yard.rows.find(r => r.kind === 'player')!
   const root: THREE.Object3D = plugins.anim.model(hero.id)
   root.updateMatrixWorld(true)
-  const [x, y, z] = wall.data.pos
-  const c = Math.cos(wall.data.yaw), s = Math.sin(wall.data.yaw)
   const hands: Record<'L' | 'R', number> = { L: Infinity, R: Infinity }
   // Each foot's nearest skin to the wall, its toes and the rest of it.
   const soles: Record<'L' | 'R', number> = { L: Infinity, R: Infinity }
@@ -204,8 +212,7 @@ function against(g: Game) {
       mesh.getVertexPosition(i, v).applyMatrix4(mesh.matrixWorld)
       lowest = Math.min(lowest, v.y)
       // Into the wall's own frame.
-      const dx = v.x - x, dz = v.z - z
-      const local = [dx * c - dz * s, v.y - y, dx * s + dz * c]
+      const local = localTo(wall, [v.x, v.y, v.z])
       const d = fromSurface(local)
       let most = 0
       for (let k = 1; k < 4; k++) if (sw.getComponent(i, k) > sw.getComponent(i, most)) most = k
@@ -380,10 +387,8 @@ async function climbing(g: Game, want: number[], keys: string[], frames: number)
   const { wall, hero } = putOn(g, want)
   await g.frames(60)
   const wire = g.p.client!.plugins.wire
-  const spot = () => {
-    const s = spotOn(wire, wall, hero.data.hold).at
-    return [s[0] - wall.data.pos[0], s[1] - wall.data.pos[1], s[2] - wall.data.pos[2]]
-  }
+  // Where his hold is, in the wall's own frame.
+  const spot = () => localTo(wall, spotOn(wire, wall, hero.data.hold).at)
   const from = spot()
   for (const k of keys) key('keydown', k)
   const limbs = defs.player.climb.limbs as Record<string, { touch: string[] }>
@@ -746,53 +751,136 @@ const climbs = async () => {
 const LIMBS = ['handL', 'handR', 'footL', 'footR']
 const limbOf = (name: string) => (defs.player.climb.limbs as Record<string, { skin: number; group: number }>)[name]
 
+// Every frame of a climb, step 4's: none gives up its point; never two groups stepping at once; a planted
+// hand or foot on its point, its skin out from the face, within 1 mm, reached (ik3d short under 1 mm), and
+// not moved since the last frame (1 mm); one in a step off the face (in the wall's frame) by no more than
+// its skin, the lift and 1 cm and never into it, landing on the point it stepped to. And every limb steps,
+// lifting off the face by at least half the lift. How many steps each took, and how high each lifted.
+function climbedWell(r: Awaited<ReturnType<typeof climbing>>, net: ReturnType<typeof netOf>, what: string) {
+  const d = defs.wall.size[2] / 2
+  // Where a point puts where a limb touches: on the front face, its skin out, in the world.
+  const on = (point: number, skin: number) => heldPoint(r.wall, [net.at[point * 3], net.at[point * 3 + 1], net.at[point * 3 + 2] + skin])
+  const steps: Record<string, number> = Object.fromEntries(LIMBS.map(n => [n, 0]))
+  const lifted: Record<string, number> = Object.fromEntries(LIMBS.map(n => [n, 0]))
+  r.seen.forEach((s, i) => {
+    for (const name of LIMBS) expect(s.touches[name]).toBeDefined()
+    const groups = new Set(LIMBS.filter(n => s.touches[n].step).map(n => limbOf(n).group))
+    if (groups.size > 1) console.log('turns', what, i, JSON.stringify(r.seen.slice(Math.max(0, i - 12), i + 1).map(f => Object.fromEntries(LIMBS.map(n => [n, `${f.touches[n].point}${f.touches[n].step ? `>${f.touches[n].step!.to}@${f.touches[n].step!.s.toFixed(2)}` : ''} ${f.touches[n].room?.toFixed(3)}`])))))
+    expect(groups.size).toBeLessThanOrEqual(1)
+    LIMBS.forEach((name, j) => {
+      const t = s.touches[name], skin = limbOf(name).skin, mid = s.middles[name]
+      if (!t.step) {
+        const want = on(t.point, skin)
+        expect(Math.hypot(mid.x - want[0], mid.y - want[1], mid.z - want[2])).toBeLessThanOrEqual(0.001)
+        expect(s.short[j]).toBeLessThan(0.001)
+        const was = r.seen[i - 1]?.touches[name]
+        if (was && !was.step && was.point === t.point) expect(mid.distanceTo(r.seen[i - 1].middles[name])).toBeLessThanOrEqual(0.001)
+      } else {
+        const off = localTo(r.wall, mid.toArray())[2] - d
+        expect(off).toBeLessThanOrEqual(skin + defs.player.climb.step.lift + 0.01)
+        expect(off).toBeGreaterThanOrEqual(skin - 0.001)
+        lifted[name] = Math.max(lifted[name], off - skin)
+        const next = r.seen[i + 1]?.touches[name]
+        if (next && !next.step) {
+          expect(next.point).toBe(t.step.to)
+          steps[name]++
+        }
+      }
+    })
+  })
+  for (const name of LIMBS) {
+    expect(steps[name]).toBeGreaterThan(0)
+    expect(lifted[name]).toBeGreaterThan(defs.player.climb.step.lift / 2)
+  }
+  return { steps, lifted: Object.fromEntries(Object.entries(lifted).map(([n, v]) => [n, +v.toFixed(3)])) }
+}
+
 test('4: every way he climbs, each hand and foot holds its point planted, steps to a new one lifted off the face and lands on it, in diagonal pairs, never sliding, keeping up with him', async () => {
   const g0 = await start()
-  const T = g0.p.client!.plugins.render3d.THREE as typeof THREE
   const net = netOf(g0.p.client!.plugins.wire, g0.yard.rows.find(r => r.kind === 'wall')!)
   for (const { keys, r } of await climbs()) {
-    const [x, y, z] = r.wall.data.pos
-    // Where a point puts where a limb touches: on the front face, its skin out.
-    const on = (point: number, skin: number) => new T.Vector3(net.at[point * 3] + x, net.at[point * 3 + 1] + y, net.at[point * 3 + 2] + z + skin)
-    const steps: Record<string, number> = Object.fromEntries(LIMBS.map(n => [n, 0]))
-    const lifted: Record<string, number> = Object.fromEntries(LIMBS.map(n => [n, 0]))
     onTheFace(r)
-    r.seen.forEach((s, i) => {
-      // 4e: none ever gives up its point, and every planted one reaches it.
-      for (const name of LIMBS) expect(s.touches[name]).toBeDefined()
-      // 4c: never two groups stepping at once.
-      const groups = new Set(LIMBS.filter(n => s.touches[n].step).map(n => limbOf(n).group))
-      if (groups.size > 1) console.log('4c', keys.join(''), i, JSON.stringify(r.seen.slice(Math.max(0, i - 12), i + 1).map(f => Object.fromEntries(LIMBS.map(n => [n, `${f.touches[n].point}${f.touches[n].step ? `>${f.touches[n].step!.to}@${f.touches[n].step!.s.toFixed(2)}` : ''} ${f.touches[n].room?.toFixed(3)}`])))))
-      expect(groups.size).toBeLessThanOrEqual(1)
-      LIMBS.forEach((name, j) => {
-        const t = s.touches[name], skin = limbOf(name).skin, mid = s.middles[name]
-        if (!t.step) {
-          // 4a: planted on its point, its skin out, within 1 mm; and reached.
-          expect(mid.distanceTo(on(t.point, skin))).toBeLessThanOrEqual(0.001)
-          expect(s.short[j]).toBeLessThan(0.001)
-          // 4d: not moved since the last frame if it was planted on the same point then.
-          const was = r.seen[i - 1]?.touches[name]
-          if (was && !was.step && was.point === t.point) expect(mid.distanceTo(r.seen[i - 1].middles[name])).toBeLessThanOrEqual(0.001)
-        } else {
-          // 4b: in a step, off the face by no more than its skin, the lift and 1 cm, and never into it.
-          const off = mid.z - (z + net.at[t.point * 3 + 2])
-          expect(off).toBeLessThanOrEqual(skin + defs.player.climb.step.lift + 0.01)
-          expect(off).toBeGreaterThanOrEqual(skin - 0.001)
-          lifted[name] = Math.max(lifted[name], off - skin)
-          // It lands where it stepped to.
-          const next = r.seen[i + 1]?.touches[name]
-          if (next && !next.step) {
-            expect(next.point).toBe(t.step.to)
-            steps[name]++
-          }
-        }
-      })
-    })
-    console.log('4', keys.join(''), JSON.stringify({ steps, lifted: Object.fromEntries(Object.entries(lifted).map(([n, v]) => [n, +v.toFixed(3)])) }))
-    // 4b: every limb steps, and lifts off the face by at least half the lift doing it.
-    for (const name of LIMBS) {
-      expect(steps[name]).toBeGreaterThan(0)
-      expect(lifted[name]).toBeGreaterThan(defs.player.climb.step.lift / 2)
+    console.log('4', keys.join(''), JSON.stringify(climbedWell(r, net, keys.join(''))))
+  }
+})
+
+// A tilted wall: the yard's wall leaned back by `pitch` (radians; under 0 it leans out), and its base's
+// middle raised to `high` metres, once it stands.
+async function tilted(pitch: number, high: number) {
+  const g = await start()
+  await g.frames(30)
+  const wall = g.yard.rows.find(r => r.kind === 'wall')!
+  wall.data.pitch = pitch
+  wall.data.pos = [wall.data.pos[0], wall.data.pos[1] + high, wall.data.pos[2]]
+  return g
+}
+// The slab, the overhang and the ceiling, each with where on its face he is put: the slab and the overhang
+// lean 20° back and out; the ceiling is the wall laid flat on its back, its face down, 4 m up.
+const TILTS: { name: string; pitch: number; high: number; at: number[] }[] = [
+  { name: 'slab', pitch: (20 * Math.PI) / 180, high: 0, at: [0, 4, defs.wall.size[2] / 2] },
+  { name: 'overhang', pitch: (-20 * Math.PI) / 180, high: 0, at: [0, 4, defs.wall.size[2] / 2] },
+  { name: 'ceiling', pitch: -Math.PI / 2, high: 4 + defs.wall.size[2] / 2, at: [0, 4, defs.wall.size[2] / 2] },
+]
+
+// Held still on a tilted face for a second: his body framed on it (his front into it within a degree, his
+// up along it within a degree), each hand and foot on its point with its skin on the face within 1 mm, and
+// nothing of him in the wall deeper than touching skin, 1 mm.
+async function heldOnTilt(t: (typeof TILTS)[number]) {
+  const g = await tilted(t.pitch, t.high)
+  const { wall, hero } = putOn(g, t.at)
+  await g.frames(60)
+  const plugins = g.p.client!.plugins
+  const T = plugins.render3d.THREE as typeof THREE
+  const root: THREE.Object3D = plugins.anim.model(hero.id)
+  const out = new T.Vector3(...heldWay(wall, [0, 0, 1]))
+  for (let i = 0; i < 60; i++) {
+    await g.frames(1)
+    root.updateMatrixWorld(true)
+    const turn = root.getWorldQuaternion(new T.Quaternion())
+    expect(new T.Vector3(0, 0, 1).applyQuaternion(turn).angleTo(out.clone().negate())).toBeLessThan(Math.PI / 180)
+    expect(Math.abs(new T.Vector3(0, 1, 0).applyQuaternion(turn).dot(out))).toBeLessThan(Math.sin(Math.PI / 180))
+    const m = against(g)
+    for (const side of ['L', 'R'] as const) {
+      expect(Math.abs(m.hands[side])).toBeLessThanOrEqual(0.001)
+      expect(Math.abs(m.soles[side])).toBeLessThanOrEqual(0.001)
+    }
+    expect(m.rest.depth).toBeLessThanOrEqual(0.001)
+    expect(m.feet.depth).toBeLessThanOrEqual(0.001)
+  }
+  return { g, hero, wall }
+}
+
+test('5a: on a wall leaning back 20°, his body leans with it, hands and feet on its face, nothing of him in it', async () => {
+  await heldOnTilt(TILTS[0])
+})
+
+test('5b: under a wall leaning out 20°, his body leans with it, hands and feet on its face, nothing of him in it', async () => {
+  await heldOnTilt(TILTS[1])
+})
+
+test('5c: under a ceiling he hangs face up, hands and feet on it, his up the way he faced when he took hold, nothing of him in it', async () => {
+  const { g, hero } = await heldOnTilt(TILTS[2])
+  // Facing straight up, his up is the way he faced (the start's, toward −z), laid flat.
+  const lean = hero.data.lean
+  expect(lean.ahead[1]).toBeCloseTo(1, 9)
+  expect(Math.hypot(lean.up[0] - Math.sin(hero.data.yaw), lean.up[2] - Math.cos(hero.data.yaw))).toBeLessThan(1e-9)
+  void g
+})
+
+test('5d: on the slab, under the overhang and under the ceiling, he climbs every way as he does on the wall: on the face, stepping in pairs, never sliding, nothing of him in it', async () => {
+  for (const t of TILTS) {
+    for (const keys of [['w'], ['s'], ['a'], ['d']]) {
+      const g = await tilted(t.pitch, t.high)
+      const net = netOf(g.p.client!.plugins.wire, g.yard.rows.find(r => r.kind === 'wall')!)
+      const r = await climbing(g, t.at, keys, 180)
+      // On the face (its front, in its frame) all the way, and moved the way pushed.
+      for (const s of r.seen) expect(s.at[2]).toBeCloseTo(defs.wall.size[2] / 2, 9)
+      expect(Math.hypot(...moved(r))).toBeGreaterThan(going(170))
+      console.log('5d', t.name, keys.join(''), JSON.stringify(climbedWell(r, net, `${t.name} ${keys.join('')}`)))
+      for (const s of r.seen) {
+        expect(s.m.rest.depth).toBeLessThanOrEqual(0.001)
+        expect(s.m.feet.depth).toBeLessThanOrEqual(0.001)
+      }
     }
   }
 })

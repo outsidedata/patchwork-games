@@ -48,10 +48,16 @@
 // Holding a net. A hold on a net is `{ on, a, b, t }` (`NetHold`): the held row's id, two linked points
 // of its net, and how far from `a` (0) to `b` (1) the holder's hands are between them; `onNet(hold)`
 // tells one from a hold on a limb. A held row's net is its kind's box (`netOf(from, held)`), placed
-// where the row stands and turned by its `yaw`; `spotOn(from, held, h)` is a place on it in the world,
-// `{ at, out }`. `stay(me, w)` puts the holder where its hold is: facing into the surface there, turned
-// by yaw alone, its root set back so the middle of its palms (each midway between its wrist and its
-// middle fingertip, in its `clips.still` clip's first frame, its own `ends`) is on the spot, and out
+// where the row stands, turned back by its `pitch` (radians, its front faced up that much) about its own
+// x through its base's middle and then by its `yaw` (`heldPoint`, `heldWay`); `spotOn(from, held, h)` is
+// a place on it in the world, `{ at, out }`. The holder's body is framed on the surface (`frameOn(out,
+// had, yaw)`): its front into it, its up the world's up laid flat on it, or where the surface faces up or
+// down so that leaves next to nothing (under a ceiling), the up it had (`had`) laid flat, or failing
+// that the way it faces. `stay(me, w)` puts the holder where its hold is: framed on the surface there
+// (kept on its row as `lean`, `{ up, ahead }`, which the page turns its body by; its `yaw` its front laid
+// flat, or kept while it faces straight up or down), its root set back so the middle of its palms (each
+// midway between its wrist and its middle fingertip, in its `clips.still` clip's first frame, its own
+// `ends`) is on the spot, and out
 // along the surface's way out by its `climb.brace` metres (under 0, in: his body stands nearer the
 // surface than that clip holds it from its hands, whose real hands reach the surface by IK on the page);
 // standing, not falling, holding its `clips.still` clip at its first frame (played at rate 0).
@@ -59,12 +65,12 @@
 // holder's palms, as they are in that clip's first frame where it stands now, within its `climb.reach`,
 // and stays there; it returns whether it did. `climbNet(me, w, dt, stick)` moves the hold by the stick
 // (x to the right, y down, each −1 to 1, pushed less than `climb.still` counting as not pushed): the
-// way is his right and the world's up, mixed by the stick and laid on the surface at his hold, and he
+// way is his right and his up as framed on the surface at his hold, mixed by the stick, and he
 // goes `climb.speed` metres a second times how far it is pushed (at most 1). Along a link he goes to
 // its end lying that way; from a point, on to a point whose surface faces within `climb.bend` (a cosine)
 // of the one he leaves, so a sharp edge (a wall's sides and top) stops him, and where his hands fit:
-// each palm, placed as his still pose places it with the middle of his palms on that point, nearest a
-// point of the net facing within `bend` of it. Of those links, the ones within `climb.fan` (a cosine) of
+// each palm, placed as his still pose places it with the middle of his palms on that point and his body
+// framed on the surface there, nearest a point of the net facing within `bend` of it. Of those links, the ones within `climb.fan` (a cosine) of
 // the way pushed, the one leaving him nearest the straight line he has been pushed along (the hold's
 // `lat`, how far he has drifted to one side of it, and `way`, the way he was pushed, kept while the way
 // stays the same), so a slant between the net's links zigzags along its line; failing those, the link
@@ -72,7 +78,8 @@
 // leaves by its nearer end. At a point with no such link he stops. A move that would put his root under
 // the ground (walker's) is not made. Then he stays where the hold is. Letting go of a net (`release`), the body is moved back
 // from the surface, if it must be, until the toes of the body standing (its stance's `still` role's
-// first frame, its own `ends`) are its `climb.clear` metres off it, so it falls and stands clear.
+// first frame, its own `ends`) are its `climb.clear` metres off it, so it falls and stands clear; its
+// `lean` is let go of, and it is upright again.
 import type { Row, W } from '#engine/engine.ts'
 import type { Wire } from '#engine/browser.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
@@ -323,6 +330,27 @@ export const linked = (net: Net, i: number): Uint32Array => net.to.subarray(net.
 export type NetHold = { on: number; a: number; b: number; t: number; lat?: number; way?: V }
 export const onNet = (h: Hold | NetHold): h is NetHold => 'a' in h
 
+// A point of a held row's own frame in the world, and a way: turned back by its `pitch` (radians, its
+// front faced up that much) about its x, then by its `yaw`, from where it stands.
+const pitched = (pitch: number, v: V) => [v[0], v[1] * math.cos(pitch) + v[2] * math.sin(pitch), -v[1] * math.sin(pitch) + v[2] * math.cos(pitch)]
+export const heldPoint = (held: Row, p: V) => world(held.data.pos, held.data.yaw, pitched(held.data.pitch, p))
+export const heldWay = (held: Row, v: V) => world([0, 0, 0], held.data.yaw, pitched(held.data.pitch, v))
+
+// The body's frame on a surface facing `out`: its front into the surface, and its up the world's up laid
+// flat on it; where the surface faces up or down so that leaves next to nothing, `had` laid flat (the
+// up it had), or failing that the way it faces, `yaw`.
+export function frameOn(out: V, had: V | null | undefined, yaw: number): { up: V; ahead: V } {
+  let up = sub([0, 1, 0], mul(out, out[1]))
+  if (len(up) < 0.2) {
+    const keep = had ?? [math.sin(yaw), 0, math.cos(yaw)]
+    up = sub(keep, mul(out, dot(keep, out)))
+  }
+  return { up: unit(up), ahead: mul(out, -1) }
+}
+// A way in the body's frame (x its left, y up, z ahead) in the world, for a body whose up and front are
+// `up` and `ahead`.
+const framed = (f: { up: V; ahead: V }, p: V) => add(add(mul(cross(f.up, f.ahead), p[0]), mul(f.up, p[1])), mul(f.ahead, p[2]))
+
 const nets = new WeakMap<object, Net>()
 // The net of a held row: its kind's box, of its definition's `size` and `cell`, made once a definition.
 export function netOf(from: W | Wire, held: Row): Net {
@@ -340,10 +368,9 @@ export function spotOn(from: W | Wire, held: Row, h: { a: number; b: number; t: 
   const net = netOf(from, held)
   const p = (i: number) => [...net.at.subarray(i * 3, i * 3 + 3)]
   const o = (i: number) => [...net.out.subarray(i * 3, i * 3 + 3)]
-  const { pos, yaw } = held.data
   return {
-    at: world(pos, yaw, add(p(h.a), mul(sub(p(h.b), p(h.a)), h.t))),
-    out: unit(world([0, 0, 0], yaw, add(o(h.a), mul(sub(o(h.b), o(h.a)), h.t)))),
+    at: heldPoint(held, add(p(h.a), mul(sub(p(h.b), p(h.a)), h.t))),
+    out: unit(heldWay(held, add(o(h.a), mul(sub(o(h.b), o(h.a)), h.t)))),
   }
 }
 
@@ -362,7 +389,7 @@ export function grabNet(me: Row, w: W, kinds: string[]): boolean {
   for (const held of kinds.flatMap(kind => w.all(kind))) {
     const net = netOf(w, held)
     for (let i = 0; i < net.points; i++) {
-      const far = len(sub(world(held.data.pos, held.data.yaw, [...net.at.subarray(i * 3, i * 3 + 3)]), hands))
+      const far = len(sub(heldPoint(held, [...net.at.subarray(i * 3, i * 3 + 3)]), hands))
       if (far <= k.reach && (!best || far < best.far)) best = { on: held.id, a: i, far }
     }
   }
@@ -449,21 +476,21 @@ export function climbNet(me: Row, w: W, dt: number, stick: V) {
   if (x || y) {
     const held = w.get(d.hold.on)!
     const net = netOf(w, held)
-    const { pos, yaw } = held.data
-    const place = (i: number) => world(pos, yaw, [...net.at.subarray(i * 3, i * 3 + 3)])
-    const face = (i: number) => world([0, 0, 0], yaw, [...net.out.subarray(i * 3, i * 3 + 3)])
+    const place = (i: number) => heldPoint(held, [...net.at.subarray(i * 3, i * 3 + 3)])
+    const face = (i: number) => heldWay(held, [...net.out.subarray(i * 3, i * 3 + 3)])
     const { out } = spotOn(w, held, d.hold)
-    // His right (his frame's x is his left) and the world's up, laid on the surface.
-    const right = world([0, 0, 0], d.yaw, [-1, 0, 0])
-    const along = add(mul(right, x), mul([0, 1, 0], y))
+    // His right and his up, laid on the surface.
+    const f = frameOn(out, d.lean?.up, d.yaw)
+    const along = add(mul(framed(f, [-1, 0, 0]), x), mul(f.up, y))
     const way = unit(sub(along, mul(out, dot(along, out))))
     // His hands fit at a point when each palm, placed as his still pose places it with the middle of his
-    // palms on that point, is nearest a point of the net facing within `bend` of it.
+    // palms on that point, his body framed on the surface there, is nearest a point of the net facing
+    // within `bend` of it.
     const [mid, hands] = [palms(w, me, k.clips.still), [palm(w, me, k.clips.still, 'L'), palm(w, me, k.clips.still, 'R')]]
     const fits = (p: number) => {
-      const o = face(p), yaw = math.atan2(-o[0], -o[2])
+      const o = face(p), there = frameOn(o, f.up, d.yaw)
       return hands.every(hand => {
-        const q = nearestOn(net, place, add(place(p), world([0, 0, 0], yaw, sub(hand, mid))), p)
+        const q = nearestOn(net, place, add(place(p), framed(there, sub(hand, mid))), p)
         return dot(face(q), o) >= k.bend
       })
     }
@@ -481,9 +508,12 @@ export function stay(me: Row, w: W) {
   const d = me.data
   const k = def(w, me.kind).climb
   const { at, out } = spotOn(w, w.get(d.hold.on)!, d.hold)
-  const yaw = math.atan2(-out[0], -out[2])
-  const root = add(sub(at, world([0, 0, 0], yaw, palms(w, me, k.clips.still))), mul(out, k.brace))
-  Object.assign(d, { pos: root, yaw, vel: [0, 0, 0], want: [0, 0], face: null, grounded: true, sliding: false, speed: 0 })
+  const lean = frameOn(out, d.lean?.up, d.yaw)
+  const root = add(sub(at, framed(lean, palms(w, me, k.clips.still))), mul(out, k.brace))
+  // His yaw is his front laid flat; facing straight up or down he keeps the one he had.
+  const flat = math.hypot(lean.ahead[0], lean.ahead[2])
+  const yaw = flat > 1e-6 ? math.atan2(lean.ahead[0], lean.ahead[2]) : d.yaw
+  Object.assign(d, { pos: root, yaw, lean, vel: [0, 0, 0], want: [0, 0], face: null, grounded: true, sliding: false, speed: 0 })
   if (d.clip !== k.clips.still) play(me, k.clips.still, { rate: 0 })
 }
 
@@ -498,6 +528,7 @@ export function release(me: Row, w: W) {
     const toes = Math.max(ends(w, me, 'footL', still)[5], ends(w, me, 'footR', still)[5])
     const short = toes + def(w, me.kind).climb.clear - dot(sub(d.pos, at), out)
     if (short > 0) d.pos = add(d.pos, mul(out, short))
+    d.lean = null
   }
   d.hold = null
   d.grounded = false

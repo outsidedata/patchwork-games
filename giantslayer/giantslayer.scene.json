@@ -145,7 +145,7 @@
       "placed": false,
       "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "grounded": true, "limp": false,
       "want": [0, 0], "face": null, "jump": false, "sliding": false, "speed": 0, "side": 0, "turned": 0,
-      "stick": [0, 0], "turning": [0, 0], "run": false, "gripping": false, "hold": null,
+      "stick": [0, 0], "turning": [0, 0], "run": false, "gripping": false, "hold": null, "lean": null,
       "hp": 4, "grip": 1, "charging": false, "charge": 0, "power": 0, "downFor": 0,
       "look": { "yaw": 0, "pitch": 0.25, "dist": 7 }, "lift": 1.4,
       "rig": "stand"
@@ -156,7 +156,7 @@
       "rig": "stand", "placed": false, "cool": 0, "shook": 0, "struck": false, "dead": false
     },
     "weakpoint": { "of": 0, "on": null, "segment": "torso", "along": 0.5, "around": 0, "hp": 1, "broken": false },
-    "wall": { "pos": [0, 0, 0], "yaw": 0, "placed": false }
+    "wall": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false }
   },
   "actors": [
     {

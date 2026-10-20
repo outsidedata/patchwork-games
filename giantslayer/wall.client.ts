@@ -1,5 +1,6 @@
 // A wall's look: its box (the climb plugin's `box` of its definition's `size` and `cell`) in its
-// definition's `colour`, at its row's `pos`, turned by its `yaw`, casting and taking shadows; the mesh
+// definition's `colour`, at its row's `pos`, leaned back by its `pitch` and turned by its `yaw`, casting
+// and taking shadows; the mesh
 // is named `wall`. While its definition's `shown` is true its net (climb's `netOn` of that box) is drawn
 // over it, a line for each link, named `wall net`, in front of everything.
 import type * as THREE from 'three'
@@ -41,7 +42,8 @@ export function tick(row: Row, plugins: Plugins) {
   if (!mesh || !lines) return
   const [x, y, z] = row.data.pos
   mesh.position.set(x, y, z)
-  mesh.rotation.set(0, row.data.yaw, 0)
+  // Leaned back by its pitch about its own x, then turned by its yaw, as climb's `heldPoint` places it.
+  mesh.rotation.set(-row.data.pitch, row.data.yaw, 0, 'YXZ')
   lines.visible = !!def(plugins.wire, row.kind).shown
 }
 

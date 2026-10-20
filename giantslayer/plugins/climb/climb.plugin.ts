@@ -3,7 +3,9 @@
 // kind's definition, `climb`. It is listed after anim, which poses the holder in its tick, and before
 // ik3d, which bends the limbs this hands it (`climb.ik3d.ts`, the `limbs` mod) in its own.
 //
-// Each frame, for each row holding a net (climb's `NetHold`), each limb its definition's `climb.ik`
+// Each frame, for each row holding a net (climb's `NetHold`), its body is turned by its row's `lean`
+// (`{ up, ahead }`, framed on the surface by the rules) in place of the yaw anim turned it by; and each
+// limb its definition's `climb.ik`
 // names (one of `climb.limbs`, `{ bones, touch, skin, across, side, bend, group, out }`: the three
 // bones ik3d bends, the last the hand or the foot; `touch`, two bone suffixes whose places mixed by half
 // are where it touches, the middle of a hand or the ball of a foot to its toe tip; `skin`, metres, how
@@ -58,7 +60,7 @@ import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
 import type { Handed } from '#plugins/ik3d/ik3d.plugin.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
-import { linked, nearestOn, netOf, onNet, spotOn } from './climb.sim.ts'
+import { heldPoint, heldWay, linked, nearestOn, netOf, onNet, spotOn } from './climb.sim.ts'
 
 type Limb = { bones: [string, string, string]; touch: [string, string]; skin: number; across?: [string, string]; side?: number; bend: number[]; group: number; out: number }
 // A limb's touch: the point it is planted on, and the step it is in, from one point to another, `s` 0
@@ -102,6 +104,12 @@ export function climb() {
         mine.n = plugins.wire.n
         const touches = mine.touches
         const limbsOf = k.limbs as Record<string, Limb>
+        // His body framed on the surface: turned by the row's `lean` in place of the yaw anim turned it by.
+        const lean = r.data.lean as { up: number[]; ahead: number[] } | null
+        if (lean) {
+          const up = new T.Vector3(...lean.up), ahead = new T.Vector3(...lean.ahead)
+          root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(new T.Vector3().crossVectors(up, ahead), up, ahead))
+        }
         // Where each end bone is as last frame's reach left it, before that is taken off: a step begins
         // from there.
         root.updateMatrixWorld(true)
@@ -109,15 +117,8 @@ export function climb() {
         // The body as its clip draws it this frame, not as last frame's reach left it.
         plugins.ik3d.unbend(r.id)
         const net = netOf(plugins.wire, held)
-        const [x, y, z] = held.data.pos, c = Math.cos(held.data.yaw), s = Math.sin(held.data.yaw)
-        const place = (i: number) => {
-          const p = net.at.subarray(i * 3, i * 3 + 3)
-          return [x + p[0] * c + p[2] * s, y + p[1], z - p[0] * s + p[2] * c]
-        }
-        const face = (i: number) => {
-          const o = net.out.subarray(i * 3, i * 3 + 3)
-          return new T.Vector3(o[0] * c + o[2] * s, o[1], -o[0] * s + o[2] * c)
-        }
+        const place = (i: number) => heldPoint(held, [...net.at.subarray(i * 3, i * 3 + 3)])
+        const face = (i: number) => new T.Vector3(...heldWay(held, [...net.out.subarray(i * 3, i * 3 + 3)]))
         root.updateMatrixWorld(true)
         const at = (o: THREE.Object3D) => new T.Vector3().setFromMatrixPosition(o.matrixWorld)
         // The way out of the surface where he holds, which the points his limbs reach must face near.
