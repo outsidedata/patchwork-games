@@ -116,3 +116,16 @@ Proof (`yard.test.ts`): held still, every frame for a second his left palm's mid
 nearest it, a palm out, within 1 mm, ik3d short under 0.1 mm, not moving (under 1 µm); its skin 0.86 mm
 into the face (it was 7.8 mm); the right hand, the rest and the feet as before. Step 2's tests all pass
 with it.
+Commit: core `639ef07` (ik3d's `unbend`), games `0cec4b0`.
+
+**3b. Both hands by IK.** `handR` joins `climb.ik`. Two cases found by step 2's tests once both hands
+reached when he stops:
+- by a side edge the right hand's nearest point was the wall's corner, facing 45° off, and its palm sat
+  1.7 cm off the face. A limb now reaches only points facing within `bend` of where he holds.
+- stopped going down (his root at the ground), the nearest points were 6 cm above his hands and his arms,
+  near straight hanging, fell 2.5 cm short. A limb now reaches only points it can reach (its end bone,
+  placed for the point, within its two bones' lengths of its first bone, less ik3d's millimetre);
+  failing the nearest point, the nearest of those that can, out to `climb.near` 4 links.
+Proof (`yard.test.ts`): held still, every frame for a second each hand's middle on its point, a palm
+out, within 1 mm, ik3d short under 0.1 mm, not moving; skins 0.86 mm and 0.075 mm into the face, both
+within 1 mm. All of steps 1 and 2 pass with both hands reaching whenever he stops.

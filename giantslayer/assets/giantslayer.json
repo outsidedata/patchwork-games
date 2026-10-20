@@ -37,9 +37,11 @@
       "turn": 0.5,
       "fan": 0.7,
       "bend": 0.9,
-      "ik": ["handL"],
+      "near": 4,
+      "ik": ["handL", "handR"],
       "limbs": {
-        "handL": { "bones": ["LeftArm", "LeftForeArm", "LeftHand"], "end": "LeftHand", "tip": "LeftHandMiddle4" }
+        "handL": { "bones": ["LeftArm", "LeftForeArm", "LeftHand"], "end": "LeftHand", "tip": "LeftHandMiddle4" },
+        "handR": { "bones": ["RightArm", "RightForeArm", "RightHand"], "end": "RightHand", "tip": "RightHandMiddle4" }
       },
       "rate": 1.6,
       "still": 0.1,

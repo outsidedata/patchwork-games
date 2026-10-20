@@ -8,7 +8,11 @@
 // (one of `climb.limbs`, `{ bones, end, tip }`: the three bones ik3d bends, and the suffixes of the end
 // bone and of the bone at its tip, whose places mixed by half are the middle of the hand or foot) reaches:
 // the point of the held row's net nearest the middle of that hand or foot as its clip puts it this
-// frame (ik3d's `unbend` first takes off last frame's reach), the hand
+// frame (ik3d's `unbend` first takes off last frame's reach), if that point faces within `climb.bend`
+// of the surface where he holds (so a hand by a wall's edge stays on its face) and the limb reaches it
+// (its end bone, placed for it, within its two bones' lengths of its first bone, less ik3d's
+// millimetre); failing that, the nearest to the middle of the points that do, out to `climb.near`
+// links from it; failing those, the limb is drawn as its clip draws it. The hand
 // or foot moved, as it is turned, so its middle is on that point and `climb.palm` metres out along the
 // way out of the surface there. Its middle joint bends the way its clip bends it: the pole ik3d is
 // handed is where the clip has the elbow or knee, off the line from the limb's first bone to its target,
@@ -24,7 +28,7 @@ import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
 import type { Handed } from '#plugins/ik3d/ik3d.plugin.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
-import { nearestOn, netOf, onNet } from './climb.sim.ts'
+import { linked, nearestOn, netOf, onNet, spotOn } from './climb.sim.ts'
 
 type Limb = { bones: [string, string, string]; end: string; tip: string }
 
@@ -77,14 +81,37 @@ export function climb() {
         }
         root.updateMatrixWorld(true)
         const at = (o: THREE.Object3D) => new T.Vector3().setFromMatrixPosition(o.matrixWorld)
+        // The way out of the surface where he holds, which the points his limbs reach must face near.
+        const facing = new T.Vector3(...spotOn(plugins.wire, held, hold).out)
         const limbs: Handed[] = []
         for (const name of k.ik as string[]) {
           const limb = (k.limbs as Record<string, Limb>)[name]
           const [first, middle] = limb.bones.map(b => bone(root, b))
           const end = bone(root, limb.end), tip = bone(root, limb.tip)
           const wrist = at(end), mid = wrist.clone().add(at(tip)).multiplyScalar(0.5)
-          const point = nearestOn(net, place, mid.toArray(), hold.a)
-          const goal = new T.Vector3(...place(point)).addScaledVector(face(point), k.palm).add(wrist.clone().sub(mid))
+          const from = at(first)
+          // Where the end bone goes for point `i`: the middle on it a palm out, as the hand is turned.
+          const goalOf = (i: number) => new T.Vector3(...place(i)).addScaledVector(face(i), k.palm).add(wrist.clone().sub(mid))
+          // How far the limb reaches, as ik3d cuts it: a millimetre short of its two bones' lengths.
+          const span = from.distanceTo(at(middle)) + at(middle).distanceTo(wrist) - 1e-3
+          const ok = (i: number) => face(i).dot(facing) >= k.bend && goalOf(i).distanceTo(from) <= span
+          // The point nearest its middle; failing it, the nearest of those it can reach that face near
+          // where he holds, out to `climb.near` links from it.
+          const nearest = nearestOn(net, place, mid.toArray(), hold.a)
+          let point = ok(nearest) ? nearest : -1
+          if (point < 0) {
+            let ring = [nearest], far = Infinity
+            const seen = new Set(ring)
+            for (let n = 0; n < k.near && ring.length; n++) {
+              ring = ring.flatMap(p => [...linked(net, p)]).filter(o => !seen.has(o) && (seen.add(o), true))
+              for (const o of ring) {
+                const d = new T.Vector3(...place(o)).distanceTo(mid)
+                if (ok(o) && d < far) { far = d; point = o }
+              }
+            }
+          }
+          if (point < 0) continue
+          const goal = goalOf(point)
           const key = `${r.id} ${name}`
           let target = targets.get(key)
           if (!target) targets.set(key, (target = new T.Object3D()))
@@ -92,7 +119,7 @@ export function climb() {
           end.matrixWorld.decompose(new T.Vector3(), target.quaternion, new T.Vector3())
           target.updateMatrixWorld(true)
           // The bend: where the clip has the middle joint, off the line from the first bone to the target.
-          const from = at(first), line = goal.clone().sub(from).normalize()
+          const line = goal.clone().sub(from).normalize()
           const off = at(middle).sub(from)
           off.sub(line.clone().multiplyScalar(off.dot(line)))
           const pole = off.applyQuaternion(root.getWorldQuaternion(new T.Quaternion()).invert()).normalize()
