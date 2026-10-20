@@ -77,3 +77,25 @@ his own `ends`) are `climb.clear` 3 cm off it: without it he landed with a toe 2
 Proof (`yard.test.ts`): from 4 m up he is off the ground, then lands (`grounded`) at the ground's
 height, standing in `idle`, upright as drawn, his lowest skin 1.2 cm into the ground (his soles on it,
 within 2 cm), and nothing of him in the wall (0 m).
+Commit: games `c35b7ea`.
+
+**2. Climbing the wall.** climb's `climbNet`: the stick (the page's `w a s d`) pushes his hold over the
+net at `climb.speed` 0.8 m/s, the way his right and the world's up laid on the surface. First tries got
+three things wrong, each seen in the numbers, each fixed:
+- pushed down he first slid a whole cell (25 cm) sideways: a hold starts on any link, and he kept going
+  along it because it lay within `turn` of down. Now at every point he takes the best link onward.
+- pushed up-left he went straight left: the left and up links tie on the face's grid and he took the
+  same one each time. Now of the links within `fan` (45°) of the push he takes the one that leaves him
+  nearest the straight line he is pushed along (`lat`, his drift to one side of it, kept on the hold).
+- at a side his outer hand overhung the edge, 1.3 cm off the face. Now a point is taken only where both
+  palms, placed as his still pose places them, land on net facing within `bend` of it.
+Proof (`yard.test.ts`, every frame of every push: the hold on the front face, both palms within 1 cm of
+it, nothing above the knees in it, shins and feet within 1e's 5 cm, root and skin over the ground, and
+his root the same offset from his hold every frame, his body following it):
+- 2a up: straight up (0 m across), 0.8 m/s from the step the push reaches the rules.
+- 2b down, left, right: each straight (0 m across), at the same speed.
+- 2c the four slants: up-right and down-left run the face's diagonal links straight; up-left and
+  down-right zigzag up and across, each within 10° of the push.
+- 2d at the top and both sides he stops where his hands are all on the face and a cell further would put
+  one past its edge, and stays; down, he stops before his root would go under the ground.
+- 2e going up, every step's move is his speed times the step, to a nanometre.

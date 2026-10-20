@@ -54,7 +54,20 @@
 // standing, not falling, holding its `clips.still` clip at its first frame (played at rate 0).
 // `grabNet(me, w, kinds)` takes hold of the point of a row of one of `kinds` nearest the middle of the
 // holder's palms, as they are in that clip's first frame where it stands now, within its `climb.reach`,
-// and stays there; it returns whether it did. Letting go of a net (`release`), the body is moved back
+// and stays there; it returns whether it did. `climbNet(me, w, dt, stick)` moves the hold by the stick
+// (x to the right, y down, each −1 to 1, pushed less than `climb.still` counting as not pushed): the
+// way is his right and the world's up, mixed by the stick and laid on the surface at his hold, and he
+// goes `climb.speed` metres a second times how far it is pushed (at most 1). Along a link he goes to
+// its end lying that way; from a point, on to a point whose surface faces within `climb.bend` (a cosine)
+// of the one he leaves, so a sharp edge (a wall's sides and top) stops him, and where his hands fit:
+// each palm, placed as his still pose places it with the middle of his palms on that point, nearest a
+// point of the net facing within `bend` of it. Of those links, the ones within `climb.fan` (a cosine) of
+// the way pushed, the one leaving him nearest the straight line he has been pushed along (the hold's
+// `lat`, how far he has drifted to one side of it, and `way`, the way he was pushed, kept while the way
+// stays the same), so a slant between the net's links zigzags along its line; failing those, the link
+// lying most the way pushed within `climb.turn` (a cosine). A link lying across the way he pushes he
+// leaves by its nearer end. At a point with no such link he stops. A move that would put his root under
+// the ground (walker's) is not made. Then he stays where the hold is. Letting go of a net (`release`), the body is moved back
 // from the surface, if it must be, until the toes of the body standing (its stance's `still` role's
 // first frame, its own `ends`) are its `climb.clear` metres off it, so it falls and stands clear.
 import type { Row, W } from '#engine/engine.ts'
@@ -304,7 +317,7 @@ export const linked = (net: Net, i: number): Uint32Array => net.to.subarray(net.
 // ---------------------------------------------------------------- holding a net
 
 // A hold on a net: the held row's id, two linked points of its net, and how far from `a` (0) to `b` (1).
-export type NetHold = { on: number; a: number; b: number; t: number }
+export type NetHold = { on: number; a: number; b: number; t: number; lat?: number; way?: V }
 export const onNet = (h: Hold | NetHold): h is NetHold => 'a' in h
 
 const nets = new WeakMap<object, Net>()
@@ -331,12 +344,13 @@ export function spotOn(from: W | Wire, held: Row, h: { a: number; b: number; t: 
   }
 }
 
-// The middle of the holder's palms in its own frame on a clip's first frame: each palm midway between
-// the wrist and the middle fingertip (its own `ends`), and midway between the two.
-function palms(w: W, me: Row, clip: string): V {
-  const l = ends(w, me, 'handL', { clip, clipT: 0 }), r = ends(w, me, 'handR', { clip, clipT: 0 })
-  return [(l[0] + l[3] + r[0] + r[3]) / 4, (l[1] + l[4] + r[1] + r[4]) / 4, (l[2] + l[5] + r[2] + r[5]) / 4]
+// A palm in the holder's own frame on a clip's first frame: midway between the wrist and the middle
+// fingertip (its own `ends`); and the middle of the two palms.
+function palm(w: W, me: Row, clip: string, hand: 'L' | 'R'): V {
+  const e = ends(w, me, `hand${hand}`, { clip, clipT: 0 })
+  return [(e[0] + e[3]) / 2, (e[1] + e[4]) / 2, (e[2] + e[5]) / 2]
 }
+const palms = (w: W, me: Row, clip: string): V => mul(add(palm(w, me, clip, 'L'), palm(w, me, clip, 'R')), 0.5)
 
 export function grabNet(me: Row, w: W, kinds: string[]): boolean {
   const k = def(w, me.kind).climb
@@ -353,6 +367,109 @@ export function grabNet(me: Row, w: W, kinds: string[]): boolean {
   me.data.hold = { on: best.on, a: best.a, b: linked(netOf(w, w.get(best.on)!), best.a)[0], t: 0 }
   stay(me, w)
   return true
+}
+
+// The point of a net nearest `to`, walking its links from `from` while each step comes nearer.
+function nearestOn(net: Net, place: (i: number) => V, to: V, from: number): number {
+  let at = from, far = len(sub(place(from), to))
+  for (;;) {
+    let next = -1
+    for (const o of linked(net, at)) {
+      const d = len(sub(place(o), to))
+      if (d < far) { far = d; next = o }
+    }
+    if (next < 0) return at
+    at = next
+  }
+}
+
+// How a hold moves over a net (`place` and `face` a point's place and way out in the world): `way` the
+// unit way pushed on the surface; `turn`, `fan` and `bend` cosines; `fits(p)` whether the holder's hands
+// fit at point `p`.
+type Travel = { place: (i: number) => V; face: (i: number) => V; way: V; turn: number; fan: number; bend: number; fits: (p: number) => boolean }
+
+// The hold moved `dist` metres the way pushed: along its link to the end lying that way, and from a
+// point on along a link to a point whose way out is within `bend` of the one it leaves and where the
+// hands fit. Of the links within `fan` of the way pushed, the one that leaves the hold nearest the
+// straight line it has been pushed along (`lat`, how far it has drifted to one side of that line, kept
+// on the hold while the way pushed stays the same); if none is, the link lying most that way within
+// `turn`. A link lying across the way pushed is left by its nearer end. It stops at a point with no
+// such link.
+function travel(net: Net, m: Travel, h: NetHold, dist: number): NetHold {
+  let { a, b, t } = h
+  const side = (out: V) => unit(cross(out, m.way))
+  // The drift is kept while the way pushed stays within a degree of the last.
+  let lat = h.way && dot(h.way, m.way) > 0.9998 ? h.lat ?? 0 : 0
+  let left = dist
+  const onward = (p: number) => {
+    const ok = [...linked(net, p)].filter(o => dot(m.face(o), m.face(p)) >= m.bend && m.fits(o))
+    const dir = (o: number) => sub(m.place(o), m.place(p))
+    const near = ok.filter(o => dot(unit(dir(o)), m.way) >= m.fan)
+    if (near.length) return near.reduce((x, y) => (Math.abs(lat + dot(dir(y), side(m.face(p)))) < Math.abs(lat + dot(dir(x), side(m.face(p)))) ? y : x))
+    let best: number | undefined, most = m.turn
+    for (const o of ok) {
+      const c = dot(unit(dir(o)), m.way)
+      if (c > most) { most = c; best = o }
+    }
+    return best
+  }
+  for (let n = 0; n < 256 && left > 1e-9; n++) {
+    // At a point: on along the best link from it.
+    if (t <= 0 || t >= 1) {
+      const p = t <= 0 ? a : b
+      const o = onward(p)
+      if (o === undefined) return { ...h, a: p, b: p === a ? b : a, t: 0, lat, way: m.way }
+      a = p
+      b = o
+      t = 0
+    }
+    const e = sub(m.place(b), m.place(a)), l = len(e) || 1e-9
+    let along = dot(e, m.way) / l
+    if (Math.abs(along) < m.turn) along = t < 0.5 ? -1 : 1
+    const room = along > 0 ? (1 - t) * l : t * l
+    const go = Math.min(left, room)
+    lat += dot(mul(e, ((along > 0 ? 1 : -1) * go) / l), side(m.face(a)))
+    t += ((along > 0 ? 1 : -1) * go) / l
+    if (go === room) t = along > 0 ? 1 : 0
+    left -= go
+  }
+  return { ...h, a, b, t, lat, way: m.way }
+}
+
+export function climbNet(me: Row, w: W, dt: number, stick: V) {
+  const d = me.data
+  const k = def(w, me.kind).climb
+  const push = (v: number) => (Math.abs(v) < k.still ? 0 : v)
+  const x = push(stick[0]), y = push(-stick[1])
+  if (x || y) {
+    const held = w.get(d.hold.on)!
+    const net = netOf(w, held)
+    const { pos, yaw } = held.data
+    const place = (i: number) => world(pos, yaw, [...net.at.subarray(i * 3, i * 3 + 3)])
+    const face = (i: number) => world([0, 0, 0], yaw, [...net.out.subarray(i * 3, i * 3 + 3)])
+    const { out } = spotOn(w, held, d.hold)
+    // His right (his frame's x is his left) and the world's up, laid on the surface.
+    const right = world([0, 0, 0], d.yaw, [-1, 0, 0])
+    const along = add(mul(right, x), mul([0, 1, 0], y))
+    const way = unit(sub(along, mul(out, dot(along, out))))
+    // His hands fit at a point when each palm, placed as his still pose places it with the middle of his
+    // palms on that point, is nearest a point of the net facing within `bend` of it.
+    const [mid, hands] = [palms(w, me, k.clips.still), [palm(w, me, k.clips.still, 'L'), palm(w, me, k.clips.still, 'R')]]
+    const fits = (p: number) => {
+      const o = face(p), yaw = math.atan2(-o[0], -o[2])
+      return hands.every(hand => {
+        const q = nearestOn(net, place, add(place(p), world([0, 0, 0], yaw, sub(hand, mid))), p)
+        return dot(face(q), o) >= k.bend
+      })
+    }
+    const was = d.hold
+    d.hold = travel(net, { place, face, way, turn: k.turn, fan: k.fan, bend: k.bend, fits }, d.hold, k.speed * Math.min(1, math.hypot(x, y)) * dt)
+    stay(me, w)
+    // A hold that would put his root under the ground is not taken: he stays where he was.
+    const [px, py, pz] = d.pos
+    if (py < stand(numbers(me, w), groundOf(w), px, pz)) d.hold = was
+  }
+  stay(me, w)
 }
 
 export function stay(me: Row, w: W) {

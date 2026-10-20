@@ -189,6 +189,8 @@ function against(g: Game) {
   const [x, y, z] = wall.data.pos
   const c = Math.cos(wall.data.yaw), s = Math.sin(wall.data.yaw)
   const hands: Record<'L' | 'R', number> = { L: Infinity, R: Infinity }
+  // Each hand's extent in the wall's frame: its least and most x and y.
+  const extent: Record<'L' | 'R', number[]> = { L: [Infinity, -Infinity, Infinity, -Infinity], R: [Infinity, -Infinity, Infinity, -Infinity] }
   let deepest = { depth: 0, bone: '' }, feet = { depth: 0, bone: '' }, rest = { depth: 0, bone: '' }
   let lowest = Infinity
   const v = new T.Vector3()
@@ -201,17 +203,23 @@ function against(g: Game) {
       lowest = Math.min(lowest, v.y)
       // Into the wall's own frame.
       const dx = v.x - x, dz = v.z - z
-      const d = fromSurface([dx * c - dz * s, v.y - y, dx * s + dz * c])
+      const local = [dx * c - dz * s, v.y - y, dx * s + dz * c]
+      const d = fromSurface(local)
       let most = 0
       for (let k = 1; k < 4; k++) if (sw.getComponent(i, k) > sw.getComponent(i, most)) most = k
       const bone = mesh.skeleton.bones[si.getComponent(i, most)].name
-      for (const side of ['L', 'R'] as const) if (bone.includes(side === 'L' ? 'LeftHand' : 'RightHand')) hands[side] = Math.min(hands[side], d)
+      for (const side of ['L', 'R'] as const) {
+        if (!bone.includes(side === 'L' ? 'LeftHand' : 'RightHand')) continue
+        hands[side] = Math.min(hands[side], d)
+        const e = extent[side]
+        extent[side] = [Math.min(e[0], local[0]), Math.max(e[1], local[0]), Math.min(e[2], local[1]), Math.max(e[3], local[1])]
+      }
       if (-d > deepest.depth) deepest = { depth: -d, bone }
       if (/(Left|Right)(Leg|Foot|Toe)/.test(bone)) { if (-d > feet.depth) feet = { depth: -d, bone } }
       else if (!/(Left|Right)Hand/.test(bone) && -d > rest.depth) rest = { depth: -d, bone }
     }
   })
-  return { hands, deepest, feet, rest, lowest }
+  return { hands, extent, deepest, feet, rest, lowest }
 }
 
 test('1c: the hero put on a spot of the wall stays on it, still, not falling, upright and facing straight into the wall', async () => {
@@ -315,7 +323,9 @@ test('1f: walking at the wall holding grip, he takes hold the first step a point
   const took = nearest(palmsAt(g, hero, before.pos, before.yaw))
   expect(hero.data.hold.a).toBe(took.best)
   expect(took.far).toBeLessThanOrEqual(defs.player.climb.reach)
-  expect(hero.data.hold.t).toBe(0)
+  // `w` still held, he climbs on from it that same step, a step's climb at most.
+  const along = Math.hypot(...[0, 1, 2].map(k => point(hero.data.hold.b)[k] - point(hero.data.hold.a)[k])) * hero.data.hold.t
+  expect(along).toBeLessThanOrEqual(defs.player.climb.speed * DT + 1e-9)
   // On the face: settled, each hand's nearest skin within 1 cm of it.
   await g.frames(60)
   const m = against(g)
@@ -358,4 +368,121 @@ test('1g: holding the wall 4 m up, he lets go of grip, drops off it, and lands o
   expect(Math.abs(m.lowest - wall.data.pos[1])).toBeLessThanOrEqual(0.02)
   // Nothing of him in the wall.
   expect(m.deepest.depth).toBe(0)
+})
+
+// The hero held on the face at `want`, settled, then `keys` held down for `frames` frames: each frame
+// where his hold is (in the wall's frame), where his root is, and his skin against the wall.
+async function climbing(g: Game, want: number[], keys: string[], frames: number) {
+  await g.frames(30)
+  const { wall, hero } = putOn(g, want)
+  await g.frames(60)
+  const wire = g.p.client!.plugins.wire
+  const spot = () => {
+    const s = spotOn(wire, wall, hero.data.hold).at
+    return [s[0] - wall.data.pos[0], s[1] - wall.data.pos[1], s[2] - wall.data.pos[2]]
+  }
+  const from = spot()
+  for (const k of keys) key('keydown', k)
+  const seen: { at: number[]; pos: number[]; m: ReturnType<typeof against> }[] = []
+  for (let i = 0; i < frames; i++) {
+    await g.frames(1)
+    expect(hero.data.hold).not.toBeNull()
+    seen.push({ at: spot(), pos: [...hero.data.pos], m: against(g) })
+  }
+  for (const k of keys) key('keyup', k)
+  return { from, seen, hero, wall }
+}
+
+// Every frame on the face: the hold on the front face, both palms touching it within 1 cm, nothing above
+// the knees in the wall, his shins and feet no deeper than 1e's 5 cm, his root and skin over the ground,
+// and his root where his hold puts it, the same offset from it every frame (his body following it).
+function onTheFace(r: Awaited<ReturnType<typeof climbing>>) {
+  const offset = r.seen[0].pos.map((v, k) => v - r.seen[0].at[k])
+  for (const s of r.seen) {
+    expect(s.at[2]).toBeCloseTo(defs.wall.size[2] / 2, 9)
+    expect(Math.abs(s.m.hands.L)).toBeLessThanOrEqual(0.01)
+    expect(Math.abs(s.m.hands.R)).toBeLessThanOrEqual(0.01)
+    expect(s.m.rest.depth).toBe(0)
+    expect(s.m.feet.depth).toBeLessThanOrEqual(0.05)
+    expect(s.pos[1]).toBeGreaterThanOrEqual(r.wall.data.pos[1])
+    expect(s.m.lowest).toBeGreaterThanOrEqual(r.wall.data.pos[1])
+    s.pos.forEach((v, k) => expect(v - s.at[k]).toBeCloseTo(offset[k], 9))
+  }
+}
+
+const moved = (r: Awaited<ReturnType<typeof climbing>>) => r.seen[r.seen.length - 1].at.map((v, k) => v - r.from[k])
+// How far he goes in `frames` frames at his speed, pushed all the way.
+const going = (frames: number) => defs.player.climb.speed * frames * DT
+
+test('2a: pushed up, his hold goes straight up the face, his body following, on the face the whole way', async () => {
+  const r = await climbing(await start(), [0, 3, defs.wall.size[2] / 2], ['w'], 60)
+  onTheFace(r)
+  const [x, y] = moved(r)
+  expect(Math.abs(x)).toBeLessThan(1e-9)
+  // He moves from the step the push reaches the rules, a step or two after the key.
+  expect(y).toBeGreaterThan(going(57))
+  expect(y).toBeLessThanOrEqual(going(60) + 1e-9)
+})
+
+test('2b: pushed down, left and right, his hold goes straight that way over the face, on it the whole way', async () => {
+  // Facing the wall (toward −z), his left is −x and his right +x.
+  for (const [keyName, way] of [['s', [0, -1]], ['a', [-1, 0]], ['d', [1, 0]]] as const) {
+    const r = await climbing(await start(), [0, 4, defs.wall.size[2] / 2], [keyName], 60)
+    onTheFace(r)
+    const [x, y] = moved(r)
+    const along = x * way[0] + y * way[1], across = x * way[1] - y * way[0]
+    expect(Math.abs(across)).toBeLessThan(1e-9)
+    expect(along).toBeGreaterThan(going(57))
+    expect(along).toBeLessThanOrEqual(going(60) + 1e-9)
+  }
+})
+
+test('2c: pushed on a slant, his hold goes that way over the face, within 10° of it, on it the whole way', async () => {
+  for (const [keys, way] of [[['w', 'd'], [1, 1]], [['w', 'a'], [-1, 1]], [['s', 'd'], [1, -1]], [['s', 'a'], [-1, -1]]] as const) {
+    const r = await climbing(await start(), [0, 4, defs.wall.size[2] / 2], [...keys], 90)
+    onTheFace(r)
+    const [x, y] = moved(r)
+    const angle = Math.acos((x * way[0] + y * way[1]) / (Math.hypot(x, y) * Math.SQRT2))
+    expect(angle).toBeLessThan((10 * Math.PI) / 180)
+    expect(Math.hypot(x, y)).toBeGreaterThan(0.5)
+  }
+})
+
+test('2d: pushed at the top and the sides he stops where his hands are still on the face and a cell further would put one past its edge, and stays there, never off it; pushed down he stops before his feet would go under the ground', async () => {
+  const [w, h, d] = defs.wall.size
+  const cell = defs.wall.cell
+  // Up: from 6 m, for 4 s, far past the top.
+  const up = await climbing(await start(), [0, 6, d / 2], ['w'], 240)
+  onTheFace(up)
+  const top = up.seen[up.seen.length - 1]
+  expect(up.seen.slice(-60).every(s => Math.abs(s.at[1] - top.at[1]) < 1e-9)).toBe(true)
+  // His hands' tops are on the face, and a cell higher the higher would be over the top.
+  const highest = Math.max(top.m.extent.L[3], top.m.extent.R[3])
+  expect(highest).toBeLessThanOrEqual(h)
+  expect(highest + cell).toBeGreaterThan(h)
+  // Right and left: for 5 s from the middle, past each side.
+  for (const [keyName, sign] of [['d', 1], ['a', -1]] as const) {
+    const r = await climbing(await start(), [0, 4, d / 2], [keyName], 300)
+    onTheFace(r)
+    const last = r.seen[r.seen.length - 1]
+    expect(r.seen.slice(-60).every(s => Math.abs(s.at[0] - last.at[0]) < 1e-9)).toBe(true)
+    // His outer hand is on the face, and a cell further it would be past the side.
+    const outer = sign > 0 ? Math.max(last.m.extent.L[1], last.m.extent.R[1]) : -Math.min(last.m.extent.L[0], last.m.extent.R[0])
+    expect(outer).toBeLessThanOrEqual(w / 2)
+    expect(outer + cell).toBeGreaterThan(w / 2)
+  }
+  // Down: for 5 s from 4 m; he stops with his root and skin still over the ground (onTheFace).
+  const down = await climbing(await start(), [0, 4, d / 2], ['s'], 300)
+  onTheFace(down)
+  const low = down.seen[down.seen.length - 1].at[1]
+  expect(down.seen.slice(-60).every(s => Math.abs(s.at[1] - low) < 1e-9)).toBe(true)
+  expect(low).toBeLessThan(4 - 1)
+})
+
+test('2e: going up the face his hold moves his speed every step, and every frame of every way he goes he is on the face and nothing of him is in the wall', async () => {
+  const r = await climbing(await start(), [0, 3, defs.wall.size[2] / 2], ['w'], 60)
+  onTheFace(r)
+  // Once he is going: each step's move is his speed times the step.
+  const steps = r.seen.slice(10).map((s, i) => s.at[1] - r.seen[9 + i].at[1])
+  for (const step of steps) expect(step).toBeCloseTo(defs.player.climb.speed * DT, 9)
 })

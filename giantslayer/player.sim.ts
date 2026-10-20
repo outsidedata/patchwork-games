@@ -16,8 +16,8 @@
 // game's `climb` plugin), and holds on until grip is let go or its `grip`, 1 full, runs out: holding,
 // it drains at `grip.drain` a second, `grip.shaken` while the colossus it holds roars, and on the
 // ground it fills at `grip.refill`; it takes hold only with `grip.least` or more. On the limb, the stick climbs it (w up, s down, a and d round it)
-// and the body goes where the limb goes. Holding a spot on a wall's net (climb's `NetHold`), it stays
-// on that spot (climb's `stay`). Let go, it falls.
+// and the body goes where the limb goes. Holding a spot on a wall's net (climb's `NetHold`), the stick
+// moves it over the net and it stays on its spot (climb's `climbNet`). Let go, it falls.
 //
 // Attack held charges a stab, full after `stab.charge` seconds; let go, the stab is played on the
 // upper body (`gesture`), and at its `hit` marker it strikes, with `stab.least` of its power uncharged
@@ -38,7 +38,7 @@ import { def } from '#plugins/loader/loader.sim.ts'
 import { animate, committed, gesture, play, rest, stop } from '#plugins/anim/anim.sim.ts'
 import { carry, groundOf, numbers, relative, stand, walk } from '#plugins/walker/walker.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
-import { apart, grab, grabNet, hang, onNet, release, stay } from './plugins/climb/climb.sim.ts'
+import { apart, climbNet, grab, grabNet, hang, onNet, release } from './plugins/climb/climb.sim.ts'
 
 const finite = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
@@ -102,7 +102,7 @@ export const player: Kind = {
     if (!d.hold && d.gripping && d.hp > 0 && d.grip >= k.grip.least && !grabNet(me, w, ['wall'])) grab(me, w, ['colossus'])
     if (d.hold) {
       d.grip = Math.max(0, d.grip - dt * (shaking(w, me) ? k.grip.shaken : k.grip.drain))
-      if (onNet(d.hold)) stay(me, w)
+      if (onNet(d.hold)) climbNet(me, w, dt, d.stick)
       else hang(me, w, dt, d.stick)
       const { markers } = animate(me, w, dt)
       if (markers.some(m => m.name === 'hit')) strike(me, w, k)
