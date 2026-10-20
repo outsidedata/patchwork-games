@@ -42,6 +42,16 @@
 // A mesh to climb. `box(size, cell)` is a box's mesh (`Mesh`, below), the shape a `wall` is drawn by.
 // `netOn(mesh)` is the net a body climbs on it (`Net`, below): its vertices the points, its triangles'
 // edges the links. `linked(net, i)` is the points point `i` links to.
+//
+// Holding a net. A hold on a net is `{ on, a, b, t }` (`NetHold`): the held row's id, two linked points
+// of its net, and how far from `a` (0) to `b` (1) the holder's hands are between them; `onNet(hold)`
+// tells one from a hold on a limb. A held row's net is its kind's box (`netOf(from, held)`), placed
+// where the row stands and turned by its `yaw`; `spotOn(from, held, h)` is a place on it in the world,
+// `{ at, out }`. `stay(me, w)` puts the holder where its hold is: facing into the surface there, turned
+// by yaw alone, its root set back so the middle of its palms (each midway between its wrist and its
+// middle fingertip, in its `clips.hold` clip's first frame, its own `ends`) is on the spot, and out
+// along the surface's way out by its `climb.palm` metres, the skin of the palm past that middle;
+// standing, not falling, playing its `clips.hold` clip.
 import type { Row, W } from '#engine/engine.ts'
 import type { Wire } from '#engine/browser.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
@@ -285,6 +295,53 @@ export function netOn(mesh: Mesh): Net {
 
 // The points point `i` links to.
 export const linked = (net: Net, i: number): Uint32Array => net.to.subarray(net.start[i], net.start[i + 1])
+
+// ---------------------------------------------------------------- holding a net
+
+// A hold on a net: the held row's id, two linked points of its net, and how far from `a` (0) to `b` (1).
+export type NetHold = { on: number; a: number; b: number; t: number }
+export const onNet = (h: Hold | NetHold): h is NetHold => 'a' in h
+
+const nets = new WeakMap<object, Net>()
+// The net of a held row: its kind's box, of its definition's `size` and `cell`, made once a definition.
+export function netOf(from: W | Wire, held: Row): Net {
+  const k = def(from, held.kind)
+  let net = nets.get(k)
+  if (!net) {
+    net = netOn(box(k.size, k.cell))
+    nets.set(k, net)
+  }
+  return net
+}
+
+// A place on a held row's net in the world now: the spot, and the way out of the surface there.
+export function spotOn(from: W | Wire, held: Row, h: { a: number; b: number; t: number }): { at: V; out: V } {
+  const net = netOf(from, held)
+  const p = (i: number) => [...net.at.subarray(i * 3, i * 3 + 3)]
+  const o = (i: number) => [...net.out.subarray(i * 3, i * 3 + 3)]
+  const { pos, yaw } = held.data
+  return {
+    at: world(pos, yaw, add(p(h.a), mul(sub(p(h.b), p(h.a)), h.t))),
+    out: unit(world([0, 0, 0], yaw, add(o(h.a), mul(sub(o(h.b), o(h.a)), h.t)))),
+  }
+}
+
+// The middle of the holder's palms in its own frame on a clip's first frame: each palm midway between
+// the wrist and the middle fingertip (its own `ends`), and midway between the two.
+function palms(w: W, me: Row, clip: string): V {
+  const l = ends(w, me, 'handL', { clip, clipT: 0 }), r = ends(w, me, 'handR', { clip, clipT: 0 })
+  return [(l[0] + l[3] + r[0] + r[3]) / 4, (l[1] + l[4] + r[1] + r[4]) / 4, (l[2] + l[5] + r[2] + r[5]) / 4]
+}
+
+export function stay(me: Row, w: W) {
+  const d = me.data
+  const k = def(w, me.kind).climb
+  const { at, out } = spotOn(w, w.get(d.hold.on)!, d.hold)
+  const yaw = math.atan2(-out[0], -out[2])
+  const root = add(sub(at, world([0, 0, 0], yaw, palms(w, me, k.clips.hold))), mul(out, k.palm))
+  Object.assign(d, { pos: root, yaw, vel: [0, 0, 0], want: [0, 0], face: null, grounded: true, sliding: false, speed: 0 })
+  if (d.clip !== k.clips.hold) play(me, k.clips.hold)
+}
 
 export function release(me: Row, w: W) {
   const d = me.data

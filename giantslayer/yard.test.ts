@@ -6,7 +6,7 @@ import { boot, type Scene } from '#engine/engine.ts'
 import { accept, link, load, manager, view } from '#addons/scenemanager/scenemanager.addon.ts'
 import { loopback } from '#addons/loopback/loopback.addon.ts'
 import { prepared } from '#plugins/loader/loader.sim.ts'
-import { box, linked, netOn } from './plugins/climb/climb.sim.ts'
+import { box, linked, netOf, netOn, spotOn } from './plugins/climb/climb.sim.ts'
 import { sim } from './giantslayer.sim.ts'
 import file from './giantslayer.scene.json'
 import defs from './assets/giantslayer.json'
@@ -42,6 +42,14 @@ async function start() {
   const frames = async (k: number) => { for (let i = 0; i < k; i++) { truth.step(DT); await p.frame() } }
   // The one copy of the definitions every rule and look reads.
   const shared = await prepared(top.world!, top.world!.defs)
+  // Frames until the hero's model has loaded and anim draws it, the loader decoding it meanwhile.
+  await frames(2)
+  for (let i = 0; i < 600; i++) {
+    const hero = yard.rows.find(r => r.kind === 'player')
+    if (hero && p.client!.plugins.anim.model(hero.id)) break
+    await new Promise(r => setTimeout(r, 10))
+    await frames(1)
+  }
   return { truth, yard, p, frames, shared }
 }
 
@@ -141,4 +149,79 @@ test('1a: the yard holds one wall, standing on the ground the hero stands on, dr
   const [x, y, z] = wall[0].data.pos
   expect(b.min.toArray()).toEqual([expect.closeTo(x - w / 2, 6), expect.closeTo(y, 6), expect.closeTo(z - d / 2, 6)])
   expect(b.max.toArray()).toEqual([expect.closeTo(x + w / 2, 6), expect.closeTo(y + h, 6), expect.closeTo(z + d / 2, 6)])
+})
+
+type Game = Awaited<ReturnType<typeof start>>
+
+// The hero put on the point of the wall's net nearest `want` (in the wall's own frame), holding grip,
+// as a hold its rule keeps: from that point toward its first link, at 0.
+function putOn(g: Game, want: number[]) {
+  const wall = g.yard.rows.find(r => r.kind === 'wall')!
+  const hero = g.yard.rows.find(r => r.kind === 'player')!
+  const net = netOf(g.p.client!.plugins.wire, wall)
+  let a = 0, far = Infinity
+  for (let i = 0; i < net.points; i++) {
+    const d = Math.hypot(net.at[i * 3] - want[0], net.at[i * 3 + 1] - want[1], net.at[i * 3 + 2] - want[2])
+    if (d < far) { far = d; a = i }
+  }
+  Object.assign(hero.data, { hold: { on: wall.id, a, b: linked(net, a)[0], t: 0 }, gripping: true, grip: 1 })
+  return { wall, hero, a }
+}
+
+// The hero's skin as the page draws it, against the wall: each vertex's distance from the wall's
+// surface (negative inside), each hand's nearest to it, and the deepest any vertex is inside and the
+// bone it is bound to most.
+function against(g: Game) {
+  const plugins = g.p.client!.plugins
+  const T = plugins.render3d.THREE as typeof THREE
+  const wall = g.yard.rows.find(r => r.kind === 'wall')!
+  const hero = g.yard.rows.find(r => r.kind === 'player')!
+  const root: THREE.Object3D = plugins.anim.model(hero.id)
+  root.updateMatrixWorld(true)
+  const [x, y, z] = wall.data.pos
+  const c = Math.cos(wall.data.yaw), s = Math.sin(wall.data.yaw)
+  const hands: Record<'L' | 'R', number> = { L: Infinity, R: Infinity }
+  let deepest = { depth: 0, bone: '' }
+  const v = new T.Vector3()
+  root.traverse(o => {
+    const mesh = o as THREE.SkinnedMesh
+    if (!mesh.isSkinnedMesh) return
+    const si = mesh.geometry.getAttribute('skinIndex'), sw = mesh.geometry.getAttribute('skinWeight')
+    for (let i = 0; i < mesh.geometry.getAttribute('position').count; i++) {
+      mesh.getVertexPosition(i, v).applyMatrix4(mesh.matrixWorld)
+      // Into the wall's own frame.
+      const dx = v.x - x, dz = v.z - z
+      const d = fromSurface([dx * c - dz * s, v.y - y, dx * s + dz * c])
+      let most = 0
+      for (let k = 1; k < 4; k++) if (sw.getComponent(i, k) > sw.getComponent(i, most)) most = k
+      const bone = mesh.skeleton.bones[si.getComponent(i, most)].name
+      for (const side of ['L', 'R'] as const) if (bone.includes(side === 'L' ? 'LeftHand' : 'RightHand')) hands[side] = Math.min(hands[side], d)
+      if (-d > deepest.depth) deepest = { depth: -d, bone }
+    }
+  })
+  return { hands, deepest }
+}
+
+test('1c: the hero put on a spot of the wall stays on it, still, not falling, upright and facing straight into the wall', async () => {
+  const g = await start()
+  await g.frames(30)
+  const { wall, hero } = putOn(g, [0, 4, defs.wall.size[2] / 2])
+  await g.frames(2)
+  const at = [...hero.data.pos], yaw = hero.data.yaw
+  const { out } = spotOn(g.p.client!.plugins.wire, wall, hero.data.hold)
+  await g.frames(120)
+  expect(hero.data.hold).not.toBeNull()
+  expect(hero.data.grounded).toBe(true)
+  expect(hero.data.vel).toEqual([0, 0, 0])
+  expect(Math.hypot(hero.data.pos[0] - at[0], hero.data.pos[1] - at[1], hero.data.pos[2] - at[2])).toBeLessThan(1e-9)
+  expect(hero.data.yaw).toBe(yaw)
+  // Facing straight into the wall: his front, (sin yaw, cos yaw), is the way into the surface.
+  expect(Math.sin(yaw) * -out[0] + Math.cos(yaw) * -out[2]).toBeCloseTo(1, 9)
+  // Upright as drawn: his model's up is the world's up.
+  const T = g.p.client!.plugins.render3d.THREE as typeof THREE
+  const root: THREE.Object3D = g.p.client!.plugins.anim.model(hero.id)
+  expect(new T.Vector3(0, 1, 0).applyQuaternion(root.quaternion).y).toBeCloseTo(1, 9)
+  // Off the ground: his feet are in the air.
+  expect(hero.data.pos[1]).toBeGreaterThan(wall.data.pos[1] + 0.5)
+  console.log('1c', JSON.stringify({ pos: hero.data.pos, clip: hero.data.clip, ...against(g) }))
 })

@@ -35,3 +35,14 @@ and a point for every place a vertex of the mesh stands, no more; each point's w
 leads out of the box (1 cm along it is outside, 1 cm against it inside); every link is an edge of a
 triangle, both ways, no longer than a cell's diagonal; not inside — no point or link middle is in the
 box. Drawn: hidden until `shown`, then a line for each link, each end on its point where the wall stands.
+Commit: games `52af105`.
+
+**1c. The hero put on one spot.** A hold on a net is `{ on, a, b, t }`: two linked points and how far
+from one to the other. climb's `stay` puts the hero there every step: facing into the surface, upright,
+his root set back so the middle of his palms (his own `ends`, in his hold clip's first frame) is on the
+spot, standing, not falling.
+Proof (`yard.test.ts`): put on the point nearest the middle of the face 4 m up, over 120 frames his place
+does not move (0 m), his yaw does not change, he is not falling (`grounded`, no velocity), his front is
+the way into the wall (cos = 1), his drawn model's up is the world's up, and his feet are 1.7 m up.
+Measured for 1d: in the `dangle` clip his left hand is 6 cm into the wall, his right 9 cm, and his right
+thigh 20 cm: that clip hangs from a ledge with the hands straight over the hips and the knees forward.
