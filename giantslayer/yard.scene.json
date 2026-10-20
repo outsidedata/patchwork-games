@@ -1,0 +1,29 @@
+{
+  "world": {
+    "terrain3d": {
+      "field": "gym",
+      "rings": [
+        { "reach": 200, "seg": 200 },
+        { "reach": 1000, "seg": 100 },
+        { "reach": 4000, "seg": 50 }
+      ],
+      "shadowReach": 200,
+      "budget": 6,
+      "seabed": false,
+      "static": true
+    }
+  },
+  "plugins": ["loader", "scenemanager", "player", "terrain3d", "skydome3d", "anim", "render3d", "chasecamera3d", "ui", "stats"],
+  "seats": 1,
+  "prefabs": {
+    "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
+    "scenemanager": { "out": {} }
+  },
+  "actors": [
+    { "is": "scenemanager" },
+    { "is": "loader" },
+    { "is": "skydome3d" },
+    { "is": "start", "slot": 0, "pos": [0, 0, 6], "yaw": 3.14159 },
+    { "is": "wall", "pos": [0, 0, 0], "yaw": 0 }
+  ]
+}

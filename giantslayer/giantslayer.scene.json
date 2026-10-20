@@ -115,6 +115,10 @@
         "gym": {
           "file": "gym.scene.json",
           "suspend": true
+        },
+        "yard": {
+          "file": "yard.scene.json",
+          "suspend": true
         }
       },
       "dt": 0.016666666666666666,
@@ -151,7 +155,8 @@
       "want": [0, 0], "face": null, "jump": false, "sliding": false, "speed": 0, "side": 0, "turned": 0,
       "rig": "stand", "placed": false, "cool": 0, "shook": 0, "struck": false, "dead": false
     },
-    "weakpoint": { "of": 0, "on": null, "segment": "torso", "along": 0.5, "around": 0, "hp": 1, "broken": false }
+    "weakpoint": { "of": 0, "on": null, "segment": "torso", "along": 0.5, "around": 0, "hp": 1, "broken": false },
+    "wall": { "pos": [0, 0, 0], "yaw": 0, "placed": false }
   },
   "actors": [
     {

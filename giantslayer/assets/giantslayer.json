@@ -59,5 +59,10 @@
     "hp": 1,
     "size": 0.9,
     "colour": "#7fe6ff"
+  },
+  "wall": {
+    "size": [6, 8, 1],
+    "cell": 0.25,
+    "colour": "#9a9488"
   }
 }

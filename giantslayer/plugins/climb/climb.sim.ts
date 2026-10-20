@@ -38,6 +38,8 @@
 // `apart(w, hold, at)` is how far another place `{ segment, along, around }` on the hold's limb is
 // from it over the limb's surface, metres, and `release(me, w)` lets go: the body is in the air where
 // it was, falling.
+//
+// A mesh to climb. `box(size, cell)` is a box's mesh (`Mesh`, below), the shape a `wall` is drawn by.
 import type { Row, W } from '#engine/engine.ts'
 import type { Wire } from '#engine/browser.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
@@ -200,6 +202,35 @@ export function apart(w: W, h: Hold, at: { segment: string; along: number; aroun
   const r = def(w, held.kind).segments[h.segment].radius
   const turn = Math.abs(math.atan2(math.sin(at.around - h.around), math.cos(at.around - h.around)))
   return math.hypot((at.along - h.along) * len(sub(b, a)), turn * r)
+}
+
+// ---------------------------------------------------------------- a mesh to climb
+
+// A mesh: every vertex's place, three numbers each, and its triangles, three vertex indices each, each
+// turned so its corners go round anticlockwise seen from outside.
+export type Mesh = { position: number[]; index: number[] }
+
+// A box `size` `[width, height, depth]` metres standing on its base, its base's middle at the origin
+// (x across, y up, z through, its front facing +z), each face a grid of squares as near `cell` metres
+// on a side as its length divides into.
+export function box(size: number[], cell: number): Mesh {
+  const [w, h, d] = size
+  const position: number[] = [], index: number[] = []
+  // A face from its corner `o` along `u` and `v`, u × v pointing out of the box.
+  const face = (o: V, u: V, v: V) => {
+    const nu = Math.max(1, Math.round(len(u) / cell)), nv = Math.max(1, Math.round(len(v) / cell))
+    const first = position.length / 3
+    for (let j = 0; j <= nv; j++) for (let i = 0; i <= nu; i++) position.push(...add(o, add(mul(u, i / nu), mul(v, j / nv))))
+    const at = (i: number, j: number) => first + j * (nu + 1) + i
+    for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) index.push(at(i, j), at(i + 1, j), at(i + 1, j + 1), at(i, j), at(i + 1, j + 1), at(i, j + 1))
+  }
+  face([-w / 2, 0, d / 2], [w, 0, 0], [0, h, 0])
+  face([w / 2, 0, -d / 2], [-w, 0, 0], [0, h, 0])
+  face([w / 2, 0, d / 2], [0, 0, -d], [0, h, 0])
+  face([-w / 2, 0, -d / 2], [0, 0, d], [0, h, 0])
+  face([-w / 2, h, d / 2], [w, 0, 0], [0, 0, -d])
+  face([-w / 2, 0, -d / 2], [w, 0, 0], [0, 0, d])
+  return { position, index }
 }
 
 export function release(me: Row, w: W) {
