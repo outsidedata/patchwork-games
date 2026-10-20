@@ -24,3 +24,14 @@ under it (walker's height).
 Proof (`yard.test.ts`, the game booted and its page run in node): the yard's rows are only scenemanager,
 loader, skydome3d, start, wall and the hero; the wall's base is at the height the hero's feet stand at;
 the page draws one `wall` mesh whose box is exactly 6 × 8 × 1 m from the ground up, centred on its row.
+Commit: games `871047e`.
+
+**1b. The wall's net.** climb's `netOn(mesh)`: a point for each place a vertex stands (the box's faces
+share their edges' vertices, so they are one point), a link for each edge of a triangle, and each
+point's way out the faces round it, by area. The wall draws it over itself while its definition's
+`shown` is true (`dev.html?net`).
+Proof (`yard.test.ts`): on — every point and the middle of every link is 0 m from the box's surface,
+and a point for every place a vertex of the mesh stands, no more; each point's way out is one long and
+leads out of the box (1 cm along it is outside, 1 cm against it inside); every link is an edge of a
+triangle, both ways, no longer than a cell's diagonal; not inside — no point or link middle is in the
+box. Drawn: hidden until `shown`, then a line for each link, each end on its point where the wall stands.

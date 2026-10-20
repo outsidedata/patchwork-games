@@ -40,6 +40,8 @@
 // it was, falling.
 //
 // A mesh to climb. `box(size, cell)` is a box's mesh (`Mesh`, below), the shape a `wall` is drawn by.
+// `netOn(mesh)` is the net a body climbs on it (`Net`, below): its vertices the points, its triangles'
+// edges the links. `linked(net, i)` is the points point `i` links to.
 import type { Row, W } from '#engine/engine.ts'
 import type { Wire } from '#engine/browser.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
@@ -232,6 +234,57 @@ export function box(size: number[], cell: number): Mesh {
   face([-w / 2, 0, -d / 2], [w, 0, 0], [0, 0, d])
   return { position, index }
 }
+
+// A net: `points` points, each one's place (`at`, three numbers) and the way out of the surface there
+// (`out`, three, one long) in the mesh's own frame, and its links: point i links to `to[start[i]]` up to
+// `to[start[i + 1]]`, both ways.
+export type Net = { points: number; at: Float32Array; out: Float32Array; start: Uint32Array; to: Uint32Array }
+
+const SAME = 1e-4 // metres: two vertices this close are one point
+
+// The net of a mesh: a point for each place a vertex stands (vertices at one place, which a mesh splits
+// where its faces part, are one point), a link for each edge of a triangle, and each point's way out
+// the faces round it, each by its area, made one long.
+export function netOn(mesh: Mesh): Net {
+  const places = new Map<string, number>()
+  const of: number[] = []
+  const at: number[] = []
+  for (let i = 0; i < mesh.position.length / 3; i++) {
+    const p = mesh.position.slice(i * 3, i * 3 + 3)
+    const key = p.map(v => Math.round(v / SAME)).join(',')
+    let n = places.get(key)
+    if (n === undefined) {
+      n = at.length / 3
+      places.set(key, n)
+      at.push(...p)
+    }
+    of.push(n)
+  }
+  const points = at.length / 3
+  const out = new Array(points * 3).fill(0)
+  const links = Array.from({ length: points }, () => new Set<number>())
+  for (let t = 0; t < mesh.index.length; t += 3) {
+    const [a, b, c] = [of[mesh.index[t]], of[mesh.index[t + 1]], of[mesh.index[t + 2]]]
+    const pa = at.slice(a * 3, a * 3 + 3), pb = at.slice(b * 3, b * 3 + 3), pc = at.slice(c * 3, c * 3 + 3)
+    const n = cross(sub(pb, pa), sub(pc, pa))
+    for (const p of [a, b, c]) for (let k = 0; k < 3; k++) out[p * 3 + k] += n[k]
+    for (const [x, y] of [[a, b], [b, c], [c, a]]) if (x !== y) { links[x].add(y); links[y].add(x) }
+  }
+  for (let p = 0; p < points; p++) {
+    const u = unit(out.slice(p * 3, p * 3 + 3))
+    for (let k = 0; k < 3; k++) out[p * 3 + k] = u[k]
+  }
+  const start = new Uint32Array(points + 1), to: number[] = []
+  links.forEach((s, p) => {
+    start[p] = to.length
+    to.push(...[...s].sort((x, y) => x - y))
+  })
+  start[points] = to.length
+  return { points, at: new Float32Array(at), out: new Float32Array(out), start, to: new Uint32Array(to) }
+}
+
+// The points point `i` links to.
+export const linked = (net: Net, i: number): Uint32Array => net.to.subarray(net.start[i], net.start[i + 1])
 
 export function release(me: Row, w: W) {
   const d = me.data

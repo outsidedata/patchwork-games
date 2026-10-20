@@ -16,7 +16,9 @@
       // `?watch=x,y,z` holds render3d's camera at x, z and y metres above the colossus's feet, looking at
       // the colossus, in place of the chase;
       // `?bot` names the playtester in the gym's copy and hands it the think of `giantslayer.think.ts`,
-      // so the seat plays the whole loop itself.
+      // so the seat plays the whole loop itself;
+      // `?net` draws the net a body climbs on over each wall (its definition's `shown`, set in the tab's
+      // one copy of the definitions, which every rule and look reads; `window.__defs`).
       // After the boot, `window.__scenes` holds the truths (`__scenes.get('gym').rows`), `window.__entered`
       // the name of the one entered, and an error
       // in a step or a frame is shown over the page and kept on `window.__error`, and `window.__client`
@@ -28,6 +30,7 @@
       import { scene as gym } from './gym.sim.ts'
       import { scene as arena } from './arena.sim.ts'
       import { think } from './giantslayer.think.ts'
+      import { prepared } from '#plugins/loader/loader.sim.ts'
       import file from './giantslayer.scene.json'
 
       const query = new URLSearchParams(location.search)
@@ -37,6 +40,9 @@
       const bot = query.has('bot')
       if (bot) ({ gym, arena })[entered].plugins.push('playtester')
       const watch = query.get('watch')?.split(',').map(Number)
+      const defs = await prepared(file.world, file.world.defs)
+      if (query.has('net')) defs.wall.shown = true
+      window.__defs = defs
 
       const dt = file.prefabs.engine.dt
       const truth = boot(file, sim)
