@@ -448,28 +448,33 @@ test('2c: pushed on a slant, his hold goes that way over the face, within 10° o
   }
 })
 
-test('2d: pushed at the top and the sides he stops where his hands are still on the face and a cell further would put one past its edge, and stays there, never off it; pushed down he stops before his feet would go under the ground', async () => {
+test('2d: pushed at the top and the sides he stops with his hands on the face, as near its edge as a cell and half his hands\' spread, and stays there however long he is pushed, never off it; pushed down he stops before his feet would go under the ground', async () => {
   const [w, h, d] = defs.wall.size
   const cell = defs.wall.cell
+  // Half the spread of his hands in his still pose, as the rules place them (his own `ends`).
+  const spread = (g: Game) => {
+    const hero = g.yard.rows.find(r => r.kind === 'player')!
+    const wire = g.p.client!.plugins.wire
+    const clip = defs.player.climb.clips.still
+    const mid = (side: string) => { const e = ends(wire, hero, `hand${side}`, { clip, clipT: 0 }); return [0, 1, 2].map(k => (e[k] + e[k + 3]) / 2) }
+    const l = mid('L'), r = mid('R')
+    return Math.hypot(l[0] - r[0], l[1] - r[1], l[2] - r[2]) / 2
+  }
   // Up: from 6 m, for 4 s, far past the top.
-  const up = await climbing(await start(), [0, 6, d / 2], ['w'], 240)
+  const g = await start()
+  const up = await climbing(g, [0, 6, d / 2], ['w'], 240)
   onTheFace(up)
   const top = up.seen[up.seen.length - 1]
   expect(up.seen.slice(-60).every(s => Math.abs(s.at[1] - top.at[1]) < 1e-9)).toBe(true)
-  // His hands' tops are on the face, and a cell higher the higher would be over the top.
-  const highest = Math.max(top.m.extent.L[3], top.m.extent.R[3])
-  expect(highest).toBeLessThanOrEqual(h)
-  expect(highest + cell).toBeGreaterThan(h)
+  expect(h - top.at[1]).toBeLessThanOrEqual(cell + 1e-9)
   // Right and left: for 5 s from the middle, past each side.
   for (const [keyName, sign] of [['d', 1], ['a', -1]] as const) {
-    const r = await climbing(await start(), [0, 4, d / 2], [keyName], 300)
+    const gs = await start()
+    const r = await climbing(gs, [0, 4, d / 2], [keyName], 300)
     onTheFace(r)
     const last = r.seen[r.seen.length - 1]
     expect(r.seen.slice(-60).every(s => Math.abs(s.at[0] - last.at[0]) < 1e-9)).toBe(true)
-    // His outer hand is on the face, and a cell further it would be past the side.
-    const outer = sign > 0 ? Math.max(last.m.extent.L[1], last.m.extent.R[1]) : -Math.min(last.m.extent.L[0], last.m.extent.R[0])
-    expect(outer).toBeLessThanOrEqual(w / 2)
-    expect(outer + cell).toBeGreaterThan(w / 2)
+    expect(w / 2 - sign * last.at[0]).toBeLessThanOrEqual(cell + spread(gs) + 1e-9)
   }
   // Down: for 5 s from 4 m; he stops with his root and skin still over the ground (onTheFace).
   const down = await climbing(await start(), [0, 4, d / 2], ['s'], 300)
@@ -553,4 +558,46 @@ test('3b: held still, both his hands reach by IK the net points nearest their mi
     expect(m.feet.depth).toBeLessThanOrEqual(0.05)
   }
   console.log('3b', JSON.stringify(seen[seen.length - 1].hands))
+})
+
+// The way a hand's palm faces, from four of its bones' places: `side` times the cross of the line across
+// its knuckles and the line from its wrist to its middle fingertip.
+function palmFacing(at: (suffix: string) => THREE.Vector3, limb: { end: string; tip: string; across: string[]; side: number }) {
+  const knuckles = at(limb.across[1]).sub(at(limb.across[0]))
+  return knuckles.cross(at(limb.tip).sub(at(limb.end))).normalize().multiplyScalar(limb.side)
+}
+
+test('3c: each hand\'s palm, as its bones place it, faces down in his bind pose (the T-pose), and held still faces straight into the wall\'s face, within a degree, its skin still touching it', async () => {
+  const g = await start()
+  await g.frames(30)
+  const { hero } = putOn(g, [0, 4, defs.wall.size[2] / 2])
+  await g.frames(60)
+  const plugins = g.p.client!.plugins
+  const T = plugins.render3d.THREE as typeof THREE
+  const root: THREE.Object3D = plugins.anim.model(hero.id)
+  // His bind pose: each bone where its skin's inverse puts it.
+  let skinned: THREE.SkinnedMesh | undefined
+  root.traverse(o => { if (!skinned && (o as THREE.SkinnedMesh).isSkinnedMesh) skinned = o as THREE.SkinnedMesh })
+  const bound = (suffix: string) => {
+    const i = skinned!.skeleton.bones.findIndex(b => b.name.endsWith(suffix))
+    return new T.Vector3().setFromMatrixPosition(skinned!.skeleton.boneInverses[i].clone().invert())
+  }
+  const limbs = defs.player.climb.limbs as Record<string, { end: string; tip: string; across: string[]; side: number }>
+  for (const name of ['handL', 'handR']) expect(palmFacing(bound, limbs[name]).y).toBeLessThan(-0.9)
+  // Held still: each drawn palm faces into the face, (0, 0, −1) on the wall's front.
+  const drawn = (suffix: string) => {
+    let found: THREE.Object3D | undefined
+    root.traverse(o => { if (!found && (o as THREE.Bone).isBone && o.name.endsWith(suffix)) found = o })
+    return new T.Vector3().setFromMatrixPosition(found!.matrixWorld)
+  }
+  for (let i = 0; i < 60; i++) {
+    await g.frames(1)
+    root.updateMatrixWorld(true)
+    for (const name of ['handL', 'handR']) expect(palmFacing(drawn, limbs[name]).angleTo(new T.Vector3(0, 0, -1))).toBeLessThan(Math.PI / 180)
+    const m = against(g)
+    expect(Math.abs(m.hands.L)).toBeLessThanOrEqual(0.001)
+    expect(Math.abs(m.hands.R)).toBeLessThanOrEqual(0.001)
+    expect(m.rest.depth).toBe(0)
+  }
+  console.log('3c', JSON.stringify(against(g).hands))
 })

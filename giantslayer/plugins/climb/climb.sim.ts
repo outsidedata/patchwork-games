@@ -52,7 +52,8 @@
 // `{ at, out }`. `stay(me, w)` puts the holder where its hold is: facing into the surface there, turned
 // by yaw alone, its root set back so the middle of its palms (each midway between its wrist and its
 // middle fingertip, in its `clips.still` clip's first frame, its own `ends`) is on the spot, and out
-// along the surface's way out by its `climb.palm` metres, the skin of the palm past that middle;
+// along the surface's way out by its `climb.brace` metres, the skin of the hands, as that clip turns
+// them, past that middle;
 // standing, not falling, holding its `clips.still` clip at its first frame (played at rate 0).
 // `grabNet(me, w, kinds)` takes hold of the point of a row of one of `kinds` nearest the middle of the
 // holder's palms, as they are in that clip's first frame where it stands now, within its `climb.reach`,
@@ -481,7 +482,7 @@ export function stay(me: Row, w: W) {
   const k = def(w, me.kind).climb
   const { at, out } = spotOn(w, w.get(d.hold.on)!, d.hold)
   const yaw = math.atan2(-out[0], -out[2])
-  const root = add(sub(at, world([0, 0, 0], yaw, palms(w, me, k.clips.still))), mul(out, k.palm))
+  const root = add(sub(at, world([0, 0, 0], yaw, palms(w, me, k.clips.still))), mul(out, k.brace))
   Object.assign(d, { pos: root, yaw, vel: [0, 0, 0], want: [0, 0], face: null, grounded: true, sliding: false, speed: 0 })
   if (d.clip !== k.clips.still) play(me, k.clips.still, { rate: 0 })
 }

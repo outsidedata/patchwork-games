@@ -129,3 +129,15 @@ reached when he stops:
 Proof (`yard.test.ts`): held still, every frame for a second each hand's middle on its point, a palm
 out, within 1 mm, ik3d short under 0.1 mm, not moving; skins 0.86 mm and 0.075 mm into the face, both
 within 1 mm. All of steps 1 and 2 pass with both hands reaching whenever he stops.
+Commit: games `a9ec42a`.
+
+**3c. Palms flat.** A palm faces along `side` times the cross of the line across its knuckles (index to
+little finger) and the line from its wrist to its middle fingertip; each hand is turned the shortest way
+that lays its palm onto the way into the surface, and placed so turned. Laid flat, the hands' skin sat
+2.81 and 2.82 cm off the face: the 5.55 cm was the clip's tilted hand. So two numbers now: `brace` 5.55
+cm, how far the rules stand his body back (his clip's hands while he climbs without IK), and `palm`
+2.74 cm, the skin of a flat palm past its middle.
+Proof (`yard.test.ts`): in his bind pose (the T-pose) both palms, by `side`, face down (y under −0.9), so
+the signs are right; held still, every frame for a second, each drawn palm faces into the face within
+1°, and its skin is 0.0009 mm and 0.09 mm from it. 2d now says what its stop means: he stays however long
+he is pushed, hands on the face, no further from the edge than a cell and half his hands' spread.

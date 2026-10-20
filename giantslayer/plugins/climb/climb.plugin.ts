@@ -5,16 +5,20 @@
 //
 // Each frame, for each row holding a net (climb's `NetHold`) where it held it last frame, each limb its
 // definition's `climb.ik` names
-// (one of `climb.limbs`, `{ bones, end, tip }`: the three bones ik3d bends, and the suffixes of the end
-// bone and of the bone at its tip, whose places mixed by half are the middle of the hand or foot) reaches:
+// (one of `climb.limbs`, `{ bones, end, tip, across, side }`: the three bones ik3d bends, and the
+// suffixes of the end bone and of the bone at its tip, whose places mixed by half are the middle of the
+// hand or foot) reaches:
 // the point of the held row's net nearest the middle of that hand or foot as its clip puts it this
 // frame (ik3d's `unbend` first takes off last frame's reach), if that point faces within `climb.bend`
 // of the surface where he holds (so a hand by a wall's edge stays on its face) and the limb reaches it
 // (its end bone, placed for it, within its two bones' lengths of its first bone, less ik3d's
 // millimetre); failing that, the nearest to the middle of the points that do, out to `climb.near`
-// links from it; failing those, the limb is drawn as its clip draws it. The hand
-// or foot moved, as it is turned, so its middle is on that point and `climb.palm` metres out along the
-// way out of the surface there. Its middle joint bends the way its clip bends it: the pole ik3d is
+// links from it; failing those, the limb is drawn as its clip draws it. The hand or foot is turned the
+// shortest way that lays it flat on the surface there: the way its palm faces (`side` times the cross
+// of the line across its knuckles, `across`, two bone suffixes, and the line from its end bone to its
+// tip) onto the way into the surface. It is moved, so turned, so its middle is on that point and
+// `climb.palm` metres out along the way out of the surface there, the skin of a palm laid flat past its
+// middle. Its middle joint bends the way its clip bends it: the pole ik3d is
 // handed is where the clip has the elbow or knee, off the line from the limb's first bone to its target,
 // in the body's frame.
 //
@@ -30,7 +34,7 @@ import type { Handed } from '#plugins/ik3d/ik3d.plugin.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import { linked, nearestOn, netOf, onNet, spotOn } from './climb.sim.ts'
 
-type Limb = { bones: [string, string, string]; end: string; tip: string }
+type Limb = { bones: [string, string, string]; end: string; tip: string; across: [string, string]; side: number }
 
 export function climb() {
   // Each holder's limbs this frame, by row id.
@@ -90,8 +94,14 @@ export function climb() {
           const end = bone(root, limb.end), tip = bone(root, limb.tip)
           const wrist = at(end), mid = wrist.clone().add(at(tip)).multiplyScalar(0.5)
           const from = at(first)
-          // Where the end bone goes for point `i`: the middle on it a palm out, as the hand is turned.
-          const goalOf = (i: number) => new T.Vector3(...place(i)).addScaledVector(face(i), k.palm).add(wrist.clone().sub(mid))
+          // The way the palm faces as the clip has it: `side` times the cross of the line across its
+          // knuckles and the line from the wrist to the tip.
+          const knuckles = at(bone(root, limb.across[1])).sub(at(bone(root, limb.across[0])))
+          const palmFaces = knuckles.cross(at(tip).sub(wrist)).normalize().multiplyScalar(limb.side)
+          // The hand turned the shortest way that lays its palm onto the surface at point `i`.
+          const flat = (i: number) => new T.Quaternion().setFromUnitVectors(palmFaces, face(i).negate())
+          // Where the end bone goes for point `i`: the middle on it a palm out, the hand laid flat.
+          const goalOf = (i: number) => new T.Vector3(...place(i)).addScaledVector(face(i), k.palm).add(wrist.clone().sub(mid).applyQuaternion(flat(i)))
           // How far the limb reaches, as ik3d cuts it: a millimetre short of its two bones' lengths.
           const span = from.distanceTo(at(middle)) + at(middle).distanceTo(wrist) - 1e-3
           const ok = (i: number) => face(i).dot(facing) >= k.bend && goalOf(i).distanceTo(from) <= span
@@ -117,6 +127,7 @@ export function climb() {
           if (!target) targets.set(key, (target = new T.Object3D()))
           target.position.copy(goal)
           end.matrixWorld.decompose(new T.Vector3(), target.quaternion, new T.Vector3())
+          target.quaternion.premultiply(flat(point))
           target.updateMatrixWorld(true)
           // The bend: where the clip has the middle joint, off the line from the first bone to the target.
           const line = goal.clone().sub(from).normalize()
