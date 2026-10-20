@@ -49,9 +49,9 @@
 // where the row stands and turned by its `yaw`; `spotOn(from, held, h)` is a place on it in the world,
 // `{ at, out }`. `stay(me, w)` puts the holder where its hold is: facing into the surface there, turned
 // by yaw alone, its root set back so the middle of its palms (each midway between its wrist and its
-// middle fingertip, in its `clips.hold` clip's first frame, its own `ends`) is on the spot, and out
+// middle fingertip, in its `clips.still` clip's first frame, its own `ends`) is on the spot, and out
 // along the surface's way out by its `climb.palm` metres, the skin of the palm past that middle;
-// standing, not falling, playing its `clips.hold` clip.
+// standing, not falling, holding its `clips.still` clip at its first frame (played at rate 0).
 import type { Row, W } from '#engine/engine.ts'
 import type { Wire } from '#engine/browser.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
@@ -338,9 +338,9 @@ export function stay(me: Row, w: W) {
   const k = def(w, me.kind).climb
   const { at, out } = spotOn(w, w.get(d.hold.on)!, d.hold)
   const yaw = math.atan2(-out[0], -out[2])
-  const root = add(sub(at, world([0, 0, 0], yaw, palms(w, me, k.clips.hold))), mul(out, k.palm))
+  const root = add(sub(at, world([0, 0, 0], yaw, palms(w, me, k.clips.still))), mul(out, k.palm))
   Object.assign(d, { pos: root, yaw, vel: [0, 0, 0], want: [0, 0], face: null, grounded: true, sliding: false, speed: 0 })
-  if (d.clip !== k.clips.hold) play(me, k.clips.hold)
+  if (d.clip !== k.clips.still) play(me, k.clips.still, { rate: 0 })
 }
 
 export function release(me: Row, w: W) {

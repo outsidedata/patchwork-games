@@ -170,7 +170,8 @@ function putOn(g: Game, want: number[]) {
 
 // The hero's skin as the page draws it, against the wall: each vertex's distance from the wall's
 // surface (negative inside), each hand's nearest to it, and the deepest any vertex is inside and the
-// bone it is bound to most.
+// bone it is bound to most; and the deepest of the vertices bound most to a shin, a foot or a toe, and
+// of all the others but the hands, whose touch is their own.
 function against(g: Game) {
   const plugins = g.p.client!.plugins
   const T = plugins.render3d.THREE as typeof THREE
@@ -181,7 +182,7 @@ function against(g: Game) {
   const [x, y, z] = wall.data.pos
   const c = Math.cos(wall.data.yaw), s = Math.sin(wall.data.yaw)
   const hands: Record<'L' | 'R', number> = { L: Infinity, R: Infinity }
-  let deepest = { depth: 0, bone: '' }
+  let deepest = { depth: 0, bone: '' }, feet = { depth: 0, bone: '' }, rest = { depth: 0, bone: '' }
   const v = new T.Vector3()
   root.traverse(o => {
     const mesh = o as THREE.SkinnedMesh
@@ -197,9 +198,11 @@ function against(g: Game) {
       const bone = mesh.skeleton.bones[si.getComponent(i, most)].name
       for (const side of ['L', 'R'] as const) if (bone.includes(side === 'L' ? 'LeftHand' : 'RightHand')) hands[side] = Math.min(hands[side], d)
       if (-d > deepest.depth) deepest = { depth: -d, bone }
+      if (/(Left|Right)(Leg|Foot|Toe)/.test(bone)) { if (-d > feet.depth) feet = { depth: -d, bone } }
+      else if (!/(Left|Right)Hand/.test(bone) && -d > rest.depth) rest = { depth: -d, bone }
     }
   })
-  return { hands, deepest }
+  return { hands, deepest, feet, rest }
 }
 
 test('1c: the hero put on a spot of the wall stays on it, still, not falling, upright and facing straight into the wall', async () => {
@@ -223,5 +226,38 @@ test('1c: the hero put on a spot of the wall stays on it, still, not falling, up
   expect(new T.Vector3(0, 1, 0).applyQuaternion(root.quaternion).y).toBeCloseTo(1, 9)
   // Off the ground: his feet are in the air.
   expect(hero.data.pos[1]).toBeGreaterThan(wall.data.pos[1] + 0.5)
-  console.log('1c', JSON.stringify({ pos: hero.data.pos, clip: hero.data.clip, ...against(g) }))
+})
+
+// The hero held on the middle of the face 4 m up, settled past his clip's fade, then measured each
+// frame for a second: each hand's nearest skin to the face, both ways, and the deepest of the rest.
+async function heldStill(g: Game) {
+  await g.frames(30)
+  const { hero } = putOn(g, [0, 4, defs.wall.size[2] / 2])
+  await g.frames(60)
+  const seen = { L: [Infinity, -Infinity], R: [Infinity, -Infinity], feet: { depth: 0, bone: '' }, rest: { depth: 0, bone: '' } }
+  for (let i = 0; i < 60; i++) {
+    await g.frames(1)
+    expect(hero.data.clip).toBe(defs.player.climb.clips.still)
+    expect(hero.data.clipT).toBe(0)
+    const m = against(g)
+    for (const side of ['L', 'R'] as const) seen[side] = [Math.min(seen[side][0], m.hands[side]), Math.max(seen[side][1], m.hands[side])]
+    if (m.feet.depth > seen.feet.depth) seen.feet = m.feet
+    if (m.rest.depth > seen.rest.depth) seen.rest = m.rest
+  }
+  return seen
+}
+
+test('1d: holding still in his still clip\'s first frame, both his palms touch the wall\'s face, each hand\'s nearest skin within 1 cm of it, in or out', async () => {
+  const seen = await heldStill(await start())
+  for (const side of ['L', 'R'] as const) {
+    expect(Math.abs(seen[side][0])).toBeLessThanOrEqual(0.01)
+    expect(Math.abs(seen[side][1])).toBeLessThanOrEqual(0.01)
+  }
+})
+
+test('1e: held still, nothing of him above the knees but his touching hands is inside the wall at all; his shins and feet, pressed to it in his still clip, are in no deeper than 5 cm until his feet reach the face by IK (3d)', async () => {
+  const seen = await heldStill(await start())
+  console.log('1e', JSON.stringify(seen))
+  expect(seen.rest.depth).toBe(0)
+  expect(seen.feet.depth).toBeLessThanOrEqual(0.05)
 })

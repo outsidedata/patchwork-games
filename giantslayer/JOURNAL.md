@@ -46,3 +46,18 @@ does not move (0 m), his yaw does not change, he is not falling (`grounded`, no 
 the way into the wall (cos = 1), his drawn model's up is the world's up, and his feet are 1.7 m up.
 Measured for 1d: in the `dangle` clip his left hand is 6 cm into the wall, his right 9 cm, and his right
 thigh 20 cm: that clip hangs from a ledge with the hands straight over the hips and the knees forward.
+Commit: games `6144166`.
+
+**1d. Palms on the face.** Every hanging clip measured against the wall, held on its first frame after
+its fade: `hang` (Braced Hang) puts the left hand 48 cm in and the right 31 cm off, useless on a flat
+face; `dangle` the thigh 20 cm in; the wall-climbing clips (`shimmyL`, `climbUp`, `climbDown`, `drop`)
+have both hands 4–7 cm in, 1.5 cm apart, and the toes about 10 cm in. A net hold now holds its own
+clip, `clips.still` = `shimmyL` (the Braced Hang Shimmy's first frame, its braced pose), at rate 0, and
+`climb.palm` = 5.55 cm, the hand's skin past the middle of its palm.
+Proof (`yard.test.ts`): held still for a second past the fade, his clip is `shimmyL` at 0 every frame,
+and each hand's nearest skin is within 1 cm of the face: left 0.78 cm in, right 0.74 cm off.
+
+**1e. Measured against the wall.** Every vertex of his drawn skin, every frame for a second: nothing
+above the knees but the touching hands is in the wall at all (0 m). His shins and feet are: the right
+toes 4.6 cm in, pressed to the wall in the braced pose. They come out when his feet reach the face by IK
+(3d); until then the test holds them to 5 cm.
