@@ -99,3 +99,20 @@ his root the same offset from his hold every frame, his body following it):
 - 2d at the top and both sides he stops where his hands are all on the face and a cell further would put
   one past its edge, and stays; down, he stops before his root would go under the ground.
 - 2e going up, every step's move is his speed times the step, to a nanometre.
+Commit: games `a96bc8a`.
+
+**3a. One hand by IK.** climb gets its browser half (`climb.plugin.ts`, shipped) and ik3d's `limbs` mod
+(`climb.ik3d.ts`); the yard lists `shipped` and `ik3d` after anim. Each limb `climb.ik` names reaches the
+net point nearest its middle as its clip puts it, its middle a `palm` out from the face there, as it is
+turned, its elbow bending the way the clip bends it. Core: ik3d's `unbend(id)` puts back the last
+solve's bones at once, so the page reads the hand where the clip has it this frame and not where last
+frame's reach left it (without it the hand clung to its old point). ik3d's own tests were not run: only
+giantslayer's are run in this work.
+Measured while climbing: the point nearest the clip's hand jumps a row (12.5 cm) above it and the arm,
+near straight hanging, falls 5.7 cm short of it for five frames. Planting a hand on a point while the
+body moves is step 4's stepping; until then a hold that moved since the last frame reaches with nothing
+(its clip's hands, as in step 2), and when he stops the hand goes to its point in one frame.
+Proof (`yard.test.ts`): held still, every frame for a second his left palm's middle is on the net point
+nearest it, a palm out, within 1 mm, ik3d short under 0.1 mm, not moving (under 1 µm); its skin 0.86 mm
+into the face (it was 7.8 mm); the right hand, the rest and the feet as before. Step 2's tests all pass
+with it.

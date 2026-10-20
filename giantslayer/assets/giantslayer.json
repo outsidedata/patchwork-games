@@ -37,6 +37,10 @@
       "turn": 0.5,
       "fan": 0.7,
       "bend": 0.9,
+      "ik": ["handL"],
+      "limbs": {
+        "handL": { "bones": ["LeftArm", "LeftForeArm", "LeftHand"], "end": "LeftHand", "tip": "LeftHandMiddle4" }
+      },
       "rate": 1.6,
       "still": 0.1,
       "clips": { "hold": "dangle", "up": "climbUp", "down": "climbDown", "left": "shimmyR", "right": "shimmyL", "still": "shimmyL" }

@@ -486,3 +486,47 @@ test('2e: going up the face his hold moves his speed every step, and every frame
   const steps = r.seen.slice(10).map((s, i) => s.at[1] - r.seen[9 + i].at[1])
   for (const step of steps) expect(step).toBeCloseTo(defs.player.climb.speed * DT, 9)
 })
+
+// Where a limb's middle is as the page draws him: midway between its end bone and the bone at its tip.
+function middleOf(g: Game, limb: { end: string; tip: string }) {
+  const T = g.p.client!.plugins.render3d.THREE as typeof THREE
+  const hero = g.yard.rows.find(r => r.kind === 'player')!
+  const root: THREE.Object3D = g.p.client!.plugins.anim.model(hero.id)
+  root.updateMatrixWorld(true)
+  const find = (suffix: string) => {
+    let found: THREE.Object3D | undefined
+    root.traverse(o => { if (!found && (o as THREE.Bone).isBone && o.name.endsWith(suffix)) found = o })
+    return new T.Vector3().setFromMatrixPosition(found!.matrixWorld)
+  }
+  return find(limb.end).add(find(limb.tip)).multiplyScalar(0.5)
+}
+
+test('3a: held still, his left hand reaches by IK the net point nearest its middle, its middle on that point a palm out from the face, to a millimetre, and stays; its skin touches the face', async () => {
+  const g = await start()
+  await g.frames(30)
+  const { wall, hero } = putOn(g, [0, 4, defs.wall.size[2] / 2])
+  await g.frames(60)
+  const net = netOf(g.p.client!.plugins.wire, wall)
+  const limb = defs.player.climb.limbs.handL
+  const first = middleOf(g, limb)
+  for (let i = 0; i < 60; i++) {
+    await g.frames(1)
+    const mid = middleOf(g, limb)
+    // The point nearest it, and where its middle should be: that point, a palm out from the face.
+    let best = 0, far = Infinity
+    for (let p = 0; p < net.points; p++) {
+      const d = Math.hypot(net.at[p * 3] + wall.data.pos[0] - mid.x, net.at[p * 3 + 1] + wall.data.pos[1] - mid.y, net.at[p * 3 + 2] + wall.data.pos[2] - mid.z)
+      if (d < far) { far = d; best = p }
+    }
+    const want = [0, 1, 2].map(k => net.at[best * 3 + k] + wall.data.pos[k] + net.out[best * 3 + k] * defs.player.climb.palm)
+    expect(Math.hypot(mid.x - want[0], mid.y - want[1], mid.z - want[2])).toBeLessThanOrEqual(0.001)
+    expect(g.p.client!.plugins.ik3d.short(hero.id)[0]).toBeLessThan(1e-4)
+    expect(mid.distanceTo(first)).toBeLessThan(1e-6)
+    const m = against(g)
+    expect(Math.abs(m.hands.L)).toBeLessThanOrEqual(0.01)
+    expect(Math.abs(m.hands.R)).toBeLessThanOrEqual(0.01)
+    expect(m.rest.depth).toBe(0)
+    expect(m.feet.depth).toBeLessThanOrEqual(0.05)
+  }
+  console.log('3a', JSON.stringify({ hands: against(g).hands }))
+})

@@ -41,7 +41,8 @@
 //
 // A mesh to climb. `box(size, cell)` is a box's mesh (`Mesh`, below), the shape a `wall` is drawn by.
 // `netOn(mesh)` is the net a body climbs on it (`Net`, below): its vertices the points, its triangles'
-// edges the links. `linked(net, i)` is the points point `i` links to.
+// edges the links. `linked(net, i)` is the points point `i` links to, and `nearestOn(net, place, to,
+// from)` the point nearest a place, walking the links from point `from` while each step comes nearer.
 //
 // Holding a net. A hold on a net is `{ on, a, b, t }` (`NetHold`): the held row's id, two linked points
 // of its net, and how far from `a` (0) to `b` (1) the holder's hands are between them; `onNet(hold)`
@@ -370,7 +371,7 @@ export function grabNet(me: Row, w: W, kinds: string[]): boolean {
 }
 
 // The point of a net nearest `to`, walking its links from `from` while each step comes nearer.
-function nearestOn(net: Net, place: (i: number) => V, to: V, from: number): number {
+export function nearestOn(net: Net, place: (i: number) => V, to: V, from: number): number {
   let at = from, far = len(sub(place(from), to))
   for (;;) {
     let next = -1

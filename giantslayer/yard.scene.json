@@ -11,9 +11,11 @@
       "budget": 6,
       "seabed": false,
       "static": true
-    }
+    },
+    "shipped": { "plugins": ["climb"] },
+    "ik3d": { "kinds": {}, "mods": { "body": "anim", "limbs": "climb" } }
   },
-  "plugins": ["loader", "scenemanager", "player", "terrain3d", "skydome3d", "anim", "render3d", "chasecamera3d", "ui", "stats"],
+  "plugins": ["loader", "scenemanager", "player", "terrain3d", "skydome3d", "anim", "shipped", "ik3d", "render3d", "chasecamera3d", "ui", "stats"],
   "seats": 1,
   "prefabs": {
     "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
