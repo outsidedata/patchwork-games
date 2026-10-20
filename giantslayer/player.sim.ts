@@ -6,7 +6,8 @@
 // `walk` m/s, or `run` while run is held, facing the way it goes; anim plays its gears and moments.
 // `before` stands it on the `start` of its slot, facing that start's `yaw`, once and again after it
 // is beaten. `look` is the camera chasecamera3d sits on, `{ yaw, pitch, dist }`, turned by the mouse
-// at `look.turn` radians a pixel, its pitch kept within `look.pitch`; while it holds on to a limb the
+// at `look.turn` radians a pixel, and by the right stick (`turning`) at `look.stick` radians a second
+// pushed all the way, less as it is pushed less, its pitch kept within `look.pitch`; while it holds on to a limb the
 // camera's yaw eases round behind its back and its distance out to `look.climb` metres, at
 // `look.follow` a second, and on the ground back to `look.dist`.
 //
@@ -25,9 +26,11 @@
 // away from the blow (`thrown`, its travel carried); at no `hp` it lies flat (`flat`) for `down`
 // seconds and stands again on its start, whole.
 //
-// Acts: `move(x, y)` the stick, x right and y down, each −1 to 1; `run(v)`, `grip(v)` and `attack(v)`
-// 1 held, 0 let go; `jump()`; `look(dx, dy)` the mouse moved, in page pixels; `hit(x, z)` and `drop()`,
-// the colossus's (seat −1): struck along (x, z), and shaken off.
+// Acts: `move(x, y)` the stick, x right and y down, each −1 to 1, how far it is pushed: the hero walks
+// (or runs) that fraction of its pace, and climbs that fraction of its climbing speed; `run(v)`,
+// `grip(v)` and `attack(v)` 1 held, 0 let go; `jump()`; `look(dx, dy)` the mouse moved, in page pixels;
+// `turn(x, y)` the right stick, x right and y down, each −1 to 1, held until it is sent again;
+// `hit(x, z)` and `drop()`, the colossus's (seat −1): struck along (x, z), and shaken off.
 import type { Kind, Row, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import { animate, committed, gesture, play, rest, stop } from '#plugins/anim/anim.sim.ts'
@@ -38,6 +41,14 @@ import { apart, grab, hang, release } from './plugins/climb/climb.sim.ts'
 const finite = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
 const held = (v: unknown) => v === 0 || v === 1
+
+const clamp = (v: number) => Math.max(-1, Math.min(1, v))
+
+// The camera turned by `yaw` radians right and `pitch` radians down, its pitch kept within `look.pitch`.
+function aim(me: Row, k: any, yaw: number, pitch: number) {
+  const l = me.data.look
+  me.data.look = { ...l, yaw: wrap(l.yaw - yaw), pitch: Math.max(k.look.pitch[0], Math.min(k.look.pitch[1], l.pitch + pitch)) }
+}
 
 // The colossus the hero holds, roaring.
 const shaking = (w: W, me: Row) => {
@@ -75,6 +86,8 @@ export const player: Kind = {
     const k = def(w, me.kind)
     const g = groundOf(w)
     if (d.charging) d.charge = Math.min(1, d.charge + dt / k.stab.charge)
+    const [tx, ty] = d.turning as number[]
+    if (tx || ty) aim(me, k, tx * k.look.stick * dt, ty * k.look.stick * dt)
     if (d.hp <= 0) {
       d.downFor += dt
       if (d.downFor >= k.down) {
@@ -109,7 +122,11 @@ export const player: Kind = {
   acts: {
     move(me, _w, _seat, x: unknown, y: unknown) {
       if (!finite(x) || !finite(y)) return
-      me.data.stick = [Math.max(-1, Math.min(1, x)), Math.max(-1, Math.min(1, y))]
+      me.data.stick = [clamp(x), clamp(y)]
+    },
+    turn(me, _w, _seat, x: unknown, y: unknown) {
+      if (!finite(x) || !finite(y)) return
+      me.data.turning = [clamp(x), clamp(y)]
     },
     run(me, _w, _seat, v: unknown) {
       if (held(v)) me.data.run = v === 1
@@ -132,9 +149,8 @@ export const player: Kind = {
     },
     look(me, w, _seat, dx: unknown, dy: unknown) {
       if (!finite(dx) || !finite(dy)) return
-      const k = def(w, me.kind).look
-      const l = me.data.look
-      me.data.look = { ...l, yaw: wrap(l.yaw - dx * k.turn), pitch: Math.max(k.pitch[0], Math.min(k.pitch[1], l.pitch + dy * k.turn)) }
+      const k = def(w, me.kind)
+      aim(me, k, dx * k.look.turn, dy * k.look.turn)
     },
     hit(me, w, seat, x: unknown, z: unknown) {
       const d = me.data

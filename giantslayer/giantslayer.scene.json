@@ -49,6 +49,7 @@
       "shadow": { "map": 4096, "half": 60, "near": 1, "far": 2400, "bias": -0.00002, "normalBias": 0.04 },
       "mods": { "land": "terrain3d" }
     },
+    "player": { "deadzone": 0.2, "resolution": 20 },
     "ui": {
       "panels": {
         "hud": { "anchor": "top-left", "at": [24, 20], "size": [360, 130] },
@@ -140,7 +141,7 @@
       "placed": false,
       "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "grounded": true, "limp": false,
       "want": [0, 0], "face": null, "jump": false, "sliding": false, "speed": 0, "side": 0, "turned": 0,
-      "stick": [0, 0], "run": false, "gripping": false, "hold": null,
+      "stick": [0, 0], "turning": [0, 0], "run": false, "gripping": false, "hold": null,
       "hp": 4, "grip": 1, "charging": false, "charge": 0, "power": 0, "downFor": 0,
       "look": { "yaw": 0, "pitch": 0.25, "dist": 7 }, "lift": 1.4,
       "rig": "stand"

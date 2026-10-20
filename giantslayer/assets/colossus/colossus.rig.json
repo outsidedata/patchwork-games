@@ -29,7 +29,8 @@
    "file": "packs/Creature Pack 30FPS/mutant dying.fbx"
   },
   "stomp": {
-   "file": "packs/mixamo-motions/Stomp.fbx"
+   "file": "packs/mixamo-motions/Stomp.fbx",
+   "markers": { "slam": 0.733, "stamp": 1.433 }
   },
   "stomping": {
    "file": "packs/mixamo-motions/Stomping.fbx"

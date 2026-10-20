@@ -16,11 +16,14 @@
 // The numbers, off the definitions of the kinds whose rows it is handed:
 //   holder `climb`: `reach` metres, how far from a limb's surface its hands take hold; `off` metres,
 //          how far its body stands out from the surface past its hands; `rate`, how fast its climbing
-//          clips play; `clips`, the clip it plays to hold still (`hold`), climb up, climb down, go left
-//          and go right. It climbs along a limb as fast as its `up` clip raises its hips (the rig's
-//          measured `rise` over the clip's length) and round it as fast as its `right` clip carries
-//          them sideways (`left` over its length), each times `rate`, so the hold moves as the clip's
-//          body does at any rate.
+//          clips play with the stick pushed all the way; `still`, how far the stick is pushed, up or
+//          down or round, before it climbs that way; `clips`, the clip it plays to hold still
+//          (`hold`), climb up, climb down, go left and go right. It climbs along a limb as fast as its
+//          `up` clip raises its hips (the rig's measured `rise` over the clip's length) and round it as
+//          fast as its `right` clip carries them sideways (`left` over its length), each times `rate`
+//          and times how far the stick is pushed that way, and the clip it climbs by plays at `rate`
+//          times how far the stick is pushed its way, so the hold moves as the clip's body does
+//          however far it is pushed.
 //   held   `segments`: `{ <segment>: { radius, up } }`, each limb that can be held, its radius, and the
 //          segment it leads on to past its upper end, if any.
 //
@@ -160,7 +163,8 @@ export function hang(me: Row, w: W, dt: number, stick: V) {
   const length = len(sub(b, a)) || 1
   // Up the limb is toward whichever joint stands higher now.
   const rising = b[1] >= a[1] ? 1 : -1
-  const climb = -stick[1], across = stick[0]
+  const push = (v: number) => (Math.abs(v) < k.still ? 0 : v)
+  const climb = push(-stick[1]), across = push(stick[0])
   // The speeds the clips carry the hips at, as they were measured (anim's table), at the clips' rate.
   const rig = rigOf(w, animKind(me))
   const up = clipOf(rig, k.clips.up).measure, side = clipOf(rig, k.clips.right).measure
@@ -183,8 +187,10 @@ export function hang(me: Row, w: W, dt: number, stick: V) {
     d.hold = was
     place(me, w)
   }
-  const clip = climb > 0.1 ? k.clips.up : climb < -0.1 ? k.clips.down : across > 0.1 ? k.clips.right : across < -0.1 ? k.clips.left : k.clips.hold
-  if (d.clip !== clip) play(me, clip, { rate: clip === k.clips.hold ? 1 : k.rate })
+  const clip = climb > 0 ? k.clips.up : climb < 0 ? k.clips.down : across > 0 ? k.clips.right : across < 0 ? k.clips.left : k.clips.hold
+  const rate = climb ? k.rate * Math.abs(climb) : across ? k.rate * Math.abs(across) : 1
+  if (d.clip !== clip) play(me, clip, { rate })
+  else d.rate = rate
 }
 
 // How far apart two places on one limb of the held row are, over its surface: along it, and round it.
