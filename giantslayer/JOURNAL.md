@@ -141,3 +141,21 @@ Proof (`yard.test.ts`): in his bind pose (the T-pose) both palms, by `side`, fac
 the signs are right; held still, every frame for a second, each drawn palm faces into the face within
 1°, and its skin is 0.0009 mm and 0.09 mm from it. 2d now says what its stop means: he stays however long
 he is pushed, hands on the face, no further from the edge than a cell and half his hands' spread.
+Commit: games `678b47c`.
+
+**3d. Feet by IK.** A limb now names the two bones whose middle touches (`touch`) and its own `skin`
+past that middle: for a hand its wrist to its middle fingertip (skin 2.74 cm, laid flat by `across` and
+`side`); for a foot the ball of its foot to its toe tip, keeping the turn its clip gives it. With skin 0
+the shoes went 3.55 cm (left) and 3.27 cm (right) into the face: those are the feet's `skin`. With the
+toes moved out onto the face the left shin went 3.7 cm into the wall and the thigh 0.6 cm: the knee,
+bending the way the clip bends it (toward the wall), bent further in as the hip-to-foot distance shrank.
+
+**3e. Elbows and knees out.** The bend ik3d is handed is the clip's, with what of it points into the
+surface taken off: the into-surface way squared to the line from the hip (or shoulder) to the target
+first, since ik3d squares the bend to that line and a plain cut let 16.5 cm of it back in. A knee the
+clip bends at the wall swings out to the side.
+Proof (`yard.test.ts`): held still with all four reaching, every frame for a second, each foot's middle
+on its point its skin out within 1 mm and its skin 0.03 mm from the face; each elbow and knee outside the
+wall and bent with nothing toward the face (to 0.01 mm: a joint bent along the wall is 0 to the
+arithmetic's grain); every limb reached (ik3d short under 0.1 mm); nothing of him in the wall but touching
+skin, 1 mm (above the knees 0; 1e's toes, 4.6 cm in on the clip alone, are now 0.03 mm).

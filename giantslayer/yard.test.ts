@@ -189,6 +189,8 @@ function against(g: Game) {
   const [x, y, z] = wall.data.pos
   const c = Math.cos(wall.data.yaw), s = Math.sin(wall.data.yaw)
   const hands: Record<'L' | 'R', number> = { L: Infinity, R: Infinity }
+  // Each foot's nearest skin to the wall, its toes and the rest of it.
+  const soles: Record<'L' | 'R', number> = { L: Infinity, R: Infinity }
   // Each hand's extent in the wall's frame: its least and most x and y.
   const extent: Record<'L' | 'R', number[]> = { L: [Infinity, -Infinity, Infinity, -Infinity], R: [Infinity, -Infinity, Infinity, -Infinity] }
   let deepest = { depth: 0, bone: '' }, feet = { depth: 0, bone: '' }, rest = { depth: 0, bone: '' }
@@ -208,6 +210,7 @@ function against(g: Game) {
       let most = 0
       for (let k = 1; k < 4; k++) if (sw.getComponent(i, k) > sw.getComponent(i, most)) most = k
       const bone = mesh.skeleton.bones[si.getComponent(i, most)].name
+      for (const side of ['L', 'R'] as const) if (new RegExp(`${side === 'L' ? 'Left' : 'Right'}(Foot|Toe)`).test(bone)) soles[side] = Math.min(soles[side], d)
       for (const side of ['L', 'R'] as const) {
         if (!bone.includes(side === 'L' ? 'LeftHand' : 'RightHand')) continue
         hands[side] = Math.min(hands[side], d)
@@ -219,7 +222,7 @@ function against(g: Game) {
       else if (!/(Left|Right)Hand/.test(bone) && -d > rest.depth) rest = { depth: -d, bone }
     }
   })
-  return { hands, extent, deepest, feet, rest, lowest }
+  return { hands, soles, extent, deepest, feet, rest, lowest }
 }
 
 test('1c: the hero put on a spot of the wall stays on it, still, not falling, upright and facing straight into the wall', async () => {
@@ -272,11 +275,11 @@ test('1d: holding still in his still clip\'s first frame, both his palms touch t
   }
 })
 
-test('1e: held still, nothing of him above the knees but his touching hands is inside the wall at all; his shins and feet, pressed to it in his still clip, are in no deeper than 5 cm until his feet reach the face by IK (3d)', async () => {
+test('1e: held still, nothing of him above the knees but his touching hands is inside the wall at all, and his shins and feet only as far as a touching foot, 1 mm (their toes were 4.6 cm in before his feet reached the face by IK, 3d)', async () => {
   const seen = await heldStill(await start())
   console.log('1e', JSON.stringify(seen))
   expect(seen.rest.depth).toBe(0)
-  expect(seen.feet.depth).toBeLessThanOrEqual(0.05)
+  expect(seen.feet.depth).toBeLessThanOrEqual(0.001)
 })
 
 // The middle of the hero's palms in the world, standing at `pos` facing `yaw`, as they are in his still
@@ -492,8 +495,8 @@ test('2e: going up the face his hold moves his speed every step, and every frame
   for (const step of steps) expect(step).toBeCloseTo(defs.player.climb.speed * DT, 9)
 })
 
-// Where a limb's middle is as the page draws him: midway between its end bone and the bone at its tip.
-function middleOf(g: Game, limb: { end: string; tip: string }) {
+// Where a limb touches as the page draws him: midway between its two `touch` bones.
+function middleOf(g: Game, limb: { touch: string[] }) {
   const T = g.p.client!.plugins.render3d.THREE as typeof THREE
   const hero = g.yard.rows.find(r => r.kind === 'player')!
   const root: THREE.Object3D = g.p.client!.plugins.anim.model(hero.id)
@@ -503,19 +506,19 @@ function middleOf(g: Game, limb: { end: string; tip: string }) {
     root.traverse(o => { if (!found && (o as THREE.Bone).isBone && o.name.endsWith(suffix)) found = o })
     return new T.Vector3().setFromMatrixPosition(found!.matrixWorld)
   }
-  return find(limb.end).add(find(limb.tip)).multiplyScalar(0.5)
+  return find(limb.touch[0]).add(find(limb.touch[1])).multiplyScalar(0.5)
 }
 
 // Held still on the middle of the face 4 m up, settled, then every frame for a second: each limb `names`
-// names has its middle on the net point nearest it, a palm out from the face, within 1 mm, ik3d reports
-// it reached (short under 0.1 mm), and it does not move; and his skin against the wall, measured.
+// names has where it touches on the net point nearest it, its skin out from the face, within 1 mm, ik3d
+// reports it reached (short under 0.1 mm), and it does not move; and his skin against the wall, measured.
 async function reachingStill(names: string[]) {
   const g = await start()
   await g.frames(30)
   const { wall, hero } = putOn(g, [0, 4, defs.wall.size[2] / 2])
   await g.frames(60)
   const net = netOf(g.p.client!.plugins.wire, wall)
-  const limbs = names.map(n => (defs.player.climb.limbs as Record<string, { end: string; tip: string }>)[n])
+  const limbs = names.map(n => (defs.player.climb.limbs as Record<string, { touch: string[]; skin: number }>)[n])
   const order = defs.player.climb.ik as string[]
   const first = limbs.map(l => middleOf(g, l))
   const seen: ReturnType<typeof against>[] = []
@@ -523,13 +526,13 @@ async function reachingStill(names: string[]) {
     await g.frames(1)
     limbs.forEach((limb, j) => {
       const mid = middleOf(g, limb)
-      // The point nearest it, and where its middle should be: that point, a palm out from the face.
+      // The point nearest it, and where it should touch: that point, its skin out from the face.
       let best = 0, far = Infinity
       for (let p = 0; p < net.points; p++) {
         const d = Math.hypot(net.at[p * 3] + wall.data.pos[0] - mid.x, net.at[p * 3 + 1] + wall.data.pos[1] - mid.y, net.at[p * 3 + 2] + wall.data.pos[2] - mid.z)
         if (d < far) { far = d; best = p }
       }
-      const want = [0, 1, 2].map(k => net.at[best * 3 + k] + wall.data.pos[k] + net.out[best * 3 + k] * defs.player.climb.palm)
+      const want = [0, 1, 2].map(k => net.at[best * 3 + k] + wall.data.pos[k] + net.out[best * 3 + k] * limb.skin)
       expect(Math.hypot(mid.x - want[0], mid.y - want[1], mid.z - want[2])).toBeLessThanOrEqual(0.001)
       expect(g.p.client!.plugins.ik3d.short(hero.id)[order.indexOf(names[j])]).toBeLessThan(1e-4)
       expect(mid.distanceTo(first[j])).toBeLessThan(1e-6)
@@ -561,10 +564,10 @@ test('3b: held still, both his hands reach by IK the net points nearest their mi
 })
 
 // The way a hand's palm faces, from four of its bones' places: `side` times the cross of the line across
-// its knuckles and the line from its wrist to its middle fingertip.
-function palmFacing(at: (suffix: string) => THREE.Vector3, limb: { end: string; tip: string; across: string[]; side: number }) {
+// its knuckles and the line through its touch, from its wrist to its middle fingertip.
+function palmFacing(at: (suffix: string) => THREE.Vector3, limb: { touch: string[]; across: string[]; side: number }) {
   const knuckles = at(limb.across[1]).sub(at(limb.across[0]))
-  return knuckles.cross(at(limb.tip).sub(at(limb.end))).normalize().multiplyScalar(limb.side)
+  return knuckles.cross(at(limb.touch[1]).sub(at(limb.touch[0]))).normalize().multiplyScalar(limb.side)
 }
 
 test('3c: each hand\'s palm, as its bones place it, faces down in his bind pose (the T-pose), and held still faces straight into the wall\'s face, within a degree, its skin still touching it', async () => {
@@ -582,8 +585,8 @@ test('3c: each hand\'s palm, as its bones place it, faces down in his bind pose 
     const i = skinned!.skeleton.bones.findIndex(b => b.name.endsWith(suffix))
     return new T.Vector3().setFromMatrixPosition(skinned!.skeleton.boneInverses[i].clone().invert())
   }
-  const limbs = defs.player.climb.limbs as Record<string, { end: string; tip: string; across: string[]; side: number }>
-  for (const name of ['handL', 'handR']) expect(palmFacing(bound, limbs[name]).y).toBeLessThan(-0.9)
+  const limbs = { handL: defs.player.climb.limbs.handL, handR: defs.player.climb.limbs.handR }
+  for (const name of ['handL', 'handR'] as const) expect(palmFacing(bound, limbs[name]).y).toBeLessThan(-0.9)
   // Held still: each drawn palm faces into the face, (0, 0, −1) on the wall's front.
   const drawn = (suffix: string) => {
     let found: THREE.Object3D | undefined
@@ -593,11 +596,61 @@ test('3c: each hand\'s palm, as its bones place it, faces down in his bind pose 
   for (let i = 0; i < 60; i++) {
     await g.frames(1)
     root.updateMatrixWorld(true)
-    for (const name of ['handL', 'handR']) expect(palmFacing(drawn, limbs[name]).angleTo(new T.Vector3(0, 0, -1))).toBeLessThan(Math.PI / 180)
+    for (const name of ['handL', 'handR'] as const) expect(palmFacing(drawn, limbs[name]).angleTo(new T.Vector3(0, 0, -1))).toBeLessThan(Math.PI / 180)
     const m = against(g)
     expect(Math.abs(m.hands.L)).toBeLessThanOrEqual(0.001)
     expect(Math.abs(m.hands.R)).toBeLessThanOrEqual(0.001)
     expect(m.rest.depth).toBe(0)
   }
   console.log('3c', JSON.stringify(against(g).hands))
+})
+
+test('3d: held still, his feet reach by IK the net points nearest the balls of their toes, each on its point its skin out, to a millimetre; each foot\'s skin touches the face within 1 mm', async () => {
+  const seen = await reachingStill(['footL', 'footR'])
+  for (const m of seen) {
+    expect(Math.abs(m.soles.L)).toBeLessThanOrEqual(0.001)
+    expect(Math.abs(m.soles.R)).toBeLessThanOrEqual(0.001)
+  }
+  console.log('3d', JSON.stringify({ soles: seen[seen.length - 1].soles, feet: seen[seen.length - 1].feet, rest: seen[seen.length - 1].rest }))
+})
+
+test('3e: held still with both hands and both feet reaching, each elbow and knee is outside the wall and bends with nothing of it toward the face; nothing of him is in the wall but touching skin, 1 mm', async () => {
+  const g = await start()
+  await g.frames(30)
+  const { wall, hero } = putOn(g, [0, 4, defs.wall.size[2] / 2])
+  await g.frames(60)
+  const plugins = g.p.client!.plugins
+  const T = plugins.render3d.THREE as typeof THREE
+  const root: THREE.Object3D = plugins.anim.model(hero.id)
+  const drawn = (suffix: string) => {
+    let found: THREE.Object3D | undefined
+    root.traverse(o => { if (!found && (o as THREE.Bone).isBone && o.name.endsWith(suffix)) found = o })
+    return new T.Vector3().setFromMatrixPosition(found!.matrixWorld)
+  }
+  const out = new T.Vector3(0, 0, 1)
+  const limbs = defs.player.climb.limbs as Record<string, { bones: string[] }>
+  for (let i = 0; i < 60; i++) {
+    await g.frames(1)
+    root.updateMatrixWorld(true)
+    for (const name of ['handL', 'handR', 'footL', 'footR']) {
+      const [a, b, c] = limbs[name].bones.map(drawn)
+      // Outside the wall: the joint's distance from its surface.
+      const local = b.clone().sub(new T.Vector3(...wall.data.pos))
+      expect(fromSurface(local.toArray())).toBeGreaterThan(0)
+      // Bent with nothing toward the face: off the line from the first bone to the end, not into it, to
+      // a hundredth of a millimetre (a joint bent along the wall is 0 to the arithmetic's grain).
+      const line = c.clone().sub(a).normalize()
+      const off = b.clone().sub(a)
+      off.sub(line.multiplyScalar(off.dot(line)))
+      expect(off.dot(out)).toBeGreaterThanOrEqual(-1e-5)
+    }
+    expect(plugins.ik3d.short(hero.id).every((v: number) => v < 1e-4)).toBe(true)
+    const m = against(g)
+    expect(m.rest.depth).toBe(0)
+    expect(m.feet.depth).toBeLessThanOrEqual(0.001)
+    expect(Math.abs(m.hands.L)).toBeLessThanOrEqual(0.001)
+    expect(Math.abs(m.hands.R)).toBeLessThanOrEqual(0.001)
+    expect(Math.abs(m.soles.L)).toBeLessThanOrEqual(0.001)
+    expect(Math.abs(m.soles.R)).toBeLessThanOrEqual(0.001)
+  }
 })
