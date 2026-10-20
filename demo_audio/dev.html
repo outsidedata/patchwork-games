@@ -58,8 +58,13 @@
       //             manifest's `order` times its rpm a second) and that tone's second harmonic traced
       //             over it, and under it the rpm, the throttle and each change of gear; with a player and
       //             the capture as a WAV to save. Every recording is on `window.dev.recordings`.
-      // The readout at the bottom left: the car, its rpm, gear and throttle, and whether the page's
-      // audio runs (a click or a key lets it).
+      //             `record this gun` does the same for the gun the seat holds, every car silent: its
+      //             trigger held for `burst s` and let go, and its echo heard out for `after s`, drawn
+      //             with a tick under the spectrum for each frame it fired, as tall as its rounds, and
+      //             its barrels' spin. `record every gun` records it and each gun after it along the row.
+      // The readout at the bottom left: the car, its rpm, gear and throttle, or the gun, the rounds it
+      // has fired, its aim and its barrels' spin; and whether the page's audio runs (a click or a key
+      // lets it). The panel tunes cars; while the seat holds a gun it keeps to the car it last tuned.
       const errors = []
       const caught = e => { errors.push(String(e?.message ?? e)); if (errors.length > 5) errors.shift() }
       addEventListener('error', e => caught(e.error ?? e.message))
@@ -103,7 +108,8 @@
 
       const fleet = () => client.plugins.wire.scene.world.box3dvehicle.vehicles
       const names = Object.keys(lot.world.box3dvehicle.vehicles)
-      const held = () => holding(client?.plugins.wire.rows ?? [])
+      // The car the seat holds; none while it holds a gun.
+      const held = () => { const it = holding(client?.plugins.wire.rows ?? []); return it?.kind === 'box3dvehicle' ? it : undefined }
 
       // The car tuned, and its mix as the panel holds it: the scene's sound over its manifest's mix.
       const state = { follow: true, car: names[1], ease: 0, range: 0, at: [0, 0, 0], stems: {} }
@@ -172,7 +178,7 @@
       benchFolder.add({ sweep: () => { bench.sweeping = true; sweepAt = performance.now() / 1000 } }, 'sweep')
 
       // ---------- the recorder ----------
-      const rec = { throttle: 9, lift: 4, solo: true, busy: false }
+      const rec = { throttle: 9, lift: 4, solo: true, burst: 1.5, after: 5, busy: false }
       const recordings = []
       window.dev.recordings = recordings
       let capture
@@ -237,7 +243,7 @@
         show(r)
       }
       async function record(every) {
-        if (rec.busy || !master) return
+        if (rec.busy || !master || !held()) return
         rec.busy = true
         document.getElementById('recordings').hidden = false
         try {
@@ -246,6 +252,44 @@
             await drive()
             if (every && i < n - 1) { client.plugins.player.next(); await wait(1500) }
           }
+        } finally { rec.busy = false }
+      }
+
+      // The gun the seat holds, or none.
+      const gunHeld = () => { const it = holding(client?.plugins.wire.rows ?? []); return it?.kind === 'gun' ? it : undefined }
+      // The seat's gun fired and its sound captured, every car silent: the trigger held for `burst`
+      // seconds and let go, and its echo heard out for `after`.
+      async function shoot() {
+        const gun = gunHeld(), ctx = client.plugins.audio.context
+        const kept = Object.fromEntries(names.map(n => [n, fleet()[n].look.sound]))
+        for (const n of names) { const { sound: _, ...look } = fleet()[n].look; fleet()[n].look = look }
+        await wait(800)
+        const player = client.plugins.player, ear = await listen(), t0 = ctx.currentTime, log = []
+        capture = { log, t0, gun: gun.id }
+        await wait(300)
+        player.fire(1)
+        await wait(rec.burst * 1000)
+        player.fire(0)
+        await wait(rec.after * 1000)
+        capture = undefined
+        for (const [n, sound] of Object.entries(kept)) fleet()[n].look = { ...fleet()[n].look, sound }
+        const r = { car: gun.data.gun, rate: ear.rate, pcm: await ear.stop(), log }
+        recordings.push(r)
+        show(r)
+      }
+      // The gun the seat holds recorded; with `every`, each gun after it along the row in turn too, until
+      // the seat walks on to a car.
+      async function fire(every) {
+        if (rec.busy || !master || !gunHeld()) return
+        rec.busy = true
+        document.getElementById('recordings').hidden = false
+        try {
+          do {
+            await shoot()
+            if (!every) break
+            client.plugins.player.next()
+            await wait(1500)
+          } while (gunHeld())
         } finally { rec.busy = false }
       }
 
@@ -320,7 +364,7 @@
         g.fillStyle = 'rgba(255,255,255,0.75)'
         for (const hz of [50, 100, 200, 500, 1000, 2000, 5000]) { g.fillRect(0, yOf(hz), 6, 1); g.fillText(`${hz >= 1000 ? `${hz / 1000}k` : hz}`, 8, yOf(hz) + 4) }
         const tx = t => (t / seconds) * W
-        for (const [k, colour] of [[1, 'rgba(80,220,255,0.9)'], [2, 'rgba(80,220,255,0.45)']]) {
+        if (r.order) for (const [k, colour] of [[1, 'rgba(80,220,255,0.9)'], [2, 'rgba(80,220,255,0.45)']]) {
           g.strokeStyle = colour; g.lineWidth = 1.5; g.beginPath()
           r.log.forEach((l, i) => { const y = yOf(Math.max(lo, (k * r.order * l.rpm) / 60)); if (i) g.lineTo(tx(l.t), y); else g.moveTo(tx(l.t), y) })
           g.stroke()
@@ -328,18 +372,30 @@
         // Under it: the rpm (orange, to the redline), the throttle (green), and each gear as it changes.
         g.fillStyle = '#111418'; g.fillRect(0, H, W, T)
         const ty = (v) => H + T - 8 - v * (T - 24)
-        for (const [field, colour, of] of [['rpm', '#ffb066', l => l.rpm / r.redline], ['throttle', '#6fdc8c', l => Math.max(0, l.throttle)]]) {
+        const lines = r.order ? [['rpm', '#ffb066', l => l.rpm / r.redline], ['throttle', '#6fdc8c', l => Math.max(0, l.throttle)]] : [['spin', '#6fdc8c', l => l.spin]]
+        // A gun's rounds: a tick for each frame its count went up, as tall as the rounds it fired since.
+        if (!r.order) {
+          g.fillStyle = '#ffb066'
+          r.log.forEach((l, i) => { if (i && l.fired > r.log[i - 1].fired) g.fillRect(tx(l.t), H + 20, 1, 12 * (l.fired - r.log[i - 1].fired)) })
+        }
+        for (const [field, colour, of] of lines) {
           g.strokeStyle = colour; g.lineWidth = 1.5; g.beginPath()
           r.log.forEach((l, i) => { const y = ty(of(l)); if (i) g.lineTo(tx(l.t), y); else g.moveTo(tx(l.t), y) })
           g.stroke()
         }
         g.fillStyle = '#dfe6ee'
-        r.log.forEach((l, i) => { if (!i || l.gear !== r.log[i - 1].gear) g.fillText(`${l.gear}`, tx(l.t) + 2, H + 14) })
+        if (r.order) r.log.forEach((l, i) => { if (!i || l.gear !== r.log[i - 1].gear) g.fillText(`${l.gear}`, tx(l.t) + 2, H + 14) })
         g.fillStyle = 'rgba(255,255,255,0.6)'
         for (let s = 1; s < seconds; s++) g.fillRect(tx(s), H, 1, 4)
         const box = document.createElement('div'), url = URL.createObjectURL(wav(r.pcm, r.rate))
-        const top3 = Math.round(Math.max(...r.log.map(l => l.rpm))), speed = Math.max(...r.log.map(l => l.speed)) * 3.6
-        box.innerHTML = `<h3>${r.car}: ${seconds.toFixed(1)} s, up to ${top3} rpm and ${speed.toFixed(0)} km/h · tone ${r.order} a turn (blue), rpm (orange), throttle (green), gears</h3>`
+        const loudest = r.pcm.reduce((m, v) => Math.max(m, Math.abs(v)), 0)
+        if (r.order) {
+          const top3 = Math.round(Math.max(...r.log.map(l => l.rpm))), speed = Math.max(...r.log.map(l => l.speed)) * 3.6
+          box.innerHTML = `<h3>${r.car}: ${seconds.toFixed(1)} s, up to ${top3} rpm and ${speed.toFixed(0)} km/h · tone ${r.order} a turn (blue), rpm (orange), throttle (green), gears</h3>`
+        } else {
+          const rounds = r.log.at(-1).fired - r.log[0].fired
+          box.innerHTML = `<h3>${r.car}: ${seconds.toFixed(1)} s, ${rounds} rounds, loudest sample ${loudest.toFixed(2)} · rounds (orange ticks), barrels' spin (green)</h3>`
+        }
         box.append(canvas)
         const audio = document.createElement('audio')
         audio.controls = true; audio.src = url
@@ -354,6 +410,10 @@
       recFolder.add(rec, 'solo').name('solo: only the car driven heard')
       recFolder.add({ go: () => record(false) }, 'go').name('record this car')
       recFolder.add({ go: () => record(true) }, 'go').name('record every car')
+      recFolder.add(rec, 'burst', 0.1, 10, 0.1).name('burst s')
+      recFolder.add(rec, 'after', 0.5, 10, 0.5).name('after s')
+      recFolder.add({ go: () => fire(false) }, 'go').name('record this gun')
+      recFolder.add({ go: () => fire(true) }, 'go').name('record every gun')
       recFolder.add({ go: () => { const el = document.getElementById('recordings'); el.hidden = !el.hidden } }, 'go').name('show or hide recordings')
 
       // ---------- the loop ----------
@@ -368,7 +428,10 @@
           await page.frame(owed / dt)
         } catch (e) { caught(e) }
         const car = held()
-        if (capture && car) {
+        if (capture?.gun) {
+          const g = client.plugins.wire.rows.find(r => r.id === capture.gun)
+          if (g) capture.log.push({ t: client.plugins.audio.context.currentTime - capture.t0, fired: g.data.fired, spin: g.data.spin ?? 0 })
+        } else if (capture && car) {
           const chassis = client.plugins.wire.rows.find(r => r.id === car.data.chassis)
           capture.log.push({ t: client.plugins.audio.context.currentTime - capture.t0, rpm: car.data.rpm, throttle: car.data.throttle ?? 0, gear: car.data.gear, speed: Math.hypot(...chassis.data.vel) })
         }
@@ -389,8 +452,10 @@
           }
         }
         const audio = client?.plugins.audio.context?.state ?? 'none'
+        const gun = holding(client?.plugins.wire.rows ?? [])
         const lines = [
-          car ? `${car.data.vehicle}  ${Math.round(car.data.rpm)} rpm  gear ${car.data.gear}  throttle ${(Math.max(0, car.data.throttle ?? 0) * 100).toFixed(0)}%` : 'no car held',
+          car ? `${car.data.vehicle}  ${Math.round(car.data.rpm)} rpm  gear ${car.data.gear}  throttle ${(Math.max(0, car.data.throttle ?? 0) * 100).toFixed(0)}%`
+            : gun?.kind === 'gun' ? `${gun.data.gun}  ${gun.data.fired} fired  aim ${Math.round(gun.data.reach)} m${gun.data.spin ? `  barrels ${Math.round(gun.data.spin * 100)}%` : ''}` : 'nothing held',
           `tuning ${state.car}${voices ? `  bench ${Math.round(bench.rpm)} rpm  throttle ${(bench.throttle * 100).toFixed(0)}%` : ''}`,
           `audio ${audio}${audio !== 'running' ? '  (click the page to let it play)' : ''}`,
         ]

@@ -56,6 +56,14 @@
             "c",
             "Pad4"
           ]
+        },
+        "fire": {
+          "label": "Fire",
+          "keys": [
+            "f",
+            "Mouse0",
+            "Pad1"
+          ]
         }
       },
       "deadzone": 0.15,
@@ -104,6 +112,202 @@
           "type": "model",
           "url": "/games/demo_audio/assets/truck/truck.glb",
           "preload": true
+        },
+        "volleys": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/volleys.json",
+          "preload": true
+        },
+        "effects": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/effects.json",
+          "preload": true
+        },
+        "fx": {
+          "type": "sheet",
+          "url": "/games/demo_audio/assets/fx.json",
+          "preload": true
+        },
+        "plinth-model": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/plinth.model.json",
+          "preload": true
+        },
+        "chaingun-model": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/guns/chaingun.model.json",
+          "preload": true
+        },
+        "twinmg-model": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/guns/twinmg.model.json",
+          "preload": true
+        },
+        "pd-model": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/guns/pd.model.json",
+          "preload": true
+        },
+        "autocannon-model": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/guns/autocannon.model.json",
+          "preload": true
+        },
+        "pulselaser-model": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/guns/pulselaser.model.json",
+          "preload": true
+        },
+        "beamlaser-model": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/guns/beamlaser.model.json",
+          "preload": true
+        },
+        "rockets-model": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/guns/rockets.model.json",
+          "preload": true
+        },
+        "heavyrockets-model": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/guns/heavyrockets.model.json",
+          "preload": true
+        },
+        "missiles-model": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/guns/missiles.model.json",
+          "preload": true
+        },
+        "grenades-model": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/guns/grenades.model.json",
+          "preload": true
+        },
+        "ggm-model": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/guns/ggm.model.json",
+          "preload": true
+        },
+        "lgm-model": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/guns/lgm.model.json",
+          "preload": true
+        },
+        "chaingun-gun": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/sounds/chaingun.gun.json"
+        },
+        "twinmg-gun": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/sounds/twinmg.gun.json"
+        },
+        "pd-gun": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/sounds/pd.gun.json"
+        },
+        "autocannon-gun": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/sounds/autocannon.gun.json"
+        },
+        "pulselaser-gun": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/sounds/pulselaser.gun.json"
+        },
+        "rockets-gun": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/sounds/rockets.gun.json"
+        },
+        "heavyrockets-gun": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/sounds/heavyrockets.gun.json"
+        },
+        "missiles-gun": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/sounds/missiles.gun.json"
+        },
+        "grenades-gun": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/sounds/grenades.gun.json"
+        },
+        "vls-gun": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/sounds/vls.gun.json"
+        },
+        "blast-gun": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/sounds/blast.gun.json"
+        },
+        "bigblast-gun": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/sounds/bigblast.gun.json"
+        },
+        "shellhit-gun": {
+          "type": "json",
+          "url": "/games/demo_audio/assets/sounds/shellhit.gun.json"
+        },
+        "dirt-1": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/dirt-1.wav"
+        },
+        "dirt-2": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/dirt-2.wav"
+        },
+        "dirt-3": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/dirt-3.wav"
+        },
+        "dirt-4": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/dirt-4.wav"
+        },
+        "dirt-5": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/dirt-5.wav"
+        },
+        "dirt-6": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/dirt-6.wav"
+        },
+        "scorch-1": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/scorch-1.wav"
+        },
+        "scorch-2": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/scorch-2.wav"
+        },
+        "scorch-3": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/scorch-3.wav"
+        },
+        "scorch-4": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/scorch-4.wav"
+        },
+        "beam-on-1": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/beam-on-1.wav"
+        },
+        "beam-on-2": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/beam-on-2.wav"
+        },
+        "beam-off-1": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/beam-off-1.wav"
+        },
+        "beam-off-2": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/beam-off-2.wav"
+        },
+        "beam-hum": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/beam-hum.wav"
+        },
+        "chaingun-motor": {
+          "type": "sound",
+          "url": "/games/demo_audio/assets/sounds/chaingun-motor.wav"
         }
       }
     },
@@ -3268,7 +3472,158 @@
         "max": 250,
         "rolloff": 1
       },
-      "cues": {}
+      "cues": {
+        "chaingun": {
+          "gun": "chaingun-gun",
+          "gain": 0.85,
+          "range": 900
+        },
+        "twinmg": {
+          "gun": "twinmg-gun",
+          "gain": 0.85,
+          "range": 900
+        },
+        "pd": {
+          "gun": "pd-gun",
+          "gain": 0.9,
+          "range": 900
+        },
+        "autocannon": {
+          "gun": "autocannon-gun",
+          "gain": 1,
+          "range": 1200
+        },
+        "pulselaser": {
+          "gun": "pulselaser-gun",
+          "gain": 0.8,
+          "range": 700
+        },
+        "rockets": {
+          "gun": "rockets-gun",
+          "gain": 0.9,
+          "range": 1000
+        },
+        "heavyrockets": {
+          "gun": "heavyrockets-gun",
+          "gain": 1,
+          "range": 1200
+        },
+        "missiles": {
+          "gun": "missiles-gun",
+          "gain": 0.9,
+          "range": 1000
+        },
+        "grenades": {
+          "gun": "grenades-gun",
+          "gain": 0.9,
+          "range": 700
+        },
+        "ggm": {
+          "gun": "vls-gun",
+          "gain": 1,
+          "range": 1400
+        },
+        "lgm": {
+          "gun": "vls-gun",
+          "gain": 1,
+          "range": 1400
+        },
+        "blast": {
+          "gun": "blast-gun",
+          "gain": 1,
+          "range": 1500
+        },
+        "bigblast": {
+          "gun": "bigblast-gun",
+          "gain": 1,
+          "range": 2000
+        },
+        "shellhit": {
+          "gun": "shellhit-gun",
+          "gain": 1,
+          "range": 1200
+        },
+        "dirt": {
+          "sounds": [
+            "dirt-1",
+            "dirt-2",
+            "dirt-3",
+            "dirt-4",
+            "dirt-5",
+            "dirt-6"
+          ],
+          "gain": 0.55,
+          "rate": [
+            0.9,
+            1.1
+          ],
+          "range": 200
+        },
+        "scorch": {
+          "sounds": [
+            "scorch-1",
+            "scorch-2",
+            "scorch-3",
+            "scorch-4"
+          ],
+          "gain": 0.6,
+          "rate": [
+            0.92,
+            1.08
+          ],
+          "range": 250
+        },
+        "beam-on": {
+          "sounds": [
+            "beam-on-1",
+            "beam-on-2"
+          ],
+          "gain": 0.8,
+          "range": 400
+        },
+        "beam-off": {
+          "sounds": [
+            "beam-off-1",
+            "beam-off-2"
+          ],
+          "gain": 0.7,
+          "range": 400
+        }
+      },
+      "held": {
+        "beam-hum": {
+          "kind": "gun",
+          "field": "on",
+          "sound": "beam-hum",
+          "over": [
+            0,
+            1
+          ],
+          "gain": [
+            0,
+            0.6
+          ],
+          "range": 300
+        },
+        "chaingun-motor": {
+          "kind": "gun",
+          "field": "spin",
+          "sound": "chaingun-motor",
+          "over": [
+            0,
+            1
+          ],
+          "gain": [
+            0,
+            0.45
+          ],
+          "rate": [
+            0.3,
+            1
+          ],
+          "range": 200
+        }
+      }
     },
     "ui": {
       "panels": {
@@ -3328,14 +3683,41 @@
           }
         }
       }
+    },
+    "shipped": {
+      "plugins": [
+        "flat"
+      ]
+    },
+    "hitscan3d": {
+      "mods": {
+        "ground": "flat"
+      },
+      "rewind": 30,
+      "kinds": {}
+    },
+    "volley3d": {
+      "patterns": "volleys",
+      "hold": 0.5,
+      "mods": {
+        "shoot": "hitscan3d",
+        "bodies": "hitscan3d"
+      }
+    },
+    "particle3d": {
+      "effects": "effects"
     }
   },
   "plugins": [
     "loader",
     "scenemanager",
+    "shipped",
     "player",
     "box3d",
     "box3dvehicle",
+    "solids",
+    "volley3d",
+    "particle3d",
     "render3d",
     "environment3d",
     "audio",
@@ -3368,7 +3750,12 @@
         "near": 0.1,
         "far": 600
       },
-      "background": "#9ec3e6"
+      "background": "#9ec3e6",
+      "bloom": {
+        "strength": 0.35,
+        "radius": 0.25,
+        "threshold": 1
+      }
     },
     "environment3d": {
       "sun": {
@@ -3454,7 +3841,8 @@
       "controls": {
         "pedal": 0,
         "steer": 0,
-        "brake": 0
+        "brake": 0,
+        "fire": 0
       }
     },
     "start": {
@@ -3469,7 +3857,36 @@
       "yaw": 0,
       "made": 0
     },
-    "caption": {}
+    "caption": {},
+    "audio": {
+      "step": 0,
+      "next": 1,
+      "live": []
+    },
+    "volley3d": {
+      "next": 1,
+      "live": []
+    },
+    "gun": {
+      "gun": "",
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0,
+      "turn": 0,
+      "reach": 60,
+      "steer": 0,
+      "pedal": 0,
+      "held": false,
+      "cool": 0,
+      "fired": 0,
+      "shot": null,
+      "mark": null,
+      "spin": 0,
+      "on": false
+    }
   },
   "actors": [
     {
@@ -3477,6 +3894,12 @@
     },
     {
       "is": "loader"
+    },
+    {
+      "is": "audio"
+    },
+    {
+      "is": "volley3d"
     },
     {
       "is": "box3d"
@@ -3557,6 +3980,128 @@
       "is": "start",
       "slot": 1,
       "spot": "muscle"
+    },
+    {
+      "is": "gun",
+      "gun": "chaingun",
+      "pos": [
+        -30,
+        0,
+        -33
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "is": "gun",
+      "gun": "twinmg",
+      "pos": [
+        -30,
+        0,
+        -27
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "is": "gun",
+      "gun": "pd",
+      "pos": [
+        -30,
+        0,
+        -21
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "is": "gun",
+      "gun": "autocannon",
+      "pos": [
+        -30,
+        0,
+        -15
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "is": "gun",
+      "gun": "pulselaser",
+      "pos": [
+        -30,
+        0,
+        -9
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "is": "gun",
+      "gun": "beamlaser",
+      "pos": [
+        -30,
+        0,
+        -3
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "is": "gun",
+      "gun": "rockets",
+      "pos": [
+        -30,
+        0,
+        3
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "is": "gun",
+      "gun": "heavyrockets",
+      "pos": [
+        -30,
+        0,
+        9
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "is": "gun",
+      "gun": "missiles",
+      "pos": [
+        -30,
+        0,
+        15
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "is": "gun",
+      "gun": "grenades",
+      "pos": [
+        -30,
+        0,
+        21
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "is": "gun",
+      "gun": "ggm",
+      "pos": [
+        -30,
+        0,
+        27
+      ],
+      "yaw": -1.5707963267948966,
+      "reach": 250
+    },
+    {
+      "is": "gun",
+      "gun": "lgm",
+      "pos": [
+        -30,
+        0,
+        33
+      ],
+      "yaw": -1.5707963267948966,
+      "reach": 250
     }
   ]
 }
