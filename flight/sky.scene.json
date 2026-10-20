@@ -1,0 +1,1537 @@
+{
+  "world": {
+    "predict": {
+      "epsilon": 0.000001,
+      "cutoff": 60,
+      "halflife": 100,
+      "snap": 30,
+      "below": 0.0001
+    },
+    "defs": "flight",
+    "loader": {
+      "assets": {
+        "flight": {
+          "type": "json",
+          "url": "/games/flight/assets/flight.json",
+          "preload": true
+        },
+        "land": {
+          "type": "json",
+          "url": "/games/flight/assets/land.json",
+          "preload": true
+        },
+        "weathers": {
+          "type": "json",
+          "url": "/games/flight/assets/weathers.json",
+          "preload": true
+        },
+        "meadow-color-1024": {
+          "type": "texture",
+          "url": "/games/flight/assets/ground/meadow-color-1024.webp",
+          "wrap": "repeat"
+        },
+        "meadow-normal-1024": {
+          "type": "texture",
+          "url": "/games/flight/assets/ground/meadow-normal-1024.webp",
+          "space": "linear",
+          "wrap": "repeat"
+        },
+        "rock-color-1024": {
+          "type": "texture",
+          "url": "/games/flight/assets/ground/rock-color-1024.webp",
+          "wrap": "repeat"
+        },
+        "rock-normal-1024": {
+          "type": "texture",
+          "url": "/games/flight/assets/ground/rock-normal-1024.webp",
+          "space": "linear",
+          "wrap": "repeat"
+        },
+        "snow-color-1024": {
+          "type": "texture",
+          "url": "/games/flight/assets/ground/snow-color-1024.webp",
+          "wrap": "repeat"
+        },
+        "snow-normal-1024": {
+          "type": "texture",
+          "url": "/games/flight/assets/ground/snow-normal-1024.webp",
+          "space": "linear",
+          "wrap": "repeat"
+        },
+        "gravel-color-1024": {
+          "type": "texture",
+          "url": "/games/flight/assets/ground/gravel-color-1024.webp",
+          "wrap": "repeat"
+        },
+        "gravel-normal-1024": {
+          "type": "texture",
+          "url": "/games/flight/assets/ground/gravel-normal-1024.webp",
+          "space": "linear",
+          "wrap": "repeat"
+        },
+        "dry-ground-color-1024": {
+          "type": "texture",
+          "url": "/games/flight/assets/ground/dry-ground-color-1024.webp",
+          "wrap": "repeat"
+        },
+        "dry-ground-normal-1024": {
+          "type": "texture",
+          "url": "/games/flight/assets/ground/dry-ground-normal-1024.webp",
+          "space": "linear",
+          "wrap": "repeat"
+        },
+        "cracked-mud-color-1024": {
+          "type": "texture",
+          "url": "/games/flight/assets/ground/cracked-mud-color-1024.webp",
+          "wrap": "repeat"
+        },
+        "cracked-mud-normal-1024": {
+          "type": "texture",
+          "url": "/games/flight/assets/ground/cracked-mud-normal-1024.webp",
+          "space": "linear",
+          "wrap": "repeat"
+        },
+        "desert-rock-color-1024": {
+          "type": "texture",
+          "url": "/games/flight/assets/ground/desert-rock-color-1024.webp",
+          "wrap": "repeat"
+        },
+        "desert-rock-normal-1024": {
+          "type": "texture",
+          "url": "/games/flight/assets/ground/desert-rock-normal-1024.webp",
+          "space": "linear",
+          "wrap": "repeat"
+        },
+        "camel": {
+          "type": "model",
+          "url": "/games/flight/assets/camel.glb"
+        },
+        "cessna": {
+          "type": "model",
+          "url": "/games/flight/assets/cessna.glb"
+        },
+        "trainer": {
+          "type": "model",
+          "url": "/games/flight/assets/trainer.glb"
+        },
+        "airport": {
+          "type": "model",
+          "url": "/games/flight/assets/airport.glb"
+        },
+        "fx": {
+          "type": "sheet",
+          "url": "/games/flight/assets/fx/fx.json",
+          "preload": true
+        },
+        "effects": {
+          "type": "json",
+          "url": "/games/flight/assets/fx/effects.json",
+          "preload": true
+        },
+        "picture.camel": {
+          "type": "texture",
+          "url": "/games/flight/assets/camel.png",
+          "for": "ui"
+        },
+        "picture.cessna": {
+          "type": "texture",
+          "url": "/games/flight/assets/cessna.png",
+          "for": "ui"
+        },
+        "picture.trainer": {
+          "type": "texture",
+          "url": "/games/flight/assets/trainer.png",
+          "for": "ui"
+        }
+      }
+    },
+    "terrain3d": {
+      "field": "land",
+      "rings": [
+        {
+          "reach": 512,
+          "seg": 256
+        },
+        {
+          "reach": 2048,
+          "seg": 256
+        },
+        {
+          "reach": 16384,
+          "seg": 256
+        }
+      ],
+      "shadowReach": 512,
+      "budget": 6,
+      "preload": false,
+      "seabed": false,
+      "bake": {
+        "rings": [
+          848,
+          3408,
+          13648
+        ],
+        "res": 2048,
+        "near": 256,
+        "far": 512,
+        "cliff": 0.6,
+        "band": 0.06,
+        "budget": 1024
+      },
+      "maps": {
+        "near": 6,
+        "reach": 512,
+        "step": 8,
+        "small": 256
+      }
+    },
+    "skydome3d": {
+      "day": 1200,
+      "weathers": "weathers",
+      "soak": 6,
+      "dry": 45,
+      "lay": 55,
+      "melt": 90,
+      "gusts": [3, 7, 11],
+      "bolt": { "lasts": [0.12, 0.4], "out": [300, 2500] },
+      "biomes": {
+        "crags": { "add": { "cloud": 0.15, "haze": 0.2 }, "scale": { "wind": 1.5 } },
+        "glacier": { "add": { "cloud": 0.35, "fog": 0.12, "haze": 0.6 }, "scale": { "wind": 2.2, "base": 0.7 } },
+        "desert": { "add": { "haze": 0.3 }, "scale": { "wind": 1.3 } }
+      },
+      "look": {
+        "dayZenith": "#2961b3", "nightZenith": "#03050e", "dayHorizon": "#bdd1e0", "nightHorizon": "#090e1a",
+        "setZenith": "#47386b", "setHorizon": "#fa7a38", "sunHigh": "#fff2db", "sunLow": "#ff6b29", "moon": "#8cadff",
+        "ground": "#0a1218", "exposure": 1.05, "nightOpen": 0.35, "sunIntensity": 2.4, "moonIntensity": 0.35,
+        "hemiDay": 0.55, "hemiNight": 0.12, "cloudScale": 0.004, "cloudSharp": 0.42, "cloudDrift": 0.01,
+        "cloudShadow": 0.55, "godrays": 1, "stars": 1, "haze": 0.00006, "mist": 0.00494, "cloudLit": 0.35,
+        "cloudShade": 0.55, "lining": 0.8, "cirrusAlpha": 0.5, "starSize": 0.15, "twinkle": 0.4, "twinkles": 900,
+        "twinkleSpread": 5, "sunShrink": [0.05, 0.4], "sunEdge": 0.85, "moonEdge": 0.9, "moonSize": 0.0045,
+        "snowScale": 0.05, "flash": 0.8, "radius": 8000, "overcast": 0.2, "envSun": 0.02, "envMix": 0.05,
+        "envIntensity": 0.25
+      },
+      "precip": {
+        "rain": 40000, "snow": 60000, "dust": 2600, "splashes": 280, "range": 26, "edge": 3, "near": 1.5,
+        "rainFall": 16, "rainLen": 0.24, "rainWidth": 0.012, "rainOpacity": 0.24, "snowFall": 1.1, "snowSize": 0.03,
+        "snowOpacity": 0.9, "snowSway": [0.25, 1.3, 0.5], "dustFall": 0.1, "dustSize": 0.02, "dustOpacity": 0.22,
+        "dustColour": "#b08a5a", "dustSway": [0.6, 0.4, 0.6], "swayPeriod": 60, "splashSize": 0.12,
+        "splashLife": 0.35, "splashOpacity": 0.32, "splashRing": 0.25, "lift": 0.02, "keyShare": 0.3
+      },
+      "shadow": { "map": 2048, "half": 60, "near": 1, "far": 2400, "bias": -0.00002, "normalBias": 0.04 },
+      "mods": { "land": "terrain3d" }
+    },
+    "flight3d": {
+      "gravity": 9.81,
+      "air": {
+        "density": 1.225,
+        "scaleHeight": 8500,
+        "calm": 0.5
+      },
+      "materials": {
+        "engineDensity": 40,
+        "wingDensity": 10,
+        "structureDrag": 0.00005
+      },
+      "overspeed": 1.05,
+      "sweep": 1,
+      "kinds": [
+        "plane"
+      ],
+      "mods": {
+        "ground": "terrain3d"
+      },
+      "planes": {
+        "camel": {
+          "airframe": {
+            "structureMass": 390,
+            "maxThrust": 2200,
+            "propSpeed": 33,
+            "throttleRate": 1,
+            "wingArea": 21.46,
+            "span": 8.53,
+            "incidence": 0.087,
+            "clAlpha": 4.5,
+            "clPostStall": 1,
+            "alphaStall": 0.236,
+            "stallBlend": 0.04,
+            "cd0": 0.044,
+            "oswald": 0.75,
+            "cdFlatPlate": 1.2,
+            "brakeCd": 0,
+            "cyBeta": -0.5,
+            "clDeltaA": 0.14,
+            "clP": -0.4,
+            "cm0": -0.0075,
+            "cmAlpha": -0.4,
+            "cmQ": -9,
+            "cmDeltaE": 0.9,
+            "cnBeta": 0.05,
+            "cnR": -0.15,
+            "cnDeltaR": 0.07,
+            "maxAileron": 0.3,
+            "maxElevator": 0.35,
+            "maxRudder": 0.4,
+            "aileronRate": 3,
+            "elevatorRate": 3,
+            "rudderRate": 3,
+            "rGyrRoll": 1.2,
+            "rGyrPitch": 1.1,
+            "rGyrYaw": 1.4,
+            "engineTorque": 740,
+            "engineInertia": 23.5,
+            "engineSpin": 131
+          },
+          "gear": {
+            "wheels": [
+              {
+                "at": [
+                  -0.76,
+                  -1.2,
+                  -0.55
+                ],
+                "radius": 0.35,
+                "spring": 29000,
+                "damper": 3500,
+                "roll": 0.03,
+                "grip": 0.7,
+                "brake": false,
+                "steer": 0
+              },
+              {
+                "at": [
+                  0.76,
+                  -1.2,
+                  -0.55
+                ],
+                "radius": 0.35,
+                "spring": 29000,
+                "damper": 3500,
+                "roll": 0.03,
+                "grip": 0.7,
+                "brake": false,
+                "steer": 0
+              },
+              {
+                "at": [
+                  0,
+                  -0.75,
+                  3.9
+                ],
+                "radius": 0.05,
+                "spring": 40000,
+                "damper": 1700,
+                "roll": 0.35,
+                "grip": 0.6,
+                "brake": false,
+                "steer": 0
+              }
+            ],
+            "brakeGrip": 0,
+            "sink": 3,
+            "retract": 0,
+            "drag": 0,
+            "touch": [
+              [
+                -4.26,
+                1.05,
+                -0.32
+              ],
+              [
+                4.26,
+                1.05,
+                -0.32
+              ],
+              [
+                -4.26,
+                -0.1,
+                0.15
+              ],
+              [
+                4.26,
+                -0.1,
+                0.15
+              ],
+              [
+                0,
+                -1.3,
+                -1.45
+              ],
+              [
+                0,
+                -0.5,
+                -1.2
+              ],
+              [
+                0,
+                -0.35,
+                4.2
+              ]
+            ]
+          },
+          "look": {
+            "model": "camel",
+            "spin": 40,
+            "airbrake": 0,
+            "gear": 0
+          }
+        },
+        "cessna": {
+          "airframe": {
+            "structureMass": 880,
+            "maxThrust": 2700,
+            "propSpeed": 39.6,
+            "throttleRate": 0.5,
+            "wingArea": 16.2,
+            "span": 11,
+            "incidence": 0.063,
+            "clAlpha": 5.2,
+            "clPostStall": 1,
+            "alphaStall": 0.32,
+            "stallBlend": 0.05,
+            "cd0": 0.0365,
+            "oswald": 0.8,
+            "cdFlatPlate": 1.2,
+            "brakeCd": 0.06,
+            "cyBeta": -0.6,
+            "clDeltaA": 0.15,
+            "clP": -0.45,
+            "cm0": 0.0067,
+            "cmAlpha": -1,
+            "cmQ": -12,
+            "cmDeltaE": 1,
+            "cnBeta": 0.08,
+            "cnR": -0.2,
+            "cnDeltaR": 0.06,
+            "maxAileron": 0.3,
+            "maxElevator": 0.35,
+            "maxRudder": 0.35,
+            "aileronRate": 2,
+            "elevatorRate": 2,
+            "rudderRate": 2,
+            "rGyrRoll": 1.5,
+            "rGyrPitch": 1.4,
+            "rGyrYaw": 1.8,
+            "engineTorque": 474,
+            "engineInertia": 3,
+            "engineSpin": 283
+          },
+          "gear": {
+            "wheels": [
+              {
+                "at": [
+                  0,
+                  -1.14,
+                  -1.7
+                ],
+                "radius": 0.18,
+                "spring": 45000,
+                "damper": 3300,
+                "roll": 0.02,
+                "grip": 0.8,
+                "brake": false,
+                "steer": 0.17
+              },
+              {
+                "at": [
+                  -1.27,
+                  -1.1,
+                  0.35
+                ],
+                "radius": 0.22,
+                "spring": 58000,
+                "damper": 6200,
+                "roll": 0.02,
+                "grip": 0.8,
+                "brake": true,
+                "steer": 0
+              },
+              {
+                "at": [
+                  1.27,
+                  -1.1,
+                  0.35
+                ],
+                "radius": 0.22,
+                "spring": 58000,
+                "damper": 6200,
+                "roll": 0.02,
+                "grip": 0.8,
+                "brake": true,
+                "steer": 0
+              }
+            ],
+            "brakeGrip": 0.5,
+            "sink": 3.5,
+            "retract": 0,
+            "drag": 0,
+            "touch": [
+              [
+                -5.5,
+                0.87,
+                -0.2
+              ],
+              [
+                5.5,
+                0.87,
+                -0.2
+              ],
+              [
+                0,
+                -0.965,
+                -2.35
+              ],
+              [
+                0,
+                -0.62,
+                0
+              ],
+              [
+                0,
+                -0.35,
+                5.6
+              ]
+            ]
+          },
+          "look": {
+            "model": "cessna",
+            "spin": 40,
+            "airbrake": -0.52,
+            "gear": 0
+          }
+        },
+        "trainer": {
+          "airframe": {
+            "structureMass": 4756,
+            "maxThrust": 52000,
+            "propSpeed": 0,
+            "throttleRate": 0.35,
+            "wingArea": 16.69,
+            "span": 9.39,
+            "incidence": 0.035,
+            "clAlpha": 4.5,
+            "clPostStall": 1,
+            "alphaStall": 0.35,
+            "stallBlend": 0.05,
+            "cd0": 0.0136,
+            "oswald": 0.8,
+            "cdFlatPlate": 1.2,
+            "brakeCd": 0.06,
+            "cyBeta": -0.7,
+            "clDeltaA": 0.12,
+            "clP": -0.35,
+            "cm0": 0.0007,
+            "cmAlpha": -2,
+            "cmQ": -20,
+            "cmDeltaE": 1.2,
+            "cnBeta": 0.1,
+            "cnR": -0.25,
+            "cnDeltaR": 0.07,
+            "maxAileron": 0.3,
+            "maxElevator": 0.3,
+            "maxRudder": 0.35,
+            "aileronRate": 3,
+            "elevatorRate": 3,
+            "rudderRate": 3,
+            "rGyrRoll": 1.5,
+            "rGyrPitch": 2.6,
+            "rGyrYaw": 2.8,
+            "engineTorque": 0,
+            "engineInertia": 0,
+            "engineSpin": 0
+          },
+          "gear": {
+            "wheels": [
+              {
+                "at": [
+                  0,
+                  -1.55,
+                  -3.2
+                ],
+                "radius": 0.23,
+                "spring": 120000,
+                "damper": 12000,
+                "roll": 0.02,
+                "grip": 0.8,
+                "brake": false,
+                "steer": 0.35
+              },
+              {
+                "at": [
+                  -1.735,
+                  -1.55,
+                  0.55
+                ],
+                "radius": 0.31,
+                "spring": 198000,
+                "damper": 26000,
+                "roll": 0.02,
+                "grip": 0.8,
+                "brake": true,
+                "steer": 0
+              },
+              {
+                "at": [
+                  1.735,
+                  -1.55,
+                  0.55
+                ],
+                "radius": 0.31,
+                "spring": 198000,
+                "damper": 26000,
+                "roll": 0.02,
+                "grip": 0.8,
+                "brake": true,
+                "steer": 0
+              }
+            ],
+            "brakeGrip": 0.5,
+            "sink": 4,
+            "retract": 5,
+            "drag": 0.33,
+            "touch": [
+              [
+                -4.695,
+                -0.29,
+                1.4
+              ],
+              [
+                4.695,
+                -0.29,
+                1.4
+              ],
+              [
+                0,
+                -0.2,
+                -5.4
+              ],
+              [
+                0,
+                -1.05,
+                0
+              ],
+              [
+                0,
+                -0.6,
+                5.5
+              ]
+            ]
+          },
+          "look": {
+            "model": "trainer",
+            "spin": 0,
+            "airbrake": -0.9,
+            "gear": 1.57
+          }
+        }
+      }
+    },
+    "player": {
+      "actions": {
+        "pitch": { "label": "Nose down and up", "keys": [["ArrowUp", "w", "PadStickUp"], ["ArrowDown", "s", "PadStickDown"]] },
+        "roll": { "label": "Roll left and right", "keys": [["ArrowLeft", "a", "PadStickLeft"], ["ArrowRight", "d", "PadStickRight"]] },
+        "yaw": { "label": "Rudder left and right", "keys": [["q", "Pad4", "PadRightStickLeft"], ["e", "Pad5", "PadRightStickRight"]] },
+        "throttle": { "label": "Throttle down and up", "keys": [["Control", "Pad6"], ["Shift", "Pad7"]] },
+        "airbrake": { "label": "Airbrake", "keys": [" ", "Pad2"] },
+        "brake": { "label": "Wheel brakes", "keys": ["b", "Pad0"] },
+        "gear": { "label": "Gear", "keys": ["g", "Pad3"] },
+        "again": { "label": "Start again", "keys": ["r", "Pad8"] }
+      },
+      "deadzone": 0.15,
+      "resolution": 64
+    },
+    "particle3d": {
+      "effects": "effects"
+    },
+    "ui": {
+      "panels": {
+        "hud": {
+          "anchor": "center",
+          "size": [
+            1280,
+            720
+          ]
+        },
+        "menu": {
+          "anchor": "center",
+          "size": [
+            900,
+            570
+          ],
+          "key": "m",
+          "layer": 4,
+          "modal": true,
+          "backdrop": {
+            "color": 0,
+            "alpha": 0.45
+          }
+        }
+      },
+      "keys": {
+        "up": [
+          "ArrowUp",
+          "w",
+          "Pad12",
+          "PadStickUp"
+        ],
+        "down": [
+          "ArrowDown",
+          "s",
+          "Pad13",
+          "PadStickDown"
+        ],
+        "left": [
+          "ArrowLeft",
+          "a",
+          "Pad14",
+          "PadStickLeft"
+        ],
+        "right": [
+          "ArrowRight",
+          "d",
+          "Pad15",
+          "PadStickRight"
+        ],
+        "press": [
+          "Enter",
+          " ",
+          "Pad0"
+        ],
+        "back": [
+          "Escape",
+          "Pad1"
+        ]
+      },
+      "styles": {
+        "hud.text": {
+          "fontFamily": "Menlo, Consolas, monospace",
+          "fontSize": 15,
+          "fill": 8319642,
+          "dropShadow": {
+            "color": 0,
+            "alpha": 0.55,
+            "blur": 2,
+            "distance": 1,
+            "angle": 1.57
+          }
+        },
+        "hud.small": {
+          "fontFamily": "Menlo, Consolas, monospace",
+          "fontSize": 11,
+          "fill": 8319642,
+          "dropShadow": {
+            "color": 0,
+            "alpha": 0.55,
+            "blur": 2,
+            "distance": 1,
+            "angle": 1.57
+          }
+        },
+        "hud.warn": {
+          "fontFamily": "Menlo, Consolas, monospace",
+          "fontSize": 20,
+          "fontWeight": "bold",
+          "letterSpacing": 2,
+          "fill": 16735309,
+          "dropShadow": {
+            "color": 0,
+            "alpha": 0.6,
+            "blur": 3,
+            "distance": 1,
+            "angle": 1.57
+          }
+        },
+        "hud.caution": {
+          "fontFamily": "Menlo, Consolas, monospace",
+          "fontSize": 14,
+          "fontWeight": "bold",
+          "letterSpacing": 1,
+          "fill": 16763210,
+          "dropShadow": {
+            "color": 0,
+            "alpha": 0.55,
+            "blur": 2,
+            "distance": 1,
+            "angle": 1.57
+          }
+        },
+        "menu.title": {
+          "fontFamily": "monospace",
+          "fontSize": 26,
+          "fontWeight": "bold",
+          "fill": 16777215
+        },
+        "menu.text": {
+          "fontFamily": "monospace",
+          "fontSize": 20,
+          "fill": 16777215
+        },
+        "menu.small": {
+          "fontFamily": "monospace",
+          "fontSize": 15,
+          "fill": 13421772
+        }
+      }
+    },
+    "shipped": {
+      "plugins": [
+        "hud",
+        "mission"
+      ]
+    }
+  },
+  "plugins": [
+    "loader",
+    "scenemanager",
+    "player",
+    "terrain3d",
+    "flight3d",
+    "particle3d",
+    "skydome3d",
+    "render3d",
+    "ui",
+    "shipped"
+  ],
+  "seats": 2,
+  "prefabs": {
+    "engine": {
+      "dt": 0.016666666666666666,
+      "width": 1280,
+      "height": 720
+    },
+    "scenemanager": {
+      "out": {}
+    },
+    "loader": {},
+    "start": {
+      "slot": 0,
+      "plane": "cessna",
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "heading": 0,
+      "pitch": 0,
+      "speed": 0,
+      "throttle": 0,
+      "from": "air",
+      "mission": "free"
+    },
+    "stand": {
+      "name": "",
+      "slot": -1,
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "heading": 0,
+      "pitch": 0,
+      "speed": 0,
+      "throttle": 0
+    },
+    "player": {
+      "seat": 0,
+      "type": "cessna",
+      "mission": "free",
+      "from": "ramp",
+      "picked": false,
+      "launched": 0,
+      "held": null,
+      "course": null,
+      "formation": null
+    },
+    "plane": {
+      "type": "cessna",
+      "stand": "",
+      "traffic": "",
+      "placed": false,
+      "phase": "parked",
+      "leg": 0,
+      "laps": 0,
+      "wait": 0,
+      "trim": 0,
+      "taxi": [
+        0,
+        0,
+        0
+      ],
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "rot": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "vel": [
+        0,
+        0,
+        0
+      ],
+      "spin": [
+        0,
+        0,
+        0
+      ],
+      "aileron": 0,
+      "elevator": 0,
+      "rudder": 0,
+      "pitch": 0,
+      "roll": 0,
+      "yaw": 0,
+      "throttle": 0,
+      "throttling": 0,
+      "airbrake": 0,
+      "brake": 0,
+      "gear": 1,
+      "gearDown": true,
+      "press": [],
+      "crashed": false
+    },
+    "airport": {
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0
+    },
+    "menu": {},
+    "ring": {
+      "order": 0,
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0,
+      "pitch": 0
+    },
+    "render3d": {
+      "camera": {
+        "at": [
+          140,
+          45,
+          40
+        ],
+        "look": [
+          190,
+          38,
+          0
+        ],
+        "fov": 60,
+        "near": 0.5,
+        "far": 32000
+      },
+      "background": "#9cc4e8",
+      "ao": {
+        "radius": 0.8,
+        "thickness": 0.3,
+        "falloff": 1,
+        "scale": 1.5,
+        "intensity": 1,
+        "samples": 16
+      }
+    },
+    "skydome3d": {
+      "t": 430,
+      "rate": 0,
+      "doy": 200,
+      "lat": 46,
+      "phase": 0.72,
+      "to": "fair",
+      "from": { "cloud": 0.34, "cirrus": 0.25, "base": 1400, "top": 2200, "dense": 1, "rain": 0, "snow": 0, "fog": 0.02, "haze": 1.2, "wind": 4.5, "gust": 0.3, "thunder": 0, "dust": 0.05 },
+      "mix": { "cloud": 0.34, "cirrus": 0.25, "base": 1400, "top": 2200, "dense": 1, "rain": 0, "snow": 0, "fog": 0.02, "haze": 1.2, "wind": 4.5, "gust": 0.3, "thunder": 0, "dust": 0.05 },
+      "blend": 1,
+      "fade": 20,
+      "wet": 0,
+      "pack": 0,
+      "windDeg": 210,
+      "flash": 0,
+      "strike": [0, 0],
+      "drift": [0, 0]
+    }
+  },
+  "actors": [
+    {
+      "is": "loader"
+    },
+    {
+      "is": "skydome3d"
+    },
+    {
+      "is": "scenemanager"
+    },
+    {
+      "is": "airport",
+      "pos": [
+        0,
+        116,
+        0
+      ],
+      "yaw": 0
+    },
+    {
+      "is": "menu"
+    },
+    {
+      "is": "ring",
+      "order": 0,
+      "pos": [
+        0,
+        222.5,
+        -900
+      ],
+      "yaw": 0,
+      "pitch": 0.1
+    },
+    {
+      "is": "ring",
+      "order": 1,
+      "pos": [
+        0,
+        415.33,
+        -1500
+      ],
+      "yaw": 0,
+      "pitch": 0.08
+    },
+    {
+      "is": "ring",
+      "order": 2,
+      "pos": [
+        400,
+        552.83,
+        -1900
+      ],
+      "yaw": 1.5708,
+      "pitch": 0.06
+    },
+    {
+      "is": "ring",
+      "order": 3,
+      "pos": [
+        800,
+        560.88,
+        -1300
+      ],
+      "yaw": 3.1416,
+      "pitch": 0.05
+    },
+    {
+      "is": "ring",
+      "order": 4,
+      "pos": [
+        800,
+        409.32,
+        0
+      ],
+      "yaw": 3.1416,
+      "pitch": 0
+    },
+    {
+      "is": "ring",
+      "order": 5,
+      "pos": [
+        800,
+        353.21,
+        1300
+      ],
+      "yaw": 3.1416,
+      "pitch": 0
+    },
+    {
+      "is": "ring",
+      "order": 6,
+      "pos": [
+        800,
+        527.14,
+        2100
+      ],
+      "yaw": 3.1416,
+      "pitch": -0.1
+    },
+    {
+      "is": "ring",
+      "order": 7,
+      "pos": [
+        400,
+        884.36,
+        2500
+      ],
+      "yaw": 4.7124,
+      "pitch": -0.1
+    },
+    {
+      "is": "ring",
+      "order": 8,
+      "pos": [
+        0,
+        639.37,
+        2100
+      ],
+      "yaw": 0,
+      "pitch": -0.1
+    },
+    {
+      "is": "ring",
+      "order": 9,
+      "pos": [
+        0,
+        171,
+        1500
+      ],
+      "yaw": 0,
+      "pitch": -0.0524
+    },
+    {
+      "is": "ring",
+      "order": 10,
+      "pos": [
+        0,
+        144.8,
+        1000
+      ],
+      "yaw": 0,
+      "pitch": -0.0524
+    },
+    {
+      "is": "stand",
+      "name": "camel 0",
+      "slot": 0,
+      "pos": [
+        180,
+        117.5,
+        -58
+      ],
+      "heading": 4.7124,
+      "pitch": 0.167,
+      "speed": 0,
+      "throttle": 0
+    },
+    {
+      "is": "stand",
+      "name": "camel 1",
+      "slot": 1,
+      "pos": [
+        180,
+        117.5,
+        -42
+      ],
+      "heading": 4.7124,
+      "pitch": 0.167,
+      "speed": 0,
+      "throttle": 0
+    },
+    {
+      "is": "stand",
+      "name": "cessna 0",
+      "slot": 0,
+      "pos": [
+        180,
+        117.38,
+        -8
+      ],
+      "heading": 4.7124,
+      "pitch": 0,
+      "speed": 0,
+      "throttle": 0
+    },
+    {
+      "is": "stand",
+      "name": "cessna 1",
+      "slot": 1,
+      "pos": [
+        180,
+        117.38,
+        8
+      ],
+      "heading": 4.7124,
+      "pitch": 0,
+      "speed": 0,
+      "throttle": 0
+    },
+    {
+      "is": "stand",
+      "name": "trainer 0",
+      "slot": 0,
+      "pos": [
+        180,
+        117.91,
+        42
+      ],
+      "heading": 4.7124,
+      "pitch": -0.0213,
+      "speed": 0,
+      "throttle": 0
+    },
+    {
+      "is": "stand",
+      "name": "trainer 1",
+      "slot": 1,
+      "pos": [
+        180,
+        117.91,
+        58
+      ],
+      "heading": 4.7124,
+      "pitch": -0.0213,
+      "speed": 0,
+      "throttle": 0
+    },
+    {
+      "is": "stand",
+      "name": "circuit cessna",
+      "slot": -1,
+      "pos": [
+        140,
+        117.38,
+        -25
+      ],
+      "heading": 4.7124,
+      "pitch": 0,
+      "speed": 0,
+      "throttle": 0
+    },
+    {
+      "is": "stand",
+      "name": "circuit trainer",
+      "slot": -1,
+      "pos": [
+        140,
+        117.91,
+        25
+      ],
+      "heading": 4.7124,
+      "pitch": -0.0213,
+      "speed": 0,
+      "throttle": 0
+    },
+    {
+      "is": "stand",
+      "name": "lead camel",
+      "slot": -1,
+      "pos": [
+        1500,
+        1133,
+        -1500
+      ],
+      "heading": 2.9814,
+      "pitch": -0.0004,
+      "speed": 38,
+      "throttle": 0.635
+    },
+    {
+      "is": "stand",
+      "name": "lead cessna",
+      "slot": -1,
+      "pos": [
+        0,
+        1133,
+        3000
+      ],
+      "heading": -1.5576,
+      "pitch": 0.0261,
+      "speed": 52,
+      "throttle": 0.661
+    },
+    {
+      "is": "stand",
+      "name": "lead trainer",
+      "slot": -1,
+      "pos": [
+        -1500,
+        1133,
+        -1500
+      ],
+      "heading": 0.1727,
+      "pitch": 0.1166,
+      "speed": 100,
+      "throttle": 0.125
+    },
+    {
+      "is": "stand",
+      "name": "lap camel",
+      "slot": -1,
+      "pos": [
+        -553.56,
+        266,
+        -971.43
+      ],
+      "heading": 3.1416,
+      "pitch": 0.0081,
+      "speed": 34.45,
+      "throttle": 0.502
+    },
+    {
+      "is": "plane",
+      "type": "camel",
+      "stand": "camel 0",
+      "traffic": ""
+    },
+    {
+      "is": "plane",
+      "type": "camel",
+      "stand": "camel 1",
+      "traffic": ""
+    },
+    {
+      "is": "plane",
+      "type": "cessna",
+      "stand": "cessna 0",
+      "traffic": ""
+    },
+    {
+      "is": "plane",
+      "type": "cessna",
+      "stand": "cessna 1",
+      "traffic": ""
+    },
+    {
+      "is": "plane",
+      "type": "trainer",
+      "stand": "trainer 0",
+      "traffic": ""
+    },
+    {
+      "is": "plane",
+      "type": "trainer",
+      "stand": "trainer 1",
+      "traffic": ""
+    },
+    {
+      "is": "plane",
+      "type": "cessna",
+      "stand": "circuit cessna",
+      "traffic": "circuit",
+      "wait": 20
+    },
+    {
+      "is": "plane",
+      "type": "trainer",
+      "stand": "circuit trainer",
+      "traffic": "circuit",
+      "wait": 75
+    },
+    {
+      "is": "plane",
+      "type": "camel",
+      "stand": "lap camel",
+      "traffic": "lap"
+    },
+    {
+      "is": "plane",
+      "type": "camel",
+      "stand": "lead camel",
+      "traffic": "lead"
+    },
+    {
+      "is": "plane",
+      "type": "cessna",
+      "stand": "lead cessna",
+      "traffic": "lead"
+    },
+    {
+      "is": "plane",
+      "type": "trainer",
+      "stand": "lead trainer",
+      "traffic": "lead"
+    },
+    {
+      "is": "start",
+      "slot": 0,
+      "plane": "camel",
+      "pos": [
+        0,
+        416,
+        1200
+      ],
+      "heading": 0,
+      "pitch": -0.0187,
+      "speed": 41.1,
+      "throttle": 0.713,
+      "from": "air",
+      "mission": "free"
+    },
+    {
+      "is": "start",
+      "slot": 0,
+      "plane": "cessna",
+      "pos": [
+        0,
+        416,
+        1200
+      ],
+      "heading": 0,
+      "pitch": 0.0067,
+      "speed": 56.35,
+      "throttle": 0.768,
+      "from": "air",
+      "mission": "free"
+    },
+    {
+      "is": "start",
+      "slot": 0,
+      "plane": "trainer",
+      "pos": [
+        0,
+        416,
+        1200
+      ],
+      "heading": 0,
+      "pitch": 0.0003,
+      "speed": 198.55,
+      "throttle": 0.231,
+      "from": "air",
+      "mission": "free"
+    },
+    {
+      "is": "start",
+      "slot": 1,
+      "plane": "camel",
+      "pos": [
+        60,
+        416,
+        1260
+      ],
+      "heading": 0,
+      "pitch": -0.0187,
+      "speed": 41.1,
+      "throttle": 0.713,
+      "from": "air",
+      "mission": "free"
+    },
+    {
+      "is": "start",
+      "slot": 1,
+      "plane": "cessna",
+      "pos": [
+        60,
+        416,
+        1260
+      ],
+      "heading": 0,
+      "pitch": 0.0067,
+      "speed": 56.35,
+      "throttle": 0.768,
+      "from": "air",
+      "mission": "free"
+    },
+    {
+      "is": "start",
+      "slot": 1,
+      "plane": "trainer",
+      "pos": [
+        60,
+        416,
+        1260
+      ],
+      "heading": 0,
+      "pitch": 0.0003,
+      "speed": 198.55,
+      "throttle": 0.231,
+      "from": "air",
+      "mission": "free"
+    },
+    {
+      "is": "start",
+      "slot": 0,
+      "plane": "camel",
+      "pos": [
+        0,
+        222.5,
+        700
+      ],
+      "heading": 0,
+      "pitch": -0.0187,
+      "speed": 40.63,
+      "throttle": 0.689,
+      "from": "air",
+      "mission": "rings"
+    },
+    {
+      "is": "start",
+      "slot": 0,
+      "plane": "cessna",
+      "pos": [
+        0,
+        222.5,
+        700
+      ],
+      "heading": 0,
+      "pitch": 0.0067,
+      "speed": 55.71,
+      "throttle": 0.742,
+      "from": "air",
+      "mission": "rings"
+    },
+    {
+      "is": "start",
+      "slot": 0,
+      "plane": "trainer",
+      "pos": [
+        0,
+        222.5,
+        700
+      ],
+      "heading": 0,
+      "pitch": 0.0003,
+      "speed": 196.3,
+      "throttle": 0.225,
+      "from": "air",
+      "mission": "rings"
+    },
+    {
+      "is": "start",
+      "slot": 1,
+      "plane": "camel",
+      "pos": [
+        0,
+        222.5,
+        1000
+      ],
+      "heading": 0,
+      "pitch": -0.0187,
+      "speed": 40.63,
+      "throttle": 0.689,
+      "from": "air",
+      "mission": "rings"
+    },
+    {
+      "is": "start",
+      "slot": 1,
+      "plane": "cessna",
+      "pos": [
+        0,
+        222.5,
+        1000
+      ],
+      "heading": 0,
+      "pitch": 0.0067,
+      "speed": 55.71,
+      "throttle": 0.742,
+      "from": "air",
+      "mission": "rings"
+    },
+    {
+      "is": "start",
+      "slot": 1,
+      "plane": "trainer",
+      "pos": [
+        0,
+        222.5,
+        1000
+      ],
+      "heading": 0,
+      "pitch": 0.0003,
+      "speed": 196.3,
+      "throttle": 0.225,
+      "from": "air",
+      "mission": "rings"
+    }
+  ]
+}

@@ -1,0 +1,196 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>flight dev</title>
+    <style>
+      body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      canvas { grid-area: 1 / 1 }
+      #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px }
+    </style>
+  </head>
+  <body>
+    <div id="readout"></div>
+    <script type="module">
+      // client.html with this seat's network in front of it: one seat a tab, over a socket to
+      // `node --experimental-strip-types games/flight/flight.server.ts`, the scene run ahead
+      // (addons/predict). Between the page and its socket stands this seat's network (`Net` in
+      // addons/loopback), both ways, which the `network` panel sets live, from a preset or by hand,
+      // kept in this browser between loads. Open two tabs for two seats.
+      //   ?tab   no server: the game's manager truth in this tab, stepped on the page's clock as
+      //          flight.server.ts steps it, the page joined to it over a loopback with this seat's
+      //          network between them.
+      // The `biomes` panel takes the camera over the airfield, or over a point deep in each biome.
+      // The readout shows the frames a second and the longest frame of the last second, how the page
+      // runs ahead, and the last five errors the page threw or wrote.
+      import { boot } from '#engine/engine.ts'
+      import { accept, link, load, manager } from '#addons/scenemanager/scenemanager.addon.ts'
+      import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import { dial } from '#addons/socket/socket.addon.ts'
+      import { predict } from '#addons/predict/predict.addon.ts'
+      import GUI from 'lil-gui'
+      import { sim } from './flight.sim.ts'
+      import file from './flight.scene.json'
+
+      // Every error the page throws or writes, the last five, shown under the readout.
+      const errors = []
+      const caught = e => {
+        errors.push(String(e?.message ?? e))
+        if (errors.length > 5) errors.shift()
+      }
+      addEventListener('error', e => caught(e.error ?? e.message))
+      addEventListener('unhandledrejection', e => caught(e.reason))
+      const written = console.error.bind(console)
+      console.error = (...a) => { caught(a.map(x => x?.message ?? x).join(' ')); written(...a) }
+
+      const tab = new URLSearchParams(location.search).get('tab') !== null
+
+      // This seat's network, both ways, kept in this browser between loads.
+      const leg = () => ({ delay: 0, jitter: 0, tail: false, loss: 0, burst: 0, reorder: 0, dup: 0 })
+      const presets = {
+        clean: leg(),
+        LAN: { ...leg(), delay: 5, jitter: 4, burst: 0.05 },
+        'bad wifi': { ...leg(), delay: 40, jitter: 40, tail: true, loss: 0.01, burst: 0.2 },
+        mobile: { ...leg(), delay: 90, jitter: 80, tail: true, loss: 0.03, burst: 0.3, reorder: 0.02 },
+        awful: { ...leg(), delay: 150, jitter: 150, tail: true, loss: 0.08, burst: 0.4, reorder: 0.05, dup: 0.02 },
+      }
+      const net = { up: leg(), down: leg(), seed: Math.floor(Math.random() * 1e9) }
+      const store = 'flight.dev.net'
+      try {
+        const saved = JSON.parse(localStorage.getItem(store) ?? 'null')
+        if (saved) { Object.assign(net.up, saved.up); Object.assign(net.down, saved.down) }
+      } catch {}
+      const keepNet = () => { try { localStorage.setItem(store, JSON.stringify({ up: net.up, down: net.down })) } catch {} }
+
+      const time = { now: () => performance.now(), after: (ms, f) => { setTimeout(f, Math.max(0, ms)) } }
+      const url = `ws://${location.hostname}:${file.prefabs.scenemanager.port}`
+      const socket = send => {
+        const w = dial(url)(send)
+        return { take: up => w.send(up), close: () => w.close() }
+      }
+      // The truth in this tab with `?tab`, as index.html boots it; the server's otherwise, over the
+      // socket.
+      const truth = tab ? boot(file, sim) : undefined
+      if (truth) await load(truth, import.meta.url)
+      window.truth = truth
+      const page = predict(link(loopback(truth ? accept(manager(truth)) : socket, time, net)), file, import.meta.url, (me, scene) => {
+        for (const c of document.querySelectorAll('canvas')) c.remove()
+        for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
+          if (!surface) continue
+          const canvas = document.createElement('canvas')
+          canvas.width = scene.prefabs.engine.width
+          canvas.height = scene.prefabs.engine.height
+          document.body.appendChild(canvas)
+          surface.mount(canvas)
+        }
+      })
+      // the page, for a driver to reach its plugins
+      window.page = page
+      const readout = document.getElementById('readout')
+
+      // The panel: this seat's network, its presets setting both ways at once, and each way's numbers
+      // by hand.
+      const gui = new GUI({ title: 'flight dev' })
+      // Keys typed into the panel reach neither this page's keys nor the game's.
+      for (const type of ['keydown', 'keyup']) gui.domElement.addEventListener(type, e => e.stopPropagation())
+      const network = gui.addFolder('network')
+      const setNet = p => {
+        Object.assign(net.up, p)
+        Object.assign(net.down, p)
+        gui.controllersRecursive().forEach(c => c.updateDisplay())
+        keepNet()
+      }
+      const pick = network.addFolder('presets')
+      for (const [name, p] of Object.entries(presets)) pick.add({ [name]: () => setNet(p) }, name)
+      for (const way of ['down', 'up']) {
+        const w = network.addFolder(`${way} (server ${way === 'down' ? '→ page' : '← page'})`)
+        w.add(net[way], 'delay', 0, 400, 1).name('delay ms').onChange(keepNet)
+        w.add(net[way], 'jitter', 0, 300, 1).name('jitter ms').onChange(keepNet)
+        w.add(net[way], 'tail').name('long tail').onChange(keepNet)
+        w.add(net[way], 'loss', 0, 0.5, 0.005).onChange(keepNet)
+        w.add(net[way], 'burst', 0, 0.9, 0.01).onChange(keepNet)
+        w.add(net[way], 'reorder', 0, 0.5, 0.01).onChange(keepNet)
+        w.add(net[way], 'dup', 0, 0.5, 0.01).onChange(keepNet)
+        w.close()
+      }
+
+      // The land's biomes, looked at without flying: each button takes the camera (render3d's
+      // `claim`, which the plane's camera stands aside for) to a view, held there until `back to the
+      // plane`. A biome's view looks down on the nearest point where that biome has nearly the whole
+      // mix, found on rings round the airfield.
+      const biomes = gui.addFolder('biomes')
+      const OWNER = 'flight dev biomes'
+      let view
+      const ground = () => page.client?.plugins.terrain3d?.ground
+      const deep = name => {
+        const g = ground()
+        if (!g) return
+        for (let r = 1000; r <= 30000; r += 500) for (let a = 0; a < 64; a++) {
+          const x = r * Math.cos(a * Math.PI / 32), z = r * Math.sin(a * Math.PI / 32)
+          if ((g.mix(x, z)[name] ?? 0) > 0.97) return [x, z]
+        }
+      }
+      const over = (x, z) => {
+        const h = ground()?.height(x, z) ?? 0
+        view = { at: [x + 1800, h + 900, z + 1800], to: [x, h, z] }
+      }
+      biomes.add({ 'over the airfield': () => { view = { at: [1, 9000, 1], to: [0, 0, 0] } } }, 'over the airfield')
+      for (const name of ['meadow', 'crags', 'glacier', 'desert']) {
+        biomes.add({ [name]: () => { const p = deep(name); if (p) over(p[0], p[1]); else caught(`no point deep in ${name} within 30 km`) } }, name)
+      }
+      biomes.add({ 'back to the plane': () => { view = undefined; page.client?.plugins.render3d.release(OWNER) } }, 'back to the plane')
+      const place = () => {
+        const r3 = page.client?.plugins.render3d
+        if (!view || !r3?.camera || !r3.claim(OWNER)) return
+        r3.camera.position.set(...view.at)
+        r3.camera.up.set(0, 1, 0)
+        r3.camera.lookAt(...view.to)
+      }
+      // Each biome's share where the camera looks.
+      const looking = () => {
+        const g = ground()
+        if (!view || !g) return []
+        const mix = g.mix(view.to[0], view.to[2])
+        return [`looking at ${view.to[0].toFixed(0)}, ${view.to[2].toFixed(0)}: ${Object.entries(mix).map(([n, s]) => `${n} ${s.toFixed(2)}`).join('  ')}`]
+      }
+
+      // The truth in this tab, stepped on the page's clock as the server steps its own.
+      const dt = file.prefabs.engine.dt
+      let last = performance.now(), owed = 0
+      // The frames drawn in the last second, and the longest of them.
+      const frames = []
+      const loop = async now => {
+        frames.push(now)
+        while (frames[0] < now - 1000) frames.shift()
+        const worst = frames.slice(1).reduce((m, t, i) => Math.max(m, t - frames[i]), 0)
+        if (truth) {
+          owed += Math.min((now - last) / 1000, 0.25)
+          last = now
+          while (owed >= dt) { truth.step(dt); owed -= dt }
+        }
+        // A frame that throws is shown, and the next frame goes on.
+        try {
+          page.input()
+          place()
+          await page.frame(now)
+        } catch (e) { caught(e) }
+        const s = page.stats, { up, down } = net
+        readout.textContent = [
+          `${frames.length} fps  longest frame ${worst.toFixed(1)} ms`,
+          `${page.name ?? '…'}  ${truth ? 'in this tab' : url}`,
+          `down ${down.delay}+${down.jitter}${down.tail ? ' tail' : ''} ms loss ${down.loss}   up ${up.delay}+${up.jitter}${up.tail ? ' tail' : ''} ms loss ${up.loss}`,
+          `${s.predicting ? 'predicting' : 'not predicting'}  step ${s.n}  ${s.behind} behind the server`,
+          `corrections ${s.corrections}  drifts ${s.drifts}  packets checked ${s.checked}`,
+          `other seat's presses taken ${s.taken}, too late ${s.missed}  steps gone back ${s.back}`,
+          `snapshots loaded at ${s.loads.slice(-6).join(', ')}`,
+          ...(s.differed ? [`last differed at ${s.differed.n}: ${s.differed.rows.map(r => r.kind + ' ' + r.id).join(', ')}`] : []),
+          ...(s.drifted ? [`last drifted at ${s.drifted.n} by ${s.drifted.by.toExponential(2)}: ${s.drifted.rows.map(r => r.kind + ' ' + r.id).join(', ')}`] : []),
+          ...looking(),
+          ...errors,
+        ].join('\n')
+        requestAnimationFrame(loop)
+      }
+      requestAnimationFrame(loop)
+    </script>
+  </body>
+</html>
