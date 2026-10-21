@@ -2,9 +2,8 @@
 // (terrain3d's field `assets/gym.json`) under a clear sky, with one wall standing on it, the hero's
 // start 6 m in front of it, facing it, a sphere 12 m to its side, its middle 6 m up, and on its other
 // side a pillar 10 m off and a pole 16 m off, standing, and past them an inside corner 28 m off, its
-// faces looking in toward the wall's side, and past the sphere a bowl 24 m off, its middle 4 m up and
-// its open side looking the way the wall's front does, for climbing one shape at a time from
-// `dev.html?scene=yard`.
+// faces looking in toward the wall's side, and past the sphere a bowl 24 m off, a slab standing like the
+// wall with a hollow pressed into its front, for climbing one shape at a time from `dev.html?scene=yard`.
 import type { Scene, Sim } from '#engine/engine.ts'
 import { scenemanager } from '#plugins/scenemanager/scenemanager.sim.ts'
 import { loader } from '#plugins/loader/loader.sim.ts'

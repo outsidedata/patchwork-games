@@ -364,3 +364,50 @@ Proof (`yard.test.ts`):
 - 9b, 9c: held still at its deepest and 45° above and below it, for a second: framed on it, hands and
   feet on it within 4 µm, the four on four points, nothing of him in it at all.
 All 37 tests of `yard.test.ts` pass (908 s), steps 1–8 among them.
+Commit: games `e382e0f`.
+
+**10. Climb the concave shapes: across the inside corner, out of the bowl.** Found and fixed, each by
+numbers:
+- he stopped 0.5 m short of the corner: a link turning more than `bend` stops him, and that rule cannot
+  tell a wall's outside edge from an inside fold. climb's `crosses` now lets him over a link that folds in
+  toward him, however sharply: neither point behind the other's face, one in front of it (a seam lies
+  in both faces). Over an outside edge each point is behind the other's face, so the wall's sides and
+  top still stop him. It is the one rule for which way the hold goes, where the hands fit, and which
+  points a limb may take.
+- by the seam his left forearm went 1.07 cm into the other wall: "how far out" was read along one
+  point's way out, and a seam's is 45°. The bend check now reads the true distance to the net's
+  triangles: climb's `fromNet` reads a grid of 10 cm boxes made once a net, with every triangle's,
+  edge's and corner's way out worked out ahead. Points further than a box get the distance from the
+  triangles round their nearest point, `nearNet`.
+- the round "girth" the bend check used (each bone as thick as its widest skin) made his elbows swing 60°
+  on a flat wall where nothing was in it, and when bounded, failed to clear the corner. The check now
+  moves each bone's real skin as the swing would turn the bone, and reads it. A vertex is out by at
+  least its bone point's distance less how far it is from that point; only where that bound does not
+  show it out is it read off the field. Skin within half a millimetre counts as touching (the skin by a
+  wrist lies on the surface with the hand).
+- a step began 6.6 mm from where its hand was drawn: it began where the end bone rode along when the sim
+  moved his body, not where last frame drew it. It now begins there (the bone's place in his body,
+  carried back by how his body moved), and a hand no longer goes 1.3 mm in at the start of a step.
+- the half-ball bowl's rim is a 90° outside edge, which stops him as a wall's top does. The bowl is now a
+  hollow pressed 0.8 m into a slab's front by a ball of radius 3 m (`dish`, from `box` with a height on
+  its front), its rim turning 43°, crossed on the net in links of about 21°.
+- speed, every number measured on node over 120 frames of climb's page tick: the skin check first took
+  137 ms by the corner. Keeping each limb's skin in its bone's frame, the field, the bound, stopping a
+  failing bend at the first skin in, reading bone points only when wanted, and `outOf` cutting each
+  vertex against the highest corner of its own 5 cm square took it to 5.8 ms there and 3.0 ms on a flat
+  wall (1.2 ms before the skin check). Keeping only each bone's outermost skin in 16, then 32, directions
+  was faster but missed by up to 3.75 mm, and was taken out.
+Proof (`yard.test.ts`):
+- 10a: from one face 0.75 m from the corner, pushed toward it for 6 s: he climbs into it, over the seam
+  and on along the other face, 1.35 m past the seam. The way he faces turns a right angle and his up
+  stays upright. Every frame he is framed on the surface, steps in pairs (4 steps each), reaches,
+  never slides, and nothing of him is in either wall. A stepping limb is off the surface by no more than
+  its skin, the lift and 1 cm past how far the straight way between its points stands off it.
+- 9b again, in the new bowl: its net is closed, every point on its hollow's ball or the box's faces;
+  two cells or more inside the rim every point looks at the ball's middle within 0.23°. Held still at
+  its deepest and 30° above and below it, hands and feet on it within 4 µm, nothing of him in it.
+- 10b: from the bottom of the hollow, pushed up: he climbs up out of it, over its rim and on up the
+  flat face to two cells past the rim, in 469 frames, every limb stepping 5 times, nothing of him in it.
+- on the flat wall every elbow and knee still bends its clip's way (3f), and every test of steps 1–9
+  passes.
+All 39 tests of `yard.test.ts` pass (1049 s).

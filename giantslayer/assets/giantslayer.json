@@ -110,10 +110,11 @@
     "colour": "#9a9488"
   },
   "bowl": {
-    "shape": "bowl",
-    "radius": 3,
-    "thick": 0.5,
+    "shape": "dish",
+    "size": [6, 8, 2],
     "cell": 0.25,
+    "radius": 3,
+    "depth": 0.8,
     "colour": "#928c80"
   }
 }

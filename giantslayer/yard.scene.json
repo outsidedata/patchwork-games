@@ -31,6 +31,6 @@
     { "is": "pillar", "pos": [-10, 0, 0], "yaw": 0 },
     { "is": "pole", "pos": [-16, 0, 0], "yaw": 0 },
     { "is": "corner", "pos": [-28, 0, -3], "yaw": 0 },
-    { "is": "bowl", "pos": [24, 4, -2], "yaw": 0 }
+    { "is": "bowl", "pos": [24, 0, -2], "yaw": 0 }
   ]
 }

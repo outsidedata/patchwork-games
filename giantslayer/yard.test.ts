@@ -8,7 +8,7 @@ import { loopback } from '#addons/loopback/loopback.addon.ts'
 import { prepared } from '#plugins/loader/loader.sim.ts'
 import { ends } from '#plugins/anim/anim.sim.ts'
 import { keyCode } from '#plugins/player/player.plugin.ts'
-import { bowl, box, corner, cylinder, heldPoint, heldWay, linked, meshOf, netOf, netOn, sphere, spotOn } from './plugins/climb/climb.sim.ts'
+import { box, corner, cylinder, dish, heldPoint, heldWay, linked, meshOf, netOf, netOn, sphere, spotOn } from './plugins/climb/climb.sim.ts'
 import { sim } from './giantslayer.sim.ts'
 import file from './giantslayer.scene.json'
 import defs from './assets/giantslayer.json'
@@ -887,7 +887,8 @@ const limbOf = (name: string) => (defs.player.climb.limbs as Record<string, { sk
 // once; a planted hand or foot on its point (where it touches on the line out of the surface through
 // that point, within 1 mm) with its own skin on the surface within 1 mm, reached (ik3d short under 1 mm),
 // and not moved since the last frame (1 mm); one in a step off the surface by no more than its skin, the
-// lift and 1 cm, its skin never into it, reached (1 mm), landing on the point it stepped to. And every limb steps, lifting
+// lift and 1 cm past how far the straight way between its two points stands off it, its skin never into
+// it, reached (1 mm), landing on the point it stepped to. And every limb steps, lifting
 // off the surface by at least half the lift. How many steps each took, and how high each lifted.
 function climbedWell(r: Awaited<ReturnType<typeof climbing>>, net: ReturnType<typeof netOf>, what: string) {
   // The line out of the surface through a point, in the world: where it starts and its way.
@@ -917,7 +918,12 @@ function climbedWell(r: Awaited<ReturnType<typeof climbing>>, net: ReturnType<ty
         if (was && !was.step && was.point === t.point) expect(mid.distanceTo(r.seen[i - 1].middles[name])).toBeLessThanOrEqual(0.001)
       } else {
         const off = fromHeld(r.wall, mid.toArray())
-        expect(off).toBeLessThanOrEqual(skin + defs.player.climb.step.lift + 0.01)
+        // Off by no more than the skin, the lift and a centimetre past how far the straight way between
+        // its two points stands off the surface (across an inside corner, the way cuts across it).
+        const a = place(t.step.from), b = place(t.step.to)
+        let across = 0
+        for (let n = 1; n < 16; n++) across = Math.max(across, fromHeld(r.wall, a.map((v, k) => v + (b[k] - v) * (n / 16))))
+        expect(off).toBeLessThanOrEqual(skin + defs.player.climb.step.lift + across + 0.01)
         expect(skinOf(s, name)).toBeGreaterThanOrEqual(-0.001)
         // Reached the whole way: it goes where its step takes it.
         expect(s.short[j]).toBeLessThan(0.001)
@@ -1428,39 +1434,91 @@ test('9a, 9c: near the inside corner, a quarter of a metre from it on either fac
   }
 })
 
-test('9b: the bowl\'s net is a point on its surface for every corner of its mesh and a link for every edge, closed all round, its inside looking in at its middle', () => {
+// The bowl's hollow: the middle of the ball pressed into it, in its own frame, and its rim's radius.
+const HOLLOW = (() => {
   const k = defs.bowl
-  const shape = bowl(k.radius, k.thick, k.cell)
+  return { middle: [0, k.size[1] / 2, k.size[2] / 2 + k.radius - k.depth], rim: Math.sqrt(2 * k.radius * k.depth - k.depth * k.depth) }
+})()
+// A place on the bowl's hollow `deg` degrees above (under 0, below) its deepest.
+const inHollow = (deg: number) => {
+  const a = (deg * Math.PI) / 180, R = defs.bowl.radius, c = HOLLOW.middle
+  return [c[0], c[1] + R * Math.sin(a), c[2] - R * Math.cos(a)]
+}
+
+test('9b: the bowl\'s net is a point on its surface for every corner of its mesh and a link for every edge, closed all round, its hollow looking in at the middle of the ball pressed into it', () => {
+  const k = defs.bowl
+  const shape = dish(k.size, k.cell, k.radius, k.depth)
   const net = netOn(shape)
   const measure = signedTo(shape, k.cell)
-  let inside = 0
+  const [w, h, d] = k.size
+  let hollow = 0, worst = 0
   for (let i = 0; i < net.points; i++) {
     const q = [...net.at.subarray(i * 3, i * 3 + 3)], o = [...net.out.subarray(i * 3, i * 3 + 3)]
-    // ON it: on its inner ball, its outer ball or its rim (on the plane z = 0, between the two), and 0
-    // from its mesh; its way out leaves it.
-    const r = vlen(q)
-    const onBall = (Math.abs(r - k.radius) < 1e-5 || Math.abs(r - k.radius - k.thick) < 1e-5) && q[2] < 1e-5
-    const onRim = Math.abs(q[2]) < 1e-5 && r > k.radius - 1e-5 && r < k.radius + k.thick + 1e-5
-    expect(onBall || onRim).toBe(true)
+    // ON it: on the ball of the hollow (in front of the slab's middle, within the rim), or on the box's
+    // faces, and 0 from its mesh; its way out leaves it.
+    const fromMiddle = vlen(vsub(q, HOLLOW.middle)), r = Math.hypot(q[0], q[1] - h / 2)
+    const inBall = Math.abs(fromMiddle - k.radius) < 1e-5 && r < HOLLOW.rim + 1e-5
+    const onBox = Math.abs(Math.abs(q[0]) - w / 2) < 1e-5 || Math.abs(q[1]) < 1e-5 || Math.abs(q[1] - h) < 1e-5 || Math.abs(q[2] + d / 2) < 1e-5 || (Math.abs(q[2] - d / 2) < 1e-5 && r > HOLLOW.rim - k.cell * 2)
+    expect(inBall || onBox).toBe(true)
     expect(Math.abs(measure(q))).toBeLessThan(1e-5)
     expect(measure(q.map((v, j) => v + o[j] * 0.01))).toBeGreaterThan(0)
     expect(measure(q.map((v, j) => v - o[j] * 0.01))).toBeLessThan(0)
-    // Off the rim, a point of the inside looks in at the middle, within a degree.
-    if (Math.abs(r - k.radius) < 1e-5 && q[2] < -0.5) { expect(vdot(o, q.map(v => -v / r))).toBeGreaterThan(Math.cos(Math.PI / 180)); inside++ }
+    // Two cells or more inside the rim (nearer, a point's way out shares the triangles that cross the
+    // rim), a point of the hollow looks in at the ball's middle, within a degree.
+    if (inBall && r < HOLLOW.rim - 2 * k.cell) {
+      hollow++
+      worst = Math.max(worst, Math.acos(Math.min(1, vdot(o, vsub(HOLLOW.middle, q).map(v => v / fromMiddle)))))
+    }
   }
-  expect(inside).toBeGreaterThan(0)
+  expect(hollow).toBeGreaterThan(0)
+  expect(worst).toBeLessThan(Math.PI / 180)
   let links = 0
   for (let i = 0; i < net.points; i++) for (const o of linked(net, i)) if (o > i) links++
   expect(net.points - links + net.tri.length / 3).toBe(2)
-  console.log('9b net', JSON.stringify({ points: net.points, links, triangles: net.tri.length / 3, inside }))
+  console.log('9b net', JSON.stringify({ points: net.points, links, triangles: net.tri.length / 3, hollow, worstDeg: (worst * 180) / Math.PI }))
 })
 
-test('9b, 9c: inside the bowl, at its deepest and 45° above and below it, he hangs still, framed on it, hands and feet on it within 1 mm, no two on one point, nothing of him in it', async () => {
-  const k = defs.bowl, r45 = k.radius * Math.SQRT1_2
-  for (const at of [[0, 0, -k.radius], [0, r45, -r45], [0, -r45, -r45]]) {
+test('9b, 9c: in the bowl\'s hollow, at its deepest and 30° above and below it, he hangs still, framed on it, hands and feet on it within 1 mm, no two on one point, nothing of him in it', async () => {
+  for (const at of [inHollow(0), inHollow(30), inHollow(-30)]) {
     const { g, hero, seen } = await heldOn(await start(), at, 'bowl')
     const points = [...g.p.client!.plugins.climb.touches(hero)!.values()].map((x: { point: number }) => x.point)
     expect(new Set(points).size).toBe(4)
     console.log('9b held', JSON.stringify(at), JSON.stringify(seen))
   }
+})
+
+test('10a: from one face of the inside corner, pushed toward it, he climbs into it and onto the other face, framed on the surface all the way, stepping in pairs, never sliding, nothing of him through either wall', async () => {
+  const t = defs.corner.thick
+  const g = await start()
+  const net = netOf(g.p.client!.plugins.wire, g.yard.rows.find(r => r.kind === 'corner')!)
+  // On the face looking along +z, his left is toward the corner.
+  const r = await climbing(g, [t + 0.75, 4, t], ['a'], 360, 'corner')
+  const turned = onTheShape(r)
+  const well = climbedWell(r, net, 'corner')
+  const last = r.seen[r.seen.length - 1]
+  console.log('10a', JSON.stringify({ last: last.at, out: last.out, turned, ...well }))
+  // On the other face, looking along +x, gone along it: the way he faces turned a right angle, his up
+  // kept upright.
+  expect(last.at[0]).toBeCloseTo(t, 6)
+  expect(last.at[2]).toBeGreaterThan(t + 0.5)
+  expect(vdot(last.out, [1, 0, 0])).toBeCloseTo(1, 6)
+  expect(vdot(r.seen[0].out, [0, 0, 1])).toBeCloseTo(1, 6)
+  expect(turned).toBeLessThan(1)
+})
+
+test('10b: from the bottom of the bowl\'s hollow, pushed up, he climbs up out of it, over its rim and on up the flat face above, framed on the surface all the way, stepping in pairs, never sliding, nothing of him in it', async () => {
+  const k = defs.bowl
+  const g = await start()
+  const net = netOf(g.p.client!.plugins.wire, g.yard.rows.find(r => r.kind === 'bowl')!)
+  // Held till his hold is on the flat face two cells past the rim (where every triangle round a point is
+  // flat), at most 20 s.
+  const past = k.size[1] / 2 + HOLLOW.rim + 2 * k.cell
+  const r = await climbing(g, inHollow(0), ['w'], 1200, 'bowl', at => Math.abs(at[2] - k.size[2] / 2) < 1e-6 && at[1] > past)
+  const turned = onTheShape(r)
+  const well = climbedWell(r, net, 'bowl')
+  const last = r.seen[r.seen.length - 1]
+  console.log('10b', JSON.stringify({ frames: r.seen.length, last: last.at, out: last.out, turned, ...well }))
+  expect(Math.abs(last.at[2] - k.size[2] / 2)).toBeLessThan(1e-6)
+  expect(last.at[1]).toBeGreaterThan(past)
+  expect(vdot(last.out, [0, 0, 1])).toBeCloseTo(1, 6)
 })

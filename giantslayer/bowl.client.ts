@@ -1,8 +1,8 @@
 // A bowl's look: the shape of its definition, climb's (`show`, the browser half of the climb plugin): its
-// half of a hollow ball in its definition's `colour` round its row's `pos`, tipped back by its `pitch` and
-// turned by its `yaw`, the mesh named `bowl`, with its net drawn over it while its definition's `shown` is
-// true, named `bowl net`. It is drawn from its first tick: climb, a plugin the game ships, is on `plugins`
-// from the first frame's ticks (`shipped`), which come after a new row's setup.
+// slab with the hollow in its front, in its definition's `colour` from its row's `pos`, tipped back by its
+// `pitch` and turned by its `yaw`, the mesh named `bowl`, with its net drawn over it while its definition's
+// `shown` is true, named `bowl net`. It is drawn from its first tick: climb, a plugin the game ships, is on
+// `plugins` from the first frame's ticks (`shipped`), which come after a new row's setup.
 import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
 
