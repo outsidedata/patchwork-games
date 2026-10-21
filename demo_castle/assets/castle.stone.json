@@ -27,7 +27,7 @@
       ]
     },
     "keep": {
-      "style": "rough", "thickness": 1.2, "seed": 5,
+      "style": "rough", "thickness": 1.2, "seed": 5, "footing": 3,
       "pieces": [
         { "round": [0, 0, -2, 5, 14], "thickness": 1.6, "plinth": [2.0, 0.6, 3], "strings": [[7, 0.15]], "walk": [0.6, 1.6], "corbels": [0.35, 0.8, 0.5], "crenels": [0.8, 1.0], "floors": [5, 9, 14], "roof": [5, 0] },
         { "round": [34, 0, -2, 4, 12], "plinth": [1.6, 0.5, 2], "walk": [0.5, 1.5], "crenels": [0.8, 0.9], "floors": [6, 9, 12], "roof": [6, 0] },
@@ -37,6 +37,8 @@
         { "opening": [17, 0, -4.3, 3.2, 4.5], "arch": "round" },
         { "opening": [17, 0, 3.3, 3.2, 4.5], "arch": "round" },
         { "opening": [17, 7.0, -4.3, 1.0, 1.8], "arch": "round" },
+        { "wall": [[[-6, 0, -14], [4, 0, -18]], 3.2], "thickness": 0.9 },
+        { "ruin": [-1, 1.4, -16, 3.5] },
         { "wall": [[[34, 0, 0], [0, 0, 0]], 9], "thickness": 2.4, "plinth": [1.5, 0.4, 2], "walk": [0.6, 1.5], "corbels": [0.3, 0.7, 0.5], "crenels": [0.8, 0.9] },
         { "opening": [3.69, 9, 0, 1.2, 2.2], "arch": "round" },
         { "opening": [31.25, 9, 0, 1.2, 2.2], "arch": "round" },
