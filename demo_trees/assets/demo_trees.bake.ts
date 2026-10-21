@@ -17,7 +17,7 @@ export default async ({ blender, pack, scratch, library, texture }: Tools) => {
   const { leafSets, barkSets } = await import(pathToFileURL(path.join(library, 'trees', 'trees.mjs')).href)
   for (const zip of [...leafSets(spec), ...barkSets(spec)] as string[]) await texture(zip)
   const raw = scratch('trees.glb')
-  await blender(['--factory-startup', '--python', path.join(library, 'trees', 'trees.py'), '--', spec, raw])
+  await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(library, 'trees', 'trees.py'), '--', spec, raw])
   const out = path.join(here, 'trees.glb')
   await pack(raw, out)
   console.log('wrote', path.relative(path.join(here, '..', '..', '..'), out))
