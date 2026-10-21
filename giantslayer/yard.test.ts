@@ -322,8 +322,37 @@ function putOn(g: Game, want: number[], kind = 'wall') {
 // vertex's distance from its surface (negative inside), each hand's nearest to it, and the deepest any
 // vertex is inside and the bone it is bound to most; and the deepest of the vertices bound most to a
 // shin, a foot or a toe, and of all the others but the hands, whose touch is their own; and the height of
-// his lowest vertex.
-function against(g: Game, kind = 'wall') {
+// his lowest vertex. Only the hands and feet unless `full` (every vertex): the rest are then not measured
+// (`deepest`, `feet` and `rest` 0, `lowest` Infinity).
+// Each skinned mesh's vertices by the bone each is bound to most, worked out once: its name, and its class
+// (HAND_L, HAND_R, SOLE_L, SOLE_R; LEG for a shin, foot or toe; REST for all others but the hands).
+const HAND_L = 1, HAND_R = 2, SOLE_L = 4, SOLE_R = 8, LEG = 16, REST = 32
+const classed = new WeakMap<object, { bone: string[]; cls: Uint8Array; limbs: number[] }>()
+function classesOf(mesh: THREE.SkinnedMesh) {
+  let c = classed.get(mesh)
+  if (c) return c
+  const si = mesh.geometry.getAttribute('skinIndex'), sw = mesh.geometry.getAttribute('skinWeight')
+  const n = mesh.geometry.getAttribute('position').count
+  const bone: string[] = [], cls = new Uint8Array(n), limbs: number[] = []
+  for (let i = 0; i < n; i++) {
+    let most = 0
+    for (let k = 1; k < 4; k++) if (sw.getComponent(i, k) > sw.getComponent(i, most)) most = k
+    const b = mesh.skeleton.bones[si.getComponent(i, most)].name
+    bone.push(b)
+    let f = 0
+    if (b.includes('LeftHand')) f |= HAND_L
+    if (b.includes('RightHand')) f |= HAND_R
+    if (/Left(Foot|Toe)/.test(b)) f |= SOLE_L
+    if (/Right(Foot|Toe)/.test(b)) f |= SOLE_R
+    if (/(Left|Right)(Leg|Foot|Toe)/.test(b)) f |= LEG
+    else if (!/(Left|Right)Hand/.test(b)) f |= REST
+    cls[i] = f
+    if (f & (HAND_L | HAND_R | SOLE_L | SOLE_R)) limbs.push(i)
+  }
+  classed.set(mesh, (c = { bone, cls, limbs }))
+  return c
+}
+function against(g: Game, kind = 'wall', full = true) {
   const plugins = g.p.client!.plugins
   const T = plugins.render3d.THREE as typeof THREE
   const wall = g.yard.rows.find(r => r.kind === kind)!
@@ -341,29 +370,31 @@ function against(g: Game, kind = 'wall') {
   root.traverse(o => {
     const mesh = o as THREE.SkinnedMesh
     if (!mesh.isSkinnedMesh) return
-    const si = mesh.geometry.getAttribute('skinIndex'), sw = mesh.geometry.getAttribute('skinWeight')
-    for (let i = 0; i < mesh.geometry.getAttribute('position').count; i++) {
+    const { bone, cls, limbs } = classesOf(mesh)
+    const each = (i: number) => {
       mesh.getVertexPosition(i, v).applyMatrix4(mesh.matrixWorld)
       lowest = Math.min(lowest, v.y)
-      // Into the shape's own frame.
-      const local = localTo(wall, [v.x, v.y, v.z])
       const d = fromHeld(wall, [v.x, v.y, v.z])
-      let most = 0
-      for (let k = 1; k < 4; k++) if (sw.getComponent(i, k) > sw.getComponent(i, most)) most = k
-      const bone = mesh.skeleton.bones[si.getComponent(i, most)].name
-      for (const side of ['L', 'R'] as const) if (new RegExp(`${side === 'L' ? 'Left' : 'Right'}(Foot|Toe)`).test(bone)) soles[side] = Math.min(soles[side], d)
-      for (const side of ['L', 'R'] as const) {
-        if (!bone.includes(side === 'L' ? 'LeftHand' : 'RightHand')) continue
+      const f = cls[i]
+      if (f & SOLE_L) soles.L = Math.min(soles.L, d)
+      if (f & SOLE_R) soles.R = Math.min(soles.R, d)
+      for (const [side, bit] of [['L', HAND_L], ['R', HAND_R]] as const) {
+        if (!(f & bit)) continue
         hands[side] = Math.min(hands[side], d)
+        // Into the shape's own frame.
+        const local = localTo(wall, [v.x, v.y, v.z])
         const e = extent[side]
         extent[side] = [Math.min(e[0], local[0]), Math.max(e[1], local[0]), Math.min(e[2], local[1]), Math.max(e[3], local[1])]
       }
-      if (-d > deepest.depth) deepest = { depth: -d, bone }
-      if (/(Left|Right)(Leg|Foot|Toe)/.test(bone)) { if (-d > feet.depth) feet = { depth: -d, bone } }
-      else if (!/(Left|Right)Hand/.test(bone) && -d > rest.depth) rest = { depth: -d, bone }
+      if (-d > deepest.depth) deepest = { depth: -d, bone: bone[i] }
+      if (f & LEG) { if (-d > feet.depth) feet = { depth: -d, bone: bone[i] } }
+      else if (f & REST && -d > rest.depth) rest = { depth: -d, bone: bone[i] }
     }
+    if (full) for (let i = 0; i < cls.length; i++) each(i)
+    else for (const i of limbs) each(i)
   })
-  return { hands, soles, extent, deepest, feet, rest, lowest }
+  if (!full) { deepest = { depth: 0, bone: '' }; feet = { depth: 0, bone: '' }; rest = { depth: 0, bone: '' }; lowest = Infinity }
+  return { hands, soles, extent, deepest, feet, rest, lowest, full }
 }
 
 test('1c: the hero put on a spot of the wall stays on it, still, not falling, upright and facing straight into the wall', async () => {
@@ -518,6 +549,8 @@ test('1g: holding the wall 4 m up, he lets go of grip, drops off it, and lands o
 // `frames` frames, or till `until` holds of where his hold is (in its own frame), at most `frames`: each
 // frame where his hold is, where his root is, his skin against it, his frame on it, and his limbs'
 // touches.
+// A climb measures his hands' and feet's skin every frame and all of him every `WHOLE` frames.
+const WHOLE = 6
 async function climbing(g: Game, want: number[], keys: string[], frames: number, kind = 'wall', until?: (at: number[]) => boolean) {
   await g.frames(30)
   const { wall, hero } = putOn(g, want, kind)
@@ -549,7 +582,7 @@ async function climbing(g: Game, want: number[], keys: string[], frames: number,
     const turn = root.getWorldQuaternion(new T.Quaternion())
     const model = { up: new T.Vector3(0, 1, 0).applyQuaternion(turn).toArray(), ahead: new T.Vector3(0, 0, 1).applyQuaternion(turn).toArray() }
     seen.push({
-      at: spot(), pos: [...hero.data.pos], m: against(g, kind), touches, middles, short: g.p.client!.plugins.ik3d.short(hero.id) ?? [],
+      at: spot(), pos: [...hero.data.pos], m: against(g, kind, i % WHOLE === 0), touches, middles, short: g.p.client!.plugins.ik3d.short(hero.id) ?? [],
       out: spotOn(wire, wall, hero.data.hold).out, lean: structuredClone(hero.data.lean), model,
       placed: { kind: wall.kind, data: { pos: [...wall.data.pos], yaw: wall.data.yaw, pitch: wall.data.pitch, bend: wall.data.bend } },
     })

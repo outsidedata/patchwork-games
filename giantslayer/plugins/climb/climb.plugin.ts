@@ -99,7 +99,7 @@ import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
 import type { Handed } from '#plugins/ik3d/ik3d.plugin.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
-import { bent, crosses, FIELD, fromNet, fromRest, heldLocal, heldPoint, heldWay, linked, meshOf, nearestOn, nearNet, netOf, netOn, onNet, outOf, placedOf, restOf, spotOn, type Placed } from './climb.sim.ts'
+import { SAME, bent, crosses, FIELD, fromNet, fromRest, heldLocal, heldPoint, heldWay, linked, meshOf, nearestOn, nearNet, netOf, netOn, onNet, outOf, placedOf, restOf, spotOn, type Placed } from './climb.sim.ts'
 
 type Limb = { bones: [string, string, string]; touch: [string, string]; skin: number; across?: [string, string]; side?: number; bend: number[]; group: number; out: number }
 // A limb's touch: the point it is planted on, and the step it is in, from one point to another, `s` 0
@@ -125,7 +125,7 @@ export function climb() {
   const skins = new WeakMap<THREE.Object3D, Map<string, { mesh: THREE.SkinnedMesh; i: number }[]>>()
   // Each shape drawn, by row id: its mesh, its net's lines over it, and for one that bends, where each
   // corner of each is at rest and the bend they were last posed at.
-  const drawn = new Map<number, { mesh: THREE.Mesh; lines: THREE.LineSegments; rest: number[]; ends: number[]; bend: number }>()
+  const drawn = new Map<number, { mesh: THREE.Mesh; lines: THREE.LineSegments; rest: number[]; ends: number[]; bend: number; vertexOf: number[] }>()
   const undraw = (plugins: Plugins, id: number) => {
     const d = drawn.get(id)
     if (!d) return
@@ -260,7 +260,7 @@ export function climb() {
     return skin
   }
 
-  return {
+  const api = {
     tick(plugins: Plugins) {
       const T = plugins.render3d.THREE as typeof THREE
       reaching.clear()
@@ -301,7 +301,14 @@ export function climb() {
         // The body as its clip draws it this frame, not as last frame's reach left it.
         plugins.ik3d.unbend(r.id)
         const net = netOf(plugins.wire, held)
-        const place = (i: number) => heldPoint(held, [...net.at.subarray(i * 3, i * 3 + 3)])
+        // Each point pinned to its vertex of the shape as drawn this frame: wherever the drawn mesh has
+        // moved, turned or bent it.
+        api.show(held, plugins)
+        const shown = drawn.get(held.id)!
+        shown.mesh.updateMatrixWorld(true)
+        const verts = shown.mesh.geometry.getAttribute('position')
+        const pin = new T.Vector3()
+        const place = (i: number) => pin.fromBufferAttribute(verts, shown.vertexOf[i]).applyMatrix4(shown.mesh.matrixWorld).toArray()
         const faced = (i: number) => heldWay(held, [...net.out.subarray(i * 3, i * 3 + 3)])
         const face = (i: number) => new T.Vector3(...faced(i))
         root.updateMatrixWorld(true)
@@ -704,6 +711,13 @@ export function climb() {
         mesh.castShadow = true
         mesh.receiveShadow = true
         const net = netOn(shape)
+        // Each point of its net's first vertex of the mesh (vertices at one place are one point, in the order
+        // `netOn` meets them).
+        const vertexOf: number[] = [], seen = new Set<string>()
+        for (let i = 0; i < shape.position.length / 3; i++) {
+          const key = shape.position.slice(i * 3, i * 3 + 3).map(v => Math.round(v / SAME)).join(',')
+          if (!seen.has(key)) { seen.add(key); vertexOf.push(i) }
+        }
         const ends: number[] = []
         for (let i = 0; i < net.points; i++) for (const o of linked(net, i)) if (o > i) ends.push(...net.at.subarray(i * 3, i * 3 + 3), ...net.at.subarray(o * 3, o * 3 + 3))
         const lg = new T.BufferGeometry()
@@ -713,7 +727,7 @@ export function climb() {
         lines.renderOrder = 10
         mesh.add(lines)
         plugins.render3d.scene.add(mesh)
-        drawn.set(row.id, (d = { mesh, lines, rest: shape.position, ends, bend: 0 }))
+        drawn.set(row.id, (d = { mesh, lines, rest: shape.position, ends, bend: 0, vertexOf }))
       }
       // One that bends: its mesh and its net's lines posed as its row's bend has it, when that changes (each
       // corner the bend moves; it is drawn flat, its faces' own ways, so it needs no ways at its corners).
@@ -752,4 +766,5 @@ export function climb() {
       for (const id of [...drawn.keys()]) undraw(plugins, id)
     },
   }
+  return api
 }

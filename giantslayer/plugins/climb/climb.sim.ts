@@ -499,7 +499,7 @@ export type Net = {
   posed?: { rest: Net; b: Bends; bend: number; part: Uint8Array }
 }
 
-const SAME = 1e-4 // metres: two vertices this close are one point
+export const SAME = 1e-4 // metres: two vertices this close are one point
 
 // The net of a mesh: a point for each place a vertex stands (vertices at one place, which a mesh splits
 // where its faces part, are one point), a link for each edge of a triangle, and each point's way out
