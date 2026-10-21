@@ -19,12 +19,12 @@
     "bottlebrush": { "species": "bottlebrush", "height": 5 }
   },
   "lods": [
-    { "name": "0", "resolution": 2, "keep": 1 },
-    { "name": "1", "resolution": 1, "keep": 2 },
-    { "name": "2", "resolution": 1, "levels": 2, "keep": 4 },
+    { "name": "0", "resolution": 2, "bevel": 4, "keep": 1 },
+    { "name": "1", "resolution": 1, "bevel": 2, "keep": 2 },
+    { "name": "2", "resolution": 1, "bevel": 0, "levels": 2, "keep": 4 },
     { "name": "3", "crown": { "bands": 4, "sides": 8, "taper": 0.8 } }
   ],
   "colours": { "bark": "#5a4636", "leaf": "#4f7d2f" },
-  "textures": { "leaf": 1024, "normal": 512 },
+  "textures": { "leaf": 1024, "normal": 512, "bark": 1024, "barkNormal": 1024 },
   "node": "{tree}-{lod}-{part}"
 }
