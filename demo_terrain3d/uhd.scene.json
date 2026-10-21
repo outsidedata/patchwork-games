@@ -28,7 +28,7 @@
         { "reach": 2048, "seg": 256 },
         { "reach": 9000, "seg": 180 }
       ],
-      "shadowReach": 512,
+      "shadowReach": 150,
       "budget": 8,
       "preload": true,
       "seabed": false,
