@@ -17,7 +17,7 @@
       // the colossus, in place of the chase;
       // `?bot` names the playtester in the gym's copy and hands it the think of `giantslayer.think.ts`,
       // so the seat plays the whole loop itself;
-      // `?net` draws the net a body climbs on over each wall, sphere, pillar, pole, corner, bowl and bumpy slab (their definitions' `shown`, set in the tab's
+      // `?net` draws the net a body climbs on over each wall, sphere, pillar, pole, corner, bowl, bumpy slab, sliding wall, tipping wall and swinging ball (their definitions' `shown`, set in the tab's
       // one copy of the definitions, which every rule and look reads; `window.__defs`).
       // After the boot, `window.__scenes` holds the truths (`__scenes.get('gym').rows`), `window.__entered`
       // the name of the one entered, and an error
@@ -41,7 +41,7 @@
       if (bot) ({ gym, arena })[entered].plugins.push('playtester')
       const watch = query.get('watch')?.split(',').map(Number)
       const defs = await prepared(file.world, file.world.defs)
-      if (query.has('net')) for (const kind of ['wall', 'sphere', 'pillar', 'pole', 'corner', 'bowl', 'bumpy']) defs[kind].shown = true
+      if (query.has('net')) for (const kind of ['wall', 'sphere', 'pillar', 'pole', 'corner', 'bowl', 'bumpy', 'slider', 'tipper', 'swinger']) defs[kind].shown = true
       window.__defs = defs
 
       const dt = file.prefabs.engine.dt

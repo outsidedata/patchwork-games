@@ -127,5 +127,30 @@
     "waves": [3, 4],
     "height": 0.1,
     "colour": "#978f83"
+  },
+  "slider": {
+    "shape": "box",
+    "size": [6, 8, 1],
+    "cell": 0.25,
+    "reach": 1,
+    "period": 12,
+    "colour": "#8c9294"
+  },
+  "tipper": {
+    "shape": "box",
+    "size": [6, 8, 1],
+    "cell": 0.25,
+    "tip": 0.26,
+    "period": 8,
+    "colour": "#94908c"
+  },
+  "swinger": {
+    "shape": "sphere",
+    "radius": 3,
+    "cell": 0.25,
+    "length": 6,
+    "swing": 0.35,
+    "period": 6,
+    "colour": "#8e8a84"
   }
 }

@@ -15,7 +15,8 @@
 // most angle of its `bend` spans, and no nearer than the least spans. How long it could hold a point is
 // how long it would go on reaching it with `climb.step.slack` metres of room to spare if its first bone
 // went on as his body carries it (as his body itself moved and turned when the rows last moved on, not as
-// his clip moves it inside his body): the first of `climb.step.ahead` seconds, looked at in eighths, at which it would not, or all of
+// his clip moves it inside his body, and over the surface: what the held row moved it by, carrying him
+// with it, is not counted): the first of `climb.step.ahead` seconds, looked at in eighths, at which it would not, or all of
 // them. It could step from one point to another when its end bone would be within reach the whole way of
 // its first bone carried along so (folding with `climb.step.slack` to spare at the middle of the step,
 // none at its ends), looked at in sixteenths of the step as a step goes, unrested, and where the step's
@@ -61,7 +62,8 @@
 // longer; or, his hold standing still, when the point it wants is more than `climb.step.far` metres from
 // its own. A group steps together, each of its limbs whose wanted point is not its own, when one of them
 // is behind and no group is stepping; when both groups are behind, the one whose limb has least time
-// left goes, and when even, the one that did not step last. A limb that can no longer reach its point
+// left goes, and when even, the one that did not step last. (His hold standing still is still on the
+// surface: a shape that moves carries it and him.) A limb that can no longer reach its point
 // steps at once, out of turn if another group is stepping (`forced`). A step goes from its point to the
 // point it wants over `climb.step.time` seconds, eased in and out: its end bone on the straight way
 // between where the two put it, then resting on the surface under that (as a planted one rests, read
@@ -71,7 +73,8 @@
 // within the limb's reach (over a ball's top the way out points at his body), or if none does the lift
 // that comes nearest; turned between the two turns; and
 // off that by as far as its end bone was from it where last frame drew it (`off`; its place in his body as
-// the last reach bent it, carried back by how his body has moved since), fading out as it goes,
+// the last reach bent it, carried back by how his body has moved since, and on with the held row as it
+// has moved since), fading out as it goes,
 // so it begins where the limb really was though it fell short. A limb that can neither reach its point nor step lets go of it, and is drawn as its
 // clip draws it. Time is the steps the rows have gone on since the last frame, each the scene's step, so
 // a page reaches the same however fast it draws. Letting go of the net forgets every touch.
@@ -95,7 +98,7 @@ import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
 import type { Handed } from '#plugins/ik3d/ik3d.plugin.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
-import { crosses, FIELD, fromNet, heldLocal, heldPoint, heldWay, linked, meshOf, nearestOn, nearNet, netOf, netOn, onNet, outOf, spotOn } from './climb.sim.ts'
+import { crosses, FIELD, fromNet, heldLocal, heldPoint, heldWay, linked, meshOf, nearestOn, nearNet, netOf, netOn, onNet, outOf, placedOf, spotOn, type Placed } from './climb.sim.ts'
 
 type Limb = { bones: [string, string, string]; touch: [string, string]; skin: number; across?: [string, string]; side?: number; bend: number[]; group: number; out: number }
 // A limb's touch: the point it is planted on, and the step it is in, from one point to another, `s` 0
@@ -111,8 +114,11 @@ export function climb() {
   const reaching = new Map<number, Handed[]>()
   const targets = new Map<string, THREE.Object3D>()
   // Each holder's touches, by row id and limb, the step of the rows it last reached by, and the group
-  // that stepped last.
-  const touching = new Map<number, { n: number; touches: Map<string, Touch>; last: number; spot?: THREE.Vector3; going?: THREE.Vector3; body?: THREE.Matrix4; moved?: THREE.Matrix4; span?: number }>()
+  // that stepped last; where its hold was in the held row's own frame (`spot`), how fast it went over
+  // it (`going`); its body when the rows last moved on and where the held row stood then (`body`,
+  // `then`), and how its body moved over the step before (`moved`, over `span` seconds, from where the
+  // held row stood at its start, `was`).
+  const touching = new Map<number, { n: number; touches: Map<string, Touch>; last: number; spot?: number[]; going?: THREE.Vector3; body?: THREE.Matrix4; then?: Placed; moved?: THREE.Matrix4; was?: Placed; span?: number }>()
   // Each holder's model's skin by limb: the vertices of its skinned meshes bound most to the limb's end
   // bone or a bone under it, found once a model.
   const skins = new WeakMap<THREE.Object3D, Map<string, { mesh: THREE.SkinnedMesh; i: number }[]>>()
@@ -275,11 +281,15 @@ export function climb() {
           const up = new T.Vector3(...lean.up), ahead = new T.Vector3(...lean.ahead)
           root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(new T.Vector3().crossVectors(up, ahead), up, ahead))
         }
+        // A place in the world as the held row stood at `then`, carried on with it to where it stands now
+        // (the same place on it), so what moves with a moving shape is not taken for moving over it.
+        const carried = (p: THREE.Vector3, then?: Placed) => (then ? new T.Vector3(...heldPoint(held, heldLocal(then, p.toArray()))) : p)
         // Where each end bone was drawn last frame, as last frame's reach left it: its place in his body
-        // as that reach bends it, carried back by how his body has moved since. A step begins from there.
+        // as that reach bends it, carried back by how his body has moved since, and on with the held row
+        // as it has moved since. A step begins from there.
         root.updateMatrixWorld(true)
         const back = mine.body && dt > 0 ? mine.body.clone().multiply(root.matrixWorld.clone().invert()) : new T.Matrix4()
-        const reached = new Map((k.ik as string[]).map(name => [name, new T.Vector3().setFromMatrixPosition(bone(root, limbsOf[name].bones[2]).matrixWorld).applyMatrix4(back)]))
+        const reached = new Map((k.ik as string[]).map(name => [name, carried(new T.Vector3().setFromMatrixPosition(bone(root, limbsOf[name].bones[2]).matrixWorld).applyMatrix4(back), dt > 0 ? mine.then : undefined)]))
         // The body as its clip draws it this frame, not as last frame's reach left it.
         plugins.ik3d.unbend(r.id)
         const net = netOf(plugins.wire, held)
@@ -291,21 +301,26 @@ export function climb() {
         // The way out of the surface where he holds, which his elbows and knees bend out along.
         const here = spotOn(plugins.wire, held, hold)
         const facing = new T.Vector3(...here.out)
-        // How fast his hold goes over the surface, metres a second, from where it was when the rows last
-        // moved on; still when they have not.
+        // How fast his hold goes over the surface, metres a second, from where it was on it when the rows
+        // last moved on (in the held row's own frame, so a shape that moves does not move it); still when
+        // they have not.
         const spot = new T.Vector3(...here.at)
         if (dt > 0) {
-          mine.going = mine.spot ? spot.clone().sub(mine.spot).divideScalar(dt) : new T.Vector3()
-          mine.spot = spot
+          const local = heldLocal(held, here.at)
+          mine.going = mine.spot ? new T.Vector3(...heldWay(held, local.map((v, i) => (v - mine!.spot![i]) / dt))) : new T.Vector3()
+          mine.spot = local
         }
         const going = mine.going ?? new T.Vector3()
         // How his body itself moved and turned since the rows last moved on: what takes a place held in
-        // it now back to where that place was then (not what his clip does inside it).
+        // it now back to where that place was then (not what his clip does inside it), then from where
+        // the held row stood (`was`); and where the held row stands now, for the next.
         if (dt > 0) {
           const body = root.matrixWorld.clone()
           mine.moved = mine.body ? mine.body.clone().multiply(body.clone().invert()) : new T.Matrix4()
+          mine.was = mine.then
           mine.span = dt
           mine.body = body
+          mine.then = placedOf(held)
         }
         const moved = mine.moved ?? new T.Matrix4()
         // The points of the surface he holds: from his hold's point, over links he goes over (`crosses`:
@@ -389,9 +404,10 @@ export function climb() {
           }
           const slack = (i: number) => spare(goalOf(i))
           const ok = (i: number) => on.has(i) && slack(i) >= 0
-          // How fast its first bone goes as his body moves and turns, metres a second: from where his body's
-          // last move had it to where it is now, over the time between the rows' last two steps.
-          const rootGoing = mine.span ? from.clone().sub(from.clone().applyMatrix4(moved)).divideScalar(mine.span) : new T.Vector3()
+          // How fast its first bone goes over the surface as his body moves and turns, metres a second: from
+          // where his body's last move had it (carried on with the held row as it moved over that step) to
+          // where it is now, over the time between the rows' last two steps.
+          const rootGoing = mine.span ? from.clone().sub(carried(from.clone().applyMatrix4(moved), mine.was)).divideScalar(mine.span) : new T.Vector3()
           // How long the limb could hold point `i` if its first bone went on as it is going: the first of
           // `step.ahead` seconds, looked at in eighths, at which its first bone, carried along, is out of
           // reach of it by `step.slack`; all of them while it stays in reach.

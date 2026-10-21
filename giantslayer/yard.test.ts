@@ -266,7 +266,7 @@ test('1b: the wall\'s net is a point on its surface for every corner of its mesh
 test('1a: the yard holds one wall, standing on the ground the hero stands on, drawn as a box of its definition\'s size from the ground up', async () => {
   const { yard, p, frames } = await start()
   await frames(30)
-  expect([...new Set(yard.rows.map(r => r.kind))].sort()).toEqual(['bowl', 'bumpy', 'corner', 'loader', 'pillar', 'player', 'pole', 'scenemanager', 'skydome3d', 'sphere', 'start', 'wall'])
+  expect([...new Set(yard.rows.map(r => r.kind))].sort()).toEqual(['bowl', 'bumpy', 'corner', 'loader', 'pillar', 'player', 'pole', 'scenemanager', 'skydome3d', 'slider', 'sphere', 'start', 'swinger', 'tipper', 'wall'])
   const wall = yard.rows.filter(r => r.kind === 'wall')
   expect(wall).toHaveLength(1)
   const hero = yard.rows.find(r => r.kind === 'player')!
@@ -519,6 +519,8 @@ async function climbing(g: Game, want: number[], keys: string[], frames: number,
     touches: Record<string, { point: number; step?: { from: number; to: number; s: number }; room?: number }>
     middles: Record<string, THREE.Vector3>; short: number[]
     out: number[]; lean: { up: number[]; ahead: number[] }; model: { up: number[]; ahead: number[] }
+    // Where the held row stood that frame (one that moves stands somewhere new each).
+    placed: { kind: string; data: { pos: number[]; yaw: number; pitch: number } }
   }
   const T = g.p.client!.plugins.render3d.THREE as typeof THREE
   const root: THREE.Object3D = g.p.client!.plugins.anim.model(hero.id)
@@ -535,6 +537,7 @@ async function climbing(g: Game, want: number[], keys: string[], frames: number,
     seen.push({
       at: spot(), pos: [...hero.data.pos], m: against(g, kind), touches, middles, short: g.p.client!.plugins.ik3d.short(hero.id) ?? [],
       out: spotOn(wire, wall, hero.data.hold).out, lean: structuredClone(hero.data.lean), model,
+      placed: { kind: wall.kind, data: { pos: [...wall.data.pos], yaw: wall.data.yaw, pitch: wall.data.pitch } },
     })
   }
   for (const k of keys) key('keyup', k)
@@ -895,14 +898,18 @@ const limbOf = (name: string) => (defs.player.climb.limbs as Record<string, { sk
 // and not moved since the last frame (1 mm); one in a step with its skin off the surface by no more than
 // the lift and 1 cm past how far the straight way between its two points stands off it, never into it,
 // reached (1 mm), landing on the point it stepped to. And every limb steps, its skin lifting
-// off the surface by at least half the lift. How many steps each took, and how high each lifted.
-function climbedWell(r: Awaited<ReturnType<typeof climbing>>, net: ReturnType<typeof netOf>, what: string) {
-  // The line out of the surface through a point, in the world: where it starts and its way.
-  const place = (point: number) => heldPoint(r.wall, [...net.at.subarray(point * 3, point * 3 + 3)])
-  const way = (point: number) => heldWay(r.wall, [...net.out.subarray(point * 3, point * 3 + 3)])
+// off the surface by at least half the lift; or, held still (`still`), none ever steps. All of it on the
+// held row where it stood that frame, and "not moved" on it: one that moves carries a planted limb with
+// it. How many steps each took, and how high each lifted.
+function climbedWell(r: Awaited<ReturnType<typeof climbing>>, net: ReturnType<typeof netOf>, what: string, still = false) {
+  type Placed = (typeof r.seen)[number]['placed']
+  // The line out of the surface through a point, in the world, the held row where it stood: where it
+  // starts and its way.
+  const place = (at: Placed, point: number) => heldPoint(at, [...net.at.subarray(point * 3, point * 3 + 3)])
+  const way = (at: Placed, point: number) => heldWay(at, [...net.out.subarray(point * 3, point * 3 + 3)])
   // How far a place is from that line.
-  const offLine = (point: number, p: number[]) => {
-    const a = place(point), o = way(point), v = vsub(p, a)
+  const offLine = (at: Placed, point: number, p: number[]) => {
+    const a = place(at, point), o = way(at, point), v = vsub(p, a)
     return vlen(vsub(v, o.map(x => x * vdot(v, o))))
   }
   // A limb's own nearest skin to the surface.
@@ -917,19 +924,20 @@ function climbedWell(r: Awaited<ReturnType<typeof climbing>>, net: ReturnType<ty
     LIMBS.forEach((name, j) => {
       const t = s.touches[name], mid = s.middles[name]
       if (!t.step) {
-        expect(offLine(t.point, mid.toArray())).toBeLessThanOrEqual(0.001)
+        expect(offLine(s.placed, t.point, mid.toArray())).toBeLessThanOrEqual(0.001)
         expect(Math.abs(skinOf(s, name))).toBeLessThanOrEqual(0.001)
         expect(s.short[j]).toBeLessThan(0.001)
         const was = r.seen[i - 1]?.touches[name]
-        if (was && !was.step && was.point === t.point) expect(mid.distanceTo(r.seen[i - 1].middles[name])).toBeLessThanOrEqual(0.001)
+        if (was && !was.step && was.point === t.point) expect(vlen(vsub(localTo(s.placed, mid.toArray()), localTo(r.seen[i - 1].placed, r.seen[i - 1].middles[name].toArray())))).toBeLessThanOrEqual(0.001)
       } else {
+        expect(still).toBe(false)
         // Its own skin off by no more than the lift and a centimetre past how far the straight way between
         // its two points stands off the surface (across an inside corner, the way cuts across it). Its
         // skin and not its middle: a hand turned as it goes holds its middle further out than its skin.
         const off = skinOf(s, name)
-        const a = place(t.step.from), b = place(t.step.to)
+        const a = place(s.placed, t.step.from), b = place(s.placed, t.step.to)
         let across = 0
-        for (let n = 1; n < 16; n++) across = Math.max(across, fromHeld(r.wall, a.map((v, k) => v + (b[k] - v) * (n / 16))))
+        for (let n = 1; n < 16; n++) across = Math.max(across, fromHeld(s.placed, a.map((v, k) => v + (b[k] - v) * (n / 16))))
         expect(off).toBeLessThanOrEqual(defs.player.climb.step.lift + across + 0.01)
         expect(off).toBeGreaterThanOrEqual(-0.001)
         // Reached the whole way: it goes where its step takes it.
@@ -943,7 +951,7 @@ function climbedWell(r: Awaited<ReturnType<typeof climbing>>, net: ReturnType<ty
       }
     })
   })
-  for (const name of LIMBS) {
+  if (!still) for (const name of LIMBS) {
     expect(steps[name]).toBeGreaterThan(0)
     expect(lifted[name]).toBeGreaterThan(defs.player.climb.step.lift / 2)
   }
@@ -1677,4 +1685,74 @@ test('11c: pushed right across the bumps and dips, he climbs over them, framed o
   // and over the bumps, out and in.
   expect(Math.abs(across)).toBeGreaterThan(going(357) * defs.player.climb.fan * (2 / Math.PI))
   expect(rose).toBeGreaterThan(defs.bumpy.height)
+})
+
+// Held still on a moving shape (`kind`: a sliding or a tipping wall, on the middle of its face; a
+// swinging ball, on its side) for a whole period: every frame framed on it, nothing of him in it, his
+// hands and feet planted on their points, none stepping and none moving on it; and the shape carrying
+// him: on it neither his hold nor his body moved (1 mm), and in the world his body went as far as the
+// shape took the place he was on, at least as far as a whole period takes it from wherever it was in it
+// (a sliding wall's reach; a tipping wall's tip, swung at his distance from its base; a ball's swing, at
+// his distance from its pivot). Or pushed the whole time (`keys`), climbing on it as it moves: every
+// frame as above but stepping, as on a shape standing still (climb's step 4), and his hold going over it
+// as fast. Its `period` its definition's, or `period` seconds.
+type Moving = 'slider' | 'tipper' | 'swinger'
+async function carried(kind: Moving, period?: number, keys: string[] = []) {
+  const g = await start()
+  const k = g.shared[kind], was = k.period
+  if (period !== undefined) k.period = period
+  try {
+    await carriedOn(g, kind, Math.round(k.period / DT), keys)
+  } finally {
+    k.period = was
+  }
+}
+async function carriedOn(g: Game, kind: Moving, frames: number, keys: string[]) {
+  const k = g.shared[kind] as any, still = !keys.length
+  const net = netOf(g.p.client!.plugins.wire, g.yard.rows.find(r => r.kind === kind)!)
+  // On a wall climbing, from low on it, so a period's climb stays on its face.
+  const want = kind === 'swinger' ? [0, 0, k.radius] : [0, still ? 4 : 2.5, k.size[2] / 2]
+  const r = await climbing(g, want, keys, frames, kind)
+  const turned = onTheShape(r)
+  const well = climbedWell(r, net, kind, still)
+  const first = r.seen[0], last = r.seen[r.seen.length - 1]
+  const on = (s: (typeof r.seen)[number]) => localTo(s.placed, s.pos)
+  if (still) for (const s of r.seen) {
+    expect(vlen(vsub(s.at, first.at))).toBeLessThanOrEqual(0.001)
+    expect(vlen(vsub(on(s), on(first)))).toBeLessThanOrEqual(0.001)
+  }
+  // How far his body went in the world, less how far it went on the wall: what the wall took him; and
+  // how far the wall took the place he was on at first, the most.
+  const went = Math.max(...r.seen.map(s => vlen(vsub(vsub(s.pos, first.pos), vsub(heldPoint(s.placed, on(s)), heldPoint(s.placed, on(first)))))))
+  const took = Math.max(...r.seen.map(s => vlen(vsub(heldPoint(s.placed, on(first)), first.pos))))
+  const least =
+    kind === 'slider' ? k.reach
+    : kind === 'tipper' ? 2 * vlen(on(first)) * Math.sin(k.tip / 2)
+    : 2 * vlen(vsub(on(first), [0, k.length, 0])) * Math.sin(k.swing / 2)
+  // How far his hold went over it.
+  let path = 0
+  r.seen.forEach((s, i) => { path += vlen(vsub(s.at, i ? r.seen[i - 1].at : r.from)) })
+  console.log('12 carried', JSON.stringify({ kind, frames, period: k.period, keys, went, took, least, path, last: last.at, turned, ...well }))
+  expect(Math.abs(went - took)).toBeLessThanOrEqual(0.001)
+  expect(took).toBeGreaterThan(least - 0.001)
+  if (!still) expect(path).toBeGreaterThan(going(frames - 3) * 0.95)
+}
+
+test('12a: held still on a wall sliding to and fro along its width, he is carried with it, his hands and feet planted, framed on it, nothing of him in it', async () => {
+  await carried('slider')
+})
+
+test('12b: the same, the wall sliding four times as fast (there and back in 3 s, 2.1 m/s at its fastest); and pushed up on it so, he climbs up it as it slides, stepping in pairs on it, never sliding over it, nothing of him in it', async () => {
+  await carried('slider', 3)
+  await carried('slider', 3, ['w'])
+})
+
+test('12c: held still on a wall tipping back and forth about its base, he is carried with it, his body turning with it, his hands and feet planted, framed on it, nothing of him in it; and pushed up on it, he climbs up it as it tips', async () => {
+  await carried('tipper')
+  await carried('tipper', undefined, ['w'])
+})
+
+test('12d: held still on the side of a ball swinging under a pivot, he is carried with it, his body turning with it, his hands and feet planted, framed on it, nothing of him in it; and pushed right, he climbs round it as it swings', async () => {
+  await carried('swinger')
+  await carried('swinger', undefined, ['d'])
 })

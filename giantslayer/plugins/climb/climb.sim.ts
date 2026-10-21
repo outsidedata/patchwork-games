@@ -715,8 +715,11 @@ function nearestOf(net: Net, f: Field, p: V, tris: Iterable<number>): { best: nu
   return { best, by: sign * best, way: [wx, wy, wz] }
 }
 
-// A place in the world in a held row's own frame (the reverse of `heldPoint`), and a way (of `heldWay`).
-export function heldLocal(held: Row, p: V): V {
+// Where a held row stands: its `pos`, `yaw` and `pitch` (a row, or those kept from one).
+export type Placed = { data: { pos: V; yaw: number; pitch: number } }
+
+// A place in the world in a held row's own frame (the reverse of `heldPoint`).
+export function heldLocal(held: Placed, p: V): V {
   const [x, y, z] = held.data.pos, s = math.sin(held.data.yaw), c = math.cos(held.data.yaw)
   const dx = p[0] - x, dy = p[1] - y, dz = p[2] - z
   const u = [dx * c - dz * s, dy, dx * s + dz * c]
@@ -809,8 +812,10 @@ export const onNet = (h: Hold | NetHold): h is NetHold => 'a' in h
 // A point of a held row's own frame in the world, and a way: turned back by its `pitch` (radians, its
 // front faced up that much) about its x, then by its `yaw`, from where it stands.
 const pitched = (pitch: number, v: V) => [v[0], v[1] * math.cos(pitch) + v[2] * math.sin(pitch), -v[1] * math.sin(pitch) + v[2] * math.cos(pitch)]
-export const heldPoint = (held: Row, p: V) => world(held.data.pos, held.data.yaw, pitched(held.data.pitch, p))
-export const heldWay = (held: Row, v: V) => world([0, 0, 0], held.data.yaw, pitched(held.data.pitch, v))
+export const heldPoint = (held: Placed, p: V) => world(held.data.pos, held.data.yaw, pitched(held.data.pitch, p))
+export const heldWay = (held: Placed, v: V) => world([0, 0, 0], held.data.yaw, pitched(held.data.pitch, v))
+// Where a held row stands now, kept apart from its row.
+export const placedOf = (held: Placed): Placed => ({ data: { pos: [...held.data.pos], yaw: held.data.yaw, pitch: held.data.pitch } })
 
 // The body's frame on a surface facing `out`: its front into the surface, and its up the up it had
 // (`had`) laid flat on it, carried over the surface as he goes; then, where the world's up laid flat on it

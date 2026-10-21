@@ -456,3 +456,31 @@ Proof (`yard.test.ts`):
   short under 1 mm, 1.8 cm of room); its elbow never goes under 128.7°.
 42 of the 43 tests of `yard.test.ts` passed in one run (1243 s); the 43rd, 3f, failed on the old
 let-go claim, and passes with the new one, run alone.
+
+**12a–d. Shapes that move.** Three new kinds in the yard, each moving in `before`, so the shape is in
+its new place when the player's `tick` places him by his hold: `slider`, a wall sliding along its width
+by its `reach` (1 m) over its `period` (12 s); `tipper`, a wall tipping back and forth about its base by
+its `tip` (0.26 rad) over 8 s; `swinger`, a ball of radius 3 m hung 6 m under a pivot, swinging by its
+`swing` (0.35 rad) over 6 s and turning with the swing as one rigid thing. A hold is on the net in the
+shape's own frame, so the rules carried him with no change. The page did not: it read his motion in
+the world. Three things now read it in the held shape's own frame (climb's `Placed`, `placedOf`, and
+`heldPoint`/`heldLocal` taking either a row or a kept place):
+- how fast his hold goes over the surface (`going`), which says whether he is standing still;
+- how fast each shoulder and hip goes over the surface (`rootGoing`), which says how long a planted
+  limb can hold its point: in the world, the wall carrying him counted as going away from his points;
+- where a step begins, where the end bone was drawn last frame, carried on with the shape.
+The test checks read the shape where it stood each frame, and a planted limb "not moving" is on the
+shape. Negative proof: with the carrying turned off on the page, 12a fails, the limbs stepping on a wall
+he is not moving over.
+Proof (`yard.test.ts`), each over a whole period:
+- 12a: held still on the sliding wall, it carried him 1.72 m in the world and his hold and his body did
+  not move on it (1 mm); no limb stepped, all four planted and reached every frame, framed on it,
+  nothing of him in it.
+- 12b: the same at a period of 3 s (2.1 m/s at its fastest): carried 1.10 m. Climbing up it so, his hold
+  went 1.05 m up it in 3 s (his full 0.35 m/s), every limb stepping on it, in pairs, never sliding.
+- 12c: held still on the tipping wall, it carried him 0.87 m and his body turned 59.5° in all (15° each
+  way, twice), never more in a frame than the wall did. Climbing up it, 2.8 m in 8 s, each limb 5 steps.
+- 12d: held on the swinging ball's side, it carried his root, 8.9 m from the pivot, 6.13 m (a 40° swing
+  across that is 6.17 m), turning him 80° in all. Climbing round it as it swung, 2.10 m in 6 s.
+All 46 tests of `yard.test.ts` passed in one run (1465 s) before the ball was added; 12d and 1a pass
+with it.

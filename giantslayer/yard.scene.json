@@ -32,6 +32,9 @@
     { "is": "pole", "pos": [-16, 0, 0], "yaw": 0 },
     { "is": "corner", "pos": [-28, 0, -3], "yaw": 0 },
     { "is": "bowl", "pos": [24, 0, -2], "yaw": 0 },
-    { "is": "bumpy", "pos": [34, 0, -2], "yaw": 0 }
+    { "is": "bumpy", "pos": [34, 0, -2], "yaw": 0 },
+    { "is": "slider", "pos": [46, 0, -2], "yaw": 0 },
+    { "is": "tipper", "pos": [58, 0, -2], "yaw": 0 },
+    { "is": "swinger", "pos": [70, 6, 0], "yaw": 0 }
   ]
 }
