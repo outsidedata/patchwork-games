@@ -35,6 +35,7 @@
     { "is": "bumpy", "pos": [34, 0, -2], "yaw": 0 },
     { "is": "slider", "pos": [46, 0, -2], "yaw": 0 },
     { "is": "tipper", "pos": [58, 0, -2], "yaw": 0 },
-    { "is": "swinger", "pos": [70, 6, 0], "yaw": 0 }
+    { "is": "swinger", "pos": [70, 6, 0], "yaw": 0 },
+    { "is": "tube", "pos": [82, 0, 0], "yaw": 0 }
   ]
 }

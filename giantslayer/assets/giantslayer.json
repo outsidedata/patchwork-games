@@ -152,5 +152,15 @@
     "swing": 0.35,
     "period": 6,
     "colour": "#8e8a84"
+  },
+  "tube": {
+    "shape": "cylinder",
+    "radius": 1,
+    "length": 8,
+    "cell": 0.25,
+    "bends": { "at": 4, "over": 0.75 },
+    "most": 0.6,
+    "period": 8,
+    "colour": "#928a86"
   }
 }

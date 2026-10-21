@@ -84,7 +84,8 @@
 // casting and taking shadows, a mesh named after its kind, with its net (`netOn` of that mesh) over it,
 // a line for each link, named `<kind> net`, in front of everything; and each time, puts it at its row's
 // `pos`, tipped back by its `pitch` and turned by its `yaw`, its net shown while its definition's
-// `shown` is true. `hide(id, plugins)` takes the shape of row `id` away.
+// `shown` is true; a kind that bends (its definition's `bends`) drawn, mesh and net, bent as its row's
+// `bend` bends it (climb's `bent`). `hide(id, plugins)` takes the shape of row `id` away.
 //
 // `limbs(row)` is a row's limbs this frame, `{ bones, pole, target, bend }` each, or undefined for a row
 // that holds no net. `touches(row)` is its touches by limb, `{ point, step, room, left, clear }` (`step`
@@ -98,7 +99,7 @@ import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
 import type { Handed } from '#plugins/ik3d/ik3d.plugin.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
-import { crosses, FIELD, fromNet, heldLocal, heldPoint, heldWay, linked, meshOf, nearestOn, nearNet, netOf, netOn, onNet, outOf, placedOf, spotOn, type Placed } from './climb.sim.ts'
+import { bent, crosses, FIELD, fromNet, fromRest, heldLocal, heldPoint, heldWay, linked, meshOf, nearestOn, nearNet, netOf, netOn, onNet, outOf, placedOf, restOf, spotOn, type Placed } from './climb.sim.ts'
 
 type Limb = { bones: [string, string, string]; touch: [string, string]; skin: number; across?: [string, string]; side?: number; bend: number[]; group: number; out: number }
 // A limb's touch: the point it is planted on, and the step it is in, from one point to another, `s` 0
@@ -122,8 +123,9 @@ export function climb() {
   // Each holder's model's skin by limb: the vertices of its skinned meshes bound most to the limb's end
   // bone or a bone under it, found once a model.
   const skins = new WeakMap<THREE.Object3D, Map<string, { mesh: THREE.SkinnedMesh; i: number }[]>>()
-  // Each shape drawn, by row id: its mesh, its net's lines over it.
-  const drawn = new Map<number, { mesh: THREE.Mesh; lines: THREE.LineSegments }>()
+  // Each shape drawn, by row id: its mesh, its net's lines over it, and for one that bends, where each
+  // corner of each is at rest and the bend they were last posed at.
+  const drawn = new Map<number, { mesh: THREE.Mesh; lines: THREE.LineSegments; rest: number[]; ends: number[]; bend: number }>()
   const undraw = (plugins: Plugins, id: number) => {
     const d = drawn.get(id)
     if (!d) return
@@ -196,13 +198,17 @@ export function climb() {
   // every vertex where it is (`at`, three numbers each) and which eighth along its bone it lies (`eighth`,
   // from the bone's start to the next joint). Each is kept in its own bone's frame, with its eighth, and
   // read again only when one of the bones it hangs on (the first bone's parent, the limb's three bones)
-  // has moved against its parent.
+  // has moved or turned against its parent (the skeleton's top bone: turned).
   type Side = { local: Float64Array; eighth: Uint8Array; at: Float64Array }
   const boneKept = new WeakMap<THREE.Object3D, Map<string, { under: number[]; sides: Side[] }>>()
   function boneSkinNow(T: typeof THREE, root: THREE.Object3D, k: { ik: string[]; limbs: Record<string, Limb> }, name: string): Side[] {
     const [first, middle, end] = k.limbs[name].bones.map(b => bone(root, b))
     const hangs = [first.parent ?? first, first, middle, end]
-    const under = hangs.flatMap(o => [...o.position.toArray(), ...o.quaternion.toArray(), ...o.scale.toArray()])
+    // The first bone's parent, when it is the skeleton's top bone (a leg's hips), by its turn and size only:
+    // moved, it carries every bone, and so every vertex, the same way, which leaves each where it was in its
+    // own bone's frame.
+    const top = !(hangs[0].parent as THREE.Bone | null)?.isBone
+    const under = hangs.flatMap((o, i) => [...(i || !top ? o.position.toArray() : []), ...o.quaternion.toArray(), ...o.scale.toArray()])
     let mine = boneKept.get(root)
     if (!mine) boneKept.set(root, (mine = new Map()))
     let was = mine.get(name)
@@ -282,8 +288,10 @@ export function climb() {
           root.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(new T.Vector3().crossVectors(up, ahead), up, ahead))
         }
         // A place in the world as the held row stood at `then`, carried on with it to where it stands now
-        // (the same place on it), so what moves with a moving shape is not taken for moving over it.
-        const carried = (p: THREE.Vector3, then?: Placed) => (then ? new T.Vector3(...heldPoint(held, heldLocal(then, p.toArray()))) : p)
+        // (the same place on it, at rest, posed as it is bent now), so what moves with a moving shape is not
+        // taken for moving over it.
+        const shape = def(plugins.wire, held.kind)
+        const carried = (p: THREE.Vector3, then?: Placed) => (then ? new T.Vector3(...fromRest(shape, held, restOf(shape, then, p.toArray()))) : p)
         // Where each end bone was drawn last frame, as last frame's reach left it: its place in his body
         // as that reach bends it, carried back by how his body has moved since, and on with the held row
         // as it has moved since. A step begins from there.
@@ -302,13 +310,13 @@ export function climb() {
         const here = spotOn(plugins.wire, held, hold)
         const facing = new T.Vector3(...here.out)
         // How fast his hold goes over the surface, metres a second, from where it was on it when the rows
-        // last moved on (in the held row's own frame, so a shape that moves does not move it); still when
-        // they have not.
+        // last moved on (in the held row's own frame at rest, so a shape that moves or bends does not move
+        // it); still when they have not.
         const spot = new T.Vector3(...here.at)
         if (dt > 0) {
-          const local = heldLocal(held, here.at)
-          mine.going = mine.spot ? new T.Vector3(...heldWay(held, local.map((v, i) => (v - mine!.spot![i]) / dt))) : new T.Vector3()
-          mine.spot = local
+          const rest = restOf(shape, held, here.at)
+          mine.going = mine.spot ? spot.clone().sub(new T.Vector3(...fromRest(shape, held, mine.spot))).divideScalar(dt) : new T.Vector3()
+          mine.spot = rest
         }
         const going = mine.going ?? new T.Vector3()
         // How his body itself moved and turned since the rows last moved on: what takes a place held in
@@ -705,7 +713,28 @@ export function climb() {
         lines.renderOrder = 10
         mesh.add(lines)
         plugins.render3d.scene.add(mesh)
-        drawn.set(row.id, (d = { mesh, lines }))
+        drawn.set(row.id, (d = { mesh, lines, rest: shape.position, ends, bend: 0 }))
+      }
+      // One that bends: its mesh and its net's lines posed as its row's bend has it, when that changes (each
+      // corner the bend moves; it is drawn flat, its faces' own ways, so it needs no ways at its corners).
+      const bend = row.data.bend ?? 0
+      if (k.bends && bend !== d.bend) {
+        const p: [number, number, number] = [0, 0, 0]
+        const pose = (from: number[], into: THREE.BufferAttribute) => {
+          const to = into.array as Float32Array
+          for (let i = 0; i < from.length; i += 3) {
+            if (from[i + 1] <= k.bends.at - k.bends.over) continue
+            p[0] = from[i]; p[1] = from[i + 1]; p[2] = from[i + 2]
+            const q = bent(k.bends, bend, p)
+            to[i] = q[0]; to[i + 1] = q[1]; to[i + 2] = q[2]
+          }
+          into.needsUpdate = true
+        }
+        pose(d.rest, d.mesh.geometry.getAttribute('position') as THREE.BufferAttribute)
+        d.mesh.geometry.computeBoundingSphere()
+        pose(d.ends, d.lines.geometry.getAttribute('position') as THREE.BufferAttribute)
+        d.lines.geometry.computeBoundingSphere()
+        d.bend = bend
       }
       const [x, y, z] = row.data.pos
       d.mesh.position.set(x, y, z)

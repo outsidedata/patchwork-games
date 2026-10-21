@@ -492,7 +492,12 @@ export function settle(me: Row, w: W) {
 // (`out`, three, one long) in the mesh's own frame, and its links: point i links to `to[start[i]]` up to
 // `to[start[i + 1]]`, both ways; and the mesh's triangles, three points each (`tri`), point i's being
 // `round[first[i]]` up to `round[first[i + 1]]`.
-export type Net = { points: number; at: Float32Array; out: Float32Array; start: Uint32Array; to: Uint32Array; tri: Uint32Array; first: Uint32Array; round: Uint32Array }
+export type Net = {
+  points: number; at: Float32Array; out: Float32Array; start: Uint32Array; to: Uint32Array; tri: Uint32Array; first: Uint32Array; round: Uint32Array
+  // A net a bend poses (`posedNet`): the net at rest, the bend, and its triangles by how the bend moves
+  // them: each triangle's part, 0 unmoved, 1 only turned, 2 mixed.
+  posed?: { rest: Net; b: Bends; bend: number; part: Uint8Array }
+}
 
 const SAME = 1e-4 // metres: two vertices this close are one point
 
@@ -567,52 +572,138 @@ export function crosses(place: (i: number) => V, face: (i: number) => V, p: numb
 // corners (the faces along an edge summed; round a corner, each by its angle there) worked out once; and
 // for each box with no triangle that near, whether its middle is inside (a ray from it crossing the
 // surface an odd number of times), found when first asked.
-type Field = {
-  h: number; lo: V; n: number[]; boxes: Map<number, number[]>; inside: Map<number, boolean>
-  // Each triangle's way out (three numbers), each of its edges' (a–b, a–c, b–c; nine), each point's.
-  normal: Float64Array; edge: Float64Array; corner: Float64Array
-}
+// The ways out of a net's triangles: each triangle's own (three numbers), each of its edges' (a–b, a–c,
+// b–c; nine; the faces along an edge summed), each point's (round a corner, each face by its angle
+// there); worked out once a net.
+type Ways = { normal: Float64Array; edge: Float64Array; corner: Float64Array }
+type Field = Ways & { h: number; lo: V; n: number[]; boxes: Map<number, number[]>; inside: Map<number, boolean> }
 // Metres: a field's box, and how far it reads exactly.
 export const FIELD = 0.1
-const fields = new WeakMap<Net, Field>()
-function fieldOf(net: Net): Field {
-  let f = fields.get(net)
-  if (f) return f
-  const h = FIELD
-  const at = (i: number) => [net.at[i * 3], net.at[i * 3 + 1], net.at[i * 3 + 2]]
-  const tris = net.tri.length / 3
-  const corners = (t: number) => [net.tri[t * 3], net.tri[t * 3 + 1], net.tri[t * 3 + 2]]
-  const normals: V[] = [], corners3: V[] = Array.from({ length: net.points }, () => [0, 0, 0])
-  const edges = new Map<string, V>()
-  const key = (a: number, b: number) => (a < b ? `${a} ${b}` : `${b} ${a}`)
-  for (let t = 0; t < tris; t++) {
-    const cs = corners(t), [a, b, c] = cs.map(at)
-    normals.push(unit(cross(sub(b, a), sub(c, a))))
+const waysKept = new WeakMap<Net, Ways>()
+// Of every triangle; or (`only`) of those `only` keeps, with their edges and corners: worked out from the
+// triangles round their corners alone (the rest left 0).
+function waysOf(net: Net, only?: (t: number) => boolean): Ways {
+  let ws = only ? undefined : waysKept.get(net)
+  if (ws) return ws
+  if (!only && net.posed) {
+    ws = posedWays(net, net.posed)
+    waysKept.set(net, ws)
+    return ws
+  }
+  const A = net.at, tris = net.tri.length / 3
+  let round: number[] | undefined
+  if (only) {
+    const near = new Set<number>()
+    for (let t = 0; t < tris; t++) {
+      if (!only(t)) continue
+      for (let k = 0; k < 3; k++) {
+        const i = net.tri[t * 3 + k]
+        for (const r of net.round.subarray(net.first[i], net.first[i + 1])) near.add(r)
+      }
+    }
+    round = [...near]
+  }
+  const normal = new Float64Array(tris * 3), corner = new Float64Array(net.points * 3)
+  const edges = new Map<number, number>(), sums: number[] = []
+  const key = (a: number, b: number) => (a < b ? a * net.points + b : b * net.points + a)
+  const edgeOf = (a: number, b: number) => {
+    let e = edges.get(key(a, b))
+    if (e === undefined) { edges.set(key(a, b), (e = sums.length)); sums.push(0, 0, 0) }
+    return e
+  }
+  for (const t of round ?? Array.from({ length: tris }, (_, t) => t)) {
+    const cs = [net.tri[t * 3], net.tri[t * 3 + 1], net.tri[t * 3 + 2]]
+    const at = (i: number): V => [A[i * 3], A[i * 3 + 1], A[i * 3 + 2]]
+    const [a, b, c] = cs.map(at)
+    const nn = unit(cross(sub(b, a), sub(c, a)))
+    normal.set(nn, t * 3)
     for (let k = 0; k < 3; k++) {
       const i = cs[k], j = cs[(k + 1) % 3], l = cs[(k + 2) % 3]
       const u = sub(at(j), at(i)), v = sub(at(l), at(i))
       const angle = Math.acos(Math.max(-1, Math.min(1, dot(u, v) / (len(u) * len(v) || 1))))
-      corners3[i] = add(corners3[i], mul(normals[t], angle))
-      edges.set(key(i, j), add(edges.get(key(i, j)) ?? [0, 0, 0], normals[t]))
+      for (let x = 0; x < 3; x++) corner[i * 3 + x] += nn[x] * angle
+      const e = edgeOf(i, j)
+      for (let x = 0; x < 3; x++) sums[e + x] += nn[x]
     }
   }
-  const normal = new Float64Array(tris * 3), edge = new Float64Array(tris * 9), corner = new Float64Array(net.points * 3)
-  for (let t = 0; t < tris; t++) {
-    const [a, b, c] = corners(t)
-    normal.set(normals[t], t * 3)
-    edge.set(edges.get(key(a, b))!, t * 9)
-    edge.set(edges.get(key(a, c))!, t * 9 + 3)
-    edge.set(edges.get(key(b, c))!, t * 9 + 6)
+  const edge = new Float64Array(tris * 9)
+  for (const t of round ?? Array.from({ length: tris }, (_, t) => t)) {
+    if (only && !only(t)) continue
+    const [a, b, c] = [net.tri[t * 3], net.tri[t * 3 + 1], net.tri[t * 3 + 2]]
+    ;[[a, b], [a, c], [b, c]].forEach(([x, y], k) => {
+      const e = edges.get(key(x, y))!
+      edge.set([sums[e], sums[e + 1], sums[e + 2]], t * 9 + k * 3)
+    })
   }
-  corners3.forEach((v, i) => corner.set(v, i * 3))
-  const lo = [0, 1, 2].map(k => Math.min(...Array.from({ length: net.points }, (_, i) => net.at[i * 3 + k])) - 2 * h)
-  const hi = [0, 1, 2].map(k => Math.max(...Array.from({ length: net.points }, (_, i) => net.at[i * 3 + k])) + 2 * h)
+  ws = { normal, edge, corner }
+  if (!only) waysKept.set(net, ws)
+  return ws
+}
+// The ways out of a net a bend poses, from the net's at rest: a triangle the bend leaves where it was keeps
+// its ways, one it only turns has them turned, and the triangles it mixes, with their edges and corners,
+// are worked out again (`waysOf` of those alone); a corner of none of those keeps its way, or has it
+// turned, as all the triangles round it do.
+function posedWays(net: Net, posed: NonNullable<Net['posed']>): Ways {
+  const { rest, bend, part } = posed
+  const at = waysOf(rest), mix = waysOf(net, t => part[t] === 2)
+  const c = math.cos(bend), s = math.sin(bend)
+  const turn = (from: Float64Array, to: Float64Array, i: number) => {
+    const y = from[i + 1], z = from[i + 2]
+    to[i] = from[i]; to[i + 1] = y * c - z * s; to[i + 2] = y * s + z * c
+  }
+  const tris = part.length
+  const normal = new Float64Array(tris * 3), edge = new Float64Array(tris * 9), corner = new Float64Array(net.points * 3)
+  // Each corner: 0 round unmoved triangles only, 1 round turned ones only, 2 by a mixed one.
+  const of = new Uint8Array(net.points).fill(255)
+  for (let t = 0; t < tris; t++) {
+    for (let k = 0; k < 3; k++) {
+      const i = net.tri[t * 3 + k]
+      of[i] = of[i] === 255 ? part[t] : of[i] === part[t] ? part[t] : 2
+    }
+    if (part[t] === 2) {
+      normal.set(mix.normal.subarray(t * 3, t * 3 + 3), t * 3)
+      edge.set(mix.edge.subarray(t * 9, t * 9 + 9), t * 9)
+    } else if (part[t] === 1) {
+      turn(at.normal, normal, t * 3)
+      for (let k = 0; k < 3; k++) turn(at.edge, edge, t * 9 + k * 3)
+    } else {
+      normal.set(at.normal.subarray(t * 3, t * 3 + 3), t * 3)
+      edge.set(at.edge.subarray(t * 9, t * 9 + 9), t * 9)
+    }
+  }
+  for (let i = 0; i < net.points; i++) {
+    if (of[i] === 2) corner.set(mix.corner.subarray(i * 3, i * 3 + 3), i * 3)
+    else if (of[i] === 1) turn(at.corner, corner, i * 3)
+    else corner.set(at.corner.subarray(i * 3, i * 3 + 3), i * 3)
+  }
+  return { normal, edge, corner }
+}
+
+// A net's field: its triangles (those `only` keeps) in a grid of `h`-metre boxes in the net's own frame,
+// each box holding every triangle that comes within `h` of it, with the net's ways out (`waysOf`); and for
+// each box with no triangle that near, whether its middle is inside (a ray from it crossing the surface an
+// odd number of times), found when first asked.
+const fields = new WeakMap<Net, Field>()
+function fieldOf(net: Net, only?: (t: number) => boolean): Field {
+  let f = only ? undefined : fields.get(net)
+  if (f) return f
+  const h = FIELD
+  const A = net.at, tris = net.tri.length / 3
+  let lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity]
+  for (let i = 0; i < net.points; i++) for (let k = 0; k < 3; k++) { lo[k] = Math.min(lo[k], A[i * 3 + k]); hi[k] = Math.max(hi[k], A[i * 3 + k]) }
+  lo = lo.map(v => v - 2 * h)
+  hi = hi.map(v => v + 2 * h)
   const n = [0, 1, 2].map(k => Math.ceil((hi[k] - lo[k]) / h))
-  const cell = (p: V) => p.map((v, k) => Math.floor((v - lo[k]) / h))
+  const cell = (v: number, k: number) => Math.floor((v - lo[k]) / h)
   const boxes = new Map<number, number[]>()
   for (let t = 0; t < tris; t++) {
-    const ps = corners(t).map(at)
-    const from = cell([0, 1, 2].map(k => Math.min(...ps.map(p => p[k])) - h)), to = cell([0, 1, 2].map(k => Math.max(...ps.map(p => p[k])) + h))
+    if (only && !only(t)) continue
+    const from = [0, 0, 0], to = [0, 0, 0]
+    for (let k = 0; k < 3; k++) {
+      const a = A[net.tri[t * 3] * 3 + k], b = A[net.tri[t * 3 + 1] * 3 + k], c = A[net.tri[t * 3 + 2] * 3 + k]
+      from[k] = cell(Math.min(a, b, c) - h, k)
+      to[k] = cell(Math.max(a, b, c) + h, k)
+    }
     for (let z = from[2]; z <= to[2]; z++) for (let y = from[1]; y <= to[1]; y++) for (let x = from[0]; x <= to[0]; x++) {
       const i = (z * n[1] + y) * n[0] + x
       let box = boxes.get(i)
@@ -620,9 +711,15 @@ function fieldOf(net: Net): Field {
       box.push(t)
     }
   }
-  f = { h, lo, n, boxes, inside: new Map(), normal, edge, corner }
-  fields.set(net, f)
+  f = { h, lo, n, boxes, inside: new Map(), ...waysOf(net) }
+  if (!only) fields.set(net, f)
   return f
+}
+// The triangles of a field's box at place `p`, or none off its grid.
+function boxAt(f: Field, p: V): number[] {
+  const cx = Math.floor((p[0] - f.lo[0]) / f.h), cy = Math.floor((p[1] - f.lo[1]) / f.h), cz = Math.floor((p[2] - f.lo[2]) / f.h)
+  if (cx < 0 || cy < 0 || cz < 0 || cx >= f.n[0] || cy >= f.n[1] || cz >= f.n[2]) return []
+  return f.boxes.get((cz * f.n[1] + cy) * f.n[0] + cx) ?? []
 }
 
 // How far a place `p` of a net's own frame is out of its surface, and the way further out from there, off
@@ -631,6 +728,7 @@ function fieldOf(net: Net): Field {
 // nearest point is on one); further than that, the box size, in or out as the box's middle is. Off the
 // field's grid, out.
 export function fromNet(net: Net, p: V): { by: number; way: V } {
+  if (net.posed) return fromPosed(net, net.posed, p)
   const f = fieldOf(net)
   const cx = Math.floor((p[0] - f.lo[0]) / f.h), cy = Math.floor((p[1] - f.lo[1]) / f.h), cz = Math.floor((p[2] - f.lo[2]) / f.h)
   if (cx < 0 || cy < 0 || cz < 0 || cx >= f.n[0] || cy >= f.n[1] || cz >= f.n[2]) return { by: f.h, way: [0, 0, 1] }
@@ -668,17 +766,80 @@ export function nearNet(net: Net, p: V, near: number, rings: number): { by: numb
     for (const q of ring) for (const t of net.round.subarray(net.first[q], net.first[q + 1])) tris.add(t)
     ring = ring.flatMap(q => [...linked(net, q)]).filter(o => !seen.has(o) && (seen.add(o), true))
   }
-  const { by, way } = nearestOf(net, fieldOf(net), p, tris)
+  const { by, way } = nearestOf(net, waysOf(net), p, tris)
   return { by, way }
+}
+
+// `fromNet` on a net a bend poses, read part by part, so a pose makes no field of its own but for the
+// triangles it mixes: those it leaves where they were, off the field at rest where the place is; those it
+// only turns, off the field at rest where the place is turned back to, the way out turned on again; those it
+// mixes, off a field of the posed net of those alone. The nearest of the three; further than a box from
+// all, in or out as the place is undone to rest (the bend keeps in in and out out).
+// The mixed triangles of a posed net, each one's bounds as posed, and by box of the field's size (keyed
+// by where it is, of `FIELD` metres), those within a box of it, found when a box is first read.
+type Mixed = { tris: number[]; lo: Float64Array; hi: Float64Array; boxes: Map<string, number[]> }
+const mixedKept = new WeakMap<Net, Mixed>()
+function mixedOf(net: Net, part: Uint8Array): Mixed {
+  let m = mixedKept.get(net)
+  if (m) return m
+  const tris: number[] = []
+  for (let t = 0; t < part.length; t++) if (part[t] === 2) tris.push(t)
+  const lo = new Float64Array(tris.length * 3), hi = new Float64Array(tris.length * 3)
+  tris.forEach((t, n) => {
+    for (let k = 0; k < 3; k++) {
+      const a = net.at[net.tri[t * 3] * 3 + k], b = net.at[net.tri[t * 3 + 1] * 3 + k], c = net.at[net.tri[t * 3 + 2] * 3 + k]
+      lo[n * 3 + k] = Math.min(a, b, c)
+      hi[n * 3 + k] = Math.max(a, b, c)
+    }
+  })
+  m = { tris, lo, hi, boxes: new Map() }
+  mixedKept.set(net, m)
+  return m
+}
+function mixedAt(m: Mixed, p: V): number[] {
+  const h = FIELD, c = p.map(v => Math.floor(v / h))
+  const key = c.join(' ')
+  let found = m.boxes.get(key)
+  if (found) return found
+  found = []
+  for (let n = 0; n < m.tris.length; n++) {
+    let near = true
+    for (let k = 0; k < 3 && near; k++) near = m.lo[n * 3 + k] - h <= (c[k] + 1) * h && m.hi[n * 3 + k] + h >= c[k] * h
+    if (near) found.push(m.tris[n])
+  }
+  m.boxes.set(key, found)
+  return found
+}
+function fromPosed(net: Net, posed: NonNullable<Net['posed']>, p: V): { by: number; way: V } {
+  const { rest, b, bend, part } = posed
+  const f = fieldOf(rest)
+  const c = math.cos(bend), s = math.sin(bend)
+  // Turned back by the bend about the joint, and a way turned on by it.
+  const back: V = [p[0], (p[1] - b.at) * c + p[2] * s + b.at, -(p[1] - b.at) * s + p[2] * c]
+  const on = (v: V): V => [v[0], v[1] * c - v[2] * s, v[1] * s + v[2] * c]
+  const m = mixedOf(net, part), ways = waysOf(net)
+  const still = nearestOf(rest, f, p, boxAt(f, p), part, 0)
+  const turned = nearestOf(rest, f, back, boxAt(f, back), part, 1)
+  const mix = nearestOf(net, ways, p, mixedAt(m, p))
+  const best = Math.min(still.best, turned.best, mix.best)
+  if (best <= f.h) {
+    if (best === still.best) return { by: still.by, way: still.way }
+    if (best === turned.best) return { by: turned.by, way: on(turned.way) }
+    return { by: mix.by, way: mix.way }
+  }
+  const at = fromNet(rest, unbent(b, bend, p))
+  return { by: at.by < 0 ? -f.h : f.h, way: [0, 0, 1] }
 }
 
 // The nearest point to `p` of the triangles `tris` (a net's own frame): how far it is, how far `p` is out
 // of the surface there (under 0, in: behind the way out there, the triangle's own, or its edge's or
 // corner's where the nearest point is on one), and the way further out.
-function nearestOf(net: Net, f: Field, p: V, tris: Iterable<number>): { best: number; by: number; way: V } {
+function nearestOf(net: Net, f: Ways, p: V, tris: Iterable<number>, part?: Uint8Array, only?: number): { best: number; by: number; way: V } {
   const A = net.at, px = p[0], py = p[1], pz = p[2]
   let best = Infinity, sign = 1, wx = 0, wy = 0, wz = 1
   for (const t of tris) {
+    // Of a posed net's triangles, those of one part only (`fromPosed`).
+    if (part && part[t] !== only) continue
     const ia = net.tri[t * 3], ib = net.tri[t * 3 + 1], ic = net.tri[t * 3 + 2]
     const ax = A[ia * 3], ay = A[ia * 3 + 1], az = A[ia * 3 + 2]
     const abx = A[ib * 3] - ax, aby = A[ib * 3 + 1] - ay, abz = A[ib * 3 + 2] - az
@@ -715,8 +876,9 @@ function nearestOf(net: Net, f: Field, p: V, tris: Iterable<number>): { best: nu
   return { best, by: sign * best, way: [wx, wy, wz] }
 }
 
-// Where a held row stands: its `pos`, `yaw` and `pitch` (a row, or those kept from one).
-export type Placed = { data: { pos: V; yaw: number; pitch: number } }
+// Where a held row stands: its `pos`, `yaw` and `pitch`, and for one that bends its `bend` (a row, or
+// those kept from one).
+export type Placed = { data: { pos: V; yaw: number; pitch: number; bend?: number } }
 
 // A place in the world in a held row's own frame (the reverse of `heldPoint`).
 export function heldLocal(held: Placed, p: V): V {
@@ -815,7 +977,58 @@ const pitched = (pitch: number, v: V) => [v[0], v[1] * math.cos(pitch) + v[2] * 
 export const heldPoint = (held: Placed, p: V) => world(held.data.pos, held.data.yaw, pitched(held.data.pitch, p))
 export const heldWay = (held: Placed, v: V) => world([0, 0, 0], held.data.yaw, pitched(held.data.pitch, v))
 // Where a held row stands now, kept apart from its row.
-export const placedOf = (held: Placed): Placed => ({ data: { pos: [...held.data.pos], yaw: held.data.yaw, pitch: held.data.pitch } })
+export const placedOf = (held: Placed): Placed => ({ data: { pos: [...held.data.pos], yaw: held.data.yaw, pitch: held.data.pitch, bend: held.data.bend } })
+
+// ---------------------------------------------------------------- bending
+//
+// A kind that bends, as a limb does at its elbow: its definition's `bends`, `{ at, over }`. Above `at`
+// metres up its own y it is turned about its own x through that height by its row's `bend` (radians; over
+// 0 its top goes toward its front, its own z); below it, not; and over `over` metres to either side of
+// `at`, a place is turned by its share of the bend's frame, as a skinned mesh's vertex bound to two bones
+// is (the two frames mixed by its weight, which rises smoothly from 0 to 1 up through that span, by
+// where it is at rest). `bent` takes a place of its own frame at rest to where the bend puts it, and
+// `unbent` takes it back: unturned if that leaves it below the span, turned back all the way if that
+// leaves it above; else the height at rest in the span whose weight, undone, takes it back to that same
+// height (halving the span till it is found to the last bit).
+export type Bends = { at: number; over: number }
+const weightOf = (b: Bends, y: number) => {
+  const s = Math.max(0, Math.min(1, (y - (b.at - b.over)) / (2 * b.over)))
+  return s * s * (3 - 2 * s)
+}
+export function bent(b: Bends | undefined, bend: number, r: V): V {
+  if (!b || !bend) return r
+  const w = weightOf(b, r[1]), c = math.cos(bend), s = math.sin(bend)
+  const y = r[1] - b.at, z = r[2]
+  return [r[0], r[1] + w * (y * c - z * s + b.at - r[1]), r[2] + w * (y * s + z * c - r[2])]
+}
+export function unbent(b: Bends | undefined, bend: number, q: V): V {
+  if (!b || !bend) return q
+  const c = math.cos(bend), s = math.sin(bend), qy = q[1] - b.at, qz = q[2]
+  // Undone by weight `w`: the mix of the two frames turns the way from the joint by `a` along and `ws`
+  // across, undone.
+  const undo = (w: number): V => {
+    const a = 1 - w + w * c, ws = w * s, det = a * a + ws * ws
+    return [q[0], (a * qy + ws * qz) / det + b.at, (-ws * qy + a * qz) / det]
+  }
+  const lo = b.at - b.over, hi = b.at + b.over
+  if (q[1] <= lo) return q
+  const top = undo(1)
+  if (top[1] >= hi) return top
+  // In the span: undone from height `y`, how much higher than `y` it lands.
+  const over = (y: number) => undo(weightOf(b, y))[1] - y
+  let from = lo, to = hi
+  for (let n = 0; n < 64 && to - from > 0; n++) {
+    const mid = (from + to) / 2
+    if (mid === from || mid === to) break
+    if (over(mid) > 0) from = mid
+    else to = mid
+  }
+  return undo(weightOf(b, (from + to) / 2))
+}
+// A place in the world on a held row of definition `k`, as it stands (`held`), in the row's own frame at
+// rest; and back.
+export const restOf = (k: { bends?: Bends }, held: Placed, p: V) => unbent(k.bends, held.data.bend ?? 0, heldLocal(held, p))
+export const fromRest = (k: { bends?: Bends }, held: Placed, r: V) => heldPoint(held, bent(k.bends, held.data.bend ?? 0, r))
 
 // The body's frame on a surface facing `out`: its front into the surface, and its up the up it had
 // (`had`) laid flat on it, carried over the surface as he goes; then, where the world's up laid flat on it
@@ -844,7 +1057,11 @@ export function frameOn(out: V, had: V | null | undefined, yaw: number, turn: nu
 const framed = (f: { up: V; ahead: V }, p: V) => add(add(mul(cross(f.up, f.ahead), p[0]), mul(f.up, p[1])), mul(f.ahead, p[2]))
 
 const nets = new WeakMap<object, Net>()
-// The net of a held row: the mesh of its kind's definition (`meshOf`), made once a definition.
+// The net of a held row: the mesh of its kind's definition (`meshOf`), made once a definition; for a kind
+// that bends, that net posed as the row's `bend` bends it (`posedNet`), kept for the last few bends asked
+// for.
+const POSED = 4
+const posedNets = new WeakMap<object, { bend: number; net: Net }[]>()
 export function netOf(from: W | Wire, held: Row): Net {
   const k = def(from, held.kind)
   let net = nets.get(k)
@@ -852,7 +1069,44 @@ export function netOf(from: W | Wire, held: Row): Net {
     net = netOn(meshOf(k))
     nets.set(k, net)
   }
-  return net
+  const bend = held.data.bend ?? 0
+  if (!k.bends || !bend) return net
+  let kept = posedNets.get(k)
+  if (!kept) posedNets.set(k, (kept = []))
+  const found = kept.find(x => x.bend === bend)
+  if (found) return found.net
+  const posed = posedNet(net, k.bends, bend)
+  kept.unshift({ bend, net: posed })
+  kept.length = Math.min(kept.length, POSED)
+  return posed
+}
+
+// A net as a bend poses it: each point where `bent` puts it, each way out the faces round it, each by its
+// area, made one long (as `netOn` finds them); its links and triangles its own; and each triangle's part,
+// by its corners' weights at rest (`posed`).
+const partsKept = new WeakMap<Net, Uint8Array>()
+export function posedNet(net: Net, b: Bends, bend: number): Net {
+  let part = partsKept.get(net)
+  if (!part) {
+    part = new Uint8Array(net.tri.length / 3)
+    for (let t = 0; t < part.length; t++) {
+      const ws = [0, 1, 2].map(k => weightOf(b, net.at[net.tri[t * 3 + k] * 3 + 1]))
+      part[t] = ws.every(w => w === 0) ? 0 : ws.every(w => w === 1) ? 1 : 2
+    }
+    partsKept.set(net, part)
+  }
+  const at = new Float32Array(net.points * 3)
+  for (let i = 0; i < net.points; i++) at.set(bent(b, bend, [net.at[i * 3], net.at[i * 3 + 1], net.at[i * 3 + 2]]), i * 3)
+  const out = new Float64Array(net.points * 3)
+  for (let t = 0; t < net.tri.length; t += 3) {
+    const [a, b2, c] = [net.tri[t], net.tri[t + 1], net.tri[t + 2]]
+    const p = (i: number) => [at[i * 3], at[i * 3 + 1], at[i * 3 + 2]]
+    const n = cross(sub(p(b2), p(a)), sub(p(c), p(a)))
+    for (const q of [a, b2, c]) for (let k = 0; k < 3; k++) out[q * 3 + k] += n[k]
+  }
+  const ways = new Float32Array(net.points * 3)
+  for (let i = 0; i < net.points; i++) ways.set(unit([out[i * 3], out[i * 3 + 1], out[i * 3 + 2]]), i * 3)
+  return { ...net, at, out: ways, posed: { rest: net, b, bend, part } }
 }
 
 // A place on a held row's net in the world now: the spot, and the way out of the surface there.
@@ -995,6 +1249,8 @@ export function climbNet(me: Row, w: W, dt: number, stick: V) {
   stay(me, w, k.upright * dt)
 }
 
+// Rows of places down his middle `standing` reads against the net at once.
+const ROWS = 4
 // Where he stands for a hold: framed on the surface there (`frameOn`, from the up he has, turned toward
 // upright by at most `turn` radians), his root set back from the middle of his palms on the spot and out
 // by his `climb.brace`.
@@ -1024,11 +1280,16 @@ function standing(me: Row, w: W, hold: NetHold, turn: number) {
   // At each edge, out from the middle, how far ahead: the more of the bands on either side.
   const edges = k.front.length
   const ahead = (j: number) => Math.max(k.front[Math.max(0, j - 1)], k.front[Math.min(edges - 1, j)])
+  // Read four rows of places at a time (a tenth of a metre of the line), against the net's triangles round
+  // the point nearest the middle of them.
   let more = 0
-  for (let n = 0; n <= along; n++) {
-    const middle = add(top, mul(down, n / along))
+  for (let n = 0; n <= along; n += ROWS) {
     const ps: V[] = []
-    for (let j = -edges; j <= edges; j++) ps.push(add(root, framed(lean, add(middle, [j * k.across, 0, ahead(Math.abs(j))]))))
+    for (let m = n; m < n + ROWS && m <= along; m++) {
+      const middle = add(top, mul(down, m / along))
+      for (let j = -edges; j <= edges; j++) ps.push(add(root, framed(lean, add(middle, [j * k.across, 0, ahead(Math.abs(j))]))))
+    }
+    const middle = add(top, mul(down, Math.min(along, n + (ROWS - 1) / 2) / along))
     const there = outOf(net, place, { length: ps.length, dots: ways => ways.map(w => Float64Array.from(ps, p => dot(p, w))) }, out, nearestOn(net, place, add(root, framed(lean, middle)), hold.a), 1)
     if (there !== undefined) more = Math.max(more, -there)
   }

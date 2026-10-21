@@ -165,7 +165,8 @@
     "bumpy": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false },
     "slider": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false, "home": null, "t": 0 },
     "tipper": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false, "home": null, "t": 0 },
-    "swinger": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false, "home": null, "t": 0 }
+    "swinger": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false, "home": null, "t": 0 },
+    "tube": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false, "bend": 0, "t": 0 }
   },
   "actors": [
     {

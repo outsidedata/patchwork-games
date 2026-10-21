@@ -6,7 +6,8 @@
 // wall with a hollow pressed into its front, and a bumpy slab 34 m off, its front rising and falling in
 // bumps and dips, and past it a wall 46 m off sliding to and fro along its width and one 58 m off tipping
 // back and forth about its base, and a ball 70 m off, its middle 6 m up, swinging under a pivot 6 m over
-// that, for climbing one shape at a time from `dev.html?scene=yard`.
+// that, and a tube 82 m off standing up and bending to and fro at its middle as a limb does at its elbow,
+// for climbing one shape at a time from `dev.html?scene=yard`.
 import type { Scene, Sim } from '#engine/engine.ts'
 import { scenemanager } from '#plugins/scenemanager/scenemanager.sim.ts'
 import { loader } from '#plugins/loader/loader.sim.ts'
@@ -22,9 +23,10 @@ import { slider } from './slider.sim.ts'
 import { sphere } from './sphere.sim.ts'
 import { swinger } from './swinger.sim.ts'
 import { tipper } from './tipper.sim.ts'
+import { tube } from './tube.sim.ts'
 import { wall } from './wall.sim.ts'
 import file from './yard.scene.json' with { type: 'json' }
 
-export const sim: Sim = { scenemanager, loader, skydome3d, player, start, wall, sphere, pillar, pole, corner, bowl, bumpy, slider, tipper, swinger }
+export const sim: Sim = { scenemanager, loader, skydome3d, player, start, wall, sphere, pillar, pole, corner, bowl, bumpy, slider, tipper, swinger, tube }
 
 export const scene = file as Scene

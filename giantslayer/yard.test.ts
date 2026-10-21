@@ -8,7 +8,7 @@ import { loopback } from '#addons/loopback/loopback.addon.ts'
 import { prepared } from '#plugins/loader/loader.sim.ts'
 import { ends } from '#plugins/anim/anim.sim.ts'
 import { keyCode } from '#plugins/player/player.plugin.ts'
-import { box, bumps, corner, cylinder, dish, heldPoint, heldWay, linked, meshOf, netOf, netOn, sphere, spotOn } from './plugins/climb/climb.sim.ts'
+import { bent, box, bumps, corner, cylinder, dish, fromNet, fromRest, heldPoint, heldWay, linked, meshOf, netOf, netOn, posedNet, restOf, sphere, spotOn, unbent } from './plugins/climb/climb.sim.ts'
 import { sim } from './giantslayer.sim.ts'
 import file from './giantslayer.scene.json'
 import defs from './assets/giantslayer.json'
@@ -188,11 +188,24 @@ function signedTo(mesh: { position: number[]; index: number[] }, h: number) {
 
 // How far a place in the world is from a held row's surface, 0 on it, negative inside it: the wall's
 // box by its own measure, any other shape by its mesh's (`signedTo`, its grid in boxes of 10 cm: a place
-// further than that is only known to be that far, in or out).
+// further than that is only known to be that far, in or out); one that bends, by its mesh with every
+// corner where its row's bend puts it (climb's `bent`), made again for each bend (the last few kept).
 const measures = new Map<string, (p: ArrayLike<number>) => number>()
+const bentMeasures: { kind: string; bend: number; measure: (p: ArrayLike<number>) => number }[] = []
 function fromHeld(held: { kind: string; data: any }, p: number[]) {
   if (held.kind === 'wall') return fromSurface(localTo(held, p))
   const k = (defs as any)[held.kind]
+  const bend = held.data.bend ?? 0
+  if (k.bends && bend) {
+    let found = bentMeasures.find(m => m.kind === held.kind && m.bend === bend)
+    if (!found) {
+      const mesh = meshOf(k), position: number[] = []
+      for (let i = 0; i < mesh.position.length; i += 3) position.push(...bent(k.bends, bend, mesh.position.slice(i, i + 3)))
+      bentMeasures.unshift((found = { kind: held.kind, bend, measure: signedTo({ position, index: mesh.index }, 0.1) }))
+      bentMeasures.length = Math.min(bentMeasures.length, 3)
+    }
+    return found.measure(localTo(held, p))
+  }
   if (!measures.has(held.kind)) measures.set(held.kind, signedTo(meshOf(k), 0.1))
   return measures.get(held.kind)!(localTo(held, p))
 }
@@ -266,7 +279,7 @@ test('1b: the wall\'s net is a point on its surface for every corner of its mesh
 test('1a: the yard holds one wall, standing on the ground the hero stands on, drawn as a box of its definition\'s size from the ground up', async () => {
   const { yard, p, frames } = await start()
   await frames(30)
-  expect([...new Set(yard.rows.map(r => r.kind))].sort()).toEqual(['bowl', 'bumpy', 'corner', 'loader', 'pillar', 'player', 'pole', 'scenemanager', 'skydome3d', 'slider', 'sphere', 'start', 'swinger', 'tipper', 'wall'])
+  expect([...new Set(yard.rows.map(r => r.kind))].sort()).toEqual(['bowl', 'bumpy', 'corner', 'loader', 'pillar', 'player', 'pole', 'scenemanager', 'skydome3d', 'slider', 'sphere', 'start', 'swinger', 'tipper', 'tube', 'wall'])
   const wall = yard.rows.filter(r => r.kind === 'wall')
   expect(wall).toHaveLength(1)
   const hero = yard.rows.find(r => r.kind === 'player')!
@@ -294,7 +307,8 @@ type Game = Awaited<ReturnType<typeof start>>
 function putOn(g: Game, want: number[], kind = 'wall') {
   const wall = g.yard.rows.find(r => r.kind === kind)!
   const hero = g.yard.rows.find(r => r.kind === 'player')!
-  const net = netOf(g.p.client!.plugins.wire, wall)
+  // `want` in its own frame at rest, for one that bends.
+  const net = netOn(meshOf((defs as any)[kind]))
   let a = 0, far = Infinity
   for (let i = 0; i < net.points; i++) {
     const d = Math.hypot(net.at[i * 3] - want[0], net.at[i * 3 + 1] - want[1], net.at[i * 3 + 2] - want[2])
@@ -509,8 +523,8 @@ async function climbing(g: Game, want: number[], keys: string[], frames: number,
   const { wall, hero } = putOn(g, want, kind)
   await g.frames(60)
   const wire = g.p.client!.plugins.wire
-  // Where his hold is, in the wall's own frame.
-  const spot = () => localTo(wall, spotOn(wire, wall, hero.data.hold).at)
+  // Where his hold is, in the wall's own frame (at rest, for one that bends).
+  const spot = () => restOf((defs as any)[kind], wall, spotOn(wire, wall, hero.data.hold).at)
   const from = spot()
   for (const k of keys) key('keydown', k)
   const limbs = defs.player.climb.limbs as Record<string, { touch: string[] }>
@@ -520,7 +534,7 @@ async function climbing(g: Game, want: number[], keys: string[], frames: number,
     middles: Record<string, THREE.Vector3>; short: number[]
     out: number[]; lean: { up: number[]; ahead: number[] }; model: { up: number[]; ahead: number[] }
     // Where the held row stood that frame (one that moves stands somewhere new each).
-    placed: { kind: string; data: { pos: number[]; yaw: number; pitch: number } }
+    placed: { kind: string; data: { pos: number[]; yaw: number; pitch: number; bend?: number } }
   }
   const T = g.p.client!.plugins.render3d.THREE as typeof THREE
   const root: THREE.Object3D = g.p.client!.plugins.anim.model(hero.id)
@@ -537,7 +551,7 @@ async function climbing(g: Game, want: number[], keys: string[], frames: number,
     seen.push({
       at: spot(), pos: [...hero.data.pos], m: against(g, kind), touches, middles, short: g.p.client!.plugins.ik3d.short(hero.id) ?? [],
       out: spotOn(wire, wall, hero.data.hold).out, lean: structuredClone(hero.data.lean), model,
-      placed: { kind: wall.kind, data: { pos: [...wall.data.pos], yaw: wall.data.yaw, pitch: wall.data.pitch } },
+      placed: { kind: wall.kind, data: { pos: [...wall.data.pos], yaw: wall.data.yaw, pitch: wall.data.pitch, bend: wall.data.bend } },
     })
   }
   for (const k of keys) key('keyup', k)
@@ -903,10 +917,19 @@ const limbOf = (name: string) => (defs.player.climb.limbs as Record<string, { sk
 // it. How many steps each took, and how high each lifted.
 function climbedWell(r: Awaited<ReturnType<typeof climbing>>, net: ReturnType<typeof netOf>, what: string, still = false) {
   type Placed = (typeof r.seen)[number]['placed']
+  // The net as the held row stood: for one that bends, posed as it was bent (climb's `posedNet`).
+  const k = (defs as any)[r.wall.kind]
+  const posed = new Map<number, ReturnType<typeof netOf>>()
+  const netAt = (at: Placed) => {
+    const bend = at.data.bend ?? 0
+    if (!k.bends || !bend) return net
+    if (!posed.has(bend)) posed.set(bend, posedNet(net, k.bends, bend))
+    return posed.get(bend)!
+  }
   // The line out of the surface through a point, in the world, the held row where it stood: where it
   // starts and its way.
-  const place = (at: Placed, point: number) => heldPoint(at, [...net.at.subarray(point * 3, point * 3 + 3)])
-  const way = (at: Placed, point: number) => heldWay(at, [...net.out.subarray(point * 3, point * 3 + 3)])
+  const place = (at: Placed, point: number) => heldPoint(at, [...netAt(at).at.subarray(point * 3, point * 3 + 3)])
+  const way = (at: Placed, point: number) => heldWay(at, [...netAt(at).out.subarray(point * 3, point * 3 + 3)])
   // How far a place is from that line.
   const offLine = (at: Placed, point: number, p: number[]) => {
     const a = place(at, point), o = way(at, point), v = vsub(p, a)
@@ -928,7 +951,7 @@ function climbedWell(r: Awaited<ReturnType<typeof climbing>>, net: ReturnType<ty
         expect(Math.abs(skinOf(s, name))).toBeLessThanOrEqual(0.001)
         expect(s.short[j]).toBeLessThan(0.001)
         const was = r.seen[i - 1]?.touches[name]
-        if (was && !was.step && was.point === t.point) expect(vlen(vsub(localTo(s.placed, mid.toArray()), localTo(r.seen[i - 1].placed, r.seen[i - 1].middles[name].toArray())))).toBeLessThanOrEqual(0.001)
+        if (was && !was.step && was.point === t.point) expect(vlen(vsub(restOf(k, s.placed, mid.toArray()), restOf(k, r.seen[i - 1].placed, r.seen[i - 1].middles[name].toArray())))).toBeLessThanOrEqual(0.001)
       } else {
         expect(still).toBe(false)
         // Its own skin off by no more than the lift and a centimetre past how far the straight way between
@@ -1201,7 +1224,7 @@ function onTheShape(r: Awaited<ReturnType<typeof climbing>>) {
   const angle = (a: number[], b: number[]) => Math.acos(Math.max(-1, Math.min(1, vdot(a, b) / (vlen(a) * vlen(b)))))
   let turned = 0
   r.seen.forEach((s, i) => {
-    expect(Math.abs(fromHeld(r.wall, heldPoint(r.wall, s.at)))).toBeLessThan(1e-5)
+    expect(Math.abs(fromHeld(s.placed, fromRest((defs as any)[r.wall.kind], s.placed, s.at)))).toBeLessThan(1e-5)
     expect(angle(s.model.ahead, s.out.map(v => -v))).toBeLessThan(deg)
     expect(Math.abs(vdot(s.model.up, s.out))).toBeLessThan(Math.sin(deg))
     expect(angle(s.model.up, s.lean.up)).toBeLessThan(deg)
@@ -1693,10 +1716,12 @@ test('11c: pushed right across the bumps and dips, he climbs over them, framed o
 // him: on it neither his hold nor his body moved (1 mm), and in the world his body went as far as the
 // shape took the place he was on, at least as far as a whole period takes it from wherever it was in it
 // (a sliding wall's reach; a tipping wall's tip, swung at his distance from its base; a ball's swing, at
-// his distance from its pivot). Or pushed the whole time (`keys`), climbing on it as it moves: every
-// frame as above but stepping, as on a shape standing still (climb's step 4), and his hold going over it
-// as fast. Its `period` its definition's, or `period` seconds.
-type Moving = 'slider' | 'tipper' | 'swinger'
+// his distance from its pivot; a tube's bend, at his distance from its joint, held above it where all of
+// the bend turns it). On it is where it is at rest, for a tube that bends. Or pushed the whole time
+// (`keys`), climbing on it as it moves: every frame as above but stepping, as on a shape standing still
+// (climb's step 4), and his hold going over it as fast (on a tube, up from below its joint to above it).
+// Its `period` its definition's, or `period` seconds.
+type Moving = 'slider' | 'tipper' | 'swinger' | 'tube'
 async function carried(kind: Moving, period?: number, keys: string[] = []) {
   const g = await start()
   const k = g.shared[kind], was = k.period
@@ -1709,32 +1734,45 @@ async function carried(kind: Moving, period?: number, keys: string[] = []) {
 }
 async function carriedOn(g: Game, kind: Moving, frames: number, keys: string[]) {
   const k = g.shared[kind] as any, still = !keys.length
-  const net = netOf(g.p.client!.plugins.wire, g.yard.rows.find(r => r.kind === kind)!)
-  // On a wall climbing, from low on it, so a period's climb stays on its face.
-  const want = kind === 'swinger' ? [0, 0, k.radius] : [0, still ? 4 : 2.5, k.size[2] / 2]
+  // Its net at rest (a tube's posed for each frame as it was bent then).
+  const net = netOn(meshOf(k))
+  // On a wall climbing, from low on it, so a period's climb stays on its face; on a tube held high, where
+  // all of its bend turns him, or climbing from low across its joint.
+  const want =
+    kind === 'swinger' ? [0, 0, k.radius]
+    : kind === 'tube' ? [0, still ? 7.2 : 2.5, k.radius]
+    : [0, still ? 4 : 2.5, k.size[2] / 2]
   const r = await climbing(g, want, keys, frames, kind)
   const turned = onTheShape(r)
   const well = climbedWell(r, net, kind, still)
   const first = r.seen[0], last = r.seen[r.seen.length - 1]
-  const on = (s: (typeof r.seen)[number]) => localTo(s.placed, s.pos)
+  const on = (s: (typeof r.seen)[number]) => restOf(k, s.placed, s.pos)
+  const there = (at: (typeof r.seen)[number]['placed'], p: number[]) => fromRest(k, at, p)
+  // On a tube held still, above all of its joint's mixing.
+  if (kind === 'tube' && still) expect(on(first)[1]).toBeGreaterThan(k.bends.at + k.bends.over)
   if (still) for (const s of r.seen) {
     expect(vlen(vsub(s.at, first.at))).toBeLessThanOrEqual(0.001)
     expect(vlen(vsub(on(s), on(first)))).toBeLessThanOrEqual(0.001)
   }
   // How far his body went in the world, less how far it went on the wall: what the wall took him; and
   // how far the wall took the place he was on at first, the most.
-  const went = Math.max(...r.seen.map(s => vlen(vsub(vsub(s.pos, first.pos), vsub(heldPoint(s.placed, on(s)), heldPoint(s.placed, on(first)))))))
-  const took = Math.max(...r.seen.map(s => vlen(vsub(heldPoint(s.placed, on(first)), first.pos))))
+  const went = Math.max(...r.seen.map(s => vlen(vsub(vsub(s.pos, first.pos), vsub(there(s.placed, on(s)), there(s.placed, on(first)))))))
+  const took = Math.max(...r.seen.map(s => vlen(vsub(there(s.placed, on(first)), first.pos))))
   const least =
     kind === 'slider' ? k.reach
     : kind === 'tipper' ? 2 * vlen(on(first)) * Math.sin(k.tip / 2)
-    : 2 * vlen(vsub(on(first), [0, k.length, 0])) * Math.sin(k.swing / 2)
-  // How far his hold went over it.
+    : kind === 'swinger' ? 2 * vlen(vsub(on(first), [0, k.length, 0])) * Math.sin(k.swing / 2)
+    : 2 * vlen(vsub(on(first), [0, k.bends.at, 0])) * Math.sin(k.most / 2)
+  // How far his hold went over it: each frame from where it was to where it is, both on it as it stands
+  // that frame (bent as it is then).
   let path = 0
-  r.seen.forEach((s, i) => { path += vlen(vsub(s.at, i ? r.seen[i - 1].at : r.from)) })
+  r.seen.forEach((s, i) => { path += vlen(vsub(there(s.placed, s.at), there(s.placed, i ? r.seen[i - 1].at : r.from))) })
   console.log('12 carried', JSON.stringify({ kind, frames, period: k.period, keys, went, took, least, path, last: last.at, turned, ...well }))
   expect(Math.abs(went - took)).toBeLessThanOrEqual(0.001)
-  expect(took).toBeGreaterThan(least - 0.001)
+  // Climbing a tube from below its joint, where the bend does not move what he starts on: on up over the
+  // joint, past all of its mixing, as it bends.
+  if (kind === 'tube' && !still) expect(last.at[1]).toBeGreaterThan(k.bends.at + k.bends.over)
+  else expect(took).toBeGreaterThan(least - 0.001)
   if (!still) expect(path).toBeGreaterThan(going(frames - 3) * 0.95)
 }
 
@@ -1755,4 +1793,56 @@ test('12c: held still on a wall tipping back and forth about its base, he is car
 test('12d: held still on the side of a ball swinging under a pivot, he is carried with it, his body turning with it, his hands and feet planted, framed on it, nothing of him in it; and pushed right, he climbs round it as it swings', async () => {
   await carried('swinger')
   await carried('swinger', undefined, ['d'])
+})
+
+test('12e: a tube standing up bends at its joint: every corner of its mesh, bent and taken back, is where it was; the page draws it bent as its row is, and its net is the bent mesh\'s; held still high on it, he is carried with it as it bends, his body turning with it, his hands and feet planted, framed on it, nothing of him in it; and pushed up from below its joint, he climbs up over the joint as it bends', async () => {
+  const k = defs.tube
+  const mesh = meshOf(k)
+  let back = 0, moved = 0
+  for (const bend of [-k.most, -0.2, 0.3, k.most]) for (let i = 0; i < mesh.position.length; i += 3) {
+    const p = mesh.position.slice(i, i + 3), q = bent(k.bends, bend, p)
+    back = Math.max(back, vlen(vsub(unbent(k.bends, bend, q), p)))
+    moved = Math.max(moved, vlen(vsub(q, p)))
+  }
+  expect(back).toBeLessThan(1e-9)
+  // Bent all the way, the rim of its top went furthest: its distance from the joint, swung by the bend.
+  expect(moved).toBeCloseTo(2 * Math.hypot(k.length - k.bends.at, k.radius) * Math.sin(k.most / 2), 6)
+  // Drawn as the page's copy of its row is bent, a quarter of a period in.
+  const g = await start()
+  await g.frames(Math.round(k.period / 4 / DT))
+  const plugins = g.p.client!.plugins
+  const row = plugins.wire.rows.find(r => r.kind === 'tube')!
+  expect(Math.abs(row.data.bend)).toBeGreaterThan(k.most * 0.9)
+  const drawn = plugins.render3d.scene.getObjectByName('tube') as THREE.Mesh
+  const at = drawn.geometry.getAttribute('position')
+  let off = 0
+  for (let i = 0; i < at.count; i++) off = Math.max(off, vlen(vsub([at.getX(i), at.getY(i), at.getZ(i)], bent(k.bends, row.data.bend, mesh.position.slice(i * 3, i * 3 + 3)))))
+  expect(off).toBeLessThan(1e-5)
+  // Its net, as the rules and the page read it, is that bent mesh's: a point at each of its corners, each
+  // way out the faces round it.
+  const net = netOf(plugins.wire, row), fresh = netOn({ position: Array.from({ length: at.count * 3 }, (_, i) => at.array[i]), index: mesh.index })
+  expect(net.points).toBe(fresh.points)
+  let apart = 0, turned = 0
+  for (let i = 0; i < net.points; i++) {
+    apart = Math.max(apart, vlen(vsub([...net.at.subarray(i * 3, i * 3 + 3)], [...fresh.at.subarray(i * 3, i * 3 + 3)])))
+    turned = Math.max(turned, 1 - vdot([...net.out.subarray(i * 3, i * 3 + 3)], [...fresh.out.subarray(i * 3, i * 3 + 3)]))
+  }
+  expect(apart).toBeLessThan(1e-5)
+  expect(turned).toBeLessThan(1e-6)
+  // Read off that net as the page reads it (climb's `fromNet`, part by part) as the mesh, bent, measures
+  // it: at places in and out of it near every point, and moved along it, within a box of it.
+  const measure = signedTo({ position: Array.from({ length: at.count * 3 }, (_, i) => at.array[i]), index: mesh.index }, 0.1)
+  let differs = 0, read = 0
+  for (let i = 0; i < net.points; i++) for (const by of [-0.06, -0.01, 0.02, 0.07]) for (const along of [0, 0.09]) {
+    const o = [...net.out.subarray(i * 3, i * 3 + 3)], side = vcross(o, Math.abs(o[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0])
+    const p = [0, 1, 2].map(k => net.at[i * 3 + k] + o[k] * by + side[k] * along / (vlen(side) || 1))
+    const want = measure(p)
+    if (Math.abs(want) >= 0.1) continue
+    differs = Math.max(differs, Math.abs(fromNet(net, p).by - want))
+    read++
+  }
+  console.log('12e bent', JSON.stringify({ back, moved, bend: row.data.bend, off, apart, turned, differs, read }))
+  expect(differs).toBeLessThan(1e-5)
+  await carried('tube')
+  await carried('tube', undefined, ['w'])
 })

@@ -484,3 +484,39 @@ Proof (`yard.test.ts`), each over a whole period:
   across that is 6.17 m), turning him 80° in all. Climbing round it as it swung, 2.10 m in 6 s.
 All 46 tests of `yard.test.ts` passed in one run (1465 s) before the ball was added; 12d and 1a pass
 with it.
+
+**12e. A tube that bends, like a limb.** A new kind, `tube`: a cylinder of radius 1 m and 8 m standing
+up, its definition's `bends` (`{ at: 4, over: 0.75 }`) bending it at its middle by its row's `bend`,
+`most` 0.6 rad each way over 8 s. climb's bending: above `at` it turns about its own x through that
+height; within `over` of it a place takes its share of the turn by a weight rising smoothly with its
+height at rest, as a vertex bound to two bones does. `bent` poses a place, `unbent` takes it back
+(below the span unturned, above it turned back all the way, in it the height at rest found by halving
+the span: a first try by turns stayed 0.8 mm off after 12). `netOf` hands back the net posed at the
+row's bend (`posedNet`: its points bent, its ways out from the posed triangles), so every rule and the
+page read the bent surface; `restOf`/`fromRest` carry a place by its spot at rest, so the page's
+carrying (12a–d) holds a hand still on the bent part; the look is drawn bent.
+Speed, climb's page tick on node over 120 frames held high on it: 24 ms at first, making a field for
+each pose. Now a posed net is read part by part: triangles the bend leaves where they were off the
+field at rest, those it only turns off the field at rest where the place is turned back, and only the
+mixed ones (inside the span) as posed, their boxes found when first read; their ways out are the rest
+net's, turned where the bend turns them, worked again only round the mixed ones. That took it to 7.1
+ms. The rest was the legs' skin read again every frame: anim moves the hips in his body as his body
+turns (it splits the clip's hips by the world's up), and a move of the skeleton's top bone carries every
+bone and vertex alike, so it no longer sets off a read. 4.7 ms bending, 3.7 ms held straight. The
+stand-off (step 11) now reads four rows of places at a time against the net: the whole frame on the
+pillar went from 11.0 to 6.9 ms.
+Proof (`yard.test.ts`, 12e):
+- every corner of its mesh, bent each way and taken back, is where it was within 2e-15 m; bent all the
+  way, its top rim moved 2.437 m, its distance from the joint swung by the bend.
+- a quarter period in, the page draws its mesh where the bend puts each corner (2.5e-7 m), and the net
+  the rules and the page read is that drawn mesh's net: points within 4.8e-7 m, ways out within 1e-7.
+- read off that net part by part (climb's `fromNet`), 7785 places in and out of it near every point
+  agree with the bent mesh's own exact measure within 2.2e-7 m.
+- held still at 7.2 m, above all the mixing, over a whole period: carried 1.65 m, his body turning
+  137° in all (34° each way, twice), no limb stepping, all planted and still on it, framed on it every
+  frame, nothing of him in it.
+- pushed up from 2.5 m: up over the joint to 5.0 m as it bent, 2.81 m over it in 8 s (his speed makes
+  2.8), 6 to 7 steps a limb, in pairs, never sliding, nothing of him in it.
+- negative: with the net left unbent, 12e fails at once, the net 2.44 m off the drawn tube.
+12e and 11c pass after the speed changes (248 s and 22 s). The full yard file was not run after them:
+it takes 25 minutes, far over any reasonable cap, and its tests are to be cut to fit.
