@@ -411,3 +411,48 @@ Proof (`yard.test.ts`):
 - on the flat wall every elbow and knee still bends its clip's way (3f), and every test of steps 1–9
   passes.
 All 39 tests of `yard.test.ts` pass (1049 s).
+
+**11. Bumps and dips, like skin.** A new shape, climb's `bumps`: a box whose front rises and falls as
+sin·sin, its definition's `waves` (whole waves across and up) and `height`. A new kind, `bumpy`, in the
+yard: a 6 × 8 m slab, 3 waves across and 4 up. Found and fixed, each by numbers:
+- the stand-off (step 9) pushed his body out until every place down his middle was as far out of the
+  surface as his hips were from the root, which over bumps was 14 cm too far: his right hand could
+  not reach and stuck. He now stands out only as far as keeps the front of his skin off the surface.
+  His front is read as a line from the top of his head to his hips, carried on past the hips by
+  `climb.past` (0.2) of its length, since his skin goes 19% of the line below his hips. Beside it is
+  `climb.front`, how far his skin stands ahead of that line in bands of `climb.across` (2.5 cm) out to
+  either side. Measured on him: 14.8 cm at the middle, 13.9, 12.8, 10.4, 8.8, 6.2, and 0.3 cm at 20 cm
+  out, the same still and in every climbing clip (his body does not move against his root in any of
+  them). The surface is read under every band's edge, every 2.5 cm down the line. At the first spacing
+  tried, eighths of the line (12.7 cm), a bump's top rose 2 mm between two places read, and his hips
+  went 2 mm in.
+- a hand stepping, turned as it goes, holds its middle up to 1.2 cm further out than its skin. The test
+  now bounds a stepping limb's own nearest skin (no more than the lift and 1 cm past the straight way),
+  not its middle less a fixed skin. Its skin peaked at 5.9 cm, under the 6 cm lift.
+- a limb wanted only points it could hold with `step.slack` (5 cm) of reach to spare. Over the dips
+  none had that much, so it wanted nothing, stayed until it was out of reach and let go. Where no point
+  would hold at all, it now wants the one in reach with the most room.
+- a limb that lost its point began its step in the same frame as the other pair began theirs: which
+  pairs were stepping was read before the lost limb began. It is now counted as soon as it begins.
+- bumps 15 cm high (30 cm from crest to dip) are deeper than his arms reach. His trunk is straight and
+  1.6 m long, so it always spans a crest and a dip, and kept off the crest, his shoulder stood 0.58 m off
+  the dip under it, past his arm's 0.56 m. The slab's bumps are now 10 cm high.
+- the climb test pushed him along y = 4, where the bumps neither rise nor fall (sin of a whole wave):
+  it climbed a flat line. It now climbs along the row of a bump's top.
+Proof (`yard.test.ts`):
+- 11a: the slab's net is closed (points − links + triangles = 2), its front rises and falls as the bumps
+  do, every link turns within 12.9° (his `bend` allows 25.8°).
+- 11: still and climbing up, down, left and right on the wall (0.525 m each way), every frame his skin
+  goes no further below his hips than `past`, and in each band stands no further ahead than its
+  `front` and within a centimetre of it; on the flat wall his line stands 26.2 cm off the face.
+- 11b: on a bump's top and in a dip's bottom he hangs still, framed on it, hands and feet on it within
+  4 µm, no two on one point, nothing of him in it.
+- 11c: from near the slab's left edge, pushed right along the row of a bump's top: 2.05 m across,
+  rising and falling 0.2 m over the bumps and dips, every limb stepping 4 times, lifted 6 cm, framed on
+  the surface every frame, never sliding, nothing of him in it.
+- 9b, 10b (the bowl) pass with the new stand-off.
+- 3f again: with the left elbow's least angle raised to 128.7°, the hand used to let go, since no
+  point had 5 cm to spare. It now goes from point 411 to 336, which it reaches within the limit (ik3d
+  short under 1 mm, 1.8 cm of room); its elbow never goes under 128.7°.
+42 of the 43 tests of `yard.test.ts` passed in one run (1243 s); the 43rd, 3f, failed on the old
+let-go claim, and passes with the new one, run alone.

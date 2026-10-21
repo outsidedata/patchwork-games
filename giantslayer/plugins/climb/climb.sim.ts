@@ -44,10 +44,12 @@
 // closed at both ends, a `pillar`'s and a `pole`'s. `prism(xs, zs, inside, height, cell)` is a solid
 // stood up from a footprint of grid cells, and `corner(size, thick, cell)` the one of two walls at a right
 // angle, a `corner`'s. `dish(size, cell, radius, depth)` is a box with a hollow pressed into its front by
-// a ball, a `bowl`'s (`box(size, cell, front)` moves a box's front out or in by a height). `meshOf(k)` is
-// the mesh of a held kind's definition, by the shape it names: `{ shape: "box", size, cell }`,
-// `{ shape: "sphere", radius, cell }`, `{ shape: "cylinder", radius, length, cell }`, `{ shape: "corner",
-// size, thick, cell }` or `{ shape: "dish", size, cell, radius, depth }`.
+// a ball, a `bowl`'s (`box(size, cell, front)` moves a box's front out or in by a height), and
+// `bumps(size, cell, waves, height)` a box whose front rises and falls in bumps and dips, a `bumpy`'s.
+// `meshOf(k)` is the mesh of a held kind's definition, by the shape it names: `{ shape: "box", size,
+// cell }`, `{ shape: "sphere", radius, cell }`, `{ shape: "cylinder", radius, length, cell }`,
+// `{ shape: "corner", size, thick, cell }`, `{ shape: "dish", size, cell, radius, depth }` or
+// `{ shape: "bumps", size, cell, waves, height }`.
 // `settle(me, w)` is a held kind's rule: on its first step it stands its row's `pos` that high over the
 // ground under it (walker's), and marks it `placed`.
 // `netOn(mesh)` is the net a body climbs on it (`Net`, below): its vertices the points, its triangles'
@@ -82,9 +84,10 @@
 // `ends`) is on the spot, and out
 // along the surface's way out by its `climb.brace` metres (under 0, in: his body stands nearer the
 // surface than that clip holds it from its hands, whose real hands reach the surface by IK on the page),
-// and further out as far as the surface comes nearer his body than the flat face through his hold
-// would (inside a bowl), looked at in eighths down the line from the top of his head to his hips (its
-// own `ends`);
+// and further out, if he must, until his front is off the surface (in a bowl, over bumps): his front the
+// line from the top of his head to his hips (its own `ends`), carried on past them by his `climb.past` of
+// its length, with his skin ahead of it by his `climb.front`, metres for each band of `climb.across`
+// metres to either side of it;
 // standing, not falling, holding its `clips.still` clip at its first frame (played at rate 0).
 // `grabNet(me, w, kinds)` takes hold of the point of a row of one of `kinds` nearest the middle of the
 // holder's palms, as they are in that clip's first frame where it stands now, within its `climb.reach`,
@@ -448,16 +451,25 @@ export function dish(size: number[], cell: number, radius: number, depth: number
   })
 }
 
+// A bumpy slab: a box of `size` (`box`) whose front rises and falls in bumps and dips, `waves[0]` whole
+// waves across it and `waves[1]` up it, `height` metres out at a bump's top and in at a dip's bottom,
+// flat at its edges.
+export function bumps(size: number[], cell: number, waves: number[], height: number): Mesh {
+  const [w, h] = size
+  return box(size, cell, (x, y) => height * Math.sin((2 * Math.PI * waves[0] * (x + w / 2)) / w) * Math.sin((2 * Math.PI * waves[1] * y) / h))
+}
+
 // The shapes a held kind's definition names as its `shape`, each the mesh it makes of that definition:
 // `box`, of its `size` and `cell`; `sphere`, of its `radius` and `cell`; `cylinder`, of its `radius`,
 // `length` and `cell`; `corner`, of its `size`, `thick` and `cell`; `dish`, of its `size`, `cell`,
-// `radius` and `depth`.
+// `radius` and `depth`; `bumps`, of its `size`, `cell`, `waves` and `height`.
 const shapes: Record<string, (k: any) => Mesh> = {
   box: k => box(k.size, k.cell),
   sphere: k => sphere(k.radius, k.cell),
   cylinder: k => cylinder(k.radius, k.length, k.cell),
   corner: k => corner(k.size, k.thick, k.cell),
   dish: k => dish(k.size, k.cell, k.radius, k.depth),
+  bumps: k => bumps(k.size, k.cell, k.waves, k.height),
 }
 export function meshOf(k: { shape: string }): Mesh {
   // A definition comes from the game's data file.
@@ -988,20 +1000,32 @@ function standing(me: Row, w: W, hold: NetHold, turn: number) {
   const { at, out } = spotOn(w, held, hold)
   const lean = frameOn(out, d.lean?.up, d.yaw, turn)
   const root = add(sub(at, framed(lean, palms(w, me, k.clips.still))), mul(out, k.brace))
-  // Stood out from the surface as far as it comes nearer his body than the flat face through his hold
-  // would: looked at in eighths along the line down his middle, from the top of his head to his hips (his
-  // still clip's first frame, his own `ends`; his legs below keep out by how the page bends them), each
-  // place's way out of the surface under it read off the net (`outOf`) against its way out of that flat
-  // face. A surface curving away (a ball) leaves him where he is.
+  // Stood out from the surface as far as he must to keep the front of his body off it. His front is
+  // told by the line down his middle, from the top of his head to his hips and on past them by his
+  // `climb.past` of its length, as far as the skin of his body goes (his still clip's first frame, his own
+  // `ends`; his legs below keep out by how the page bends them), and by how far his skin stands ahead of
+  // that line in bands of `climb.across` metres to either side of it, `climb.front` (out from the middle,
+  // the most of each band). Every `climb.across` metres along the line, at the edge of every band, a
+  // place that far ahead of the line (the more of the two bands it parts) is kept out of the surface under
+  // it along the way out (read off the net, `outOf`): so close together that the surface between them
+  // rises over them by no more than a tenth of a millimetre over a bump's top. On a flat face his skin is
+  // further out than that, and he stays where he is.
   const net = netOf(w, held)
   const place = (i: number) => heldPoint(held, [...net.at.subarray(i * 3, i * 3 + 3)])
   const still = { clip: k.clips.still, clipT: 0 }
   const top = ends(w, me, 'head', still).slice(3), hips = ends(w, me, 'torso', still).slice(0, 3)
+  const down = mul(sub(hips, top), 1 + k.past)
+  const along = Math.ceil(len(down) / k.across)
+  // At each edge, out from the middle, how far ahead: the more of the bands on either side.
+  const edges = k.front.length
+  const ahead = (j: number) => Math.max(k.front[Math.max(0, j - 1)], k.front[Math.min(edges - 1, j)])
   let more = 0
-  for (let n = 0; n <= 8; n++) {
-    const p = add(root, framed(lean, add(top, mul(sub(hips, top), n / 8))))
-    const there = outOf(net, place, { length: 1, dots: ways => ways.map(w => Float64Array.of(dot(p, w))) }, out, nearestOn(net, place, p, hold.a), 1)
-    if (there !== undefined) more = Math.max(more, dot(sub(p, at), out) - there)
+  for (let n = 0; n <= along; n++) {
+    const middle = add(top, mul(down, n / along))
+    const ps: V[] = []
+    for (let j = -edges; j <= edges; j++) ps.push(add(root, framed(lean, add(middle, [j * k.across, 0, ahead(Math.abs(j))]))))
+    const there = outOf(net, place, { length: ps.length, dots: ways => ways.map(w => Float64Array.from(ps, p => dot(p, w))) }, out, nearestOn(net, place, add(root, framed(lean, middle)), hold.a), 1)
+    if (there !== undefined) more = Math.max(more, -there)
   }
   return { lean, root: add(root, mul(out, more)) }
 }

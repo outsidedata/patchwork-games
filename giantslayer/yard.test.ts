@@ -8,7 +8,7 @@ import { loopback } from '#addons/loopback/loopback.addon.ts'
 import { prepared } from '#plugins/loader/loader.sim.ts'
 import { ends } from '#plugins/anim/anim.sim.ts'
 import { keyCode } from '#plugins/player/player.plugin.ts'
-import { box, corner, cylinder, dish, heldPoint, heldWay, linked, meshOf, netOf, netOn, sphere, spotOn } from './plugins/climb/climb.sim.ts'
+import { box, bumps, corner, cylinder, dish, heldPoint, heldWay, linked, meshOf, netOf, netOn, sphere, spotOn } from './plugins/climb/climb.sim.ts'
 import { sim } from './giantslayer.sim.ts'
 import file from './giantslayer.scene.json'
 import defs from './assets/giantslayer.json'
@@ -266,7 +266,7 @@ test('1b: the wall\'s net is a point on its surface for every corner of its mesh
 test('1a: the yard holds one wall, standing on the ground the hero stands on, drawn as a box of its definition\'s size from the ground up', async () => {
   const { yard, p, frames } = await start()
   await frames(30)
-  expect([...new Set(yard.rows.map(r => r.kind))].sort()).toEqual(['bowl', 'corner', 'loader', 'pillar', 'player', 'pole', 'scenemanager', 'skydome3d', 'sphere', 'start', 'wall'])
+  expect([...new Set(yard.rows.map(r => r.kind))].sort()).toEqual(['bowl', 'bumpy', 'corner', 'loader', 'pillar', 'player', 'pole', 'scenemanager', 'skydome3d', 'sphere', 'start', 'wall'])
   const wall = yard.rows.filter(r => r.kind === 'wall')
   expect(wall).toHaveLength(1)
   const hero = yard.rows.find(r => r.kind === 'player')!
@@ -851,23 +851,29 @@ test('3f: held still with all four reaching, each elbow and knee is within its l
     if (i === 0) console.log('3f', JSON.stringify(Object.fromEntries(Object.entries(limbs).map(([n]) => [n, { angle: +solved[n].angle.toFixed(1), clipAngle: +clip[n].angle.toFixed(1), side: +solved[n].off.dot(clip[n].off).toFixed(3) }]))))
   }
   // The limit bites: the left elbow's least angle raised halfway from the angle it bends to toward the
-  // angle its clip has, no point within it is in reach, so the hand lets go and stands as its clip has
-  // it; its elbow never goes under the limit.
+  // angle its clip has, the point it holds is out of reach, so the hand goes to another it reaches
+  // within the limit (reached, ik3d short under 1 mm, with room to spare); its elbow never goes under it.
   const shared = g.shared.player.climb.limbs.handL
   const was = shared.bend
   await g.frames(1)
+  const held = plugins.climb.touches(hero).get('handL').point
   const bent = read().handL.angle
   plugins.ik3d.unbend(hero.id)
   const clipped = read().handL.angle
   const least = (bent + clipped) / 2
   shared.bend = [least, 178]
   try {
-    for (let i = 0; i < 10; i++) {
+    // Through its step (`step.time`) and on a while.
+    for (let i = 0; i < 30; i++) {
       await g.frames(1)
       expect(read().handL.angle).toBeGreaterThanOrEqual(least - 0.01)
     }
-    expect(plugins.climb.touches(hero).has('handL')).toBe(false)
-    console.log('3f bitten', JSON.stringify({ bent, clipped, least, angle: read().handL.angle }))
+    const now = plugins.climb.touches(hero).get('handL')
+    expect(now.step).toBeUndefined()
+    expect(now.point).not.toBe(held)
+    expect(now.room).toBeGreaterThanOrEqual(0)
+    expect(plugins.ik3d.short(hero.id)[0]).toBeLessThan(0.001)
+    console.log('3f bitten', JSON.stringify({ bent, clipped, least, angle: read().handL.angle, held, now: now.point, room: now.room }))
   } finally {
     shared.bend = was
   }
@@ -886,9 +892,9 @@ const limbOf = (name: string) => (defs.player.climb.limbs as Record<string, { sk
 // Every frame of a climb, step 4's, on any shape: none gives up its point; never two groups stepping at
 // once; a planted hand or foot on its point (where it touches on the line out of the surface through
 // that point, within 1 mm) with its own skin on the surface within 1 mm, reached (ik3d short under 1 mm),
-// and not moved since the last frame (1 mm); one in a step off the surface by no more than its skin, the
-// lift and 1 cm past how far the straight way between its two points stands off it, its skin never into
-// it, reached (1 mm), landing on the point it stepped to. And every limb steps, lifting
+// and not moved since the last frame (1 mm); one in a step with its skin off the surface by no more than
+// the lift and 1 cm past how far the straight way between its two points stands off it, never into it,
+// reached (1 mm), landing on the point it stepped to. And every limb steps, its skin lifting
 // off the surface by at least half the lift. How many steps each took, and how high each lifted.
 function climbedWell(r: Awaited<ReturnType<typeof climbing>>, net: ReturnType<typeof netOf>, what: string) {
   // The line out of the surface through a point, in the world: where it starts and its way.
@@ -909,7 +915,7 @@ function climbedWell(r: Awaited<ReturnType<typeof climbing>>, net: ReturnType<ty
     if (groups.size > 1) console.log('turns', what, i, JSON.stringify(r.seen.slice(Math.max(0, i - 12), i + 1).map(f => Object.fromEntries(LIMBS.map(n => [n, `${f.touches[n].point}${f.touches[n].step ? `>${f.touches[n].step!.to}@${f.touches[n].step!.s.toFixed(2)}` : ''} ${f.touches[n].room?.toFixed(3)}`])))))
     expect(groups.size).toBeLessThanOrEqual(1)
     LIMBS.forEach((name, j) => {
-      const t = s.touches[name], skin = limbOf(name).skin, mid = s.middles[name]
+      const t = s.touches[name], mid = s.middles[name]
       if (!t.step) {
         expect(offLine(t.point, mid.toArray())).toBeLessThanOrEqual(0.001)
         expect(Math.abs(skinOf(s, name))).toBeLessThanOrEqual(0.001)
@@ -917,17 +923,18 @@ function climbedWell(r: Awaited<ReturnType<typeof climbing>>, net: ReturnType<ty
         const was = r.seen[i - 1]?.touches[name]
         if (was && !was.step && was.point === t.point) expect(mid.distanceTo(r.seen[i - 1].middles[name])).toBeLessThanOrEqual(0.001)
       } else {
-        const off = fromHeld(r.wall, mid.toArray())
-        // Off by no more than the skin, the lift and a centimetre past how far the straight way between
-        // its two points stands off the surface (across an inside corner, the way cuts across it).
+        // Its own skin off by no more than the lift and a centimetre past how far the straight way between
+        // its two points stands off the surface (across an inside corner, the way cuts across it). Its
+        // skin and not its middle: a hand turned as it goes holds its middle further out than its skin.
+        const off = skinOf(s, name)
         const a = place(t.step.from), b = place(t.step.to)
         let across = 0
         for (let n = 1; n < 16; n++) across = Math.max(across, fromHeld(r.wall, a.map((v, k) => v + (b[k] - v) * (n / 16))))
-        expect(off).toBeLessThanOrEqual(skin + defs.player.climb.step.lift + across + 0.01)
-        expect(skinOf(s, name)).toBeGreaterThanOrEqual(-0.001)
+        expect(off).toBeLessThanOrEqual(defs.player.climb.step.lift + across + 0.01)
+        expect(off).toBeGreaterThanOrEqual(-0.001)
         // Reached the whole way: it goes where its step takes it.
         expect(s.short[j]).toBeLessThan(0.001)
-        lifted[name] = Math.max(lifted[name], off - skin)
+        lifted[name] = Math.max(lifted[name], off)
         const next = r.seen[i + 1]?.touches[name]
         if (next && !next.step) {
           expect(next.point).toBe(t.step.to)
@@ -1521,4 +1528,153 @@ test('10b: from the bottom of the bowl\'s hollow, pushed up, he climbs up out of
   expect(Math.abs(last.at[2] - k.size[2] / 2)).toBeLessThan(1e-6)
   expect(last.at[1]).toBeGreaterThan(past)
   expect(vdot(last.out, [0, 0, 1])).toBeCloseTo(1, 6)
+})
+
+test('11: held on the wall, still and climbing every way, every frame the skin of his body (all but his limbs\') goes no further below his hips than his climb.past of the line down his middle, from the top of his head to his hips in his still clip\'s first frame, and in each band of his climb.across to either side of that line, carried on so far past them, stands no further ahead of it than his climb.front has for that band, and within a centimetre of it at its most; on a flat wall that line stands further off the face than all of them', async () => {
+  const g = await start()
+  const { hero } = putOn(g, [0, 4, 0.5])
+  await g.frames(90)
+  const plugins = g.p.client!.plugins
+  const T = plugins.render3d.THREE as typeof THREE
+  const root: THREE.Object3D = plugins.anim.model(hero.id)
+  const wire = plugins.wire, clip = defs.player.climb.clips.still
+  const head = ends(wire, hero as any, 'head', { clip, clipT: 0 }), torso = ends(wire, hero as any, 'torso', { clip, clipT: 0 })
+  const wall = g.yard.rows.find(r => r.kind === 'wall')!
+  const v = new T.Vector3()
+  // As he is drawn this frame: how far his skin goes past his hips, and stands ahead of his middle line
+  // (in the world, from the top of his head to his hips, carried on past them by his past), the most, and
+  // the most of each band of his climb.across out from the line to either side (kept over every frame in
+  // `bands`); and how far off the face that line stands, the least.
+  const measure = () => {
+    root.updateMatrixWorld(true)
+    const lean = hero.data.lean, up = new T.Vector3(...lean.up), ahead = new T.Vector3(...lean.ahead), left = new T.Vector3().crossVectors(up, ahead)
+    const toWorld = (p: number[]) => new T.Vector3(...hero.data.pos).addScaledVector(left, p[0]).addScaledVector(up, p[1]).addScaledVector(ahead, p[2])
+    const top = toWorld(head.slice(3)), hips = toWorld(torso.slice(0, 3))
+    const line = hips.clone().sub(top)
+    let front = 0, past = 0
+    const left0 = left.clone().normalize()
+    root.traverse(o => {
+      const mesh = o as THREE.SkinnedMesh
+      if (!mesh.isSkinnedMesh) return
+      const si = mesh.geometry.getAttribute('skinIndex'), sw = mesh.geometry.getAttribute('skinWeight')
+      for (let i = 0; i < si.count; i++) {
+        let most = 0
+        for (let j = 1; j < 4; j++) if (sw.getComponent(i, j) > sw.getComponent(i, most)) most = j
+        const bone = mesh.skeleton.bones[si.getComponent(i, most)].name
+        if (/(Arm|Hand|Leg|Foot|Toe|Shoulder)/.test(bone)) continue
+        mesh.getVertexPosition(i, v).applyMatrix4(mesh.matrixWorld)
+        const s = v.clone().sub(top).dot(line) / line.lengthSq()
+        past = Math.max(past, s - 1)
+        const rel = v.clone().sub(top.clone().addScaledVector(line, Math.max(0, Math.min(1 + defs.player.climb.past, s))))
+        front = Math.max(front, rel.dot(ahead))
+        const band = Math.floor(Math.abs(rel.dot(left0)) / defs.player.climb.across)
+        bands[band] = Math.max(bands[band] ?? -1, rel.dot(ahead))
+      }
+    })
+    const off = Math.min(...Array.from({ length: 9 }, (_, n) => fromSurface(localTo(wall, top.clone().addScaledVector(line, (1 + defs.player.climb.past) * n / 8).toArray()))))
+    return { front, past, off }
+  }
+  const bands: number[] = []
+  const most: Record<string, { front: number; past: number; off: number }> = {}
+  const keep = (as: string) => {
+    const m = measure(), was = most[as] ?? { front: 0, past: 0, off: Infinity }
+    most[as] = { front: Math.max(was.front, m.front), past: Math.max(was.past, m.past), off: Math.min(was.off, m.off) }
+  }
+  keep('still')
+  // Each way for a second and a half, and the half second after letting go: how far he went each way.
+  const went: Record<string, number> = {}
+  for (const k of ['w', 's', 'a', 'd']) {
+    const from = [...hero.data.pos]
+    key('keydown', k)
+    for (let i = 0; i < 90; i++) { await g.frames(1); keep(k) }
+    key('keyup', k)
+    for (let i = 0; i < 30; i++) { await g.frames(1); keep(k) }
+    went[k] = vlen(vsub(hero.data.pos, from))
+  }
+  const all = Object.values(most), front: number[] = defs.player.climb.front
+  const past = Math.max(...all.map(m => m.past))
+  console.log('11 front', JSON.stringify({ most, went, bands: [...bands].map(b => +(b ?? -1).toFixed(4)) }))
+  for (const k in went) expect(went[k]).toBeGreaterThan(0.3)
+  expect(past).toBeLessThanOrEqual(defs.player.climb.past)
+  // Every band his skin reaches is one of his, its skin no further ahead than its number, and within a
+  // centimetre of it.
+  expect(bands.length).toBe(front.length)
+  bands.forEach((b, i) => {
+    expect(b).toBeLessThanOrEqual(front[i])
+    expect(b).toBeGreaterThan(front[i] - 0.01)
+  })
+  for (const m of all) expect(m.off).toBeGreaterThan(Math.max(...front))
+})
+
+// The bumpy slab's front: how far out it stands at a place across and up it (0 at its edges).
+const bumpAt = (x: number, y: number) => {
+  const k = defs.bumpy, [w, h] = k.size
+  return k.height * Math.sin((2 * Math.PI * k.waves[0] * (x + w / 2)) / w) * Math.sin((2 * Math.PI * k.waves[1] * y) / h)
+}
+
+test('11a: the bumpy slab\'s net is a point on its surface for every corner of its mesh and a link for every edge, closed all round; its front rises and falls as its bumps do, every link over it turning within the bend he goes over', () => {
+  const k = defs.bumpy
+  const shape = bumps(k.size, k.cell, k.waves, k.height)
+  const net = netOn(shape)
+  const measure = signedTo(shape, k.cell)
+  const [w, h, d] = k.size
+  let front = 0, highest = -Infinity, lowest = Infinity
+  for (let i = 0; i < net.points; i++) {
+    const q = [...net.at.subarray(i * 3, i * 3 + 3)], o = [...net.out.subarray(i * 3, i * 3 + 3)]
+    expect(Math.abs(measure(q))).toBeLessThan(1e-5)
+    expect(measure(q.map((v, j) => v + o[j] * 0.01))).toBeGreaterThan(0)
+    expect(measure(q.map((v, j) => v - o[j] * 0.01))).toBeLessThan(0)
+    // On the front, where it stands out as far as its bumps put it there.
+    if (q[2] > d / 2 - k.height - 1e-6 && Math.abs(q[0]) < w / 2 - 1e-6 && q[1] > 1e-6 && q[1] < h - 1e-6) {
+      expect(q[2] - d / 2).toBeCloseTo(bumpAt(q[0], q[1]), 6)
+      front++
+      highest = Math.max(highest, q[2] - d / 2)
+      lowest = Math.min(lowest, q[2] - d / 2)
+    }
+  }
+  expect(highest).toBeCloseTo(k.height, 6)
+  expect(lowest).toBeCloseTo(-k.height, 6)
+  // Every link between two points of the front turns by no more than the bend he goes over.
+  const onFront = (i: number) => net.at[i * 3 + 2] > d / 2 - k.height - 1e-6 && Math.abs(net.at[i * 3]) < w / 2 - 1e-6 && net.at[i * 3 + 1] > 1e-6 && net.at[i * 3 + 1] < h - 1e-6
+  let turn = 0, links = 0
+  for (let i = 0; i < net.points; i++) {
+    for (const o of linked(net, i)) {
+      if (o > i) links++
+      if (!onFront(i) || !onFront(o)) continue
+      turn = Math.max(turn, Math.acos(Math.min(1, vdot([...net.out.subarray(i * 3, i * 3 + 3)], [...net.out.subarray(o * 3, o * 3 + 3)]))))
+    }
+  }
+  expect(Math.cos(turn)).toBeGreaterThan(defs.player.climb.bend)
+  expect(net.points - links + net.tri.length / 3).toBe(2)
+  console.log('11a', JSON.stringify({ points: net.points, links, front, turnDeg: (turn * 180) / Math.PI }))
+})
+
+// The top of a bump and the bottom of a dip, in the bumpy slab's own frame.
+const BUMP = [-0.5, 4.5], DIP = [-0.5, 3.5]
+const onBumps = (at: number[]) => [at[0], at[1], defs.bumpy.size[2] / 2 + bumpAt(at[0], at[1])]
+
+test('11b: on the top of a bump and in the bottom of a dip he hangs still, framed on the surface, hands and feet on it within 1 mm, no two on one point, nothing of him in it', async () => {
+  for (const at of [BUMP, DIP]) {
+    const { g, hero, seen } = await heldOn(await start(), onBumps(at), 'bumpy')
+    const points = [...g.p.client!.plugins.climb.touches(hero)!.values()].map((x: { point: number }) => x.point)
+    expect(new Set(points).size).toBe(4)
+    console.log('11b held', JSON.stringify(at), JSON.stringify(seen))
+  }
+})
+
+test('11c: pushed right across the bumps and dips, he climbs over them, framed on the surface all the way, stepping in pairs, never sliding, nothing of him in it', async () => {
+  const g = await start()
+  const net = netOf(g.p.client!.plugins.wire, g.yard.rows.find(r => r.kind === 'bumpy')!)
+  // From near the slab's left edge (his left, the start facing it), on the row of a bump's top: pushed
+  // right he goes along +x, over bumps and dips (halfway up, the bumps neither rise nor fall across it).
+  const r = await climbing(g, onBumps([-2, BUMP[1]]), ['d'], 360, 'bumpy')
+  const turned = onTheShape(r)
+  const well = climbedWell(r, net, 'bumps')
+  const last = r.seen[r.seen.length - 1]
+  const across = last.at[0] - r.from[0], rose = Math.max(...r.seen.map(s => s.at[2])) - Math.min(...r.seen.map(s => s.at[2]))
+  console.log('11c', JSON.stringify({ across, rose, turned, ...well }))
+  // At least `fan` of his speed along the surface, and across, the straight way, no less than 2/π of it;
+  // and over the bumps, out and in.
+  expect(Math.abs(across)).toBeGreaterThan(going(357) * defs.player.climb.fan * (2 / Math.PI))
+  expect(rose).toBeGreaterThan(defs.bumpy.height)
 })

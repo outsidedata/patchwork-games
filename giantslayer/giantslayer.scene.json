@@ -161,7 +161,8 @@
     "pillar": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false },
     "pole": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false },
     "corner": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false },
-    "bowl": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false }
+    "bowl": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false },
+    "bumpy": { "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "placed": false }
   },
   "actors": [
     {

@@ -433,21 +433,23 @@ export function climb() {
           }
           // The point it wants: of the points out to `climb.near` links from the one of the surface he holds
           // nearest its middle, those of that surface it could step to from where it is planted (or is
-          // stepping to), the one it could hold longest; even, the nearest its middle.
+          // stepping to), the one it could hold longest; even, the nearest its middle. Where none would hold
+          // at all (none with `step.slack` to spare now, as over the dips of a bumpy surface, which his arms
+          // only just reach into), the one in reach with the most room now.
           const was = touches.get(name), base = was && (was.step ? was.step.to : was.point)
           // The points the other limbs are planted on or stepping to are theirs.
           const taken = new Set([...touches].filter(([n]) => n !== name).flatMap(([, x]) => (x.step ? [x.point, x.step.to] : [x.point])))
           const nearest = nearestOn(net, place, mid.toArray(), hold.a, o => on.has(o))
-          let wants = -1, best = 0, far = Infinity
+          let wants = -1, best = 0, far = Infinity, room = 0
           let ring = [nearest]
           const seen = new Set(ring)
           for (let n = 0; n <= k.near && ring.length; n++) {
             for (const o of ring) {
               if (!on.has(o) || taken.has(o)) continue
-              const h = holds(o), d = new T.Vector3(...place(o)).distanceTo(mid)
-              if (!(h > best || (h === best && h > 0 && d < far))) continue
+              const h = holds(o), d = new T.Vector3(...place(o)).distanceTo(mid), r = h > 0 ? 0 : slack(o)
+              if (!(h > best || (h === best && (h > 0 ? d < far : r >= room && (wants < 0 || r > room))))) continue
               if (base !== undefined && o !== base && !steps(base, o)) continue
-              best = h; far = d; wants = o
+              best = h; far = d; room = r; wants = o
             }
             ring = ring.flatMap(p => [...linked(net, p)]).filter(o => !seen.has(o) && (seen.add(o), true))
           }
@@ -494,7 +496,11 @@ export function climb() {
           const off = reached.get(name)!.clone().sub(reach.get(name)!.pathAt(t.point, t.point, 0)).toArray()
           t.step = { from: t.point, to: reach.get(name)!.wants, s: 0, forced, off }
         }
-        for (const name of reach.keys()) if (lost(name)) begin(name, [...steppingGroups].some(g => g !== groupOf(name)))
+        // One that has lost its point steps at once, and its group is then stepping.
+        for (const name of reach.keys()) if (lost(name)) {
+          begin(name, [...steppingGroups].some(g => g !== groupOf(name)))
+          steppingGroups.add(groupOf(name))
+        }
         if (!steppingGroups.size) {
           // Of the groups with a limb behind, the one whose limb has least time left; even, the one that
           // did not step last.
