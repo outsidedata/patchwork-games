@@ -25,6 +25,10 @@ what it needs).
   you drive it, and a row of guns on plinths.
 - **demo_audiodaw**: a music studio on the audiodaw plugin: a rack, a mixer, a piano roll and an
   arrangement.
+- **demo_box2d**: box2d's bodies and joints side-on: a pile, a one-way platform, a seesaw, a car to
+  drive, a ragdoll, a rope and a piston, with spawning, explosions and wind.
+- **demo_box3d**: box3d's bodies and joints in an arena: piles to knock over, every shape, a hinged
+  door, a pendulum, a sprung plank and a welded chain, with a ball to fire and an explosion.
 - **demo_castle**: a lineup of structures to walk around.
 - **demo_gamepads**: what the player plugin reads of every gamepad, drawn live.
 - **demo_gameui**: the conventions of the `ui` plugin, each shown by a kind of its own.
