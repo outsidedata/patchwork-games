@@ -42,5 +42,8 @@ what it needs).
 - **demo_skydome3d**: the sky, the weather and the clouds over flat sand.
 - **demo_terrain3d**: a valley drawn by terrain3d at three tiers, uhd, hd and lofi.
 - **demo_trees**: a lineup of trees to walk around.
+- **demo_walker**: an X Bot on walker over a checkerboard course of stairs, ramps, a pond, a ladder
+  and a parkour yard, and the game's own plugins that extend walker with climbing, sitting, cover,
+  vaults, wall runs, rolls, slides and flips.
 
 MIT, Outside Data, but for art a demo credits to someone else under its own licence.

@@ -16,5 +16,6 @@
 !/demo_skydome3d/
 !/demo_terrain3d/
 !/demo_trees/
+!/demo_walker/
 __pycache__/
 .DS_Store

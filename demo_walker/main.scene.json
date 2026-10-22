@@ -1,0 +1,151 @@
+{
+  "world": {
+    "defs": "demo_walker",
+    "seed": 7,
+    "player": { "deadzone": 0.2, "resolution": 32 },
+    "loader": {
+      "assets": {
+        "demo_walker": { "type": "json", "url": "/games/demo_walker/assets/demo_walker.json", "preload": true },
+        "course": { "type": "json", "url": "/games/demo_walker/assets/course.json", "preload": true },
+        "land": { "type": "json", "url": "/games/demo_walker/assets/land.json", "preload": true },
+        "checker": { "type": "texture", "url": "/games/demo_walker/assets/checker-1024.webp", "preload": true, "wrap": "repeat", "anisotropy": 8 },
+        "xbot-rig": { "type": "json", "url": "/games/demo_walker/assets/xbot.rig.json", "preload": true },
+        "xbot": { "type": "model", "url": "/games/demo_walker/assets/xbot.glb", "preload": true }
+      }
+    },
+    "shipped": { "plugins": ["floors"] },
+    "terrain3d": {
+      "field": "land",
+      "rings": [
+        { "reach": 64, "seg": 256 },
+        { "reach": 320, "seg": 128 },
+        { "reach": 2000, "seg": 100 }
+      ],
+      "shadowReach": 64,
+      "budget": 8,
+      "seabed": true,
+      "preload": true
+    },
+    "floors": {
+      "mods": { "height": "terrain3d" }
+    },
+    "walker": {
+      "kinds": {
+        "xbot": {
+          "radius": 0.3, "height": 1.8, "accel": 12, "airAccel": 2, "turnRate": 12, "gravity": 20, "jumpH": 1.1,
+          "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5, "seekSpeed": 1.7,
+          "bodies": ["player", "wanderer"]
+        },
+        "wanderer": {
+          "radius": 0.3, "height": 1.8, "accel": 8, "turnRate": 6, "gravity": 20, "jumpH": 1.1,
+          "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5, "seekSpeed": 1.4,
+          "bodies": ["player", "wanderer"]
+        }
+      },
+      "mods": { "height": "floors", "solids": "floors", "depth": "terrain3d" }
+    },
+    "anim": {
+      "still": 0.05, "shift": 0.75, "leap": 0.5, "landFall": 7.5, "moves": 0.05, "turns": 30,
+      "kinds": {
+        "xbot": {
+          "rig": "xbot-rig", "model": "xbot", "fade": 0.2,
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
+        },
+        "wanderer": {
+          "rig": "xbot-rig", "model": "xbot", "fade": 0.25,
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
+        }
+      }
+    }
+  },
+  "plugins": ["loader", "scenemanager", "player", "terrain3d", "anim", "environment3d", "render3d", "chasecamera3d", "stats"],
+  "seats": 1,
+  "prefabs": {
+    "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
+    "scenemanager": { "out": {} },
+    "loader": {},
+    "render3d": {
+      "camera": { "fov": 55, "near": 0.1, "far": 3000, "at": [0, 3, -6], "look": [0, 1, 0] },
+      "pixelRatio": 2,
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "background": "#bcd4e8",
+      "ao": { "on": false, "radius": 0.6, "thickness": 0.5, "falloff": 1, "scale": 1, "intensity": 1, "samples": 16 },
+      "bloom": { "strength": 0.15, "radius": 0.4, "threshold": 1.5 }
+    },
+    "environment3d": {
+      "sun": { "color": "#fff3e0", "power": 2.6, "at": [-30, 60, -40], "shadow": { "map": 4096, "half": 40, "near": 1, "far": 200, "distance": 100, "bias": -0.0002, "normalBias": 0.02 } },
+      "sky": { "color": "#dbe8f5", "ground": "#6b6252", "power": 1.1 }
+    },
+    "start": { "slot": 0, "pos": [0, 0], "yaw": 0 },
+    "player": {
+      "seat": 0,
+      "stood": false,
+      "as": "xbot",
+      "pos": [0, 0, 0],
+      "yaw": 0,
+      "vel": [0, 0, 0],
+      "grounded": false,
+      "sliding": false,
+      "speed": 0,
+      "side": 0,
+      "turned": 0,
+      "want": [0, 0],
+      "face": null,
+      "jump": false,
+      "stick": [0, 0],
+      "turning": [0, 0],
+      "fast": false,
+      "look": { "yaw": 0, "pitch": 0.35, "dist": 5 },
+      "lift": 1.4,
+      "ladder": 0,
+      "phase": "",
+      "clock": 0,
+      "rungs": 0,
+      "level": 0,
+      "slip": [0, 0, 0],
+      "rig": "stand",
+      "crouch": false,
+      "move": "",
+      "anchor": [0, 0, 0],
+      "turn0": 0,
+      "chair": [0, 0, 0],
+      "wall": [0, 0, 0, 0, 0, 0, 0, 0]
+    },
+    "course": { "pos": [0, 0.3, 0], "yaw": 0 },
+    "ladder": { "pos": [0, 0, 0], "yaw": 0 },
+    "spot": { "pos": [0, 0] },
+    "wanderer": {
+      "pos": [0, 0, 0],
+      "yaw": 0,
+      "vel": [0, 0, 0],
+      "grounded": true,
+      "sliding": false,
+      "speed": 0,
+      "side": 0,
+      "turned": 0,
+      "want": [0, 0],
+      "face": null,
+      "jump": false,
+      "spot": 0,
+      "wait": 0
+    }
+  },
+  "actors": [
+    { "is": "scenemanager" },
+    { "is": "loader" },
+    { "is": "course", "pos": [0, 0.3, 0], "yaw": 0 },
+    { "is": "ladder", "pos": [20.5, 0.3, 10], "yaw": 3.141592653589793 },
+    { "is": "start", "slot": 0, "pos": [0, 0], "yaw": 0 },
+    { "is": "spot", "pos": [-6, 2] },
+    { "is": "spot", "pos": [8, 2] },
+    { "is": "spot", "pos": [2, -30] },
+    { "is": "spot", "pos": [14, -12] },
+    { "is": "spot", "pos": [-7, -28] },
+    { "is": "spot", "pos": [26, -8] },
+    { "is": "wanderer", "pos": [-6, 0.3, 2], "yaw": 1.2 },
+    { "is": "wanderer", "pos": [14, 0.3, -12], "yaw": -2 },
+    { "is": "wanderer", "pos": [2, 0.3, -30], "yaw": 0.5 }
+  ]
+}
