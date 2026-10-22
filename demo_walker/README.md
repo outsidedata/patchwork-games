@@ -46,6 +46,29 @@ the player's definition in `assets/demo_walker.json`, so it can be tuned. A new 
 `assets/xbot.rig.json` and a `yarn bake demo_walker`. A new key is a line in `player.client.ts`, and
 an act of the same name in `player.sim.ts` that calls your plugin.
 
+## Crowds: the wanderers
+
+You walk as walker's whole body, every footstep worked out. The wanderers strolling about the course
+walk as walker's **agents**, the cheap body walker gives a crowd, so a game can send dozens or hundreds
+of them. Three things in this game make that happen, and a game of your own does the same:
+
+1. **Walker's row.** `main.scene.json` has `"walker": {}` in `prefabs` and `{ "is": "walker" }` in
+   `actors`, and `main.sim.ts` lists `walker` (from `#plugins/walker/walker.sim.ts`). At the start of
+   every step it keeps the ground and notes where every body stands, so the wanderers push each other
+   apart in whatever order they move.
+2. **The course handed over as `fixed`.** The course's trees and chairs never move, so `floors` hands
+   them to walker as `fixed` (`plugins/floors/floors.walker.ts`, and `"fixed": "floors"` in
+   `world.walker.mods`). Walker asks for them once for each patch of ground a wanderer reaches, and
+   never again. Something that does move would go in `solids` instead, asked every step.
+3. **`agent` on the wanderer.** The wanderer's entry in `world.walker.kinds` has `"agent": 0.25`: walker
+   makes a map of the course in 0.25 m squares, each one standable for a wanderer or not and at what
+   height, and walks the wanderers on it. Their rule (`wanderer.sim.ts`) is the same as before: `seek`
+   toward a spot and `stride`.
+
+An agent climbs the stairs and ramps, keeps out of deep water and slides round the trees as you do,
+but it never jumps or falls, and its feet are only as exact as its squares. More wanderers are more
+`{ "is": "wanderer" }` lines in `actors`, and more spots for them to walk between.
+
 ## Controls
 
 | Keyboard | Gamepad | Does |

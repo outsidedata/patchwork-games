@@ -1,5 +1,6 @@
-// A bystander that strolls about the course between the scene's spots: an X Bot walked by walker (its
-// numbers `world.walker.kinds.wanderer`) and played by anim (`world.anim.kinds.wanderer`), solid to
+// A bystander that strolls about the course between the scene's spots: an X Bot walked by walker as one
+// of its agents, a crowd's body (its numbers `world.walker.kinds.wanderer`, its map's squares `agent`
+// metres across), and played by anim (`world.anim.kinds.wanderer`), solid to
 // the seats' bodies and theirs to it as each kind's `bodies` lists. It stands at `pos` [x, y, z] in its
 // `actors` entry; its own fields, beside walker's and anim's: `spot`, the id of the `spot` row it
 // heads for or rests at (0 before it has chosen one), and `wait`, the seconds it rests there yet.

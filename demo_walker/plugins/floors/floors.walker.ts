@@ -1,10 +1,11 @@
 // floors' mod for walker (`addons/scenemanager`'s mods). A scene with
-// `world.walker.mods: { height: 'floors', solids: 'floors' }` stands walker's bodies on the course's
-// shapes and walks them round its trees (`floors.sim.ts`), over the ground the scene's
+// `world.walker.mods: { height: 'floors', fixed: 'floors' }` stands walker's bodies on the course's
+// shapes and walks them round its trees and chairs (`floors.sim.ts`), over the ground the scene's
 // `world.floors.mods.height` names, which every point no shape covers is asked of.
 //
-// `height(w, x, z)` is the higher of that ground and the highest shape over (x, z). `solids(w, x, z,
-// r)` is every trunk reaching within r of (x, z).
+// `height(w, x, z)` is the higher of that ground and the highest shape over (x, z). `fixed(w, x, z, r)`
+// is every trunk and chair reaching within r of (x, z): they never move, so walker asks for them once
+// for each tile of a wanderer's map and never again.
 import type { W } from '#engine/engine.ts'
 import { mod } from '#addons/scenemanager/scenemanager.addon.ts'
 import { courseOf, posts, top } from './floors.sim.ts'
@@ -29,4 +30,4 @@ export const height = (w: W, x: number, z: number) => {
   return t === undefined ? ground : Math.max(ground, t)
 }
 
-export const solids = (w: W, x: number, z: number, r: number) => posts(courseOf(w), x, z, r)
+export const fixed = (w: W, x: number, z: number, r: number) => posts(courseOf(w), x, z, r)
