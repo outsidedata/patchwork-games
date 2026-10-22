@@ -6,20 +6,17 @@
     <style>
       body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
       canvas { grid-area: 1 / 1 }
-      #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px }
       .lil-gui.root { max-height: 100vh; overflow-y: auto }
     </style>
   </head>
   <body>
-    <div id="readout"></div>
     <script type="module">
       // The demo of ocean3d: index.html, the manager truth and the scenes its row names all in this tab,
       // one seat on them over a loopback, stepped on the page's clock, and a panel holding every
       // number of the sea and the render3d settings that change how it looks or what it costs.
       // `?scene=<scene>` enters that scene. The truths are kept on `window.__scenes` and the page on
-      // `window.__page` for the profilers (benchmarking-a-game). The readout shows the frames drawn in
-      // the last second, the longest of them, the scene, the step, the sea's clock `t`, the amplitude
-      // the sea is drawn and floated at, and the last five errors the page threw or wrote.
+      // `window.__page` for the profilers (benchmarking-a-game). The frame rate is three's stats panel,
+      // the stats plugin, at the top left.
       //
       // The keys are the testbed's own (devBinds, below), so no click takes the pointer and the panel is
       // clicked freely: W and S fly forward and back, A and D turn left and right, E and Q tilt up and
@@ -42,22 +39,10 @@
       import { boot } from '#engine/engine.ts'
       import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
       import { loopback } from '#addons/loopback/loopback.addon.ts'
-      import { ampAt } from '#plugins/ocean3d/ocean3d.sim.ts'
       import GUI from 'lil-gui'
       import { sim } from './demo_ocean3d.sim.ts'
       import { scene as open } from './open.sim.ts'
       import file from './demo_ocean3d.scene.json'
-
-      // Every error the page throws or writes, the last five, shown under the readout.
-      const errors = []
-      const caught = e => {
-        errors.push(String(e?.message ?? e))
-        if (errors.length > 5) errors.shift()
-      }
-      addEventListener('error', e => caught(e.error ?? e.message))
-      addEventListener('unhandledrejection', e => caught(e.reason))
-      const written = console.error.bind(console)
-      console.error = (...a) => { caught(a.map(x => x?.message ?? x).join(' ')); written(...a) }
 
       const clone = v => JSON.parse(JSON.stringify(v))
       const params = new URLSearchParams(location.search)
@@ -103,9 +88,9 @@
           document.body.appendChild(canvas)
           surface.mount(canvas)
         }
+        me.plugins.stats?.mount(document.body)
       })
       window.__page = page
-      const readout = document.getElementById('readout')
       // The truth of the scene the seat is on.
       const room = () => window.__scenes.get(chosen.scene)
 
@@ -263,29 +248,16 @@
       bf.add(bloom, 'radius', 0, 1, 0.01).onChange(setBloom)
       bf.add(bloom, 'threshold', 0, 10, 0.05).onChange(setBloom)
 
-      // The frames drawn in the last second, and the longest of them.
-      const frames = []
       let last = performance.now(), owed = 0
       const loop = async now => {
-        frames.push(now)
-        while (frames[0] < now - 1000) frames.shift()
-        const worst = frames.slice(1).reduce((m, t, i) => Math.max(m, t - frames[i]), 0)
         owed += Math.min((now - last) / 1000, 0.25)
         last = now
-        // A frame that throws is shown, and the next frame goes on.
+        // A frame that throws is logged, and the next frame goes on.
         try {
           page.input()
           while (owed >= dt) { truth.step(dt); owed -= dt }
           await page.frame(owed / dt)
-        } catch (e) { caught(e) }
-        const r = room()
-        const row = r?.rows.find(x => x.kind === 'ocean3d')
-        readout.textContent = [
-          `${frames.length} fps  longest frame ${worst.toFixed(1)} ms`,
-          `${chosen.scene}  step ${truth.n}`,
-          row ? `sea t ${row.data.t.toFixed(2)} s  amp ${ampAt(r).toFixed(3)}` : 'no sea',
-          ...errors,
-        ].join('\n')
+        } catch (e) { console.error(e) }
         requestAnimationFrame(loop)
       }
       requestAnimationFrame(loop)

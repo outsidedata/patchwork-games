@@ -18,7 +18,7 @@
       "depthHalf": 1200, "depthMax": 32, "depthRes": 256, "depthRows": 8
     }
   },
-  "plugins": ["loader", "scenemanager", "player", "ocean3d", "render3d", "chasecamera3d"],
+  "plugins": ["loader", "scenemanager", "player", "ocean3d", "render3d", "chasecamera3d", "stats"],
   "seats": 1,
   "prefabs": {
     "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
