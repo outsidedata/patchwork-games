@@ -5,7 +5,7 @@
       "lines": [
         "rings: 1 m cells near the eye, out to 9 km",
         "ground: ten warped photo layers at 2048² to the horizon, alpine and desert, height-blended",
-        "firs to 2 km, billboards past 512 m, grass to 128 m, boulders to 512 m, soft shadows to 512 m, AO, bloom"
+        "firs to 2 km, billboards past 512 m, grass to 128 m, boulders to 512 m, soft shadows to 512 m, bloom"
       ]
     },
     "shipped": { "plugins": ["seabed"] },
@@ -138,7 +138,7 @@
       "tone": "neutral",
       "exposure": 1,
       "shadows": "soft",
-      "ao": { "on": true, "radius": 0.8, "thickness": 0.3, "falloff": 1, "scale": 1.5, "intensity": 0.8, "samples": 16 },
+      "ao": { "on": false, "radius": 0.8, "thickness": 0.3, "falloff": 1, "scale": 1.5, "intensity": 0.8, "samples": 16 },
       "bloom": { "strength": 0.2, "radius": 0.4, "threshold": 4 }
     }
   },
