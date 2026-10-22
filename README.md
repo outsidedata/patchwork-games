@@ -1,29 +1,36 @@
 # patchwork-games
 
-The flagship games of Patchwork: the reference for how things are built in core. Each one ships
-baked: its art built and compressed (meshopt geometry, WebP textures), so it plays from a clone with
-no Blender and no library.
+The demo games of Patchwork: small, light games, each showing one part of core working, and the
+living reference for how things are built in core. Each one ships baked: its art built and
+compressed (meshopt geometry, WebP textures), so it plays from a clone with no Blender and no
+library.
 
-Clone it as `games/` inside a core clone, then open a game in the editor:
+Clone it as `games/` inside a core clone, then play a demo:
 
 ```
 git clone git@github.com:outsidedata/patchwork-games.git games
-yarn editor <game>
+yarn vite
 ```
 
-A game's art is made again with `yarn bake <game>`, which reads the raw parts from
-`PATCHWORK_LIBRARY` and runs the scripts beside the game's art (`yarn health` checks the machine has
+and open `/games/<game>/index.html`. A demo's server is
+`node --experimental-strip-types games/<game>/<game>.server.ts`, with `/games/<game>/client.html`.
+
+A demo's art is made again with `yarn bake <game>`, which reads the raw parts from
+`PATCHWORK_LIBRARY` and runs the scripts beside the demo's art (`yarn health` checks the machine has
 what it needs).
 
-## The flagships
+## The demos
 
-- **arcaderacer**: an arcade racer of three courses, Cascade Forest, Tokyo Bayside and Paris Dusk,
-  against seven rivals, with a lobby for several players.
+- **demo_audio**: a row of cars, one for each engine the library's sounds can make, each heard as
+  you drive it, and a row of guns on plinths.
 - **demo_audiodaw**: a music studio on the audiodaw plugin: a rack, a mixer, a piano roll and an
-  arrangement, and the jungle song generator arcaderacer's music is made with.
-- **farm2d**: Tiny Harvest, a pixel farm that never stops: play the farmer, a cow or a chicken, and
-  the computer plays every one nobody does.
+  arrangement.
+- **demo_castle**: a lineup of structures to walk around.
+- **demo_gamepads**: what the player plugin reads of every gamepad, drawn live.
+- **demo_gameui**: the conventions of the `ui` plugin, each shown by a kind of its own.
+- **demo_rocks**: a lineup of rocks to walk around.
+- **demo_skydome3d**: the sky, the weather and the clouds over flat sand.
+- **demo_terrain3d**: a valley drawn by terrain3d at three tiers, uhd, hd and lofi.
+- **demo_trees**: a lineup of trees to walk around.
 
-MIT, Outside Data, but for art a game credits to someone else under its own licence. farm2d's art
-is maevedevs' Farm RPG FREE 16x16 (https://maevedevs.itch.io/farm-rpg), shipped sealed in
-`farm2d/assets/farm2d.wad`, which the loader opens in memory; the pack itself is not in this repo.
+MIT, Outside Data, but for art a demo credits to someone else under its own licence.

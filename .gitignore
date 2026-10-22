@@ -2,7 +2,6 @@
 !/.gitignore
 !/README.md
 !/LICENSE
-!/arcaderacer/
 !/demo_audio/
 !/demo_audiodaw/
 !/demo_gameui/
@@ -12,10 +11,5 @@
 !/demo_skydome3d/
 !/demo_terrain3d/
 !/demo_trees/
-!/demo_wormhole/
-!/farm2d/
-!/flight/
-!/giantslayer/
-!/vehicles/
 __pycache__/
 .DS_Store
