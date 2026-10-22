@@ -28,6 +28,8 @@ what it needs).
 - **demo_castle**: a lineup of structures to walk around.
 - **demo_gamepads**: what the player plugin reads of every gamepad, drawn live.
 - **demo_gameui**: the conventions of the `ui` plugin, each shown by a kind of its own.
+- **demo_ocean3d**: the ocean3d sea alone, buoys and a boat riding it, every number of it on a
+  panel in its `dev.html`.
 - **demo_rocks**: a lineup of rocks to walk around.
 - **demo_skydome3d**: the sky, the weather and the clouds over flat sand.
 - **demo_terrain3d**: a valley drawn by terrain3d at three tiers, uhd, hd and lofi.
