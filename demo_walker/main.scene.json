@@ -49,11 +49,11 @@
       "still": 0.05, "shift": 0.75, "leap": 0.5, "landFall": 7.5, "moves": 0.05, "turns": 30,
       "kinds": {
         "xbot": {
-          "rig": "xbot-rig", "model": "xbot", "fade": 0.2,
+          "rig": "xbot-rig", "model": "xbot", "fade": 0.2, "falls": [{ "above": 4.3, "role": "fall" }],
           "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
         },
         "wanderer": {
-          "rig": "xbot-rig", "model": "xbot", "fade": 0.25,
+          "rig": "xbot-rig", "model": "xbot", "fade": 0.25, "falls": [{ "above": 4.3, "role": "fall" }],
           "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
         }
       }

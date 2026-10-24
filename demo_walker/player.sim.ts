@@ -25,11 +25,20 @@
 // cover, get up, leave cover), `crouch`, `roll`, `slide` and `flip` (moves' tricks), `look(dyaw,
 // dpitch)` and `zoom(by)`, the wheel's pixels. A seat's message arrives from outside the program, so
 // each refuses arguments of the wrong kind and writes nothing.
-import type { Kind } from '#engine/engine.ts'
+//
+// `walking` is the seat's row in a scene of shapes3d's shapes on the land (`shapes.scene.json`), which
+// holds no course, ladder or chair: it walks, runs and jumps on shapes3d's ground (`plugins/shapes3d`'s
+// `ground`, handed the body's feet each step), so it steps up stairs of boxes, walks up tilted planes
+// and stands on what it climbs onto, and makes no moves. `before` stands it on that ground at its slot's
+// `start`; its view turns as the player's does; its acts are the player's `stick`, `turn`, `fast`,
+// `look` and `zoom`, and `jump`, always a jump.
+import type { Kind, Row, W } from '#engine/engine.ts'
 import { animate } from '#plugins/anim/anim.sim.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
-import { groundOf, relative } from '#plugins/walker/walker.sim.ts'
+import { groundOf, numbers, relative } from '#plugins/walker/walker.sim.ts'
+import { land } from '#plugins/shapes3d/shapes3d.sim.ts'
+import { ground } from '#plugins/shapes3d/shapes3d.walker.ts'
 import { climb, grab } from './plugins/climber/climber.sim.ts'
 import { stride } from './plugins/gait/gait.sim.ts'
 import * as moves from './plugins/moves/moves.sim.ts'
@@ -38,6 +47,17 @@ const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Mat
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
 const finite = (...v: unknown[]) => v.every(x => typeof x === 'number' && Number.isFinite(x))
 const way = (v: unknown) => typeof v === 'number' && Math.abs(v) <= 1
+
+// The view turns while the right stick is held, whatever the body does.
+function view(me: Row, dt: number, k: any) {
+  const d = me.data
+  if (d.turning[0] === 0 && d.turning[1] === 0) return
+  const c = k.camera
+  d.look = { ...d.look, yaw: wrap(d.look.yaw - d.turning[0] * c.turn * dt), pitch: clamp(d.look.pitch + d.turning[1] * c.tilt * dt, c.minPitch, c.maxPitch) }
+}
+
+// The ground shapes3d makes for the body's feet where they stand.
+const shaped = (me: Row, w: W) => ground(w, me.data.pos[1], numbers(me, w))
 
 export const player: Kind = {
   before(me, _dt, w) {
@@ -55,11 +75,7 @@ export const player: Kind = {
     const d = me.data
     if (!d.stood) return
     const k = def(w, me.kind)
-    // The view turns while the right stick is held, whatever the body does.
-    if (d.turning[0] !== 0 || d.turning[1] !== 0) {
-      const c = k.camera
-      d.look = { ...d.look, yaw: wrap(d.look.yaw - d.turning[0] * c.turn * dt), pitch: clamp(d.look.pitch + d.turning[1] * c.tilt * dt, c.minPitch, c.maxPitch) }
-    }
+    view(me, dt, k)
     if (d.move === 'seated' && (d.stick[0] !== 0 || d.stick[1] !== 0)) moves.use(me, w, k.moves)
     if (climb(me, w, dt) || moves.held(me, w, dt, k.moves)) {
       animate(me, w, dt)
@@ -117,6 +133,40 @@ export const player: Kind = {
       const c = def(w, me.kind).camera
       const l = me.data.look
       me.data.look = { ...l, dist: clamp(l.dist * math.exp((by as number) * c.zoom), c.minDist, c.maxDist) }
+    },
+  },
+}
+
+const { stick, turn, fast, look, zoom } = player.acts!
+
+export const walking: Kind = {
+  before(me, _dt, w) {
+    const d = me.data
+    if (d.stood) return
+    const start = w.find('start', s => s.data.slot === d.seat).data
+    const [x, z] = start.pos
+    const on = land(w)(w, x, z)
+    d.pos = [x, ground(w, on, numbers(me, w)).height(x, z), z]
+    d.yaw = start.yaw
+    d.look = { ...d.look, yaw: start.yaw }
+    d.grounded = true
+    d.stood = true
+  },
+  tick(me, dt, w) {
+    const d = me.data
+    if (!d.stood) return
+    const k = def(w, me.kind)
+    view(me, dt, k)
+    const [wx, wz] = relative(d.stick, d.look.yaw)
+    const speed = d.fast ? k.run : k.walk
+    d.face = null
+    d.want = [wx * speed, wz * speed]
+    stride(me, w, dt, shaped(me, w))
+  },
+  acts: {
+    stick, turn, fast, look, zoom,
+    jump(me) {
+      me.data.jump = true
     },
   },
 }
