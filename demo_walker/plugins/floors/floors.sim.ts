@@ -26,7 +26,8 @@
 // `faces(course)` is every side of every box, `{ a, b, out, top, deep }`: its two ends [x, z] across
 // the ground, the way out from it [x, z], its top's height and how deep the box is behind it, for the
 // moves made against a wall (`plugins/cover`, `plugins/parkour`). `seats(course)` is every chair as
-// `{ x, z, yaw }`.
+// `{ x, z, yaw, y, seat }`: where its sitter's hips stand, the way it faces, the plane it stands on,
+// and its shape.
 //
 // `courseOf(w)` is the course of a rule's world, `courseIn(rows, level)` the course of the rows a page
 // was sent and the level its loader read. `floors.walker.ts` hands walker the shapes over the ground
@@ -143,6 +144,6 @@ export function faces(course: Course): Face[] {
   return all
 }
 
-export function seats(course: Course): { x: number; z: number; yaw: number }[] {
-  return course.placed.filter(p => p.shape.is === 'seat').map(p => ({ x: p.x, z: p.z, yaw: math.atan2(p.s, p.c) }))
+export function seats(course: Course): { x: number; z: number; yaw: number; y: number; seat: Seat }[] {
+  return course.placed.filter(p => p.shape.is === 'seat').map(p => ({ x: p.x, z: p.z, yaw: math.atan2(p.s, p.c), y: course.y, seat: p.shape as Seat }))
 }

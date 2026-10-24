@@ -5,6 +5,7 @@ import { boot, type Row, type Scene } from '#engine/engine.ts'
 import { connection, load, manager, type Down } from '#addons/scenemanager/scenemanager.addon.ts'
 import { sim } from '../../demo_walker.sim.ts'
 import file from '../../demo_walker.scene.json' with { type: 'json' }
+import contacts from '../../assets/xbot.contacts.json' with { type: 'json' }
 
 const DT = file.prefabs.engine.dt
 
@@ -70,13 +71,14 @@ test('a seat takes cover at the tall wall, sneaks along it and steps out', async
   expect(me().data.pos[2]).toBeLessThan(24.75)
 })
 
-test('a running seat vaults the low wall', async () => {
+test('a running seat vaults the low wall, its hands on its top', async () => {
   const { me, send, until, stand } = await joined()
-  // Running at the low wall at (3, 25), 0.6 deep and 1 m high.
+  // Running at the low wall at (3, 25), 0.6 deep and 0.845 m high, where the vault sets its hands;
+  // jump pressed where its clip starts, the wall's middle less how far ahead it sets them.
   stand(3, 20, 0)
   send('fast', 1)
   send('stick', 0, -1)
-  until(() => me().data.pos[2] > 25.3 - 0.6 - 1.4, 60 * 3)
+  until(() => me().data.pos[2] > 25 - contacts.clips.vault.ledge!.at[1], 60 * 3)
   send('jump')
   until(() => me().data.move === 'vault', 2)
   until(() => me().data.move === '', 60 * 2)
@@ -84,17 +86,18 @@ test('a running seat vaults the low wall', async () => {
   expect(me().data.pos[1]).toBeCloseTo(0.3, 2)
 })
 
-test('a running seat runs up onto the platform', async () => {
+test('a running seat runs up onto the platform, onto the top its clip ends on', async () => {
   const { me, send, until, stand } = await joined()
-  // Running at the platform at (13, 27), 3 m square and 1.9 m high, its front face at z = 25.5.
-  stand(13, 21, 0)
+  // Running at the platform at (13, 27), 3 m square and 2.266 m high, its front face at z = 25.5;
+  // jump pressed where its clip starts, the face less how far ahead it kicks it.
+  stand(13, 19, 0)
   send('fast', 1)
   send('stick', 0, -1)
-  until(() => me().data.pos[2] > 25.5 - 1.6, 60 * 3)
+  until(() => me().data.pos[2] > 25.5 - contacts.clips.wallrun.wall!.at[1], 60 * 3)
   send('jump')
   until(() => me().data.move === 'wallrun', 2)
   until(() => me().data.move === '', 60 * 3)
-  expect(me().data.pos[1]).toBeCloseTo(0.3 + 1.9, 2)
+  expect(me().data.pos[1]).toBeCloseTo(0.3 + 2.266, 2)
 })
 
 test('a crouched seat creeps', async () => {

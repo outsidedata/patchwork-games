@@ -1,15 +1,16 @@
 // A ladder's look: two rails and the rungs between them, standing `standoff` metres out from the
 // wall face at the row's `pos`, facing out along its `yaw`, in the definition's `look`:
 //   width   metres between the rails' middles;  rail  their side, metres;
-//   rung    metres between rungs, and `first` the lowest rung's height over the foot: the climbing
-//           loop's hands and feet land on rungs so spaced, read off the rig's measured ends;
 //   thick   a rung's radius;  above  metres the rails stand over the top;  colour  the wood's.
-// The top is the course's shape `behind` metres in from the wall face (floors' `top`, the floor
-// climber reads the top off), and the rungs run up to it.
+// Its rungs are the ones its clips climb (climber's `rungsOf`): spaced as the climbing loop climbs them,
+// each one's top where the clips stand the balls of the feet, its middle `thick` under that, from the
+// lowest such top over the foot. The top is the course's shape `behind` metres in from the wall face
+// (floors' `top`, the floor climber reads the top off), and the rungs run up to it.
 import type * as THREE from 'three'
 import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
 import { def, json } from '#plugins/loader/loader.sim.ts'
+import { rungsOf } from './plugins/climber/climber.sim.ts'
 import { courseIn, top } from './plugins/floors/floors.sim.ts'
 
 let group: THREE.Group | undefined
@@ -24,6 +25,7 @@ export function setup(row: Row, plugins: Plugins) {
   const course = courseIn(plugins.wire.rows, json(plugins.wire, def(plugins.wire, 'course').level))
   const high = top(course, x - out[0] * k.behind, z - out[1] * k.behind)
   if (high === undefined) throw new Error(`ladder ${row.id} stands against no shape of the course`)
+  const { spacing, first } = rungsOf(plugins.wire, row)
   const tall = high - y + look.above
   const wood = plugins.render3d.dress(new T.MeshStandardMaterial({ color: look.colour, roughness: 0.75 }))
   group = new T.Group()
@@ -37,10 +39,10 @@ export function setup(row: Row, plugins: Plugins) {
     rail.position.set((side * look.width) / 2, tall / 2, 0)
     add(rail)
   }
-  for (let h = look.first; h <= high - y; h += look.rung) {
+  for (let h = first; h <= high - y; h += spacing) {
     const rung = new T.Mesh(new T.CylinderGeometry(look.thick, look.thick, look.width, 8), wood)
     rung.rotation.z = Math.PI / 2
-    rung.position.set(0, h, 0)
+    rung.position.set(0, h - look.thick, 0)
     add(rung)
   }
   group.position.set(x + out[0] * k.standoff, y, z + out[1] * k.standoff)

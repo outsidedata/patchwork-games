@@ -171,13 +171,11 @@ Y flip, LB roll, RB slide, d-pad up and down zoom</div>
       cf.add(mv.cover, 'low', 0.3, 2, 0.05).name('crouched over, m')
       for (const [name, m] of [['vault', mv.vault], ['wall run', mv.wallrun]]) {
         const f = mf.addFolder(name)
-        f.add(m, 'low', 0, 3, 0.05).name('wall from, m')
-        f.add(m, 'high', 0, 3, 0.05).name('wall to, m')
-        f.add(m, 'near', 0, 3, 0.05).name('nearest start, m')
-        f.add(m, 'far', 0, 4, 0.05).name('furthest start, m')
+        f.add(m, 'reach', 0, 3, 0.05).name('reach of its start, m')
         f.add(m, 'run', 0, 8, 0.05).name('at least, m/s')
         f.close()
       }
+      mf.add(mv, 'fit', 0, 0.2, 0.005).name('fit to the clips, m')
       const tf = mf.addFolder('tricks')
       tf.add(mv.tricks, 'slideAbove', 0, 8, 0.05).name('slide at, m/s')
       tf.add(mv.tricks, 'flipAbove', 0, 8, 0.05).name('front flip at, m/s')

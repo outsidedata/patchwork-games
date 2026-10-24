@@ -14,15 +14,15 @@
     { "is": "box", "at": [10, 11], "yaw": 0, "size": [2, 2], "top": 0.6, "tint": "#88d088" },
     { "is": "box", "at": [13, 11], "yaw": 0, "size": [2, 2], "top": 1.0, "tint": "#88d088" },
     { "is": "box", "at": [16, 11], "yaw": 0, "size": [2, 2], "top": 1.4, "tint": "#88d088" },
-    { "is": "box", "at": [20.5, 12], "yaw": 0, "size": [4, 4], "top": 3.0, "tint": "#d088c8" },
+    { "is": "box", "at": [20.5, 12], "yaw": 0, "size": [4, 4], "top": 2.983, "tint": "#d088c8" },
 
     { "is": "box", "at": [-8, 25], "yaw": 0, "size": [8, 0.5], "top": 1.8, "tint": "#e0c060" },
-    { "is": "box", "at": [3, 25], "yaw": 0, "size": [6, 0.6], "top": 1.0, "tint": "#60c0c0" },
-    { "is": "box", "at": [13, 27], "yaw": 0, "size": [3, 3], "top": 1.9, "tint": "#c07060" },
+    { "is": "box", "at": [3, 25], "yaw": 0, "size": [6, 0.6], "top": 0.845, "tint": "#60c0c0" },
+    { "is": "box", "at": [13, 27], "yaw": 0, "size": [3, 3], "top": 2.266, "tint": "#c07060" },
 
-    { "is": "seat", "at": [-16, 18], "yaw": 3.141592653589793, "radius": 0.25, "height": 0.45, "width": 0.5, "depth": 0.45, "back": 0.5, "behind": 0.12, "board": 0.05, "leg": 0.05, "tint": "#b08050" },
-    { "is": "seat", "at": [-14.8, 18], "yaw": 3.141592653589793, "radius": 0.25, "height": 0.45, "width": 0.5, "depth": 0.45, "back": 0.5, "behind": 0.12, "board": 0.05, "leg": 0.05, "tint": "#b08050" },
-    { "is": "seat", "at": [-13.6, 18], "yaw": 3.141592653589793, "radius": 0.25, "height": 0.45, "width": 0.5, "depth": 0.45, "back": 0.5, "behind": 0.12, "board": 0.05, "leg": 0.05, "tint": "#b08050" },
+    { "is": "seat", "at": [-16, 18], "yaw": 3.141592653589793, "radius": 0.25, "height": 0.437, "width": 0.5, "depth": 0.552, "back": 0.5, "behind": 0.222, "board": 0.05, "leg": 0.05, "tint": "#b08050" },
+    { "is": "seat", "at": [-14.8, 18], "yaw": 3.141592653589793, "radius": 0.25, "height": 0.437, "width": 0.5, "depth": 0.552, "back": 0.5, "behind": 0.222, "board": 0.05, "leg": 0.05, "tint": "#b08050" },
+    { "is": "seat", "at": [-13.6, 18], "yaw": 3.141592653589793, "radius": 0.25, "height": 0.437, "width": 0.5, "depth": 0.552, "back": 0.5, "behind": 0.222, "board": 0.05, "leg": 0.05, "tint": "#b08050" },
 
     { "is": "tree", "at": [-3, -15], "radius": 0.22, "tall": 3.2, "crown": 1.3 },
     { "is": "tree", "at": [0.5, -14], "radius": 0.28, "tall": 3.8, "crown": 1.5 },

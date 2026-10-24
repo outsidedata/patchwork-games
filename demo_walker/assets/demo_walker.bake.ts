@@ -1,5 +1,9 @@
 // demo_walker's bake, `yarn bake demo_walker` (core's `scripts/bake.ts`): every built file the scene's
 // catalogue names, written where the catalogue reads it.
+//   xbot.contacts.json   what every clip does with the body (`xbot.contacts.mjs`), read off where the
+//                        skin is on every frame of each clip as its FBX has it (`xbot.contacts.py`, in
+//                        Blender), and each clip's lift written to its sidecar beside its FBX, which
+//                        anim's export lays onto the clip as it bakes it
 //   xbot.glb             Mixamo's X Bot (the library's `characters/xbot/xbot.fbx`) with every clip of
 //                        `xbot.rig.json` baked onto it by anim's export (`plugins/anim/anim.export.py`),
 //                        which packs it with gltfpack; the rig's measured `table` and `ends` are then
@@ -72,8 +76,13 @@ export default async ({ blender, webp, scratch }: Tools) => {
   await webp(raw, checker, SIZE)
   console.log('wrote', path.relative(root, checker))
 
-  // the X Bot and its clips, and the rig's measures
+  // what the clips do with the body, and their sidecars, before the export lays them on
   const rig = path.join(here, 'xbot.rig.json')
+  const skin = scratch('xbot.skin.json')
+  console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(here, 'xbot.contacts.py'), '--', rig, skin]))
+  console.log(await node([path.join(here, 'xbot.contacts.mjs'), skin]))
+
+  // the X Bot and its clips, and the rig's measures
   const table = scratch('xbot.table.json')
   const glb = path.join(here, 'xbot.glb')
   console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(root, 'plugins', 'anim', 'anim.export.py'), '--', rig, table, `xbot=${glb}`]))
