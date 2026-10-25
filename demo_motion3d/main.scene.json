@@ -1,0 +1,140 @@
+{
+  "world": {
+    "defs": "demo_motion3d",
+    "seed": 7,
+    "player": { "deadzone": 0.2, "resolution": 32 },
+    "loader": {
+      "assets": {
+        "demo_motion3d": { "type": "json", "url": "/games/demo_motion3d/assets/demo_motion3d.json", "preload": true },
+        "land": { "type": "json", "url": "/games/demo_motion3d/assets/land.json", "preload": true },
+        "checker": { "type": "texture", "url": "/games/demo_motion3d/assets/checker-1024.webp", "preload": true, "wrap": "repeat", "anisotropy": 8 },
+        "xbot-rig": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.rig.json", "preload": true },
+        "xbot": { "type": "model", "url": "/games/demo_motion3d/assets/xbot.glb", "preload": true }
+      }
+    },
+    "terrain3d": {
+      "field": "land",
+      "rings": [{ "reach": 64, "seg": 256 }, { "reach": 320, "seg": 128 }, { "reach": 2000, "seg": 100 }],
+      "shadowReach": 64,
+      "budget": 8,
+      "preload": true
+    },
+    "shapes3d": {
+      "kinds": {
+        "partyzone": { "shape": { "box": { "size": [4, 0.04, 4] } }, "look": { "colour": "#e060c0", "roughness": 0.8 }, "activities": ["party"] },
+        "sadzone": { "shape": { "box": { "size": [4, 0.04, 4] } }, "look": { "colour": "#5080e0", "roughness": 0.8 }, "activities": ["sad"] },
+        "wall": { "shape": { "box": { "size": [4, 2.372, 1.2] } }, "look": { "colour": "#d08a40", "roughness": 0.8 } },
+        "ledgezone": {
+          "shape": { "box": { "size": [4, 2.872, 1.2] } },
+          "points": { "Lip": { "line": { "from": [-2, 2.654, 0.6], "to": [2, 2.654, 0.6] } } },
+          "activities": ["ledge"]
+        },
+        "chair": { "shape": { "box": { "size": [0.5, 0.437, 0.552] } }, "look": { "colour": "#40b0a0", "roughness": 0.8 } },
+        "chairback": { "shape": { "box": { "size": [0.5, 0.9, 0.06] } }, "look": { "colour": "#40b0a0", "roughness": 0.8 } },
+        "chairzone": {
+          "shape": { "box": { "size": [1.2, 1.8, 1.4] } },
+          "points": { "Seat": { "point": { "at": [0, 0.61, 1], "turn": [180, 0, 0] } } },
+          "activities": ["chair"]
+        }
+      },
+      "mods": { "height": "terrain3d" }
+    },
+    "solids": {
+      "mods": { "models": "shapes3d" }
+    },
+    "walker": {
+      "kinds": {
+        "xbot": {
+          "radius": 0.3, "height": 1.8, "accel": 12, "airAccel": 2, "turnRate": 12, "gravity": 20, "jumpH": 1.1,
+          "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5, "seekSpeed": 1.7
+        }
+      },
+      "mods": { "height": "terrain3d", "behaviors": "shapes3d" }
+    },
+    "anim": {
+      "still": 0.05, "shift": 0.75, "leap": 0.5, "landFall": 7.5, "moves": 0.05, "turns": 30,
+      "kinds": {
+        "xbot": {
+          "rig": "xbot-rig", "model": "xbot", "fade": 0.2, "falls": [{ "above": 4.3, "role": "fall" }],
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
+        }
+      }
+    },
+    "motion3d": {
+      "kinds": { "xbot": { "anywhere": ["walk"] } },
+      "mods": { "spaces": "shapes3d", "behaviors": ["walker", "zones"] }
+    },
+    "shipped": { "plugins": ["zones"] }
+  },
+  "plugins": ["loader", "scenemanager", "player", "terrain3d", "anim", "solids", "environment3d", "render3d", "chasecamera3d", "stats"],
+  "seats": 1,
+  "prefabs": {
+    "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
+    "scenemanager": { "out": {} },
+    "loader": {},
+    "walker": {},
+    "render3d": {
+      "camera": { "fov": 55, "near": 0.1, "far": 3000, "at": [0, 3, -6], "look": [0, 1, 0] },
+      "pixelRatio": 2,
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "background": "#bcd4e8",
+      "ao": { "on": false, "radius": 0.6, "thickness": 0.5, "falloff": 1, "scale": 1, "intensity": 1, "samples": 16 },
+      "bloom": { "strength": 0.15, "radius": 0.4, "threshold": 1.5 }
+    },
+    "environment3d": {
+      "sun": { "color": "#fff3e0", "power": 2.6, "at": [-30, 60, -40], "shadow": { "map": 4096, "half": 40, "near": 1, "far": 200, "distance": 100, "bias": -0.0002, "normalBias": 0.02 } },
+      "sky": { "color": "#dbe8f5", "ground": "#6b6252", "power": 1.1 }
+    },
+    "start": { "slot": 0, "pos": [0, 0], "yaw": 0 },
+    "player": {
+      "seat": 0,
+      "stood": false,
+      "as": "xbot",
+      "pos": [0, 0, 0],
+      "yaw": 0,
+      "vel": [0, 0, 0],
+      "grounded": false,
+      "sliding": false,
+      "speed": 0,
+      "side": 0,
+      "turned": 0,
+      "want": [0, 0],
+      "face": null,
+      "jump": false,
+      "stick": [0, 0],
+      "turning": [0, 0],
+      "fast": false,
+      "look": { "yaw": 0, "pitch": 0.35, "dist": 5 },
+      "lift": 1.4,
+      "rig": "stand",
+      "activity": "walk",
+      "motion": null,
+      "space": null,
+      "along": null,
+      "offered": [],
+      "stuck": 0
+    },
+    "partyzone": { "pos": [0, 0, 0], "yaw": 0 },
+    "sadzone": { "pos": [0, 0, 0], "yaw": 0 },
+    "wall": { "pos": [0, 0, 0], "yaw": 0 },
+    "ledgezone": { "pos": [0, 0, 0], "yaw": 0 },
+    "chair": { "pos": [0, 0, 0], "yaw": 0 },
+    "chairback": { "pos": [0, 0, 0], "yaw": 0 },
+    "chairzone": { "pos": [0, 0, 0], "yaw": 0 }
+  },
+  "actors": [
+    { "is": "scenemanager" },
+    { "is": "loader" },
+    { "is": "walker" },
+    { "is": "start", "slot": 0, "pos": [0, -8], "yaw": 0 },
+    { "is": "partyzone", "pos": [-4, -0.02, 2] },
+    { "is": "sadzone", "pos": [4, -0.02, 2] },
+    { "is": "wall", "pos": [0, 0, 10.6] },
+    { "is": "ledgezone", "pos": [0, -0.5, 9.4] },
+    { "is": "chair", "pos": [6, 0, 10] },
+    { "is": "chairback", "pos": [6, 0, 10.306] },
+    { "is": "chairzone", "pos": [6, 0, 9] }
+  ]
+}

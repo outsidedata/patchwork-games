@@ -32,6 +32,9 @@ what it needs).
 - **demo_castle**: a lineup of structures to walk around.
 - **demo_gamepads**: what the player plugin reads of every gamepad, drawn live.
 - **demo_gameui**: the conventions of the `ui` plugin, each shown by a kind of its own.
+- **demo_motion3d**: an X Bot on motion3d over a checkerboard yard: zones where the use key plays
+  each zone's clip, a wall's lip to hang from, shimmy along, climb up or drop from, and a chair to
+  sit in.
 - **demo_ocean3d**: the ocean3d sea alone, buoys and a boat riding it, every number of it on a
   panel in its `dev.html`.
 - **demo_particle2d**: particle2d's effects running on their own in a flat hall: a row of exhibits

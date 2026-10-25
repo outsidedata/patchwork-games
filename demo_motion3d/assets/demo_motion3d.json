@@ -1,0 +1,20 @@
+{
+  "player": {
+    "walk": 1.7,
+    "run": 4.4,
+    "sens": 0.004,
+    "camera": { "minPitch": -0.5, "maxPitch": 1.3, "minDist": 2, "maxDist": 14, "zoom": 0.0015, "turn": 2.6, "tilt": 1.6, "step": 120 },
+    "keys": {
+      "stick": [["a", "ArrowLeft", "PadStickLeft"], ["d", "ArrowRight", "PadStickRight"], ["w", "ArrowUp", "PadStickUp"], ["s", "ArrowDown", "PadStickDown"]],
+      "look": ["PadRightStickLeft", "PadRightStickRight", "PadRightStickUp", "PadRightStickDown"],
+      "fast": ["Shift", "Pad7", "Pad10"],
+      "motions": {
+        "jump": [" ", "Pad0"],
+        "use": ["e", "Pad2"]
+      },
+      "nearer": ["Pad12"],
+      "further": ["Pad13"],
+      "drag": "Mouse2"
+    }
+  }
+}
