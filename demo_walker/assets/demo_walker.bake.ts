@@ -5,11 +5,14 @@
 //                        FBX has it (`touches.py`, in Blender, with the rearmost skin of the sitting clips),
 //                        and each clip's lift and turn written to its sidecar beside its FBX, which anim's
 //                        export lays onto the clip as it bakes it
+//   yard.json            the yard (`yard.mjs`): a station for every kind of interaction the rig has a
+//                        clip of, and its thing, sized to the clip from `xbot.touches.json`, as shapes3d's
+//                        kinds and actors in `yard.scene.json`
 //   xbot.glb             Mixamo's X Bot (the library's `characters/xbot/xbot.fbx`) with every clip of
 //                        `xbot.rig.json` baked onto it by anim's export (`plugins/anim/anim.export.py`),
 //                        which packs it with gltfpack; the rig's measured `table` and `ends` are then
 //                        written back into `xbot.rig.json` by the mixamo skill's `merge-table.mjs`
-//   checker-1024.webp    the ground's and the course's checkerboard, drawn here from nothing: `squares`
+//   checker-1024.webp    the ground's checkerboard, drawn here from nothing: `squares`
 //                        squares a side in two greys, `light` and `dark`, each with a `line` pixel rim
 //                        of `rim` grey, so a repeat of the map is `squares` squares across
 import { execFile } from 'node:child_process'
@@ -87,6 +90,8 @@ export default async ({ blender, webp, scratch }: Tools) => {
   const skins = scratch('skin')
   console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(here, 'touches.py'), '--', list, skins, '--rear']))
   console.log(await node([path.join(here, 'xbot.touches.mjs'), skins]))
+  // the yard's level, its things sized to the clips just read
+  console.log(await node([path.join(here, 'yard.mjs')]))
 
   // the X Bot and its clips, and the rig's measures
   const table = scratch('xbot.table.json')

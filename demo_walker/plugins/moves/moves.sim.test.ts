@@ -9,8 +9,8 @@ import touches from '../../assets/xbot.touches.json' with { type: 'json' }
 
 const DT = file.prefabs.engine.dt
 
-// The course stands on y = 0.3 (`main.scene.json`'s course row); each place below is a shape's of
-// `assets/course.json`.
+// The course stands on the land at y = 0.3; each place below is a row's of `main.scene.json`, a chair or
+// a shapes3d box.
 async function joined() {
   const truth = boot(file as Scene, sim)
   const room = (await load(truth, new URL('../../demo_walker.sim.ts', import.meta.url).href)).get('main')!
@@ -73,7 +73,7 @@ test('a seat takes cover at the tall wall, sneaks along it and steps out', async
 
 test('a running seat vaults the low wall, its hands on its top', async () => {
   const { me, send, until, stand } = await joined()
-  // Running at the low wall at (3, 25), 0.6 deep and 0.845 m high, where the vault sets its hands;
+  // Running at the low wall at (3, 25), 0.6 deep and 0.808 m high, where the vault sets its hands;
   // jump pressed where its clip starts, the wall's middle less how far ahead it sets them.
   stand(3, 20, 0)
   send('fast', 1)

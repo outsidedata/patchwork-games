@@ -4,14 +4,14 @@
 //   thick   a rung's radius;  above  metres the rails stand over the top;  colour  the wood's.
 // Its rungs are the ones its clips climb (climber's `rungsOf`): spaced as the climbing loop climbs them,
 // each one's top where the clips stand the balls of the feet, its middle `thick` under that, from the
-// lowest such top over the foot. The top is the course's shape `behind` metres in from the wall face
-// (floors' `top`, the floor climber reads the top off), and the rungs run up to it.
+// lowest such top over the foot. The top is the highest of shapes3d's shapes `behind` metres in from the
+// wall face (gait's `shapeTop`, the top climber climbs onto), and the rungs run up to it.
 import type * as THREE from 'three'
 import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
-import { def, json } from '#plugins/loader/loader.sim.ts'
+import { def } from '#plugins/loader/loader.sim.ts'
 import { rungsOf } from './plugins/climber/climber.sim.ts'
-import { courseIn, top } from './plugins/floors/floors.sim.ts'
+import { shapeTop } from './plugins/gait/gait.sim.ts'
 
 let group: THREE.Group | undefined
 
@@ -22,9 +22,8 @@ export function setup(row: Row, plugins: Plugins) {
   const [x, y, z] = row.data.pos
   const yaw = row.data.yaw
   const out = [Math.sin(yaw), Math.cos(yaw)]
-  const course = courseIn(plugins.wire.rows, json(plugins.wire, def(plugins.wire, 'course').level))
-  const high = top(course, x - out[0] * k.behind, z - out[1] * k.behind)
-  if (high === undefined) throw new Error(`ladder ${row.id} stands against no shape of the course`)
+  const high = shapeTop(plugins.wire.scene.world ?? {}, plugins.wire.rows, x - out[0] * k.behind, z - out[1] * k.behind)
+  if (high === undefined) throw new Error(`ladder ${row.id} stands against no shape`)
   const { spacing, first } = rungsOf(plugins.wire, row)
   const tall = high - y + look.above
   const wood = plugins.render3d.dress(new T.MeshStandardMaterial({ color: look.colour, roughness: 0.75 }))

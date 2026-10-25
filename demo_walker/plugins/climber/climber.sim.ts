@@ -4,8 +4,10 @@
 // it walks, it calls `grab`, which starts a climb when the body asks for one.
 //
 // A ladder is a `ladder` row: `pos` [x, y, z] the foot of the wall it stands against, on the ground,
-// and `yaw` the way out from that wall. Its top is the ground walker stands on `behind` metres in from
-// the wall face (`groundOf`). Its definition (`assets/demo_walker.json`) holds its numbers:
+// and `yaw` the way out from that wall. Its top is the top of the highest of shapes3d's shapes `behind`
+// metres in from the wall face, or the land there where none stands (gait's `topOf`), and a body that
+// climbs off onto it or down off the ladder stands on gait's `underfoot` there. Its definition
+// (`assets/demo_walker.json`) holds its numbers:
 //   clips     `{ mount, climb, top }`, the rig's clips: stepping onto the ladder from the ground, the
 //             climbing loop, and climbing off the top onto the ground there.
 //   touches   the loader `json` entry of what the clips touch, measured on the body they play on
@@ -60,20 +62,21 @@
 //   descend  `top` run back from its end, from a body on the top at the ladder that pushes out over the
 //            edge; at its start the climb goes on at the hand-off's rungs.
 //
-// `grab(me, w, ground)` starts a climb for a body on the ground, not held by a clip, pushing toward a
+// `grab(me, w)` starts a climb for a body on the ground, not held by a clip, pushing toward a
 // ladder's wall within `reach` of where `mount` starts, or on its top pushing out over the edge within
 // `reach` of where `top` ends, and hands back whether it did. `climb(me, w, dt)` is one step of a climb,
 // and false for a body on no ladder. `starts(me, w, ladder)` is where a climb of that ladder row starts
 // for the body: `up` the root's place [x, y, z] and facing `[x, y, z, yaw]` where `mount` starts it,
-// `down` where `top` ends it. `ladderOf(w, row, ground)` is a ladder as the climber reads it (its foot,
-// its way out, its top, its rungs and each clip's `Place`), `rigging(w, me, ladder)` the clips the body
+// `down` where `top` ends it. `ladderOf(w, row)` is a ladder as the climber reads it (its foot, its way
+// out, its top, its rungs and each clip's `Place`), `rigging(w, me, ladder)` the clips the body
 // climbs it by and the rungs it hands over to the top at, and `placed(place, clip, a, t)` where a clip
 // placed at `place` has the root at t: what the workshop poses a climb by (`demo_walker.workshop.ts`).
 import type { Row, W } from '#engine/engine.ts'
 import { animKind, at, carries, clipOf, ends, numbersOf, play, rigOf, stop, type Clip } from '#plugins/anim/anim.sim.ts'
 import { def, json } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
-import { groundOf, numbers, stand, type Ground } from '#plugins/walker/walker.sim.ts'
+import { numbers, stand } from '#plugins/walker/walker.sim.ts'
+import { topOf, underfoot } from '../gait/gait.sim.ts'
 
 const DEG = Math.PI / 180
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
@@ -147,13 +150,13 @@ export function rungsOf(from: Parameters<typeof def>[0], row: Row) {
 // its clips placed.
 export type Ladder = ReturnType<typeof ladderOf>
 
-export function ladderOf(w: W, row: Row, ground: Ground) {
+export function ladderOf(w: W, row: Row) {
   const r = rungsOf(w, row)
   const { k, c } = r
   const [x, y, z] = row.data.pos
   const yaw = row.data.yaw
   const out = [math.sin(yaw), math.cos(yaw)]
-  const top = ground.height(x - out[0] * k.behind, z - out[1] * k.behind)
+  const top = topOf(w, x - out[0] * k.behind, z - out[1] * k.behind)
   // The rung plane midway between the rails, and a clip turned and set onto it.
   const plane = [x + out[0] * k.standoff, z + out[1] * k.standoff]
   const place = (clip: string, height: number): Place => {
@@ -244,15 +247,15 @@ function cut(me: Row, clip: string) {
   me.data.from = null
 }
 
-// The body still, on the ground, on no ladder.
-function off(me: Row, w: W, ground: Ground) {
+// The body still, on the ground its feet stand on at `feet`, on no ladder.
+function off(me: Row, w: W, feet: number) {
   const d = me.data
   d.ladder = 0
   d.phase = ''
   d.slip = [0, 0, 0]
   d.vel = [0, 0, 0]
   d.want = [0, 0]
-  d.pos = [d.pos[0], stand(numbers(me, w), ground, d.pos[0], d.pos[2]), d.pos[2]]
+  d.pos = [d.pos[0], stand(numbers(me, w), underfoot(me, w, feet), d.pos[0], d.pos[2]), d.pos[2]]
   d.grounded = true
   d.sliding = false
   stop(me, w)
@@ -262,20 +265,20 @@ function off(me: Row, w: W, ground: Ground) {
 const left = (k: Numbers, elapsed: number) => Math.max(0, 1 - elapsed / k.settle)
 
 export function starts(me: Row, w: W, ladder: Row) {
-  const l = ladderOf(w, ladder, groundOf(w))
+  const l = ladderOf(w, ladder)
   const r = rigging(w, me, l)
   const s = placed(l.mount, r.mount, r.a, 0), e = placed(l.up, r.top, r.a, r.top.dur)
   return { up: [s.x, l.mount.y, s.z, s.yaw], down: [e.x, l.top, e.z, e.yaw] }
 }
 
-export function grab(me: Row, w: W, ground: Ground): boolean {
+export function grab(me: Row, w: W): boolean {
   const d = me.data
   if (d.ladder || !d.grounded || d.state === 'act') return false
   const speed = math.hypot(d.want[0], d.want[1])
   if (!(speed > 0)) return false
   const [x, y, z] = d.pos
   for (const row of w.all('ladder')) {
-    const l = ladderOf(w, row, ground)
+    const l = ladderOf(w, row)
     const r = rigging(w, me, l)
     // From the ground: pushing toward the wall, near where the mount starts.
     const s = placed(l.mount, r.mount, r.a, 0)
@@ -305,8 +308,7 @@ export function grab(me: Row, w: W, ground: Ground): boolean {
 export function climb(me: Row, w: W, dt: number): boolean {
   const d = me.data
   if (!d.ladder) return false
-  const ground = groundOf(w)
-  const l = ladderOf(w, w.get(d.ladder), ground)
+  const l = ladderOf(w, w.get(d.ladder))
   const { k } = l
   const r = rigging(w, me, l)
   d.vel = [0, 0, 0]
@@ -333,7 +335,7 @@ export function climb(me: Row, w: W, dt: number): boolean {
         cut(me, k.clips.climb)
         return climbing(me, l, r, 0)
       }
-      if (d.phase === 'leave' && d.clock <= 0) off(me, w, ground)
+      if (d.phase === 'leave' && d.clock <= 0) off(me, w, l.foot[1])
       return true
     }
     case 'climb': {
@@ -370,7 +372,7 @@ export function climb(me: Row, w: W, dt: number): boolean {
       d.pos = [p.x + d.slip[0] * ease, l.up.y, p.z + d.slip[1] * ease]
       d.yaw = wrap(p.yaw + d.slip[2] * ease)
       scrub(me, r.top, t)
-      if (d.phase === 'top' && d.clock >= r.top.dur) off(me, w, ground)
+      if (d.phase === 'top' && d.clock >= r.top.dur) off(me, w, l.top)
       if (d.phase === 'descend' && d.clock <= 0) {
         d.phase = 'climb'
         d.rungs = r.handoff

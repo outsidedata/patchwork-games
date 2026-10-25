@@ -1,5 +1,6 @@
 // The row one seat possesses, and the body it plays: an X Bot (`as: "xbot"`) that walks on walker
-// (`plugins/walker`, its numbers `world.walker.kinds.xbot`), is drawn and played by anim (its
+// (`plugins/walker`, its numbers `world.walker.kinds.xbot`) over shapes3d's shapes and the land under
+// them (gait's `underfoot`, shapes3d's ground for its feet), is drawn and played by anim (its
 // `world.anim.kinds.xbot`), climbs ladders on the game's own climber (`plugins/climber`) and makes the
 // game's own moves (`plugins/moves`): crouching, sitting, cover, the vault, the wall run and the
 // tricks. Every seat is sent every `player` row. Its own fields, beside walker's, anim's, climber's and
@@ -8,8 +9,8 @@
 // far a gamepad's right stick is pushed right and down; and `stood`, once it stands on its slot's
 // start.
 //
-// `before` stands it once on the ground at its slot's `start`, facing the start's `yaw`, its look
-// along it. Each step its look turns while `turning` is held, at the definition's `camera.turn` across
+// `before` stands it once on the ground at its slot's `start`, on the land or the shape there no more
+// than a step over it, facing the start's `yaw`, its look along it. Each step its look turns while `turning` is held, at the definition's `camera.turn` across
 // and `tilt` up and down a second at full push, the yaw less for a push right and the pitch more for a
 // push down, within `minPitch` and `maxPitch`. A climb is climber's and a held move is moves', and anim plays the clip they
 // hold; a seated body that the stick pushes gets up. Otherwise it strides (`plugins/gait`) the way the
@@ -27,20 +28,18 @@
 // each refuses arguments of the wrong kind and writes nothing.
 //
 // `walking` is the seat's row in a scene of shapes3d's shapes on the land (`shapes.scene.json`), which
-// holds no course, ladder or chair: it walks, runs and jumps on shapes3d's ground (`plugins/shapes3d`'s
-// `ground`, handed the body's feet each step), so it steps up stairs of boxes, walks up tilted planes
-// and stands on what it climbs onto, and makes no moves. `before` stands it on that ground at its slot's
-// `start`; its view turns as the player's does; its acts are the player's `stick`, `turn`, `fast`,
-// `look` and `zoom`, and `jump`, always a jump.
+// holds no ladder or chair: it walks, runs and jumps on the same ground, so it steps up stairs of boxes,
+// walks up tilted planes and stands on what it climbs onto, and makes no moves. `before` stands it on
+// that ground at its slot's `start`; its view turns as the player's does; its acts are the player's
+// `stick`, `turn`, `fast`, `look` and `zoom`, and `jump`, always a jump.
 import type { Kind, Row, W } from '#engine/engine.ts'
 import { animate } from '#plugins/anim/anim.sim.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
-import { groundOf, numbers, relative } from '#plugins/walker/walker.sim.ts'
+import { relative } from '#plugins/walker/walker.sim.ts'
 import { land } from '#plugins/shapes3d/shapes3d.sim.ts'
-import { ground } from '#plugins/shapes3d/shapes3d.walker.ts'
 import { climb, grab } from './plugins/climber/climber.sim.ts'
-import { stride } from './plugins/gait/gait.sim.ts'
+import { stride, underfoot } from './plugins/gait/gait.sim.ts'
 import * as moves from './plugins/moves/moves.sim.ts'
 
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
@@ -56,20 +55,21 @@ function view(me: Row, dt: number, k: any) {
   d.look = { ...d.look, yaw: wrap(d.look.yaw - d.turning[0] * c.turn * dt), pitch: clamp(d.look.pitch + d.turning[1] * c.tilt * dt, c.minPitch, c.maxPitch) }
 }
 
-// The ground shapes3d makes for the body's feet where they stand.
-const shaped = (me: Row, w: W) => ground(w, me.data.pos[1], numbers(me, w))
+// The body stood once on the ground at its slot's start, facing the start's yaw, its look along it.
+function stood(me: Row, w: W) {
+  const d = me.data
+  const start = w.find('start', s => s.data.slot === d.seat).data
+  const [x, z] = start.pos
+  d.pos = [x, underfoot(me, w, land(w)(w, x, z)).height(x, z), z]
+  d.yaw = start.yaw
+  d.look = { ...d.look, yaw: start.yaw }
+  d.grounded = true
+  d.stood = true
+}
 
 export const player: Kind = {
   before(me, _dt, w) {
-    const d = me.data
-    if (d.stood) return
-    const start = w.find('start', s => s.data.slot === d.seat).data
-    const [x, z] = start.pos
-    d.pos = [x, groundOf(w).height(x, z), z]
-    d.yaw = start.yaw
-    d.look = { ...d.look, yaw: start.yaw }
-    d.grounded = true
-    d.stood = true
+    if (!me.data.stood) stood(me, w)
   },
   tick(me, dt, w) {
     const d = me.data
@@ -89,9 +89,9 @@ export const player: Kind = {
       const speed = d.crouch ? k.moves.crouch.speed : d.fast ? k.run : k.walk
       d.want = [wx * speed, wz * speed]
     }
-    const ground = stride(me, w, dt)
+    stride(me, w, dt, underfoot(me, w))
     moves.landed(me, dt, k.moves)
-    if (!d.crouch && !d.move) grab(me, w, ground)
+    if (!d.crouch && !d.move) grab(me, w)
   },
   acts: {
     stick(me, _w, _seat, x: unknown, y: unknown) {
@@ -141,16 +141,7 @@ const { stick, turn, fast, look, zoom } = player.acts!
 
 export const walking: Kind = {
   before(me, _dt, w) {
-    const d = me.data
-    if (d.stood) return
-    const start = w.find('start', s => s.data.slot === d.seat).data
-    const [x, z] = start.pos
-    const on = land(w)(w, x, z)
-    d.pos = [x, ground(w, on, numbers(me, w)).height(x, z), z]
-    d.yaw = start.yaw
-    d.look = { ...d.look, yaw: start.yaw }
-    d.grounded = true
-    d.stood = true
+    if (!me.data.stood) stood(me, w)
   },
   tick(me, dt, w) {
     const d = me.data
@@ -161,7 +152,7 @@ export const walking: Kind = {
     const speed = d.fast ? k.run : k.walk
     d.face = null
     d.want = [wx * speed, wz * speed]
-    stride(me, w, dt, shaped(me, w))
+    stride(me, w, dt, underfoot(me, w))
   },
   acts: {
     stick, turn, fast, look, zoom,

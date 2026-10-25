@@ -38,9 +38,10 @@
 //                       it (on a rung the heel stands level or hangs under). A level within LEVEL of
 //                       another is the same one
 //   lift                `[[t, metres], ...]`: how far the clip is raised on each frame to stand on its
-//                       floor: the deepest of the soles planted within NEAR under it and the knees, seat
-//                       and belly within SINKS under it (lying, kneeling and sitting on the floor sink
-//                       further), filled between the frames that plant none and smoothed over SMOOTH
+//                       floor: the deepest of the soles planted within NEAR under it (or, for a clip
+//                       whose lowest held sole floats FLOAT to STEP over it, those standing as low) and
+//                       the knees, seat and belly within SINKS under it (lying, kneeling and sitting on the
+//                       floor sink further), filled between the frames that plant none and smoothed over SMOOTH
 //                       frames, as `xbot.contacts.mjs` lifts a clip; null where it never reaches LIFT, and
 //                       for a case placed by its grip (`touches.json`'s `by`), which hangs from what it
 //                       holds and stands on no floor
@@ -76,6 +77,9 @@
 //            (a zip line), `swing` `{ line: [start, end], from, to }`
 //   floors   the floor it starts on and the one it ends on, each where the lowest part held on it at
 //            that end stands: `start`, `end`, and `rise`, end less start
+//   steps    stairs: `steps` `{ riser, tread, count }`, the median rise from one floor the soles stand
+//            on to the next, and the median distance the next one's soles stand further along the way
+//            the body goes
 //   rungs    the heights the balls stand on while climbing (a ball held FLOAT or more up, its sole not
 //            flat on a raised floor the while): `rungs` folded into one lap and clustered within FLAT,
 //            `lap` a loop's climb, `spacing`; and `ladder`, the rung plane, as `xbot.contacts.mjs` read
@@ -353,7 +357,12 @@ export function read(file, s, opts = {}) {
     // The soles planted on the floor, and the knees, the seat and the torso a body kneels, sits or lies
     // on it by, which sink further: the deepest of them on each frame is stood on the floor.
     const measured = holdsOf(raw)
-    const planted = measured.filter(h => (h.part.startsWith('sole') && h.at[1] > -NEAR && h.at[1] < FLOAT) ||
+    // A clip that floats over its floor (Pushing Heavy Object's soles stand 6.7 cm over it) stands its
+    // lowest planted soles on it, where they stand less than STEP over it.
+    const soleYs = measured.filter(h => h.part.startsWith('sole')).map(h => h.at[1])
+    const lowestSole = soleYs.length ? Math.min(...soleYs) : Infinity
+    const float = lowestSole >= FLOAT && lowestSole < STEP ? lowestSole + LEVEL : FLOAT
+    const planted = measured.filter(h => (h.part.startsWith('sole') && h.at[1] > -NEAR && h.at[1] < float) ||
       (['kneeL', 'kneeR', 'seat', 'belly'].includes(h.part) && h.at[1] > -SINKS && h.at[1] < FLOAT))
     for (const h of planted) {
       for (let f = h.s; f <= h.e; f++) {
@@ -421,14 +430,18 @@ export function read(file, s, opts = {}) {
       lowest[g] = Math.min(lowest[g], at(h.part, g)[1])
     }
   }
+  // A part is on a floor where it is the lowest held part (within LEVEL, the belly within LIES) for at
+  // least half its hold: on stairs both feet stand at once on two steps for a few frames before the
+  // lower one lifts.
   const footed = holds.filter(h => {
     if (!BEARS.includes(h.part)) return false
-    let above = 0, hung = 0
+    let lowestFor = 0, hung = 0
+    const near = h.part === 'belly' ? LIES : LEVEL
     for (let f = h.s; f <= h.e; f++) {
-      above += at(h.part, f)[1] - lowest[f % (n + 1)]
+      if (frames[f % (n + 1)][h.part][1] - lowest[f % (n + 1)] <= near) lowestFor++
       if (hanging(f % (n + 1))) hung++
     }
-    if (hung > (h.e - h.s + 1) / 2 || above / (h.e - h.s + 1) > (h.part === 'belly' ? LIES : LEVEL)) return false
+    if (hung > (h.e - h.s + 1) / 2 || lowestFor < (h.e - h.s + 1) / 2) return false
     if (h.part.startsWith('sole')) return flat(h)
     if (h.part.startsWith('ball')) return tiptoe(h)
     return h.part.startsWith('knee') || h.part === 'belly' || h.part === 'seat'
@@ -535,6 +548,22 @@ export function read(file, s, opts = {}) {
       things.top = round(endFloor.y)
       if (things.lip !== undefined) things.climb = round(endFloor.y - things.lip)
     }
+  }
+
+  if (want.has('steps')) {
+    // The steps the soles stand on, one floor each: their rise, the median of the floors' rises one to
+    // the next, and their tread, the median of how far along the way the body goes each step's soles
+    // stand past the step's before.
+    const levels = [...floors].sort((a, b) => a.y - b.y)
+    const soles = levels.map(l => footed.filter(h => h.part.startsWith('sole') && Math.abs(h.at[1] - l.y) <= LEVEL))
+    if (levels.length >= 2 && soles.every(s => s.length)) {
+      const goes = sub(at('hips', n), at('hips', 0))
+      const k = Math.hypot(goes[0], goes[2]) || 1
+      const ahead = s => mean(s.map(h => h.at)).reduce((v, c, i) => v + (i === 0 ? c * goes[0] : i === 2 ? c * goes[2] : 0), 0) / k
+      const rises = levels.slice(1).map((l, i) => l.y - levels[i].y)
+      const treads = soles.slice(1).map((s, i) => ahead(s) - ahead(soles[i]))
+      things.steps = { riser: round(median(rises)), tread: round(median(treads)), count: levels.length }
+    } else doubts.push({ t: null, question: 'its case climbs stairs, and its soles stand on fewer than two steps' })
   }
 
   if (want.has('press')) {

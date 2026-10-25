@@ -74,6 +74,17 @@
 // hard landing it has just begun. Each but `use` (which also gets up and leaves cover) and `hug`
 // refuses, doing nothing, while the body is in the air, on a ladder, held or playing an act.
 //
+// The things the moves are made against are rows of the scene. A wall is any side of a shapes3d box
+// (`faces(w)`, every box's four sides, `sidesOf(box)` one box's, each `{ a, b, out, top, base, deep }`: its two ends [x, z] across the
+// ground, the way out from it [x, z], its top's height and its underside's, and how deep the box is
+// behind it, listed ahead, behind, right and left of the way the box faces), and a move is made only
+// against a side that stands on the ground the body stands on, its underside no more than a step over
+// the feet. A chair is a `chair` row (`chairs(w)`): its `pos` where its sitter's hips stand over the
+// ground, its `yaw` the way the sitter faces, and its seat's sizes its definition's (`height`, `width`,
+// `depth`, `back`, `behind`, `board`, `leg`), which `chair.client.ts` draws. A body stands back on its
+// feet where a held clip ends on the ground at the floor the clip ends on over its start (its touches'
+// `floor`, the wall run's top), by gait's `underfoot`.
+//
 // `startFor(w, me, clip, x, z, yaw)` is where a held clip starts for its end to stand the body at (x, z)
 // facing `yaw`, `placed(w, me, clip, anchor, turn0, t)` where a held clip begun there has the root at t,
 // `begin(me, move, clip, anchor, turn0)` a held move begun, `onFace(face, x, z)` a point's place along a
@@ -83,10 +94,11 @@
 // `jump` start it.
 import type { Row, W } from '#engine/engine.ts'
 import { at, carries, clipOf, numbersOf, play, rigOf, stop, animKind } from '#plugins/anim/anim.sim.ts'
-import { json } from '#plugins/loader/loader.sim.ts'
+import { def, json } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
-import { groundOf, numbers, stand } from '#plugins/walker/walker.sim.ts'
-import { courseOf, faces, seats, type Face } from '../floors/floors.sim.ts'
+import { shapes, type Box } from '#plugins/shapes3d/shapes3d.sim.ts'
+import { numbers, stand } from '#plugins/walker/walker.sim.ts'
+import { underfoot } from '../gait/gait.sim.ts'
 
 const DEG = Math.PI / 180
 const SHORT = 1e-6
@@ -110,6 +122,32 @@ export type Numbers = {
   wallrun: { clip: string; reach: number; run: number }
   tricks: { roll: string; slide: string; flip: string; backflip: string; landroll: string; land: string; slideAbove: number; flipAbove: number; rollAbove: number }
 }
+
+// A side of a box, and a chair (the header).
+export type Face = { a: number[]; b: number[]; out: number[]; top: number; base: number; deep: number }
+export type Seat = { height: number; width: number; depth: number; back: number; behind: number; board: number; leg: number }
+export type Chair = { x: number; z: number; yaw: number; y: number; seat: Seat }
+
+// A box's four sides: ahead, behind, right and left of the way it faces.
+export function sidesOf(b: Box): Face[] {
+  const [across, , along] = b.size
+  const s = math.sin(b.yaw), c = math.cos(b.yaw)
+  const fwd = [s, c], right = [c, -s]
+  // Each side: the way out, its half length along it, and the box's half depth behind it.
+  return ([[fwd, across / 2, along / 2], [[-fwd[0], -fwd[1]], across / 2, along / 2], [right, along / 2, across / 2], [[-right[0], -right[1]], along / 2, across / 2]] as [number[], number, number][]).map(([out, half, depth]) => {
+    const t = [-out[1], out[0]]
+    const mx = b.pos[0] + out[0] * depth, mz = b.pos[2] + out[1] * depth
+    return { a: [mx - t[0] * half, mz - t[1] * half], b: [mx + t[0] * half, mz + t[1] * half], out, top: b.pos[1] + b.size[1], base: b.pos[1], deep: 2 * depth }
+  })
+}
+
+export const faces = (w: W): Face[] => shapes(w).flatMap(p => (p.word === 'box' ? sidesOf(p.shape.box as Box) : []))
+
+export const chairs = (w: W): Chair[] =>
+  w.all('chair').map(r => ({ x: r.data.pos[0], z: r.data.pos[2], yaw: r.data.yaw, y: r.data.pos[1], seat: def(w, 'chair') as Seat }))
+
+// Whether a side stands on the ground a body stands on at `y`: its underside no more than a step over it.
+const grounded = (f: Face, y: number, step: number) => f.base <= y + step
 
 // Where a held clip leaves the root at t, the way it faces, from its start.
 export function placed(w: W, me: Row, clip: string, anchor: number[], turn0: number, t: number) {
@@ -156,13 +194,15 @@ function scrub(me: Row, w: W, dt: number, k: Numbers): boolean {
   return d.clock >= p.dur
 }
 
-// The body back on its feet on the ground where it stands, walking, in its stance.
-function walkOn(me: Row, w: W) {
+// The body back on its feet where its held clip ends, on the ground at the floor the clip ends on over
+// its start, walking, in its stance.
+function walkOn(me: Row, w: W, k: Numbers) {
   const d = me.data
+  const feet = d.anchor[1] + (touchOf(w, me, k, d.clip).floor ?? 0)
   d.move = ''
   d.slip = [0, 0, 0]
   d.want = [0, 0]
-  d.pos = [d.pos[0], stand(numbers(me, w), groundOf(w), d.pos[0], d.pos[2]), d.pos[2]]
+  d.pos = [d.pos[0], stand(numbers(me, w), underfoot(me, w, feet), d.pos[0], d.pos[2]), d.pos[2]]
   d.grounded = true
   d.sliding = false
   stop(me, w)
@@ -236,7 +276,7 @@ export function held(me: Row, w: W, dt: number, k: Numbers): boolean {
     case 'out':
       if (scrub(me, w, dt, k)) {
         if (d.move === 'out') d.rig = d.crouch ? 'crouch' : 'stand'
-        walkOn(me, w)
+        walkOn(me, w, k)
       }
       return true
     case 'in':
@@ -254,7 +294,7 @@ export function held(me: Row, w: W, dt: number, k: Numbers): boolean {
       if (!scrub(me, w, dt, k)) return true
       // On its feet where the clip ends, running on the way it faced.
       const speed = (d.move === 'vault' ? k.vault : k.wallrun).run
-      walkOn(me, w)
+      walkOn(me, w, k)
       d.vel = [math.sin(d.yaw) * speed, 0, math.cos(d.yaw) * speed]
       return true
     }
@@ -283,11 +323,10 @@ export function use(me: Row, w: W, k: Numbers): boolean {
   if (d.move === 'hug') return leave(me, w, k, 0)
   if (!free(me)) return false
   const [x, y, z] = d.pos
-  const course = courseOf(w)
 
   // The nearest chair whose sitting starts within reach.
-  let best: (ReturnType<typeof seats>[number] & { far: number }) | undefined
-  for (const s of seats(course)) {
+  let best: (Chair & { far: number }) | undefined
+  for (const s of chairs(w)) {
     const start = startFor(w, me, k.seat.sit, s.x, s.z, s.yaw)
     const far = math.hypot(x - start.x, z - start.z)
     if (far <= k.seat.reach && (!best || far < best.far)) best = { ...s, far }
@@ -314,11 +353,13 @@ export function use(me: Row, w: W, k: Numbers): boolean {
     return true
   }
 
-  // The nearest wall within reach that stands at least `low` over the feet.
+  // The nearest wall within reach, on the ground the body stands on, that stands at least `low` over the
+  // feet.
+  const step = numbers(me, w).step
   let wall: { f: Face; u: number; out: number; t: number[] } | undefined
-  for (const f of faces(course)) {
+  for (const f of faces(w)) {
     const o = onFace(f, x, z)
-    if (o.out < 0 || o.out > k.cover.reach || o.u < k.cover.margin || o.u > o.len - k.cover.margin) continue
+    if (!grounded(f, y, step) || o.out < 0 || o.out > k.cover.reach || o.u < k.cover.margin || o.u > o.len - k.cover.margin) continue
     if (f.top - y < k.cover.low) continue
     if (!wall || o.out < wall.out) wall = { f, u: o.u, out: o.out, t: o.t }
   }
@@ -342,7 +383,7 @@ export function use(me: Row, w: W, k: Numbers): boolean {
 // the chair's frame, from the floor the body stands on at `y`): of the skin within the back's width and
 // between the seat's top and the back's, the furthest behind, and the board's thickness behind that.
 // Undefined where no skin of the clips reaches the back's span.
-export function backFits(w: W, me: Row, k: Numbers, chair: ReturnType<typeof seats>[number], y: number): number | undefined {
+export function backFits(w: W, me: Row, k: Numbers, chair: Chair, y: number): number | undefined {
   const { width, height, back, board } = chair.seat
   const rear = [k.seat.sit, k.seat.seated, k.seat.rise].flatMap(c => touchOf(w, me, k, c).things.behind ?? [])
   const inside = rear.filter(([x, up]) => Math.abs(x) <= width / 2 && y + up >= chair.y + height && y + up <= chair.y + height + back)
@@ -398,19 +439,20 @@ export function jump(me: Row, w: W, k: Numbers): boolean {
   const speed = speedOf(me)
   const [x, y, z] = d.pos
   const fx = math.sin(d.yaw), fz = math.cos(d.yaw)
+  const step = numbers(me, w).step
   for (const [move, m] of [['vault', k.vault], ['wallrun', k.wallrun]] as const) {
     if (speed < m.run) continue
     const c = touchOf(w, me, k, m.clip)
-    for (const f of faces(courseOf(w))) {
+    for (const f of faces(w)) {
       const o = onFace(f, x, z)
       const head = -(fx * f.out[0] + fz * f.out[1])
-      if (head < 0.7 || o.out < 0 || o.u < 0 || o.u > o.len) continue
+      if (!grounded(f, y, step) || head < 0.7 || o.out < 0 || o.u < 0 || o.u > o.len) continue
       const start = move === 'vault' ? overWall(c, m.clip, f, o, y, k) : upWall(c, m.clip, f, o, y, k)
       if (!start || math.hypot(x - start.x, z - start.z) > m.reach) continue
       // A vault lands where the ground is near the feet's height.
       if (move === 'vault') {
         const end = placed(w, me, m.clip, [start.x, y, start.z], start.yaw, Infinity)
-        if (Math.abs(groundOf(w).height(end.x, end.z) - y) > numbers(me, w).step) continue
+        if (Math.abs(underfoot(me, w, y).height(end.x, end.z) - y) > step) continue
       }
       begin(me, move, m.clip, [start.x, y, start.z], start.yaw)
       return true

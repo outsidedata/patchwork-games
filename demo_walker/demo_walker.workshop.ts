@@ -1,8 +1,10 @@
 // demo_walker's moves, as the asset workshop shows them (`tools/workshop`, its Moves): each move the
-// body makes against a thing of the course, made by the game's own plugins (climber, moves, floors,
+// body makes against a thing of the course, made by the game's own plugins (climber, moves, gait,
 // walker, anim) on the rows of the scene `scene`, so the workshop draws the body where the game puts it.
 // The workshop boots that scene, spawns one row of `body` from its prefab, draws the rows of the kinds
-// `looks` names by their own looks (`course.client.ts`, `ladder.client.ts`) and the body by anim, and
+// `looks` names by their own looks (`ladder.client.ts`, `chair.client.ts`, `tree.client.ts`,
+// `water.client.ts`; the course's boxes and ramps are shapes3d's, drawn by solids, not a look) and the
+// body by anim, and
 // each frame hands a step its playhead: `pose(t)` writes the body's row as the game has it `t` seconds
 // into the step, and `marks()` is what the clip touches then, read off the row as posed.
 //
@@ -37,7 +39,7 @@
 // seat a sitting clip sits on (its `things.seat`), each where the clip has it: its place in the clip set where the step
 // started the root, turned the way the root faced then. Its `gap` is how far it stands off what it is
 // on, metres, by `on`: `ground` over the floor the move stands on, `raised floor` over walker's ground
-// under it (the course's tops over the land), `ledge` over the top of the nearest side of a box, `rung`
+// under it (the tops of shapes3d's shapes over the land, gait's `topOf`), `ledge` over the top of the nearest side of a box, `rung`
 // over the nearest top of the ladder's rungs, `wall` out from the nearest side of a box that stands
 // beside it, `seat` over the nearest chair's seat; `off` where that is further than the move's plugin's
 // `fit` (the ladder's `fit`, the player's `moves.fit`), or a seat outside its chair. A `hold` on a
@@ -47,14 +49,16 @@ import type { Row, W } from '#engine/engine.ts'
 import { animKind, clipOf, momentOf, numbersOf, play, rest, rigOf, type Clip, type Rig } from '#plugins/anim/anim.sim.ts'
 import { def, json } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
-import { groundOf, numbers, stand } from '#plugins/walker/walker.sim.ts'
+import { land } from '#plugins/shapes3d/shapes3d.sim.ts'
+import { numbers, stand } from '#plugins/walker/walker.sim.ts'
 import { climb, ladderOf, placed, rigging, rungsOf, type Place } from './plugins/climber/climber.sim.ts'
+import { topOf, underfoot } from './plugins/gait/gait.sim.ts'
 import * as moving from './plugins/moves/moves.sim.ts'
-import { courseOf, faces, seats, top, type Face } from './plugins/floors/floors.sim.ts'
+import { chairs, faces, type Chair, type Face } from './plugins/moves/moves.sim.ts'
 
 export const scene = 'main'
 export const body = 'player'
-export const looks = ['course', 'ladder']
+export const looks = ['ladder', 'chair', 'tree', 'water']
 
 export type Mark = { name: string; on: string; at: number[]; gap?: number; off?: boolean }
 export type Step = { name: string; clip: string; dur: number; loop: boolean; pose(t: number): void; marks(): Mark[] }
@@ -138,9 +142,9 @@ function ladderAt(w: W, row: Row) {
   const [x, y, z] = row.data.pos
   const yaw = row.data.yaw
   const out = [math.sin(yaw), math.cos(yaw)], right = [math.cos(yaw), -math.sin(yaw)]
-  const high = top(courseOf(w), x - out[0] * k.behind, z - out[1] * k.behind)
+  const high = topOf(w, x - out[0] * k.behind, z - out[1] * k.behind)
   const tops: number[] = []
-  if (high !== undefined) for (let h = first; h <= high - y; h += spacing) tops.push(y + h)
+  for (let h = first; h <= high - y; h += spacing) tops.push(y + h)
   return { plane: [x + out[0] * k.standoff, z + out[1] * k.standoff], out, right, tops, half: k.look.width / 2, thick: k.look.thick, rail: k.look.rail }
 }
 
@@ -163,10 +167,10 @@ function gapOf(w: W, m: Mark, on: On): Mark {
       gap = y - on.floor
       break
     case 'raised floor':
-      gap = y - groundOf(w).height(x, z)
+      gap = y - topOf(w, x, z)
       break
     case 'ledge': {
-      const f = nearest(faces(courseOf(w)), f => offSide(f, x, z))
+      const f = nearest(faces(w), f => offSide(f, x, z))
       if (f) gap = y - f.top
       break
     }
@@ -189,14 +193,13 @@ function gapOf(w: W, m: Mark, on: On): Mark {
       break
     }
     case 'wall': {
-      const course = courseOf(w)
-      const beside = faces(course).map(f => ({ f, o: moving.onFace(f, x, z) })).filter(({ f, o }) => o.u >= 0 && o.u <= o.len && y >= course.y && y <= f.top)
+      const beside = faces(w).map(f => ({ f, o: moving.onFace(f, x, z) })).filter(({ f, o }) => o.u >= 0 && o.u <= o.len && y >= f.base && y <= f.top)
       const f = nearest(beside, b => Math.abs(b.o.out))
       if (f) gap = f.o.out
       break
     }
     case 'seat': {
-      const s = nearest(seats(courseOf(w)), s => math.hypot(x - s.x, z - s.z))
+      const s = nearest(chairs(w), s => math.hypot(x - s.x, z - s.z))
       if (!s) break
       gap = y - (s.y + s.seat.height)
       const dx = x - s.x, dz = z - s.z
@@ -253,7 +256,7 @@ function gearStep(w: W, me: Row, name: string, c: Clip, start: Place, stance: st
 // ---------------------------------------------------------------- the ladder
 
 function ladderMove(w: W, me: Row, row: Row): Move {
-  const l = ladderOf(w, row, groundOf(w))
+  const l = ladderOf(w, row)
   const r = rigging(w, me, l)
   const { k } = l
   const speed = l.rungs.lap / r.loop.dur
@@ -305,9 +308,9 @@ function ladderMove(w: W, me: Row, row: Row): Move {
 
 // ---------------------------------------------------------------- the chairs
 
-function chairMove(w: W, me: Row, k: moving.Numbers, s: ReturnType<typeof seats>[number]): Move {
+function chairMove(w: W, me: Row, k: moving.Numbers, s: Chair): Move {
   const st = moving.startFor(w, me, k.seat.sit, s.x, s.z, s.yaw)
-  const y = stand(numbers(me, w), groundOf(w), st.x, st.z)
+  const y = stand(numbers(me, w), underfoot(me, w, s.y), st.x, st.z)
   const rig = rigOf(w, animKind(me))
   const dur = (clip: string) => clipOf(rig, clip).dur
   const on: On = { touches: k.touches, fit: k.fit, floor: y }
@@ -370,7 +373,7 @@ function chairMove(w: W, me: Row, k: moving.Numbers, s: ReturnType<typeof seats>
 // Each box's side facing (x, z): of its four (`faces` lists each box's four in turn), the one whose way
 // out points most toward it.
 function sidesFacing(w: W, x: number, z: number): Face[] {
-  const all = faces(courseOf(w))
+  const all = faces(w)
   const toward = (f: Face) => {
     const [mx, mz] = middleOf(f)
     const len = math.hypot(x - mx, z - mz)
@@ -390,7 +393,7 @@ function coverMove(w: W, me: Row, k: moving.Numbers, f: Face, low: boolean): Mov
   const len = lengthOf(f)
   const t = [(f.b[0] - f.a[0]) / len, (f.b[1] - f.a[1]) / len]
   const ex = f.a[0] + t[0] * (len / 2) + f.out[0] * k.cover.hug, ez = f.a[1] + t[1] * (len / 2) + f.out[1] * k.cover.hug
-  const y = stand(numbers(me, w), groundOf(w), ex, ez)
+  const y = stand(numbers(me, w), underfoot(me, w, f.base), ex, ez)
   const yaw = k.cover.faces === 'wall' ? yawOf(-f.out[0], -f.out[1]) : yawOf(f.out[0], f.out[1])
   const stance = low ? k.cover.crouch : k.cover.stand
   const wall = [...f.a, ...f.b, ...f.out, yaw, low ? 1 : 0]
@@ -458,13 +461,13 @@ function overMove(w: W, me: Row, k: moving.Numbers, f: Face, move: 'vault' | 'wa
   const m = move === 'vault' ? k.vault : k.wallrun
   const c = moving.touchOf(w, me, k, m.clip)
   const [mx, mz] = middleOf(f)
-  const y = stand(numbers(me, w), groundOf(w), mx + f.out[0] * m.reach, mz + f.out[1] * m.reach)
+  const y = stand(numbers(me, w), underfoot(me, w, f.base), mx + f.out[0] * m.reach, mz + f.out[1] * m.reach)
   const o = moving.onFace(f, mx, mz)
   const start = move === 'vault' ? moving.overWall(c, m.clip, f, o, y, k) : moving.upWall(c, m.clip, f, o, y, k)
   if (!start) return undefined
   if (move === 'vault') {
     const end = moving.placed(w, me, m.clip, [start.x, y, start.z], start.yaw, Infinity)
-    if (Math.abs(groundOf(w).height(end.x, end.z) - y) > numbers(me, w).step) return undefined
+    if (Math.abs(underfoot(me, w, y).height(end.x, end.z) - y) > numbers(me, w).step) return undefined
   }
   const anchor = [start.x, y, start.z]
   const name = move === 'vault' ? 'vault' : 'wall run'
@@ -492,7 +495,7 @@ function floorMove(w: W, me: Row, p: any, there: Row): Move {
   const rig = rigOf(w, animKind(me))
   const a = numbersOf(w)
   const [x, z] = there.data.pos
-  const y = groundOf(w).height(x, z)
+  const y = underfoot(me, w, land(w)(w, x, z)).height(x, z)
   const start: Place = { x, y, z, yaw: there.data.yaw }
   const on: On = { touches: k.touches, fit: k.fit, floor: y }
   // A clip played where the body stands in `stance`, carried by the travel a one-shot carries.
@@ -548,19 +551,18 @@ function floorMove(w: W, me: Row, p: any, there: Row): Move {
 export function moves(w: W, me: Row): Move[] {
   const p = def(w, me.kind)
   const k = p.moves as moving.Numbers
-  const course = courseOf(w)
   const there = w.find('start', s => s.data.slot === me.data.seat)
   const sides = sidesFacing(w, there.data.pos[0], there.data.pos[1])
   // How high a side stands over the ground where a body takes cover at its middle.
   const over = (f: Face) => {
     const [mx, mz] = middleOf(f)
-    return f.top - stand(numbers(me, w), groundOf(w), mx + f.out[0] * k.cover.hug, mz + f.out[1] * k.cover.hug)
+    return f.top - stand(numbers(me, w), underfoot(me, w, f.base), mx + f.out[0] * k.cover.hug, mz + f.out[1] * k.cover.hug)
   }
   // A side a body takes cover at the middle of: as long as its two margins.
   const coverable = (f: Face) => lengthOf(f) >= 2 * k.cover.margin
   return [
     ...w.all('ladder').map(row => ladderMove(w, me, row)),
-    ...seats(course).map(s => chairMove(w, me, k, s)),
+    ...chairs(w).map(s => chairMove(w, me, k, s)),
     ...sides.filter(f => coverable(f) && over(f) >= k.cover.tall).map(f => coverMove(w, me, k, f, false)),
     ...sides.filter(f => coverable(f) && over(f) >= k.cover.low && over(f) < k.cover.tall).map(f => coverMove(w, me, k, f, true)),
     ...sides.map(f => overMove(w, me, k, f, 'vault')).filter((m): m is Move => !!m),

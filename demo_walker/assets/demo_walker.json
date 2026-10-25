@@ -35,13 +35,24 @@
       "tricks": { "roll": "dodge", "slide": "slide", "flip": "frontflip", "backflip": "backflip", "landroll": "landroll", "land": "land", "slideAbove": 3, "flipAbove": 2.5, "rollAbove": 2.5 }
     }
   },
+  "mannequin": {
+    "touches": "xbot-touches",
+    "body": "xbot",
+    "lip": "freeclimb",
+    "edge": "bracedidle",
+    "rest": 1,
+    "laps": 3
+  },
   "wanderer": {
     "stop": 0.6,
     "rest": [1.5, 4]
   },
-  "course": {
-    "level": "course"
+  "stage": {
+    "stations": "stations"
   },
+  "chair": { "height": 0.437, "width": 0.5, "depth": 0.552, "back": 0.5, "behind": 0.222, "board": 0.05, "leg": 0.05, "tint": "#b08050" },
+  "tree": { "taper": 0.8, "crown": 1.4, "trunk": "#7a5636", "leaves": "#4f9a48" },
+  "water": { "colour": "#3d7fb8", "opacity": 0.72, "size": 400 },
   "ladder": {
     "clips": { "mount": "mount", "climb": "ladder", "top": "dismount" },
     "touches": "xbot-touches",

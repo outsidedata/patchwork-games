@@ -6,7 +6,8 @@
 // heads for or rests at (0 before it has chosen one), and `wait`, the seconds it rests there yet.
 //
 // Each step, resting, it stands; otherwise walker's `seek` takes it toward its spot at the kind's
-// `seekSpeed`, round the trunks and the other bodies, and it strides (`plugins/gait`). Within its
+// `seekSpeed` over the land, round shapes3d's shapes (the scene's `world.walker.mods.fixed`) and the
+// other bodies, and it strides (`plugins/gait`) on the ground those mods make. Within its
 // definition's `stop` metres of the spot it rests for a time between the definition's `rest` [least,
 // most] seconds, rolled on the scene's die, and then chooses, on the die, a spot no other wanderer
 // holds; the spot a row has chosen is its `spot` field, so two never head for one.

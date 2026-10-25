@@ -7,6 +7,15 @@ trees and dodge the other walkers strolling about. Climb the ladder onto the big
 off. In the yard, sit on a chair, hide behind a wall and sneak along it, vault the low wall, run up
 the platform, and roll, slide and flip.
 
+## The course and the yard
+
+Everything you walk on, climb, hang from or hide behind is shapes3d's (`plugins/shapes3d`): boxes,
+tilted planes and cylinders, each kind in the scene's `world.shapes3d.kinds` and each one an actor,
+drawn by solids. Main's course is written by hand in `main.scene.json`; the yard's is written by
+`assets/yard.mjs`, every thing sized to the clip that uses it, with the stations that stand a mannequin
+on each in `assets/yard.json` (`/games/demo_walker/dev.html?scene=yard`). Chairs, trees and the water
+are kinds of the game's own with their own looks.
+
 ## Writing your own walker plugin
 
 The point of this demo: walker handles walking, running, jumping, falling, steps, slopes, water and
@@ -56,17 +65,21 @@ of them. Three things in this game make that happen, and a game of your own does
    `actors`, and `main.sim.ts` lists `walker` (from `#plugins/walker/walker.sim.ts`). At the start of
    every step it keeps the ground and notes where every body stands, so the wanderers push each other
    apart in whatever order they move.
-2. **The course handed over as `fixed`.** The course's trees and chairs never move, so `floors` hands
-   them to walker as `fixed` (`plugins/floors/floors.walker.ts`, and `"fixed": "floors"` in
-   `world.walker.mods`). Walker asks for them once for each patch of ground a wanderer reaches, and
-   never again. Something that does move would go in `solids` instead, asked every step.
+2. **The course handed over as `fixed`.** The course is shapes3d's shapes (boxes, ramps, the chairs'
+   and trees' cylinders) that never move, so shapes3d hands them to walker as `fixed`
+   (`plugins/shapes3d/shapes3d.walker.ts`, and `"fixed": "shapes3d"` in `world.walker.mods`). Walker
+   asks for them once for each patch of ground a wanderer reaches, and never again. Something that does
+   move would go in `solids` instead, asked every step.
 3. **`agent` on the wanderer.** The wanderer's entry in `world.walker.kinds` has `"agent": 0.25`: walker
    makes a map of the course in 0.25 m squares, each one standable for a wanderer or not and at what
    height, and walks the wanderers on it. Their rule (`wanderer.sim.ts`) is the same as before: `seek`
    toward a spot and `stride`.
 
-An agent climbs the stairs and ramps, keeps out of deep water and slides round the trees as you do,
-but it never jumps or falls, and its feet are only as exact as its squares. More wanderers are more
+An agent walks the land round every shape, keeps out of deep water and slides round the trees as you
+do, but it never climbs onto a shape, jumps or falls, and its feet are only as exact as its squares.
+You walk on the shapes themselves: your rule hands walker shapes3d's `ground` for your feet each step
+(gait's `underfoot`), so you step up stairs of boxes, walk up the tilted planes of the ramps and stand
+on whatever you climb onto. More wanderers are more
 `{ "is": "wanderer" }` lines in `actors`, and more spots for them to walk between.
 
 ## Controls
@@ -151,7 +164,7 @@ and hands land on it:
   behind the sitter's hips, where the body reaches back furthest sitting down, seated and getting up
   (`xbot.touches.json`'s `things.behind` for each sitting clip, the skin furthest behind at every
   height), so no clip passes through the back.
-- **The low wall**: 0.845 m high, where the vault sets its hands, its middle under them, and thin enough
+- **The low wall**: 0.808 m high, where the vault sets its hands, its middle under them, and thin enough
   for the feet to keep over it.
 - **The platform**: 2.266 m high, the top the wall run ends on; the run starts where its kick lands on
   the platform's face.
