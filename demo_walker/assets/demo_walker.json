@@ -18,6 +18,7 @@
       "further": ["Pad13"],
       "drag": "Mouse2"
     },
+    "touch": { "touches": "xbot-touches", "body": "xbot", "lip": "freeclimb", "edge": "bracedidle", "rest": 1, "laps": 3, "reach": 1.5, "settle": 0.35 },
     "moves": {
       "touches": "xbot-touches",
       "fit": 0.02,
@@ -41,7 +42,8 @@
     "lip": "freeclimb",
     "edge": "bracedidle",
     "rest": 1,
-    "laps": 3
+    "laps": 3,
+    "away": 50
   },
   "wanderer": {
     "stop": 0.6,

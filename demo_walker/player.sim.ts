@@ -12,8 +12,8 @@
 // `before` stands it once on the ground at its slot's `start`, on the land or the shape there no more
 // than a step over it, facing the start's `yaw`, its look along it. Each step its look turns while `turning` is held, at the definition's `camera.turn` across
 // and `tilt` up and down a second at full push, the yaw less for a push right and the pitch more for a
-// push down, within `minPitch` and `maxPitch`. A climb is climber's and a held move is moves', and anim plays the clip they
-// hold; a seated body that the stick pushes gets up. Otherwise it strides (`plugins/gait`) the way the
+// push down, within `minPitch` and `maxPitch`. A station's clip is touch's (its `station`, `place` and
+// `eased` fields), a climb is climber's and a held move is moves', and anim plays the clip they hold; a seated body that the stick pushes gets up. Otherwise it strides (`plugins/gait`) the way the
 // stick points from the camera's yaw, facing the way it goes: in cover along the wall as moves' `hug`
 // has it; standing still while an act plays (a trick, a landing, going down into a crouch); crouched at
 // its definition's `moves.crouch.speed`; else at `walk` m/s or `run` with `fast` held. After it strides
@@ -22,8 +22,10 @@
 //
 // The acts are the page's keys: `stick(x, y)` (y down, as a stick reads), `turn(x, y)` (the right
 // stick, the same), `fast(v)` (1 held, 0 let
-// go), `jump` (a vault or a wall run where moves' `jump` finds one, else a jump), `use` (sit, take
-// cover, get up, leave cover), `crouch`, `roll`, `slide` and `flip` (moves' tricks), `look(dyaw,
+// go), `jump` (a vault or a wall run where moves' `jump` finds one, else a jump), `use` (in a scene of
+// stations, the yard, play the station whose clip starts nearest, within reach, or let go of the one it
+// plays, touch's `take` and `letGo`; else sit, take cover, get up, leave cover), `crouch`, `roll`,
+// `slide` and `flip` (moves' tricks), `look(dyaw,
 // dpitch)` and `zoom(by)`, the wheel's pixels. A seat's message arrives from outside the program, so
 // each refuses arguments of the wrong kind and writes nothing.
 //
@@ -41,6 +43,7 @@ import { land } from '#plugins/shapes3d/shapes3d.sim.ts'
 import { climb, grab } from './plugins/climber/climber.sim.ts'
 import { stride, underfoot } from './plugins/gait/gait.sim.ts'
 import * as moves from './plugins/moves/moves.sim.ts'
+import * as touch from './plugins/touch/touch.sim.ts'
 
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
@@ -77,7 +80,7 @@ export const player: Kind = {
     const k = def(w, me.kind)
     view(me, dt, k)
     if (d.move === 'seated' && (d.stick[0] !== 0 || d.stick[1] !== 0)) moves.use(me, w, k.moves)
-    if (climb(me, w, dt) || moves.held(me, w, dt, k.moves)) {
+    if (touch.held(me, w, dt, k.touch) || climb(me, w, dt) || moves.held(me, w, dt, k.moves)) {
       animate(me, w, dt)
       return
     }
@@ -108,7 +111,9 @@ export const player: Kind = {
       me.data.jump = true
     },
     use(me, w) {
-      moves.use(me, w, def(w, me.kind).moves)
+      const k = def(w, me.kind)
+      if (me.data.station >= 0) touch.letGo(me, w, k.touch)
+      else if (!touch.take(me, w, k.touch)) moves.use(me, w, k.moves)
     },
     crouch(me, w) {
       moves.crouch(me, w, def(w, me.kind).moves)

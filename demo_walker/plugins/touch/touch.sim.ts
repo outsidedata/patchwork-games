@@ -59,14 +59,27 @@
 // every `laps` laps; a one-shot carried by its measured travel (anim's `at`) where anim carries it, and
 // begun again `rest` seconds after it ends. `toWorld(place, q)` is where a point of the clip begun at
 // `place` stands. `touchOf(from, k, clip)` is one clip's reading.
+//
+// A seat's body takes a station too (the player's `use`). `take(me, w, k)` starts the station whose
+// clip starts nearest the body, within the numbers' `reach` across the ground, for a body on its feet in
+// no move, on no ladder and playing no act, and is whether it did: the row's `station` the station's
+// index, `place` where its clip starts, `clock` 0 (a partner's clip begun in step with its partner's
+// mannequin), the body eased from where it stood onto the clip's start over `settle` seconds (`slip`),
+// as moves' held moves are. `held(me, w, dt, k)` is one step of it, and false for a body at no station:
+// the clip posed as a mannequin's is (`pose`); a one-shot ends at its end, a loop goes on until
+// `letGo`. `letGo(me, w, k)` ends it: the body stands where the clip has it, on the ground there when
+// the floor the clip ends on (its `things.end`, else its `floor`, else the floor it started on) is
+// within a step of it, else in the air there, to fall. A station's mannequin stands out of sight under
+// the ground while a body plays its station (`mannequin.sim.ts`).
 import type { Row, W } from '#engine/engine.ts'
 import type { Wire } from '#engine/browser.ts'
-import { animKind, at, carries, clipOf, numbersOf, play, rigOf } from '#plugins/anim/anim.sim.ts'
+import { animKind, at, carries, clipOf, numbersOf, play, rigOf, stop } from '#plugins/anim/anim.sim.ts'
 import { def, json } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
 import { land, shapes, type Box, type Cylinder, type Placed } from '#plugins/shapes3d/shapes3d.sim.ts'
 import { ground as shaped } from '#plugins/shapes3d/shapes3d.walker.ts'
-import { topOf } from '../gait/gait.sim.ts'
+import { numbers } from '#plugins/walker/walker.sim.ts'
+import { topOf, underfoot } from '../gait/gait.sim.ts'
 import { sidesOf, type Face, type Seat } from '../moves/moves.sim.ts'
 
 const DEG = Math.PI / 180
@@ -80,6 +93,9 @@ const yawOf = (x: number, z: number) => math.atan2(x, z)
 const mean = (ps: number[][]) => ps[0].map((_, i) => ps.reduce((s, p) => s + p[i], 0) / ps.length)
 
 export type Numbers = { touches: string; body: string; lip: string; edge: string; rest: number; laps: number }
+// A seat's numbers for taking a station: touch's, how near its clip's start the body must be, and the
+// seconds it is eased onto it over.
+export type Taking = Numbers & { reach: number; settle: number }
 export type Place = { x: number; y: number; z: number; yaw: number }
 // A station: a clip stood on a thing (the header), and the loose things the mannequin's look draws
 // where the clip touches them (`mannequin.client.ts`).
@@ -100,7 +116,7 @@ export type Touch = {
     grips?: { hand: string; y: number; at: number[] }[]; lip?: number
     face?: { at: number[]; normal: number; under?: number }
     over?: { top: number; at: number[]; way: number }
-    start?: number; top?: number
+    start?: number; end?: number; top?: number
     seat?: { y: number; at: number[]; facing: number }[]
     back?: { y: number; at: number[]; normal: number }[]
     swing?: { pivot?: number[]; radius?: number }
@@ -340,4 +356,73 @@ export function pose(me: Row, w: W, k: Numbers, clip: string, place: Place, t: n
   }
   d.vel = [0, 0, 0]
   d.grounded = true
+}
+
+// ---------------------------------------------------------------- a seat at a station
+
+const placeIn = (d: Record<string, any>): Place => ({ x: d.place[0], y: d.place[1], z: d.place[2], yaw: d.place[3] })
+
+export function take(me: Row, w: W, k: Taking): boolean {
+  const d = me.data
+  if (!d.grounded || d.ladder || d.move || d.state === 'act' || d.station >= 0 || !w.all('stage').length) return false
+  const [x, , z] = d.pos
+  let best: { i: number; p: Place; far: number } | undefined
+  stationsOf(w).forEach((s, i) => {
+    const p = placeOf(w, me, k, s)
+    const far = math.hypot(x - p.x, z - p.z)
+    if (far <= k.reach && (!best || far < best.far)) best = { i, p, far }
+  })
+  if (!best) return false
+  const { i, p } = best
+  const s = stationsOf(w)[i]
+  d.station = i
+  d.place = [p.x, p.y, p.z, p.yaw]
+  // A partner's clip begun in step with its partner's mannequin.
+  const partner = s.with === undefined ? undefined : w.all('mannequin').find(m => m.data.station === s.with)
+  d.clock = partner ? partner.data.clock : 0
+  d.eased = [d.pos[0] - p.x, d.pos[1] - p.y, d.pos[2] - p.z, wrap(d.yaw - p.yaw)]
+  d.want = [0, 0]
+  play(me, s.clip, { holds: true, rate: 0 })
+  return true
+}
+
+export function held(me: Row, w: W, dt: number, k: Taking): boolean {
+  const d = me.data
+  if (!(d.station >= 0)) return false
+  const s = stationsOf(w)[d.station]
+  const c = clipOf(rigOf(w, animKind(me)), s.clip)
+  d.clock += dt
+  // A one-shot ends at its end; a loop goes on until let go.
+  if (!c.loop && d.clock >= c.dur) {
+    pose(me, w, k, s.clip, placeIn(d), c.dur - SHORT)
+    letGo(me, w, k)
+    return true
+  }
+  pose(me, w, k, s.clip, placeIn(d), d.clock)
+  const ease = Math.max(0, 1 - d.clock / k.settle)
+  const [ex, ey, ez, eyaw] = d.eased
+  d.pos = [d.pos[0] + ex * ease, d.pos[1] + ey * ease, d.pos[2] + ez * ease]
+  d.yaw = wrap(d.yaw + eyaw * ease)
+  d.want = [0, 0]
+  return true
+}
+
+export function letGo(me: Row, w: W, k: Taking) {
+  const d = me.data
+  const s = stationsOf(w)[d.station]
+  const t = touchOf(w, k, s.clip)
+  const place = placeIn(d)
+  const start = t.things.start ?? 0
+  const feet = place.y + (t.things.end ?? t.floor ?? start)
+  const [x, , z] = d.pos
+  const g = underfoot(me, w, feet).height(x, z)
+  const on = Math.abs(g - feet) <= numbers(me, w).step
+  d.pos = [x, on ? g : feet, z]
+  d.vel = [0, 0, 0]
+  d.want = [0, 0]
+  d.grounded = on
+  d.sliding = false
+  d.station = -1
+  d.place = null
+  stop(me, w)
 }

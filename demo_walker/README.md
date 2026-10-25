@@ -16,6 +16,12 @@ drawn by solids. Main's course is written by hand in `main.scene.json`; the yard
 on each in `assets/yard.json` (`/games/demo_walker/dev.html?scene=yard`). Chairs, trees and the water
 are kinds of the game's own with their own looks.
 
+Walk up to any station in the yard and press E (X on a gamepad): your body takes the mannequin's place
+and plays the same clip on the same thing, its hands and feet landing where the mannequin's do
+(`plugins/touch`'s `take`). A one-shot (a climb, a vault, a drop) plays to its end and leaves you on
+your feet, or falling where it ends in the air; a hold (a hang, a seat, swimming) lasts until you
+press E again.
+
 ## Writing your own walker plugin
 
 The point of this demo: walker handles walking, running, jumping, falling, steps, slopes, water and
@@ -89,7 +95,7 @@ on whatever you climb onto. More wanderers are more
 | W A S D or the arrows | left stick | walk |
 | Shift | RT or L3 | run |
 | Space | A | jump; running at a low wall vaults it, at a high one runs up it |
-| E | X | sit on a chair, take cover at a wall, get up, leave cover |
+| E | X | sit on a chair, take cover at a wall, get up, leave cover; in the yard, do the move of the station you stand at, and let go of a hang |
 | C | B | crouch and creep |
 | Q | LB | dodge roll |
 | X | RB | slide, while running |
