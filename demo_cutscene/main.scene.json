@@ -1,0 +1,78 @@
+{
+  "world": {
+    "defs": "demo_cutscene",
+    "loader": {
+      "assets": {
+        "demo_cutscene": {
+          "type": "json",
+          "url": "/games/demo_cutscene/assets/demo_cutscene.json",
+          "preload": true
+        },
+        "intro": {
+          "type": "json",
+          "url": "/games/demo_cutscene/assets/intro.json",
+          "preload": true
+        }
+      }
+    },
+    "shipped": { "plugins": ["stagehand"] },
+    "ui": {
+      "panels": {
+        "cutscene.top": { "anchor": "top", "size": [960, 60] },
+        "cutscene.bottom": { "anchor": "bottom", "size": [960, 60] },
+        "cutscene.veil": { "anchor": "center", "size": [960, 540], "layer": 1 }
+      },
+      "styles": {
+        "cutscene.bars": { "color": 0 },
+        "cutscene.veil": { "color": 0 }
+      }
+    },
+    "cutscene": {
+      "script": "intro",
+      "kinds": ["gate"],
+      "settle": 1,
+      "tremor": [[1, 31], [0.6, 47], [0.3, 23]],
+      "mods": { "behaviors": ["stagehand"] }
+    }
+  },
+  "plugins": ["loader", "scenemanager", "player", "environment3d", "render3d", "cutscene", "ui"],
+  "seats": 1,
+  "prefabs": {
+    "engine": {
+      "dt": 0.016666666666666666,
+      "width": 960,
+      "height": 540
+    },
+    "scenemanager": {
+      "out": {}
+    },
+    "loader": {},
+    "render3d": {
+      "camera": { "fov": 50, "near": 0.1, "far": 500, "at": [0, 2.4, 7], "look": [0, 0, -5] },
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "background": "#bcd4e8"
+    },
+    "environment3d": {
+      "sun": { "color": "#fff3e0", "power": 2.6, "at": [-20, 40, 25], "shadow": { "map": 2048, "half": 20, "near": 1, "far": 120, "distance": 60, "bias": -0.0002, "normalBias": 0.02 } },
+      "sky": { "color": "#dbe8f5", "ground": "#6b6252", "power": 1.1 }
+    },
+    "player": {
+      "seat": 0
+    },
+    "cutscene": {},
+    "mark": { "name": "", "at": [0, 0] },
+    "yard": {},
+    "gate": { "name": "", "pos": [0, 0, 0], "yaw": 0, "open": 0, "rate": 0, "direct": null },
+    "guard": { "name": "", "pos": [0, 0, 0] }
+  },
+  "actors": [
+    { "is": "scenemanager" },
+    { "is": "loader" },
+    { "is": "yard" },
+    { "is": "cutscene" },
+    { "is": "mark", "name": "beyond", "at": [0, -5] },
+    { "is": "gate", "name": "gate", "pos": [0, 0, 0] }
+  ]
+}

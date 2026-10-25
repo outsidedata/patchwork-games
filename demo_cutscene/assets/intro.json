@@ -1,0 +1,25 @@
+{
+  "end": 7,
+  "auto": true,
+  "reach": 1.4,
+  "stop": 0.2,
+  "head": 1.3,
+  "fov": 50,
+  "pace": 1.4,
+  "limit": 10,
+  "cast": {
+    "gate": { "kind": "gate", "name": "gate" }
+  },
+  "cues": [
+    { "at": 0, "do": "shot", "name": "wide", "pos": [0, 7, 16], "look": "gate", "over": 0 },
+    { "at": 0, "do": "fade", "to": 1, "over": 0 },
+    { "at": 0, "do": "bars", "on": true, "over": 0.6 },
+    { "at": 0.2, "do": "fade", "to": 0, "over": 1.2 },
+    { "at": 1, "do": "shot", "name": "closer", "pos": [3.5, 2.2, 6], "look": "gate", "over": 1.8 },
+    { "at": 3, "do": "open", "who": "gate", "over": 2 },
+    { "at": 3, "do": "wait", "on": "open" },
+    { "at": 3, "do": "spawn", "kind": "guard", "name": "warden", "where": "beyond" },
+    { "at": 3, "do": "shot", "name": "through", "pos": [0, 2.4, 7], "look": "beyond", "over": 1.5 },
+    { "at": 6, "do": "bars", "on": false, "over": 0.6 }
+  ]
+}

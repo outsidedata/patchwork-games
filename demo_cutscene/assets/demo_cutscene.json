@@ -1,0 +1,20 @@
+{
+  "yard": {
+    "size": 80,
+    "colour": "#6f7d5a"
+  },
+  "gate": {
+    "width": 4,
+    "height": 2.6,
+    "thick": 0.15,
+    "post": 0.6,
+    "swing": 1.6,
+    "wood": "#7a4e2a",
+    "stone": "#9a958c"
+  },
+  "guard": {
+    "size": 0.8,
+    "tall": 1.9,
+    "colour": "#b33a3a"
+  }
+}
