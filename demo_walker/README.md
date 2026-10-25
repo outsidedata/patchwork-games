@@ -22,6 +22,75 @@ and plays the same clip on the same thing, its hands and feet landing where the 
 your feet, or falling where it ends in the air; a hold (a hang, a seat, swimming) lasts until you
 press E again.
 
+## How the yard's moves work
+
+Five pieces, each feeding the next. To improve a move, find which piece it is in.
+
+1. **What the clip touches** (`assets/xbot.touches.json`). The bake measures the X Bot's skin on every
+   frame of every rig clip in Blender (`assets/touches.py`) and reads where it touches things
+   (`assets/touches.read.mjs`): where the hands grip a ledge, where the feet kick a wall, the seat's
+   height, the floor it ends on, and so on, all in the clip's own space (x the body's left, y up, z
+   ahead, the clip's floor at y = 0). Every number below comes from here.
+2. **The thing, sized to the clip** (`assets/yard.mjs`, run by the bake). For each station it builds
+   the shapes3d boxes and cylinders the clip needs, at the sizes the clip measured (a ledge's height
+   from where the grip is, a chair at the seat's height, a car's seat block where the driver sits),
+   writes them into `yard.scene.json`, and writes the station into `assets/yard.json`: `{ clip, on,
+   at, side, along }` (the shape and which side of it), or `{ clip, at, yaw, water }` on the ground,
+   or `{ clip, with }` beside a partner.
+3. **Where the clip starts** (`plugins/touch`, `placeOf`). Anim plays a clip rigidly: every point of
+   it is where the root started plus the clip's own offset, turned by the root's facing. So one start
+   place and one facing put the clip anywhere. `placeOf` picks the point the clip touches (the grip,
+   the kick, the seat, the soles) and the point of the shape it should land on, and works out the
+   start that carries one onto the other (`anchor`). Each case has its own rule; the header of
+   `touch.sim.ts` lists them.
+4. **Playing it** (`touch.sim.ts`, `pose`). The clip is played by anim at rate 0 and its playhead
+   written each step (`clipT`). A one-shot is carried along its measured travel (anim's `at`); a loop
+   is carried by its lap's steady progress and stepped back to its start every `laps` laps.
+5. **The player taking it** (`touch.sim.ts`, `take`, `held`, `letGo`; called from `player.sim.ts`).
+   E runs the player's `use` act: `take` finds the station whose start is nearest the body, within the
+   player's `touch.reach` (1.5 m, `assets/demo_walker.json`), on a body on its feet and in no other
+   move. It writes `station`, `place` and `clock` onto the player row, and `eased`, how far the body
+   stood from the start, which `held` eases away over `touch.settle` seconds (0.35 s), position
+   and facing, height included. Each step `held` poses the body exactly as a mannequin is posed, and
+   walker is not asked to walk it. A one-shot ends at its end; a loop ends at the next E. `letGo`
+   stands the body where the clip left it: on the ground if the floor the clip ends on (its
+   `things.end`, else `floor`, else the floor it started on) is within a step of the ground there,
+   else at that height in the air, where walker drops it and it lands. While the player has a
+   station, that station's mannequin stands 50 m under the ground (`mannequin.away`) so there is one
+   body, not two. A partner clip (the handshake) starts its clock at the partner mannequin's, so the
+   two stay in step.
+
+`plugins/touch/touch.sim.test.ts` walks a seat up to all 46 stations, presses use, plays each and
+checks it ends up on its feet.
+
+### What is not right yet
+
+These are what I know is rough, from how the code works; each is a place to start.
+
+- **The snap.** Pressing E within 1.5 m slides the body onto the clip's start over 0.35 s, through
+  anything in the way, including up into the air for a hang. Nothing walks you to the start, and
+  nothing checks you can reach it from where you are.
+- **No control while holding.** A hang, a bar, a rope, a seat just loop. The stick does nothing: no
+  shimmying a ledge by pushing left, no climbing up from a hang by pushing up, no letting go by
+  pushing away. The yard has the clips for each (`bracedleft`, `bracedclimb`, `braceddrop`, ...), but
+  each is its own station; nothing chains one into the next.
+- **Nothing collides during a clip.** While `held` has the body, walker doesn't walk it, so the clip
+  goes wherever its travel goes, through walls and other bodies.
+- **The end of a clip.** The body stands where the clip's root ends, at the floor the reading says.
+  Where the reading has the floor wrong, the body pops up or down onto the ground, or falls from where
+  the clip left it.
+- **Loops that travel** (a shimmy, the bar, the crawl, swimming) are posed as the mannequin is: carried
+  along their lap's progress and jumped back to the start every 3 laps. For a player that jump is a
+  teleport.
+- **The props.** Tables, panels, crates, the ball, the door, the wheel, the rope swing's platform and
+  rope, and the pool water are the mannequin's looks (`mannequin.client.ts`), not shapes3d: the player
+  walks through them, and a carried crate is drawn with the mannequin, not with the player.
+- **Moves only at stations.** E only does a station. A ledge or wall anywhere else is not a station,
+  so nothing happens there. Moving that to "any box of the right height" means `take` looking for
+  shapes the way moves' `jump` looks for walls, instead of reading `yard.json`.
+- **Not looked at in Chrome.** All 46 pass the node test. In Chrome, only the first braced hang was
+  played with a real E press and looked at.
+
 ## Writing your own walker plugin
 
 The point of this demo: walker handles walking, running, jumping, falling, steps, slopes, water and
