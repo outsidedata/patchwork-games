@@ -8,10 +8,11 @@
 // the wall face (`groundOf`). Its definition (`assets/demo_walker.json`) holds its numbers:
 //   clips     `{ mount, climb, top }`, the rig's clips: stepping onto the ladder from the ground, the
 //             climbing loop, and climbing off the top onto the ground there.
-//   contacts  the loader `json` entry of what the clips do with the body they were measured on
-//             (`assets/xbot.contacts.json`, its `body` that body's anim kind): each ladder clip's rung
-//             plane, the rung tops its balls stand on, and the floor the top clip ends on. The ladder is
-//             built to them, so no clip is moved off where it stands its feet.
+//   touches   the loader `json` entry of what the clips touch, measured on the body they play on
+//             (`assets/xbot.touches.json`, its `body` that body's anim kind, written by the game's bake):
+//             each ladder clip's rung plane (`things.ladder`), the rung tops its balls stand on, a loop's
+//             `lap`, and the `floor` the top clip ends on. The ladder is built to them, so no clip is
+//             moved off where it stands its feet.
 //   standoff  metres from the wall face to the rungs' middles: far enough that where the mount starts a
 //             body, beside the ladder, it stands its walker radius or more out from the wall, or the
 //             climb throws, naming the standoff that fits.
@@ -32,7 +33,7 @@
 // Anim draws a clip placed rigidly in the world: every point of it stands at where its root started plus
 // the clip's own place of the point, turned by the way the root faced then, its travel and its turn
 // included. So each clip is placed (`Place`) by one start and one facing, read off where its rung plane
-// stands in the clip (`contacts`): turned so the plane's normal toward the body points out from the
+// stands in the clip (`touches`): turned so the plane's normal toward the body points out from the
 // wall, and set so the point of the plane between its balls stands on the ladder's rung plane, midway
 // between the rails. Its height: the mount's on the ground, where it starts; the climb's whole laps up
 // from the foot, its rung tops being the ladder's; the top clip's with the floor it ends on on the top.
@@ -85,14 +86,16 @@ const SEGMENTS = ['torso', 'handL', 'handR', 'forearmL', 'forearmR', 'legL', 'le
 
 type Numbers = {
   clips: { mount: string; climb: string; top: string }
-  contacts: string
+  touches: string
   standoff: number; behind: number; reach: number; settle: number; leap: number[]; fit: number
   look: { width: number; rail: number; thick: number }
 }
-// What a ladder clip does with the body, as `xbot.contacts.mjs` writes it.
+// What a ladder clip touches, as `xbot.touches.mjs` writes it: its rung plane, a loop's lap, the floor it
+// ends on.
 type Rungs = { normal: number; at: number[]; tops: number[]; across: number; rails: number | null }
-type Contact = { dur: number; lap: number[] | null; ladder: Rungs | null; floor: number | null }
-type Contacts = { body: string; clips: Record<string, Contact> }
+type Touch = { dur: number; lap: number[] | null; floor: number | null; things: { ladder?: Rungs } }
+type Touches = { body: string; clips: Record<string, Touch> }
+type Climbed = Touch & { ladder: Rungs }
 // A clip placed: where its root starts, the way it faces then, and the height it stands at.
 export type Place = { x: number; z: number; y: number; yaw: number }
 
@@ -106,19 +109,19 @@ function phaseOf(tops: number[], s: number): number {
   return (((a / (2 * Math.PI)) * s) % s + s) % s
 }
 
-// A ladder clip's contacts, thrown for when there are none.
-function contactOf(c: Contacts, clip: string, row: Row): Contact & { ladder: Rungs } {
+// A ladder clip's touches, its rung plane brought up as `ladder`, thrown for when it has none.
+function touchOf(c: Touches, clip: string, row: Row): Climbed {
   const got = c.clips[clip]
-  if (!got) throw new Error(`climber: ladder ${row.id}'s contacts have no clip ${clip}`)
-  if (!got.ladder) throw new Error(`climber: ladder ${row.id}'s clip ${clip} stands on no rungs in its contacts`)
-  return got as Contact & { ladder: Rungs }
+  if (!got) throw new Error(`climber: ladder ${row.id}'s touches have no clip ${clip}`)
+  if (!got.things?.ladder) throw new Error(`climber: ladder ${row.id}'s clip ${clip} stands on no rungs in its touches`)
+  return { ...got, ladder: got.things.ladder }
 }
 
 // A ladder's rungs: their spacing, the height of the lowest top over the foot, and the loop's lap.
 export function rungsOf(from: Parameters<typeof def>[0], row: Row) {
   const k = def(from, row.kind) as Numbers
-  const c = json(from, k.contacts) as Contacts
-  const loop = contactOf(c, k.clips.climb, row)
+  const c = json(from, k.touches) as Touches
+  const loop = touchOf(c, k.clips.climb, row)
   if (!loop.lap) throw new Error(`climber: ladder ${row.id}'s climbing clip ${k.clips.climb} is no loop`)
   const lap = loop.lap[1]
   // The rung tops one lap holds: the loop's tops, each taken to its lap's first.
@@ -127,7 +130,7 @@ export function rungsOf(from: Parameters<typeof def>[0], row: Row) {
   if (distinct.length > 1 && distinct[distinct.length - 1] - distinct[0] > lap - SAME) distinct.pop()
   const spacing = lap / distinct.length
   const phase = phaseOf(loop.ladder.tops, spacing)
-  const ladders = Object.values(k.clips).map(name => contactOf(c, name, row).ladder)
+  const ladders = Object.values(k.clips).map(name => touchOf(c, name, row).ladder)
   const across = Math.max(...ladders.map(l => l.across))
   if (k.look.width / 2 - k.look.rail / 2 < across) {
     throw new Error(`climber: ladder ${row.id}'s rails stand ${k.look.width} m apart, and its clips stand a foot ${across} m to either side of its middle: they must stand more than ${2 * across + k.look.rail} m apart`)
@@ -154,14 +157,14 @@ export function ladderOf(w: W, row: Row, ground: Ground) {
   // The rung plane midway between the rails, and a clip turned and set onto it.
   const plane = [x + out[0] * k.standoff, z + out[1] * k.standoff]
   const place = (clip: string, height: number): Place => {
-    const l = contactOf(c, clip, row).ladder
+    const l = touchOf(c, clip, row).ladder
     const turn = wrap(yaw - l.normal * DEG)
     const [ox, oz] = along(0, 0, turn, l.at[1], l.at[0])
     return { x: plane[0] - ox, z: plane[1] - oz, y: height, yaw: turn }
   }
   // The top clip ends on the floor it measured, set on the top; its rungs must then be the ladder's.
-  const tops = contactOf(c, k.clips.top, row)
-  if (tops.floor === null) throw new Error(`climber: ladder ${row.id}'s top clip ${k.clips.top} ends on no raised floor in its contacts`)
+  const tops = touchOf(c, k.clips.top, row)
+  if (tops.floor === null) throw new Error(`climber: ladder ${row.id}'s top clip ${k.clips.top} ends on no raised floor in its touches`)
   const upY = top - tops.floor
   const miss = ((((upY + phaseOf(tops.ladder.tops, r.spacing)) - (y + r.phase)) % r.spacing) + r.spacing) % r.spacing
   const off = Math.min(miss, r.spacing - miss)

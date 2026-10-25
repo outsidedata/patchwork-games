@@ -26,10 +26,12 @@
 //            the yaw it faces there, and 1 for a low wall
 //
 // The numbers, `k`, the `moves` of the rule's kind's definition (`assets/demo_walker.json`):
-//   contacts the loader `json` entry of what the clips do with the body they were measured on
-//            (`assets/xbot.contacts.json`, its `body` that body's anim kind): where the seated clip
-//            sits, where the vault sets its hands and how far its feet keep over the wall, where the
-//            wall run kicks the wall and the top it ends on. The chairs and walls are built to them.
+//   touches  the loader `json` entry of what the clips touch, measured on the body they play on
+//            (`assets/xbot.touches.json`, its `body` that body's anim kind, written by the game's bake):
+//            where the seated clip sits (`things.seat`), the skin furthest behind of the sitting clips
+//            (`things.behind`), where the vault sets its hands and how far its feet keep over the wall
+//            (`things.over`), where the wall run kicks the wall (`things.face`) and the top it ends on
+//            (`floor`). The chairs and walls are built to them.
 //   fit      metres: how far a chair's seat, a vault's wall top or a wall run's top may stand from where
 //            its clip has it
 //   settle   seconds a held move's start is eased over
@@ -39,7 +41,7 @@
 //            A chair's seat must stand where the seated clip sits, within `fit` of its height and
 //            under it across the ground, and its back's front face on the body's rearmost skin within
 //            the back's span over the whole of sitting down, seated and getting up, no nearer and no
-//            more than `fit` further (`backFits`, off the contacts' `rear`), or sitting on it throws,
+//            more than `fit` further (`backFits`, off the touches' `behind`), or sitting on it throws,
 //            naming the height or the back that fits.
 //   cover    `{ stand, crouch, in, out, lowIn, lowOut, tall, low, hug, faces, speed, reach, margin }`:
 //            the stances, the clips in and out of a wall `tall` metres or more over the body's feet and
@@ -76,7 +78,7 @@
 // facing `yaw`, `placed(w, me, clip, anchor, turn0, t)` where a held clip begun there has the root at t,
 // `begin(me, move, clip, anchor, turn0)` a held move begun, `onFace(face, x, z)` a point's place along a
 // side and out from it, `overWall` and `upWall` where the vault and the wall run start against a side
-// (none where the side does not fit), and `contactOf(w, me, k, clip)` one clip's contacts: what the
+// (none where the side does not fit), and `touchOf(w, me, k, clip)` what one clip touches: what the
 // workshop stands a move by (`demo_walker.workshop.ts`), so a body there makes the move as `use` and
 // `jump` start it.
 import type { Row, W } from '#engine/engine.ts'
@@ -95,7 +97,7 @@ const along = (x: number, z: number, yaw: number, f: number, l: number) =>
 const yawOf = (x: number, z: number) => math.atan2(x, z)
 
 export type Numbers = {
-  contacts: string
+  touches: string
   fit: number
   settle: number
   crouch: { down: string; up: string; speed: number }
@@ -174,21 +176,25 @@ const free = (me: Row) => {
 
 const speedOf = (me: Row) => math.hypot(me.data.vel[0], me.data.vel[2])
 
-// What the clips do with the body (`assets/xbot.contacts.json`, as `xbot.contacts.mjs` writes it), one
-// clip's, measured on the body this row plays.
-export type Contact = {
+// What one clip touches (`assets/xbot.touches.json`, as `xbot.touches.mjs` writes it), measured on the
+// body this row plays: the floor it ends on, and of its `things` the wall it kicks (`face`), the top it
+// sets its hands on going over (`over`), where it sits (`seat`) and its skin furthest behind in the
+// chair's frame (`behind`).
+export type Touch = {
   floor: number | null
-  wall: { normal: number; at: number[] } | null
-  ledge: { top: number; at: number[]; way: number; clear: number[] } | null
-  rear: number[][] | null
-  surfaces: { kind: string; at?: number[] }[]
+  things: {
+    face?: { normal: number; at: number[] }
+    over?: { top: number; at: number[]; way: number; clear: number[] }
+    seat?: { y: number; at: number[] }[]
+    behind?: number[][]
+  }
 }
-export function contactOf(w: W, me: Row, k: Numbers, clip: string): Contact {
-  const c = json(w, k.contacts) as { body: string; clips: Record<string, Contact> }
+export function touchOf(w: W, me: Row, k: Numbers, clip: string): Touch {
+  const c = json(w, k.touches) as { body: string; clips: Record<string, Touch> }
   const kind = animKind(me)
-  if (c.body !== kind) throw new Error(`moves: the contacts ${k.contacts} are measured on ${c.body}, and a ${kind} makes the move`)
+  if (c.body !== kind) throw new Error(`moves: the touches ${k.touches} are measured on ${c.body}, and a ${kind} makes the move`)
   const got = c.clips[clip]
-  if (!got) throw new Error(`moves: the contacts ${k.contacts} have no clip ${clip}`)
+  if (!got) throw new Error(`moves: the touches ${k.touches} have no clip ${clip}`)
   return got
 }
 
@@ -288,9 +294,9 @@ export function use(me: Row, w: W, k: Numbers): boolean {
   }
   if (best) {
     // The seat stands where the seated clip sits: its height, and under it across the ground.
-    const sits = contactOf(w, me, k, k.seat.seated).surfaces.find(s => s.kind === 'seat')
-    if (!sits?.at) throw new Error(`moves: the seated clip ${k.seat.seated} sits on nothing in its contacts`)
-    const [sx, sy, sz] = sits.at
+    const sits = touchOf(w, me, k, k.seat.seated).things.seat?.[0]
+    if (!sits) throw new Error(`moves: the seated clip ${k.seat.seated} sits on nothing in its touches`)
+    const sy = sits.y, [sx, sz] = sits.at
     const { height, width, depth, behind } = best.seat
     if (Math.abs(height - sy) > k.fit) {
       throw new Error(`moves: the chair at (${best.x}, ${best.z})'s seat stands ${height} m high, and the seated clip ${k.seat.seated} sits at ${sy} m: a seat ${sy} m high fits`)
@@ -332,13 +338,13 @@ export function use(me: Row, w: W, k: Numbers): boolean {
 }
 
 // How far behind where its sitter's hips stand a chair's back stands with its front face on the body's
-// rearmost skin, over the whole of sitting down, seated and getting up (each clip's contacts' `rear`, in
+// rearmost skin, over the whole of sitting down, seated and getting up (each clip's touches' `behind`, in
 // the chair's frame, from the floor the body stands on at `y`): of the skin within the back's width and
 // between the seat's top and the back's, the furthest behind, and the board's thickness behind that.
 // Undefined where no skin of the clips reaches the back's span.
 export function backFits(w: W, me: Row, k: Numbers, chair: ReturnType<typeof seats>[number], y: number): number | undefined {
   const { width, height, back, board } = chair.seat
-  const rear = [k.seat.sit, k.seat.seated, k.seat.rise].flatMap(c => contactOf(w, me, k, c).rear ?? [])
+  const rear = [k.seat.sit, k.seat.seated, k.seat.rise].flatMap(c => touchOf(w, me, k, c).things.behind ?? [])
   const inside = rear.filter(([x, up]) => Math.abs(x) <= width / 2 && y + up >= chair.y + height && y + up <= chair.y + height + back)
   return inside.length ? board - Math.min(...inside.map(p => p[2])) : undefined
 }
@@ -394,7 +400,7 @@ export function jump(me: Row, w: W, k: Numbers): boolean {
   const fx = math.sin(d.yaw), fz = math.cos(d.yaw)
   for (const [move, m] of [['vault', k.vault], ['wallrun', k.wallrun]] as const) {
     if (speed < m.run) continue
-    const c = contactOf(w, me, k, m.clip)
+    const c = touchOf(w, me, k, m.clip)
     for (const f of faces(courseOf(w))) {
       const o = onFace(f, x, z)
       const head = -(fx * f.out[0] + fz * f.out[1])
@@ -418,9 +424,9 @@ const faceAt = (f: Face, o: ReturnType<typeof onFace>) => [f.a[0] + o.t[0] * o.u
 
 // Where the vault starts the root, and the way it faces, to set its hands on the middle of this wall's
 // top; none for a wall of a height it does not set them on, or too deep for its feet to keep over.
-export function overWall(c: Contact, clip: string, f: Face, o: ReturnType<typeof onFace>, y: number, k: Numbers) {
-  if (!c.ledge) throw new Error(`moves: the vault ${clip} sets its hands on no ledge in its contacts`)
-  const { top, at: [ax, az], way, clear } = c.ledge
+export function overWall(c: Touch, clip: string, f: Face, o: ReturnType<typeof onFace>, y: number, k: Numbers) {
+  if (!c.things.over) throw new Error(`moves: the vault ${clip} sets its hands on no top in its touches`)
+  const { top, at: [ax, az], way, clear } = c.things.over
   if (Math.abs(f.top - y - top) > k.fit || f.deep / 2 > Math.min(-clear[0], clear[1])) return undefined
   const [px, pz] = faceAt(f, o)
   const hands = [px - f.out[0] * (f.deep / 2), pz - f.out[1] * (f.deep / 2)]
@@ -431,11 +437,11 @@ export function overWall(c: Contact, clip: string, f: Face, o: ReturnType<typeof
 
 // Where the wall run starts the root, and the way it faces, to kick this wall's face; none for a wall
 // whose top is not the floor it ends on.
-export function upWall(c: Contact, clip: string, f: Face, o: ReturnType<typeof onFace>, y: number, k: Numbers) {
-  if (!c.wall) throw new Error(`moves: the wall run ${clip} kicks no wall in its contacts`)
-  if (c.floor === null) throw new Error(`moves: the wall run ${clip} ends on no raised floor in its contacts`)
+export function upWall(c: Touch, clip: string, f: Face, o: ReturnType<typeof onFace>, y: number, k: Numbers) {
+  if (!c.things.face) throw new Error(`moves: the wall run ${clip} kicks no wall in its touches`)
+  if (c.floor === null) throw new Error(`moves: the wall run ${clip} ends on no raised floor in its touches`)
   if (Math.abs(f.top - y - c.floor) > k.fit) return undefined
-  const { normal, at: [ax, az] } = c.wall
+  const { normal, at: [ax, az] } = c.things.face
   const [px, pz] = faceAt(f, o)
   const yaw = wrap(yawOf(f.out[0], f.out[1]) - normal * DEG)
   const [x, z] = along(px, pz, yaw, -az, -ax)

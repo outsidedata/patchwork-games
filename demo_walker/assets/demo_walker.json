@@ -19,7 +19,7 @@
       "drag": "Mouse2"
     },
     "moves": {
-      "contacts": "xbot-contacts",
+      "touches": "xbot-touches",
       "fit": 0.02,
       "settle": 0.35,
       "crouch": { "down": "crouch", "up": "uncrouch", "speed": 1.6 },
@@ -44,7 +44,7 @@
   },
   "ladder": {
     "clips": { "mount": "mount", "climb": "ladder", "top": "dismount" },
-    "contacts": "xbot-contacts",
+    "touches": "xbot-touches",
     "standoff": 0.28,
     "behind": 0.5,
     "reach": 1.3,

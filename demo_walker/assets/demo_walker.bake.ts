@@ -1,9 +1,10 @@
 // demo_walker's bake, `yarn bake demo_walker` (core's `scripts/bake.ts`): every built file the scene's
 // catalogue names, written where the catalogue reads it.
-//   xbot.contacts.json   what every clip does with the body (`xbot.contacts.mjs`), read off where the
-//                        skin is on every frame of each clip as its FBX has it (`xbot.contacts.py`, in
-//                        Blender), and each clip's lift written to its sidecar beside its FBX, which
-//                        anim's export lays onto the clip as it bakes it
+//   xbot.touches.json    what every clip of the rig touches (`xbot.touches.mjs`, by the library's reader
+//                        `touches.read.mjs`), read off where the skin is on every frame of each clip as its
+//                        FBX has it (`touches.py`, in Blender, with the rearmost skin of the sitting clips),
+//                        and each clip's lift and turn written to its sidecar beside its FBX, which anim's
+//                        export lays onto the clip as it bakes it
 //   xbot.glb             Mixamo's X Bot (the library's `characters/xbot/xbot.fbx`) with every clip of
 //                        `xbot.rig.json` baked onto it by anim's export (`plugins/anim/anim.export.py`),
 //                        which packs it with gltfpack; the rig's measured `table` and `ends` are then
@@ -76,11 +77,16 @@ export default async ({ blender, webp, scratch }: Tools) => {
   await webp(raw, checker, SIZE)
   console.log('wrote', path.relative(root, checker))
 
-  // what the clips do with the body, and their sidecars, before the export lays them on
+  // what the clips touch, and their sidecars, before the export lays them on: each clip of the rig with a
+  // file of its own (a mirror is anim's) measured once
   const rig = path.join(here, 'xbot.rig.json')
-  const skin = scratch('xbot.skin.json')
-  console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(here, 'xbot.contacts.py'), '--', rig, skin]))
-  console.log(await node([path.join(here, 'xbot.contacts.mjs'), skin]))
+  const files = [...new Set(Object.values(JSON.parse(fs.readFileSync(rig, 'utf8')).clips as Record<string, string | { file?: string }>)
+    .map(e => (typeof e === 'string' ? e : e.file)).filter((f): f is string => !!f))]
+  const list = scratch('xbot.clips.txt')
+  fs.writeFileSync(list, files.join('\n') + '\n')
+  const skins = scratch('skin')
+  console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(here, 'touches.py'), '--', list, skins, '--rear']))
+  console.log(await node([path.join(here, 'xbot.touches.mjs'), skins]))
 
   // the X Bot and its clips, and the rig's measures
   const table = scratch('xbot.table.json')

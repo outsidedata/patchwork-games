@@ -10,7 +10,7 @@
         "land": { "type": "json", "url": "/games/demo_walker/assets/land.json", "preload": true },
         "checker": { "type": "texture", "url": "/games/demo_walker/assets/checker-1024.webp", "preload": true, "wrap": "repeat", "anisotropy": 8 },
         "xbot-rig": { "type": "json", "url": "/games/demo_walker/assets/xbot.rig.json", "preload": true },
-        "xbot-contacts": { "type": "json", "url": "/games/demo_walker/assets/xbot.contacts.json", "preload": true },
+        "xbot-touches": { "type": "json", "url": "/games/demo_walker/assets/xbot.touches.json", "preload": true },
         "xbot": { "type": "model", "url": "/games/demo_walker/assets/xbot.glb", "preload": true }
       }
     },

@@ -5,7 +5,7 @@ import { boot, type Row, type Scene } from '#engine/engine.ts'
 import { connection, load, manager, type Down } from '#addons/scenemanager/scenemanager.addon.ts'
 import { sim } from '../../demo_walker.sim.ts'
 import file from '../../demo_walker.scene.json' with { type: 'json' }
-import contacts from '../../assets/xbot.contacts.json' with { type: 'json' }
+import touches from '../../assets/xbot.touches.json' with { type: 'json' }
 
 const DT = file.prefabs.engine.dt
 
@@ -78,7 +78,7 @@ test('a running seat vaults the low wall, its hands on its top', async () => {
   stand(3, 20, 0)
   send('fast', 1)
   send('stick', 0, -1)
-  until(() => me().data.pos[2] > 25 - contacts.clips.vault.ledge!.at[1], 60 * 3)
+  until(() => me().data.pos[2] > 25 - touches.clips.vault.things.over!.at[1], 60 * 3)
   send('jump')
   until(() => me().data.move === 'vault', 2)
   until(() => me().data.move === '', 60 * 2)
@@ -93,7 +93,7 @@ test('a running seat runs up onto the platform, onto the top its clip ends on', 
   stand(13, 19, 0)
   send('fast', 1)
   send('stick', 0, -1)
-  until(() => me().data.pos[2] > 25.5 - contacts.clips.wallrun.wall!.at[1], 60 * 3)
+  until(() => me().data.pos[2] > 25.5 - touches.clips.wallrun.things.face!.at[1], 60 * 3)
   send('jump')
   until(() => me().data.move === 'wallrun', 2)
   until(() => me().data.move === '', 60 * 3)

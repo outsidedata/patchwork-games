@@ -13,7 +13,7 @@
 //              rungs. Climbing down and stepping off are these clips run back.
 //   chair      each chair: `sit`, begun by moves' `use` from where sitting starts; `seated`; and `rise`,
 //              begun by `use` from the seated body. Each also marks `back`: the body's skin furthest
-//              behind within the chair's back over the whole of its clip (the contacts' `rear`), its gap
+//              behind within the chair's back over the whole of its clip (the touches' `behind`), its gap
 //              how far in front of the back's front face it stands, off where it is through it or more
 //              than `moves.fit` in front.
 //   cover, low cover   each box whose side facing where the seat starts stands `cover.tall` over the
@@ -32,9 +32,9 @@
 // `plugins/anim/anim.sim.ts` picks the gear); a one-shot on the floor moves by the travel it carries,
 // as walker carries it on open ground.
 //
-// A mark is a patch of skin the clip holds on something (`assets/xbot.contacts.json`'s `plants`, live
+// A mark is a patch of skin the clip holds on something (`assets/xbot.touches.json`'s `plants`, live
 // between their `from` and `to`, all but those `still`, held on nothing or at rest on the body), and the
-// seat a sitting clip sits on, each where the clip has it: its place in the clip set where the step
+// seat a sitting clip sits on (its `things.seat`), each where the clip has it: its place in the clip set where the step
 // started the root, turned the way the root faced then. Its `gap` is how far it stands off what it is
 // on, metres, by `on`: `ground` over the floor the move stands on, `raised floor` over walker's ground
 // under it (the course's tops over the land), `ledge` over the top of the nearest side of a box, `rung`
@@ -71,7 +71,7 @@ const along = (x: number, z: number, yaw: number, f: number, l: number) =>
   [x + f * math.sin(yaw) + l * math.cos(yaw), z + f * math.cos(yaw) - l * math.sin(yaw)]
 const yawOf = (x: number, z: number) => math.atan2(x, z)
 const round = (v: number) => +v.toFixed(2)
-type Fit = { contacts: string; fit: number }
+type Fit = { touches: string; fit: number }
 
 // The body on its feet at (x, y, z) facing `yaw` in `stance`, playing nothing, on no ladder and in no
 // move: a row as moves' `use` and `jump` take a free body.
@@ -106,7 +106,7 @@ const anchored = (me: Row): Place => ({ x: me.data.anchor[0], y: me.data.anchor[
 
 // ---------------------------------------------------------------- marks
 
-// What a step's marks are read against: its plugin's contacts and `fit`, the floor the move stands on,
+// What a step's marks are read against: its plugin's touches and `fit`, the floor the move stands on,
 // and the ladder a ladder's clip climbs.
 type On = Fit & { floor: number; ladder?: Row }
 
@@ -114,7 +114,7 @@ type On = Fit & { floor: number; ladder?: Row }
 // is on and whether that is further than `fit`.
 function marksOf(w: W, me: Row, on: On, start: Place): Mark[] {
   const d = me.data
-  const c = json(w, on.contacts).clips?.[d.clip]
+  const c = json(w, on.touches).clips?.[d.clip]
   if (!c) return []
   const place = (q: number[]) => {
     const [x, z] = along(start.x, start.z, start.yaw, q[2], q[0])
@@ -125,8 +125,8 @@ function marksOf(w: W, me: Row, on: On, start: Place): Mark[] {
     if (p.on === 'still' || d.clipT < p.from || d.clipT > p.to) continue
     out.push(gapOf(w, { name: p.point, on: p.on, at: place(p.at) }, on))
   }
-  const seat = ((c.surfaces ?? []) as { kind: string; at?: number[] }[]).find(s => s.kind === 'seat' && s.at)
-  if (seat) out.push(gapOf(w, { name: 'seat', on: 'seat', at: place(seat.at!) }, on))
+  const seat = (c.things?.seat as { y: number; at: number[] }[] | undefined)?.[0]
+  if (seat) out.push(gapOf(w, { name: 'seat', on: 'seat', at: place([seat.at[0], seat.y, seat.at[1]]) }, on))
   return out
 }
 
@@ -257,7 +257,7 @@ function ladderMove(w: W, me: Row, row: Row): Move {
   const r = rigging(w, me, l)
   const { k } = l
   const speed = l.rungs.lap / r.loop.dur
-  const on: On = { contacts: k.contacts, fit: k.fit, floor: l.foot[1], ladder: row }
+  const on: On = { touches: k.touches, fit: k.fit, floor: l.foot[1], ladder: row }
   // On the ladder in `phase`, the stick let go.
   const onIt = (at: Place, phase: string) => {
     free(me, [at.x, at.y, at.z], at.yaw)
@@ -310,12 +310,12 @@ function chairMove(w: W, me: Row, k: moving.Numbers, s: ReturnType<typeof seats>
   const y = stand(numbers(me, w), groundOf(w), st.x, st.z)
   const rig = rigOf(w, animKind(me))
   const dur = (clip: string) => clipOf(rig, clip).dur
-  const on: On = { contacts: k.contacts, fit: k.fit, floor: y }
+  const on: On = { touches: k.touches, fit: k.fit, floor: y }
   // The body's skin furthest behind within the chair's back over the whole of the clip it plays (its
-  // contacts' `rear`), and how far in front of the back's front face it stands: 0 touching it, under 0
+  // touches' `behind`), and how far in front of the back's front face it stands: 0 touching it, under 0
   // through it.
   const back = (): Mark[] => {
-    const rear = (json(w, k.contacts).clips?.[me.data.clip]?.rear ?? []) as number[][]
+    const rear = (json(w, k.touches).clips?.[me.data.clip]?.things?.behind ?? []) as number[][]
     const { width, height, back: tall, board, behind } = s.seat
     const inside = rear.filter(([x, up]) => Math.abs(x) <= width / 2 && y + up >= s.y + height && y + up <= s.y + height + tall)
     if (!inside.length) return []
@@ -395,7 +395,7 @@ function coverMove(w: W, me: Row, k: moving.Numbers, f: Face, low: boolean): Mov
   const stance = low ? k.cover.crouch : k.cover.stand
   const wall = [...f.a, ...f.b, ...f.out, yaw, low ? 1 : 0]
   const hugged: Place = { x: ex, y, z: ez, yaw }
-  const on: On = { contacts: k.contacts, fit: k.fit, floor: y }
+  const on: On = { touches: k.touches, fit: k.fit, floor: y }
   // In cover against this wall, as going in leaves the body.
   const hugging = () => {
     free(me, [ex, y, ez], yaw, stance)
@@ -456,7 +456,7 @@ function coverMove(w: W, me: Row, k: moving.Numbers, f: Face, low: boolean): Mov
 // where the side does not fit it.
 function overMove(w: W, me: Row, k: moving.Numbers, f: Face, move: 'vault' | 'wallrun'): Move | undefined {
   const m = move === 'vault' ? k.vault : k.wallrun
-  const c = moving.contactOf(w, me, k, m.clip)
+  const c = moving.touchOf(w, me, k, m.clip)
   const [mx, mz] = middleOf(f)
   const y = stand(numbers(me, w), groundOf(w), mx + f.out[0] * m.reach, mz + f.out[1] * m.reach)
   const o = moving.onFace(f, mx, mz)
@@ -468,7 +468,7 @@ function overMove(w: W, me: Row, k: moving.Numbers, f: Face, move: 'vault' | 'wa
   }
   const anchor = [start.x, y, start.z]
   const name = move === 'vault' ? 'vault' : 'wall run'
-  const on: On = { contacts: k.contacts, fit: k.fit, floor: y }
+  const on: On = { touches: k.touches, fit: k.fit, floor: y }
   return {
     name: `${name} · ${wallName(f, y)}`,
     against: wallName(f, y),
@@ -494,7 +494,7 @@ function floorMove(w: W, me: Row, p: any, there: Row): Move {
   const [x, z] = there.data.pos
   const y = groundOf(w).height(x, z)
   const start: Place = { x, y, z, yaw: there.data.yaw }
-  const on: On = { contacts: k.contacts, fit: k.fit, floor: y }
+  const on: On = { touches: k.touches, fit: k.fit, floor: y }
   // A clip played where the body stands in `stance`, carried by the travel a one-shot carries.
   const still = (name: string, clip: string, stance: string): Step => {
     const c = clipOf(rig, clip)

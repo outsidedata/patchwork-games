@@ -1,6 +1,6 @@
 # Where the X Bot's skin is on every frame of each clip listed, for the library's touch catalogue
 # (`touches.mjs` runs it, a share of the clips to each Blender):
-#   blender --background --factory-startup --python touches.py -- <list.txt> <out dir>
+#   blender --background --factory-startup --python touches.py -- <list.txt> <out dir> [--rear]
 #
 # <list.txt> holds one clip a line, its path under ~/troupe-collection. The body is the library's X Bot
 # (`characters/xbot/xbot.fbx` under `PATCHWORK_LIBRARY`), loaded once; each clip is loaded on its own
@@ -29,23 +29,40 @@
 #                                 joint to its left), each [x, y, z]
 #   joints                        the heads of the hips, the thighs, the upper arms, the shins and the
 #                                 feet: [hips, hipL, hipR, shoulderL, shoulderR, kneeL, kneeR, ankleL, ankleR]
+#   hipsYaw                       degrees the hips' own facing has turned from the first frame, positive
+#                                 left, read off the hips bone's axis that faces the body's forward on the
+#                                 first frame, as anim's export measures a clip's turn (`plugins/anim/anim.export.py`)
+#   rear                          given `--rear` after the out dir, in a clip whose path says it sits
+#                                 (`sit` or `seat`): the whole body's skin furthest behind, least z, in each
+#                                 square of REAR metres across (x) and up (y), [[x, y, z], ...]: what a
+#                                 chair's back must stand behind. A game asks it of its own few sitting
+#                                 clips; over the whole library it would be megabytes a clip.
 # Each clip is written to `<out dir>/<its path>.json` as `{ file, fps, frames, <patch>: [[...], one a
 # frame] }`, numbers to the millimetre, and a line `TOUCHES <n>/<count> <path>` is printed as it is.
 # A clip that cannot be read (no armature, no action) is written `{ file, error }`.
 import bpy
 import json
+import math
 import os
 import re
 import sys
 
 import numpy as np
+from mathutils import Vector
 
 args = sys.argv[sys.argv.index('--') + 1:]
 LIST, OUT = args[0], args[1]
+WITH_REAR = '--rear' in args[2:]
 FPS = 30
 # Skin within this of a patch's lowest point is its underside, metres.
 LOW = 0.01
+# The side of the squares, across and up, a sitting clip's rearmost skin is read in, metres.
+REAR = 0.02
+# A clip whose path says this sits.
+SITS = re.compile(r'sit|seat', re.I)
 REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')
+# A Mixamo body faces -Y in Blender (anim's export's FWD).
+FWD = Vector((0, -1, 0))
 
 
 def dotenv(path):
@@ -205,6 +222,14 @@ def low(pts):
     return pts[pts[:, 1] <= pts[:, 1].min() + LOW].mean(axis=0)
 
 
+def rearmost(w):
+    """The skin furthest behind, least z, in each square of REAR across and up."""
+    cell = np.floor(w[:, 0] / REAR).astype(np.int64) * 1000003 + np.floor(w[:, 1] / REAR).astype(np.int64)
+    order = np.lexsort((w[:, 2], cell))
+    first = order[np.concatenate(([True], cell[order][1:] != cell[order][:-1]))]
+    return [r(p) for p in w[first]]
+
+
 def high(pts):
     return pts[pts[:, 1] >= pts[:, 1].max() - LOW].mean(axis=0)
 
@@ -219,18 +244,29 @@ def measure(path):
     bpy.context.view_layer.update()
     start = at(hips)
     shift = np.array([start[0] - rest[0], 0, start[2] - rest[2]])
-    keys = [p for p in PATCHES if p not in ('torso',)] + ['front', 'back', 'left', 'right', 'low', 'joints']
+    sits = WITH_REAR and bool(SITS.search(path))
+    keys = [p for p in PATCHES if p not in ('torso',)] + ['front', 'back', 'left', 'right', 'low', 'joints', 'hipsYaw'] + (['rear'] if sits else [])
+    # The hips bone's axis that faces the body's forward on the first frame, and that facing flat.
+    m0 = body.matrix_world @ hips.matrix
+    hips_axis = m0.to_3x3().inverted() @ FWD
+    face0 = m0.to_3x3() @ hips_axis
+    face0 = Vector((face0.x, face0.y, 0))
+    face0 = face0.normalized() if face0.length > 1e-6 else FWD.copy()
     rows = {k: [] for k in keys}
     for f in range(first, last + 1):
         sc.frame_set(f)
         bpy.context.view_layer.update()
         pts = {p: [] for p in PATCHES}
+        whole = []
         for o, mem in zip(meshes, members):
             w = skin(o) - shift
+            whole.append(w)
             for p, idx in mem.items():
                 if len(idx):
                     pts[p].append(w[idx])
         pts = {p: np.concatenate(v) for p, v in pts.items()}
+        if sits:
+            rows['rear'].append(rearmost(np.concatenate(whole)))
         for p in PATCHES:
             if p.startswith('hand'):
                 rows[p].append(r(pts[p].mean(axis=0)) + r(low(pts[p])) + r(high(pts[p])))
@@ -248,6 +284,9 @@ def measure(path):
             rows[key].append(r(torso[pick(torso @ axis)]))
         rows['low'].append(r(low(torso)))
         rows['joints'].append([c for j in joints for c in r(j)])
+        fwd = (body.matrix_world @ hips.matrix).to_3x3() @ hips_axis
+        fwd.z = 0
+        rows['hipsYaw'].append(round(math.degrees(math.atan2(face0.cross(fwd).z, face0.dot(fwd))), 2) if fwd.length > 1e-6 else 0.0)
     body.animation_data.action = None
     bpy.data.actions.remove(act)
     return {'file': path, 'fps': FPS, 'frames': len(fr), **rows}

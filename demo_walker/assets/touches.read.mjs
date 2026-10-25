@@ -2,23 +2,32 @@
 // `touches.json`, and writes `~/troupe-collection/packs/mixamo-touches.json`:
 //   node games/demo_walker/assets/touches.read.mjs [<pattern>]
 // With a pattern, a regular expression matched case-blind against each clip's path, name and
-// description, it reads only those clips and prints them instead of writing the file.
+// description, it reads only those clips and prints them instead of writing the file. A game reads its
+// own rig's clips by `read(file, skin, opts)` (`xbot.touches.mjs`).
 //
 // Every place is in the clip's own space as `touches.py` measures it: metres, x the left of a body facing
 // +z, y up, z ahead, its origin the hips at rest across the ground on the first frame, the floor the clip
-// was made on at y = 0, each place lifted by the clip's `lift` (below). A heading is degrees from +z,
-// positive left.
+// was made on at y = 0, each place lifted by the clip's `lift` (below) and turned by its `turned`. A
+// heading is degrees from +z, positive left.
 //
 // For each clip:
 //   name, description   Mixamo's, where `mixamo-roots.json` holds them (a pack's clips have its file's name)
 //   case                the first of `touches.json`'s cases whose words match its name, description or
 //                       file's name
-//   loop, dur, frames   whether Mixamo calls it a loop, its seconds and its frames
-//   travel              [left, up, ahead] metres the hips move from the first frame to the last
-//   holds               every part held still, slower than PLANT m/s (a palm PRESS m/s) for at least HOLD
-//                       seconds (a hand's middle GRIP seconds): `{ part, from, to, at }`, `part` a
-//                       `touches.json` part and its side (`soleL`, `gripR`, `seat`, …); a pose, POSE
-//                       frames or fewer, holds every part over all of it
+//   loop, dur, frames   whether it loops (Mixamo's word, or the rig's), its seconds and its frames
+//   turned              degrees left the clip is read turned by (a game's rig turns some, `opts.turn`), 0
+//   travel              [left, up, ahead] metres the hips move from the first frame to the last; `lap` the
+//                       same for a loop, its progress over one lap, null for a one-shot
+//   floor               the height of the raised floor (STEP or more up) the clip ends standing on, or null
+//   plants              every patch of skin held: held still, slower than PLANT m/s (a palm PRESS m/s) for
+//                       at least HOLD seconds (a hand's middle GRIP seconds), a pose (POSE frames or fewer)
+//                       holding every part over all of it, and the kicks and presses the reads find;
+//                       `{ point, from, to, at, on }`, `point` a `touches.json` part and its side (`soleL`,
+//                       `gripR`, `seat`, …) and `on` what it is held on: `ground` or `raised floor` (STEP
+//                       or more up), `rung`, `wall`, `ledge` (a palm set on a top), `hold` (a hand gripping
+//                       overhead or held while the hips move about it, off the body), or `still`. A loop's
+//                       hold that goes round its end runs `to` past its last second; its places are carried
+//                       on by the lap's progress
 //   floors              the levels it stands, kneels, sits or lies on: `{ y, from, to, by }`, `by` the
 //                       parts held on it. A part is on a floor while it is the lowest of the parts held
 //                       then that bear weight (the soles, balls, heels, knees, seat and belly; the hands
@@ -54,18 +63,28 @@
 //            height, and `climb` its height over the lip where there is one
 //   press    the palms set on something STEP or more over the floor while the hips move ANCHOR or more,
 //            each staying within SETTLE of where it was put down for HOLD seconds or more (a palm bearing
-//            a vault rolls): `press` `{ hand, y, at, from, to }` each, and `over` `{ top, at, from, to }`,
-//            the presses run together in time (gaps of GAP seconds or less) pressed longest, its top
-//            their median height
+//            a vault rolls): `press` `{ hand, y, at, from, to }` each, and `over` `{ top, at, way, clear,
+//            from, to }`: the presses run together in time (gaps of GAP seconds or less) pressed longest,
+//            `top` and `at` the middle of the two hands' presses, `way` the heading the body goes over
+//            (a one-shot's travel, where it travels TRAVELS or more, else the way it faces as it
+//            presses), `clear` [back, ahead] how far behind and ahead of `at` along that way the top
+//            may reach with every sole and ball kept over it
 //   swing    the hands' path while they hang over the shoulders and the body stands on no floor: a
 //            circle fitted to it (least squares) in the upright plane along the way it goes is the line
 //            they swing on, `swing` `{ pivot, radius, from, to }`, where it hangs from and its length; a
 //            path whose circle is over STRAIGHT metres across, or hangs under it, is a line run along
 //            (a zip line), `swing` `{ line: [start, end], from, to }`
-//   floors   the floor it starts on and the one it ends on: `start`, `end`, and `rise`, end less start
-//   rungs    the heights the balls stand on while climbing: `rungs` and their `spacing`
-//   seat     the hips held low and still off the feet: `seat` `{ y, at, from, to }`, and `rear` how far
-//            behind the seat's middle the body's back reaches while it sits
+//   floors   the floor it starts on and the one it ends on, each where the lowest part held on it at
+//            that end stands: `start`, `end`, and `rise`, end less start
+//   rungs    the heights the balls stand on while climbing (a ball held FLOAT or more up, its sole not
+//            flat on a raised floor the while): `rungs` folded into one lap and clustered within FLAT,
+//            `lap` a loop's climb, `spacing`; and `ladder`, the rung plane, as `xbot.contacts.mjs` read
+//            it: `{ normal, at, tops, from, to, hands, spread, across, grips, rails, open }`
+//   seat     the hips steady in height, low and off the feet: `seat` `{ y, at, facing, rear, from, to }`
+//            each, `rear` how far behind the seat's middle the body's back reaches while it sits; and,
+//            where the skin has the rearmost skin (`touches.py --rear`), `behind` [[x, y, z], ...], the
+//            skin furthest behind over the whole clip in each square of REAR across and up, in the
+//            chair's frame: what a chair's back must stand behind
 //   back     the torso's back held still: `back` `{ at, y, normal }`, the face it rests on
 //   palms    the palms held still off the floor: `palms` `{ y, at, from, to }` each
 //   belly    the torso's lowest skin at its lowest, `belly`, and whether it lies (within LIES of a floor)
@@ -113,6 +132,13 @@ const LEVEL = 0.03
 // The balls on one rung stand within this of each other, metres: the left and the right foot's balls
 // differ by up to 3 cm on the ladder climb (`xbot.contacts.mjs`'s FLAT).
 const FLAT = 0.06
+// The balls a rung plane is read off stand within this of it, metres: a foot set on a rung stands up to
+// 7 cm further onto it than the other (Ladder Climb One Step At A Time's left 6.8 cm past its right); the
+// game's own ladder clips stand theirs within 1.5 cm.
+const PLANE = 0.08
+// A ladder leans when its rungs lean this far or more off upright, degrees: the leaning climbs lean 20 to
+// 21°, and an upright ladder's clips read 2 to 6° off where each foot is set on its rung.
+const LEANS = 10
 // A thing this far over the floor or more is raised off it, metres.
 const STEP = 0.15
 // The hips move at least this far while a part is held on something, metres (`xbot.contacts.mjs`).
@@ -140,6 +166,16 @@ const ANKLE = 0.05
 const KICK = 1
 const KICKS = 2
 const SPREAD = 0.3
+// A one-shot that travels this far, metres, goes at what it meets along its travel, which the hips,
+// twisting as it kicks or vaults, need not face (`xbot.contacts.mjs`'s TRAVELS).
+const TRAVELS = 0.5
+// A grip on a ladder further to the side than the feet by this or more is on a rail, metres; a hand
+// closed round a rung holds its middle this far out from the rung plane or less (`xbot.contacts.mjs`'s
+// RAIL and CLOSED).
+const RAIL = 0.1
+const CLOSED = 0.07
+// The side of the squares, across and up, a sitting clip's rearmost skin is kept in, metres (`touches.py`'s).
+const REAR = 0.02
 // The hands swing from a line (a rope, a trapeze, a zip line) whose path fits a circle of more than this
 // radius as a straight line, metres.
 const STRAIGHT = 20
@@ -188,9 +224,11 @@ function runs(n, loop, keep, min) {
   return out.filter(([s, e]) => e - s + 1 >= min)
 }
 
-// The lift on each frame: the lowest planted sole's depth under the floor, filled between and smoothed
-// (`xbot.contacts.mjs`'s, with nothing raised).
-function liftOf(n, loop, ground) {
+// The lift on each frame: the deepest planted part's depth under the floor, filled between the frames
+// that plant one, and toward 0 over the frames before the first and after the last where the clip also
+// stands on rungs, a wall or a raised floor (`raised`, the frames such holds start and end on), so a clip
+// that leaves the floor for them meets them where it measured them; smoothed (`xbot.contacts.mjs`'s).
+function liftOf(n, loop, ground, raised) {
   const known = ground.flatMap((v, f) => (v === undefined ? [] : [f]))
   if (!known.length) return null
   const fill = Array(n + 1)
@@ -204,7 +242,14 @@ function liftOf(n, loop, ground) {
     } else if (loop && n > 0) {
       const a = last, b = first + n, g = f < first ? f + n : f
       fill[f] = fill[a] + ((fill[first] - fill[a]) * (g - a)) / Math.max(1, b - a)
-    } else fill[f] = f < first ? fill[first] : fill[last]
+    } else if (f < first) {
+      // Before the floor: toward 0 by the first raised frame before it, or held where there is none.
+      const r = raised.filter(k => k < first).pop()
+      fill[f] = r === undefined ? fill[first] : f <= r ? 0 : (fill[first] * (f - r)) / (first - r)
+    } else {
+      const r = raised.find(k => k > last)
+      fill[f] = r === undefined ? fill[last] : f >= r ? 0 : (fill[last] * (r - f)) / (r - last)
+    }
   }
   const half = (SMOOTH - 1) / 2
   const out = fill.map((_, f) => {
@@ -237,21 +282,47 @@ function partsOf(s, f) {
 
 const HELD = ['soleL', 'soleR', 'ballL', 'ballR', 'heelL', 'heelR', 'handL', 'handR', 'palmL', 'palmR', 'gripL', 'gripR', 'forearmL', 'forearmR', 'kneeL', 'kneeR', 'seat', 'back', 'belly']
 
-export function read(file, s) {
+// A point [x, y, z] turned `deg` degrees left about the vertical through (cx, cz) (`xbot.contacts.mjs`'s).
+function turnAbout(p, deg, cx, cz) {
+  const c = Math.cos(deg * DEG), s = Math.sin(deg * DEG), x = p[0] - cx, z = p[2] - cz
+  return [cx + x * c + z * s, p[1], cz - x * s + z * c]
+}
+
+// `opts`: `turn`, degrees left, every point turned by about the hips on the first frame before it is read,
+// as anim's export turns a clip its sidecar's `offset.rotation` turns; `loop`, whether it loops, where a
+// game's rig says so (Mixamo's word otherwise); `case`, the case it is read as (its words' otherwise).
+export function read(file, s, opts = {}) {
   const words = wordsOf(file)
-  const kase = cases.find(c => c.re.test(words.text))
+  const kase = opts.case ? cases.find(c => c.case === opts.case) : cases.find(c => c.re.test(words.text))
+  if (!kase) throw new Error(`touches.read.mjs: no case ${opts.case}`)
   const e = roots[file] ?? {}
-  const loop = !!e.loop
+  const loop = opts.loop ?? !!e.loop
   const n = s.frames - 1
   const fps = s.fps
-  const raw = Array.from({ length: n + 1 }, (_, f) => partsOf(s, f))
+  const unturned = Array.from({ length: n + 1 }, (_, f) => partsOf(s, f))
+  const [cx, , cz] = unturned[0].hips
+  const turnBy = opts.turn ?? 0
+  const raw = turnBy ? unturned.map(fr => Object.fromEntries(Object.entries(fr).map(([k, v]) => [k, turnAbout(v, turnBy, cx, cz)]))) : unturned
+  const rearOf = f => (s.rear ? (turnBy ? s.rear[f].map(p => turnAbout(p, turnBy, cx, cz)) : s.rear[f]) : null)
+  // The hips' own turn from the first frame, degrees left (the measure anim's table travels by), where the
+  // skin file has it; else the hip joints' line's.
+  const hipsYaw = f => (s.hipsYaw ? s.hipsYaw[f] : wrapDeg(square(raw[f].hipL, raw[f].hipR) - square(raw[0].hipL, raw[0].hipR)))
   const sec = f => round(f / fps)
   const doubts = []
   const byGrip = kase.by === 'grip'
+  // A part's place on frame f of a run that may go round a loop's end: frames past the last are the next
+  // lap's, carried on by the lap's progress (the hips' from the first frame to the last), and frames
+  // before the first the lap before's (`xbot.contacts.mjs`'s).
+  const lapped = frames => (part, f) => {
+    if (f >= 0 && f <= n) return frames[f][part]
+    const k = Math.floor(f / n)
+    const progress = sub(frames[n].hips, frames[0].hips)
+    return frames[f - k * n][part].map((v, i) => v + progress[i] * k)
+  }
 
   // ---- holds, first as measured, for the lift
   const holdsOf = frames => {
-    const at = (part, f) => frames[((f % (n + 1)) + (n + 1)) % (n + 1)][part]
+    const at = lapped(frames)
     // A pose (POSE frames or fewer) is the body held still: every part is held over all of it.
     if (n + 1 <= POSE) return HELD.map(part => ({ part, s: 0, e: n, at: mean(frames.map(fr => fr[part])), moved: 0 }))
     const speed = (part, f) => {
@@ -291,11 +362,21 @@ export function read(file, s) {
         ground[g] = ground[g] === undefined ? -y : Math.max(ground[g], -y)
       }
     }
-    lift = liftOf(n, loop, ground)
+    // The frames the clip stands on something raised start and end on: a ball held STEP or more up (a
+    // wall, a rung; on a ladder any ball off the floor, FLOAT up), or a sole held flat STEP or more up.
+    const flatRaw = h => {
+      const side = h.part.slice(-1)
+      const span = Array.from({ length: h.e - h.s + 1 }, (_, i) => raw[(h.s + i) % (n + 1)])
+      const ball = mean(span.map(fr => fr['ball' + side])), ankle = mean(span.map(fr => fr['ankle' + side]))
+      return Math.abs(ball[1] - h.at[1]) <= LEVEL && ankle[1] - h.at[1] >= ANKLE
+    }
+    const raised = [...new Set(measured.filter(h => (h.part.startsWith('ball') && h.at[1] >= (kase.case === 'ladder' ? FLOAT : STEP)) ||
+      (h.part.startsWith('sole') && h.at[1] >= STEP && flatRaw(h))).flatMap(h => [h.s, Math.min(n, h.e)]))].sort((a, b) => a - b)
+    lift = liftOf(n, loop, ground, raised)
   }
   const liftAt = f => (lift ? lift[Math.max(0, Math.min(n, f))] : 0)
   const frames = raw.map((p, f) => Object.fromEntries(Object.entries(p).map(([k, v]) => [k, [v[0], v[1] + liftAt(f), v[2]]])))
-  const at = (part, f) => frames[((f % (n + 1)) + (n + 1)) % (n + 1)][part]
+  const at = lapped(frames)
   const facing = frames.map(fr => square(fr.hipL, fr.hipR))
   const holds = holdsOf(frames)
 
@@ -358,14 +439,32 @@ export function read(file, s) {
     if (f) { f.ys.push(h.at[1]); f.from = Math.min(f.from, h.s); f.to = Math.max(f.to, h.e); f.by.add(h.part.replace(/[LR]$/, '')) }
     else floors.push({ y: h.at[1], ys: [h.at[1]], from: h.s, to: h.e, by: new Set([h.part.replace(/[LR]$/, '')]) })
   }
-  for (const f of floors) f.y = median(f.ys)
+  // A floor stands where the lowest part held on it stands; the others hover over it.
+  for (const f of floors) f.y = Math.min(...f.ys)
   const floorAt = f => floors.filter(l => l.from <= f && l.to >= f).sort((a, b) => a.y - b.y)[0]
-  const startFloor = floors.find(l => l.from <= Math.max(2, Math.round(0.1 * fps)))
-  const endFloor = [...floors].reverse().find(l => l.to >= n - Math.max(2, Math.round(0.1 * fps)))
+  // The floor it starts on and the one it ends on, each where the lowest part held on it at that end
+  // stands (the feet may settle lower on it as they arrive, and stand there at the end).
+  const ends = Math.max(2, Math.round(0.1 * fps))
+  const levelOf = (l, keep) => {
+    if (!l) return undefined
+    const there = footed.filter(h => keep(h) && Math.abs(h.at[1] - l.y) <= LEVEL)
+    return { ...l, y: there.length ? Math.min(...there.map(h => h.at[1])) : l.y }
+  }
+  const startFloor = levelOf(floors.find(l => l.from <= ends), h => h.s <= ends)
+  const endFloor = levelOf([...floors].reverse().find(l => l.to >= n - ends), h => h.e >= n - ends)
   const floorY = startFloor ? startFloor.y : 0
+
+  // The way a one-shot goes, degrees from +z, positive left, where its hips travel TRAVELS or more across
+  // the ground; null for a loop or one that stays.
+  const travelWay = () => {
+    const tr = sub(at('hips', n), at('hips', 0))
+    return !loop && Math.hypot(tr[0], tr[2]) >= TRAVELS ? Math.atan2(tr[0], tr[2]) / DEG : null
+  }
 
   // ---- the reads
   const things = {}
+  // The holds the reads find on rungs, the kicks on a wall and the palms set on a top, labelled in `plants`.
+  let rungBalls = [], kicked = [], pressed = []
   const want = new Set(kase.reads)
   const holdsOn = prefix => holds.filter(h => h.part.startsWith(prefix))
   const span = h => ({ from: sec(h.s), to: sec(Math.min(h.e, n)) })
@@ -396,24 +495,30 @@ export function read(file, s) {
         kicks.push({ part, s: s0, e: e0, at: mean(Array.from({ length: e0 - s0 + 1 }, (_, i) => at(part, s0 + i))) })
       }
     }
+    kicked = kicks
     if (kicks.length) {
       const c = mean(kicks.map(k => k.at))
-      // Kicks spread along the ground lie on the wall's line, the body on one side of it; else the face
-      // looks back along the way the body faces as it kicks.
+      // Kicks spread SPREAD or more along the ground on a line that runs with the body's travel lie on the
+      // wall's line, the body on one side of it (a run along a wall, a shimmy). Else (a run up a wall
+      // sets the left foot and the right side by side) the face looks back along the way the body goes
+      // at it: a one-shot's travel, where it travels TRAVELS or more, else the way it faces as it kicks.
       const xs = kicks.map(k => [k.at[0] - c[0], k.at[2] - c[2]])
       const sxx = xs.reduce((s, p) => s + p[0] * p[0], 0), szz = xs.reduce((s, p) => s + p[1] * p[1], 0), sxz = xs.reduce((s, p) => s + p[0] * p[1], 0)
       const theta = 0.5 * Math.atan2(2 * sxz, sxx - szz)
       const along = [Math.cos(theta), Math.sin(theta)]
       const spread = Math.max(...xs.map(p => p[0] * along[0] + p[1] * along[1])) - Math.min(...xs.map(p => p[0] * along[0] + p[1] * along[1]))
+      const goes = travelWay()
+      const withTravel = goes === null || Math.abs(Math.cos((Math.atan2(along[0], along[1]) / DEG - goes) * DEG)) >= Math.cos(45 * DEG)
+      const runsAlong = spread >= SPREAD && withTravel
       let normal
-      if (spread >= SPREAD) {
+      if (runsAlong) {
         const hips = mean(kicks.map(k => at('hips', Math.round((k.s + k.e) / 2))))
         let nx = -along[1], nz = along[0]
         if ((hips[0] - c[0]) * nx + (hips[2] - c[2]) * nz < 0) { nx = -nx; nz = -nz }
         normal = Math.atan2(nx, nz) / DEG
-      } else normal = wrapDeg(meanDeg(kicks.map(k => facing[Math.round((k.s + k.e) / 2) % (n + 1)])) + 180)
+      } else normal = wrapDeg((goes ?? meanDeg(kicks.map(k => facing[Math.round((k.s + k.e) / 2) % (n + 1)]))) + 180)
       const way = wrapDeg(normal + 180)
-      things.face = { at: [round(c[0]), round(c[2])], heights: kicks.map(k => round(k.at[1])).sort((a, b) => a - b), normal: round(normal, 1), along: spread >= SPREAD, from: sec(Math.min(...kicks.map(k => k.s))), to: sec(Math.min(n, Math.max(...kicks.map(k => k.e)))) }
+      things.face = { at: [round(c[0]), round(c[2])], heights: kicks.map(k => round(k.at[1])).sort((a, b) => a - b), normal: round(normal, 2), along: runsAlong, from: sec(Math.min(...kicks.map(k => k.s))), to: sec(Math.min(n, Math.max(...kicks.map(k => k.e)))) }
       if (things.grips) {
         const g = mean(things.grips.map(gg => [gg.at[0], 0, gg.at[1]]))
         const dir = [Math.sin(way * DEG), 0, Math.cos(way * DEG)]
@@ -451,10 +556,14 @@ export function read(file, s) {
       }
     }
     const presses = settled.filter(h => h.moved >= ANCHOR && h.at[1] - floorY >= STEP)
+    pressed = presses
     if (presses.length) {
       things.press = presses.map(h => ({ hand: h.part.slice(-1), y: round(h.at[1]), at: [round(h.at[0]), round(h.at[2])], ...span(h) }))
       // The top the hands go over: the presses run together in time (no gap over GAP seconds), the run
-      // pressed longest, its height the median of its presses weighed by their frames.
+      // pressed longest, its height and place their middle. `way` the heading the body goes over it (a
+      // one-shot's travel, where it travels TRAVELS or more, else the way it faces as it presses), and
+      // `clear` [back, ahead] how far behind and ahead of `at` along that way the top may reach with
+      // every sole and ball of the clip kept over it (`xbot.contacts.mjs`'s ledge).
       const sorted = [...presses].sort((a, b) => a.s - b.s)
       const groups = [[sorted[0]]]
       for (const h of sorted.slice(1)) {
@@ -462,11 +571,23 @@ export function read(file, s) {
         if (h.s - Math.max(...g.map(x => x.e)) <= GAP * fps) g.push(h)
         else groups.push([h])
       }
-      const frames = g => g.reduce((s, h) => s + h.e - h.s + 1, 0)
-      const best = groups.reduce((a, b) => (frames(b) > frames(a) ? b : a))
-      const ys = best.flatMap(h => Array(h.e - h.s + 1).fill(h.at[1]))
-      const c = mean(best.map(h => h.at))
-      things.over = { top: round(median(ys)), at: [round(c[0]), round(c[2])], from: sec(best[0].s), to: sec(Math.min(n, Math.max(...best.map(h => h.e)))) }
+      const count = g => g.reduce((s, h) => s + h.e - h.s + 1, 0)
+      const best = groups.reduce((a, b) => (count(b) > count(a) ? b : a))
+      // The middle of the hands: each hand's presses' middle, then the two's.
+      const c = mean(['L', 'R'].map(side => best.filter(h => h.part.endsWith(side))).filter(g => g.length).map(g => mean(g.map(h => h.at))))
+      const way = travelWay() ?? meanDeg(best.map(h => facing[Math.round((h.s + h.e) / 2) % (n + 1)]))
+      const dir = [Math.sin(way * DEG), Math.cos(way * DEG)]
+      let back = -Infinity, ahead = Infinity
+      for (let f = 0; f <= n; f++) {
+        for (const point of ['soleL', 'soleR', 'ballL', 'ballR']) {
+          const q = at(point, f)
+          if (q[1] >= c[1]) continue
+          const a = (q[0] - c[0]) * dir[0] + (q[2] - c[2]) * dir[1]
+          if (a < 0) back = Math.max(back, a)
+          else ahead = Math.min(ahead, a)
+        }
+      }
+      things.over = { top: round(c[1]), at: [round(c[0]), round(c[2])], way: round(way, 2), clear: [round(back), round(ahead)], from: sec(best[0].s), to: sec(Math.min(n, Math.max(...best.map(h => h.e)))) }
     }
     else if (kase.reads[0] === 'press') doubts.push({ t: null, question: 'its case sets the hands on a top, and no palm is set on anything over the floor: what does it go over?' })
   }
@@ -510,11 +631,15 @@ export function read(file, s) {
   if (want.has('grip') && !things.grips && !things.press && !things.swing) doubts.push({ t: null, question: 'its case holds something, and no hand is held over the shoulders or set on a top: what does it hold?' })
 
   if (want.has('rungs')) {
-    // The balls held off the floor, on rungs, but where the sole of the same foot stands flat on a floor
-    // the while (the ladder's top, `xbot.contacts.mjs`'s rule). A loop climbs `lap` metres a lap, so a
-    // height and that height a lap up are one rung: the heights are folded into one lap first.
-    const balls = holds.filter(h => h.part.startsWith('ball') && h.at[1] - floorY >= STEP &&
-      !footed.some(o => o.part === 'sole' + h.part.slice(-1) && o.s <= h.e && o.e >= h.s))
+    // The balls held off the floor the clip was made on, on rungs, but where the sole of the same foot
+    // stands flat on the floor the clip ends on, STEP or more up, the while: the ladder's top. A clip that
+    // sets the whole sole flat on each rung (Ladder Climb One Step At A Time) stands on rungs all the
+    // same. A loop climbs `lap` metres a lap, so a height and that height a lap up are one rung: the
+    // heights are folded into one lap first.
+    const onTop = o => !loop && endFloor && endFloor.y >= STEP && Math.abs(o.at[1] - endFloor.y) <= LEVEL && flat(o)
+    const balls = holds.filter(h => h.part.startsWith('ball') && h.at[1] >= FLOAT &&
+      !holds.some(o => o.part === 'sole' + h.part.slice(-1) && o.s <= h.e && o.e >= h.s && onTop(o)))
+    rungBalls = balls
     const lap = loop ? at('hips', n)[1] - at('hips', 0)[1] : 0
     const base = balls.length ? Math.min(...balls.map(h => h.at[1])) : 0
     const fold = y => (lap > STEP ? base + ((((y - base) % lap) + lap) % lap) : y)
@@ -533,6 +658,75 @@ export function read(file, s) {
       if (lap > STEP) things.lap = round(lap)
       things.spacing = round(median(steps))
     } else doubts.push({ t: null, question: 'its case climbs rungs, and the balls stand on fewer than two heights off the floor' })
+
+    // The rung plane its held balls stand on (`xbot.contacts.mjs`'s ladder): the facing most rung holds
+    // share, and the balls of it within FLAT of one plane square to it; `normal` the heading from the plane
+    // toward the body, `at` [x, z] the point of the plane between the left and the right balls, `tops`
+    // the heights the balls stand on; `hands` how far out from the plane toward the body the held hands
+    // stand, `spread` how far the held balls stand off it, `across` the furthest they stand to either side
+    // of `at` along the rungs and `grips` how far to either side the held hands stand; `rails` the middle
+    // of the grips RAIL or more further to the side than the feet (null for none); `open` how far out the
+    // grips inside the rails stand that are not closed round a rung.
+    const rungHolds = balls.map(h => ({ ...h, facing: facing[Math.round((h.s + h.e) / 2) % (n + 1)] }))
+    if (rungHolds.length) {
+      const crowd = rungHolds.map(h => rungHolds.filter(o => Math.abs(wrapDeg(o.facing - h.facing)) <= 30)).reduce((a, b) => (b.length > a.length ? b : a))
+      const way = meanDeg(crowd.map(h => h.facing))
+      const toward = [Math.sin(way * DEG), 0, Math.cos(way * DEG)]
+      const depth = p => p.at[0] * toward[0] + p.at[2] * toward[2]
+      // A ladder may lean (Ladder Climb One Step At A Time's rises 0.593 m a lap and comes 0.215 m
+      // toward the clip's forward): the rungs' depth along the way the body faces is fitted against
+      // their height, a straight line, and each ball is read by how far it stands off that line.
+      const ys = crowd.map(h => h.at[1]), dsAll = crowd.map(depth)
+      const my = ys.reduce((a, b) => a + b, 0) / ys.length, md = dsAll.reduce((a, b) => a + b, 0) / dsAll.length
+      const vy = ys.reduce((s, y) => s + (y - my) ** 2, 0)
+      const slope = vy > 1e-6 ? ys.reduce((s, y, i) => s + (y - my) * (dsAll[i] - md), 0) / vy : 0
+      const off0 = h => depth(h) - (md + slope * (h.at[1] - my))
+      const ds = crowd.map(off0).sort((a, b) => a - b)
+      const mid = ds[Math.floor(ds.length / 2)]
+      const held = crowd.filter(h => Math.abs(off0(h) - mid) <= PLANE)
+      const L = held.filter(h => h.part.endsWith('L')), R = held.filter(h => h.part.endsWith('R'))
+      if (L.length && R.length) {
+        // A ladder leaning LEANS or more has the lean taken off each ball before the line across the
+        // rungs is read, so a left foot on a higher, deeper rung than the right does not skew it; one
+        // under it is upright, its feet set a little in or out on their rungs.
+        const leans = Math.abs(Math.atan(slope) / DEG) >= LEANS
+        const upright = p => (leans ? [p[0] - toward[0] * slope * (p[1] - my), p[1], p[2] - toward[2] * slope * (p[1] - my)] : p)
+        const pl = mean(L.map(h => upright(h.at))), pr = mean(R.map(h => upright(h.at)))
+        const across = [pl[0] - pr[0], 0, pl[2] - pr[2]]
+        let normal = [-across[2], 0, across[0]]
+        if (normal[0] * toward[0] + normal[2] * toward[2] > 0) normal = normal.map(v => -v)
+        const k = Math.hypot(normal[0], normal[2])
+        normal = normal.map(v => v / k)
+        const centre = mean([pl, pr])
+        const off = p => (p[0] - centre[0]) * normal[0] + (p[2] - centre[2]) * normal[2]
+        const side = p => Math.abs((p[0] - centre[0]) * normal[2] - (p[2] - centre[2]) * normal[0])
+        const from = Math.min(...held.map(h => h.s)), to = Math.max(...held.map(h => h.e))
+        // The hands held on it: a hand's middle held while the hips move ANCHOR or more, not resting on
+        // the body.
+        const hands = holdsOn('hand').filter(h => h.moved >= ANCHOR && h.e >= from && h.s <= to && (() => {
+          const fr = frames[Math.round((h.s + h.e) / 2) % (n + 1)]
+          const body = [fr.jointKneeL, fr.jointKneeR, mean([fr.hipL, fr.jointKneeL]), mean([fr.hipR, fr.jointKneeR]), fr.hips]
+          return Math.min(...body.map(b => len(sub(h.at, b)))) >= RESTS
+        })())
+        const ladder = {
+          normal: round(Math.atan2(normal[0], normal[2]) / DEG, 2),
+          at: [round(centre[0]), round(centre[2])],
+          // How far the rungs lean off upright, degrees, positive with the higher ones further from the
+          // body.
+          lean: round(Math.atan(slope) / DEG, 1),
+          tops: [...new Set(held.map(h => round(h.at[1])))].sort((a, b) => a - b),
+          from: sec(from), to: sec(Math.min(n, to)),
+          hands: hands.map(h => round(off(h.at))),
+          spread: round(Math.max(...held.map(h => Math.abs(off(h.at))))),
+          across: round(Math.max(...held.map(h => side(h.at)))),
+          grips: hands.map(h => round(side(h.at))),
+        }
+        const railed = ladder.grips.filter(g => g >= ladder.across + RAIL)
+        ladder.rails = railed.length ? round(railed.reduce((s, g) => s + g, 0) / railed.length) : null
+        ladder.open = hands.filter(h => side(h.at) < ladder.across + RAIL && Math.abs(off(h.at)) > CLOSED).map(h => round(off(h.at)))
+        things.ladder = ladder
+      } else doubts.push({ t: null, question: 'its case climbs rungs, and the balls on them are not both feet\'s: where is the rung plane?' })
+    }
   }
 
   if (want.has('seat')) {
@@ -555,6 +749,30 @@ export function read(file, s) {
     }
     if (seats.length) things.seat = seats
     else doubts.push({ t: null, question: 'its case sits, and the hips are never held low and still off the feet' })
+
+    // Where the skin file has the rearmost skin (`touches.py --rear`): the body's skin furthest behind over
+    // the whole clip in each square of REAR across and up, in the chair's frame, `behind` [[x, y, z], ...]:
+    // from where the root stands while the first seat holds the hips (its end for a clip that ends
+    // seated, its start for one that starts seated, the seat's last frame else), the hips' travel from
+    // the first frame, turned the way the hips' own axis has turned then; what a chair's back must stand
+    // behind (`xbot.contacts.mjs`'s rear).
+    if (seats.length && s.rear) {
+      const first = runs(n, loop, f => rises(Math.min(f, n)) < PLANT && at('hips', f)[1] - floorY < SEAT, Math.min(n + 1, Math.ceil(SITS * fps)))[0]
+      const f = first[1] >= n ? n : first[0] <= 0 ? 0 : first[1]
+      const left = at('hips', f)[0] - at('hips', 0)[0], fwd = at('hips', f)[2] - at('hips', 0)[2]
+      const yaw = hipsYaw(f) * DEG, c = Math.cos(yaw), si = Math.sin(yaw)
+      const cells = new Map()
+      for (let g = 0; g <= n; g++) {
+        for (const p of rearOf(g)) {
+          const dx = p[0] - left, dz = p[2] - fwd
+          const q = [dx * c - dz * si, p[1] + liftAt(g), dx * si + dz * c]
+          const key = `${Math.floor(q[0] / REAR)} ${Math.floor(q[1] / REAR)}`
+          const had = cells.get(key)
+          if (!had || q[2] < had[2]) cells.set(key, q)
+        }
+      }
+      things.behind = [...cells.values()].map(r3).sort((a, b) => a[1] - b[1] || a[0] - b[0])
+    }
   }
 
   if (want.has('back')) {
@@ -629,11 +847,33 @@ export function read(file, s) {
     doubts.push({ t: null, question: `the surface is set by the clip's words (${under ? 'under water' : 'on it'}), not measured: does the body stand in the water so?` })
   }
 
+  // Every patch of skin held, labelled by what it is held on (`xbot.contacts.mjs`'s `plants`): `ground` or
+  // `raised floor` (STEP or more up), a floor it stands, kneels, sits or lies on; `rung`; `wall`, a foot
+  // kicked against one; `ledge`, a palm set on a top; `hold`, a hand gripping overhead or held while the
+  // hips move about it, not resting on the body; `still`, held on nothing or at rest on the body. A loop's
+  // hold that goes round its end runs `to` past its last second.
+  const rests = h => {
+    const fr = frames[Math.round((h.s + h.e) / 2) % (n + 1)]
+    const body = [fr.jointKneeL, fr.jointKneeR, mean([fr.hipL, fr.jointKneeL]), mean([fr.hipR, fr.jointKneeR]), fr.hips]
+    return Math.min(...body.map(b => len(sub(h.at, b)))) < RESTS
+  }
+  const onOf = h => {
+    if (footed.includes(h)) return h.at[1] >= STEP ? 'raised floor' : 'ground'
+    if (rungBalls.includes(h)) return 'rung'
+    if (overhead.includes(h)) return 'hold'
+    if (h.part.startsWith('hand') && h.moved >= ANCHOR && !rests(h)) return 'hold'
+    return 'still'
+  }
+  const plant = (h, on) => ({ point: h.part, from: sec(h.s), to: sec(h.e), at: r3(h.at), on })
+  const plants = [...holds.map(h => plant(h, onOf(h))), ...kicked.map(k => plant(k, 'wall')), ...pressed.map(p => plant(p, 'ledge'))]
+
   const first = frames[0].hips, last = frames[n].hips
   return {
-    name: words.name, description: words.description, case: kase.case, loop, dur: round(n / fps), frames: n + 1,
+    name: words.name, description: words.description, case: kase.case, loop, dur: round(n / fps), frames: n + 1, turned: turnBy,
     travel: r3(sub(last, first)),
-    holds: holds.map(h => ({ part: h.part, ...span(h), at: r3(h.at) })),
+    lap: loop ? r3(sub(last, first)) : null,
+    floor: endFloor && endFloor.y >= STEP ? round(endFloor.y) : null,
+    plants,
     floors: floors.map(l => ({ y: round(l.y), from: sec(l.from), to: sec(Math.min(l.to, n)), by: [...l.by] })),
     lift: lift ? lift.map((v, f) => [sec(f), round(v)]) : null,
     things, doubts,

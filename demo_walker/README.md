@@ -119,27 +119,29 @@ with x the body's left, y up and z ahead, and a turn about the vertical, positiv
 sampled straight between its rows, and one row holds for the whole clip. The whole body is turned and
 moved by it. A clip with no sidecar bakes exactly as it is.
 
-The sidecars are written by the bake itself, before the clips are baked:
+The sidecars are written by the bake itself, before the clips are baked, with the same measuring and
+reading the whole library's touch catalogue is made by (What every clip touches, below):
 
-1. `assets/xbot.contacts.py` (in Blender) measures where the X Bot's skin is on every frame of every
-   clip as its FBX has it: the soles, the balls of the feet, the hands, the seat and the torso, and for
-   the sitting clips the whole body's skin furthest behind at every height.
-2. `assets/xbot.contacts.mjs` reads that, finds what each clip stands on and holds (the floor, rungs,
-   a seat, a raised floor), and writes `assets/xbot.contacts.json`. For each clip whose planted feet
-   sink into the floor or float over it, it writes the lift that stands them on it into the clip's
-   sidecar, frame by frame. Each cover clip (going in and out, the idles and the sneaks, low and
-   standing) it turns with a `rotation`: the Action Adventure pack made them facing up to 176° off
-   their own forward, and anim takes a clip's forward as the way the body faces. Going in or out is
-   turned so the body faces forward as it starts, an idle so it faces forward, a sneak so it travels
-   the way its gear says. In cover the body stands with its back to the wall, facing out
-   (`moves.cover.faces`), and the sneaks are filed by the way they travel turned (`right cover
-   sneak.fbx` is `coverright`).
+1. `assets/touches.py` (in Blender) measures where the X Bot's skin is on every frame of every clip of
+   the rig as its FBX has it: the soles, the balls and heels of the feet, the hands, the forearms, the
+   knees, the seat, the torso and the head, the joints, the hips' own turn, and for the sitting clips
+   the whole body's skin furthest behind at every height.
+2. `assets/xbot.touches.mjs` reads each clip with `assets/touches.read.mjs` and writes
+   `assets/xbot.touches.json`: what each clip stands on and holds (the floor, rungs, a seat, a wall, a
+   top it vaults), as the rig plays it. For each clip whose planted feet, knees, seat or back sink into
+   the floor or float over it, it writes the lift that stands them on it into the clip's sidecar, frame
+   by frame. Each cover clip (going in and out, the idles and the sneaks, low and standing) it turns
+   with a `rotation`: the Action Adventure pack made them facing up to 176° off their own forward, and
+   anim takes a clip's forward as the way the body faces. Going in or out is turned so the body faces
+   forward as it starts, an idle so it faces forward, a sneak so it travels the way its gear says. In
+   cover the body stands with its back to the wall, facing out (`moves.cover.faces`), and the sneaks
+   are filed by the way they travel turned (`right cover sneak.fbx` is `coverright`).
 3. anim's export bakes the clips with their sidecars laid on.
 
-`xbot.contacts.json` also lists, under each clip's `doubts`, what the measuring could not settle.
+`xbot.touches.json` also lists, under each clip's `doubts`, what the reading could not settle.
 
-What the body uses is built to its clips from `xbot.contacts.json`, and each clip is placed so its
-feet and hands land on it:
+What the body uses is built to its clips from `xbot.touches.json`, and each clip is placed so its feet
+and hands land on it:
 
 - **The ladder**: its rungs stand where the climbing clip puts the balls of the feet, 0.25 m apart, its
   rails 0.76 m apart where the top clip grips them, its rungs 0.28 m off the wall so the body fits
@@ -147,8 +149,8 @@ feet and hands land on it:
   feet down.
 - **The chairs**: their seats 0.437 m high, where the seated clip sits, and under it; their backs 0.222 m
   behind the sitter's hips, where the body reaches back furthest sitting down, seated and getting up
-  (`xbot.contacts.json`'s `rear` for each sitting clip, the skin furthest behind at every height), so
-  no clip passes through the back.
+  (`xbot.touches.json`'s `things.behind` for each sitting clip, the skin furthest behind at every
+  height), so no clip passes through the back.
 - **The low wall**: 0.845 m high, where the vault sets its hands, its middle under them, and thin enough
   for the feet to keep over it.
 - **The platform**: 2.266 m high, the top the wall run ends on; the run starts where its kick lands on
@@ -156,6 +158,26 @@ feet and hands land on it:
 
 Each of them refuses one that does not fit its clips, naming the size that does: a ladder when it is
 climbed, a chair when it is sat on. A wall of the wrong height is just not vaulted or run up.
+
+## What every clip touches
+
+The same measuring reads the whole Mixamo library in `~/troupe-collection/packs`, all 3,977 clips, so a
+game choosing clips for a move can see what each one touches before baking it:
+
+- `node games/demo_walker/assets/touches.mjs [<processes>]` measures every clip's skin in Blender, 4 at
+  once unless told, into `~/troupe-collection/packs/mixamo-skin/`, again only for clips that changed.
+- `node games/demo_walker/assets/touches.read.mjs [<pattern>]` reads them into
+  `~/troupe-collection/packs/mixamo-touches.json`, or, given a pattern, prints the clips it matches.
+- `node games/demo_walker/assets/touches.page.mjs <out.html>` writes the catalogue: one page of every
+  clip under its case, searchable.
+
+`assets/touches.json` is the taxonomy the reader reads by. Its `things` are what a game puts in the
+world (a ledge, a bar, a rope, a ladder, a wall, a seat, a table, a door, a vehicle, a ball, water,
+another body), each with the sizes the reader measures. Its `cases` are the kinds of interaction the
+library's clips make (hanging from a ledge braced or free, a rope swing, a wall run, a vault, sitting at
+a table, opening a door, kicking a ball, getting into a car, ...), each with the Mixamo words that pick
+its clips out and the things it needs. The headers of `touches.py` and `touches.read.mjs` say what each
+measure and each read is.
 
 ## Credit
 
