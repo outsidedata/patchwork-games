@@ -1,8 +1,8 @@
 // touch: demo_walker's own plugin, a clip stood on a thing of the scene by what the clip touches. It has
 // no row and no page half: a rule hands it a row, the station the row plays at and its kind's numbers.
 //
-// What each clip touches is the game's `assets/xbot.touches.json` (`xbot.touches.mjs`, by the library's
-// reader `assets/touches.read.mjs`, whose header says what each reading is): every place in it is in the
+// What each clip touches is the game's `assets/xbot.touches.json` (`xbot.touches.mjs`, by anim's
+// touch reader `plugins/anim/anim.touches.mjs`, whose header says what each reading is): every place in it is in the
 // clip's own space as the clip is baked (x the body's left, y up, z ahead, metres, the floor the clip was
 // made on at y = 0). Anim draws a clip placed rigidly in the world: every point of it stands at where its
 // root started plus the clip's own place of the point, turned by the way the root faced then. So a clip
@@ -16,7 +16,7 @@
 // of the way it faces) and `along` (how far along that side, 0 to 1); or `at` [x, z], `yaw` and, in a
 // pool, `water`, the height of its water over the ground there, on the ground; or `with`, the station of
 // a partner. Where a body stands on the ground it stands on the land or a shape no more than a step over
-// it (shapes3d's `ground`, for the walker kind the numbers' `body` names). By the shape and the clip's case (`touches.json`'s cases), the thing and the
+// it (shapes3d's `ground`, for the walker kind the numbers' `body` names). By the shape and the clip's case (anim's `anim.touches.json`'s cases), the thing and the
 // point:
 //   box side, a ledge's (ledge-braced, ledge-free, ledge-pullup), a wall climbed or run along (wall-climb,
 //            wall-run): the hands' grip (`things.grips`, the top of each hand) on the side's top edge,
@@ -106,7 +106,7 @@ export type Station = {
 
 export const stationsOf = (from: W | Wire): Station[] => (json(from, def(from, 'stage').stations) as { stations: Station[] }).stations
 
-// One clip's reading (`touches.read.mjs`'s header), the parts of it a placement reads.
+// One clip's reading (`anim.touches.mjs`'s header), the parts of it a placement reads.
 type Plant = { point: string; from: number; to: number; at: number[]; on: string }
 export type Touch = {
   case: string; loop: boolean; dur: number; lap: number[] | null; floor: number | null

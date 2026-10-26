@@ -1,11 +1,11 @@
 // Measures the X Bot's skin on every frame of every clip in the library, for the touch catalogue
-// (`touches.read.mjs` reads it):
+// (anim's touch reader, `plugins/anim/anim.touches.mjs`, reads it):
 //   node games/demo_walker/assets/touches.mjs [<processes>]
 //
-// Every `.fbx` under ~/troupe-collection/packs is a clip. Each is measured by `touches.py` in Blender
+// Every `.fbx` under ~/troupe-collection/packs is a clip. Each is measured by anim's `anim.touches.py` in Blender
 // (`BLENDER` from the shell or the root's `.env`, else the macOS application's), the clips split across
 // <processes> Blender runs at once (4 when not given), and written to
-// `~/troupe-collection/packs/mixamo-skin/<its path under ~/troupe-collection>.json` (`touches.py`'s
+// `~/troupe-collection/packs/mixamo-skin/<its path under ~/troupe-collection>.json` (`anim.touches.py`'s
 // header says what it holds). A clip whose measure is newer than its FBX is not measured again, so a
 // re-run measures only clips that are new or changed. At the end it prints how many clips are measured
 // and every one that could not be, with why.
@@ -44,7 +44,7 @@ if (todo.length) {
   await Promise.all(shards.map((clips, i) => new Promise(finish => {
     const list = path.join(WORK, `${i}.txt`)
     writeFileSync(list, clips.join('\n') + '\n')
-    const run = spawn(BLENDER, ['--background', '--factory-startup', '--python-exit-code', '1', '--python', path.join(here, 'touches.py'), '--', list, OUT], { stdio: ['ignore', 'pipe', 'pipe'] })
+    const run = spawn(BLENDER, ['--background', '--factory-startup', '--python-exit-code', '1', '--python', path.join(root, 'plugins', 'anim', 'anim.touches.py'), '--', list, OUT], { stdio: ['ignore', 'pipe', 'pipe'] })
     let tail = ''
     run.stdout.on('data', b => {
       tail = (tail + b).slice(-4000)

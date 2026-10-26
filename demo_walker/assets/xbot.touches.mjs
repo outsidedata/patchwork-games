@@ -1,5 +1,5 @@
-// What every clip of the X Bot's rig touches, read by the library's reader (`touches.read.mjs`) off the
-// skin `touches.py` measured on each clip as its FBX has it (the game's bake runs it with `--rear` on the
+// What every clip of the X Bot's rig touches, read by anim's touch reader (`plugins/anim/anim.touches.mjs`)
+// off the skin anim's `anim.touches.py` measured on each clip as its FBX has it (the game's bake runs it with `--rear` on the
 // rig's clips, `demo_walker.bake.ts`), and written to `xbot.touches.json` beside it; each clip's lift and
 // turn are written to its sidecar beside its FBX, which anim's export (`plugins/anim/anim.export.py`) lays
 // onto the clip as it bakes it:
@@ -25,11 +25,11 @@
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import path from 'node:path'
-import { read } from './touches.read.mjs'
+import { read } from '../../../plugins/anim/anim.touches.mjs'
 
 const here = import.meta.dirname
 const skins = process.argv[2]
-if (!skins) throw new Error('xbot.touches.mjs: name the folder touches.py wrote the rig\'s skin to')
+if (!skins) throw new Error('xbot.touches.mjs: name the folder anim.touches.py wrote the rig\'s skin to')
 const CLIPS = path.join(homedir(), 'troupe-collection')
 const BODY = 'xbot'
 const rig = JSON.parse(readFileSync(path.join(here, 'xbot.rig.json'), 'utf8'))

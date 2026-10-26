@@ -1,9 +1,9 @@
 // Writes the library's touch catalogue as one page: every clip of `~/troupe-collection/packs` under its
-// case (`touches.json`), with what `touches.read.mjs` read of it, searchable by name, description and
-// file. The page holds its data and needs nothing else:
+// case (anim's `plugins/anim/anim.touches.json`), with what anim's touch reader (`anim.touches.mjs`) read of
+// it, searchable by name, description and file. The page holds its data and needs nothing else:
 //   node games/demo_walker/assets/touches.page.mjs <out.html>
 //
-// It reads `touches.json` (the things, the cases and their families), `mixamo-touches.json` (each clip as
+// It reads `anim.touches.json` (the things, the cases and their families), `mixamo-touches.json` (each clip as
 // read) and `mixamo-catalogue.json` (Mixamo's preview of each clip, linked, not shown: the page loads no
 // picture from elsewhere). Each clip carries its case, seconds, frames, whether it loops, its travel,
 // its floors and lift, the sizes of what it touches (the reader's `things`, its long lists cut to their
@@ -17,7 +17,7 @@ const troupe = path.join(homedir(), 'troupe-collection')
 const packs = path.join(troupe, 'packs')
 const out = process.argv[2]
 if (!out) throw new Error('touches.page.mjs: name the page to write')
-const taxonomy = JSON.parse(readFileSync(path.join(here, 'touches.json'), 'utf8'))
+const taxonomy = JSON.parse(readFileSync(path.join(here, '..', '..', '..', 'plugins', 'anim', 'anim.touches.json'), 'utf8'))
 const read = JSON.parse(readFileSync(path.join(packs, 'mixamo-touches.json'), 'utf8')).clips
 const catalogue = JSON.parse(readFileSync(path.join(packs, 'mixamo-catalogue.json'), 'utf8'))
 

@@ -1,8 +1,9 @@
 // demo_walker's bake, `yarn bake demo_walker` (core's `scripts/bake.ts`): every built file the scene's
 // catalogue names, written where the catalogue reads it.
-//   xbot.touches.json    what every clip of the rig touches (`xbot.touches.mjs`, by the library's reader
-//                        `touches.read.mjs`), read off where the skin is on every frame of each clip as its
-//                        FBX has it (`touches.py`, in Blender, with the rearmost skin of the sitting clips),
+//   xbot.touches.json    what every clip of the rig touches (`xbot.touches.mjs`, by anim's touch reader
+//                        `plugins/anim/anim.touches.mjs`), read off where the skin is on every frame of each
+//                        clip as its FBX has it (anim's `anim.touches.py`, in Blender, with the rearmost
+//                        skin of the sitting clips),
 //                        and each clip's lift and turn written to its sidecar beside its FBX, which anim's
 //                        export lays onto the clip as it bakes it
 //   yard.json            the yard (`yard.mjs`): a station for every kind of interaction the rig has a
@@ -88,7 +89,7 @@ export default async ({ blender, webp, scratch }: Tools) => {
   const list = scratch('xbot.clips.txt')
   fs.writeFileSync(list, files.join('\n') + '\n')
   const skins = scratch('skin')
-  console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(here, 'touches.py'), '--', list, skins, '--rear']))
+  console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(root, 'plugins', 'anim', 'anim.touches.py'), '--', list, skins, '--rear']))
   console.log(await node([path.join(here, 'xbot.touches.mjs'), skins]))
   // the yard's level, its things sized to the clips just read
   console.log(await node([path.join(here, 'yard.mjs')]))

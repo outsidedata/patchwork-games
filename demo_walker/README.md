@@ -27,8 +27,8 @@ press E again.
 Five pieces, each feeding the next. To improve a move, find which piece it is in.
 
 1. **What the clip touches** (`assets/xbot.touches.json`). The bake measures the X Bot's skin on every
-   frame of every rig clip in Blender (`assets/touches.py`) and reads where it touches things
-   (`assets/touches.read.mjs`): where the hands grip a ledge, where the feet kick a wall, the seat's
+   frame of every rig clip in Blender (anim's `plugins/anim/anim.touches.py`) and reads where it touches things
+   (anim's touch reader, `plugins/anim/anim.touches.mjs`): where the hands grip a ledge, where the feet kick a wall, the seat's
    height, the floor it ends on, and so on, all in the clip's own space (x the body's left, y up, z
    ahead, the clip's floor at y = 0). Every number below comes from here.
 2. **The thing, sized to the clip** (`assets/yard.mjs`, run by the bake). For each station it builds
@@ -210,11 +210,11 @@ moved by it. A clip with no sidecar bakes exactly as it is.
 The sidecars are written by the bake itself, before the clips are baked, with the same measuring and
 reading the whole library's touch catalogue is made by (What every clip touches, below):
 
-1. `assets/touches.py` (in Blender) measures where the X Bot's skin is on every frame of every clip of
+1. anim's `plugins/anim/anim.touches.py` (in Blender) measures where the X Bot's skin is on every frame of every clip of
    the rig as its FBX has it: the soles, the balls and heels of the feet, the hands, the forearms, the
    knees, the seat, the torso and the head, the joints, the hips' own turn, and for the sitting clips
    the whole body's skin furthest behind at every height.
-2. `assets/xbot.touches.mjs` reads each clip with `assets/touches.read.mjs` and writes
+2. `assets/xbot.touches.mjs` reads each clip with anim's touch reader, `plugins/anim/anim.touches.mjs`, and writes
    `assets/xbot.touches.json`: what each clip stands on and holds (the floor, rungs, a seat, a wall, a
    top it vaults), as the rig plays it. For each clip whose planted feet, knees, seat or back sink into
    the floor or float over it, it writes the lift that stands them on it into the clip's sidecar, frame
@@ -254,17 +254,17 @@ game choosing clips for a move can see what each one touches before baking it:
 
 - `node games/demo_walker/assets/touches.mjs [<processes>]` measures every clip's skin in Blender, 4 at
   once unless told, into `~/troupe-collection/packs/mixamo-skin/`, again only for clips that changed.
-- `node games/demo_walker/assets/touches.read.mjs [<pattern>]` reads them into
+- `node plugins/anim/anim.touches.mjs [<pattern>]` reads them into
   `~/troupe-collection/packs/mixamo-touches.json`, or, given a pattern, prints the clips it matches.
 - `node games/demo_walker/assets/touches.page.mjs <out.html>` writes the catalogue: one page of every
   clip under its case, searchable.
 
-`assets/touches.json` is the taxonomy the reader reads by. Its `things` are what a game puts in the
+anim's `plugins/anim/anim.touches.json` is the taxonomy the reader reads by. Its `things` are what a game puts in the
 world (a ledge, a bar, a rope, a ladder, a wall, a seat, a table, a door, a vehicle, a ball, water,
 another body), each with the sizes the reader measures. Its `cases` are the kinds of interaction the
 library's clips make (hanging from a ledge braced or free, a rope swing, a wall run, a vault, sitting at
 a table, opening a door, kicking a ball, getting into a car, ...), each with the Mixamo words that pick
-its clips out and the things it needs. The headers of `touches.py` and `touches.read.mjs` say what each
+its clips out and the things it needs. The headers of `anim.touches.py` and `anim.touches.mjs` say what each
 measure and each read is.
 
 ## Credit
