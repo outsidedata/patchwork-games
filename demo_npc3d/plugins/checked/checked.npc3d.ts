@@ -48,7 +48,7 @@ export function behaviors(): Record<string, Behavior> {
         investigate.arrive!(me, w, set, time, body, k)
         return
       }
-      me.data.until = travel(me, w, time, body, f.position[0], f.position[2], set.speed, set.clip)
+      me.data.until = travel(me, w, time, body, f.position, set.speed, set.clip)
     },
     arrive(me, w, set, time, body) {
       check(me, me.data.sound)
@@ -61,7 +61,7 @@ export function behaviors(): Record<string, Behavior> {
     start(me, w, set, time, body) {
       const f = newest(me, set.types)!
       for (const held of me.data.facts as Fact[]) if (set.types.includes(held.type)) check(me, held)
-      away(me, w, set, time, body, [f.position[0], f.position[2]])
+      away(me, w, set, time, body, f.position)
     },
     arrive(me, w, set, time, body) {
       body.stand(me, w, time, pick(w, set.clips))

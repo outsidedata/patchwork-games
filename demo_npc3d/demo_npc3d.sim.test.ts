@@ -23,11 +23,11 @@ async function scene(entry: string) {
 }
 
 const time = (room: { rows: Row[] }) => room.rows.find(r => r.kind === 'npc3d')!.data.time
-// Where a row's feet stand: a walker's `pos`, a person's course at the time.
+// Where a row's feet stand across the ground at the time, as its body says: a walker's `pos`, a
+// person's course at the time.
 const feet = (r: Row, t: number) => {
-  if (r.data.since === undefined) return [r.data.pos[0], r.data.pos[2]]
-  const gone = r.data.speed * (t - r.data.since)
-  return [r.data.pos[0] + Math.sin(r.data.yaw) * gone, r.data.pos[2] + Math.cos(r.data.yaw) * gone]
+  const [x, , z] = bodyOf(r.kind, defs[r.kind as keyof typeof defs]).where(r, t)
+  return [x, z]
 }
 const at = (room: { rows: Row[] }, kind: string, x: number, z: number) => room.rows.find(r => r.kind === kind && r.data.pos[0] === x && r.data.pos[2] === z)!
 
@@ -176,7 +176,7 @@ test('sent across the wall, the walker and the person go round it along their ro
   for (const r of [runner, passer]) {
     expect(r.data.doing).toBe('go')
     expect(r.data.route.points.length).toBeGreaterThan(1)
-    expect(r.data.route.points.at(-1)).toEqual([goal[0], goal[2]])
+    expect(r.data.route.points.at(-1)).toEqual(goal)
   }
   const legs = new Map<number, number>()
   for (let i = 0; i < 25 / DT && (runner.data.goal !== null || passer.data.speed > 0); i++) {
@@ -205,7 +205,7 @@ test('a walker held up on the way to a place of its route asks for a new route f
   run(2 * DT)
   const first = runner.data.route
   // Sentries stand round the first place it walks to, so it cannot get there.
-  const [x, z] = first.points[first.leg]
+  const [x, , z] = first.points[first.leg]
   for (const [dx, dz] of [[0, 0], [0.65, 0], [-0.65, 0], [0, 0.65], [0, -0.65]]) room.spawn('sentry', { pos: [x + dx, 0, z + dz] })
   const goal = first.points.at(-1)
   // The step its route was asked again: a new one, or none for a way now straight, while it still walks
@@ -222,7 +222,7 @@ test('a walker held up on the way to a place of its route asks for a new route f
   // And got to where it was sent.
   expect(runner.data.doing).toBe('go')
   expect(runner.data.goal).toBeNull()
-  expect(Math.hypot(runner.data.pos[0] - goal[0], runner.data.pos[2] - goal[1])).toBeLessThan(defs.runner.arrive + 0.05)
+  expect(Math.hypot(runner.data.pos[0] - goal[0], runner.data.pos[2] - goal[2])).toBeLessThan(defs.runner.arrive + 0.05)
 })
 
 test('in the town the guards hunt the intruders down, and the people run from the shots', async () => {

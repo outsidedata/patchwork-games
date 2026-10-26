@@ -139,7 +139,7 @@
     "noise": { "pos": [0, 0, 0] },
     "beacon": { "pos": [0, 0, 0] },
     "bystander": {
-      "pos": [0, 0, 0], "yaw": 0, "speed": 0, "body": "farmer_man", "clip": "idle", "since": 0, "holding": {}
+      "pos": [0, 0, 0], "to": [0, 0, 0], "yaw": 0, "speed": 0, "body": "farmer_man", "clip": "idle", "since": 0, "holding": {}
     },
     "sentry": {
       "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "grounded": true, "sliding": false, "speed": 0, "want": [0, 0], "face": null, "jump": false,
@@ -158,20 +158,20 @@
       "target": null, "next": 0, "shot": null, "sound": null, "checked": {}, "hp": 100, "dead": false, "hurt": 0
     },
     "stroller": {
-      "pos": [0, 0, 0], "yaw": 0, "speed": 0, "body": "farmer_man", "clip": "idle", "since": 0, "holding": {},
+      "pos": [0, 0, 0], "to": [0, 0, 0], "yaw": 0, "speed": 0, "body": "farmer_man", "clip": "idle", "since": 0, "holding": {},
       "look": 0, "gaze": null, "seen": [], "noticing": {}, "facts": [], "doing": "", "until": 0, "wake": 0, "arrived": false, "told": null, "route": null
     },
     "passer": {
-      "pos": [0, 0, 0], "yaw": 0, "speed": 0, "body": "farmer_man", "clip": "idle", "since": 0, "holding": {},
+      "pos": [0, 0, 0], "to": [0, 0, 0], "yaw": 0, "speed": 0, "body": "farmer_man", "clip": "idle", "since": 0, "holding": {},
       "look": 0, "gaze": null, "seen": [], "noticing": {}, "facts": [], "doing": "", "until": 0, "wake": 0, "arrived": false, "told": null, "route": null
     },
     "person": {
-      "pos": [0, 0, 0], "yaw": 0, "speed": 0, "body": "farmer_man", "clip": "idle", "since": 0, "holding": {},
+      "pos": [0, 0, 0], "to": [0, 0, 0], "yaw": 0, "speed": 0, "body": "farmer_man", "clip": "idle", "since": 0, "holding": {},
       "look": 0, "gaze": null, "seen": [], "noticing": {}, "facts": [], "doing": "", "until": 0, "wake": 0, "arrived": false, "told": null, "route": null,
       "target": null, "sound": null, "checked": {}, "hp": 30, "dead": false, "hurt": 0
     },
     "intruder": {
-      "pos": [0, 0, 0], "yaw": 0, "speed": 0, "body": "mechworker", "clip": "idle", "since": 0, "holding": {},
+      "pos": [0, 0, 0], "to": [0, 0, 0], "yaw": 0, "speed": 0, "body": "mechworker", "clip": "idle", "since": 0, "holding": {},
       "look": 0, "gaze": null, "seen": [], "noticing": {}, "facts": [], "doing": "", "until": 0, "wake": 0, "arrived": false, "told": null, "route": null,
       "target": null, "sound": null, "hp": 60, "dead": false, "hurt": 0
     }
