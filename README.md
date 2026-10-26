@@ -35,6 +35,9 @@ what it needs).
 - **demo_motion3d**: an X Bot on motion3d over a checkerboard yard: zones where the use key plays
   each zone's clip, a wall's lip to hang from, shimmy along, climb up or drop from, and a chair to
   sit in.
+- **demo_npc3d**: NPCs on npc3d that see, notice, remember, hear and choose what to do: sentries,
+  guards hunting intruders through a town, people running from the shots, and walkers taking
+  nav3d's baked routes round a wall.
 - **demo_ocean3d**: the ocean3d sea alone, buoys and a boat riding it, every number of it on a
   panel in its `dev.html`.
 - **demo_particle2d**: particle2d's effects running on their own in a flat hall: a row of exhibits

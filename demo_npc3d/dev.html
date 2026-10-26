@@ -1,0 +1,175 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demo_npc3d dev</title>
+    <style>
+      body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      canvas { grid-area: 1 / 1 }
+      .lil-gui.root { max-height: 100vh; overflow-y: auto }
+      #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px; max-height: 60vh; overflow: hidden }
+    </style>
+  </head>
+  <body>
+    <div id="readout"></div>
+    <script type="module">
+      // The testbed: index.html, the manager truth and the scenes its row names all in this tab, one
+      // seat on them over a loopback, stepped on the page's clock. `?scene=<scene>` enters that scene:
+      // sight, notice, hearing, moving, town or wall. The truths are kept on `window.__scenes`, the page on
+      // `window.__page` and the scene's client (its plugins) on `window.__client`. The readout shows the frames drawn in the last second, the longest of them,
+      // the step and the scene; for every sentry and guard what it sees, what it is noticing (each row's
+      // awareness, `!` once noticed, `?` noticed and out of sight) and the facts it holds (`✓` once
+      // checked, its row's `checked`, the `checked` plugin's); what each kind is
+      // doing; and the last five errors the page threw or wrote.
+      //
+      // The panel's views turn npc3d's drawings on and off (its `cones`, `facts`, `sounds`, `shots`,
+      // `cards` and `routes`), and nav3d's `graphs` in a scene that lists nav3d, every one on at first.
+      // The sentry folder edits the sentry's definition in the tab's one
+      // copy of the definitions (its cone, range, edge, the time it takes to notice and how long it
+      // remembers), read by the rule on the next step, and turns every sentry, written on its row's
+      // `face`, which walker turns it to. The orders folder makes a `noise` at a place, as a sound is
+      // made, or a `beacon`, which orders the runners and passers there; and in town another intruder at
+      // a corner. Nothing is written to disk.
+      import { boot } from '#engine/engine.ts'
+      import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
+      import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import { prepared } from '#plugins/loader/loader.sim.ts'
+      import GUI from 'lil-gui'
+      import { sim } from './demo_npc3d.sim.ts'
+      import partial from './demo_npc3d.partial_scene.json'
+      import file from './demo_npc3d.scene.json'
+
+      // Every error the page throws or writes, the last five, shown under the readout.
+      const errors = []
+      const caught = e => {
+        errors.push(String(e?.message ?? e))
+        if (errors.length > 5) errors.shift()
+      }
+      addEventListener('error', e => caught(e.error ?? e.message))
+      addEventListener('unhandledrejection', e => caught(e.reason))
+      const written = console.error.bind(console)
+      console.error = (...a) => { caught(a.map(x => x?.message ?? x).join(' ')); written(...a) }
+
+      file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
+      // The tab's one copy of the definitions: every rule and look reads this object.
+      const defs = await prepared(partial.world, partial.world.defs)
+
+      const dt = file.prefabs.engine.dt
+      const truth = boot(file, sim)
+      window.__scenes = await load(truth, import.meta.url)
+      let client
+      const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+        client = me
+        window.__client = me
+        for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
+          if (!surface) continue
+          const canvas = document.createElement('canvas')
+          canvas.width = scene.prefabs.engine.width
+          canvas.height = scene.prefabs.engine.height
+          document.body.appendChild(canvas)
+          surface.mount(canvas)
+        }
+      })
+      window.__page = page
+      const readout = document.getElementById('readout')
+      const chosen = { scene: file.prefabs.scenemanager.entry }
+      const room = () => window.__scenes.get(chosen.scene)
+
+      // The panel. A press on it stops at it, a release never does, so a key held in the game and let go
+      // over the panel still lets go; after a click the focus goes back to the page, so the game's keys
+      // keep working once a slider has been touched.
+      const gui = new GUI({ title: 'demo_npc3d dev' })
+      for (const type of ['keydown', 'keyup', 'click', 'mousedown', 'contextmenu', 'wheel'])
+        gui.domElement.addEventListener(type, e => e.stopPropagation())
+      gui.domElement.addEventListener('pointerup', () => requestAnimationFrame(() => {
+        const at = document.activeElement
+        if (gui.domElement.contains(at) && !(at.tagName === 'INPUT' && (at.type === 'text' || at.type === 'number'))) at.blur()
+      }))
+      addEventListener('change', e => { if (gui.domElement.contains(e.target)) e.target.blur() })
+      gui.add(chosen, 'scene', Object.keys(file.prefabs.scenemanager.scenes)).onChange(s => {
+        const url = new URL(location.href)
+        url.searchParams.set('scene', s)
+        location.href = url.href
+      })
+
+      // ---------- views ----------
+      const vf = gui.addFolder('views')
+      const shows = { cones: true, facts: true, sounds: true, shots: true, cards: true, routes: true }
+      for (const key of Object.keys(shows)) vf.add(shows, key)
+      const navShows = { graphs: true }
+      if (room().scene.plugins.includes('nav3d')) vf.add(navShows, 'graphs')
+
+      // ---------- sentry ----------
+      if (room().rows.some(r => r.kind === 'sentry')) {
+        const sf = gui.addFolder('sentry')
+        const s = defs.sentry
+        sf.add(s.sight, 'cone', 1, 360, 1).name('cone (degrees)')
+        sf.add(s.sight, 'range', 0.5, 40, 0.5).name('range (m)')
+        sf.add(s.sight.edge, 'cone', 1, 360, 1).name('edge cone (degrees)')
+        sf.add(s.sight.edge, 'range', 0.5, 20, 0.5).name('edge range (m)')
+        sf.add(s.notice, 'time', 0.1, 10, 0.1).name('notice time (s)')
+        sf.add(s, 'memory', 0, 30, 0.5).name('memory (s)')
+        const facing = { yaw: 0 }
+        sf.add(facing, 'yaw', -180, 180, 1).name('faces (degrees)').onChange(v => {
+          for (const g of room().rows.filter(r => r.kind === 'sentry')) g.data.face = (v * Math.PI) / 180
+        })
+      }
+
+      // ---------- orders ----------
+      const orders = room().rows.some(r => ['guard', 'runner', 'passer'].includes(r.kind))
+      const of = orders ? gui.addFolder('orders') : undefined
+      const PLACES = { north: [0, 12], south: [0, -10], east: [-12, 2], west: [12, 2], middle: [0, 4] }
+      if (room().rows.some(r => r.kind === 'guard')) {
+        for (const [name, [x, z]] of Object.entries(PLACES)) of.add({ go: () => room().spawn('noise', { pos: [x, 0, z] }) }, 'go').name(`noise ${name}`)
+      }
+      if (room().rows.some(r => r.kind === 'runner' || r.kind === 'passer')) {
+        for (const [name, [x, z]] of Object.entries(PLACES)) of.add({ go: () => room().spawn('beacon', { pos: [x, 0, z] }) }, 'go').name(`beacon ${name}`)
+      }
+      if (chosen.scene === 'town') {
+        const CORNERS = [[-15, 15], [15, 15], [-15, -15], [15, -15]]
+        let next = 0
+        of.add({ go: () => {
+          const [x, z] = CORNERS[next++ % CORNERS.length]
+          room().spawn('intruder', { pos: [x, 0, z], yaw: Math.atan2(-x, -z), since: room().rows.find(r => r.kind === 'npc3d').data.time })
+        } }, 'go').name('another intruder')
+      }
+
+      // What an NPC is noticing, for the readout: each row's awareness, `!` once noticed, `?` out of sight.
+      const knows = r => Object.entries(r.data.noticing).map(([id, k]) => `${id}${k.aware >= 1 ? (r.data.seen.includes(Number(id)) ? '!' : '?') : ':' + k.aware.toFixed(2)}`).join(' ')
+
+      // The frames drawn in the last second, and the longest of them.
+      const frames = []
+      let last = performance.now(), owed = 0
+      const loop = async now => {
+        frames.push(now)
+        while (frames[0] < now - 1000) frames.shift()
+        const worst = frames.slice(1).reduce((m, t, i) => Math.max(m, t - frames[i]), 0)
+        owed += Math.min((now - last) / 1000, 0.25)
+        last = now
+        // A frame that throws is shown, and the next frame goes on.
+        try {
+          page.input()
+          while (owed >= dt) { truth.step(dt); owed -= dt }
+          const npc = client?.plugins.npc3d
+          if (npc) Object.assign(npc, shows)
+          const nav = client?.plugins.nav3d
+          if (nav) Object.assign(nav, navShows)
+          await page.frame(owed / dt)
+        } catch (e) { caught(e) }
+        const rows = room()?.rows ?? []
+        const watchers = rows.filter(r => r.kind === 'sentry' || r.kind === 'guard')
+        const doing = {}
+        for (const r of rows) if (r.data.doing) doing[`${r.kind} ${r.data.doing}`] = (doing[`${r.kind} ${r.data.doing}`] ?? 0) + 1
+        readout.textContent = [
+          `${frames.length} fps  longest frame ${worst.toFixed(1)} ms`,
+          `${chosen.scene}  step ${truth.n}`,
+          ...watchers.map(g => `${g.kind} ${g.id} sees [${g.data.seen.join(' ')}] noticing [${knows(g)}] facts [${g.data.facts.map(f => f.type + (g.data.checked?.[f.type] === f.time ? '✓' : '')).join(' ')}]${g.data.doing ? ' ' + g.data.doing : ''}`),
+          Object.entries(doing).map(([k, n]) => `${k} ×${n}`).join('  '),
+          ...errors,
+        ].join('\n')
+        requestAnimationFrame(loop)
+      }
+      requestAnimationFrame(loop)
+    </script>
+  </body>
+</html>

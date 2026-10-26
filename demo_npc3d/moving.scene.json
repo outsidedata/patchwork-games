@@ -1,0 +1,22 @@
+{
+  "extends": "demo_npc3d.partial_scene.json",
+  "world": {},
+  "plugins": ["loader", "scenemanager", "player", "crowd3d", "anim", "npc3d", "terrain3d", "environment3d", "solids", "render3d"],
+  "seats": 1,
+  "prefabs": {},
+  "actors": [
+    { "is": "runner", "pos": [-8, 0, -6], "yaw": 0 },
+    { "is": "runner", "pos": [-6, 0, -6], "yaw": 0 },
+    { "is": "runner", "pos": [-4, 0, -6], "yaw": 0 },
+    { "is": "runner", "pos": [-2, 0, -6], "yaw": 0 },
+    { "is": "runner", "pos": [0, 0, -6], "yaw": 0 },
+    { "is": "passer", "pos": [2, 0, -6], "yaw": 0, "body": "farmer_man" },
+    { "is": "passer", "pos": [4, 0, -6], "yaw": 0, "body": "farmer_woman" },
+    { "is": "passer", "pos": [6, 0, -6], "yaw": 0, "body": "farmhand" },
+    { "is": "passer", "pos": [8, 0, -6], "yaw": 0, "body": "mechworker" },
+    { "is": "pillar", "pos": [0, 0, 1] },
+    { "is": "pillar", "pos": [-5, 0, 4] },
+    { "is": "pillar", "pos": [5, 0, 4] },
+    { "is": "start", "slot": 0, "pos": [0, 16, -18], "view": [0, -0.7] }
+  ]
+}

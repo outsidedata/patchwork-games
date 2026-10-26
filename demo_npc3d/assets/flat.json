@@ -1,0 +1,7 @@
+{
+  "program": { "world": 1000, "hscale": 1, "sea": 0.5, "flood": false, "out": "flat", "nodes": [{ "id": "flat", "op": "const", "value": 0 }] },
+  "analysis": { "slopeStep": 1.5, "curveStep": 4, "positionRadius": 18, "occlusionRadius": 30, "occlusionSteps": 5, "cliffProbe": 12, "cliffSlope": 0.5, "cliffDrop": 7, "flatAngle": 0.03, "records": 50000 },
+  "ground": { "roughness": 0.9, "layers": [{ "name": "checker", "map": "checker", "scale": 2 }] },
+  "surfaces": {},
+  "layers": []
+}

@@ -1,0 +1,45 @@
+{
+  "extends": "demo_npc3d.partial_scene.json",
+  "world": {
+    "loader": {
+      "assets": {
+        "townNav": { "type": "json", "url": "/games/demo_npc3d/assets/town.nav.json", "preload": true }
+      }
+    },
+    "nav3d": {
+      "graphs": {
+        "town": { "asset": "townNav", "bake": { "area": [-20, -20, 20, 20], "clearance": 0.5, "around": 8, "sample": 1, "slope": 0.6, "wade": 0.4 } }
+      },
+      "mods": { "solids": ["shapes3d"], "height": "terrain3d", "link": "terrain3d", "behaviors": ["terrain3d"] }
+    },
+    "npc3d": {
+      "mods": { "route": "nav3d" }
+    }
+  },
+  "plugins": ["loader", "scenemanager", "player", "crowd3d", "anim", "npc3d", "terrain3d", "environment3d", "solids", "nav3d", "render3d"],
+  "seats": 1,
+  "prefabs": {},
+  "actors": [
+    { "is": "pillar", "pos": [0, 0, 0] },
+    { "is": "pillar", "pos": [-8, 0, 7] },
+    { "is": "pillar", "pos": [8, 0, 7] },
+    { "is": "pillar", "pos": [-8, 0, -7] },
+    { "is": "pillar", "pos": [8, 0, -7] },
+    { "is": "guard", "pos": [-12, 0, -12], "yaw": 0.8 },
+    { "is": "guard", "pos": [12, 0, -12], "yaw": -0.8 },
+    { "is": "guard", "pos": [0, 0, 13], "yaw": 3.14 },
+    { "is": "person", "pos": [-3, 0, 2], "yaw": 1, "body": "farmer_man" },
+    { "is": "person", "pos": [3, 0, 2], "yaw": -1, "body": "farmer_woman" },
+    { "is": "person", "pos": [-6, 0, 9], "yaw": 2, "body": "farmhand" },
+    { "is": "person", "pos": [6, 0, 9], "yaw": -2, "body": "farmer_man" },
+    { "is": "person", "pos": [-10, 0, 5], "yaw": 0.5, "body": "farmer_woman" },
+    { "is": "person", "pos": [10, 0, 5], "yaw": -0.5, "body": "farmhand" },
+    { "is": "person", "pos": [-6, 0, -5], "yaw": 2.5, "body": "farmer_man" },
+    { "is": "person", "pos": [6, 0, -5], "yaw": -2.5, "body": "farmer_woman" },
+    { "is": "person", "pos": [0, 0, -4], "yaw": 3, "body": "farmhand" },
+    { "is": "person", "pos": [0, 0, 5], "yaw": 0, "body": "farmer_woman" },
+    { "is": "intruder", "pos": [-15, 0, 15], "yaw": 2.4 },
+    { "is": "intruder", "pos": [15, 0, 15], "yaw": -2.4 },
+    { "is": "start", "slot": 0, "pos": [0, 22, -26], "view": [0, -0.7] }
+  ]
+}

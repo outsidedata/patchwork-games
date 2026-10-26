@@ -1,0 +1,24 @@
+{
+ "bodies": {
+  "farmer_man": "characters/farmer_man/farmer_man.fbx",
+  "farmer_woman": "characters/farmer_woman/farmer_woman.fbx",
+  "farmhand": "characters/farmhand/farmhand.fbx",
+  "mechworker": "characters/mechworker/mechworker.fbx"
+ },
+ "clips": {
+  "idle": "packs/mixamo-motions/Breathing Idle.fbx",
+  "talk": "packs/mixamo-motions/Talking (2).fbx",
+  "hiphop": "packs/mixamo-motions/Hip Hop Dancing.fbx",
+  "salsa": "packs/mixamo-motions/Salsa Dancing.fbx",
+  "house": "packs/mixamo-motions/House Dancing.fbx",
+  "twist": "packs/mixamo-motions/Twist Dance.fbx",
+  "drink": "packs/mixamo-motions/Drinking.fbx",
+  "walk": "packs/Male Locomotion Pack 30FPS/walking.fbx",
+  "run": "packs/Male Locomotion Pack 30FPS/standard run.fbx",
+  "scared": "packs/mixamo-motions/Terrified.fbx",
+  "die": "packs/mixamo-motions/Falling Back Death.fbx",
+  "rise": "packs/mixamo-motions/Zombie Stand Up.fbx",
+  "shamble": "packs/mixamo-motions/Zombie Walk.fbx",
+  "sway": "packs/mixamo-motions/Zombie Idle.fbx"
+ }
+}

@@ -1,0 +1,41 @@
+{
+  "extends": "demo_npc3d.partial_scene.json",
+  "world": {
+    "loader": {
+      "assets": {
+        "wallNav": { "type": "json", "url": "/games/demo_npc3d/assets/wall.nav.json", "preload": true }
+      }
+    },
+    "shapes3d": {
+      "kinds": {
+        "block": { "shape": { "box": { "size": [2, 2.4, 0.6] } }, "look": { "colour": "#8c8a86", "roughness": 0.85 } }
+      }
+    },
+    "nav3d": {
+      "graphs": {
+        "wall": { "asset": "wallNav", "bake": { "area": [-16, -16, 16, 16], "clearance": 0.5, "around": 8, "sample": 1, "slope": 0.6, "wade": 0.4 } }
+      },
+      "mods": { "solids": ["shapes3d"], "height": "terrain3d", "link": "terrain3d", "behaviors": ["terrain3d"] }
+    },
+    "npc3d": {
+      "mods": { "route": "nav3d" }
+    }
+  },
+  "plugins": ["loader", "scenemanager", "player", "crowd3d", "anim", "npc3d", "terrain3d", "environment3d", "solids", "nav3d", "render3d"],
+  "seats": 1,
+  "prefabs": {
+    "block": { "pos": [0, 0, 0], "yaw": 0 }
+  },
+  "actors": [
+    { "is": "block", "pos": [-5, 0, 0] },
+    { "is": "block", "pos": [-3, 0, 0] },
+    { "is": "block", "pos": [-1, 0, 0] },
+    { "is": "block", "pos": [1, 0, 0] },
+    { "is": "block", "pos": [3, 0, 0] },
+    { "is": "block", "pos": [5, 0, 0] },
+    { "is": "runner", "pos": [-2, 0, -8], "yaw": 0 },
+    { "is": "passer", "pos": [2, 0, -8], "yaw": 0, "body": "farmer_woman" },
+    { "is": "beacon", "pos": [0, 0, 8] },
+    { "is": "start", "slot": 0, "pos": [0, 16, -18], "view": [0, -0.7] }
+  ]
+}

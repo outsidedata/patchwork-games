@@ -1,0 +1,21 @@
+{
+  "extends": "demo_npc3d.partial_scene.json",
+  "world": {},
+  "plugins": ["loader", "scenemanager", "player", "crowd3d", "anim", "npc3d", "terrain3d", "environment3d", "solids", "render3d"],
+  "seats": 1,
+  "prefabs": {},
+  "actors": [
+    { "is": "sentry", "pos": [0, 0, 0], "yaw": 0 },
+    { "is": "bystander", "pos": [2, 0, 5], "yaw": 3.1, "body": "farmer_man" },
+    { "is": "bystander", "pos": [-3, 0, 4], "yaw": 2.4, "body": "farmer_woman", "clip": "talk" },
+    { "is": "bystander", "pos": [-7, 0, 7], "yaw": 2.2, "body": "farmhand" },
+    { "is": "bystander", "pos": [6, 0, 1], "yaw": -1.6, "body": "mechworker" },
+    { "is": "bystander", "pos": [0, 0, -6], "yaw": 0, "body": "farmer_woman" },
+    { "is": "bystander", "pos": [-3, 0, -1], "yaw": 1.2, "body": "farmhand", "clip": "talk" },
+    { "is": "bystander", "pos": [1, 0, 15], "yaw": 3.1, "body": "farmer_man", "clip": "talk" },
+    { "is": "bystander", "pos": [4.5, 0, 9], "yaw": 3.6, "body": "mechworker" },
+    { "is": "pillar", "pos": [3, 0, 6] },
+    { "is": "pillar", "pos": [-4.5, 0, 4.5] },
+    { "is": "start", "slot": 0, "pos": [0, 11, -13], "view": [0, -0.6] }
+  ]
+}

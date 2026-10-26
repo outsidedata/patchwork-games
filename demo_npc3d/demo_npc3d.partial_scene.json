@@ -1,0 +1,184 @@
+{
+  "world": {
+    "seed": 7,
+    "defs": "demo_npc3d",
+    "loader": {
+      "assets": {
+        "demo_npc3d": { "type": "json", "url": "/games/demo_npc3d/assets/demo_npc3d.json", "preload": true },
+        "flat": { "type": "json", "url": "/games/demo_npc3d/assets/flat.json", "preload": true },
+        "checker": { "type": "texture", "url": "/games/demo_npc3d/assets/checker.png", "wrap": "repeat" },
+        "farmer_man": { "type": "model", "url": "/games/demo_npc3d/assets/farmer_man.glb", "preload": true },
+        "farmer_woman": { "type": "model", "url": "/games/demo_npc3d/assets/farmer_woman.glb", "preload": true },
+        "farmhand": { "type": "model", "url": "/games/demo_npc3d/assets/farmhand.glb", "preload": true },
+        "mechworker": { "type": "model", "url": "/games/demo_npc3d/assets/mechworker.glb", "preload": true },
+        "swatRig": { "type": "json", "url": "/games/demo_npc3d/assets/swat.rig.json", "preload": true },
+        "swat": { "type": "model", "url": "/games/demo_npc3d/assets/swat.glb", "preload": true },
+        "swatWoman": { "type": "model", "url": "/games/demo_npc3d/assets/swatWoman.glb", "preload": true },
+        "rifle": { "type": "model", "url": "/games/demo_npc3d/assets/rifle.glb", "preload": true }
+      }
+    },
+    "terrain3d": {
+      "field": "flat",
+      "rings": [{ "reach": 64, "seg": 64 }, { "reach": 256, "seg": 64 }],
+      "shadowReach": 64,
+      "budget": 8,
+      "seabed": false
+    },
+    "walker": {
+      "kinds": {
+        "sentry": {
+          "radius": 0.3, "height": 1.8, "accel": 8, "turnRate": 4, "gravity": 20, "jumpH": 0, "step": 0.4,
+          "maxSlope": 0.5, "slopeBand": 0.05, "slide": 2, "wade": 0, "span": 0.5, "probe": 1.5, "seekSpeed": 1.935, "bodies": ["sentry", "runner", "guard"]
+        },
+        "runner": {
+          "radius": 0.3, "height": 1.8, "accel": 8, "turnRate": 4, "gravity": 20, "jumpH": 0, "step": 0.4,
+          "maxSlope": 0.5, "slopeBand": 0.05, "slide": 2, "wade": 0, "span": 0.5, "probe": 1.5, "seekSpeed": 1.935, "bodies": ["sentry", "runner", "guard"]
+        },
+        "guard": {
+          "radius": 0.3, "height": 1.8, "accel": 8, "turnRate": 4, "gravity": 20, "jumpH": 0, "step": 0.4,
+          "maxSlope": 0.5, "slopeBand": 0.05, "slide": 2, "wade": 0, "span": 0.5, "probe": 1.5, "seekSpeed": 1.935, "bodies": ["sentry", "runner", "guard"]
+        }
+      },
+      "mods": { "height": "terrain3d", "depth": "terrain3d", "cell": "terrain3d", "fixed": "shapes3d", "behaviors": "shapes3d" }
+    },
+    "shapes3d": {
+      "kinds": {
+        "pillar": { "shape": { "cylinder": { "radius": 0.6, "height": 2.6 } }, "look": { "colour": "#7a6f62", "roughness": 0.8, "sides": 24 } }
+      }
+    },
+    "solids": {
+      "mods": { "models": "shapes3d" }
+    },
+    "anim": {
+      "still": 0.05, "shift": 0.75, "leap": 0.5, "landFall": 7.5, "moves": 0.05, "turns": 30,
+      "kinds": {
+        "sentry": {
+          "rig": "swatRig", "model": "swat", "fade": 0.15, "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
+          "props": [{ "model": "rifle", "bone": "RightHand", "at": [-0.01, 0.108, 0], "turn": [91.8, 34.5, -109.9] }]
+        },
+        "runner": {
+          "rig": "swatRig", "model": "swatWoman", "fade": 0.15, "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
+          "props": [{ "model": "rifle", "bone": "RightHand", "at": [-0.011, 0.107, -0.007], "turn": [91.2, 34.8, -116.4] }]
+        },
+        "guard": {
+          "rig": "swatRig", "model": "swat", "fade": 0.15, "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
+          "props": [{ "model": "rifle", "bone": "RightHand", "at": [-0.01, 0.108, 0], "turn": [91.8, 34.5, -109.9] }]
+        }
+      }
+    },
+    "crowd3d": {
+      "bodies": {
+        "farmer_man": "farmer_man",
+        "farmer_woman": "farmer_woman",
+        "farmhand": "farmhand",
+        "mechworker": "mechworker"
+      },
+      "clips": ["idle", "talk", "hiphop", "salsa", "house", "twist", "drink", "walk", "run", "scared", "die", "rise", "shamble", "sway"],
+      "rate": 30,
+      "hold": ["die", "rise"],
+      "kinds": ["bystander", "stroller", "passer", "person", "intruder"]
+    },
+    "hitscan3d": {
+      "kinds": { "guard": { "off": "dead" }, "person": { "off": "dead" }, "intruder": { "off": "dead" } },
+      "rewind": 6,
+      "mods": { "ground": "terrain3d", "solids": "shapes3d", "behaviors": "shapes3d", "bodies": "npc3d" }
+    },
+    "npc3d": {
+      "mods": { "sight": "hitscan3d", "shot": "hitscan3d", "behaviors": "checked" }
+    },
+    "shipped": { "plugins": ["checked"] }
+  },
+  "prefabs": {
+    "engine": {
+      "dt": 0.016666666666666666,
+      "width": 960,
+      "height": 540
+    },
+    "scenemanager": {
+      "out": {}
+    },
+    "loader": {},
+    "environment3d": {
+      "sun": {
+        "at": [8, 20, 6],
+        "color": "#ffe9d6",
+        "power": 2.2,
+        "shadow": { "map": 2048, "half": 24, "near": 1, "far": 80, "distance": 40, "bias": -0.0004, "normalBias": 0.03 }
+      },
+      "sky": { "color": "#b8c8e0", "ground": "#404040", "power": 1 }
+    },
+    "render3d": {
+      "camera": { "fov": 60, "near": 0.1, "far": 400, "at": [0, 9, -12], "look": [0, 0, 4] },
+      "pixelRatio": 2,
+      "tone": "neutral",
+      "exposure": 1.2,
+      "shadows": "soft",
+      "background": "#9fb4cc"
+    },
+    "player": {
+      "seat": 0,
+      "pos": [0, 0, 0],
+      "view": [0, 0],
+      "stick": [0, 0],
+      "up": false,
+      "down": false,
+      "pace": 0,
+      "placed": false
+    },
+    "start": {
+      "slot": 0,
+      "pos": [0, 0, 0],
+      "view": [0, 0]
+    },
+    "npc3d": {
+      "time": 0,
+      "sounds": [],
+      "next": 1
+    },
+    "pillar": { "pos": [0, 0, 0], "yaw": 0 },
+    "noise": { "pos": [0, 0, 0] },
+    "beacon": { "pos": [0, 0, 0] },
+    "bystander": {
+      "pos": [0, 0, 0], "yaw": 0, "speed": 0, "body": "farmer_man", "clip": "idle", "since": 0, "holding": {}
+    },
+    "sentry": {
+      "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "grounded": true, "sliding": false, "speed": 0, "want": [0, 0], "face": null, "jump": false,
+      "side": 0, "turned": 0, "rig": "stand", "limp": false, "rest": null, "goal": null, "stalled": 0, "gap": null,
+      "look": 0, "gaze": null, "seen": [], "noticing": {}, "facts": [], "doing": "", "until": 0, "wake": 0, "arrived": false, "told": null, "route": null
+    },
+    "runner": {
+      "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "grounded": true, "sliding": false, "speed": 0, "want": [0, 0], "face": null, "jump": false,
+      "side": 0, "turned": 0, "rig": "stand", "limp": false, "rest": null, "goal": null, "stalled": 0, "gap": null,
+      "look": 0, "gaze": null, "seen": [], "noticing": {}, "facts": [], "doing": "", "until": 0, "wake": 0, "arrived": false, "told": null, "route": null
+    },
+    "guard": {
+      "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "grounded": true, "sliding": false, "speed": 0, "want": [0, 0], "face": null, "jump": false,
+      "side": 0, "turned": 0, "rig": "stand", "limp": false, "rest": null, "goal": null, "stalled": 0, "gap": null,
+      "look": 0, "gaze": null, "seen": [], "noticing": {}, "facts": [], "doing": "", "until": 0, "wake": 0, "arrived": false, "told": null, "route": null,
+      "target": null, "next": 0, "shot": null, "sound": null, "checked": {}, "hp": 100, "dead": false, "hurt": 0
+    },
+    "stroller": {
+      "pos": [0, 0, 0], "yaw": 0, "speed": 0, "body": "farmer_man", "clip": "idle", "since": 0, "holding": {},
+      "look": 0, "gaze": null, "seen": [], "noticing": {}, "facts": [], "doing": "", "until": 0, "wake": 0, "arrived": false, "told": null, "route": null
+    },
+    "passer": {
+      "pos": [0, 0, 0], "yaw": 0, "speed": 0, "body": "farmer_man", "clip": "idle", "since": 0, "holding": {},
+      "look": 0, "gaze": null, "seen": [], "noticing": {}, "facts": [], "doing": "", "until": 0, "wake": 0, "arrived": false, "told": null, "route": null
+    },
+    "person": {
+      "pos": [0, 0, 0], "yaw": 0, "speed": 0, "body": "farmer_man", "clip": "idle", "since": 0, "holding": {},
+      "look": 0, "gaze": null, "seen": [], "noticing": {}, "facts": [], "doing": "", "until": 0, "wake": 0, "arrived": false, "told": null, "route": null,
+      "target": null, "sound": null, "checked": {}, "hp": 30, "dead": false, "hurt": 0
+    },
+    "intruder": {
+      "pos": [0, 0, 0], "yaw": 0, "speed": 0, "body": "mechworker", "clip": "idle", "since": 0, "holding": {},
+      "look": 0, "gaze": null, "seen": [], "noticing": {}, "facts": [], "doing": "", "until": 0, "wake": 0, "arrived": false, "told": null, "route": null,
+      "target": null, "sound": null, "hp": 60, "dead": false, "hurt": 0
+    }
+  },
+  "actors": [
+    { "is": "scenemanager" },
+    { "is": "loader" },
+    { "is": "npc3d" }
+  ]
+}
