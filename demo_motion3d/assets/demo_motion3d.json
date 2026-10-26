@@ -8,13 +8,32 @@
       "stick": [["a", "ArrowLeft", "PadStickLeft"], ["d", "ArrowRight", "PadStickRight"], ["w", "ArrowUp", "PadStickUp"], ["s", "ArrowDown", "PadStickDown"]],
       "look": ["PadRightStickLeft", "PadRightStickRight", "PadRightStickUp", "PadRightStickDown"],
       "fast": ["Shift", "Pad7", "Pad10"],
-      "motions": {
-        "jump": [" ", "Pad0"],
-        "use": ["e", "Pad2"]
-      },
+      "motions": { "jump": [" ", "Pad0"], "use": ["e", "Pad2"] },
       "nearer": ["Pad12"],
       "further": ["Pad13"],
       "drag": "Mouse2"
     }
+  },
+  "swingzone": { "rope": { "colour": "#b08a5a", "radius": 0.02 }, "pivot": [0.135, 7.136, 1.603], "length": 4.207 },
+  "pool": { "look": { "colour": "#3a8fd0", "opacity": 0.55 }, "water": { "at": [0, -1.062, 2.9], "size": [3, 5] } },
+  "car": {
+    "speed": 6,
+    "accel": 4,
+    "turn": 1.4,
+    "lot": [-2, 41, 16, 58],
+    "parts": [
+      { "kind": "carhood", "at": [0, 0, 1.47] },
+      { "kind": "carboot", "at": [0, 0, -1.68] },
+      { "kind": "carfloor", "at": [0, 0, -0.21] },
+      { "kind": "cardoor", "at": [-0.87, 0, -0.21] },
+      { "kind": "carroof", "at": [0, 1.525, 0] },
+      { "kind": "carpillar", "at": [-0.86, 0.805, -1.05] },
+      { "kind": "carpillar", "at": [0.86, 0.805, -1.05] },
+      { "kind": "carpillar", "at": [-0.86, 0.805, 1.05] },
+      { "kind": "carpillar", "at": [0.86, 0.805, 1.05] },
+      { "kind": "carseat", "at": [0.4, 0.535, 0.1] },
+      { "kind": "carwheel", "at": [0.228, 1.145, 0.099] }
+    ],
+    "zone": { "kind": "carzone", "at": [2.163, 0, 0.174] }
   }
 }

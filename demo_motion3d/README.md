@@ -1,20 +1,30 @@
 # demo_motion3d
 
-The demo of motion3d (`plugins/motion3d`): an X Bot on a checkerboard yard, and spaces where the use
-key does what each offers.
+The demo of motion3d (`plugins/motion3d`): an X Bot on a checkerboard yard, and stations where the use
+key does what each offers: hang, shimmy, climb, swing, vault, sit, lie down, swim and drive.
 
 ## Playing it
 
 `yarn dev`, then `localhost:5173/games/demo_motion3d/index.html`, or `dev.html` for the testbed, whose
-readout shows the activity and motion the body is in and what the space it stands in offers. Against
-its server: `yarn serve demo_motion3d`, then `localhost:5173/games/demo_motion3d/client.html`.
+panel tunes motion3d's settings and whose readout shows what the body is doing. Against its server:
+`yarn serve demo_motion3d`, then `localhost:5173/games/demo_motion3d/client.html`.
 
-- W A S D walk, Shift run, Space jump, right drag look, wheel zoom.
-- E is use. In the pink zone it plays a backflip, in the blue zone it picks something up, and on open
-  ground it does nothing.
-- Under the orange wall's lip, E jumps up and hangs from it. Hanging, A and D shimmy along the lip until
-  the hands would leave it, W + E climbs up onto the wall's top, S + E drops back down.
-- In front of the chair, E sits down in it; E again stands up.
+- W A S D walk, Shift run, Space jump, right drag look, wheel zoom. E is use.
+- Near the start: in the pink zone E plays a backflip, in the blue zone it picks something up, and on
+  open ground it does nothing. Under the orange wall's lip, E jumps up and hangs from it; A and D
+  shimmy along the lip until the hands would leave it, W + E climbs up onto the wall's top, S + E drops
+  back down. In front of the chair, E sits down in it; E again stands up.
+- The first row past the wall: stand still in the pale blue cold room and the body rubs its shoulder
+  and looks about; under the bar E jumps up and hangs, A and D move along it, E drops; at the rope E
+  takes hold, W climbs and letting go of W holds on, E lets go; at the rope swing E swings onto the
+  platform; at the climbing wall E takes hold, W climbs up, S down, E lets go.
+- The second row: at the run wall E runs along it; at the low wall E vaults it; up the step onto the
+  block, at its front edge E teeters, E again steps down off it, S steps back; at the foot of the
+  stairs E climbs them while W is held; along the landing to the pool's edge, E falls in, W swims to
+  the far wall, E there climbs out; at the desk E sits and types, E again stands up.
+- The third row: under the ceiling E jumps up and hangs, A and D move across it, E drops; at the
+  bed's foot E lies down, E again gets up; at the car's door E gets in, W A S D drive, Space honks,
+  E gets out.
 - Gamepad: left stick walk, right stick look, RT or L3 run, A jump, X use, d-pad up and down zoom.
 
 ## How it is made
@@ -24,17 +34,33 @@ its server: `yarn serve demo_motion3d`, then `localhost:5173/games/demo_motion3d
 - motion3d's numbers are `world.motion3d` in `main.scene.json`: the X Bot's `anywhere` is `walk`, its
   spaces are shapes3d's (`shapes3d.motion3d.ts`), and its activities come from the game's own `zones`
   plugin (`plugins/zones/zones.motion3d.ts`), which delivers `walk` too, on shapes3d's ground, so the
-  body walks round the wall and the chair and stands on the wall's top.
-- The spaces are shapes3d kinds that name the activity they offer and stand in nothing's way:
-  `partyzone` (`party`), `sadzone` (`sad`), `ledgezone` (`ledge`, held to its `Lip` line) and
-  `chairzone` (`chair`, held to its `Seat` point). The `wall`, `chair` and `chairback` are solid
-  shapes of their own.
-- The sizes come from the clips' measures in the rig: the lip is where `bracedjump` ends the wrists,
-  2.154 m up; the wall's top is 0.218 m over it, where `bracedclimb` ends the feet; the seat is where
-  `seated` holds the hips, 0.61 m up.
-- The X Bot and its clips are baked by `yarn bake demo_motion3d` (`assets/demo_motion3d.bake.ts`):
-  the clips of `assets/xbot.rig.json` onto the library's `characters/xbot/xbot.fbx` as
-  `assets/xbot.glb`, and the checkerboard `assets/checker-1024.webp`.
+  body walks round the yard's things and stands on what it climbs onto. `ease` is how long a planted
+  hand or foot's pin eases in and out.
+- The spaces are shapes3d kinds that name the activity they offer and stand in nothing's way; the
+  things they are by (walls, the bar, the steps, the chair, the bed, the car's parts) are solid shapes
+  of their own. Each space's points are where its motions hold the body: the `Lip` line where the
+  wrists hang, a `Seat` point where the hips sit, the `Face` plane of the climbing wall, the
+  `Ceiling` plane turned face down, the pool's `Float` plane, the stairs' `Flight` line.
+- The hands and feet each motion names are bent onto their points by ik3d while anim says they are
+  planted (`world.ik3d.mods.limbs: 'motion3d'`), so a hanging body's hands stay on the lip as it sways.
+- Every station past the wall and the chair is sized and placed to its clips by `assets/yard.mjs`,
+  from what the rig measures of each clip (anim's `ends` and `touches`), as demo_walker's yard is:
+  the bar at the height `freejump` ends the hands holding, the rope swing's beam where its swing hangs
+  from, the climbing wall's face where `wallclimb` holds the hands and feet, the run wall's and the
+  vault's starts where their kicks and palm land, the edge where `teeter` stands the toes, the steps
+  half a lap of `stairsup` each, the pool's deck as high as `poolin` starts the feet, the chair and the
+  table where `typing` sits and types, the bed as high as `liedown` lies, the car's seat where `carin`
+  sits. The lip by the wall and the chair are written by hand: the lip is where `bracedjump` ends the
+  wrists, 2.154 m up; the wall's top is 0.218 m over it, where `bracedclimb` ends the feet; the seat is
+  where `seated` holds the hips, 0.61 m up.
+- The car is the game's own `car` kind (`car.sim.ts`): it makes its parts and its space, drives by its
+  driver's stick, and stands them about it every step, so a body in its seat goes where it goes; the
+  page draws the body on the seat as it draws the car (`zones.motion3d.ts`'s `object`).
+- `zones`' page half (`plugins/zones/zones.plugin.ts`) draws the swing's rope and the pool's water.
+- The X Bot, its clips, the rig's measures and the yard are baked by `yarn bake demo_motion3d`
+  (`assets/demo_motion3d.bake.ts`): the clips of `assets/xbot.rig.json` onto the library's
+  `characters/xbot/xbot.fbx` as `assets/xbot.glb`, the rig's `table`, `ends` and `touches`, the yard's
+  stations (`yard.mjs`), and the checkerboard `assets/checker-1024.webp`.
 
 ## Credit
 
@@ -44,5 +70,9 @@ The X Bot and its clips are Mixamo's (Adobe), from the library's `characters/xbo
 ## Tests
 
 `yarn vitest run games/demo_motion3d/demo_motion3d.sim.test.ts`: a seat walks into each zone and
-presses use; hangs from the lip, its wrists on it, shimmies to its end, climbs onto the top; drops
-back down; sits in the chair, its hips on the seat, and stands up.
+presses use; hangs from the lip, its drawn hands steady through every change of motion and bent onto
+the lip, shimmies to its end and climbs onto the top; drops back down; sits in the chair; shivers in
+the cold room; hangs from the bar and the ceiling and moves along them; climbs the rope and the wall;
+swings onto the platform; runs along the wall; vaults; teeters at the edge and steps down; climbs the
+stairs, falls into the pool, swims across and climbs out; sits at the desk; lies on the bed; and gets
+into the car, drives it, honks and gets out.

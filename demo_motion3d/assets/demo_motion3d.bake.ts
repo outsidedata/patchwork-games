@@ -2,8 +2,11 @@
 // scene's catalogue names, written where the catalogue reads it.
 //   xbot.glb             Mixamo's X Bot (the library's `characters/xbot/xbot.fbx`) with every clip of
 //                        `xbot.rig.json` baked onto it by anim's export (`plugins/anim/anim.export.py`),
-//                        which packs it with gltfpack; the rig's measured `table` and `ends` are then
-//                        written back into `xbot.rig.json` by the mixamo skill's `merge-table.mjs`
+//                        which packs it with gltfpack; the rig's measured `table`, `ends` and `touches`
+//                        are then written back into `xbot.rig.json` by the mixamo skill's `merge-table.mjs`
+//   the yard's stations  `main.scene.json`'s shapes3d kinds, prefabs and actors of the stations past the
+//                        wall and the chair, and `demo_motion3d.json`'s car, pool and rope swing, each
+//                        sized to the clips just measured (`yard.mjs`)
 //   checker-1024.webp    the ground's checkerboard, drawn here from nothing: `squares`
 //                        squares a side in two greys, `light` and `dark`, each with a `line` pixel rim
 //                        of `rim` grey, so a repeat of the map is `squares` squares across
@@ -79,4 +82,6 @@ export default async ({ blender, webp, scratch }: Tools) => {
   console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(root, 'plugins', 'anim', 'anim.export.py'), '--', rig, table, `xbot=${glb}`]))
   console.log(await node([path.join(root, '.claude', 'skills', 'using-mixamo-assets', 'scripts', 'merge-table.mjs'), rig, table, rig]))
   console.log('wrote', path.relative(root, glb))
+  // the yard's stations, sized to the clips just measured
+  console.log(await node([path.join(here, 'yard.mjs')]))
 }
