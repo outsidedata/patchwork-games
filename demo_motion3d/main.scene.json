@@ -66,7 +66,10 @@
         "runwall": { "shape": { "box": { "size": [8, 3.5, 0.6] } }, "look": { "colour": "#c9a27e", "roughness": 0.8 } },
         "runzone": {
           "shape": { "box": { "size": [2, 2.4, 2] } },
-          "points": { "Run": { "point": { "at": [0, 0, 0], "turn": [-50.95, 0, 0] } } },
+          "points": {
+            "Run": { "point": { "at": [0, 0, 0], "turn": [-50.95, 0, 0] } },
+            "Land": { "point": { "at": [-2.948, 0, -0.007], "turn": [-146.35, 0, 0] } }
+          },
           "activities": ["wallrun"]
         },
         "vaultwall": { "shape": { "box": { "size": [2.5, 0.784, 0.4] } }, "look": { "colour": "#60c0c0", "roughness": 0.8 } },

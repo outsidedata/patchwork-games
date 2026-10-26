@@ -432,9 +432,25 @@ async function oneShot(kind: string, clip: string, lane: number, front: number) 
   return j
 }
 
-test('at the run wall it runs along the wall, and lands walking further along it', async () => {
-  const { me, row } = await oneShot('runzone', 'wallside', -LANE, ROW2)
-  expect(me().data.pos[0]).toBeLessThan(row('runzone').data.pos[0] - 2)
+test('at the run wall it runs along the wall, comes down onto the ground, and walks on there further along it', async () => {
+  const { truth, send, me, until, row, route } = await joined()
+  const zone = row('runzone').data.pos
+  route([[-LANE, ROW2], [zone[0], ROW2], [zone[0], zone[2]]], 0.3)
+  send('press', 'use')
+  truth.step(DT)
+  expect(me().data.clip).toBe('wallside')
+  // The run ends in the air off the wall, and the landing brings it down.
+  until(() => me().data.clip === 'land', 60 * 2)
+  until(() => me().data.activity === 'walk', 60 * 3)
+  // Walking again with its feet on the ground, never handed back in the air: its root no higher than
+  // the landing's toes stand over it at its end, on the ground within a few steps.
+  for (let i = 0; i < 30; i++) {
+    expect(me().data.pos[1]).toBeLessThan(0.03)
+    truth.step(DT)
+  }
+  expect(me().data.grounded).toBe(true)
+  expect(me().data.pos[1]).toBeCloseTo(0, 6)
+  expect(me().data.pos[0]).toBeLessThan(zone[0] - 2)
 })
 
 test('on the block\'s top at its front it teeters with its ankles at the edge, and steps down off it onto the ground', async () => {

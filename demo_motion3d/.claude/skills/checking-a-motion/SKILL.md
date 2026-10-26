@@ -1,0 +1,64 @@
+---
+name: checking-a-motion
+description: Use in demo_motion3d whenever Bill says one of the yard's interactions (an activity, a station, a motion - the bar, the wall run, the climbing wall, the drop, the landing) looks wrong, pops, floats, sinks, hangs in the air, has its feet through the floor, or snaps; when he adds a new interaction; or when he asks to check one. It is the loop that finds what is wrong with a number, shows it in a close-up screenshot, fixes it, and proves it fixed.
+---
+
+# Checking a motion
+
+Bill names an interaction. That one is the job: its station, its rows of the checklist, nothing else.
+What he says is wrong is wrong; the numbers say where and when.
+
+The checklist is `motion3d confirmations and safety checks.md` in the game: for each activity, what it
+must do (confirmations) and the safety checks every activity is held to. The dev page (`dev.html`) runs
+each interaction as a station: it puts the body down before it, the playtester presses the keys, and
+every step is measured.
+
+Every command below is one plain command. The scripts are beside this file.
+
+## The loop
+
+1. **Serve.** `yarn dev` in the background; read the port it prints.
+2. **Run its station.** `node games/demo_motion3d/.claude/skills/checking-a-motion/stations.mjs <port> "<station>"`
+   Prints whether the script ran through, every fault with its time, the worst of each measure, and
+   each hand-back to walking. The station names are the page's `STATIONS` (the stations panel); the
+   script lists them when a name is wrong.
+3. **Look at the moments.** For each fault, and each confirmation in the checklist, say what is expected
+   there, then shoot just that, every moment of the station in one call (the station runs once):
+   `node games/demo_motion3d/.claude/skills/checking-a-motion/look.mjs <port> "<station>" <scratchpad>/<name> <seconds> <part> "<what is expected>" [<seconds> <part> "<what is expected>" ...]`
+   `<part>` is `feet`, `hands`, `hips` or `head`; the camera closes in on it at that moment, with the
+   expectation and the measured numbers written across the top, and writes `<name>-1.png`, `-2`, ...
+   Read every png. Pick the moment from the timeline of step 2's faults or the clip's measures (a clip
+   that ends a jump is not on the bar until its end). A shot that does not show the thing (a post in
+   the way, the camera under the floor) is taken again from another side, `hands@120` (degrees round
+   from the way the body faces, to its left), before anything is said about it.
+4. **Find the cause in the code and the rig's measures.** The activity is `plugins/zones/zones.motion3d.ts`;
+   the points are written by `assets/yard.mjs` (run `node games/demo_motion3d/assets/yard.mjs`, then
+   `git -C games diff demo_motion3d/main.scene.json` must show only the change meant); what a clip does
+   is `node games/demo_motion3d/.claude/skills/checking-a-motion/clip.mjs <clip>` (the toes, hips and
+   hands frame by frame, and what it plants). The cause is arithmetic on those numbers, written down.
+5. **Fix it in the game.** Never in core's plugins without asking Bill first (prime-directive).
+6. **Run step 2 and step 3 again** until the station has no faults and every confirmation's shot shows it.
+7. **Pin it.** Add the confirmation to that station's test in `demo_motion3d.sim.test.ts` and run that
+   one test: `yarn vitest run games/demo_motion3d/demo_motion3d.sim.test.ts -t "<words of its name>"`.
+   Never the whole file or the suite.
+8. **Mark the checklist.** ☑ or ☒ in the row, with the measured number and the moment of its shot.
+9. **Report** in two or three sentences: what was wrong, the number before and after, the screenshot.
+   Stop the dev server.
+
+## A new interaction
+
+Before anything else: its rows in the checklist (each confirmation: when, passes if, how), and its
+station in `dev.html`'s `STATIONS` (where the body is put down, the stages the playtester plays, the
+camera). Then the loop.
+
+## What the checks catch (`dev.html`'s `LIMITS`)
+
+- the feet more than 5 cm through the floor
+- handed back to walking with the feet more than 5 cm in the air, or off the ground more than 0.1 s after
+- a fall that slows in the air with nothing holding the body
+- a jolt: the hips' speed changing by more than 1 m/s in one step (too low as it stands: clean clips
+  reach 1.7 m/s; set it from clean runs)
+- a pinned hand or foot more than 2 cm short of its point
+
+The checklist's "Known faults in how the page measures" lists readings not to trust yet (seated poses,
+water). A number the page cannot be trusted on is fixed in the page first.

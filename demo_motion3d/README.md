@@ -18,7 +18,7 @@ panel tunes motion3d's settings and whose readout shows what the body is doing. 
   and looks about; under the bar E jumps up and hangs, A and D move along it, E drops; at the rope E
   takes hold, W climbs and letting go of W holds on, E lets go; at the rope swing E swings onto the
   platform; at the climbing wall E takes hold, W climbs up, S down, E lets go.
-- The second row: at the run wall E runs along it; at the low wall E vaults it; up the step onto the
+- The second row: at the run wall E runs along it and comes down off it onto the ground; at the low wall E vaults it; up the step onto the
   block, at its front edge E teeters, E again steps down off it, S steps back; at the foot of the
   stairs E climbs them while W is held; along the landing to the pool's edge, E falls in, W swims to
   the far wall, E there climbs out; at the desk E sits and types, E again stands up.
@@ -47,7 +47,8 @@ panel tunes motion3d's settings and whose readout shows what the body is doing. 
   from what the rig measures of each clip (anim's `ends` and `touches`), as demo_walker's yard is:
   the bar at the height `freejump` ends the hands holding, the rope swing's beam where its swing hangs
   from, the climbing wall's face where `wallclimb` holds the hands and feet, the run wall's and the
-  vault's starts where their kicks and palm land, the edge where `teeter` stands the toes, the steps
+  vault's starts where their kicks and palm land, the run wall's landing on the ground where
+  `wallside` ends the root in the air and `land` comes down, the edge where `teeter` stands the toes, the steps
   half a lap of `stairsup` each, the pool's deck as high as `poolin` starts the feet, the chair and the
   table where `typing` sits and types, the bed as high as `liedown` lies, the car's seat where `carin`
   sits. The lip by the wall and the chair are written by hand: the lip is where `bracedjump` ends the
@@ -73,6 +74,6 @@ The X Bot and its clips are Mixamo's (Adobe), from the library's `characters/xbo
 presses use; hangs from the lip, its drawn hands steady through every change of motion and bent onto
 the lip, shimmies to its end and climbs onto the top; drops back down; sits in the chair; shivers in
 the cold room; hangs from the bar and the ceiling and moves along them; climbs the rope and the wall;
-swings onto the platform; runs along the wall; vaults; teeters at the edge and steps down; climbs the
+swings onto the platform; runs along the wall and lands, walking on the ground; vaults; teeters at the edge and steps down; climbs the
 stairs, falls into the pool, swims across and climbs out; sits at the desk; lies on the bed; and gets
 into the car, drives it, honks and gets out.

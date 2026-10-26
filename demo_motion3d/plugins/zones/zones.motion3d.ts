@@ -33,7 +33,9 @@
 //   climb    offered by `climbzone`: `use` takes hold of the wall's `Face` plane where the hands and
 //            the feet hold it, `wallclimb` up while the stick is forward, `walldown` down while it is
 //            back, held still while it is neither, stopping at its top and its foot; `use` again lets go
-//   wallrun  offered by `runzone`: `use` runs along the wall from its `Run` (`wallside`)
+//   wallrun  offered by `runzone`: `use` runs along the wall from its `Run` (`wallside`), which ends in the
+//            air off the wall; then `land`, down onto the ground at its `Land` (`land`), picked up where
+//            its hips come down as low as the run ends them, then walking
 //   vault    offered by `vaultzone`: `use` vaults the low wall from its `Vault` (`vaultone`)
 //   edge     offered by `edgezone`, on the block's top at its front, its `Edge` line where the ankles
 //            stand: `use` teeters at it (`teeter`); `use` again steps down off it (`jumpdown`), then
@@ -56,7 +58,7 @@
 //              use     `sitdown`, ending on the seat; then `seated`
 //              seated  `seated`, sitting; `use` stands up
 //              stand   `standup`, up from the seat, then walking
-// `party`, `sad`, `swing`, `wallrun` and `vault` have no logic: motion3d holds the body still while the
+// `party`, `sad`, `swing` and `vault` have no logic: motion3d holds the body still while the
 // clip plays and hands it back to walking once it has played out.
 //
 // A body hanging from a lip, a bar or a ceiling has the row's `stuck`: the way the stick pushed when
@@ -70,7 +72,7 @@
 import type { Object3D } from 'three'
 import type { Plugins } from '#engine/browser.ts'
 import type { Row, W } from '#engine/engine.ts'
-import { animKind, clipOf, rigOf } from '#plugins/anim/anim.sim.ts'
+import { animKind, clipOf, ends, numbersOf, rigOf } from '#plugins/anim/anim.sim.ts'
 import { asDrawn, type Activity, type Handed, type Motion } from '#plugins/motion3d/motion3d.sim.ts'
 import { stride } from './zones.sim.ts'
 
@@ -135,6 +137,29 @@ export function object(plugins: Plugins, space: number): Object3D | undefined {
   new T.Matrix4().compose(p, q, new T.Vector3(1, 1, 1)).multiply(frame(part.data).invert()).multiply(frame(zone.data)).decompose(out.position, out.quaternion, out.scale)
   out.updateMatrixWorld(true)
   return out
+}
+
+// How far into `to`, seconds, its hips first come down as low as `from` ends them, by the rig's measures
+// (anim's `ends`): where a clip that comes down picks up a body another left in the air, so the body
+// goes on down from there and is never lifted back up to where `to` starts. 0 when `to`'s hips start
+// that low already.
+function pickUp(me: Row, w: W, from: string, to: string): number {
+  const kind = animKind(me)
+  const rig = rigOf(w, kind)
+  const hips = (clip: string, t: number) => ends(w, me, 'torso', { clip, clipT: t })[1]
+  const low = hips(from, clipOf(rig, from).dur)
+  const c = clipOf(rig, to)
+  // anim's measures are taken a frame apart and drawn straight between, so the hips cross `low` straight
+  // between the first frame at or under it and the one before.
+  const fps: number = rig.ends![numbersOf(w).kinds[kind].model][c.source].fps
+  let was = hips(to, 0)
+  if (was <= low) return 0
+  for (let i = 1; i / fps <= c.dur; i++) {
+    const now = hips(to, i / fps)
+    if (now <= low) return (i - 1 + (was - low) / (was - now)) / fps
+    was = now
+  }
+  throw new Error(`zones: ${to}'s hips never come down as low as ${from} ends them, ${low.toFixed(3)} m`)
 }
 
 // The clip a held loop plays at, playing while `on` and held still while not (anim's row `rate`).
@@ -206,7 +231,18 @@ export const behaviors = (): Record<string, Activity> => {
         pace(me, way !== 0 && !stopped)
       },
     },
-    wallrun: { use: { clips: ['wallside'], root: 'Run', travel: 'from' } },
+    wallrun: {
+      use: { clips: ['wallside'], root: 'Run', travel: 'from' },
+      land: { clips: ['land'], root: 'Land' },
+      step(me, w, _dt, handed) {
+        const { ended } = handed.hold()
+        if (!ended) return
+        if (me.data.motion !== 'use') return handed.leave()
+        const ran = me.data.clip
+        handed.go('land')
+        me.data.clipT = pickUp(me, w, ran, me.data.clip)
+      },
+    },
     vault: { use: { clips: ['vaultone'], root: 'Vault', travel: 'from' } },
     edge: {
       use: { clips: ['teeter'], root: 'Edge', ik: feet('Edge') },

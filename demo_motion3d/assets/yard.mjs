@@ -27,7 +27,8 @@
 //   climb wall  a wall 5 m high, offering `climb`: its `Face` plane, stood up on the wall's face where
 //               `wallclimb` holds its hands and feet
 //   run wall    a wall 8 m long, offering `wallrun`: its `Run` point, where `wallside` starts the root so
-//               its kicks land on the wall
+//               its kicks land on the wall, and its `Land` point, on the ground where `wallside` ends the
+//               root, where `land` comes down from the air the run ends in
 //   vault       a low wall as high as `vaultone` sets its palm, offering `vault`: its `Vault` point, where
 //               the vault starts the root so the palm lands on the wall's top
 //   edge        a block as high as `jumpdown` starts, with a step up onto it, offering `edge` on its top at
@@ -256,14 +257,19 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
 // ---------------------------------------------------------------- row two
 
 // The run wall: 8 m long, the `Run` point the root where `wallside`'s kicks land on its face at the
-// ground, a third of the way along it.
+// ground, a third of the way along it, and the `Land` point the root on the ground where `wallside`
+// ends it, facing the way it ends, where `land` comes down from the air the run ends in.
 {
   const [x, z] = [-14, 28]
   const wall = { x: x + 1, z: z + 2, long: 8, deep: 0.6 }
   box('runwall', [wall.long, 3.5, wall.deep], '#c9a27e', wall.x, 0, wall.z + wall.deep / 2)
   const face = t('wallside').things.face
   const start = anchor([face.at[0], 0, face.at[1]], face.normal + 180, [wall.x - wall.long / 2 + 0.3 * wall.long, 0, wall.z], 0)
-  space('runzone', [2, 2.4, 2], [start.root[0], 0, start.root[2]], ['wallrun'], { Run: { point: { at: start.root, turn: [start.yaw / DEG, 0, 0] } } })
+  const end = travelled('wallside', start.root, start.yaw)
+  space('runzone', [2, 2.4, 2], [start.root[0], 0, start.root[2]], ['wallrun'], {
+    Run: { point: { at: start.root, turn: [start.yaw / DEG, 0, 0] } },
+    Land: { point: { at: end.root, turn: [end.yaw / DEG, 0, 0] } },
+  })
 }
 
 // The vault: a wall as high as `vaultone` sets its palm, the `Vault` point the root where the palm lands
