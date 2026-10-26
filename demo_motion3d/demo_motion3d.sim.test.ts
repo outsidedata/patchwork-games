@@ -122,6 +122,18 @@ function toWorld(me: Row, [x, y, z]: number[]): number[] {
   return [px + z * Math.sin(yaw) + x * Math.cos(yaw), py + y, pz + z * Math.cos(yaw) - x * Math.sin(yaw)]
 }
 const far = (a: number[], b: number[]) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2])
+// The lowest of the body's toes' tips as drawn, over the yard's floor at 0.
+const toe = (t: Truth, me: Row) => Math.min(boneAt(t, me, 'LeftToe_End')[1], boneAt(t, me, 'RightToe_End')[1])
+// Steps a drop until it walks again: its toes as drawn never more than 5 cm through the floor (the dev
+// page's limit), and on it, within 2 cm, as it is handed back to walking.
+function landsOnFloor({ truth, room, me }: { truth: Truth; room: Truth; me: () => Row }, most: number) {
+  for (let i = 0; i < most && me().data.activity !== 'walk'; i++) {
+    truth.step(DT)
+    expect(toe(room, me())).toBeGreaterThanOrEqual(-0.05)
+  }
+  expect(me().data.activity).toBe('walk')
+  expect(Math.abs(toe(room, me()))).toBeLessThanOrEqual(0.02)
+}
 // The most a drawn bone moves in one step through a change of motion: the hands and the hips move at the
 // clips' own speed, never jumping to where the clip coming in would have them.
 const STEP = 0.06
@@ -249,15 +261,15 @@ test('under the wall it hangs from the lip, shimmies along it until the hands wo
   expect(me().data.pos[1]).toBeCloseTo(top, 6)
 })
 
-test('hanging, back and use drops it to the ground, walking', async () => {
-  const { truth, send, me, until, steady } = await hung()
+test('hanging, back and use drops it to the ground, its feet landing on the floor, walking', async () => {
+  const { truth, room, send, me, until, steady } = await hung()
   send('stick', 0, 1)
   send('press', 'use')
   truth.step(DT)
   expect(me().data.clip).toBe(clipsOf('ledge', 'drop')[0])
   steady(HANDS, () => me().data.eased === null, 30)
   send('stick', 0, 0)
-  until(() => me().data.activity === 'walk', 60 * 3)
+  landsOnFloor({ truth, room, me }, 60 * 3)
   until(() => me().data.grounded && me().data.pos[1] === 0, 60)
 })
 
@@ -339,7 +351,7 @@ async function freehang(kind: string, point: string, across: (p: Point) => numbe
   send('press', 'use')
   truth.step(DT)
   expect(me().data.clip).toBe('freedrop')
-  until(() => me().data.activity === 'walk', 60 * 3)
+  landsOnFloor(j, 60 * 3)
   until(() => me().data.grounded && Math.abs(me().data.pos[1]) < 1e-6, 60 * 2)
 }
 
@@ -453,8 +465,8 @@ test('at the run wall it runs along the wall, comes down onto the ground, and wa
   expect(me().data.pos[0]).toBeLessThan(zone[0] - 2)
 })
 
-test('on the block\'s top at its front it teeters with its ankles at the edge, and steps down off it onto the ground', async () => {
-  const { truth, send, me, until, row, route, middle, pointOf } = await joined()
+test('on the block\'s top at its front it teeters with its ankles at the edge, and steps down off it, its feet landing on the floor', async () => {
+  const { truth, room, send, me, until, row, route, middle, pointOf } = await joined()
   const zone = row('edgezone').data.pos
   const step = row('edgestep').data.pos
   // Round to the step behind the block, up it onto the top, and along it to its front.
@@ -472,7 +484,8 @@ test('on the block\'s top at its front it teeters with its ankles at the edge, a
   send('press', 'use')
   truth.step(DT)
   expect(me().data.clip).toBe('jumpdown')
-  until(() => me().data.activity === 'walk' && me().data.eased === null, 60 * 5)
+  landsOnFloor({ truth, room, me }, 60 * 5)
+  until(() => me().data.eased === null, 60)
   until(() => me().data.grounded && Math.abs(me().data.pos[1]) < 1e-6, 60 * 2)
   expect(me().data.pos[2]).toBeLessThan(edge.from![2])
 })
