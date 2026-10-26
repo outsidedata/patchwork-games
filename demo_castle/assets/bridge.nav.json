@@ -1,0 +1,28 @@
+{
+  "nodes": [
+    { "at": [-20, 0, 0], "tags": ["west field"] },
+    { "at": [-16, 0, 0] },
+    { "at": [-8, 3, 0], "tags": ["west end"] },
+    { "at": [0, 3, 0], "tags": ["bridge"] },
+    { "at": [8, 3, 0], "tags": ["east end"] },
+    { "at": [16, 0, 0] },
+    { "at": [20, 0, 0], "tags": ["east field"] },
+    { "at": [0, 0, -14], "tags": ["south road"] },
+    { "at": [0, 0, 0], "tags": ["under the bridge"] },
+    { "at": [0, 0, 14], "tags": ["north road"] }
+  ],
+  "links": [
+    { "a": 0, "b": 1, "cost": 4, "walk": {} },
+    { "a": 1, "b": 2, "cost": 8.544, "walk": {} },
+    { "a": 2, "b": 3, "cost": 8, "walk": {} },
+    { "a": 3, "b": 4, "cost": 8, "walk": {} },
+    { "a": 4, "b": 5, "cost": 8.544, "walk": {} },
+    { "a": 5, "b": 6, "cost": 4, "walk": {} },
+    { "a": 7, "b": 8, "cost": 14, "walk": {} },
+    { "a": 8, "b": 9, "cost": 14, "walk": {} },
+    { "a": 0, "b": 7, "cost": 24.4131, "walk": {} },
+    { "a": 0, "b": 9, "cost": 24.4131, "walk": {} },
+    { "a": 6, "b": 7, "cost": 24.4131, "walk": {} },
+    { "a": 6, "b": 9, "cost": 24.4131, "walk": {} }
+  ]
+}

@@ -6,37 +6,49 @@
     <style>
       body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
       canvas { grid-area: 1 / 1 }
-      .lil-gui.root { max-height: 100vh; overflow-y: auto }
+      #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px; max-height: 60vh; overflow: hidden }
     </style>
   </head>
   <body>
+    <div id="readout"></div>
     <script type="module">
-      // The testbed: index.html, entering the climb scene, or the scene `?scene=<name>` names (`main`).
-      // The panel, top right, edits this tab's one copy of the climb scene's definitions
-      // (`assets/climb.json`), which the climber's rule reads each step: its run, and every number of
-      // its climb. The truths in this tab are on `window.__scenes` (`__scenes.get('climb').rows`), and
-      // the last error a step or a frame threw on `window.__error`, shown over the page while the loop
-      // goes on.
+      // The testbed: index.html, the manager truth and main in this tab (or the scene `?scene=` names:
+      // `?scene=bridge`), one seat on it over a loopback, stepped on the page's clock. The truths are kept
+      // on `window.__scenes`, the page on `window.__page` and the scene's client (its plugins) on
+      // `window.__client`. The panel turns nav3d's drawing of the scene's graph on and off (`graphs`,
+      // `?graphs=1` on at first), and puts the seat's body on any place of the graph, standing on
+      // whatever is there (`go to`). The readout shows the frames drawn in
+      // the last second and the longest of them, the step, where the seat's body stands and what it
+      // stands on, each visitor's place it is going to and how many places of its route it has still to
+      // get to, or the place it stands at, with the height its feet stand at now, and the last five errors
+      // the page threw or wrote. Nothing is written to disk.
       import { boot } from '#engine/engine.ts'
       import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
       import { loopback } from '#addons/loopback/loopback.addon.ts'
       import GUI from 'lil-gui'
-      import { prepared } from '#plugins/loader/loader.sim.ts'
-      import { scene as theScene } from './climb.sim.ts'
+      import { bodies } from '#plugins/npc3d/npc3d.sim.ts'
       import { sim } from './demo_castle.sim.ts'
       import file from './demo_castle.scene.json'
+      import fortress from './assets/fortress.nav.json'
+      import bridge from './assets/bridge.nav.json'
 
-      // The scene the address names: dev.html?scene=<scene>
-      file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? 'climb'
-      // The tab's one copy of the climb scene's definitions: every rule and look reads this object, so
-      // the panel's edits reach the next step.
-      const defs = await prepared(theScene.world, theScene.world.defs)
+      file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
+
+      const errors = []
+      const caught = e => {
+        errors.push(String(e?.message ?? e))
+        if (errors.length > 5) errors.shift()
+      }
+      addEventListener('error', e => caught(e.error ?? e.message))
+      addEventListener('unhandledrejection', e => caught(e.reason))
+      const written = console.error.bind(console)
+      console.error = (...a) => { caught(a.map(x => x?.message ?? x).join(' ')); written(...a) }
 
       const dt = file.prefabs.engine.dt
       const truth = boot(file, sim)
-      const scenes = await load(truth, import.meta.url)
-      window.__scenes = scenes
+      window.__scenes = await load(truth, import.meta.url)
       const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+        window.__client = me
         for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
           if (!surface) continue
           const canvas = document.createElement('canvas')
@@ -46,56 +58,53 @@
           surface.mount(canvas)
         }
       })
+      window.__page = page
+      const room = window.__scenes.get(file.prefabs.scenemanager.entry)
+      // the scene's graph, the one its page draws
+      const graph = { main: fortress, bridge }[file.prefabs.scenemanager.entry]
+      const places = [...new Set(graph.nodes.flatMap(n => n.tags ?? []))].sort()
+      const me = () => room.rows.find(r => r.kind === 'player')
 
-      // The panel. A press on it stops there, a release does not, and the focus goes back to the page
-      // after a click, so the game's keys keep working.
+      // The panel. A press on it stops at it, so the game's keys are the game's.
       const gui = new GUI({ title: 'demo_castle dev' })
       for (const type of ['keydown', 'keyup', 'click', 'mousedown', 'contextmenu', 'wheel'])
         gui.domElement.addEventListener(type, e => e.stopPropagation())
-      gui.domElement.addEventListener('pointerup', () => requestAnimationFrame(() => {
-        const at = document.activeElement
-        if (gui.domElement.contains(at) && !(at.tagName === 'INPUT' && (at.type === 'text' || at.type === 'number'))) at.blur()
-      }))
-      addEventListener('change', e => { if (gui.domElement.contains(e.target)) e.target.blur() })
+      const views = { graphs: new URLSearchParams(location.search).get('graphs') === '1' }
+      gui.add(views, 'graphs')
+      const jump = { place: places[0], 'go to': () => {
+        const node = graph.nodes.find(n => n.tags?.includes(jump.place))
+        const p = me()
+        if (node && p) { p.data.pos = [...node.at]; p.data.vel = [0, 0, 0] }
+      } }
+      gui.add(jump, 'place', places)
+      gui.add(jump, 'go to')
 
-      const p = defs.player, c = p.climb
-      const body = gui.addFolder('climber')
-      body.add(p, 'run', 1, 12, 0.1).name('run (m/s)')
-      const reach = gui.addFolder('reach')
-      reach.add(c.reach, 'above', 0, 1.5, 0.01).name('over the head (m)')
-      reach.add(c.reach, 'below', 0, 1.5, 0.01).name('under the head (m)')
-      reach.add(c.reach, 'out', 0.1, 1.5, 0.01).name('out from the body (m)')
-      const hang = gui.addFolder('hang')
-      hang.add(c.hang, 'depth', 1, 2.5, 0.01).name('feet under the ledge (m)')
-      hang.add(c.hang, 'off', 0.1, 1, 0.01).name('out from the ledge (m)')
-      hang.add(c, 'shimmy', 0.2, 4, 0.05).name('shimmy (m/s)')
-      hang.add(c.join, 'gap', 0, 1, 0.01).name('join gap (m)')
-      hang.add(c.join, 'rise', 0, 1, 0.01).name('join rise (m)')
-      const pull = gui.addFolder('pull up')
-      pull.add(c.pull, 'time', 0.1, 2, 0.01).name('time (s)')
-      pull.add(c.pull, 'in', 0.1, 1.5, 0.01).name('in from the edge (m)')
-      const leap = gui.addFolder('leap')
-      leap.add(c.leap.back, 0, 0, 10, 0.1).name('back out (m/s)')
-      leap.add(c.leap.back, 1, 0, 10, 0.1).name('back up (m/s)')
-      leap.add(c.leap.side, 0, 0, 10, 0.1).name('side along (m/s)')
-      leap.add(c.leap.side, 1, 0, 10, 0.1).name('side up (m/s)')
-      leap.add(c.leap, 'up', 0, 10, 0.1).name('up (m/s)')
-      leap.add(c, 'cool', 0, 1, 0.01).name('regrab after (s)')
-
-      // Every error a step or a frame throws, over the page and on window.__error; the loop goes on.
-      const shown = document.createElement('pre')
-      shown.style.cssText = 'position:fixed;left:8px;top:8px;margin:0;color:#ff8a80;font:12px monospace;white-space:pre-wrap;max-width:90vw;z-index:9'
-      document.body.appendChild(shown)
-
+      const readout = document.getElementById('readout')
+      const frames = []
       let last = performance.now(), owed = 0
       const loop = async now => {
+        frames.push(now)
+        while (frames[0] < now - 1000) frames.shift()
+        const worst = frames.slice(1).reduce((m, t, i) => Math.max(m, t - frames[i]), 0)
         owed += Math.min((now - last) / 1000, 0.25)
         last = now
         try {
           page.input()
           while (owed >= dt) { truth.step(dt); owed -= dt }
+          const nav = window.__client?.plugins.nav3d
+          if (nav) Object.assign(nav, views)
           await page.frame(owed / dt)
-        } catch (e) { window.__error = e; shown.textContent = String(e?.stack ?? e); owed = 0 }
+        } catch (e) { caught(e) }
+        const p = me()
+        const visitors = room.rows.filter(r => r.kind === 'visitor')
+        const time = room.rows.find(r => r.kind === 'npc3d')?.data.time ?? 0
+        const left = v => (v.data.route ? v.data.route.points.length - v.data.route.leg : 1)
+        readout.textContent = [
+          `${frames.length} fps  longest frame ${worst.toFixed(1)} ms  step ${truth.n}`,
+          p ? `you (${p.data.pos.map(v => v.toFixed(2)).join(', ')}) ${p.data.grounded ? 'on the ground' : 'in the air'}` : '',
+          ...visitors.map(v => `visitor ${v.id} ${v.data.body}: ${v.data.speed > 0 ? `going to ${v.data.going}, ${left(v)} places left` : `standing at ${v.data.going}`} at y ${bodies.crowd3d.where(v, time)[1].toFixed(2)}`),
+          ...errors,
+        ].join('\n')
         requestAnimationFrame(loop)
       }
       requestAnimationFrame(loop)

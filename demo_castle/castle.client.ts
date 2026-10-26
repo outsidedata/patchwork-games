@@ -1,57 +1,46 @@
-// The castle (`castle.sim.ts`) as it stands: its row's `structure` out of the loader's `model`, worn by
-// the game's stone plugin (`plugins/stone`), every chunk moved by the row's `at`, so it stands where its
-// bodies walk on it. The light is a hemisphere light of `hemi` and a sun, a directional light from
-// `sun.from`, casting shadows over `sun.shadow.half` metres each way of the camera's foot, which it
-// follows. Every number is the castle's definition. The model and the textures are asked of the loader
-// at once and the castle built the first frame all are there.
+// The fortress drawn: the model the castle's definition names (`model`), castle-plus's glb, each stone,
+// tread and timber in the colour castle-plus gave it, casting and taking shadows; and under it the land, a
+// square `land.size` metres across in `land.colour` and `land.roughness`, at y = 0, where the walkers
+// stand where no shape is.
 import type * as THREE from 'three'
 import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
-import { dispose, structure, wears, type Built } from './plugins/stone/stone.plugin.ts'
 
-let built: Built | undefined
-let added: THREE.Object3D[] = []
-let sun: THREE.DirectionalLight
+let fortress: THREE.Object3D | undefined
+let land: THREE.Mesh | undefined
+let gone = false
 
 export function setup(row: Row, plugins: Plugins) {
   const T = plugins.render3d.THREE as typeof THREE
   const k = def(plugins.wire, row.kind)
-  const hemi = new T.HemisphereLight(k.hemi.sky, k.hemi.ground, k.hemi.intensity)
-  sun = new T.DirectionalLight(k.sun.colour, k.sun.intensity)
-  sun.castShadow = true
-  const s = k.sun.shadow
-  sun.shadow.mapSize.set(s.map, s.map)
-  Object.assign(sun.shadow.camera, { left: -s.half, right: s.half, top: s.half, bottom: -s.half, near: 1, far: s.far })
-  sun.shadow.camera.updateProjectionMatrix()
-  sun.shadow.bias = s.bias
-  added = [hemi, sun, sun.target]
-  for (const o of added) plugins.render3d.scene.add(o)
-  for (const name of wears(k)) plugins.loader.load(name)
+  // An actor is set up before the loader's first tick, so the model is put in once it has landed.
+  plugins.loader.on(k.model, () => {
+    if (gone) return
+    fortress = plugins.loader.model(k.model).scene as THREE.Object3D
+    fortress.traverse(o => {
+      const m = o as THREE.Mesh
+      if (!m.isMesh) return
+      m.castShadow = m.receiveShadow = true
+      m.material = plugins.render3d.dress(m.material as THREE.Material)
+    })
+    plugins.render3d.scene.add(fortress)
+  })
+  const skin = plugins.render3d.dress(new T.MeshStandardMaterial({ color: k.land.colour, roughness: k.land.roughness }))
+  land = new T.Mesh(new T.PlaneGeometry(k.land.size, k.land.size).rotateX(-Math.PI / 2), skin)
+  land.receiveShadow = true
+  plugins.render3d.scene.add(land)
 }
 
-export function tick(row: Row, plugins: Plugins) {
-  const k = def(plugins.wire, row.kind)
-  if (!built) {
-    if (wears(k).some(name => plugins.loader.get(name) === undefined)) return
-    built = structure(plugins, k, row.data.structure)
-    plugins.render3d.scene.add(built.group)
-  }
-  const [x, y, z] = row.data.at
-  built.group.position.set(x, y, z)
-  // the sun follows the camera's foot, so its shadows fall where the eye is looking
-  const cam = (plugins.render3d.camera as THREE.Camera).position
-  const from = k.sun.from as number[], far = k.sun.shadow.far / 2
-  sun.position.set(cam.x + from[0] * far, cam.y + from[1] * far, cam.z + from[2] * far)
-  sun.target.position.set(cam.x, cam.y, cam.z)
-}
+export function tick() {}
 
 export function remove(plugins: Plugins) {
-  for (const o of added) plugins.render3d.scene.remove(o)
-  if (built) {
-    plugins.render3d.scene.remove(built.group)
-    dispose(built.made)
+  gone = true
+  if (fortress) plugins.render3d.scene.remove(fortress)
+  if (land) {
+    plugins.render3d.scene.remove(land)
+    land.geometry.dispose()
+    ;(land.material as THREE.Material).dispose()
   }
-  built = undefined
-  added = []
+  fortress = land = undefined
 }

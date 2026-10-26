@@ -1,0 +1,13 @@
+{
+ "bodies": {
+  "farmer_man": "characters/farmer_man/farmer_man.fbx",
+  "farmer_woman": "characters/farmer_woman/farmer_woman.fbx",
+  "farmhand": "characters/farmhand/farmhand.fbx",
+  "mechworker": "characters/mechworker/mechworker.fbx"
+ },
+ "clips": {
+  "idle": "packs/mixamo-motions/Breathing Idle.fbx",
+  "walk": "packs/Male Locomotion Pack 30FPS/walking.fbx",
+  "run": "packs/Male Locomotion Pack 30FPS/standard run.fbx"
+ }
+}
