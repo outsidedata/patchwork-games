@@ -76,8 +76,8 @@ Known faults in how the page measures, to be fixed before its numbers are truste
 | ☐ | Stops at the lip's end | the stick held to the end | stops with the leading hand at the end | the test |
 | ☒ | Climbs up and stands on the top | `bracedclimb`'s end | the feet on the wall's top, the body walking there | the test (the root to 1 mm); measured: the feet 9.6 cm under the top as the climb ends and standing after, though the clip's ground matches the top to 4 mm, so the cause is elsewhere |
 | ☒ | The hands stay on the lip while it climbs | `bracedclimb` | a pinned hand on the lip | measured: a hand 55 cm short of the lip at the climb's end |
-| ☑ | Drops back down onto the floor | `braceddrop`'s end | lowest toe within 2 cm of the floor | the test; measured: handed back 0.0 cm over the floor (was 33 cm under), 3.6 cm under at the landing's deepest; close-ups (of the fix's first version, 1.6 cm higher) at 5.45 s and 6.12 s: the soles on the floor |
-| ☒ | The hands let go cleanly as it drops | `braceddrop` | no pinned hand short of the lip | measured: a hand 48.5 cm short |
+| ☑ | Drops back down onto the floor | `braceddrop`'s end | lowest toe within 2 cm of the floor | the test; measured: handed back 0.0 cm over the floor (was 29.1 cm under), 3.6 cm under at the landing's deepest; close-up (of the drop 4.2 cm higher) at 6.10 s: the soles on the floor |
+| ☑ | The hands let go cleanly as it drops | `braceddrop` | no pinned hand short of the lip | measured: no pinned hand or foot short in the drop (was 73.0 cm); close-up at 4.55 s: the hands on the wall's top as they let go |
 | ☑ | Walks on smoothly after the drop | handed back to walking | no jolt | measured: no jolt from the drop on |
 
 ## bar: the left-right pole
@@ -86,9 +86,9 @@ Known faults in how the page measures, to be fixed before its numbers are truste
 |---|---|---|---|---|
 | ☑ | Jumps up and the hands land on the bar | `freejump`'s end, into `freeidle` | the wrists at the bar's height, within 1 cm | the test; close-up at 4.2 s: both hands round the bar, 0.0 cm short of it |
 | ☐ | Moves along it to the end and back | `barmove`, `barleft` | stops at each end, no hand past it by more than 5 cm | the test |
-| ☑ | Drops onto the floor | `freedrop`'s end | lowest toe within 2 cm of the floor | the test; measured: handed back 0.1 cm under the floor (was 18.3 cm under), 2.5 cm under at the landing's deepest; close-ups (of the fix's first version, 1 cm higher) at 20.60 s, 20.78 s and 21.25 s: the soles on the floor |
-| ☒ | The hands let go cleanly as it drops | `freedrop` | no pinned hand short of the bar | measured: a hand 53.2 cm short |
-| ☑ | Walks on smoothly after the drop | handed back to walking | no jolt | measured: no jolt once the hands let go (one of 1.3 m/s before they do, the 1 m/s limit being too low) |
+| ☑ | Drops onto the floor | `freedrop`'s end | lowest toe within 2 cm of the floor | the test; measured: handed back 0.0 cm over the floor (was 15.8 cm under), 2.5 cm under at the landing's deepest; close-up (of the drop 3.9 cm higher) at 21.20 s: the soles on the floor |
+| ☑ | The hands let go cleanly as it drops | `freedrop` | no pinned hand short of the bar | measured: no pinned hand or foot short in the drop (was 68.3 cm); close-up at 20.00 s: the hands at the bar as they let go |
+| ☑ | Walks on smoothly after the drop | handed back to walking | no jolt | measured: no jolt from the hand-back on (1.5 and 1.6 m/s as the hands let go, the 1 m/s limit being too low) |
 
 ## ceiling: the slab
 
@@ -96,8 +96,8 @@ Known faults in how the page measures, to be fixed before its numbers are truste
 |---|---|---|---|---|
 | ☐ | Jumps up and the hands land on the ceiling | `freejump`'s end | the wrists on the ceiling's plane, within 1 cm | the test |
 | ☐ | Moves across it to its side and back | `freeleft`, `freeright` | stops at each side, no hand past it by more than 5 cm | the test |
-| ☑ | Drops onto the floor | `freedrop`'s end | lowest toe within 2 cm of the floor | the test; measured: handed back 0.1 cm under the floor (was 18 cm under), 2.5 cm under at the landing's deepest; close-ups (of the fix's first version, 1 cm higher) at 20.15 s and 20.82 s: the soles on the floor |
-| ☑ | Walks on smoothly after the drop | handed back to walking | no jolt | measured: no jolt once the hands let go (1.3 and 1.1 m/s before they do, the 1 m/s limit being too low) |
+| ☑ | Drops onto the floor | `freedrop`'s end | lowest toe within 2 cm of the floor | the test; measured: handed back 0.0 cm over the floor (was 15.8 cm under), 2.5 cm under at the landing's deepest; close-up (of the drop 3.9 cm higher) at 20.80 s: the soles on the floor; at 19.60 s the hands at the ceiling as they let go |
+| ☑ | Walks on smoothly after the drop | handed back to walking | no jolt | measured: no jolt from the hand-back on (2.1 and 1.1 m/s as the hands let go, the 1 m/s limit being too low) |
 
 ## rope
 
@@ -151,7 +151,7 @@ Known faults in how the page measures, to be fixed before its numbers are truste
 | ☐ | Confirmation | When | Passes if | How |
 |---|---|---|---|---|
 | ☐ | Teeters with the ankles at the edge | `teeter` | the ankles at the edge, within 1 cm | the test; close-up on the feet and the edge |
-| ☑ | Steps down onto the ground in front | `jumpdown`'s end | in front of the block; lowest toe within 2 cm of the floor | the test; measured: handed back 0.3 cm over the floor (was 13.9 cm over); no close-up yet: Chrome stopped answering screenshots |
+| ☑ | Steps down onto the ground in front | `jumpdown`'s end | in front of the block; lowest toe within 2 cm of the floor | the test; measured: handed back 0.3 cm over the floor (was 13.9 cm over), no fault in the step down; close-ups (of the drop 2.4 cm higher, the block as much higher) at 4.70 s: the feet on the block's top, and 8.10 s: the soles on the floor |
 | ☐ | Steps back off the edge with the stick back | the stick back | walking again on the top | not in the station's script yet |
 
 ## stairs

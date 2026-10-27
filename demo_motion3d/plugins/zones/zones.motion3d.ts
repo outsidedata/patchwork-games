@@ -17,16 +17,15 @@
 //              move   along the lip the way the stick pushes, until the hands would leave it (`hanging`)
 //              climb  `bracedclimb`, `use` with the stick forward while hanging: up onto the wall's top,
 //                     then walking
-//              drop   `braceddrop`, `use` with the stick back while hanging: down to the ground, its
-//                     feet landing on it however high the lip is (`landing`), then walking
+//              drop   `braceddrop`, `use` with the stick back while hanging: down to the ground, then
+//                     walking
 //   bar      offered by `barzone`, under the bar, its `Bar` line where the wrists hold it, and
 //   ceiling  offered by `hallzone`, under the slab, its `Ceiling` plane face down where they hold it:
 //              use    `freejump`, up into the hang, ending on it; then `hang`
 //              hang   `freeidle`, hanging still
 //              move   `barmove` and `barleft` along the bar, `freeleft` and `freeright` across the
 //                     ceiling, the way the stick pushes, until the hands would leave it
-//              drop   `freedrop`, `use` while hanging: down to the ground, its feet landing on it
-//                     however high the bar or the ceiling is (`landing`), then walking
+//              drop   `freedrop`, `use` while hanging: down to the ground, then walking
 //   rope     offered by `ropezone`: `use` takes hold of the `Rope` line where the wrists hold it,
 //            `ropeclimb` playing while the stick is forward and held still while not, up to the top;
 //            `use` again lets go, to fall
@@ -39,9 +38,8 @@
 //            its hips come down as low as the run ends them, then walking
 //   vault    offered by `vaultzone`: `use` vaults the low wall from its `Vault` (`vaultone`)
 //   edge     offered by `edgezone`, on the block's top at its front, its `Edge` line where the ankles
-//            stand: `use` teeters at it (`teeter`); `use` again steps down off it (`jumpdown`), its
-//            feet landing on the ground however high the block is (`landing`), then walking; the stick
-//            back steps away, walking
+//            stand: `use` teeters at it (`teeter`); `use` again steps down off it (`jumpdown`), then
+//            walking; the stick back steps away, walking
 //   stairs   offered by `stairzone`, at the stairs' foot: `use` climbs the `Flight` (`stairsup`) while
 //            the stick is forward, standing while it is not, and walks from the landing at its top
 //   pool     offered by `pool`, on the deck at the water's edge: `use` falls in (`poolin`), ending on
@@ -74,9 +72,9 @@
 import type { Object3D } from 'three'
 import type { Plugins } from '#engine/browser.ts'
 import type { Row, W } from '#engine/engine.ts'
-import { animKind, at as curveAt, carries, clipOf, ends, numbersOf, plantsOf, rigOf, type Limb } from '#plugins/anim/anim.sim.ts'
+import { animKind, clipOf, ends, numbersOf, rigOf } from '#plugins/anim/anim.sim.ts'
 import { asDrawn, type Activity, type Handed, type Motion } from '#plugins/motion3d/motion3d.sim.ts'
-import { stride, underfoot } from './zones.sim.ts'
+import { stride } from './zones.sim.ts'
 
 const hands = (p: string) => ({ LeftHand: p, RightHand: p })
 const feet = (p: string) => ({ LeftFoot: p, RightFoot: p })
@@ -115,7 +113,6 @@ function freehang(p: string, across: string[]): Activity {
     step(me, w, _dt, handed) {
       const d = me.data
       if (d.motion === 'hang' || d.motion === 'move') return hanging(me, w, handed, move)
-      if (d.motion === 'drop') return toGround(me, w, handed, HANDS)
       const { ended } = handed.hold()
       if (!ended) return
       if (d.motion === 'use') handed.go('hang')
@@ -141,65 +138,6 @@ export function object(plugins: Plugins, space: number): Object3D | undefined {
   out.updateMatrixWorld(true)
   return out
 }
-
-// The lowest of the body's toes' tips over its root `t` seconds into `clip`, by the rig's measures.
-function toeOf(me: Row, w: W, clip: string, t: number): number {
-  return Math.min(ends(w, me, 'footL', { clip, clipT: t })[4], ends(w, me, 'footR', { clip, clipT: t })[4])
-}
-
-const DEG = Math.PI / 180
-
-// Where the root of a body held in `clip` with `travel: 'from'` stands across the ground `to` seconds in,
-// from where it stands `t` seconds in: on by the clip's measured travel between, as motion3d carries it,
-// along the facing the body was placed with (its yaw less the clip's turn so far, where it keeps it).
-function travelled(me: Row, w: W, clip: string, t: number, to: number): number[] {
-  const d = me.data
-  const r = clipOf(rigOf(w, animKind(me)), clip)
-  const how = carries(r, numbersOf(w))
-  if (!how.carries) return [d.pos[0], d.pos[2]]
-  const [f0, l0, turn] = curveAt(r.measure, t), [f1, l1] = curveAt(r.measure, to)
-  const yaw = d.yaw - (how.turns ? turn * DEG : 0)
-  const f = (f1 - f0) * r.scale, l = (l1 - l0) * r.scale
-  return [d.pos[0] + f * Math.sin(yaw) + l * Math.cos(yaw), d.pos[2] + f * Math.cos(yaw) - l * Math.sin(yaw)]
-}
-
-// A body placed `t` seconds into `clip`, a clip that leaves what it holds and comes down to stand on the
-// ground (a drop from a bar, a ceiling or a lip; a step down off the block), with its feet landing on it.
-// motion3d holds the root so that the limbs it holds by, `holds`, are on their point as the clip starts,
-// so the ground the clip ends on stands wherever that puts it: a bar lower than the clip's own (the bar
-// 2.295 m up, `freedrop`'s hands 2.466 m over its root) leaves the root 0.171 m under the floor. The root
-// is raised (or lowered) by as far as the toes would end the clip from the ground under them there,
-// between the holding limbs letting go (the latest end of their plants before the landing) and the feet
-// landing (the earliest start of each foot's last plant), in step with the toes: by the share of their
-// way down in the clip they have come, so a fall is shortened and never slowed, and they end the clip on
-// the ground. Nothing while the limbs hold.
-function landing(me: Row, w: W, clip: string, t: number, holds: Limb[]) {
-  const d = me.data
-  const plants = plantsOf(w, me, clip)
-  const lasts = [plants.footL, plants.footR].map(runs => runs[runs.length - 1])
-  if (lasts.some(r => r === undefined)) throw new Error(`zones: ${clip} plants not both feet, so it never stands on the ground it comes to`)
-  const touch = Math.min(...lasts.map(r => r[0]))
-  const free = Math.max(0, ...holds.flatMap(limb => plants[limb].filter(r => r[1] <= touch).map(r => r[1])))
-  const dur = clipOf(rigOf(w, animKind(me)), clip).dur
-  const end = d.pos[1] + toeOf(me, w, clip, dur)
-  const [x, z] = travelled(me, w, clip, t, dur)
-  const short = underfoot(me, w, end).height(x, z) - end
-  const high = toeOf(me, w, clip, free), low = toeOf(me, w, clip, touch)
-  const come = t >= touch ? 1 : t <= free ? 0 : Math.max(0, Math.min(1, (high - toeOf(me, w, clip, t)) / (high - low)))
-  d.pos = [d.pos[0], d.pos[1] + short * come, d.pos[2]]
-}
-
-// One step of a body held in a motion that comes to stand on the ground (`landing`), holding by the
-// limbs `holds`; handed back to walking under its feet once the clip has played out.
-function toGround(me: Row, w: W, handed: Handed, holds: Limb[]) {
-  const clip: string = me.data.clip
-  const { ended } = handed.hold()
-  landing(me, w, clip, ended ? clipOf(rigOf(w, animKind(me)), clip).dur : me.data.clipT, holds)
-  if (ended) handed.leave()
-}
-
-const HANDS: Limb[] = ['handL', 'handR']
-const FEET: Limb[] = ['footL', 'footR']
 
 // How far into `to`, seconds, its hips first come down as low as `from` ends them, by the rig's measures
 // (anim's `ends`): where a clip that comes down picks up a body another left in the air, so the body
@@ -255,7 +193,6 @@ export const behaviors = (): Record<string, Activity> => {
       step(me, w, _dt, handed) {
         const d = me.data
         if (d.motion === 'hang' || d.motion === 'move') return hanging(me, w, handed, ledgeMove)
-        if (d.motion === 'drop') return toGround(me, w, handed, HANDS)
         const { ended } = handed.hold()
         if (!ended) return
         if (d.motion === 'use') handed.go('hang')
@@ -315,10 +252,13 @@ export const behaviors = (): Record<string, Activity> => {
         if (motion === 'use' && me.data.motion === 'use') handed.go('down')
         return true
       },
-      step(me, w, _dt, handed) {
+      step(me, _w, _dt, handed) {
         const d = me.data
-        if (d.motion === 'down') return toGround(me, w, handed, FEET)
-        handed.hold()
+        const { ended } = handed.hold()
+        if (d.motion === 'down') {
+          if (ended) handed.leave()
+          return
+        }
         if (d.stick[1] < 0) handed.leave()
       },
     },
