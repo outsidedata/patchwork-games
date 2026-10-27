@@ -201,7 +201,8 @@
         "xbot": {
           "triangles": { "radius": 0.3, "height": 1.8, "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5 },
           "move": { "accel": 12, "turnRate": 12, "still": 0.05 },
-          "fall": { "gravity": 20, "jumpH": 2, "airAccel": 2, "fall": 4.3 }
+          "fall": { "gravity": 20, "airAccel": 2 },
+          "jump": { "jumpH": 2 }
         }
       },
       "mods": { "behaviors": ["shapes3d", "terrain3d", "motion3d"], "solids": ["shapes3d"], "footprints": ["shapes3d"], "states": ["motion3d", "yard"] }

@@ -77,7 +77,6 @@ function stood(me: Row, w: W) {
   d.pos = nearest(w, { triangles: {} }, [x, 0, z], me)
   d.yaw = start.yaw
   d.look = { ...d.look, yaw: start.yaw }
-  d.grounded = true
   d.stood = true
 }
 
