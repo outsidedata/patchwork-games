@@ -12,6 +12,8 @@
         "xbot-rig-baked": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.rig.baked.json", "preload": true },
         "xbot": { "type": "model", "url": "/games/demo_motion3d/assets/xbot.glb", "preload": true },
         "xbot-glb": { "type": "binary", "url": "/games/demo_motion3d/assets/xbot.glb", "preload": true },
+        "rifle": { "type": "model", "url": "/games/demo_motion3d/assets/rifle.glb", "preload": true },
+        "cup": { "type": "model", "url": "/games/demo_motion3d/assets/cup.glb", "preload": true },
         "xbot-motion3d": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.motion3d.json", "preload": true },
         "xbot-motion3d-baked": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.motion3d.baked.json", "preload": true }
       }
@@ -162,7 +164,8 @@
           "model": "xbot",
           "glb": "xbot-glb",
           "fade": 0.2,
-          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
+          "props": [{ "model": "rifle", "bone": "RightHand", "at": [0.0033, 0.1072, 0.0122], "turn": [91.56, 27.38, -95.79] }, { "model": "cup", "bone": "LeftHand", "at": [0, 0, 0], "turn": [0, 0, 0] }]
         }
       },
       "ease": 0.15,
@@ -192,10 +195,9 @@
         }
       },
       "mods": { "behaviors": ["shapes3d"], "footprints": ["shapes3d"], "ground": "shapes3d", "states": ["yard"] }
-    },
-    "ik3d": { "kinds": {}, "mods": { "body": "motion3d", "limbs": "motion3d" } }
+    }
   },
-  "plugins": ["loader", "scenemanager", "player", "terrain3d", "solids", "shipped", "motion3d", "ik3d", "environment3d", "render3d", "chasecamera3d", "stats"],
+  "plugins": ["loader", "scenemanager", "player", "terrain3d", "solids", "shipped", "motion3d", "environment3d", "render3d", "chasecamera3d", "stats"],
   "seats": 1,
   "prefabs": {
     "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
@@ -228,6 +230,7 @@
       "stick": [0, 0],
       "turning": [0, 0],
       "fast": false,
+      "aiming": false,
       "look": { "yaw": 0, "pitch": 0.35, "dist": 5 },
       "lift": 1.4
     },

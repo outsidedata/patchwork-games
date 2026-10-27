@@ -23,7 +23,7 @@ Each is checked on every step of every station's run. The limits are the dev pag
 | ☐ | Dropped after an activity | off the ground more than 0.1 s after going back to walking | a body handed back on its feet settles the last 2.5 cm in a step or two |
 | ☐ | A fall that slows in the air | the hips' fall slows by more than 1 m/s within 0.2 s, while no hand or foot is planted on anything and the toes are 5 cm or more over the ground | nothing in the air slows a fall |
 | ☐ | A jolt | the hips' speed changes by more than 1 m/s in one step | not yet set from a clean run: a clip's own hips change by up to 1.7 m/s a step (the backflip), so this limit is too low and flags clean clips |
-| ☐ | A pinned hand or foot that can't reach | ik3d leaves a hand or foot pinned wholly to its point more than 2 cm short of it | |
+| ☐ | A pinned hand or foot that can't reach | motion3d's bend leaves a hand or foot pinned wholly to its point more than 2 cm short of it | |
 
 Known faults in how the page measures, to be fixed before its numbers are trusted:
 

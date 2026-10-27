@@ -179,6 +179,14 @@
   "swimunder": {
    "spot": ["Hips"],
    "on": "both"
+  },
+  "rifleout": {
+   "spot": ["Hips"],
+   "on": "both"
+  },
+  "rifleaway": {
+   "spot": ["Hips"],
+   "on": "both"
   }
  },
  "offsets": {
@@ -407,6 +415,16 @@
     "beginTurn": 0
    },
    "swimunder": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "rifleout": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "rifleaway": {
     "beginOffset": [0, 0, 0],
     "endOffset": [0, 0, 0],
     "beginTurn": 0

@@ -45,8 +45,8 @@ panel tunes motion3d's settings and whose readout shows what the body is doing. 
   of their own. Each space's points are where its motions hold the body: the `Lip` line where the
   wrists hang, a `Seat` point where the hips sit, the `Face` plane of the climbing wall, the
   `Ceiling` plane turned face down, the pool's `Float` plane, the stairs' `Flight` line.
-- The hands and feet each motion names are bent onto their points by ik3d while the bake says they are
-  planted (`world.ik3d.mods: { body: 'motion3d', limbs: 'motion3d' }`), so a hanging body's hands stay on the lip as it sways.
+- The hands and feet each clip's spot names are bent onto their points by motion3d while the bake says they are
+  planted, so a hanging body's hands stay on the lip as it sways.
 - Every station past the wall and the chair is sized and placed to its clips by `assets/yard.mjs`,
   from what the bake measures of each clip (`assets/xbot.rig.baked.json`), as demo_walker's yard is:
   the bar at the height `freejump` ends the hands holding, the rope swing's beam where its swing hangs

@@ -9,6 +9,8 @@
       #readout { position: fixed; left: 8px; bottom: 186px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px; pointer-events: none }
       #caption { position: fixed; left: 50%; top: 8px; transform: translateX(-50%); max-width: 70vw; color: #fff; font: 600 18px sans-serif; white-space: pre-wrap; text-align: center; background: #000c; padding: 8px 14px; pointer-events: none }
       #caption:empty { display: none }
+      #tag { position: fixed; transform: translate(-50%, -100%); color: #fff; font: 12px monospace; white-space: pre; background: #000b; padding: 3px 6px; pointer-events: none }
+      #tag:empty { display: none }
       #caption:not(:empty) ~ #readout, body:has(#caption:not(:empty)) #readout { display: none }
       #timeline { position: fixed; left: 0; right: 0; bottom: 0; width: 100vw; height: 178px; background: #111318; cursor: crosshair }
       .lil-gui.root { max-height: calc(100vh - 178px); overflow-y: auto }
@@ -17,6 +19,7 @@
   <body>
     <div id="readout"></div>
     <div id="caption"></div>
+    <div id="tag"></div>
     <canvas id="timeline"></canvas>
     <script type="module">
       // The testbed: index.html's game, the manager truth and the scenes its row names all in this tab,
@@ -66,13 +69,12 @@
       // motion it plays in it, the space and its place on the point it is held to, whether its root is
       // being eased, the layer played over walking, and the activities the spaces it stands in offer; the
       // clip and its playhead, the clip it fades from, its place, way, speed and lowest foot; each limb
-      // motion3d bends, how much of it is pinned and how far ik3d's last solve left its hand or foot from
+      // motion3d bends, how much of it is pinned and how far its last bend left its hand or foot from
       // where it reaches; and the last five errors the page threw or wrote.
       //
       // The panel, motion3d's settings, laid into the truth's world and the page's as they change:
       //   pin ease, s       `world.motion3d.ease`, how long a planted limb's pin eases in and out
       //   crossfade, s      motion3d's `fade` of the X Bot, which the root is eased over between clips too
-      //   bend the limbs    ik3d's `limbs` from motion3d on or off (`world.ik3d.mods.limbs`)
       //   draw on the car   motion3d's `object` from yard on or off, the body drawn on the car as the
       //                     page draws the car, or where its row stands (`world.motion3d.mods.object`)
       //   priority          each space's priority (shapes3d's kind's `priority`, 1 where it gives none)
@@ -227,14 +229,14 @@
           ...body, short: null, stage: samples.get(rec.n)?.stage ?? (run && run.stage < run.stages.length ? run.stages[run.stage].label : run?.result ?? null),
         })
       }
-      // How far ik3d's solve on the page left the furthest of the limbs pinned wholly to their points from
+      // How far motion3d's bend on the page left the furthest of the limbs pinned wholly to their points from
       // them, the frame drawn at this step, kept on its sample: null with none pinned wholly.
       function sampleReach() {
         const s = samples.get(rec.n), t = room(), me = meIn(t)
         if (!s || !me) return
         let reach = []
         try { reach = reachesOf(readerOf(t), me) } catch (e) { caught(e) }
-        const short = client?.plugins.ik3d?.short(me.id) ?? []
+        const short = client?.plugins.motion3d?.short(me.id) ?? []
         const whole = reach.map((r, i) => (r.weight >= 1 && short[i] !== undefined ? short[i] : null)).filter(v => v !== null)
         s.short = whole.length ? Math.max(...whole) : null
       }
@@ -573,7 +575,7 @@
       //           its clip plants on anything.
       //   slowed  m/s: how much a fall in the air slowed, within `window` s: nothing in the air slows a fall.
       //   jolt    m/s: how much the drawn hips' speed changed in one step.
-      //   short   m: how far ik3d left a hand or a foot pinned wholly to its point from it.
+      //   short   m: how far motion3d left a hand or a foot pinned wholly to its point from it.
       const LIMITS = { under: 0.05, over: 0.05, off: 0.1, air: 0.05, slowed: 1, window: 0.2, jolt: 1, short: 0.02 }
 
       // Each step of the run's measures: `under`, `jolt`, `slowed`, `short`, each as the limits name them,
@@ -738,6 +740,28 @@
         })
         return at.length ? [0, 1, 2].map(i => at.reduce((s, p) => s + p[i], 0) / at.length) : null
       }
+      // Over the seat's body as drawn: the clip its top half plays and the one its body plays, each with
+      // how far through it is, off the page's row.
+      const tagEl = document.getElementById('tag')
+      function placeTag() {
+        const plugins = page.client?.plugins
+        const me = plugins && possessed(plugins.wire.rows)
+        const root = me && plugins.motion3d?.model(me.id)
+        const r3 = plugins?.render3d
+        if (!me || !root || !r3?.camera) { tagEl.textContent = ''; return }
+        const d = me.data
+        const rig = rigOf(plugins.wire, me.data.as ?? me.kind)
+        const through = (clip, t) => `${clip}  ${t.toFixed(2)} / ${clipOf(rig, clip).dur.toFixed(2)} s  ${Math.round((100 * t) / clipOf(rig, clip).dur)}%`
+        tagEl.textContent = [
+          `top     ${d.upper != null ? through(d.upper, d.upperT) : d.upperMotion ? `${d.upperMotion} (no clip)` : '-'}`,
+          `bottom  ${d.clip != null ? through(d.clip, d.clipT) : '-'}`,
+        ].join('\n')
+        const at = root.getWorldPosition(new r3.THREE.Vector3()).add(new r3.THREE.Vector3(0, 2.1, 0)).project(r3.camera)
+        const box = document.querySelector('canvas:not(#timeline)').getBoundingClientRect()
+        tagEl.style.left = `${box.left + ((at.x + 1) / 2) * box.width}px`
+        tagEl.style.top = `${box.top + ((1 - at.y) / 2) * box.height}px`
+        tagEl.style.visibility = at.z < 1 ? 'visible' : 'hidden'
+      }
       function placeCamera(between) {
         const r3 = page.client?.plugins.render3d
         if (!r3?.camera) return
@@ -828,7 +852,6 @@
       const fileOf = () => ({
         ease: main.world.motion3d.ease,
         fade: main.world.motion3d.kinds.xbot.fade,
-        limbs: main.world.ik3d.mods.limbs !== undefined,
         object: main.world.motion3d.mods.object !== undefined,
         priority: Object.fromEntries(spaces.map(name => [name, main.world.shapes3d.kinds[name].priority ?? 1])),
       })
@@ -838,8 +861,6 @@
         for (const world of worlds()) {
           world.motion3d.ease = own.ease
           world.motion3d.kinds.xbot.fade = own.fade
-          if (own.limbs) world.ik3d.mods.limbs = 'motion3d'
-          else delete world.ik3d.mods.limbs
           if (own.object) world.motion3d.mods.object = 'yard'
           else delete world.motion3d.mods.object
           for (const name of spaces) world.shapes3d.kinds[name].priority = own.priority[name]
@@ -848,7 +869,6 @@
       const mf = gui.addFolder('motion3d')
       mf.add(own, 'ease', 0, 1, 0.01).name('pin ease, s').onChange(apply)
       mf.add(own, 'fade', 0, 1, 0.01).name('crossfade, s').onChange(apply)
-      mf.add(own, 'limbs').name('bend the limbs').onChange(apply)
       mf.add(own, 'object').name('draw on the car').onChange(apply)
       const pf = mf.addFolder('priority')
       for (const name of spaces) pf.add(own.priority, name, 0, 5, 1).onChange(apply)
@@ -870,7 +890,8 @@
         const me = meIn(truthNow)
         if (!me) return []
         const d = me.data
-        const offered = d.offered.length ? d.offered.map(a => `${a} offered`).join(', ') : 'nothing offered'
+        // motion3d fills `offered` the first time it moves the body, after it has stood.
+        const offered = d.offered?.length ? d.offered.map(a => `${a} offered`).join(', ') : 'nothing offered'
         const s = samples.get(rec.n)
         const lines = [
           `${d.activity}${d.motion ? `.${d.motion}` : ''}   ${d.clip ?? ''}   ${offered}`,
@@ -881,7 +902,7 @@
         const w = readerOf(truthNow)
         let reach = []
         try { reach = reachesOf(w, me) } catch (e) { caught(e) }
-        const short = client?.plugins.ik3d?.short(me.id) ?? []
+        const short = client?.plugins.motion3d?.short(me.id) ?? []
         if (reach.length) lines.push(reach.map((r, i) => `${r.bone} pinned ${fixed(r.weight)} short ${short[i] === undefined ? '-' : `${(short[i] * 100).toFixed(1)} cm`}`).join('   '))
         return lines
       }
@@ -1047,6 +1068,7 @@
             const between = clock.paused ? undefined : owed / dt
             placeCamera(between)
             await page.frame(between)
+            placeTag()
             sampleReach()
             // A finished script holds the clock a second on, then pauses it, so the run ends where it did.
             if (run?.result && !run.held && !clock.paused && !inTurn) {

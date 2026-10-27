@@ -11,7 +11,7 @@ import { possessed } from '#addons/player/player.addon.ts'
 import * as THREE from 'three'
 import { motion3d } from '#plugins/motion3d/motion3d.plugin.ts'
 import { posed } from '#plugins/motion3d/motion3d.play.ts'
-import { reachesOf, type File } from '#plugins/motion3d/motion3d.sim.ts'
+import { carrying, reachesOf, type File } from '#plugins/motion3d/motion3d.sim.ts'
 import { sim } from './demo_motion3d.sim.ts'
 import file from './demo_motion3d.scene.json' with { type: 'json' }
 import motions from './assets/xbot.motion3d.json' with { type: 'json' }
@@ -131,12 +131,32 @@ function standIn(room: Truth, more: Record<string, unknown> = {}) {
   const keyed = new THREE.Object3D()
   keyed.name = 'Keyed'
   root.add(keyed)
+  // The spine the aim turns, each bone over the one before.
+  let spine: THREE.Object3D = root
+  for (const name of ['Spine', 'Spine1', 'Spine2']) {
+    const bone = new THREE.Bone()
+    bone.name = name
+    bone.position.set(0, spine === root ? 1 : 0.1, 0)
+    spine.add(bone)
+    spine = bone
+  }
+  // Each arm a chain of bones motion3d bends: the arm, its forearm and its hand.
+  for (const side of ['Left', 'Right']) {
+    let parent: THREE.Object3D = root
+    for (const [name, at] of [['Arm', [side === 'Left' ? 0.2 : -0.2, 1.4, 0]], ['ForeArm', [0, -0.25, 0]], ['Hand', [0, -0.25, 0]]] as const) {
+      const bone = new THREE.Bone()
+      bone.name = side + name
+      bone.position.fromArray(at)
+      parent.add(bone)
+      parent = bone
+    }
+  }
   const animations = Object.entries(written.clips).filter(([, e]) => typeof e === 'string' || !('mirror' in e))
     .map(([name]) => new THREE.AnimationClip(name, -1, [new THREE.VectorKeyframeTrack('Keyed.position', [0, measured.table[name as keyof typeof measured.table].dur], [0, 0, 0, 0, 0, 0])]))
   const page = {
     wire: { n: 1, rows: room.rows, scene: { ...room.scene, plugins: ['solids', 'shipped', 'motion3d', 'render3d'] } },
     render3d: { THREE, scene: new THREE.Scene(), dress: () => {} },
-    loader: { ready: () => true, load: async () => {}, model: () => ({ scene: root, animations }) },
+    loader: { ready: () => true, load: async () => {}, model: (name: string) => (name === 'rifle' || name === 'cup' ? { scene: new THREE.Group(), animations: [] } : { scene: root, animations }) },
     ...more,
   } as never
   return { page, root }
@@ -209,7 +229,7 @@ async function hung() {
   const wrists = middle(HANDS)
   expect(wrists[1]).toBeCloseTo(lipY, 2)
   expect(wrists[2]).toBeCloseTo(lipZ, 2)
-  // Both hands grip the lip all through the hang, so both are bent onto it, wholly: the page hands ik3d
+  // Both hands grip the lip all through the hang, so both are bent onto it, wholly: the page's motion3d bends
   // the arms, each reaching the lip, for the body drawn where its row stands.
   const reach = reachesOf(reader(j.room), me())
   expect(reach.map(r => r.bone).sort()).toEqual(HANDS)
@@ -634,8 +654,16 @@ test('at the car\'s door it gets in, its hips on the seat; drives it, held on th
   until(() => car.data.speed === 0, 60 * 3)
   send('press', 'jump')
   truth.step(DT)
-  expect(me().data.clip).toBe('honk')
-  until(() => me().data.motion === 'pilot', 60 * 4)
+  // The honk on the upper half alone, from Spine1 up, the body driving on beneath it, its hips on the seat.
+  expect(me().data.upper).toBe('honk')
+  expect(me().data.upperBone).toBe('Spine1')
+  expect(me().data.motion).toBe('pilot')
+  expect(me().data.clip).toBe('drive')
+  until(() => {
+    near(middle(['Hips']), seatOf())
+    return me().data.upper === null && me().data.was === null
+  }, 60 * 4)
+  expect(me().data.upperMotion).toBe(null)
   send('press', 'use')
   truth.step(DT)
   expect(me().data.clip).toBe('carout')
@@ -647,4 +675,41 @@ test('at the low wall it vaults over it, and walks on beyond it', async () => {
   const { me, row, kinds } = await oneShot('vaultzone', 'vaultone', -LANE, ROW2)
   const wall = row('vaultwall').data.pos
   expect(me().data.pos[2]).toBeGreaterThan(wall[2] + kinds.vaultwall.shape.box.size[2] / 2)
+})
+
+test('the gun key draws the rifle over the walk, the hands on it, holds it aimed, and puts it away again', async () => {
+  const { truth, send, me, until, room } = await joined()
+  send('press', 'gun')
+  truth.step(DT)
+  expect(me().data).toMatchObject({ upperMotion: 'draw', upper: 'rifleout', upperBone: 'Spine', activity: 'walk' })
+  // Drawn, then aimed: the rifle carried wholly once the aim has faded in, the body walking on beneath.
+  until(() => me().data.upperMotion === 'aim', 60 * 4)
+  until(() => me().data.was === null, 60)
+  expect(carrying(reader(room), me())).toMatchObject({ carry: { prop: 'rifle' }, weight: 1 })
+  send('stick', 0, -1)
+  until(() => me().data.clip === 'walk', 60)
+  expect(me().data.upper).toBe(null)
+  send('stick', 0, 0)
+  // Its key again puts it away, and the upper half is let go once that has played out.
+  send('press', 'gun')
+  truth.step(DT)
+  expect(me().data).toMatchObject({ upperMotion: 'holster', upper: 'rifleaway' })
+  until(() => me().data.upperMotion === null && me().data.upper === null, 60 * 4)
+  expect(carrying(reader(room), me())).toBe(undefined)
+})
+
+test('held, the aim key turns the body to the way the camera looks and pitches it by the camera\'s pitch; let go, it walks as before', async () => {
+  const { truth, send, me, until } = await joined()
+  const yaw = me().data.yaw + 1
+  send('look', 1, 0.3)
+  send('aiming', 1)
+  truth.step(DT)
+  expect(me().data.aiming).toBe(true)
+  expect(me().data.face).toBeCloseTo(me().data.look.yaw, 9)
+  expect(me().data.aim).toBeCloseTo(-me().data.look.pitch, 9)
+  until(() => Math.abs(me().data.yaw - yaw) < 1e-3, 60 * 2)
+  send('aiming', 0)
+  truth.step(DT)
+  expect(me().data.face).toBe(null)
+  expect(me().data.aim).toBe(0)
 })

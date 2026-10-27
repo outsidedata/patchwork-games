@@ -3,10 +3,30 @@
  "moves": 0.05,
  "turns": 30,
  "anywhere": ["walk"],
+ "carries": {
+  "cup": {
+   "prop": "cup",
+   "anchor": { "bone": "LeftHand", "at": [0, 0.08, 0.03], "turn": [0, 0, 0], "point": "handle" },
+   "limbs": []
+  },
+  "rifle": {
+   "prop": "rifle",
+   "anchor": { "bone": "RightShoulder", "at": [0.133, 0.1669, 0.0867], "turn": [-87.22, -36.23, 29.51], "point": "stock" },
+   "limbs": [
+    { "bones": ["RightArm", "RightForeArm", "RightHand"], "target": "grip", "pole": [-1, -1, 0] },
+    { "bones": ["LeftArm", "LeftForeArm", "LeftHand"], "target": "support", "pole": [1, -1, 0] }
+   ]
+  }
+ },
  "activities": {
   "walk": {
    "normal": [0, 1, 0],
    "motions": {
+    "cupdown": { "clips": [], "over": "Spine", "press": "cup", "from": ["cup"] },
+    "cup": { "clips": [], "over": "Spine", "press": "cup", "carry": "cup" },
+    "holster": { "clips": ["rifleaway"], "over": "Spine", "press": "gun", "from": ["aim"], "carry": "rifle" },
+    "draw": { "clips": ["rifleout"], "over": "Spine", "press": "gun", "then": "aim", "carry": "rifle" },
+    "aim": { "clips": [], "over": "Spine", "carry": "rifle" },
     "jump": { "target": "plane", "clips": ["jump"], "when": ["rising"], "then": "fall" },
     "fall": { "target": "plane", "clips": ["fall"], "when": ["falling"] },
     "land": { "target": "plane", "clips": ["land"], "from": ["jump", "fall"], "when": ["landed"] },
@@ -123,7 +143,7 @@
    "motions": {
     "use": { "target": "point", "clips": ["carin"], "press": "use", "then": "pilot" },
     "pilot": { "target": "point", "clips": ["drive"] },
-    "honk": { "target": "point", "clips": ["honk"], "press": "jump", "from": ["pilot"], "then": "pilot" },
+    "honk": { "clips": ["honk"], "over": "Spine1", "press": "jump", "from": ["pilot"] },
     "out": { "target": "point", "clips": ["carout"], "press": "use", "from": ["pilot"] }
    }
   },

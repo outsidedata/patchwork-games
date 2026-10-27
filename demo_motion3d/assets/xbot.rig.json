@@ -2,6 +2,14 @@
  "bodies": {
   "xbot": "characters/xbot/xbot.fbx"
  },
+ "aim": {
+  "bones": {
+   "Spine": 0.3,
+   "Spine1": 0.3,
+   "Spine2": 0.4
+  },
+  "eye": "Head"
+ },
  "clips": {
   "idle": {
    "file": "packs/Male Locomotion Pack 30FPS/idle.fbx",
@@ -165,6 +173,12 @@
   "swimunder": {
    "file": "packs/mixamo-motions/Swimming.fbx",
    "loop": true
+  },
+  "rifleout": {
+   "file": "packs/mixamo-motions/Rifle Pull Out.fbx"
+  },
+  "rifleaway": {
+   "file": "packs/mixamo-motions/Rifle Put Away.fbx"
   }
  },
  "roles": {

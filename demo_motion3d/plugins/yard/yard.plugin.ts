@@ -8,7 +8,7 @@
 //              hanging straight down its `length` metres
 //   pool       the water, its definition's `look` `{ colour, opacity }`, a sheet `water.size` [across,
 //              along] metres, its middle `water.at` [x, y, z] from the pool's row
-// It draws in its `afterTick`, once motion3d has drawn the bodies and ik3d has bent their limbs, so it is
+// It draws in its `afterTick`, once motion3d has drawn the bodies and bent their limbs, so it is
 // listed after them (as `shipped`, with `yard` in `world.shipped.plugins`), and before render3d. Its mod
 // for motion3d, `yard.motion3d.ts`, hands motion3d the frame the car is drawn in.
 import type * as THREE from 'three'

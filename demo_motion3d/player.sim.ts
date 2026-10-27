@@ -2,7 +2,8 @@
 // (`world.kinematics3d.kinds.xbot`) and played and drawn by motion3d (`world.motion3d.kinds.xbot`), every
 // move it makes the X Bot's motion3d file's (`assets/xbot.motion3d.json`). Every seat is sent every
 // `player` row. Its own fields, beside kinematics3d's and motion3d's: `stick` [x, z], the keys' way,
-// right and forward; `fast`, the run key held; `look` `{ yaw, pitch, dist }`, chasecamera3d's orbit about
+// right and forward; `fast`, the run key held; `aiming`, the aim key held, which aims the body (motion3d's
+// `aim`) the way the camera looks; `look` `{ yaw, pitch, dist }`, chasecamera3d's orbit about
 // it, `lift` metres over its feet; `turning` [x, y], how far a gamepad's right stick is pushed right and
 // down; and `stood`, once it stands on its slot's start.
 //
@@ -14,14 +15,14 @@
 // motion3d's `drive`, which moves and plays the body by it.
 //
 // The acts are the page's keys: `stick(x, y)` (y down, as a stick reads), `turn(x, y)` (the right
-// stick, the same), `fast(v)` (1 held, 0 let go), `press(key)`, a key pressed, handed to motion3d's
+// stick, the same), `fast(v)` and `aiming(v)` (1 held, 0 let go), `press(key)`, a key pressed, handed to motion3d's
 // `press` with the stick, and `jump` the body's jump where motion3d takes it for no move; `look(dyaw,
 // dpitch)` and `zoom(by)`, the wheel's pixels. A seat's message arrives from outside the program, so each
 // refuses arguments of the wrong kind and writes nothing.
 import type { Kind, Row, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
-import { drive, press } from '#plugins/motion3d/motion3d.sim.ts'
+import { aim, drive, press } from '#plugins/motion3d/motion3d.sim.ts'
 import { ground, relative } from '#plugins/kinematics3d/kinematics3d.sim.ts'
 
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
@@ -64,6 +65,9 @@ export const player: Kind = {
     const speed = d.fast ? k.run : k.walk
     d.face = null
     d.want = [wx * speed, wz * speed]
+    // Aimed the way the camera looks while the aim key is held: chasecamera3d looks along its yaw and
+    // down by its pitch.
+    aim(me, w, d.aiming ? { yaw: d.look.yaw, pitch: -d.look.pitch } : null)
     drive(me, w, dt, d.stick)
   },
   acts: {
@@ -75,6 +79,9 @@ export const player: Kind = {
     },
     fast(me, _w, _seat, v: unknown) {
       if (v === 0 || v === 1) me.data.fast = v === 1
+    },
+    aiming(me, _w, _seat, v: unknown) {
+      if (v === 0 || v === 1) me.data.aiming = v === 1
     },
     press(me, w, _seat, key: unknown) {
       const d = me.data
