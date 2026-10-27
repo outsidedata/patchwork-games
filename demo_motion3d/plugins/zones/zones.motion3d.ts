@@ -1,8 +1,9 @@
 // zones' mod for motion3d: the activities demo_motion3d's yard offers (`world.motion3d.mods.behaviors:
 // ['walker', 'zones']`, with `zones` in `world.shipped.plugins`). Each activity is its motions, the
 // clips of the X Bot's rig (`assets/xbot.rig.json`) they play and the points of its space they are
-// held to, the bones of its `ik` on its root point the spot each clip's offsets place
-// (`world.motion3d.offsets`, written by `assets/offsets.mjs`), and its logic. The keys press `use` (E) and `jump` (Space); the stick is the `player` row's
+// held to, the hands and feet its `ik` bends onto points, and its logic. What each clip's spot is and
+// where it stands from its point is the rig's alone (each clip's `held` and `offsets`). The keys press
+// `use` (E) and `jump` (Space); the stick is the `player` row's
 // own `stick` [x, forward]. Every limb a motion bends onto a point is bent as its clip bends it
 // (motion3d's `asDrawn`).
 //   walk     walking on the yard's shapes and land (`zones.sim.ts`'s `stride`), in the place of walker's
@@ -82,7 +83,6 @@ import { stride } from './zones.sim.ts'
 
 const hands = (p: string) => ({ LeftHand: p, RightHand: p })
 const feet = (p: string) => ({ LeftFoot: p, RightFoot: p })
-const hips = (p: string) => ({ Hips: p })
 
 // One step of a body hanging (`hang`) or moving along what it hangs from (`move`): the clip of `move`'s
 // that goes the way the stick pushes across (its measured travel, left or right of the body) until the
@@ -279,9 +279,9 @@ export const behaviors = (): Record<string, Activity> => {
       },
     },
     pool: {
-      use: { clips: ['poolin'], root: 'Float', ik: hips('Float') },
-      float: { clips: ['tread'], root: 'Float', ik: hips('Float') },
-      swim: { clips: ['swimunder'], root: 'Float', ik: hips('Float') },
+      use: { clips: ['poolin'], root: 'Float' },
+      float: { clips: ['tread'], root: 'Float' },
+      swim: { clips: ['swimunder'], root: 'Float' },
       out: { clips: ['bracedclimb'], root: 'Lip', ik: hands('Lip') },
       pole: asDrawn,
       press(me, _w, motion, handed) {
@@ -307,7 +307,7 @@ export const behaviors = (): Record<string, Activity> => {
       },
     },
     desk: {
-      use: { clips: ['typing'], root: 'Seat', ik: hips('Seat') },
+      use: { clips: ['typing'], root: 'Seat' },
       press(_me, _w, motion, handed) {
         if (motion === 'use') {
           const { at, yaw } = handed.point('Side')
@@ -318,8 +318,8 @@ export const behaviors = (): Record<string, Activity> => {
       step(_me, _w, _dt, handed) { handed.hold() },
     },
     bed: {
-      use: { clips: ['liedown'], root: 'Bed', ik: hips('Bed') },
-      lie: { clips: ['bedidle'], root: 'Bed', ik: hips('Bed') },
+      use: { clips: ['liedown'], root: 'Bed' },
+      lie: { clips: ['bedidle'], root: 'Bed' },
       press(me, _w, motion, handed) {
         if (motion === 'use' && me.data.motion === 'lie') {
           const { at, yaw } = handed.point('Foot')
@@ -333,10 +333,10 @@ export const behaviors = (): Record<string, Activity> => {
       },
     },
     car: {
-      use: { clips: ['carin'], root: 'Seat', ik: hips('Seat') },
-      pilot: { clips: ['drive'], root: 'Seat', ik: { ...hips('Seat'), LeftHand: 'WheelL', RightHand: 'WheelR' } },
-      honk: { clips: ['honk'], root: 'Seat', ik: hips('Seat') },
-      out: { clips: ['carout'], root: 'Seat', ik: hips('Seat') },
+      use: { clips: ['carin'], root: 'Seat' },
+      pilot: { clips: ['drive'], root: 'Seat', ik: { LeftHand: 'WheelL', RightHand: 'WheelR' } },
+      honk: { clips: ['honk'], root: 'Seat' },
+      out: { clips: ['carout'], root: 'Seat' },
       pole: asDrawn,
       press(me, _w, motion, handed) {
         const d = me.data
@@ -352,9 +352,9 @@ export const behaviors = (): Record<string, Activity> => {
       },
     },
     chair: {
-      use: { clips: ['sitdown'], root: 'Seat', ik: hips('Seat') },
-      seated: { clips: ['seated'], root: 'Seat', ik: hips('Seat') },
-      stand: { clips: ['standup'], root: 'Seat', ik: hips('Seat') },
+      use: { clips: ['sitdown'], root: 'Seat' },
+      seated: { clips: ['seated'], root: 'Seat' },
+      stand: { clips: ['standup'], root: 'Seat' },
       press(me, _w, motion, handed) {
         if (motion === 'use' && me.data.motion === 'seated') handed.go('stand')
         return true

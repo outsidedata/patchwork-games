@@ -5,126 +5,342 @@
  "clips": {
   "idle": {
    "file": "packs/Male Locomotion Pack 30FPS/idle.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["LeftFoot", "RightFoot"],
+    "on": "both"
+   }
   },
   "walk": {
    "file": "packs/Male Locomotion Pack 30FPS/walking.fbx",
    "loop": true,
    "gear": 0,
-   "stance": "stand"
+   "stance": "stand",
+   "held": {
+    "spot": ["LeftFoot", "RightFoot"],
+    "on": "both"
+   }
   },
   "run": {
    "file": "packs/Male Locomotion Pack 30FPS/standard run.fbx",
    "loop": true,
    "gear": 0,
-   "stance": "stand"
+   "stance": "stand",
+   "held": {
+    "spot": ["LeftFoot", "RightFoot"],
+    "on": "both"
+   }
   },
-  "jump": "packs/mixamo-motions/Jumping Up (2).fbx",
+  "jump": {
+   "file": "packs/mixamo-motions/Jumping Up (2).fbx",
+   "held": {
+    "spot": ["LeftFoot", "RightFoot"],
+    "on": "begin"
+   }
+  },
   "fall": {
    "file": "packs/mixamo-motions/Falling Idle.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["Hips"],
+    "on": "both"
+   }
   },
-  "land": "packs/mixamo-motions/Falling To Landing.fbx",
-  "backflip": "packs/mixamo-motions/Backflip.fbx",
-  "pickup": "packs/mixamo-motions/Picking Up.fbx",
-  "bracedjump": "packs/mixamo-motions/Idle To Braced Hang.fbx",
+  "land": {
+   "file": "packs/mixamo-motions/Falling To Landing.fbx",
+   "held": {
+    "after": "wallside"
+   }
+  },
+  "backflip": {
+   "file": "packs/mixamo-motions/Backflip.fbx",
+   "held": {
+    "spot": ["LeftFoot", "RightFoot"],
+    "on": "begin"
+   }
+  },
+  "pickup": {
+   "file": "packs/mixamo-motions/Picking Up.fbx",
+   "held": {
+    "spot": ["LeftFoot", "RightFoot"],
+    "on": "both"
+   }
+  },
+  "bracedjump": {
+   "file": "packs/mixamo-motions/Idle To Braced Hang.fbx",
+   "held": {
+    "spot": ["LeftHand", "RightHand"],
+    "on": "end"
+   }
+  },
   "bracedidle": {
    "file": "packs/mixamo-motions/Hanging Idle (3).fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["LeftHand", "RightHand"],
+    "on": "both"
+   }
   },
   "bracedleft": {
    "file": "packs/mixamo-motions/Braced Hang Shimmy (2).fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["LeftHand", "RightHand"],
+    "on": "both"
+   }
   },
   "bracedright": {
    "file": "packs/mixamo-motions/Braced Hang Shimmy.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["LeftHand", "RightHand"],
+    "on": "both"
+   }
   },
-  "bracedclimb": "packs/mixamo-motions/Braced Hang To Crouch.fbx",
-  "braceddrop": "packs/mixamo-motions/Braced Hang Drop (2).fbx",
-  "sitdown": "packs/mixamo-motions/Stand To Sit.fbx",
+  "bracedclimb": {
+   "file": "packs/mixamo-motions/Braced Hang To Crouch.fbx",
+   "held": {
+    "spot": ["LeftHand", "RightHand"],
+    "on": "begin"
+   }
+  },
+  "braceddrop": {
+   "file": "packs/mixamo-motions/Braced Hang Drop (2).fbx",
+   "held": {
+    "on": "end"
+   }
+  },
+  "sitdown": {
+   "file": "packs/mixamo-motions/Stand To Sit.fbx",
+   "held": {
+    "spot": ["Hips"],
+    "on": "end"
+   }
+  },
   "seated": {
    "file": "packs/mixamo-motions/Sitting Idle (2).fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["Hips"],
+    "on": "both"
+   }
   },
-  "standup": "packs/mixamo-motions/Sit To Stand.fbx",
+  "standup": {
+   "file": "packs/mixamo-motions/Sit To Stand.fbx",
+   "held": {
+    "spot": ["Hips"],
+    "on": "begin"
+   }
+  },
   "coldrub": {
    "file": "packs/mixamo-motions/Shoulder Rubbing.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["LeftFoot", "RightFoot"],
+    "on": "both"
+   }
   },
   "coldlook": {
    "file": "packs/mixamo-motions/Nervously Look Around.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["LeftFoot", "RightFoot"],
+    "on": "both"
+   }
   },
-  "freejump": "packs/mixamo-motions/Stand To Freehang.fbx",
+  "freejump": {
+   "file": "packs/mixamo-motions/Stand To Freehang.fbx",
+   "held": {
+    "spot": ["LeftHand", "RightHand"],
+    "on": "end"
+   }
+  },
   "freeidle": {
    "file": "packs/mixamo-motions/Hanging Idle.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["LeftHand", "RightHand"],
+    "on": "both"
+   }
   },
   "freeleft": {
    "file": "packs/mixamo-motions/Left Shimmy.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["LeftHand", "RightHand"],
+    "on": "both"
+   }
   },
   "freeright": {
    "file": "packs/mixamo-motions/Right Shimmy.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["LeftHand", "RightHand"],
+    "on": "both"
+   }
   },
-  "freedrop": "packs/mixamo-motions/Freehang Drop.fbx",
+  "freedrop": {
+   "file": "packs/mixamo-motions/Freehang Drop.fbx",
+   "held": {
+    "on": "end"
+   }
+  },
   "barmove": {
    "file": "packs/mixamo-motions/Moving While Hanging.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["LeftHand", "RightHand"],
+    "on": "both"
+   }
   },
   "barleft": {
-   "mirror": "barmove"
+   "mirror": "barmove",
+   "held": {
+    "spot": ["LeftHand", "RightHand"],
+    "on": "both"
+   }
   },
   "ropeclimb": {
    "file": "packs/mixamo-motions/Climbing A Rope (2).fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["LeftHand", "RightHand"],
+    "on": "both"
+   }
   },
-  "ropeswing": "packs/mixamo-motions/Swinging.fbx",
+  "ropeswing": {
+   "file": "packs/mixamo-motions/Swinging.fbx",
+   "held": {
+    "on": "begin"
+   }
+  },
   "wallclimb": {
    "file": "packs/mixamo-motions/Climbing Up Wall.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["LeftHand", "RightHand", "LeftFoot", "RightFoot"],
+    "on": "face",
+    "facing": "into"
+   }
   },
   "walldown": {
    "file": "packs/mixamo-motions/Climbing Down Wall.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["LeftHand", "RightHand", "LeftFoot", "RightFoot"],
+    "on": "face",
+    "facing": "into"
+   }
   },
-  "wallside": "packs/mixamo-motions/Wall Run (2).fbx",
-  "vaultone": "packs/mixamo-motions/Jumping (2).fbx",
+  "wallside": {
+   "file": "packs/mixamo-motions/Wall Run (2).fbx",
+   "held": {
+    "spot": ["LeftFoot", "RightFoot"],
+    "on": "face",
+    "facing": "along"
+   }
+  },
+  "vaultone": {
+   "file": "packs/mixamo-motions/Jumping (2).fbx",
+   "held": {
+    "on": "begin"
+   }
+  },
   "teeter": {
    "file": "packs/mixamo-motions/Teeter (2).fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["LeftFoot", "RightFoot"],
+    "on": "both"
+   }
   },
-  "jumpdown": "packs/mixamo-motions/Jump Down.fbx",
+  "jumpdown": {
+   "file": "packs/mixamo-motions/Jump Down.fbx",
+   "held": {
+    "on": "end"
+   }
+  },
   "stairsup": {
    "file": "packs/mixamo-motions/Ascending Stairs.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "on": "both"
+   }
   },
   "typing": {
    "file": "packs/mixamo-motions/Typing.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["Hips"],
+    "on": "both"
+   }
   },
-  "liedown": "packs/mixamo-motions/Lying Down.fbx",
+  "liedown": {
+   "file": "packs/mixamo-motions/Lying Down.fbx",
+   "held": {
+    "spot": ["Hips"],
+    "on": "end"
+   }
+  },
   "bedidle": {
    "file": "packs/mixamo-motions/Laying Idle (2).fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["Hips"],
+    "on": "both"
+   }
   },
-  "carin": "packs/mixamo-motions/Entering Car.fbx",
+  "carin": {
+   "file": "packs/mixamo-motions/Entering Car.fbx",
+   "held": {
+    "spot": ["Hips"],
+    "on": "end"
+   }
+  },
   "drive": {
    "file": "packs/mixamo-motions/Driving.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["Hips"],
+    "on": "both"
+   }
   },
-  "honk": "packs/mixamo-motions/Honking Horn.fbx",
-  "carout": "packs/mixamo-motions/Exiting Car.fbx",
-  "poolin": "packs/mixamo-motions/Falling Into Pool (2).fbx",
+  "honk": {
+   "file": "packs/mixamo-motions/Honking Horn.fbx",
+   "held": {
+    "spot": ["Hips"],
+    "on": "both"
+   }
+  },
+  "carout": {
+   "file": "packs/mixamo-motions/Exiting Car.fbx",
+   "held": {
+    "spot": ["Hips"],
+    "on": "begin"
+   }
+  },
+  "poolin": {
+   "file": "packs/mixamo-motions/Falling Into Pool (2).fbx",
+   "held": {
+    "spot": ["Hips"],
+    "on": "end"
+   }
+  },
   "tread": {
    "file": "packs/mixamo-motions/Treading Water.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["Hips"],
+    "on": "both"
+   }
   },
   "swimunder": {
    "file": "packs/mixamo-motions/Swimming.fbx",
-   "loop": true
+   "loop": true,
+   "held": {
+    "spot": ["Hips"],
+    "on": "both"
+   }
   }
  },
  "roles": {
@@ -81380,6 +81596,239 @@
       "question": "the surface is set by the clip's words (under water), not measured: does the body stand in the water so?"
      }
     ]
+   }
+  }
+ },
+ "offsets": {
+  "xbot": {
+   "idle": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "walk": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "run": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "jump": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0.009, 0.405, 0.116],
+    "beginTurn": 0
+   },
+   "fall": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "wallside": {
+    "beginOffset": [0, 1.243, 0],
+    "endOffset": [0.844, 1.179, 3.241],
+    "beginTurn": 39.05,
+    "normal": [-0.777, 0, -0.63]
+   },
+   "land": {
+    "beginOffset": [-0.226, 1.132, 3.064],
+    "endOffset": [-0.226, 1.175, 3.155],
+    "beginTurn": -56.35,
+    "normal": [-0.554, 0, 0.832]
+   },
+   "backflip": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "pickup": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "bracedjump": {
+    "beginOffset": [0.319, -1.28, -0.408],
+    "endOffset": [0, 0, 0],
+    "beginTurn": -38.5
+   },
+   "bracedidle": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "bracedleft": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "bracedright": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "bracedclimb": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [-0.134, 0.511, 0.574],
+    "beginTurn": 0
+   },
+   "braceddrop": {
+    "beginOffset": [-0.044, 0, 0.461],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 36.6
+   },
+   "sitdown": {
+    "beginOffset": [0.002, 0.413, 0.479],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "seated": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "standup": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0.005, 0.413, 0.473],
+    "beginTurn": 0
+   },
+   "coldrub": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "coldlook": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "freejump": {
+    "beginOffset": [0.4, -1.421, -0.055],
+    "endOffset": [0, 0, 0],
+    "beginTurn": -44.9
+   },
+   "freeidle": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "freeleft": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "freeright": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "freedrop": {
+    "beginOffset": [0.327, 0, 0.314],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 44.9
+   },
+   "barmove": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "barleft": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "ropeclimb": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "ropeswing": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0.033, 0, 5.948],
+    "beginTurn": 0
+   },
+   "wallclimb": {
+    "beginOffset": [0, 0.14, 0],
+    "endOffset": [0, 0.14, 0],
+    "beginTurn": -1.22,
+    "normal": [-0.021, 0, -1]
+   },
+   "walldown": {
+    "beginOffset": [0, 0.166, 0],
+    "endOffset": [0, 0.166, 0],
+    "beginTurn": 1.54,
+    "normal": [0.027, 0, -1]
+   },
+   "vaultone": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0.014, 0, 5.093],
+    "beginTurn": 0
+   },
+   "teeter": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "jumpdown": {
+    "beginOffset": [0.05, 0, -1.256],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "stairsup": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "typing": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "liedown": {
+    "beginOffset": [-0.02, 0.067, 0.467],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "bedidle": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "carin": {
+    "beginOffset": [1.888, 0.126, 0.382],
+    "endOffset": [0, 0, 0],
+    "beginTurn": -97.4
+   },
+   "drive": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "honk": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "carout": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [1.984, 0.16, 0.188],
+    "beginTurn": 0
+   },
+   "poolin": {
+    "beginOffset": [-0.156, 2.579, -1.018],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "tread": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "swimunder": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
    }
   }
  }

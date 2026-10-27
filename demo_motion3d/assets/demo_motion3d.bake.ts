@@ -7,8 +7,8 @@
 //   the yard's stations  `main.scene.json`'s shapes3d kinds, prefabs and actors of the stations past the
 //                        wall and the chair, and `demo_motion3d.json`'s car, pool and rope swing, each
 //                        sized to the clips just measured (`yard.mjs`)
-//   the offsets          `main.scene.json`'s `world.motion3d.offsets`, each clip's two offsets from the
-//                        clips just measured (`offsets.mjs`)
+//   the offsets          `xbot.rig.json`'s `offsets`, each clip's two offsets for each body, from the
+//                        clips just measured and each clip's `held` (motion3d's `motion3d.offsets.ts`)
 //   checker-1024.webp    the ground's checkerboard, drawn here from nothing: `squares`
 //                        squares a side in two greys, `light` and `dark`, each with a `line` pixel rim
 //                        of `rim` grey, so a repeat of the map is `squares` squares across
@@ -86,6 +86,6 @@ export default async ({ blender, webp, scratch }: Tools) => {
   console.log('wrote', path.relative(root, glb))
   // the yard's stations, sized to the clips just measured
   console.log(await node([path.join(here, 'yard.mjs')]))
-  // each clip's offsets, from the clips just measured
-  console.log(await node([path.join(here, 'offsets.mjs')]))
+  // each held clip's offsets for each body, from the clips just measured, into the rig
+  console.log(await node(['--experimental-strip-types', path.join(root, 'plugins', 'motion3d', 'motion3d.offsets.ts'), rig, path.join(here, '..', 'main.scene.json')]))
 }

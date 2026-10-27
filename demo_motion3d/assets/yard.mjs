@@ -29,7 +29,7 @@
 //   tilted wall a slab 5 m high leaning back 20°, offering `climb` the same: its `Face` plane on its face,
 //               facing out of it and up, the climber leaning onto it
 //   run wall    a wall 8 m long, offering `wallrun`: its `Wall` plane on its face, facing out of it, which
-//               `wallside`'s feet kick off and `land` comes down from (their offsets, `offsets.mjs`)
+//               `wallside`'s feet kick off and `land` comes down from (their offsets, in the rig)
 //   vault       a low wall as high as `vaultone` sets its palm, offering `vault`: its `Vault` point, where
 //               the vault starts the root so the palm lands on the wall's top
 //   edge        a block as high as `jumpdown` steps down, with a step up onto it, offering `edge` on its top at
@@ -253,7 +253,7 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
 }
 
 // The climbing wall: its face on z, the `Face` plane stood up on it, facing out of it, which `wallclimb`'s
-// hands and feet are on (their offsets, `offsets.mjs`).
+// hands and feet are on (their offsets, in the rig).
 {
   const [x, z] = [14, 18]
   box('climbwall', [3, 5, 1.2], '#c9a27e', x, 0, z + 0.6)
