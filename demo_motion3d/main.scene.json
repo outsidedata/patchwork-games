@@ -198,7 +198,28 @@
       "ease": 0.15,
       "mods": { "spaces": "shapes3d", "body": "anim" }
     },
-    "kinematics3d": { "mods": { "behaviors": ["shapes3d"] } },
+    "kinematics3d": {
+      "kinds": {
+        "xbot": {
+          "radius": 0.3,
+          "height": 1.8,
+          "accel": 12,
+          "airAccel": 2,
+          "turnRate": 12,
+          "gravity": 20,
+          "jumpH": 1.1,
+          "step": 0.45,
+          "maxSlope": 0.9,
+          "slopeBand": 0.2,
+          "slide": 4,
+          "wade": 0.8,
+          "span": 0.3,
+          "probe": 0.5,
+          "seekSpeed": 1.7
+        }
+      },
+      "mods": { "behaviors": ["shapes3d"], "footprints": ["shapes3d"] }
+    },
     "ik3d": { "kinds": {}, "mods": { "body": "anim", "limbs": "motion3d" } }
   },
   "plugins": [

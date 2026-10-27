@@ -15,7 +15,6 @@
 import type { Scene, Sim } from '#engine/engine.ts'
 import { scenemanager } from '#plugins/scenemanager/scenemanager.sim.ts'
 import { loader } from '#plugins/loader/loader.sim.ts'
-import { walker } from '#plugins/walker/walker.sim.ts'
 import { car } from './car.sim.ts'
 import { player } from './player.sim.ts'
 import { start } from './start.sim.ts'
@@ -24,6 +23,6 @@ import file from './main.scene.json' with { type: 'json' }
 // Every shapes3d kind of the scene, none with a rule.
 const shapes = Object.fromEntries(Object.keys(file.world.shapes3d.kinds).map(kind => [kind, {}]))
 
-export const sim: Sim = { ...shapes, scenemanager, loader, walker, player, start, car }
+export const sim: Sim = { ...shapes, scenemanager, loader, player, start, car }
 
 export const scene = file as Scene

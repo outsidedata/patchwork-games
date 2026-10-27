@@ -1,7 +1,7 @@
 // The row one seat possesses, and the body it plays: an X Bot (`as: "xbot"`) moved by motion3d
 // (`plugins/motion3d`, its numbers `world.motion3d.kinds.xbot` and the X Bot's motion3d file,
 // `assets/xbot.motion3d.json`), drawn and played by anim (`world.anim.kinds.xbot`). Every seat is sent
-// every `player` row. Its own fields, beside walker's, anim's and motion3d's: `stick` [x, z], the keys'
+// every `player` row. Its own fields, beside kinematics3d's, anim's and motion3d's: `stick` [x, z], the keys'
 // way, right and forward; `fast`, the run key held; `look` `{ yaw, pitch, dist }`, chasecamera3d's orbit
 // about it, `lift` metres over its feet; `turning` [x, y], how far a gamepad's right stick is pushed
 // right and down; `stood`, once it stands on its slot's start; and `stuck`, the way the stick pushed when
@@ -11,12 +11,13 @@
 // `before` stands it once on the ground at its slot's start, facing the start's `yaw`, its look along
 // it. Each step its look turns while `turning` is held, at the definition's `camera.turn` across and
 // `tilt` up and down a second at full push, the yaw less for a push right and the pitch more for a push
-// down, within `minPitch` and `maxPitch`. Then motion3d's `step`; a free body walks: walker on the
-// yard's shapes and land (shapes3d's `ground`, the top of the highest shape no more than a step above
-// its feet, every shape rising past that and starting below its head walked round), the way the stick
-// points from the camera's yaw at `walk` m/s or `run` with `fast` held, facing the way it goes, anim
-// playing it from how it moved (motion3d's `animate`) and the travel of a clip that carries one, a
-// landing's step, carried by walker's `carry`, its turn on its `yaw`. A held body is the game's: this
+// down, within `minPitch` and `maxPitch`. Then motion3d's `step`; a free body walks: kinematics3d's
+// `walk` (its numbers `world.kinematics3d.kinds.xbot`) on the yard's shapes and land (shapes3d's
+// `ground`, the top of the highest shape no more than a step above its feet, every shape rising past
+// that and starting below its head walked round), the way the stick points from the camera's yaw at
+// `walk` m/s or `run` with `fast` held, facing the way it goes, anim playing it from how it moved
+// (motion3d's `animate`) and the travel of a clip that carries one, a landing's step, carried by
+// kinematics3d's `carry`, its turn on its `yaw`. A held body is the game's: this
 // rule picks each step what it plays, by its activity:
 //   party, sad, swing, vault   held where the clip puts it until the clip has played out, then walking
 //   ledge   `use`, `bracedjump`, up onto the `Lip`; then `hang`; the stick across moves along it (`move`,
@@ -54,8 +55,8 @@ import { animKind, clipOf, rigOf } from '#plugins/anim/anim.sim.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
 import { activityOf, animate, hold, leave, offering, play, point, step } from '#plugins/motion3d/motion3d.sim.ts'
-import { ground } from '#plugins/shapes3d/shapes3d.walker.ts'
-import { carry, groundOf, numbers, relative, walk } from '#plugins/walker/walker.sim.ts'
+import { carry, numbers, relative, walk } from '#plugins/kinematics3d/kinematics3d.sim.ts'
+import { ground } from '#plugins/shapes3d/shapes3d.kinematics3d.ts'
 
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
@@ -263,7 +264,7 @@ function stood(me: Row, w: W) {
   const d = me.data
   const start = w.find('start', s => s.data.slot === d.seat).data
   const [x, z] = start.pos
-  d.pos = [x, groundOf(w).height(x, z), z]
+  d.pos = [x, ground(w, 0, numbers(me, w)).height(x, z), z]
   d.yaw = start.yaw
   d.look = { ...d.look, yaw: start.yaw }
   d.grounded = true
