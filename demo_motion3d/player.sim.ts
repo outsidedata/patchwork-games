@@ -1,7 +1,7 @@
 // The row one seat possesses, and the body it plays: an X Bot (`as: "xbot"`) moved by motion3d
 // (`plugins/motion3d`, its numbers `world.motion3d.kinds.xbot` and the X Bot's motion3d file,
-// `assets/xbot.motion3d.json`), drawn and played by anim (`world.anim.kinds.xbot`). Every seat is sent
-// every `player` row. Its own fields, beside kinematics3d's, anim's and motion3d's: `stick` [x, z], the keys'
+// `assets/xbot.motion3d.json`), its clips played and drawn by motion3d. Every seat is sent
+// every `player` row. Its own fields, beside kinematics3d's and motion3d's: `stick` [x, z], the keys'
 // way, right and forward; `fast`, the run key held; `look` `{ yaw, pitch, dist }`, chasecamera3d's orbit
 // about it, `lift` metres over its feet; `turning` [x, y], how far a gamepad's right stick is pushed
 // right and down; `stood`, once it stands on its slot's start; and `stuck`, the way the stick pushed when
@@ -15,8 +15,8 @@
 // `walk` (its numbers `world.kinematics3d.kinds.xbot`) on the yard's shapes and land (shapes3d's
 // `ground`, the top of the highest shape no more than a step above its feet, every shape rising past
 // that and starting below its head walked round), the way the stick points from the camera's yaw at
-// `walk` m/s or `run` with `fast` held, facing the way it goes, anim playing it from how it moved
-// (motion3d's `animate`) and the travel of a clip that carries one, a landing's step, carried by
+// `walk` m/s or `run` with `fast` held, facing the way it goes, motion3d playing the motion this rule
+// picks from how it moved (`moving`) and the travel of a clip that carries one, a landing's step, carried by
 // kinematics3d's `carry`, its turn on its `yaw`. A held body is the game's: this
 // rule picks each step what it plays, by its activity:
 //   party, sad, swing, vault   held where the clip puts it until the clip has played out, then walking
@@ -51,10 +51,10 @@
 // `look(dyaw, dpitch)` and `zoom(by)`, the wheel's pixels. A seat's message arrives from outside the
 // program, so each refuses arguments of the wrong kind and writes nothing.
 import type { Kind, Row, W } from '#engine/engine.ts'
-import { animKind, clipOf, rigOf } from '#plugins/anim/anim.sim.ts'
+import { clipOf, playKind, rigOf } from '#plugins/motion3d/motion3d.play.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
-import { activityOf, animate, hold, leave, offering, play, point, step } from '#plugins/motion3d/motion3d.sim.ts'
+import { activityOf, hold, leave, moving, offering, play, point, settle, step } from '#plugins/motion3d/motion3d.sim.ts'
 import { carry, numbers, relative, walk } from '#plugins/kinematics3d/kinematics3d.sim.ts'
 import { ground } from '#plugins/shapes3d/shapes3d.kinematics3d.ts'
 
@@ -94,7 +94,7 @@ function go(me: Row, w: W, motion: string, clip?: string) {
   play(me, w, d.activity, d.space, motion, a.root, a.ik, clip)
 }
 
-// The clip a held loop plays at, playing while `on` and held still while not (anim's row `rate`).
+// The clip a held loop plays at, playing while `on` and held still while not (the row's `rate`).
 const pace = (me: Row, on: boolean) => { me.data.rate = on ? 1 : 0 }
 
 // One step of a body hanging (`hang`) or moving along what it hangs from (`move`): the clip of `move`'s
@@ -107,7 +107,7 @@ function hanging(me: Row, w: W, dt: number) {
   if (stopped) d.stuck = way
   if (way !== d.stuck) d.stuck = 0
   if (way === 0 || way === d.stuck) return go(me, w, 'hang')
-  const rig = rigOf(w, animKind(me))
+  const rig = rigOf(w, playKind(me))
   const clips = activityOf(w, me, d.activity).motions.move.clips
   // The stick pushes right for a clip that travels to the body's right, its measured left below 0.
   const clip = clips.find(c => Math.sign(-clipOf(rig, c).measure.left) === way)
@@ -242,13 +242,43 @@ const PRESSES: Record<string, (me: Row, w: W, motion: string) => void> = {
   },
 }
 
-// One step of a free body walking on the yard's shapes and land (the header).
+const WALKING = ['stand', 'walk', 'run', 'jump', 'fall', 'land']
+
+// The motion of `walk` a free body plays, by how kinematics3d moved it this step, `was` whether it stood
+// on the ground before it and `sink` how fast it fell then, m/s. In the air: leaving the ground rising,
+// `jump`, played through, and `fall` once it has played out in the air; falling faster than the
+// definition's `fall`, `fall`, until it comes down; falling slower (a step down a stair, or handed back
+// a little over the floor), on as it was, or `stand`.
+// Coming down from a jump or a fall, or after falling faster than the definition's `land`, `land`,
+// played through. On the ground, slower than `world.motion3d.still`, `stand`; else `run` with the run
+// key held and `walk` without.
+function walking(me: Row, w: W, was: boolean, sink: number): string {
+  const d = me.data
+  const k = def(w, me.kind)
+  const playing = (motion: string) => d.motion === motion && d.state === 'act'
+  if (!d.grounded) {
+    if (playing('jump') || playing('fall')) return d.motion
+    if (d.motion === 'jump') return 'fall'
+    if (was && d.vel[1] > 0) return 'jump'
+    if (-d.vel[1] > k.fall) return 'fall'
+    return WALKING.includes(d.motion) ? d.motion : 'stand'
+  }
+  if (playing('land') || (!was && (sink > k.land || d.motion === 'fall' || d.motion === 'jump'))) return 'land'
+  if (d.speed < w.world.motion3d.still) return 'stand'
+  return d.fast ? 'run' : 'walk'
+}
+
+// One step of a free body walking on the yard's shapes and land (the header): kinematics3d moves it,
+// the game picks its motion, motion3d plays it (standing still in the cold room, its shiver over it).
 function stride(me: Row, w: W, dt: number) {
-  const on = ground(w, me.data.pos[1], numbers(me, w))
+  const d = me.data
+  const on = ground(w, d.pos[1], numbers(me, w))
+  const was = d.grounded
+  const sink = -d.vel[1]
   walk(me, w, dt, on)
-  const { travel } = animate(me, w, dt)
+  const { travel } = moving(me, w, dt, walking(me, w, was, sink), d.speed)
   if (travel.move[0] !== 0 || travel.move[1] !== 0) carry(me, w, travel.move, on)
-  if (travel.yaw !== 0) me.data.yaw = wrap(me.data.yaw + travel.yaw)
+  if (travel.yaw !== 0) d.yaw = wrap(d.yaw + travel.yaw)
 }
 
 // The view turns while the right stick is held, whatever the body does.
@@ -284,8 +314,8 @@ export const player: Kind = {
     const speed = d.fast ? k.run : k.walk
     d.face = null
     d.want = [wx * speed, wz * speed]
-    const state = step(me, w, dt)
-    if (state === 'settling') return
+    const state = step(me, w)
+    if (state === 'settling') return settle(me, () => stride(me, w, dt))
     if (state === 'free') return stride(me, w, dt)
     const held = STEPS[d.activity]
     if (!held) throw new Error(`demo_motion3d has no step for the activity ${d.activity}`)

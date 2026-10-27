@@ -71,9 +71,9 @@
       //
       // The panel, motion3d's settings, laid into the truth's world and the page's as they change:
       //   pin ease, s       `world.motion3d.ease`, how long a planted limb's pin eases in and out
-      //   crossfade, s      anim's `fade` of the X Bot, which the root is eased over between clips too
+      //   crossfade, s      motion3d's `fade` of the X Bot, which the root is eased over between clips too
       //   bend the limbs    ik3d's `limbs` from motion3d on or off (`world.ik3d.mods.limbs`)
-      //   draw on the car   motion3d's `object` from zones on or off, the body drawn on the car as the
+      //   draw on the car   motion3d's `object` from yard on or off, the body drawn on the car as the
       //                     page draws the car, or where its row stands (`world.motion3d.mods.object`)
       //   priority          each space's priority (shapes3d's kind's `priority`, 1 where it gives none)
       // `copy motion3d JSON` copies the panel's numbers, and `reset to the file` puts the file's back.
@@ -82,9 +82,10 @@
       import { recorder } from '#addons/recorder/recorder.addon.ts'
       import { possessed } from '#addons/player/player.addon.ts'
       import { reachesOf } from '#plugins/motion3d/motion3d.sim.ts'
-      import { clipOf, plantsOf, posed, rigOf } from '#plugins/anim/anim.sim.ts'
+      import { clipOf, plantsOf, posed, rigOf } from '#plugins/motion3d/motion3d.play.ts'
       import GUI from 'lil-gui'
-      import { underfoot } from './plugins/zones/zones.sim.ts'
+      import { ground } from '#plugins/shapes3d/shapes3d.kinematics3d.ts'
+      import { numbers } from '#plugins/kinematics3d/kinematics3d.sim.ts'
       import { sim } from './demo_motion3d.sim.ts'
       import file from './demo_motion3d.scene.json'
 
@@ -171,10 +172,10 @@
       const rowOf = kind => room()?.rows.find(r => r.kind === kind)
 
       // The body as its clips pose it this step: `foot`, the lowest of its toes (its feet where the rig has
-      // no toes) over the ground under the root, the ground a body of its walker numbers whose feet stand
+      // no toes) over the ground under the root, the ground a body of its kinematics3d numbers whose feet stand
       // where the toes are stands on there; `hips`,
       // its hips in the world; and `held`, whether the clip it plays (the one coming in, in a crossfade)
-      // has a hand or a foot planted on something now, by anim's reading of what it touches.
+      // has a hand or a foot planted on something now, by the bake's reading of what it touches.
       let toes
       function bodyOf(t, me) {
         const w = readerOf(t)
@@ -201,7 +202,7 @@
         // The ground under the drawn toes, found at their height: a held clip can draw the body on the top
         // of a wall while its root stands low by the wall.
         const toe = Math.min(...toes.map(n => { const e = pose.get(n).elements; return inWorld([e[12], e[13], e[14]])[1] }))
-        const foot = toe - underfoot(me, w, toe).height(d.pos[0], d.pos[2])
+        const foot = toe - ground(w, toe, numbers(me, w)).height(d.pos[0], d.pos[2])
         const h = pose.get('Hips').elements
         const hips = inWorld([h[12], h[13], h[14]])
         const runs = Object.values(plantsOf(w, me, d.clip))
@@ -271,9 +272,9 @@
           return {}
         },
       })
-      // Stood still: slower than anim plays a body still at (`world.anim.still`), as walker's speed falls
+      // Stood still: slower than a body stands still at (`world.motion3d.still`), as kinematics3d's speed falls
       // toward 0 and need never reach it.
-      const still = until('stood still', d => d.speed < room().world.anim.still, 3)
+      const still = until('stood still', d => d.speed < room().world.motion3d.still, 3)
       const walking = until('walking again', d => d.activity === 'walk')
       const settled = until('root no longer eased', d => d.eased === null, 3)
       const grounded = until('on the ground, not eased', d => d.grounded && d.eased === null, 4)
@@ -826,7 +827,7 @@
       const spaces = Object.entries(main.world.shapes3d.kinds).filter(([, k]) => k.activities).map(([name]) => name)
       const fileOf = () => ({
         ease: main.world.motion3d.ease,
-        fade: main.world.anim.kinds.xbot.fade,
+        fade: main.world.motion3d.kinds.xbot.fade,
         limbs: main.world.ik3d.mods.limbs !== undefined,
         object: main.world.motion3d.mods.object !== undefined,
         priority: Object.fromEntries(spaces.map(name => [name, main.world.shapes3d.kinds[name].priority ?? 1])),
@@ -836,10 +837,10 @@
       const apply = () => {
         for (const world of worlds()) {
           world.motion3d.ease = own.ease
-          world.anim.kinds.xbot.fade = own.fade
+          world.motion3d.kinds.xbot.fade = own.fade
           if (own.limbs) world.ik3d.mods.limbs = 'motion3d'
           else delete world.ik3d.mods.limbs
-          if (own.object) world.motion3d.mods.object = 'zones'
+          if (own.object) world.motion3d.mods.object = 'yard'
           else delete world.motion3d.mods.object
           for (const name of spaces) world.shapes3d.kinds[name].priority = own.priority[name]
         }
@@ -852,7 +853,7 @@
       const pf = mf.addFolder('priority')
       for (const name of spaces) pf.add(own.priority, name, 0, 5, 1).onChange(apply)
       pf.close()
-      mf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({ motion3d: { ease: own.ease }, anim: { fade: own.fade }, priority: own.priority }, null, 2)) }, 'copy').name('copy motion3d JSON')
+      mf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({ motion3d: { ease: own.ease, fade: own.fade }, priority: own.priority }, null, 2)) }, 'copy').name('copy motion3d JSON')
       mf.add({ reset: () => {
         Object.assign(own, clone(was))
         for (const c of gui.controllersRecursive()) c.updateDisplay()
@@ -1056,7 +1057,7 @@
         } catch (e) { caught(e) }
         readoutEl.textContent = [
           'W A S D  walk     Shift  run     Space  jump     right drag  look     wheel  zoom     E  use',
-          'zones: backflip (pink), pick up (blue), shiver (pale blue, stand still)',
+          'mats: backflip (pink), pick up (blue), shiver (pale blue, stand still)',
           'orange wall: hang; A D shimmy, W + E climb up, S + E drop      chair: sit, E again to stand',
           'bar and ceiling: hang; A D along, E drop      rope and climbing wall: hold W to climb (S down the wall), E let go',
           'swing, run wall, vault: E      edge: E teeter, E again step down, S step back      stairs: hold W to climb',

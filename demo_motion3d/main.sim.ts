@@ -1,7 +1,8 @@
 // The kinds of main and the main.scene.json file next to this one: a checkerboard yard on terrain3d's
-// level land, where the seat's X Bot walks (motion3d's `walk`, the game's own `zones` plugin's, on
-// shapes3d's ground), and the spaces offering motion3d the activities `zones` delivers
-// (`plugins/zones/zones.motion3d.ts`): `partyzone` and `sadzone`, shapes3d's mats, offer `party` and
+// level land, where the seat's X Bot walks (kinematics3d on shapes3d's ground, its `walk` activity's
+// clips played by motion3d), and the spaces offering motion3d the activities of the X Bot's motion3d
+// file (`assets/xbot.motion3d.json`), each played as the player's rule picks (`player.sim.ts`):
+// `partyzone` and `sadzone`, shapes3d's mats, offer `party` and
 // `sad`; `ledgezone`, before the `wall` from below its lip up to it, offers `ledge`, held to its `Lip`
 // line; `chairzone`, in front of the `chair` and its `chairback`, offers `chair`, held to its `Seat`
 // point; and the stations past them (`assets/yard.mjs` writes them): the cold room, the bar, the rope,

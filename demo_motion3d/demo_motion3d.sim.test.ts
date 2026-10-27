@@ -10,18 +10,19 @@ import { connection, load, manager, type Down } from '#addons/scenemanager/scene
 import { possessed } from '#addons/player/player.addon.ts'
 import * as THREE from 'three'
 import { motion3d } from '#plugins/motion3d/motion3d.plugin.ts'
-import { posed } from '#plugins/anim/anim.sim.ts'
-import { reachesOf, type Motion } from '#plugins/motion3d/motion3d.sim.ts'
-import { behaviors } from './plugins/zones/zones.motion3d.ts'
+import { posed } from '#plugins/motion3d/motion3d.play.ts'
+import { reachesOf, type File } from '#plugins/motion3d/motion3d.sim.ts'
 import { sim } from './demo_motion3d.sim.ts'
 import file from './demo_motion3d.scene.json' with { type: 'json' }
-import rig from './assets/xbot.rig.json' with { type: 'json' }
+import motions from './assets/xbot.motion3d.json' with { type: 'json' }
+import measured from './assets/xbot.rig.baked.json' with { type: 'json' }
+import written from './assets/xbot.rig.json' with { type: 'json' }
 
 const DT = file.prefabs.engine.dt
 // A space's point in the world: a point's place, a line's two ends, a plane's middle and its size.
 type Point = { at?: number[]; from?: number[]; to?: number[]; size?: number[] }
-const activities = behaviors()
-const clipsOf = (word: string, motion: string) => (activities[word][motion] as Motion).clips!
+// The clips the X Bot's motion3d file plays for a motion of an activity.
+const clipsOf = (word: string, motion: string) => (motions as File).activities[word].motions[motion].clips
 
 async function joined() {
   const truth = boot(file as Scene, sim)
@@ -101,14 +102,14 @@ async function joined() {
   return { truth, room, send, me, until, kinds, row, walkTo, route, pointOf, middle, steady }
 }
 
-// Where a bone of the body stands in the world as the page draws it this step: anim's pose of the row's
+// Where a bone of the body stands in the world as the page draws it this step: motion3d's pose of the row's
 // fields (`posed`, every clip fading in and out at its weight), in the body's frame, set on the row's
 // place and turned by its yaw.
 function boneAt(t: Truth, me: Row, bone: string): number[] {
   const p = new THREE.Vector3().setFromMatrixPosition(posed(reader(t), me).get(bone)!)
   return toWorld(me, [p.x, p.y, p.z])
 }
-// The scene's rows as a rule's `w` reads them, for anim and motion3d to read the rig, the glb and the
+// The scene's rows as a rule's `w` reads them, for motion3d to read the rig, the glb and the
 // spaces off.
 const reader = (t: Truth): W => ({
   world: t.world,
@@ -122,6 +123,24 @@ function toWorld(me: Row, [x, y, z]: number[]): number[] {
   return [px + z * Math.sin(yaw) + x * Math.cos(yaw), py + y, pz + z * Math.cos(yaw) - x * Math.sin(yaw)]
 }
 const far = (a: number[], b: number[]) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2])
+// A page on the room that motion3d draws the X Bot on by a stand-in of its model: a root, and every clip
+// of its rig as long as the bake measured it, keying a bone-less object under it, so the body is drawn
+// where its row stands, turned by its yaw; beside it, `more` of the page's plugins.
+function standIn(room: Truth, more: Record<string, unknown> = {}) {
+  const root = new THREE.Group()
+  const keyed = new THREE.Object3D()
+  keyed.name = 'Keyed'
+  root.add(keyed)
+  const animations = Object.entries(written.clips).filter(([, e]) => typeof e === 'string' || !('mirror' in e))
+    .map(([name]) => new THREE.AnimationClip(name, -1, [new THREE.VectorKeyframeTrack('Keyed.position', [0, measured.table[name as keyof typeof measured.table].dur], [0, 0, 0, 0, 0, 0])]))
+  const page = {
+    wire: { n: 1, rows: room.rows, scene: { ...room.scene, plugins: ['solids', 'shipped', 'motion3d', 'render3d'] } },
+    render3d: { THREE, scene: new THREE.Scene(), dress: () => {} },
+    loader: { ready: () => true, load: async () => {}, model: () => ({ scene: root, animations }) },
+    ...more,
+  } as never
+  return { page, root }
+}
 // The lowest of the body's toes' tips as drawn, over the yard's floor at 0.
 const toe = (t: Truth, me: Row) => Math.min(boneAt(t, me, 'LeftToe_End')[1], boneAt(t, me, 'RightToe_End')[1])
 // Steps a drop until it walks again: its toes as drawn never more than 5 cm through the floor (the dev
@@ -155,7 +174,7 @@ test('the use key plays each zone\'s own clip in it, holding the body still, and
     expect(me().data.activity).toBe(word)
     expect(me().data.clip).toBe(clipsOf(word, 'use')[0])
     const at = [...me().data.pos]
-    const dur = rig.table[me().data.clip as keyof typeof rig.table].dur
+    const dur = measured.table[me().data.clip as keyof typeof measured.table].dur
     for (let i = 0; i < Math.floor(dur / DT) - 1; i++) {
       truth.step(DT)
       expect(me().data.activity).toBe(word)
@@ -196,12 +215,10 @@ async function hung() {
     expect(at[1]).toBeCloseTo(lipY, 6)
     expect(at[2]).toBeCloseTo(lipZ, 6)
   }
-  const root = new THREE.Group()
-  root.position.set(me().data.pos[0], me().data.pos[1], me().data.pos[2])
-  root.rotation.set(0, me().data.yaw, 0)
-  root.updateMatrixWorld(true)
-  const page = { wire: { n: 1, rows: j.room.rows, scene: j.room.scene }, render3d: { THREE }, anim: { model: () => root, props: () => [] } } as never
-  const limbs = motion3d().limbs(page, me())!
+  const { page } = standIn(j.room)
+  const drawing = motion3d()
+  drawing.tick(page)
+  const limbs = drawing.limbs(page, me())!
   expect(limbs.map(l => l.bones[2]).sort()).toEqual(HANDS)
   for (const l of limbs) {
     const at = l.target.getWorldPosition(new THREE.Vector3())
@@ -312,12 +329,12 @@ test('standing still in the cold room plays its idle over walking\'s, and walkin
   until(() => me().data.layer !== null, 30)
   expect(clipsOf('cold', 'idle')).toContain(me().data.clip)
   expect(me().data.activity).toBe('walk')
-  // It walks: walking's own gears, the layer let go.
+  // It walks: walking's walk, the layer let go.
   send('stick', 0, -1)
-  until(() => me().data.layer === null && me().data.state === 'loco', 10)
+  until(() => me().data.layer === null && me().data.clip === clipsOf('walk', 'walk')[0], 30)
   walkTo(room[0], ROW1, 0.4)
   for (let i = 0; i < 30; i++) truth.step(DT)
-  expect(me().data.clip).toBe('idle')
+  expect(me().data.clip).toBe(clipsOf('walk', 'stand')[0])
   expect(me().data.layer).toBe(null)
 })
 
@@ -595,11 +612,7 @@ test('at the car\'s door it gets in, its hips on the seat; drives it, held on th
   // where the car's rows stand, and a bob of the car's drawn 0.1 m up with it.
   const part = room.rows.find(r => r.id === car.data.parts[0])!
   const group = new THREE.Object3D()
-  const root = new THREE.Group()
-  const page = {
-    wire: { n: 1, rows: room.rows, scene: { ...room.scene, plugins: ['anim', 'solids', 'shipped', 'motion3d', 'render3d'] } },
-    render3d: { THREE }, anim: { model: () => root, props: () => [] }, solids: { group: () => group },
-  } as never
+  const { page, root } = standIn(room, { solids: { group: () => group } })
   for (const bob of [0, 0.1]) {
     group.position.set(part.data.pos[0], part.data.pos[1] + bob, part.data.pos[2])
     group.rotation.set(0, part.data.yaw, 0)

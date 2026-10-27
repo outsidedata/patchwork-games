@@ -8,7 +8,7 @@
 // scene as it was: the zones, the wall's ledge and the chair written by hand.
 //
 // Every size and every point comes from what the clips measure (`xbot.rig.baked.json`): `ends`, each
-// bone where anim draws it in the body's frame (x left, y up, z ahead, metres from the root), and
+// bone where it is drawn in the body's frame (x left, y up, z ahead, metres from the root), and
 // `touches`, what each clip touches (anim's touch reader, `plugins/anim/anim.touches.mjs`, whose places
 // are in the clip's frame at its start). As demo_walker's yard does (`games/demo_walker/assets/yard.mjs`,
 // its touch plugin's `placeOf`), a thing is sized and set where the clip touches it, and the place a
@@ -29,7 +29,7 @@
 //   tilted wall a slab 5 m high leaning back 20°, offering `climb` the same: its `Face` plane on its face,
 //               facing out of it and up, the climber leaning onto it
 //   run wall    a wall 8 m long, offering `wallrun`: its `Wall` plane on its face, facing out of it, which
-//               `wallside`'s feet kick off and `land` comes down from (their offsets, in the rig)
+//               `wallside`'s feet kick off (its offsets, `xbot.motion3d.baked.json`)
 //   vault       a low wall as high as `vaultone` sets its palm, offering `vault`: its `Vault` point, where
 //               the vault starts the root so the palm lands on the wall's top
 //   edge        a block as high as `jumpdown` steps down, with a step up onto it, offering `edge` on its top at
@@ -66,8 +66,9 @@ const scene = JSON.parse(readFileSync(sceneFile, 'utf8'))
 // The kinds of the scene written by hand, which this leaves as they are; every other shapes3d kind is
 // this file's, written anew.
 const BY_HAND = ['partyzone', 'sadzone', 'wall', 'ledgezone', 'chair', 'chairback', 'chairzone']
-// A one-shot keeps its turn turning this far or further (`world.anim.turns`).
-const TURNS = scene.world.anim.turns
+// A one-shot carries travel ending further than `moves` metres from its start, and keeps its turn turning
+// `turns` degrees or further (the X Bot's motion3d file).
+const { moves: MOVES, turns: TURNS } = JSON.parse(readFileSync(path.join(here, 'xbot.motion3d.json'), 'utf8'))
 const ends = rig.ends.xbot
 const touches = rig.touches.xbot
 
@@ -80,7 +81,7 @@ const t = name => {
   if (!c) throw new Error(`yard.mjs: the rig has no touches of ${name}; bake it`)
   return c
 }
-// A bone's place in the body's frame `s` seconds into a clip, as anim's `ends` has it.
+// A bone's place in the body's frame `s` seconds into a clip, as the bake's `ends` has it.
 const SEGMENT = { Hips: 'torso', LeftHand: 'handL', RightHand: 'handR', LeftFoot: 'footL', RightFoot: 'footR' }
 function bone(clip, name, s) {
   const e = ends[clip]
@@ -89,7 +90,7 @@ function bone(clip, name, s) {
   return rows[Math.max(0, Math.min(rows.length - 1, Math.round(s * e.fps)))].slice(0, 3)
 }
 // The curve of a clip's measured travel at `s` seconds: [forward, left, turn degrees], straight between
-// the table's rows (anim's `at`).
+// the table's rows (motion3d's `at`).
 function curve(clip, s) {
   const rows = rig.table[clip].travel
   if (s <= rows[0][0]) return rows[0].slice(1)
@@ -100,15 +101,15 @@ function curve(clip, s) {
   }
   return rows[rows.length - 1].slice(1)
 }
-// Whether anim carries a clip's travel, and keeps its turn (anim's `carries`).
+// Whether a clip carries its travel, and keeps its turn (motion3d's `carries`).
 function carries(clip) {
   const e = rig.clips[clip]
   if (typeof e === 'object' && e.loop) return { carries: false, turns: false }
   const m = rig.table[clip]
   const turns = Math.abs(m.yaw) >= TURNS
-  return { carries: turns || Math.hypot(m.forward, m.left) > scene.world.anim.moves, turns }
+  return { carries: turns || Math.hypot(m.forward, m.left) > MOVES, turns }
 }
-// A bone as anim draws it in the body's frame (motion3d's `drawnAt`): its measured place, but for a
+// A bone as it is drawn in the body's frame (motion3d's `drawnAt`): its measured place, but for a
 // one-shot that carries travel, the hips held at their rest across the ground and the body turned back
 // about them by the curve's turn.
 function drawn(clip, name, s) {
@@ -135,7 +136,7 @@ function anchor(q, h, at, yaw) {
   return { root: [at[0] - p[0], at[1] - q[1], at[2] - p[2]], yaw: turn }
 }
 // Where a one-shot ends the root, and the way it faces then, begun at `root` facing `yaw`: as far on as
-// anim carries its measured travel (the table's last row), or where it began for one anim carries none.
+// it carries its measured travel (the table's last row), or where it began for one that carries none.
 function travelled(clip, root, yaw) {
   const how = carries(clip)
   if (!how.carries) return { root, yaw }
@@ -150,7 +151,7 @@ const inBody = (root, yaw, p) => {
 }
 // For a one-shot that ends hanging from its hands, in the body's frame as it ends: `bar`, the middle of
 // the hands as they hold on at its end (the last hold of each, its `touches`, which stand in the
-// clip's frame at its start), and `wrists`, the wrists' middle as anim draws them then.
+// clip's frame at its start), and `wrists`, the wrists' middle as they are drawn then.
 function held(clip) {
   const last = dur(clip) - 1e-6
   const finish = travelled(clip, [0, 0, 0], 0)
@@ -248,12 +249,12 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
   const mid = mean(soles)
   box('swingplatform', [2.4, top, 2.4], '#b08a5a', mid[0], 0, mid[2])
   space('swingzone', [1.6, 2.4, 1.6], [start.root[0], 0, start.root[2]], ['swing'], { Start: { point: { at: start.root } } })
-  // The rope the game's zones plugin draws, from the swing zone's row: where it hangs from.
+  // The rope the game's yard plugin draws, from the swing zone's row: where it hangs from.
   defs.swingzone = { ...defs.swingzone, pivot: r3([x - start.root[0], swing.pivot[1], z - start.root[2]]), length: swing.radius }
 }
 
 // The climbing wall: its face on z, the `Face` plane stood up on it, facing out of it, which `wallclimb`'s
-// hands and feet are on (their offsets, in the rig).
+// hands and feet are on (their offsets, `xbot.motion3d.baked.json`).
 {
   const [x, z] = [14, 18]
   box('climbwall', [3, 5, 1.2], '#c9a27e', x, 0, z + 0.6)
@@ -359,7 +360,7 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
     Float: { plane: { at: [x, float, mid], size: [hole.across - 0.8, hole.long - 0.8], turn: [0, 0, 0] } },
     Lip: { line: { from: [x - hole.across / 2, lipY, lipZ], to: [x + hole.across / 2, lipY, lipZ] } },
   })
-  // The water the game's zones plugin draws, from the pool's row: its surface's middle and its size.
+  // The water the game's yard plugin draws, from the pool's row: its surface's middle and its size.
   defs.pool = { ...defs.pool, water: { at: r3([0, surface - deck, mid - (hole.near - 0.4)]), size: [hole.across, hole.long] } }
 }
 

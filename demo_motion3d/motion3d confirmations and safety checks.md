@@ -1,6 +1,6 @@
 # motion3d confirmations and safety checks
 
-Every activity the yard offers motion3d (`plugins/zones/zones.motion3d.ts`), and what each must do right
+Every activity the yard offers motion3d (`assets/xbot.motion3d.json`, played as `player.sim.ts` picks), and what each must do right
 (confirmations) and must never do (safety checks). Each is checked on the dev page's station for it
 (`dev.html`, the stations panel): the station puts the body down before it, the playtester plays its
 keys, and every check is a number measured on a step and a close-up screenshot of that step, the camera

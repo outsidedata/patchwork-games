@@ -18,7 +18,7 @@ panel tunes motion3d's settings and whose readout shows what the body is doing. 
   and looks about; under the bar E jumps up and hangs, A and D move along it, E drops; at the rope E
   takes hold, W climbs and letting go of W holds on, E lets go; at the rope swing E swings onto the
   platform; at the climbing wall E takes hold, W climbs up, S down, E lets go.
-- The second row: at the run wall E runs along it and comes down off it onto the ground; at the low wall E vaults it; up the step onto the
+- The second row: at the run wall E runs along it, falls and lands; at the low wall E vaults it; up the step onto the
   block, at its front edge E teeters, E again steps down off it, S steps back; at the foot of the
   stairs E climbs them while W is held; along the landing to the pool's edge, E falls in, W swims to
   the far wall, E there climbs out; at the desk E sits and types, E again stands up.
@@ -29,26 +29,29 @@ panel tunes motion3d's settings and whose readout shows what the body is doing. 
 
 ## How it is made
 
-- The seat's `player` row is the X Bot. Each step its rule asks walker to go the way the stick points
-  and calls motion3d's `step`; its `press` act hands motion3d a motion's name, `jump` or `use`.
-- motion3d's numbers are `world.motion3d` in `main.scene.json`: the X Bot's `anywhere` is `walk`, its
-  spaces are shapes3d's (`shapes3d.motion3d.ts`), and its activities come from the game's own `zones`
-  plugin (`plugins/zones/zones.motion3d.ts`), which delivers `walk` too, on shapes3d's ground, so the
-  body walks round the yard's things and stands on what it climbs onto. `ease` is how long a planted
-  hand or foot's pin eases in and out.
+- The seat's `player` row is the X Bot. Its rule (`player.sim.ts`) picks what the body does each step:
+  walking, kinematics3d moves it on shapes3d's ground (`shapes3d.kinematics3d.ts`), round the yard's
+  things and onto what it climbs, and the rule picks `stand`, `walk`, `run`, `jump`, `fall` or `land`,
+  which motion3d plays; in a station's activity, the rule picks each motion and the point it plays
+  against, and motion3d holds the body there, kinematics3d moving it along a lip, a rope, a wall or the
+  water. Its `press` act takes `jump` and `use`.
+- What the X Bot can do is its motion3d file, `assets/xbot.motion3d.json`: every activity, its motions,
+  the clips each plays and the kind of point it plays against. motion3d's numbers are `world.motion3d`
+  in `main.scene.json`: the X Bot's `anywhere` is `walk`, its spaces are shapes3d's
+  (`shapes3d.motion3d.ts`), and `ease` is how long a planted hand or foot's pin eases in and out.
+  kinematics3d's numbers are `world.kinematics3d`.
 - The spaces are shapes3d kinds that name the activity they offer and stand in nothing's way; the
   things they are by (walls, the bar, the steps, the chair, the bed, the car's parts) are solid shapes
   of their own. Each space's points are where its motions hold the body: the `Lip` line where the
   wrists hang, a `Seat` point where the hips sit, the `Face` plane of the climbing wall, the
   `Ceiling` plane turned face down, the pool's `Float` plane, the stairs' `Flight` line.
-- The hands and feet each motion names are bent onto their points by ik3d while anim says they are
-  planted (`world.ik3d.mods.limbs: 'motion3d'`), so a hanging body's hands stay on the lip as it sways.
+- The hands and feet each motion names are bent onto their points by ik3d while the bake says they are
+  planted (`world.ik3d.mods: { body: 'motion3d', limbs: 'motion3d' }`), so a hanging body's hands stay on the lip as it sways.
 - Every station past the wall and the chair is sized and placed to its clips by `assets/yard.mjs`,
-  from what the rig measures of each clip (anim's `ends` and `touches`), as demo_walker's yard is:
+  from what the bake measures of each clip (`assets/xbot.rig.baked.json`), as demo_walker's yard is:
   the bar at the height `freejump` ends the hands holding, the rope swing's beam where its swing hangs
   from, the climbing wall's face where `wallclimb` holds the hands and feet, the run wall's and the
-  vault's starts where their kicks and palm land, the run wall's landing on the ground where
-  `wallside` ends the root in the air and `land` comes down, the edge where `teeter` stands the toes, the steps
+  vault's starts where their kicks and palm land, the edge where `teeter` stands the toes, the steps
   half a lap of `stairsup` each, the pool's deck as high as `poolin` starts the feet, the chair and the
   table where `typing` sits and types, the bed as high as `liedown` lies, the car's seat where `carin`
   sits. The lip by the wall and the chair are written by hand: the lip is where `bracedjump` ends the
@@ -56,12 +59,15 @@ panel tunes motion3d's settings and whose readout shows what the body is doing. 
   where `seated` holds the hips, 0.61 m up.
 - The car is the game's own `car` kind (`car.sim.ts`): it makes its parts and its space, drives by its
   driver's stick, and stands them about it every step, so a body in its seat goes where it goes; the
-  page draws the body on the seat as it draws the car (`zones.motion3d.ts`'s `object`).
-- `zones`' page half (`plugins/zones/zones.plugin.ts`) draws the swing's rope and the pool's water.
-- The X Bot, its clips, the rig's measures and the yard are baked by `yarn bake demo_motion3d`
+  page draws the body on the seat as it draws the car (the game's own `yard` plugin's `object`,
+  `plugins/yard/yard.motion3d.ts`).
+- `yard`'s page half (`plugins/yard/yard.plugin.ts`) draws the swing's rope and the pool's water.
+- The X Bot, its clips, their measures and offsets and the yard are baked by `yarn bake demo_motion3d`
   (`assets/demo_motion3d.bake.ts`): the clips of `assets/xbot.rig.json` onto the library's
-  `characters/xbot/xbot.fbx` as `assets/xbot.glb`, the rig's `table`, `ends` and `touches`, the yard's
-  stations (`yard.mjs`), and the checkerboard `assets/checker-1024.webp`.
+  `characters/xbot/xbot.fbx` as `assets/xbot.glb`; what the bake measures of each clip,
+  `assets/xbot.rig.baked.json`; the yard's stations (`yard.mjs`); each clip's spot (its sidecar,
+  `<clip>.motion3d.json` beside its FBX in `~/troupe-collection`) and offsets,
+  `assets/xbot.motion3d.baked.json`; and the checkerboard `assets/checker-1024.webp`.
 
 ## Credit
 
@@ -74,6 +80,6 @@ The X Bot and its clips are Mixamo's (Adobe), from the library's `characters/xbo
 presses use; hangs from the lip, its drawn hands steady through every change of motion and bent onto
 the lip, shimmies to its end and climbs onto the top; drops back down; sits in the chair; shivers in
 the cold room; hangs from the bar and the ceiling and moves along them; climbs the rope and the wall;
-swings onto the platform; runs along the wall and lands, walking on the ground; vaults; teeters at the edge and steps down; climbs the
+swings onto the platform; runs along the wall; vaults; teeters at the edge and steps down; climbs the
 stairs, falls into the pool, swims across and climbs out; sits at the desk; lies on the bed; and gets
 into the car, drives it, honks and gets out.
