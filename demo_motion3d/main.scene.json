@@ -10,7 +10,9 @@
         "checker": { "type": "texture", "url": "/games/demo_motion3d/assets/checker-1024.webp", "preload": true, "wrap": "repeat", "anisotropy": 8 },
         "xbot-rig": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.rig.json", "preload": true },
         "xbot": { "type": "model", "url": "/games/demo_motion3d/assets/xbot.glb", "preload": true },
-        "xbot-glb": { "type": "binary", "url": "/games/demo_motion3d/assets/xbot.glb", "preload": true }
+        "xbot-glb": { "type": "binary", "url": "/games/demo_motion3d/assets/xbot.glb", "preload": true },
+        "xbot-motion3d": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.motion3d.json", "preload": true },
+        "xbot-motion3d-baked": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.motion3d.baked.json", "preload": true }
       }
     },
     "terrain3d": {
@@ -173,28 +175,6 @@
       "mods": { "height": "terrain3d" }
     },
     "solids": { "mods": { "models": "shapes3d" } },
-    "walker": {
-      "kinds": {
-        "xbot": {
-          "radius": 0.3,
-          "height": 1.8,
-          "accel": 12,
-          "airAccel": 2,
-          "turnRate": 12,
-          "gravity": 20,
-          "jumpH": 1.1,
-          "step": 0.45,
-          "maxSlope": 0.9,
-          "slopeBand": 0.2,
-          "slide": 4,
-          "wade": 0.8,
-          "span": 0.3,
-          "probe": 0.5,
-          "seekSpeed": 1.7
-        }
-      },
-      "mods": { "height": "terrain3d", "behaviors": "shapes3d" }
-    },
     "anim": {
       "still": 0.05,
       "shift": 0.75,
@@ -214,10 +194,11 @@
       }
     },
     "motion3d": {
-      "kinds": { "xbot": { "anywhere": ["walk"] } },
+      "kinds": { "xbot": { "anywhere": ["walk"], "motion": "xbot-motion3d", "baked": "xbot-motion3d-baked" } },
       "ease": 0.15,
-      "mods": { "spaces": "shapes3d", "behaviors": ["walker"], "body": "anim" }
+      "mods": { "spaces": "shapes3d", "body": "anim" }
     },
+    "kinematics3d": { "mods": { "behaviors": ["shapes3d"] } },
     "ik3d": { "kinds": {}, "mods": { "body": "anim", "limbs": "motion3d" } }
   },
   "plugins": [
@@ -239,7 +220,6 @@
     "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
     "scenemanager": { "out": {} },
     "loader": {},
-    "walker": {},
     "render3d": {
       "camera": { "fov": 55, "near": 0.1, "far": 3000, "at": [0, 3, -6], "look": [0, 1, 0] },
       "pixelRatio": 2,
@@ -284,6 +264,8 @@
       "activity": "walk",
       "motion": null,
       "space": null,
+      "root": null,
+      "ik": null,
       "along": null,
       "eased": null,
       "layer": null,
@@ -364,7 +346,6 @@
   "actors": [
     { "is": "scenemanager" },
     { "is": "loader" },
-    { "is": "walker" },
     { "is": "start", "slot": 0, "pos": [0, -8], "yaw": 0 },
     { "is": "partyzone", "pos": [-4, -0.02, 2] },
     { "is": "sadzone", "pos": [4, -0.02, 2] },

@@ -1,4 +1,183 @@
 {
+ "held": {
+  "idle": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "walk": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "run": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "jump": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "fall": {
+   "spot": ["Hips"],
+   "on": "both"
+  },
+  "land": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "end"
+  },
+  "backflip": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "pickup": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "bracedjump": {
+   "spot": ["LeftHand", "RightHand"],
+   "on": "end"
+  },
+  "bracedidle": {
+   "spot": ["LeftHand", "RightHand"],
+   "on": "both"
+  },
+  "bracedleft": {
+   "spot": ["LeftHand", "RightHand"],
+   "on": "both"
+  },
+  "bracedright": {
+   "spot": ["LeftHand", "RightHand"],
+   "on": "both"
+  },
+  "bracedclimb": {
+   "spot": ["LeftHand", "RightHand"],
+   "on": "begin"
+  },
+  "braceddrop": {
+   "on": "end"
+  },
+  "sitdown": {
+   "spot": ["Hips"],
+   "on": "end"
+  },
+  "seated": {
+   "spot": ["Hips"],
+   "on": "both"
+  },
+  "standup": {
+   "spot": ["Hips"],
+   "on": "begin"
+  },
+  "coldrub": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "coldlook": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "freejump": {
+   "spot": ["LeftHand", "RightHand"],
+   "on": "end"
+  },
+  "freeidle": {
+   "spot": ["LeftHand", "RightHand"],
+   "on": "both"
+  },
+  "freeleft": {
+   "spot": ["LeftHand", "RightHand"],
+   "on": "both"
+  },
+  "freeright": {
+   "spot": ["LeftHand", "RightHand"],
+   "on": "both"
+  },
+  "freedrop": {
+   "on": "end"
+  },
+  "barmove": {
+   "spot": ["LeftHand", "RightHand"],
+   "on": "both"
+  },
+  "barleft": {
+   "spot": ["LeftHand", "RightHand"],
+   "on": "both"
+  },
+  "ropeclimb": {
+   "spot": ["LeftHand", "RightHand"],
+   "on": "both"
+  },
+  "ropeswing": {
+   "on": "begin"
+  },
+  "wallclimb": {
+   "spot": ["LeftHand", "RightHand", "LeftFoot", "RightFoot"],
+   "on": "face",
+   "facing": "into"
+  },
+  "walldown": {
+   "spot": ["LeftHand", "RightHand", "LeftFoot", "RightFoot"],
+   "on": "face",
+   "facing": "into"
+  },
+  "wallside": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "face",
+   "facing": "along"
+  },
+  "vaultone": {
+   "on": "begin"
+  },
+  "teeter": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "jumpdown": {
+   "on": "end"
+  },
+  "stairsup": {
+   "on": "both"
+  },
+  "typing": {
+   "spot": ["Hips"],
+   "on": "both"
+  },
+  "liedown": {
+   "spot": ["Hips"],
+   "on": "end"
+  },
+  "bedidle": {
+   "spot": ["Hips"],
+   "on": "both"
+  },
+  "carin": {
+   "spot": ["Hips"],
+   "on": "end"
+  },
+  "drive": {
+   "spot": ["Hips"],
+   "on": "both"
+  },
+  "honk": {
+   "spot": ["Hips"],
+   "on": "both"
+  },
+  "carout": {
+   "spot": ["Hips"],
+   "on": "begin"
+  },
+  "poolin": {
+   "spot": ["Hips"],
+   "on": "end"
+  },
+  "tread": {
+   "spot": ["Hips"],
+   "on": "both"
+  },
+  "swimunder": {
+   "spot": ["Hips"],
+   "on": "both"
+  }
+ },
  "offsets": {
   "xbot": {
    "idle": {
