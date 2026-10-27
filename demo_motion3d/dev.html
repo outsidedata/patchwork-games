@@ -1078,6 +1078,47 @@
         if (reach.length) lines.push(reach.map((r, i) => `${r.bone} pinned ${fixed(r.weight)} short ${short[i] === undefined ? '-' : `${(short[i] * 100).toFixed(1)} cm`}`).join('   '))
         return lines
       }
+      // The buttons, off the player's definition (`assets/demo_motion3d.json`'s `keys`): each the keys of the
+      // keyboard and the gamepad's button as a PlayStation and an Xbox pad name it, and what it does in
+      // every stance; then the stance drawn, the weapon the draw key draws, and the key in the buffer.
+      const PAD = { Pad0: '✕/A', Pad1: '○/B', Pad2: '□/X', Pad3: '△/Y', Pad4: 'L1/LB', Pad5: 'R1/RB', Pad6: 'L2/LT', Pad7: 'R2/RT', Pad8: 'Share/View', Pad9: 'Options/Menu', Pad10: 'L3', Pad11: 'R3', Pad12: 'd-pad up', Pad13: 'd-pad down', Pad14: 'd-pad left', Pad15: 'd-pad right' }
+      const DOES = {
+        fast: 'run (held)',
+        guard: 'block, or aim a gun or the bow (held); faces the camera and strafes',
+        jump: 'jump, each stance its own',
+        use: 'roll: running dives, guarding dodges the stick\'s way, standing steps back; in a space, use it',
+        switch: 'switch weapon: put this one away and draw the next (nothing drawn: pick the next)',
+        draw: 'draw or put away the weapon',
+        light: 'light attack; again as it strikes chains the next; aimed, fire',
+        heavy: 'heavy attack; after a light, the finisher; running, the running heavy',
+        special: 'special: a kick, a spell, a block',
+        skill: 'skill: power up, reload, kneel, light the torch, cast',
+        taunt: 'taunt',
+        hit: 'take a hit (guarding: a blocked hit)',
+        die: 'die, then get up',
+        cup: 'pick up or put down the cup',
+        nearer: 'camera nearer',
+        further: 'camera further',
+      }
+      const controls = () => {
+        const t = room()
+        if (!t) return []
+        const k = json(readerOf(t), 'demo_motion3d').player
+        const named = list => {
+          const pad = list.filter(key => PAD[key]).map(key => PAD[key])
+          const keys = list.filter(key => !PAD[key]).map(key => (key === ' ' ? 'Space' : key === 'Mouse0' ? 'left click' : key.length === 1 ? key.toUpperCase() : key))
+          return `${keys.join(' ').padEnd(14)}${pad.join(' ').padEnd(16)}`
+        }
+        const rows = [['fast', k.keys.fast], ['guard', k.keys.guard], ...Object.entries(k.keys.motions), ['nearer', k.keys.nearer], ['further', k.keys.further]]
+        const me = meIn(t)
+        const d = me?.data ?? {}
+        const drawn = k.weapons.includes(d.upperMotion) || Object.values(k.aimOf).includes(d.upperMotion) ? d.upperMotion : d.upperMotion ?? 'nothing drawn'
+        return [
+          'key           pad             does',
+          ...rows.map(([action, list]) => `${named(list)}${DOES[action] ?? action}`),
+          `stance ${drawn}   the draw key draws ${d.weapon}   ${d.guard ? 'guarding' : 'not guarding'}   buffer ${d.queued ? `${d.queued.key} held ${d.queued.age.toFixed(2)} s` : 'empty'}`,
+        ]
+      }
       const runLines = () => {
         const lines = []
         if (run) {
@@ -1258,7 +1299,7 @@
           'swing, run wall, vault: E      edge: E teeter, E again step down, S step back      stairs: hold W to climb',
           'pool: E fall in, hold W to swim, E by the far wall to climb out      desk, bed: E, and E again to get up',
           'car: E get in, W A S D drive, Space honk, E get out      beam: E get on, hold W to sneak along it, E get off',
-          'gamepad: left stick walk, right stick look, RT or L3 run, A jump, X use, d-pad up and down zoom',
+          ...controls(),
           '` pause     . one step on     , one step back     left drag  turn the station camera     wheel  its distance',
           `${frames.length} fps  longest frame ${worst.toFixed(1)} ms`,
           `${chosen.scene}  step ${rec.n}`,

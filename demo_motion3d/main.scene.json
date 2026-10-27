@@ -14,6 +14,13 @@
         "xbot-glb": { "type": "binary", "url": "/games/demo_motion3d/assets/xbot.glb", "preload": true },
         "rifle": { "type": "model", "url": "/games/demo_motion3d/assets/rifle.glb", "preload": true },
         "cup": { "type": "model", "url": "/games/demo_motion3d/assets/cup.glb", "preload": true },
+        "greatsword": { "type": "model", "url": "/games/demo_motion3d/assets/greatsword.glb", "preload": true },
+        "sword": { "type": "model", "url": "/games/demo_motion3d/assets/sword.glb", "preload": true },
+        "axe": { "type": "model", "url": "/games/demo_motion3d/assets/axe.glb", "preload": true },
+        "pistol": { "type": "model", "url": "/games/demo_motion3d/assets/pistol.glb", "preload": true },
+        "bow": { "type": "model", "url": "/games/demo_motion3d/assets/bow.glb", "preload": true },
+        "torch": { "type": "model", "url": "/games/demo_motion3d/assets/torch.glb", "preload": true },
+        "wand": { "type": "model", "url": "/games/demo_motion3d/assets/wand.glb", "preload": true },
         "xbot-motion3d": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.motion3d.json", "preload": true },
         "xbot-motion3d-baked": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.motion3d.baked.json", "preload": true }
       }
@@ -173,7 +180,14 @@
           "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
           "props": [
             { "model": "rifle", "bone": "RightHand", "at": [0.0033, 0.1072, 0.0122], "turn": [91.56, 27.38, -95.79] },
-            { "model": "cup", "bone": "LeftHand", "at": [0, 0, 0], "turn": [0, 0, 0] }
+            { "model": "cup", "bone": "LeftHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
+            { "model": "greatsword", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
+            { "model": "sword", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
+            { "model": "axe", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
+            { "model": "pistol", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
+            { "model": "bow", "bone": "LeftHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
+            { "model": "torch", "bone": "LeftHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
+            { "model": "wand", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] }
           ]
         }
       },
@@ -225,6 +239,9 @@
       "stick": [0, 0],
       "turning": [0, 0],
       "fast": false,
+      "guard": false,
+      "weapon": "greatsword",
+      "queued": null,
       "look": { "yaw": 0, "pitch": 0.35, "dist": 5 },
       "lift": 1.4
     },

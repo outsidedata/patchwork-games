@@ -14,6 +14,8 @@ import { posed } from '#plugins/motion3d/motion3d.play.ts'
 import { carrying, reachesOf, type File } from '#plugins/motion3d/motion3d.sim.ts'
 import { sim } from './demo_motion3d.sim.ts'
 import file from './demo_motion3d.scene.json' with { type: 'json' }
+import main from './main.scene.json' with { type: 'json' }
+import defs from './assets/demo_motion3d.json' with { type: 'json' }
 import motions from './assets/xbot.motion3d.json' with { type: 'json' }
 import measured from './assets/xbot.rig.baked.json' with { type: 'json' }
 import written from './assets/xbot.rig.json' with { type: 'json' }
@@ -22,7 +24,9 @@ const DT = file.prefabs.engine.dt
 // A space's point in the world: a point's place, a line's two ends, a plane's middle and its size.
 type Point = { at?: number[]; from?: number[]; to?: number[]; size?: number[] }
 // The clips the X Bot's motion3d file plays for a motion of an activity.
-const clipsOf = (word: string, motion: string) => (motions as File).activities[word].motions[motion].clips
+// The X Bot's motion3d file, its JSON read as motion3d reads it.
+const MOTION = motions as unknown as File
+const clipsOf = (word: string, motion: string) => MOTION.activities[word].motions[motion].clips
 
 async function joined() {
   const truth = boot(file as Scene, sim)
@@ -123,6 +127,8 @@ function toWorld(me: Row, [x, y, z]: number[]): number[] {
   return [px + z * Math.sin(yaw) + x * Math.cos(yaw), py + y, pz + z * Math.cos(yaw) - x * Math.sin(yaw)]
 }
 const far = (a: number[], b: number[]) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2])
+// The props the X Bot's kind hangs, by their loader models.
+const PROPS = main.world.motion3d.kinds.xbot.props.map(p => p.model)
 // A page on the room that motion3d draws the X Bot on by a stand-in of its model: a root, and every clip
 // of its rig as long as the bake measured it, keying a bone-less object under it, so the body is drawn
 // where its row stands, turned by its yaw; beside it, `more` of the page's plugins.
@@ -156,7 +162,7 @@ function standIn(room: Truth, more: Record<string, unknown> = {}) {
   const page = {
     wire: { n: 1, rows: room.rows, scene: { ...room.scene, plugins: ['solids', 'shipped', 'motion3d', 'render3d'] } },
     render3d: { THREE, scene: new THREE.Scene(), dress: () => {} },
-    loader: { ready: () => true, load: async () => {}, model: (name: string) => (name === 'rifle' || name === 'cup' ? { scene: new THREE.Group(), animations: [] } : { scene: root, animations }) },
+    loader: { ready: () => true, load: async () => {}, model: (name: string) => (PROPS.includes(name) ? { scene: new THREE.Group(), animations: [] } : { scene: root, animations }) },
     ...more,
   } as never
   return { page, root }
@@ -177,13 +183,14 @@ function landsOnFloor({ truth, room, me }: { truth: Truth; room: Truth; me: () =
 // clips' own speed, never jumping to where the clip coming in would have them.
 const STEP = 0.06
 
-test('the use key plays each zone\'s own clip in it, holding the body still, and nothing outside them', async () => {
+test('the use key plays each zone\'s own clip in it, holding the body still, and outside them steps back', async () => {
   const { truth, send, me, until, kinds, row, walkTo } = await joined()
   const idle = me().data.clip
   send('press', 'use')
   truth.step(DT)
   expect(me().data.activity).toBe('walk')
-  expect(me().data.clip).toBe(idle)
+  expect(me().data).toMatchObject({ motion: 'backstep', clip: clipsOf('walk', 'backstep')[0] })
+  until(() => me().data.clip === idle, 60 * 3)
 
   for (const zone of [row('partyzone'), row('sadzone')]) {
     walkTo(zone.data.pos[0], zone.data.pos[2], kinds[zone.kind].shape.box.size[0] / 4)
@@ -676,24 +683,94 @@ test('at the low wall it vaults over it, and walks on beyond it', async () => {
   expect(me().data.pos[2]).toBeGreaterThan(wall[2] + kinds.vaultwall.shape.box.size[2] / 2)
 })
 
-test('the gun key draws the rifle over the walk, the hands on it, holds it aimed, strafes with it, and puts it away again', async () => {
+test('the draw key draws the rifle over the walk, the hands on it; the guard held aims it and strafes with it; and the draw key puts it away again', async () => {
   const { truth, send, me, until, room } = await joined()
-  send('press', 'gun')
+  // With nothing drawn, the switch key picks the next weapon, to the rifle.
+  while (me().data.weapon !== 'rifle') {
+    send('press', 'switch')
+    truth.step(DT)
+  }
+  send('press', 'draw')
   truth.step(DT)
-  expect(me().data).toMatchObject({ upperMotion: 'draw', upper: 'rifleout', upperBone: 'Spine', activity: 'walk' })
-  // Drawn, then aimed: the rifle carried wholly once the aim has faded in, the body walking on beneath.
-  until(() => me().data.upperMotion === 'aim', 60 * 4)
+  expect(me().data).toMatchObject({ upperMotion: 'drawrifle', upper: 'rifleout', upperBone: 'Spine', activity: 'walk' })
+  // Drawn: the rifle carried wholly, the body standing in the rifle's stance.
+  until(() => me().data.upperMotion === 'rifle', 60 * 4)
   until(() => me().data.was === null, 60)
   expect(carrying(reader(room), me())).toMatchObject({ carry: { prop: 'rifle' }, weight: 1 })
-  // Walked with it up, the legs strafe forward beneath the aim.
+  until(() => me().data.motion === 'riflestand', 30)
+  // The guard held aims it: walked with it up, the legs strafe forward beneath the aim.
+  send('guard', 1)
+  until(() => me().data.upperMotion === 'aim', 10)
   send('stick', 0, -1)
   until(() => me().data.clip === 'riflewalk', 60)
   expect(me().data).toMatchObject({ motion: 'strafe', upper: 'rifleidle' })
   send('stick', 0, 0)
+  send('guard', 0)
+  until(() => me().data.upperMotion === 'rifle', 10)
   // Its key again puts it away, and the upper half is let go once that has played out.
-  send('press', 'gun')
+  send('press', 'draw')
   truth.step(DT)
-  expect(me().data).toMatchObject({ upperMotion: 'holster', upper: 'rifleaway' })
+  expect(me().data).toMatchObject({ upperMotion: 'holsterrifle', upper: 'rifleaway' })
   until(() => me().data.upperMotion === null && me().data.upper === null, 60 * 4)
   expect(carrying(reader(room), me())).toBe(undefined)
+})
+
+test('the switch key pressed while a weapon is still being drawn waits for it, then puts it away and draws the next', async () => {
+  const { truth, send, me, until } = await joined()
+  send('press', 'draw')
+  truth.step(DT)
+  expect(me().data.upperMotion).toBe('drawgreatsword')
+  send('press', 'switch')
+  truth.step(DT)
+  expect(me().data).toMatchObject({ weapon: 'greatsword', queued: { key: 'switch' } })
+  until(() => me().data.upperMotion === 'switchgreatsword', 60 * 3)
+  expect(me().data.weapon).toBe('swordshield')
+  until(() => me().data.upperMotion === 'swordshield', 60 * 4)
+  expect(me().data.weapon).toBe('swordshield')
+})
+
+// Every stance: drawn, it stands and walks on its own clips; a light pressed three times while the first
+// plays is held in the buffer and plays the chain, each once the one before has struck; then the use key
+// rolls it; the hit key and the jump key play its own; and the switch key puts it away and draws the next.
+test('every weapon draws into its stance, walks on its own clips, chains its lights from the buffer, rolls, and switches to the next', async () => {
+  const { truth, send, me, until } = await joined()
+  const walk = MOTION.activities.walk.motions
+  const played = (name: string, most: number) => until(() => me().data.motion === name, most)
+  send('press', 'draw')
+  for (const w of defs.player.weapons) {
+    until(() => me().data.upperMotion === w, 60 * 6)
+    played(`${w}stand`, 60)
+    expect(walk[`${w}stand`].clips).toContain(me().data.clip)
+    send('stick', 0, -1)
+    played(`${w}walk`, 60)
+    send('stick', 0, 0)
+    played(`${w}stand`, 120)
+    // Three lights in a row: each held until the one before may be followed.
+    const chain = Object.keys(walk).filter(n => n.startsWith(`${w}light`))
+    send('press', 'light')
+    truth.step(DT)
+    expect(me().data.motion).toBe(chain[0])
+    for (const next of chain.slice(1)) {
+      send('press', 'light')
+      truth.step(DT)
+      expect(me().data.queued).toMatchObject({ key: 'light' })
+      played(next, 60 * 5)
+    }
+    played(`${w}stand`, 60 * 6)
+    send('press', 'use')
+    truth.step(DT)
+    expect(me().data.motion).toBe(`${w}backstep`)
+    played(`${w}stand`, 60 * 4)
+    send('press', 'hit')
+    truth.step(DT)
+    expect(me().data.motion).toBe(`${w}hit`)
+    played(`${w}stand`, 60 * 4)
+    send('press', 'jump')
+    truth.step(DT)
+    expect(me().data.motion).toBe(`${w}jump`)
+    until(() => me().data.grounded && me().data.motion === `${w}stand`, 60 * 4)
+    send('press', 'switch')
+    truth.step(DT)
+    expect(me().data.upperMotion).toBe(`switch${w}`)
+  }
 })

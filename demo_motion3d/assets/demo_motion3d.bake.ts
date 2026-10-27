@@ -12,6 +12,9 @@
 //                        clips just measured, each clip's sidecar and `xbot.motion3d.json`'s `moves` and
 //                        `turns` (motion3d's `motion3d.offsets.ts`)
 //   cup.glb              the cup the X Bot carries, with its `handle` (`cup.mjs`)
+//   the stances' props   greatsword.glb, sword.glb, shield.glb, axe.glb, pistol.glb, bow.glb,
+//                        torch.glb and wand.glb, the stand-ins each stance carries, with their `grip`
+//                        and, held in two hands, `second` (`props.mjs`)
 //   checker-1024.webp    the ground's checkerboard, drawn here from nothing: `squares`
 //                        squares a side in two greys, `light` and `dark`, each with a `line` pixel rim
 //                        of `rim` grey, so a repeat of the map is `squares` squares across
@@ -96,6 +99,8 @@ export default async ({ blender, webp, scratch }: Tools) => {
   console.log(await node([path.join(here, 'yard.mjs')]))
   // the cup the X Bot carries
   console.log(await node([path.join(here, 'cup.mjs')]))
+  // the stand-ins the stances carry
+  console.log(await node([path.join(here, 'props.mjs')]))
   // each held clip's offsets for each body, from the clips just measured, into xbot.motion3d.baked.json
   console.log(await node(['--experimental-strip-types', path.join(root, 'plugins', 'motion3d', 'motion3d.offsets.ts'), rig, path.join(here, 'xbot.motion3d.json')]))
 }

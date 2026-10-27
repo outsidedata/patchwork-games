@@ -1,7 +1,11 @@
 # demo_motion3d
 
 The demo of motion3d (`plugins/motion3d`): an X Bot on a checkerboard yard, and stations where the use
-key does what each offers: hang, shimmy, climb, swing, vault, sit, lie down, swim and drive.
+key does what each offers: hang, shimmy, climb, swing, vault, sit, lie down, swim and drive. Anywhere,
+it draws nine weapons (a great sword, a sword and shield, a sword, an axe, a rifle, a pistol, a bow, a
+torch and magic), each a stance of its own clips, with light and heavy attacks chained from an input
+buffer, blocks, rolls, jumps, hits and deaths: `assets/MOVES.md` is every clip of the library by what is
+held, the buttons, and what the motion file cannot say yet.
 
 ## Playing it
 
@@ -9,9 +13,14 @@ key does what each offers: hang, shimmy, climb, swing, vault, sit, lie down, swi
 panel tunes motion3d's settings and whose readout shows what the body is doing. Against its server:
 `yarn serve demo_motion3d`, then `localhost:5173/games/demo_motion3d/client.html`.
 
-- W A S D walk, Shift run, Space jump, right drag look, wheel zoom. E is use.
+- W A S D walk, Shift run, Space jump, right drag look, wheel zoom. E is use; away from a station, E
+  rolls.
+- The weapons, the same buttons in every stance (`assets/MOVES.md` has the gamepad's too): G draws and
+  puts away, Q switches to the next, F held blocks (or aims a gun or the bow) and strafes facing the
+  camera, J or a left click is the light attack (again as it strikes chains the next), K heavy (after a
+  light, the finisher), L special, R skill, T taunt, H takes a hit, X dies and gets up, E rolls.
 - Near the start: in the pink zone E plays a backflip, in the blue zone it picks something up, and on
-  open ground it does nothing. Under the orange wall's lip, E jumps up and hangs from it; A and D
+  open ground it steps back. Under the orange wall's lip, E jumps up and hangs from it; A and D
   shimmy along the lip until the hands would leave it, W + E climbs up onto the wall's top, S + E drops
   back down. In front of the chair, E sits down in it; E again stands up.
 - The first row past the wall: stand still in the pale blue cold room and the body rubs its shoulder
@@ -26,7 +35,9 @@ panel tunes motion3d's settings and whose readout shows what the body is doing. 
   bed's foot E lies down, E again gets up; at the car's door E gets in, W A S D drive, Space honks,
   E gets out.
 - The fourth row: at the beam's near end E steps up onto it, W sneaks along it, E steps off.
-- Gamepad: left stick walk, right stick look, RT or L3 run, A jump, X use, d-pad up and down zoom.
+- Gamepad: left stick walk, right stick look, L3 run, ✕/A jump, □/X use or roll, △/Y switch, R3 draw,
+  L1/LB guard, R1/RB light, R2/RT heavy, ○/B special, L2/LT skill, d-pad left hit, right taunt, up and
+  down zoom, Options die, Share the cup.
 
 ## How it is made
 
@@ -38,7 +49,16 @@ panel tunes motion3d's settings and whose readout shows what the body is doing. 
   and falling by motion3d's `jump` and `fall`; in a station's activity, the motion file picks each
   motion and the point it plays against, and motion3d holds the body there, kinematics3d moving it along
   a lip, a rope, a wall, the beam or the water by the same `move`, turning it under the ceiling and in
-  the water. Its `press` act hands motion3d every key, `jump` and `use` among them.
+  the water. Its `press` act holds every key in its input buffer and hands it to motion3d once a move
+  may play it: an attack's next is held until the one playing has struck, a key during a draw until
+  the draw is done (the definition's `buffer`). The guard key is held, not pressed: each step it is
+  held the rule presses `guard`, else `unguard`.
+- The stances are moves of the `walk` activity: a weapon's draw plays over the upper half and ends in
+  a move of the weapon's name that holds its carry (the prop in the hands, `carries`); every move of
+  the stance's own (`<weapon>stand`, `walk`, `run`, `guardwalk`, `block`, the attacks, the rolls) plays
+  `from` that move. The props are boxes and cylinders, `assets/props.mjs`. The yard's `guard` and
+  `near` states (`plugins/yard/yard.kinematics3d.ts`) are the guard key held and a station in reach,
+  so E rolls only away from one.
 - What the X Bot can do is its motion3d file, `assets/xbot.motion3d.json`: every activity, its motions,
   the clips each plays and the kind of point it plays against. motion3d's numbers are `world.motion3d`
   in `main.scene.json`: the X Bot's `anywhere` is `walk`, its spaces are shapes3d's
@@ -88,4 +108,7 @@ the lip, shimmies to its end and climbs onto the top; drops back down; sits in t
 the cold room; hangs from the bar and the ceiling and moves along them; climbs the rope and the wall;
 swings onto the platform; runs along the wall; vaults; teeters at the edge and steps down; climbs the
 stairs, falls into the pool, swims across and climbs out; sits at the desk; lies on the bed; and gets
-into the car, drives it, honks and gets out.
+into the car, drives it, honks and gets out; draws the rifle, aims it with the guard held, strafes and
+puts it away; switches while a draw plays, the switch held until it is done; and draws every weapon in
+turn, standing and walking on its own clips, chaining its lights from the buffer, stepping back, taking
+a hit and jumping in each.
