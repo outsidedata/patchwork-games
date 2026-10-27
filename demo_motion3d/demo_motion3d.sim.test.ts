@@ -11,7 +11,7 @@ import { possessed } from '#addons/player/player.addon.ts'
 import * as THREE from 'three'
 import { motion3d } from '#plugins/motion3d/motion3d.plugin.ts'
 import { posed } from '#plugins/motion3d/motion3d.play.ts'
-import { reachesOf, type File } from '#plugins/motion3d/motion3d.sim.ts'
+import { carrying, reachesOf, type File } from '#plugins/motion3d/motion3d.sim.ts'
 import { sim } from './demo_motion3d.sim.ts'
 import file from './demo_motion3d.scene.json' with { type: 'json' }
 import main from './main.scene.json' with { type: 'json' }
@@ -681,4 +681,89 @@ test('at the low wall it vaults over it, and walks on beyond it', async () => {
   const { me, row, kinds } = await oneShot('vaultzone', 'vaultone', -LANE, ROW2)
   const wall = row('vaultwall').data.pos
   expect(me().data.pos[2]).toBeGreaterThan(wall[2] + kinds.vaultwall.shape.box.size[2] / 2)
+})
+
+// Row five, past the car's lot: the crawl cube and the cave, each taken up with no key.
+const ROW5 = 60
+
+test('walked into the crawl cube it crawls, lies still with the stick let go, and walks out walking', async () => {
+  const { truth, send, me, until, row, route, kinds } = await joined()
+  const cube = row('crawlcube')
+  const near = cube.data.pos[2] - kinds.crawlcube.shape.box.size[2] / 2
+  route([[LANE, ROW1], [LANE, ROW5], [cube.data.pos[0], ROW5], [cube.data.pos[0], near - 1]], 0.3)
+  expect(me().data.activity).toBe('walk')
+  // In, the stick held: once the walk comes round, the cube's crawl, prone and going forward.
+  send('stick', 0, -1)
+  until(() => me().data.activity === 'crawl', 60 * 4)
+  expect(me().data).toMatchObject({ space: cube.id, motion: 'crawl', clip: 'proneforward' })
+  const at = me().data.pos[2]
+  for (let i = 0; i < 60; i++) truth.step(DT)
+  expect(me().data.pos[2]).toBeGreaterThan(at + 0.1)
+  // Let go: lying still.
+  send('stick', 0, 0)
+  until(() => me().data.motion === 'still', 10)
+  expect(me().data).toMatchObject({ activity: 'crawl', clip: 'proneidle' })
+  // Out the far side: the cube no longer holds it, so the anywhere shape's walk.
+  send('stick', 0, -1)
+  until(() => me().data.activity === 'walk', 60 * 30)
+  expect(me().data).toMatchObject({ space: null, motion: 'walk', clip: 'walk' })
+})
+
+test('jumped into the crawl cube it falls in, lands, and crawls', async () => {
+  const { truth, send, me, until, row, route, kinds } = await joined()
+  const cube = row('crawlcube')
+  const near = cube.data.pos[2] - kinds.crawlcube.shape.box.size[2] / 2
+  route([[LANE, ROW1], [LANE, ROW5], [cube.data.pos[0], ROW5], [cube.data.pos[0], near - 2.5]], 0.3)
+  send('fast', 1)
+  send('stick', 0, -1)
+  until(() => me().data.motion === 'run', 60)
+  until(() => me().data.pos[2] > near - 1.2, 60 * 2)
+  send('press', 'jump')
+  truth.step(DT)
+  expect(me().data.motion).toBe('jump')
+  until(() => me().data.motion === 'fall', 60 * 3)
+  // Landed in the cube, the stick still held: it crawls.
+  until(() => me().data.activity === 'crawl', 60 * 4)
+  expect(me().data.grounded).toBe(true)
+  expect(me().data.pos[2]).toBeGreaterThan(near)
+})
+
+test('walked into the cave the arms draw the torch and hold it over the walk; walked out, they put it away', async () => {
+  const { send, me, until, row, route, kinds, room } = await joined()
+  const cave = row('cave')
+  const near = cave.data.pos[2] - kinds.cave.shape.box.size[2] / 2
+  route([[LANE, ROW1], [LANE, ROW5], [cave.data.pos[0], ROW5], [cave.data.pos[0], near - 1]], 0.3)
+  send('stick', 0, -1)
+  until(() => me().data.upperMotion === 'draw', 60 * 3)
+  expect(me().data).toMatchObject({ upperActivity: 'light_torch', upperSpace: cave.id, upper: 'tcdraw', upperBone: 'Spine', activity: 'walk', motion: 'walk' })
+  until(() => me().data.upperMotion === 'hold', 60 * 4)
+  // Held: the torch carried wholly, nothing played over the body, the legs walking on.
+  expect(carrying(reader(room), me())).toMatchObject({ carry: { prop: 'torch' }, weight: 1 })
+  expect(me().data).toMatchObject({ motion: 'walk', clip: 'walk' })
+  // Turned round and out: the hold is over, its then puts the torch away, and then the arms are let go.
+  send('look', Math.PI, 0)
+  until(() => me().data.upperMotion === 'putaway', 60 * 8)
+  expect(me().data).toMatchObject({ upper: 'bwsheath', activity: 'walk' })
+  until(() => me().data.upperMotion === null, 60 * 4)
+  expect(me().data).toMatchObject({ upperActivity: null, upperSpace: null })
+  expect(carrying(reader(room), me())).toBe(undefined)
+})
+
+test('jumped into the cave the arms draw the torch while it falls, and hold it as it lands', async () => {
+  const { truth, send, me, until, row, route, kinds } = await joined()
+  const cave = row('cave')
+  const near = cave.data.pos[2] - kinds.cave.shape.box.size[2] / 2
+  route([[LANE, ROW1], [LANE, ROW5], [cave.data.pos[0], ROW5], [cave.data.pos[0], near - 2.5]], 0.3)
+  send('fast', 1)
+  send('stick', 0, -1)
+  until(() => me().data.pos[2] > near - 1.2, 60 * 3)
+  send('press', 'jump')
+  truth.step(DT)
+  expect(me().data.motion).toBe('jump')
+  // Over the cave's mat in the air: the arms draw the torch before the feet are down.
+  until(() => me().data.upperMotion === 'draw', 60 * 2)
+  expect(me().data.grounded).toBe(false)
+  until(() => me().data.grounded, 60 * 3)
+  until(() => me().data.upperMotion === 'hold', 60 * 4)
+  expect(me().data.upperSpace).toBe(cave.id)
 })

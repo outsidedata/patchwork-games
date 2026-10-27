@@ -49,7 +49,12 @@
           "points": { "Seat": { "point": { "at": [0, 0.61, 1], "turn": [180, 0, 0] } } },
           "activities": ["chair"]
         },
-        "coldroom": { "shape": { "box": { "size": [5, 0.04, 5] } }, "look": { "colour": "#a8d0f0", "roughness": 0.8 }, "activities": ["cold"], "data": { "motion3d": { "autoChange": true } } },
+        "coldroom": {
+          "shape": { "box": { "size": [5, 0.04, 5] } },
+          "look": { "colour": "#a8d0f0", "roughness": 0.8 },
+          "activities": ["cold"],
+          "data": { "motion3d": { "autoChange": true } }
+        },
         "barpost": { "shape": { "box": { "size": [0.1, 2.49, 0.1] } }, "look": { "colour": "#b0b8c0", "roughness": 0.8 } },
         "bar": { "shape": { "box": { "size": [4, 0.06, 0.06] } }, "look": { "colour": "#b0b8c0", "roughness": 0.8 } },
         "barzone": {
@@ -162,7 +167,11 @@
           "shape": { "box": { "size": [1.4, 2, 1.4] } },
           "points": { "Beam": { "line": { "from": [0, 0.427, 0.5], "to": [0, 0.427, 6.5] } } },
           "activities": ["beam"]
-        }
+        },
+        "crawlcubemat": { "shape": { "box": { "size": [5, 0.02, 5] } }, "look": { "colour": "#d8c08a", "roughness": 0.8 } },
+        "crawlcube": { "shape": { "box": { "size": [5, 3, 5] } }, "activities": ["crawl"], "data": { "motion3d": { "autoChange": true } } },
+        "cavemat": { "shape": { "box": { "size": [6, 0.02, 6] } }, "look": { "colour": "#4a4552", "roughness": 0.8 } },
+        "cave": { "shape": { "box": { "size": [6, 3, 6] } }, "activities": ["light_torch"], "data": { "motion3d": { "autoChange": true } } }
       },
       "mods": { "height": "terrain3d" }
     },
@@ -191,7 +200,12 @@
           ]
         }
       },
-      "anywhere": { "shape": { "box": { "size": [1e9, 1e9, 1e9] } }, "activities": ["walk", "roll", "fight", "hurt", "cup"], "priority": 0, "data": { "motion3d": { "autoChange": true } } },
+      "anywhere": {
+        "shape": { "box": { "size": [1000000000, 1000000000, 1000000000] } },
+        "activities": ["walk", "roll", "fight", "hurt", "cup"],
+        "priority": 0,
+        "data": { "motion3d": { "autoChange": true } }
+      },
       "ease": 0.15,
       "mods": { "spaces": "shapes3d", "object": "yard" }
     },
@@ -317,7 +331,11 @@
     "slabwall": { "pos": [0, 0, 0], "yaw": 0 },
     "tiltzone": { "pos": [0, 0, 0], "yaw": 0 },
     "beam": { "pos": [0, 0, 0], "yaw": 0 },
-    "beamzone": { "pos": [0, 0, 0], "yaw": 0 }
+    "beamzone": { "pos": [0, 0, 0], "yaw": 0 },
+    "crawlcubemat": { "pos": [0, 0, 0], "yaw": 0 },
+    "crawlcube": { "pos": [0, 0, 0], "yaw": 0 },
+    "cavemat": { "pos": [0, 0, 0], "yaw": 0 },
+    "cave": { "pos": [0, 0, 0], "yaw": 0 }
   },
   "actors": [
     { "is": "scenemanager" },
@@ -392,6 +410,10 @@
     { "is": "slabwall", "pos": [14, 2.5, 44.91] },
     { "is": "tiltzone", "pos": [14, 0, 43.5] },
     { "is": "beam", "pos": [-14, 0, 59] },
-    { "is": "beamzone", "pos": [-14, 0, 55.5] }
+    { "is": "beamzone", "pos": [-14, 0, 55.5] },
+    { "is": "crawlcubemat", "pos": [0, 0, 66] },
+    { "is": "crawlcube", "pos": [0, -0.02, 66] },
+    { "is": "cavemat", "pos": [14, 0, 66] },
+    { "is": "cave", "pos": [14, -0.02, 66] }
   ]
 }

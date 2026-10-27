@@ -16,7 +16,8 @@
 // is where the bones its motions land on it stand (`plugins/motion3d`, Held to a point): the wrists for
 // a hand's hold, the ankles for a foot's, the hips for a seat, the root itself for a motion that lands
 // none. Each station, `(x, z)` its cell:
-//   cold room   a pale mat offering `cold`, whose `idle` the walk's idle is played over by
+//   cold room   a pale mat offering `cold` with no key (`data.motion3d.autoChange`): its `idle`, standing
+//               still in it
 //   bar         a bar on two posts at the height `freejump` ends the hands holding, offering `bar`: its
 //               `Bar` line where the wrists hold it
 //   rope        a rope 6 m up to a beam on two posts, offering `rope`: its `Rope` line straight up where
@@ -54,6 +55,9 @@
 //               about it (`car.sim.ts`), so the parts and the space are written into its definition
 //   beam        a low beam, offering `beam` at its near end: its `Beam` line along its top where
 //               `sneakwalk` stands the ankles
+//   crawl cube  a sandy mat offering `crawl` with no key: walked in, the legs crawl and lie prone
+//   cave        a dark mat offering `light_torch` with no key: walked in, the arms draw the torch and
+//               hold it; walked out, they put it away
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
@@ -179,15 +183,15 @@ function cylinder(name, radius, height, colour, x, y, z) {
 }
 // A space of the kind `name`: a box `size` whose foot's middle is at `at`, offering `activities`, its
 // points given in the world and written in its own frame (its row stands at `at`, facing 0); drawn as a
-// mat when it has a `colour`.
-function space(name, size, at, activities, points = {}, colour) {
+// mat when it has a `colour`; carrying `data` for the plugins that read it when given.
+function space(name, size, at, activities, points = {}, colour, data) {
   const local = p => r3([p[0] - at[0], p[1] - at[1], p[2] - at[2]])
   const placed = Object.fromEntries(Object.entries(points).map(([n, c]) => {
     if (c.point) return [n, { point: { at: local(c.point.at), ...(c.point.turn ? { turn: c.point.turn.map(round) } : {}) } }]
     if (c.line) return [n, { line: { from: local(c.line.from), to: local(c.line.to), ...(c.line.turn ? { turn: c.line.turn.map(round) } : {}) } }]
     return [n, { plane: { at: local(c.plane.at), size: r3(c.plane.size), turn: c.plane.turn.map(round), ...(c.plane.normal ? { normal: c.plane.normal } : {}) } }]
   }))
-  kind(name, { shape: { box: { size: r3(size) } }, ...(colour ? { look: look(colour) } : {}), ...(Object.keys(placed).length ? { points: placed } : {}), activities })
+  kind(name, { shape: { box: { size: r3(size) } }, ...(colour ? { look: look(colour) } : {}), ...(Object.keys(placed).length ? { points: placed } : {}), activities, ...(data ? { data } : {}) })
   actors.push({ is: name, pos: r3(at) })
 }
 // A beam `top` high, its underside there, on two posts 1.2 m apart across x.
@@ -199,8 +203,11 @@ function beam(name, x, z, top) {
 
 // ---------------------------------------------------------------- row one
 
-// The cold room: a mat, the activity `cold` over walking.
-space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
+// The data of a space whose activities a body takes up with no key (motion3d's stack).
+const AUTO = { motion3d: { autoChange: true } }
+
+// The cold room: a mat, the activity `cold` taken up with no key.
+space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0', AUTO)
 
 // The bar: as high as `freejump` ends the hands holding (their middle), the `Bar` line where it holds
 // the wrists, along the bar, the body facing it.
@@ -482,6 +489,16 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
   const ankles = round(beam.top + bones('sneakwalk', FEET, 0)[1])
   space('beamzone', [1.4, 2, 1.4], [x, 0, z - 0.5], ['beam'], { Beam: { line: { from: [x, ankles, z], to: [x, ankles, z + beam.long] } } })
 }
+
+// ---------------------------------------------------------------- row five
+
+// The crawl cube and the cave: mats a body walks onto, each offering its activity with no key, past the
+// car's lot. The cube's `crawl` lists the legs alone; the cave's `light_torch` the arms alone.
+// Each 3 m tall, so a body in the air over it is in it, drawn by a mat on the floor.
+box('crawlcubemat', [5, 0.02, 5], '#d8c08a', 0, 0, 66)
+space('crawlcube', [5, 3, 5], [0, -0.02, 66], ['crawl'], {}, undefined, AUTO)
+box('cavemat', [6, 0.02, 6], '#4a4552', 14, 0, 66)
+space('cave', [6, 3, 6], [14, -0.02, 66], ['light_torch'], {}, undefined, AUTO)
 
 // ---------------------------------------------------------------- the scene
 

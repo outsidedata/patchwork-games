@@ -1016,6 +1016,14 @@
    "spot": ["Hips"],
    "on": "both"
   },
+  "proneidle": {
+   "spot": [],
+   "on": "both"
+  },
+  "proneforward": {
+   "spot": [],
+   "on": "both"
+  },
   "tcidle": {
    "spot": ["LeftFoot", "RightFoot"],
    "on": "both"
@@ -2472,6 +2480,16 @@
     "beginTurn": 0
    },
    "tcdraw": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "proneidle": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "proneforward": {
     "beginOffset": [0, 0, 0],
     "endOffset": [0, 0, 0],
     "beginTurn": 0

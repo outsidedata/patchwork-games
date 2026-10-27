@@ -431,6 +431,20 @@
   },
   "party": { "motions": { "use": { "target": "triangles", "clips": ["backflip"], "press": "use" } } },
   "sad": { "motions": { "use": { "target": "triangles", "clips": ["pickup"], "press": "use" } } },
+  "crawl": {
+   "normal": [0, 1, 0],
+   "motions": {
+    "still": { "target": "triangles", "clips": ["proneidle"], "when": ["ground", "!pushed"] },
+    "crawl": { "target": "triangles", "clips": ["proneforward"], "when": ["ground", "pushed"] }
+   }
+  },
+  "light_torch": {
+   "motions": {
+    "draw": { "clips": ["tcdraw"], "over": "Spine", "carry": "torch", "then": "hold" },
+    "hold": { "clips": [], "over": "Spine", "carry": "torch", "then": "putaway" },
+    "putaway": { "clips": ["bwsheath"], "over": "Spine", "carry": "torch" }
+   }
+  },
   "cold": {
    "normal": [0, 1, 0],
    "motions": {

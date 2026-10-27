@@ -912,6 +912,14 @@
   "tcdraw": {
    "file": "packs/mixamo-motions/Unarmed Equip Torch 01.fbx"
   },
+  "proneidle": {
+   "file": "packs/mixamo-motions/Prone Idle.fbx",
+   "loop": true
+  },
+  "proneforward": {
+   "file": "packs/mixamo-motions/Prone Forward.fbx",
+   "loop": true
+  },
   "tcidle": {
    "file": "packs/mixamo-motions/Standing Torch Idle 01.fbx",
    "loop": true

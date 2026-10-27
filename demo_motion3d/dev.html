@@ -78,7 +78,7 @@
       //   draw on the car   motion3d's `object` from yard on or off, the body drawn on the car as the
       //                     page draws the car, or where its row stands (`world.motion3d.mods.object`)
       //   priority          each space's priority (shapes3d's kind's `priority`, 1 where it gives none)
-      //   jump height, m    the X Bot's `world.kinematics3d.kinds.xbot.fall.jumpH`, how high a jump rises
+      //   jump height, m    the X Bot's `world.kinematics3d.kinds.xbot.jump.jumpH`, how high a jump rises
       // `copy motion3d JSON` copies the panel's numbers, and `reset to the file` puts the file's back.
       //
       // The rifle carry: the rifle's anchor in the X Bot's motion3d file (`at`, metres, and `turn`, degrees,
@@ -284,9 +284,9 @@
           return {}
         },
       })
-      // Stood still: slower than a body stands still at (`world.motion3d.still`), as kinematics3d's speed falls
+      // Stood still: slower than the X Bot stands still at (kinematics3d's `move.still`), as its speed falls
       // toward 0 and need never reach it.
-      const still = until('stood still', d => d.speed < room().world.motion3d.still, 3)
+      const still = until('stood still', d => d.speed < room().world.kinematics3d.kinds.xbot.move.still, 3)
       const walking = until('walking again', d => d.activity === 'walk')
       const settled = until('root no longer eased', d => d.eased === null, 3)
       const grounded = until('on the ground, not eased', d => d.grounded && d.eased === null, 4)
@@ -308,6 +308,85 @@
       // the camera (yaw θ is (sin θ, cos θ) across the ground); `pitch` up; `dist` away.
       const pos = kind => rowOf(kind).data.pos
       const STATIONS = {
+        'walk, run, stand': () => ({
+          at: [0, 0, -8, 0],
+          stages: [
+            send('stick', 0, -1), motion('walk', 2), wait(1.5), send('fast', 1), motion('run', 2), wait(1.5),
+            send('fast', 0), motion('walk', 2), wait(1), send('stick', 0, 0), motion('stand', 2), wait(1),
+          ],
+          camera: { zone: 'partyzone', look: [4, 1, -6], yaw: Math.PI / 2, pitch: 0.2, dist: 9 },
+        }),
+        'jump and land': () => ({
+          at: [0, 0, -8, 0],
+          stages: [
+            send('press', 'jump'), motion('jump', 1), until('in the air', d => !d.grounded, 1), until('rising', d => d.vel[1] > 0, 1),
+            until('falling', d => d.vel[1] < 0 && !d.grounded, 2), until('landed', d => d.grounded, 3), motion('stand', 3), wait(1),
+            send('stick', 0, -1), send('fast', 1), motion('run', 2), wait(0.5), send('press', 'jump'), motion('jump', 1),
+            until('landed', d => d.grounded, 4), send('stick', 0, 0), send('fast', 0), motion('stand', 3), wait(1),
+          ],
+          camera: { zone: 'partyzone', look: [4, 1.5, -4], yaw: Math.PI / 2, pitch: 0.15, dist: 10 },
+        }),
+        'walk off the edge and fall': () => {
+          // Off the block of the edge station, 0.611 m high: more than a step, so a fall.
+          const [x, , z] = pos('edge')
+          return {
+            at: [x, room().world.shapes3d.kinds.edge.shape.box.size[1], z, Math.PI / 2],
+            stages: [
+              until('on the block', d => d.grounded && d.motion === 'stand', 2), wait(0.5),
+              send('stick', 0, -1), motion('walk', 1), motion('fall', 3), until('landed', d => d.grounded && d.pos[1] < 0.01, 3),
+              send('stick', 0, 0), motion('stand', 3), wait(1),
+            ],
+            camera: { zone: 'edgezone', look: [2, 0.6, 0.6], yaw: Math.PI, pitch: 0.15, dist: 6 },
+          }
+        },
+        'crawl cube: walk in, crawl, lie still, walk out': () => {
+          const [x, , z] = pos('crawlcube')
+          return {
+            at: [x, 0, z - 6, 0],
+            stages: [
+              walk(x, z - 1, 0.4, true), until('crawling', d => d.activity === 'crawl' && d.motion === 'crawl', 3), wait(1),
+              send('stick', 0, 0), until('lying still', d => d.activity === 'crawl' && d.motion === 'still', 2), wait(1.5),
+              walk(x, z + 4, 0.4), until('walking out', d => d.activity === 'walk', 15), wait(1),
+            ],
+            camera: { zone: 'crawlcube', look: [0, 0.6, 0], yaw: Math.PI / 2, pitch: 0.25, dist: 8 },
+          }
+        },
+        'crawl cube: jump in and land crawling': () => {
+          const [x, , z] = pos('crawlcube')
+          return {
+            at: [x, 0, z - 7, 0],
+            stages: [
+              send('fast', 1), send('stick', 0, -1), motion('run', 2), until('at its edge', d => d.pos[2] > z - 4, 3), send('press', 'jump'), motion('jump', 1),
+              until('in the air', d => !d.grounded, 1), until('landed crawling', d => d.grounded && d.activity === 'crawl', 5), wait(1),
+              send('stick', 0, 0), send('fast', 0), until('lying still', d => d.motion === 'still', 2), wait(1),
+            ],
+            camera: { zone: 'crawlcube', look: [0, 0.8, -1.5], yaw: Math.PI / 2, pitch: 0.2, dist: 9 },
+          }
+        },
+        'cave: draw, hold, put away': () => {
+          const [x, , z] = pos('cave')
+          return {
+            at: [x, 0, z - 6, 0],
+            stages: [
+              walk(x, z, 0.5), until('drawing the torch', d => d.upperMotion === 'draw', 2), until('holding the torch', d => d.upperMotion === 'hold', 4), wait(1),
+              walk(x, z - 3.6, 0.3, true), until('putting it away', d => d.upperMotion === 'putaway', 4), send('stick', 0, 0),
+              until('arms let go', d => d.upperMotion === null, 4), wait(1),
+            ],
+            camera: { zone: 'cave', look: [0, 1.2, -1.5], yaw: Math.PI / 2, pitch: 0.2, dist: 9 },
+          }
+        },
+        'cave: jump in, draw while falling': () => {
+          const [x, , z] = pos('cave')
+          return {
+            at: [x, 0, z - 7, 0],
+            stages: [
+              send('fast', 1), send('stick', 0, -1), motion('run', 2), until('at its edge', d => d.pos[2] > z - 4.2, 3), send('press', 'jump'), motion('jump', 1),
+              until('drawing in the air', d => d.upperMotion === 'draw' && !d.grounded, 2), until('landed', d => d.grounded, 3),
+              send('stick', 0, 0), send('fast', 0), until('holding the torch', d => d.upperMotion === 'hold', 4), wait(1),
+            ],
+            camera: { zone: 'cave', look: [0, 1.2, -2], yaw: Math.PI / 2, pitch: 0.2, dist: 10 },
+          }
+        },
         'backflip (pink zone)': () => {
           const [x, , z] = pos('partyzone')
           return { at: [x, 0, z - 3, 0], stages: [walk(x, z, 1), still, use, activity('party'), walking, grounded, wait(1)], camera: { zone: 'partyzone', look: [0, 1, 0], yaw: Math.PI / 2, pitch: 0.2, dist: 6 } }
@@ -359,6 +438,19 @@
         'ceiling: hang, across, drop': () => {
           const [x, , z] = pos('hallzone')
           return { at: [x, 0, z - 3, 0], stages: [walk(x, z, 0.3), still, ...freehang('ceiling')], camera: { zone: 'hallzone', look: [0, 1.4, 0], yaw: Math.PI * 0.85, pitch: 0.15, dist: 8 } }
+        },
+        'ceiling: turn under it': () => {
+          const [x, , z] = pos('hallzone')
+          return {
+            at: [x, 0, z - 3, 0],
+            stages: [
+              walk(x, z, 0.3), still, use, activity('ceiling'), motion('hang'), settled, wait(0.5),
+              send('stick', 0, -1), motion('move', 1), wait(1), send('stick', 1, 0), until('turned right', d => d.yaw < -1, 3), wait(0.5),
+              send('stick', 0, 1), until('turned round', d => Math.abs(d.yaw) > 2.5, 3), wait(0.5),
+              send('stick', 0, 0), motion('hang', 2), use, motion('drop', 1), walking, grounded, wait(1),
+            ],
+            camera: { zone: 'hallzone', look: [0, 1.4, 0], yaw: Math.PI * 0.85, pitch: 0.35, dist: 8 },
+          }
         },
         'rope: climb and let go': () => {
           const [x, , z] = pos('ropezone')
@@ -456,7 +548,9 @@
             at: [x, 0, z - 3, 0],
             stages: [
               walk(x, z, 0.3), still, use, activity('beam'), settled, wait(0.5),
-              send('stick', 0, -1), until('at the far end', d => d.stopped !== false, 15), send('stick', 0, 0), wait(0.5), use, walking, grounded, wait(1.5),
+              send('stick', 0, -1), until('at the far end', d => d.stopped !== false, 15), send('stick', 0, 0), wait(0.5),
+              send('stick', 0, 1), motion('back', 1), until('back at the near end', d => d.stopped !== false, 15), send('stick', 0, 0), wait(0.5),
+              use, walking, grounded, wait(1.5),
             ],
             camera: { zone: 'beamzone', look: [0, 0.8, 3], yaw: Math.PI / 2, pitch: 0.2, dist: 8 },
           }
@@ -469,7 +563,8 @@
             stages: [
               walk(x, z, 0.3), still, use, activity('car'), motion('pilot', 7), settled, wait(1),
               send('stick', 0.5, -1), wait(1.5), send('stick', 0, 0), until('the car stopped', (d, rows) => car(rows)?.data.speed === 0, 3),
-              send('press', 'jump'), motion('honk', 1), motion('pilot', 4), use, motion('out', 1), walking, grounded, wait(1.5),
+              send('press', 'jump'), until('honking over the wheel', d => d.upperMotion === 'honk' && d.motion === 'pilot', 1),
+              until('honked', d => d.upperMotion === null, 4), use, motion('out', 1), walking, grounded, wait(1.5),
             ],
             camera: { zone: 'carzone', look: [-1.5, 1, 0.5], yaw: Math.PI * 0.6, pitch: 0.2, dist: 9 },
           }
@@ -531,7 +626,9 @@
           if (!me?.data.stood) throw new Error('the seat\'s body never stood on its start')
           const { at, stages, camera } = plan()
           const [x, y, z, yaw] = at
-          const fields = { pos: [x, y, z], yaw, look: { ...me.data.look, yaw }, vel: [0, 0, 0], speed: 0, grounded: true }
+          // The body stands on the triangles: its place there (`along`) is where it is put, facing `yaw`
+          // (motion3d places it from its place; kinematics3d says whether the ground holds it).
+          const fields = { pos: [x, y, z], along: [x, y, z], yaw, facing: yaw, look: { ...me.data.look, yaw }, vel: [0, 0, 0], speed: 0 }
           for (const [path, value] of Object.entries(fields)) rec.edit({ set: { scene: chosen.scene, id: me.id, path: [path], value } })
           await stepped()
           await stepped()
@@ -920,7 +1017,7 @@
         ease: main.world.motion3d.ease,
         fade: main.world.motion3d.kinds.xbot.fade,
         object: main.world.motion3d.mods.object !== undefined,
-        jumpH: main.world.kinematics3d.kinds.xbot.fall.jumpH,
+        jumpH: main.world.kinematics3d.kinds.xbot.jump.jumpH,
         priority: Object.fromEntries(spaces.map(name => [name, main.world.shapes3d.kinds[name].priority ?? 1])),
       })
       const was = fileOf()
@@ -932,7 +1029,7 @@
           if (own.object) world.motion3d.mods.object = 'yard'
           else delete world.motion3d.mods.object
           for (const name of spaces) world.shapes3d.kinds[name].priority = own.priority[name]
-          world.kinematics3d.kinds.xbot.fall.jumpH = own.jumpH
+          world.kinematics3d.kinds.xbot.jump.jumpH = own.jumpH
         }
       }
       const mf = gui.addFolder('motion3d')
@@ -943,7 +1040,7 @@
       const pf = mf.addFolder('priority')
       for (const name of spaces) pf.add(own.priority, name, 0, 5, 1).onChange(apply)
       pf.close()
-      mf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({ motion3d: { ease: own.ease, fade: own.fade }, priority: own.priority, kinematics3d: { fall: { jumpH: own.jumpH } } }, null, 2)) }, 'copy').name('copy motion3d JSON')
+      mf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({ motion3d: { ease: own.ease, fade: own.fade }, priority: own.priority, kinematics3d: { jump: { jumpH: own.jumpH } } }, null, 2)) }, 'copy').name('copy motion3d JSON')
       mf.add({ reset: () => {
         Object.assign(own, clone(was))
         for (const c of gui.controllersRecursive()) c.updateDisplay()
