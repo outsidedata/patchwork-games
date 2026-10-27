@@ -11,7 +11,7 @@
   },
   "rifle": {
    "prop": "rifle",
-   "anchor": { "bone": "RightShoulder", "at": [0.133, 0.1669, 0.0867], "turn": [-87.22, -36.23, 29.51], "point": "stock" },
+   "anchor": { "bone": "RightShoulder", "at": [0.2086, 0.0249, -0.0209], "turn": [-67.4, -25.8, 30.7], "point": "stock" },
    "limbs": [
     { "bones": ["RightArm", "RightForeArm", "RightHand"], "target": "grip", "pole": [-1, -1, 0] },
     { "bones": ["LeftArm", "LeftForeArm", "LeftHand"], "target": "support", "pole": [1, -1, 0] }
@@ -26,10 +26,13 @@
     "cup": { "clips": [], "over": "Spine", "press": "cup", "carry": "cup" },
     "holster": { "clips": ["rifleaway"], "over": "Spine", "press": "gun", "from": ["aim"], "carry": "rifle" },
     "draw": { "clips": ["rifleout"], "over": "Spine", "press": "gun", "then": "aim", "carry": "rifle" },
-    "aim": { "clips": [], "over": "Spine", "carry": "rifle" },
+    "aim": { "clips": ["rifleidle"], "over": "Spine", "carry": "rifle" },
     "jump": { "target": "plane", "clips": ["jump"], "when": ["rising"], "then": "fall" },
     "fall": { "target": "plane", "clips": ["fall"], "when": ["falling"] },
     "land": { "target": "plane", "clips": ["land"], "from": ["jump", "fall"], "when": ["landed"] },
+    "strafefast": { "target": "plane", "clips": ["riflerun", "riflerunleft", "riflerunright", "riflerunback", "riflerunforwardleft", "riflerunforwardright", "riflerunbackleft", "riflerunbackright"], "from": ["aim"], "when": ["ground", "moving", "fast"] },
+    "strafe": { "target": "plane", "clips": ["riflewalk", "riflewalkleft", "riflewalkright", "riflewalkback", "riflewalkforwardleft", "riflewalkforwardright", "riflewalkbackleft", "riflewalkbackright"], "from": ["aim"], "when": ["ground", "moving"] },
+    "strafestand": { "target": "plane", "clips": ["rifleidle"], "from": ["aim"], "when": ["ground", "still"] },
     "run": { "target": "plane", "clips": ["run"], "when": ["ground", "moving", "fast"] },
     "walk": { "target": "plane", "clips": ["walk"], "when": ["ground", "moving"] },
     "stand": { "target": "plane", "clips": ["idle"], "when": ["ground", "still"] }

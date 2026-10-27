@@ -187,6 +187,74 @@
   "rifleaway": {
    "spot": ["Hips"],
    "on": "both"
+  },
+  "rifleidle": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflewalk": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflewalkleft": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflewalkright": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflewalkback": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflewalkforwardleft": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflewalkforwardright": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflewalkbackleft": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflewalkbackright": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflerun": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflerunleft": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflerunright": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflerunback": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflerunforwardleft": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflerunforwardright": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflerunbackleft": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "riflerunbackright": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
   }
  },
  "offsets": {
@@ -425,6 +493,91 @@
     "beginTurn": 0
    },
    "rifleaway": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "rifleidle": {
+    "beginOffset": [0, 0.08, 0],
+    "endOffset": [0, 0.08, 0],
+    "beginTurn": 0
+   },
+   "riflewalk": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "riflewalkleft": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "riflewalkright": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "riflewalkback": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "riflewalkforwardleft": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "riflewalkforwardright": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "riflewalkbackleft": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "riflewalkbackright": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "riflerun": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "riflerunleft": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "riflerunright": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "riflerunback": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "riflerunforwardleft": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "riflerunforwardright": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "riflerunbackleft": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "riflerunbackright": {
     "beginOffset": [0, 0, 0],
     "endOffset": [0, 0, 0],
     "beginTurn": 0

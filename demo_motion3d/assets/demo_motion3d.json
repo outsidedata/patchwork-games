@@ -8,7 +8,6 @@
       "stick": [["a", "ArrowLeft", "PadStickLeft"], ["d", "ArrowRight", "PadStickRight"], ["w", "ArrowUp", "PadStickUp"], ["s", "ArrowDown", "PadStickDown"]],
       "look": ["PadRightStickLeft", "PadRightStickRight", "PadRightStickUp", "PadRightStickDown"],
       "fast": ["Shift", "Pad7"],
-    "aim": ["q", "Pad5"],
       "motions": { "jump": [" ", "Pad0"], "use": ["e", "Pad2"], "gun": ["g", "Pad11"], "cup": ["c", "Pad10"] },
       "nearer": ["Pad12"],
       "further": ["Pad13"],

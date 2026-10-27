@@ -165,7 +165,10 @@
           "glb": "xbot-glb",
           "fade": 0.2,
           "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
-          "props": [{ "model": "rifle", "bone": "RightHand", "at": [0.0033, 0.1072, 0.0122], "turn": [91.56, 27.38, -95.79] }, { "model": "cup", "bone": "LeftHand", "at": [0, 0, 0], "turn": [0, 0, 0] }]
+          "props": [
+            { "model": "rifle", "bone": "RightHand", "at": [0.0033, 0.1072, 0.0122], "turn": [91.56, 27.38, -95.79] },
+            { "model": "cup", "bone": "LeftHand", "at": [0, 0, 0], "turn": [0, 0, 0] }
+          ]
         }
       },
       "ease": 0.15,
@@ -230,7 +233,6 @@
       "stick": [0, 0],
       "turning": [0, 0],
       "fast": false,
-      "aiming": false,
       "look": { "yaw": 0, "pitch": 0.35, "dist": 5 },
       "lift": 1.4
     },

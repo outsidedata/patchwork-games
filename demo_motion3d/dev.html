@@ -79,6 +79,14 @@
       //                     page draws the car, or where its row stands (`world.motion3d.mods.object`)
       //   priority          each space's priority (shapes3d's kind's `priority`, 1 where it gives none)
       // `copy motion3d JSON` copies the panel's numbers, and `reset to the file` puts the file's back.
+      //
+      // The rifle carry: the rifle's anchor in the X Bot's motion3d file (`at`, metres, and `turn`, degrees,
+      // in the anchor bone's frame), laid into the truth's and the page's copies as it changes. The
+      // readout says how far the spine turns to aim the rifle level ahead of the legs; `fit it to the
+      // clip's hands` sets the anchor so the rifle's grip is where the clip's own right hand is and its
+      // front grip toward its left, the rifle then pointing the way the clip holds it; `level it` turns the anchor by the spine's turn, so aiming
+      // straight ahead bends the spine none. `copy the anchor JSON` copies it
+      // for the file. `window.dev` has `rifle`, `setRifle`, `fit`, `level` and `spineTurn` for a driver.
       import { imported } from '#engine/browser.ts'
       import { manager, scenes, view } from '#addons/scenemanager/scenemanager.addon.ts'
       import { recorder } from '#addons/recorder/recorder.addon.ts'
@@ -88,6 +96,7 @@
       import GUI from 'lil-gui'
       import { ground } from '#plugins/shapes3d/shapes3d.kinematics3d.ts'
       import { numbers } from '#plugins/kinematics3d/kinematics3d.sim.ts'
+      import { json } from '#plugins/loader/loader.sim.ts'
       import { sim } from './demo_motion3d.sim.ts'
       import file from './demo_motion3d.scene.json'
 
@@ -881,6 +890,106 @@
       } }, 'reset').name('reset to the file')
       mf.close()
 
+      // ---------- the rifle's carry ----------
+
+      // The rifle carry's anchor in the X Bot's motion3d file, laid into the truth's and the page's copies
+      // of it as it changes.
+      const MOTION = main.world.motion3d.kinds.xbot.motion
+      const anchors = () => [room() && json(readerOf(room()), MOTION), client && json(client.plugins.wire, MOTION)].filter(Boolean).map(f => f.carries.rifle.anchor)
+      const anchorWas = clone(anchors()[0])
+      const rifle = {}
+      const fromFile = a => Object.assign(rifle, { x: a.at[0], y: a.at[1], z: a.at[2], rx: a.turn[0], ry: a.turn[1], rz: a.turn[2] })
+      fromFile(anchorWas)
+      const round = (v, n) => Number(v.toFixed(n))
+      const setRifle = () => {
+        for (const a of anchors()) {
+          a.at = [round(rifle.x, 4), round(rifle.y, 4), round(rifle.z, 4)]
+          a.turn = [round(rifle.rx, 2), round(rifle.ry, 2), round(rifle.rz, 2)]
+        }
+      }
+      // How far the spine turns to aim the rifle level, straight ahead of the legs: the angle from where
+      // the rifle points before the aim's turn to there, degrees; null when not aimed.
+      const ahead = () => {
+        const me = meIn(room())
+        const a = me && client?.plugins.motion3d?.aimed(me.id)
+        if (!a) return null
+        const yaw = me.data.yaw
+        return { aimed: a, level: [Math.sin(yaw), 0, Math.cos(yaw)] }
+      }
+      const spineTurn = () => {
+        const h = ahead()
+        if (!h) return null
+        const [f, l] = [h.aimed.forward, h.level]
+        return Math.acos(clamp(f[0] * l[0] + f[1] * l[1] + f[2] * l[2], -1, 1)) * 180 / Math.PI
+      }
+      // The anchor turned so the rifle, as the clip holds the shoulder, points level ahead: the turn the
+      // aim would make (across about up, then up or down, as motion3d's aim makes it) put into the anchor.
+      const level = () => {
+        const h = ahead()
+        if (!h) return
+        const T = client.plugins.render3d.THREE
+        const f = new T.Vector3().fromArray(h.aimed.forward), want = new T.Vector3().fromArray(h.level)
+        const across = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), Math.atan2(want.x, want.z) - Math.atan2(f.x, f.z))
+        const turn = new T.Quaternion().setFromUnitVectors(f.clone().applyQuaternion(across).normalize(), want).multiply(across)
+        const bone = new T.Quaternion().fromArray(h.aimed.bone)
+        const DEG = Math.PI / 180
+        const was = new T.Quaternion().setFromEuler(new T.Euler(rifle.rx * DEG, rifle.ry * DEG, rifle.rz * DEG, 'XYZ'))
+        const now = bone.clone().invert().multiply(turn).multiply(bone).multiply(was)
+        const e = new T.Euler().setFromQuaternion(now, 'XYZ')
+        Object.assign(rifle, { rx: e.x / DEG, ry: e.y / DEG, rz: e.z / DEG })
+        for (const c of gui.controllersRecursive()) c.updateDisplay()
+        setRifle()
+      }
+      // The anchor set so the rifle sits where the clip's own hands hold it: the rifle's grip on the hand
+      // of the carry's first limb as the clip poses it, turned about the grip until the second limb's
+      // empty lies toward that limb's hand, and the anchor's `at` and `turn` the stock's frame then, in
+      // the anchor bone's.
+      const fit = () => {
+        const me = meIn(room())
+        const a = me && client?.plugins.motion3d?.aimed(me.id)
+        if (!a?.hands?.length || !a.anchor) return
+        const T = client.plugins.render3d.THREE
+        const carry = json(readerOf(room()), MOTION).carries.rifle
+        const prop = client.plugins.motion3d.props(me.id)[main.world.motion3d.kinds.xbot.props.findIndex(p => p.model === carry.prop)]
+        prop.updateWorldMatrix(true, true)
+        const inside = name => {
+          let found
+          prop.traverse(o => { if (!found && o !== prop && o.name.endsWith(name)) found = o })
+          return prop.matrixWorld.clone().invert().multiply(found.matrixWorld)
+        }
+        const rifleAt = new T.Matrix4().fromArray(a.hands[0]).multiply(inside(carry.limbs[0].target).invert())
+        // Turned about the grip until the other limb's empty lies toward that limb's hand.
+        if (a.hands[1]) {
+          const where = m => new T.Vector3().setFromMatrixPosition(m)
+          const grip = where(rifleAt.clone().multiply(inside(carry.limbs[0].target)))
+          const other = where(rifleAt.clone().multiply(inside(carry.limbs[1].target)))
+          const hand = where(new T.Matrix4().fromArray(a.hands[1]))
+          const turn = new T.Quaternion().setFromUnitVectors(other.sub(grip).normalize(), hand.sub(grip).normalize())
+          rifleAt.premultiply(new T.Matrix4().makeTranslation(-grip.x, -grip.y, -grip.z))
+            .premultiply(new T.Matrix4().makeRotationFromQuaternion(turn))
+            .premultiply(new T.Matrix4().makeTranslation(grip.x, grip.y, grip.z))
+        }
+        const local = new T.Matrix4().fromArray(a.anchor).invert().multiply(rifleAt).multiply(inside(carry.anchor.point))
+        const p = new T.Vector3(), q = new T.Quaternion()
+        local.decompose(p, q, new T.Vector3())
+        const e = new T.Euler().setFromQuaternion(q, 'XYZ')
+        const DEG = Math.PI / 180
+        Object.assign(rifle, { x: p.x, y: p.y, z: p.z, rx: e.x / DEG, ry: e.y / DEG, rz: e.z / DEG })
+        for (const c of gui.controllersRecursive()) c.updateDisplay()
+        setRifle()
+      }
+      const rf = gui.addFolder('rifle carry')
+      rf.add(rifle, 'x', -0.4, 0.4, 0.001).name('at x, m').onChange(setRifle)
+      rf.add(rifle, 'y', -0.4, 0.4, 0.001).name('at y, m').onChange(setRifle)
+      rf.add(rifle, 'z', -0.4, 0.4, 0.001).name('at z, m').onChange(setRifle)
+      rf.add(rifle, 'rx', -180, 180, 0.1).name('turn x, °').onChange(setRifle)
+      rf.add(rifle, 'ry', -180, 180, 0.1).name('turn y, °').onChange(setRifle)
+      rf.add(rifle, 'rz', -180, 180, 0.1).name('turn z, °').onChange(setRifle)
+      rf.add({ go: fit }, 'go').name('fit it to the clip\'s hands')
+      rf.add({ go: level }, 'go').name('level it: no spine turn aiming straight ahead')
+      rf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({ at: anchors()[0].at, turn: anchors()[0].turn })) }, 'copy').name('copy the anchor JSON')
+      rf.add({ reset: () => { fromFile(anchorWas); for (const c of gui.controllersRecursive()) c.updateDisplay(); setRifle() } }, 'reset').name('reset to the file')
+
       // ---------- the readout ----------
 
       // What motion3d has the seat's body doing, off its row in the scene's truth, and the limbs it bends.
@@ -903,6 +1012,8 @@
         let reach = []
         try { reach = reachesOf(w, me) } catch (e) { caught(e) }
         const short = client?.plugins.motion3d?.short(me.id) ?? []
+        const turned = spineTurn()
+        lines.push(turned === null ? 'not aimed' : `the spine turns ${turned.toFixed(1)}° to aim level ahead of the legs`)
         if (reach.length) lines.push(reach.map((r, i) => `${r.bone} pinned ${fixed(r.weight)} short ${short[i] === undefined ? '-' : `${(short[i] * 100).toFixed(1)} cm`}`).join('   '))
         return lines
       }
@@ -1103,6 +1214,7 @@
         get current() { return run }, get all() { return all }, get busy() { return busy },
         run: begin, runNow, runAll, goTo, stepOn, focus, measure, worst, faults, LIMITS,
         pause: on => { clock.paused = on },
+        rifle, setRifle, level, fit, spineTurn,
       }
       if (query.get('station') !== null) begin(wanted.station)
     </script>

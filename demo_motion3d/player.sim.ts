@@ -2,10 +2,12 @@
 // (`world.kinematics3d.kinds.xbot`) and played and drawn by motion3d (`world.motion3d.kinds.xbot`), every
 // move it makes the X Bot's motion3d file's (`assets/xbot.motion3d.json`). Every seat is sent every
 // `player` row. Its own fields, beside kinematics3d's and motion3d's: `stick` [x, z], the keys' way,
-// right and forward; `fast`, the run key held; `aiming`, the aim key held, which aims the body (motion3d's
-// `aim`) the way the camera looks; `look` `{ yaw, pitch, dist }`, chasecamera3d's orbit about
+// right and forward; `fast`, the run key held; `look` `{ yaw, pitch, dist }`, chasecamera3d's orbit about
 // it, `lift` metres over its feet; `turning` [x, y], how far a gamepad's right stick is pushed right and
-// down; and `stood`, once it stands on its slot's start.
+// down; `aim`, the way the camera looks, which motion3d points the rifle along while it is up; and
+// `stood`, once it stands on its slot's start. With the rifle up (the upper half's `aim`) the legs keep
+// the way they face and strafe, turned only when the look is more than its rig's `aim.across`
+// (radians) to either side of them; the aim's pitch is held within the rig's `aim.up` and `aim.down`.
 //
 // `before` stands it once on the ground at its slot's start, facing the start's `yaw`, its look along
 // it. Each step its look turns while `turning` is held, at the definition's `camera.turn` across and
@@ -15,14 +17,15 @@
 // motion3d's `drive`, which moves and plays the body by it.
 //
 // The acts are the page's keys: `stick(x, y)` (y down, as a stick reads), `turn(x, y)` (the right
-// stick, the same), `fast(v)` and `aiming(v)` (1 held, 0 let go), `press(key)`, a key pressed, handed to motion3d's
+// stick, the same), `fast(v)` (1 held, 0 let go), `press(key)`, a key pressed, handed to motion3d's
 // `press` with the stick, and `jump` the body's jump where motion3d takes it for no move; `look(dyaw,
 // dpitch)` and `zoom(by)`, the wheel's pixels. A seat's message arrives from outside the program, so each
 // refuses arguments of the wrong kind and writes nothing.
 import type { Kind, Row, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
-import { aim, drive, press } from '#plugins/motion3d/motion3d.sim.ts'
+import { drive, press } from '#plugins/motion3d/motion3d.sim.ts'
+import { playKind, rigOf } from '#plugins/motion3d/motion3d.play.ts'
 import { ground, relative } from '#plugins/kinematics3d/kinematics3d.sim.ts'
 
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
@@ -63,11 +66,16 @@ export const player: Kind = {
     view(me, dt, k)
     const [wx, wz] = relative(d.stick, d.look.yaw)
     const speed = d.fast ? k.run : k.walk
-    d.face = null
+    // With the rifle up the legs keep the way they face, and strafe, turned only as far as keeps the aim
+    // within the rig's `aim.across` of them; else they turn the way they go.
+    const limits = rigOf(w, playKind(me)).aim
+    if (!limits) throw new Error(`player: the rig of ${playKind(me)} gives no aim limits`)
+    const across = wrap(d.look.yaw - d.yaw)
+    d.face = d.upperMotion !== 'aim' ? null : Math.abs(across) > limits.across ? wrap(d.look.yaw - Math.sign(across) * limits.across) : d.yaw
     d.want = [wx * speed, wz * speed]
-    // Aimed the way the camera looks while the aim key is held: chasecamera3d looks along its yaw and
-    // down by its pitch.
-    aim(me, w, d.aiming ? { yaw: d.look.yaw, pitch: -d.look.pitch } : null)
+    // Aimed the way the camera looks: along its yaw, and down by its pitch within the rig's `aim.up` and `aim.down`.
+    const up = clamp(-d.look.pitch, -limits.down, limits.up)
+    d.aim = [math.sin(d.look.yaw) * math.cos(up), math.sin(up), math.cos(d.look.yaw) * math.cos(up)]
     drive(me, w, dt, d.stick)
   },
   acts: {
@@ -79,9 +87,6 @@ export const player: Kind = {
     },
     fast(me, _w, _seat, v: unknown) {
       if (v === 0 || v === 1) me.data.fast = v === 1
-    },
-    aiming(me, _w, _seat, v: unknown) {
-      if (v === 0 || v === 1) me.data.aiming = v === 1
     },
     press(me, w, _seat, key: unknown) {
       const d = me.data

@@ -3,12 +3,9 @@
   "xbot": "characters/xbot/xbot.fbx"
  },
  "aim": {
-  "bones": {
-   "Spine": 0.3,
-   "Spine1": 0.3,
-   "Spine2": 0.4
-  },
-  "eye": "Head"
+  "across": 1.05,
+  "up": 0.8,
+  "down": 0.8
  },
  "clips": {
   "idle": {
@@ -179,6 +176,106 @@
   },
   "rifleaway": {
    "file": "packs/mixamo-motions/Rifle Put Away.fbx"
+  },
+  "rifleidle": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/idle aiming.fbx",
+   "loop": true
+  },
+  "riflewalk": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/walk forward.fbx",
+   "loop": true,
+   "gear": 0,
+   "stance": "stand"
+  },
+  "riflewalkleft": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/walk left.fbx",
+   "loop": true,
+   "gear": 90,
+   "stance": "stand"
+  },
+  "riflewalkright": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/walk right.fbx",
+   "loop": true,
+   "gear": -90,
+   "stance": "stand"
+  },
+  "riflewalkback": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/walk backward.fbx",
+   "loop": true,
+   "gear": 180,
+   "stance": "stand"
+  },
+  "riflewalkforwardleft": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/walk forward left.fbx",
+   "loop": true,
+   "gear": 45,
+   "stance": "stand"
+  },
+  "riflewalkforwardright": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/walk forward right.fbx",
+   "loop": true,
+   "gear": -45,
+   "stance": "stand"
+  },
+  "riflewalkbackleft": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/walk backward left.fbx",
+   "loop": true,
+   "gear": 135,
+   "stance": "stand"
+  },
+  "riflewalkbackright": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/walk backward right.fbx",
+   "loop": true,
+   "gear": -135,
+   "stance": "stand"
+  },
+  "riflerun": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/run forward.fbx",
+   "loop": true,
+   "gear": 0,
+   "stance": "stand"
+  },
+  "riflerunleft": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/run left.fbx",
+   "loop": true,
+   "gear": 90,
+   "stance": "stand"
+  },
+  "riflerunright": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/run right.fbx",
+   "loop": true,
+   "gear": -90,
+   "stance": "stand"
+  },
+  "riflerunback": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/run backward.fbx",
+   "loop": true,
+   "gear": 180,
+   "stance": "stand"
+  },
+  "riflerunforwardleft": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/run forward left.fbx",
+   "loop": true,
+   "gear": 45,
+   "stance": "stand"
+  },
+  "riflerunforwardright": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/run forward right.fbx",
+   "loop": true,
+   "gear": -45,
+   "stance": "stand"
+  },
+  "riflerunbackleft": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/run backward left.fbx",
+   "loop": true,
+   "gear": 135,
+   "stance": "stand"
+  },
+  "riflerunbackright": {
+   "file": "packs/Rifle 8-Way Locomotion Pack 30FPS/run backward right.fbx",
+   "loop": true,
+   "gear": -135,
+   "stance": "stand"
   }
  },
  "roles": {

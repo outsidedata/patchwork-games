@@ -8,7 +8,6 @@
 //   look      the right stick, read analog, sent as `turn` with how far it is pushed across and down:
 //             the rule turns the view at the definition's `camera.turn` and `tilt` while it is held
 //   fast      held to run
-//   aim       held to aim the body the way the camera looks
 //   motions   each a motion's name to its keys, pressed as `press` with that name: motion3d plays it
 //             in the activity the body is in, a zone's, or its own
 //   nearer, further   the camera in and out by `camera.step` of the wheel's pixels a press
@@ -40,7 +39,7 @@ export function setup(row: Row, plugins: Plugins) {
       { keys: keys.stick, send: (x, y) => ['stick', x, y], analog: true },
       { keys: keys.look, send: (x, y) => ['turn', x, y], analog: true },
     ],
-    hold: [{ keys: keys.fast, send: v => ['fast', v] }, { keys: keys.aim, send: v => ['aiming', v] }],
+    hold: [{ keys: keys.fast, send: v => ['fast', v] }],
     press,
     drag: { key: keys.drag, send: (dx, dy) => ['look', -dx * k.sens, dy * k.sens] },
     wheel: dy => ['zoom', dy],

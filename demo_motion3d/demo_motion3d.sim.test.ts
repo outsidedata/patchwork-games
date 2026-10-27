@@ -677,7 +677,7 @@ test('at the low wall it vaults over it, and walks on beyond it', async () => {
   expect(me().data.pos[2]).toBeGreaterThan(wall[2] + kinds.vaultwall.shape.box.size[2] / 2)
 })
 
-test('the gun key draws the rifle over the walk, the hands on it, holds it aimed, and puts it away again', async () => {
+test('the gun key draws the rifle over the walk, the hands on it, holds it aimed, strafes with it, and puts it away again', async () => {
   const { truth, send, me, until, room } = await joined()
   send('press', 'gun')
   truth.step(DT)
@@ -686,9 +686,10 @@ test('the gun key draws the rifle over the walk, the hands on it, holds it aimed
   until(() => me().data.upperMotion === 'aim', 60 * 4)
   until(() => me().data.was === null, 60)
   expect(carrying(reader(room), me())).toMatchObject({ carry: { prop: 'rifle' }, weight: 1 })
+  // Walked with it up, the legs strafe forward beneath the aim.
   send('stick', 0, -1)
-  until(() => me().data.clip === 'walk', 60)
-  expect(me().data.upper).toBe(null)
+  until(() => me().data.clip === 'riflewalk', 60)
+  expect(me().data).toMatchObject({ motion: 'strafe', upper: 'rifleidle' })
   send('stick', 0, 0)
   // Its key again puts it away, and the upper half is let go once that has played out.
   send('press', 'gun')
@@ -696,20 +697,4 @@ test('the gun key draws the rifle over the walk, the hands on it, holds it aimed
   expect(me().data).toMatchObject({ upperMotion: 'holster', upper: 'rifleaway' })
   until(() => me().data.upperMotion === null && me().data.upper === null, 60 * 4)
   expect(carrying(reader(room), me())).toBe(undefined)
-})
-
-test('held, the aim key turns the body to the way the camera looks and pitches it by the camera\'s pitch; let go, it walks as before', async () => {
-  const { truth, send, me, until } = await joined()
-  const yaw = me().data.yaw + 1
-  send('look', 1, 0.3)
-  send('aiming', 1)
-  truth.step(DT)
-  expect(me().data.aiming).toBe(true)
-  expect(me().data.face).toBeCloseTo(me().data.look.yaw, 9)
-  expect(me().data.aim).toBeCloseTo(-me().data.look.pitch, 9)
-  until(() => Math.abs(me().data.yaw - yaw) < 1e-3, 60 * 2)
-  send('aiming', 0)
-  truth.step(DT)
-  expect(me().data.face).toBe(null)
-  expect(me().data.aim).toBe(0)
 })
