@@ -216,10 +216,9 @@
     "motion3d": {
       "kinds": { "xbot": { "anywhere": ["walk"] } },
       "ease": 0.15,
-      "mods": { "spaces": "shapes3d", "behaviors": ["walker", "zones"], "body": "anim", "object": "zones" }
+      "mods": { "spaces": "shapes3d", "behaviors": ["walker"], "body": "anim" }
     },
-    "ik3d": { "kinds": {}, "mods": { "body": "anim", "limbs": "motion3d" } },
-    "shipped": { "plugins": ["zones"] }
+    "ik3d": { "kinds": {}, "mods": { "body": "anim", "limbs": "motion3d" } }
   },
   "plugins": [
     "loader",
@@ -228,7 +227,6 @@
     "terrain3d",
     "anim",
     "solids",
-    "shipped",
     "motion3d",
     "ik3d",
     "environment3d",

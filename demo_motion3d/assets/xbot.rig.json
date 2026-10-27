@@ -81626,17 +81626,10 @@
     "endOffset": [0, 0, 0],
     "beginTurn": 0
    },
-   "wallside": {
-    "beginOffset": [0, 1.243, 0],
-    "endOffset": [0.844, 1.179, 3.241],
-    "beginTurn": 39.05,
-    "normal": [-0.777, 0, -0.63]
-   },
    "land": {
-    "beginOffset": [-0.226, 1.132, 3.064],
-    "endOffset": [-0.226, 1.175, 3.155],
-    "beginTurn": -56.35,
-    "normal": [-0.554, 0, 0.832]
+    "beginOffset": [-0.085, 1.036, 0.099],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
    },
    "backflip": {
     "beginOffset": [0, 0, 0],
@@ -81759,6 +81752,12 @@
     "endOffset": [0, 0.166, 0],
     "beginTurn": 1.54,
     "normal": [0.027, 0, -1]
+   },
+   "wallside": {
+    "beginOffset": [0, 1.243, 0],
+    "endOffset": [0.844, 1.179, 3.241],
+    "beginTurn": 39.05,
+    "normal": [-0.777, 0, -0.63]
    },
    "vaultone": {
     "beginOffset": [0, 0, 0],

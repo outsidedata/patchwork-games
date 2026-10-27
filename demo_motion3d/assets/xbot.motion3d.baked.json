@@ -1,0 +1,234 @@
+{
+ "offsets": {
+  "xbot": {
+   "idle": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "walk": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "run": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "jump": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0.009, 0.405, 0.116],
+    "beginTurn": 0
+   },
+   "fall": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "land": {
+    "beginOffset": [-0.085, 1.036, 0.099],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "backflip": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "pickup": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "bracedjump": {
+    "beginOffset": [0.319, -1.28, -0.408],
+    "endOffset": [0, 0, 0],
+    "beginTurn": -38.5
+   },
+   "bracedidle": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "bracedleft": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "bracedright": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "bracedclimb": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [-0.134, 0.511, 0.574],
+    "beginTurn": 0
+   },
+   "braceddrop": {
+    "beginOffset": [-0.044, 0, 0.461],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 36.6
+   },
+   "sitdown": {
+    "beginOffset": [0.002, 0.413, 0.479],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "seated": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "standup": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0.005, 0.413, 0.473],
+    "beginTurn": 0
+   },
+   "coldrub": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "coldlook": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "freejump": {
+    "beginOffset": [0.4, -1.421, -0.055],
+    "endOffset": [0, 0, 0],
+    "beginTurn": -44.9
+   },
+   "freeidle": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "freeleft": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "freeright": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "freedrop": {
+    "beginOffset": [0.327, 0, 0.314],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 44.9
+   },
+   "barmove": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "barleft": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "ropeclimb": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "ropeswing": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0.033, 0, 5.948],
+    "beginTurn": 0
+   },
+   "wallclimb": {
+    "beginOffset": [0, 0.14, 0],
+    "endOffset": [0, 0.14, 0],
+    "beginTurn": -1.22,
+    "normal": [-0.021, 0, -1]
+   },
+   "walldown": {
+    "beginOffset": [0, 0.166, 0],
+    "endOffset": [0, 0.166, 0],
+    "beginTurn": 1.54,
+    "normal": [0.027, 0, -1]
+   },
+   "wallside": {
+    "beginOffset": [0, 1.243, 0],
+    "endOffset": [0.844, 1.179, 3.241],
+    "beginTurn": 39.05,
+    "normal": [-0.777, 0, -0.63]
+   },
+   "vaultone": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0.014, 0, 5.093],
+    "beginTurn": 0
+   },
+   "teeter": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "jumpdown": {
+    "beginOffset": [0.05, 0, -1.256],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "stairsup": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "typing": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "liedown": {
+    "beginOffset": [-0.02, 0.067, 0.467],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "bedidle": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "carin": {
+    "beginOffset": [1.888, 0.126, 0.382],
+    "endOffset": [0, 0, 0],
+    "beginTurn": -97.4
+   },
+   "drive": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "honk": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "carout": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [1.984, 0.16, 0.188],
+    "beginTurn": 0
+   },
+   "poolin": {
+    "beginOffset": [-0.156, 2.579, -1.018],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "tread": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "swimunder": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   }
+  }
+ }
+}

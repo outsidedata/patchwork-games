@@ -7,7 +7,7 @@
 // It writes the kinds it makes, their prefabs and their actors anew, and leaves every other line of the
 // scene as it was: the zones, the wall's ledge and the chair written by hand.
 //
-// Every size and every point comes from what the clips measure in the rig (`xbot.rig.json`): `ends`, each
+// Every size and every point comes from what the clips measure (`xbot.rig.baked.json`): `ends`, each
 // bone where anim draws it in the body's frame (x left, y up, z ahead, metres from the root), and
 // `touches`, what each clip touches (anim's touch reader, `plugins/anim/anim.touches.mjs`, whose places
 // are in the clip's frame at its start). As demo_walker's yard does (`games/demo_walker/assets/yard.mjs`,
@@ -58,7 +58,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
 const here = import.meta.dirname
-const rig = JSON.parse(readFileSync(path.join(here, 'xbot.rig.json'), 'utf8'))
+const rig = { ...JSON.parse(readFileSync(path.join(here, 'xbot.rig.json'), 'utf8')), ...JSON.parse(readFileSync(path.join(here, 'xbot.rig.baked.json'), 'utf8')) }
 const defsFile = path.join(here, 'demo_motion3d.json')
 const defs = JSON.parse(readFileSync(defsFile, 'utf8'))
 const sceneFile = path.join(here, '..', 'main.scene.json')

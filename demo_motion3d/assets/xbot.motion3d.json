@@ -1,0 +1,131 @@
+{
+ "rig": "xbot.rig.json",
+ "moves": 0.05,
+ "turns": 30,
+ "activities": {
+  "walk": {
+   "normal": [0, 1, 0],
+   "motions": {
+    "stand": { "target": "plane", "clips": ["idle"] },
+    "walk": { "target": "plane", "clips": ["walk"] },
+    "run": { "target": "plane", "clips": ["run"] },
+    "jump": { "target": "plane", "clips": ["jump"] },
+    "fall": { "target": "plane", "clips": ["fall"] },
+    "land": { "target": "plane", "clips": ["land"] }
+   }
+  },
+  "party": {
+   "motions": {
+    "use": { "target": "plane", "clips": ["backflip"] }
+   }
+  },
+  "sad": {
+   "motions": {
+    "use": { "target": "plane", "clips": ["pickup"] }
+   }
+  },
+  "cold": {
+   "normal": [0, 1, 0],
+   "motions": {
+    "idle": { "target": "plane", "clips": ["coldrub", "coldlook"] }
+   }
+  },
+  "ledge": {
+   "motions": {
+    "use": { "target": "line", "clips": ["bracedjump"] },
+    "hang": { "target": "line", "clips": ["bracedidle"] },
+    "move": { "target": "line", "clips": ["bracedleft", "bracedright"] },
+    "climb": { "target": "line", "clips": ["bracedclimb"] },
+    "drop": { "target": "line", "clips": ["braceddrop"] }
+   }
+  },
+  "bar": {
+   "motions": {
+    "use": { "target": "line", "clips": ["freejump"] },
+    "hang": { "target": "line", "clips": ["freeidle"] },
+    "move": { "target": "line", "clips": ["barmove", "barleft"] },
+    "drop": { "target": "line", "clips": ["freedrop"] }
+   }
+  },
+  "ceiling": {
+   "motions": {
+    "use": { "target": "plane", "clips": ["freejump"] },
+    "hang": { "target": "plane", "clips": ["freeidle"] },
+    "move": { "target": "plane", "clips": ["freeleft", "freeright"] },
+    "drop": { "target": "plane", "clips": ["freedrop"] }
+   }
+  },
+  "rope": {
+   "motions": {
+    "use": { "target": "line", "clips": ["ropeclimb"] }
+   }
+  },
+  "swing": {
+   "motions": {
+    "use": { "target": "point", "clips": ["ropeswing"] }
+   }
+  },
+  "climb": {
+   "motions": {
+    "use": { "target": "plane", "clips": ["wallclimb"] },
+    "down": { "target": "plane", "clips": ["walldown"] }
+   }
+  },
+  "wallrun": {
+   "motions": {
+    "use": { "target": "plane", "clips": ["wallside"] },
+    "land": { "target": "plane", "clips": ["land"] }
+   }
+  },
+  "vault": {
+   "motions": {
+    "use": { "target": "point", "clips": ["vaultone"] }
+   }
+  },
+  "edge": {
+   "motions": {
+    "use": { "target": "line", "clips": ["teeter"] },
+    "down": { "target": "line", "clips": ["jumpdown"] }
+   }
+  },
+  "stairs": {
+   "motions": {
+    "use": { "target": "line", "clips": ["stairsup"] }
+   }
+  },
+  "pool": {
+   "motions": {
+    "use": { "target": "plane", "clips": ["poolin"] },
+    "float": { "target": "plane", "clips": ["tread"] },
+    "swim": { "target": "plane", "clips": ["swimunder"] },
+    "out": { "target": "line", "clips": ["bracedclimb"] }
+   }
+  },
+  "desk": {
+   "motions": {
+    "use": { "target": "point", "clips": ["typing"] }
+   }
+  },
+  "bed": {
+   "motions": {
+    "use": { "target": "point", "clips": ["liedown"] },
+    "lie": { "target": "point", "clips": ["bedidle"] }
+   }
+  },
+  "car": {
+   "motions": {
+    "use": { "target": "point", "clips": ["carin"] },
+    "pilot": { "target": "point", "clips": ["drive"] },
+    "honk": { "target": "point", "clips": ["honk"] },
+    "out": { "target": "point", "clips": ["carout"] }
+   }
+  },
+  "chair": {
+   "motions": {
+    "use": { "target": "point", "clips": ["sitdown"] },
+    "seated": { "target": "point", "clips": ["seated"] },
+    "stand": { "target": "point", "clips": ["standup"] }
+   }
+  }
+ }
+}
