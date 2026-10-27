@@ -52,6 +52,8 @@
 //               `carin` ends the hips and `drive` holds them, its wheel where `drive` holds the wrists;
 //               the car is the game's `car` kind, which stands its parts and its space
 //               about it (`car.sim.ts`), so the parts and the space are written into its definition
+//   beam        a low beam, offering `beam` at its near end: its `Beam` line along its top where
+//               `sneakwalk` stands the ankles
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
@@ -467,6 +469,18 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
   space('tiltzone', [3, 5, 1], [x, 0, z - 0.5], ['climb'], {
     Face: { plane: { at: [x, tall / 2, z + run / 2], size: [3, tall / Math.sin(rise)], turn: [0, -rise / DEG, 0], normal: r3([0, Math.sin(lean), -Math.cos(lean)]) } },
   })
+}
+
+// ---------------------------------------------------------------- row four
+
+// The beam: a beam 6 m long along z, 0.3 m high, offering `beam` at its near end: its `Beam` line along
+// its top, where `sneakwalk` stands the ankles, the body walking along it facing +z.
+{
+  const [x, z] = [-14, 56]
+  const beam = { top: 0.3, long: 6, wide: 0.2 }
+  box('beam', [beam.wide, beam.top, beam.long], '#b08a5a', x, 0, z + beam.long / 2)
+  const ankles = round(beam.top + bones('sneakwalk', FEET, 0)[1])
+  space('beamzone', [1.4, 2, 1.4], [x, 0, z - 0.5], ['beam'], { Beam: { line: { from: [x, ankles, z], to: [x, ankles, z + beam.long] } } })
 }
 
 // ---------------------------------------------------------------- the scene

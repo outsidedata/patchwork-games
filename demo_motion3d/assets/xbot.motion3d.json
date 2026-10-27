@@ -27,31 +27,30 @@
     "holster": { "clips": ["rifleaway"], "over": "Spine", "press": "gun", "from": ["aim"], "carry": "rifle" },
     "draw": { "clips": ["rifleout"], "over": "Spine", "press": "gun", "then": "aim", "carry": "rifle" },
     "aim": { "clips": ["rifleidle"], "over": "Spine", "carry": "rifle" },
-    "jump": { "target": "plane", "clips": ["jump"], "when": ["rising"], "then": "fall" },
-    "fall": { "target": "plane", "clips": ["fall"], "when": ["falling"] },
-    "land": { "target": "plane", "clips": ["land"], "from": ["jump", "fall"], "when": ["landed"] },
-    "strafefast": { "target": "plane", "clips": ["riflerun", "riflerunleft", "riflerunright", "riflerunback", "riflerunforwardleft", "riflerunforwardright", "riflerunbackleft", "riflerunbackright"], "from": ["aim"], "when": ["ground", "moving", "fast"] },
-    "strafe": { "target": "plane", "clips": ["riflewalk", "riflewalkleft", "riflewalkright", "riflewalkback", "riflewalkforwardleft", "riflewalkforwardright", "riflewalkbackleft", "riflewalkbackright"], "from": ["aim"], "when": ["ground", "moving"] },
-    "strafestand": { "target": "plane", "clips": ["rifleidle"], "from": ["aim"], "when": ["ground", "still"] },
-    "run": { "target": "plane", "clips": ["run"], "when": ["ground", "moving", "fast"] },
-    "walk": { "target": "plane", "clips": ["walk"], "when": ["ground", "moving"] },
-    "stand": { "target": "plane", "clips": ["idle"], "when": ["ground", "still"] }
+    "jump": { "target": "triangles", "behavior": "jump", "clips": ["jump"], "press": "jump", "from": ["stand", "walk", "run", "strafe", "strafefast", "strafestand"], "then": "fall" },
+    "fall": { "target": "triangles", "behavior": "fall", "clips": ["fall"], "when": ["!ground"] },
+    "strafefast": { "target": "triangles", "clips": ["riflerun", "riflerunleft", "riflerunright", "riflerunback", "riflerunforwardleft", "riflerunforwardright", "riflerunbackleft", "riflerunbackright"], "from": ["aim"], "when": ["ground", "pushed", "fast"] },
+    "strafe": { "target": "triangles", "clips": ["riflewalk", "riflewalkleft", "riflewalkright", "riflewalkback", "riflewalkforwardleft", "riflewalkforwardright", "riflewalkbackleft", "riflewalkbackright"], "from": ["aim"], "when": ["ground", "pushed"] },
+    "strafestand": { "target": "triangles", "clips": ["rifleidle"], "from": ["aim"], "when": ["ground", "!pushed"] },
+    "run": { "target": "triangles", "clips": ["run"], "when": ["ground", "pushed", "fast"] },
+    "walk": { "target": "triangles", "clips": ["walk"], "when": ["ground", "pushed"] },
+    "stand": { "target": "triangles", "clips": ["idle"], "when": ["ground", "!pushed"] }
    }
   },
   "party": {
    "motions": {
-    "use": { "target": "plane", "clips": ["backflip"], "press": "use" }
+    "use": { "target": "triangles", "clips": ["backflip"], "press": "use" }
    }
   },
   "sad": {
    "motions": {
-    "use": { "target": "plane", "clips": ["pickup"], "press": "use" }
+    "use": { "target": "triangles", "clips": ["pickup"], "press": "use" }
    }
   },
   "cold": {
    "normal": [0, 1, 0],
    "motions": {
-    "idle": { "target": "plane", "clips": ["coldrub", "coldlook"] }
+    "idle": { "target": "triangles", "clips": ["coldrub", "coldlook"] }
    }
   },
   "ledge": {
@@ -75,7 +74,7 @@
    "motions": {
     "use": { "target": "plane", "clips": ["freejump"], "press": "use", "then": "hang" },
     "hang": { "target": "plane", "clips": ["freeidle"], "from": ["move"], "when": ["still"] },
-    "move": { "target": "plane", "clips": ["freeleft", "freeright"], "stick": "across", "from": ["hang", "move"], "when": ["!stopped"] },
+    "move": { "target": "plane", "clips": ["freeleft", "freeright"], "from": ["hang", "move"], "when": ["pushed", "!stopped"] },
     "drop": { "target": "plane", "clips": ["freedrop"], "press": "use", "from": ["hang", "move"] }
    }
   },
@@ -83,6 +82,14 @@
    "motions": {
     "use": { "target": "line", "clips": ["ropeclimb"], "press": "use" },
     "letgo": { "clips": [], "press": "use", "from": ["use"] }
+   }
+  },
+  "beam": {
+   "motions": {
+    "use": { "target": "line", "clips": ["sneakwalk"], "press": "use" },
+    "back": { "target": "line", "clips": ["sneakback"], "stick": "back", "from": ["use", "forward"] },
+    "forward": { "target": "line", "clips": ["sneakwalk"], "stick": "forward", "from": ["back"] },
+    "letgo": { "clips": [], "press": "use", "from": ["use", "back", "forward"] }
    }
   },
   "swing": {
@@ -125,7 +132,7 @@
    "motions": {
     "use": { "target": "plane", "clips": ["poolin"], "press": "use", "then": "float" },
     "float": { "target": "plane", "clips": ["tread"], "from": ["swim"], "when": ["still"] },
-    "swim": { "target": "plane", "clips": ["swimunder"], "stick": "forward", "from": ["float", "swim"], "when": ["!stopped"] },
+    "swim": { "target": "plane", "clips": ["swimunder"], "from": ["float", "swim"], "when": ["pushed", "!stopped"] },
     "out": { "target": "line", "clips": ["bracedclimb"], "press": "use", "from": ["float", "swim"], "when": ["stopped"] }
    }
   },

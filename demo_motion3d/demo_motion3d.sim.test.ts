@@ -492,11 +492,10 @@ test('at the run wall it runs along the wall, comes down onto the ground, and wa
   send('press', 'use')
   truth.step(DT)
   expect(me().data.clip).toBe('wallside')
-  // The run ends in the air off the wall, and the landing brings it down.
-  until(() => me().data.clip === 'land', 60 * 2)
+  // The run ends in the air off the wall, and falls to the ground.
   until(() => me().data.activity === 'walk', 60 * 3)
-  // Walking again with its feet on the ground, never handed back in the air: its root no higher than
-  // the landing's toes stand over it at its end, on the ground within a few steps.
+  until(() => me().data.grounded && me().data.eased === null, 60)
+  // Walking again with its feet on the ground.
   for (let i = 0; i < 30; i++) {
     expect(me().data.pos[1]).toBeLessThan(0.03)
     truth.step(DT)

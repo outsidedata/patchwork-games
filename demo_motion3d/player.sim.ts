@@ -13,12 +13,12 @@
 // it. Each step its look turns while `turning` is held, at the definition's `camera.turn` across and
 // `tilt` up and down a second at full push, the yaw less for a push right and the pitch more for a push
 // down, within `minPitch` and `maxPitch`. The stick is its want: kinematics3d's `want`, the way the stick
-// points from the camera's yaw at `walk` m/s or `run` with `fast` held, facing the way it goes; and
+// points from the camera's yaw, as hard as it is pushed (the clip it plays says how fast); and
 // motion3d's `drive`, which moves and plays the body by it.
 //
 // The acts are the page's keys: `stick(x, y)` (y down, as a stick reads), `turn(x, y)` (the right
 // stick, the same), `fast(v)` (1 held, 0 let go), `press(key)`, a key pressed, handed to motion3d's
-// `press` with the stick, and `jump` the body's jump where motion3d takes it for no move; `look(dyaw,
+// `press` with the stick (`jump` among them); `look(dyaw,
 // dpitch)` and `zoom(by)`, the wheel's pixels. A seat's message arrives from outside the program, so each
 // refuses arguments of the wrong kind and writes nothing.
 import type { Kind, Row, W } from '#engine/engine.ts'
@@ -26,7 +26,7 @@ import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
 import { drive, press } from '#plugins/motion3d/motion3d.sim.ts'
 import { playKind, rigOf } from '#plugins/motion3d/motion3d.play.ts'
-import { ground, relative } from '#plugins/kinematics3d/kinematics3d.sim.ts'
+import { nearest, relative } from '#plugins/kinematics3d/kinematics3d.sim.ts'
 
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
@@ -46,9 +46,8 @@ function stood(me: Row, w: W) {
   const d = me.data
   const start = w.find('start', s => s.data.slot === d.seat).data
   const [x, z] = start.pos
-  // The ground beneath feet set at the land's level, then stood on it.
-  d.pos = [x, 0, z]
-  d.pos = [x, ground(me, w).height(x, z), z]
+  // The triangles beneath feet set at the land's level, then stood on them.
+  d.pos = nearest(w, { triangles: {} }, [x, 0, z], me)
   d.yaw = start.yaw
   d.look = { ...d.look, yaw: start.yaw }
   d.grounded = true
@@ -65,14 +64,13 @@ export const player: Kind = {
     const k = def(w, me.kind)
     view(me, dt, k)
     const [wx, wz] = relative(d.stick, d.look.yaw)
-    const speed = d.fast ? k.run : k.walk
     // With the rifle up the legs keep the way they face, and strafe, turned only as far as keeps the aim
     // within the rig's `aim.across` of them; else they turn the way they go.
     const limits = rigOf(w, playKind(me)).aim
     if (!limits) throw new Error(`player: the rig of ${playKind(me)} gives no aim limits`)
     const across = wrap(d.look.yaw - d.yaw)
     d.face = d.upperMotion !== 'aim' ? null : Math.abs(across) > limits.across ? wrap(d.look.yaw - Math.sign(across) * limits.across) : d.yaw
-    d.want = [wx * speed, wz * speed]
+    d.want = [wx, wz]
     // Aimed the way the camera looks: along its yaw, and down by its pitch within the rig's `aim.up` and `aim.down`.
     const up = clamp(-d.look.pitch, -limits.down, limits.up)
     d.aim = [math.sin(d.look.yaw) * math.cos(up), math.sin(up), math.cos(d.look.yaw) * math.cos(up)]
@@ -91,7 +89,7 @@ export const player: Kind = {
     press(me, w, _seat, key: unknown) {
       const d = me.data
       if (typeof key !== 'string' || !d.stood) return
-      if (!press(me, w, key, d.stick) && key === 'jump' && d.space === null) d.jump = true
+      press(me, w, key, d.stick)
     },
     look(me, w, _seat, dyaw: unknown, dpitch: unknown) {
       if (!finite(dyaw, dpitch)) return

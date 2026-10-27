@@ -104,6 +104,14 @@
   "barleft": {
    "mirror": "barmove"
   },
+  "sneakwalk": {
+   "file": "packs/mixamo-motions/Sneak Walk.fbx",
+   "loop": true
+  },
+  "sneakback": {
+   "file": "packs/mixamo-motions/Cautious Backward Walk.fbx",
+   "loop": true
+  },
   "ropeclimb": {
    "file": "packs/mixamo-motions/Climbing A Rope (2).fbx",
    "loop": true

@@ -104,6 +104,14 @@
    "spot": ["LeftHand", "RightHand"],
    "on": "both"
   },
+  "sneakwalk": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "sneakback": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
   "ropeclimb": {
    "spot": ["LeftHand", "RightHand"],
    "on": "both"
@@ -385,6 +393,16 @@
     "beginTurn": 0
    },
    "barleft": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "sneakwalk": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "sneakback": {
     "beginOffset": [0, 0, 0],
     "endOffset": [0, 0, 0],
     "beginTurn": 0

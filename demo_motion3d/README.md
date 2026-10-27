@@ -25,26 +25,32 @@ panel tunes motion3d's settings and whose readout shows what the body is doing. 
 - The third row: under the ceiling E jumps up and hangs, A and D move across it, E drops; at the
   bed's foot E lies down, E again gets up; at the car's door E gets in, W A S D drive, Space honks,
   E gets out.
+- The fourth row: at the beam's near end E steps up onto it, W sneaks along it, E steps off.
 - Gamepad: left stick walk, right stick look, RT or L3 run, A jump, X use, d-pad up and down zoom.
 
 ## How it is made
 
 - The seat's `player` row is the X Bot. Its rule (`player.sim.ts`) picks what the body does each step:
-  walking, kinematics3d moves it on shapes3d's ground (`shapes3d.kinematics3d.ts`), round the yard's
-  things and onto what it climbs, and the rule picks `stand`, `walk`, `run`, `jump`, `fall` or `land`,
-  which motion3d plays; in a station's activity, the rule picks each motion and the point it plays
-  against, and motion3d holds the body there, kinematics3d moving it along a lip, a rope, a wall or the
-  water. Its `press` act takes `jump` and `use`.
+  walking, kinematics3d moves it by motion3d's `move` (`motion3d.kinematics3d.ts`) across terrain3d's
+  `triangles` (`terrain3d.kinematics3d.ts`), the land, round the yard's things (shapes3d's solids,
+  `shapes3d.kinematics3d.ts`) and onto what it climbs, as fast as the clip it plays carries it; the
+  motion file picks `stand`, `walk`, `run`, `jump`, `fall` or `land`, which motion3d plays, jumping
+  and falling by motion3d's `jump` and `fall`; in a station's activity, the motion file picks each
+  motion and the point it plays against, and motion3d holds the body there, kinematics3d moving it along
+  a lip, a rope, a wall, the beam or the water by the same `move`, turning it under the ceiling and in
+  the water. Its `press` act hands motion3d every key, `jump` and `use` among them.
 - What the X Bot can do is its motion3d file, `assets/xbot.motion3d.json`: every activity, its motions,
   the clips each plays and the kind of point it plays against. motion3d's numbers are `world.motion3d`
   in `main.scene.json`: the X Bot's `anywhere` is `walk`, its spaces are shapes3d's
   (`shapes3d.motion3d.ts`), and `ease` is how long a planted hand or foot's pin eases in and out.
-  kinematics3d's numbers are `world.kinematics3d`.
+  kinematics3d's numbers are `world.kinematics3d.kinds.xbot`: `triangles` (the body against the land
+  and its solids), `move` (how fast its speed and facing ease) and `fall` (gravity and the jump).
 - The spaces are shapes3d kinds that name the activity they offer and stand in nothing's way; the
   things they are by (walls, the bar, the steps, the chair, the bed, the car's parts) are solid shapes
   of their own. Each space's points are where its motions hold the body: the `Lip` line where the
   wrists hang, a `Seat` point where the hips sit, the `Face` plane of the climbing wall, the
-  `Ceiling` plane turned face down, the pool's `Float` plane, the stairs' `Flight` line.
+  `Ceiling` plane turned face down, the pool's `Float` plane, the stairs' `Flight` line, the beam's
+  `Beam` line where the ankles walk.
 - The hands and feet each clip's spot names are bent onto their points by motion3d while the bake says they are
   planted, so a hanging body's hands stay on the lip as it sways.
 - Every station past the wall and the chair is sized and placed to its clips by `assets/yard.mjs`,
@@ -54,7 +60,7 @@ panel tunes motion3d's settings and whose readout shows what the body is doing. 
   vault's starts where their kicks and palm land, the edge where `teeter` stands the toes, the steps
   half a lap of `stairsup` each, the pool's deck as high as `poolin` starts the feet, the chair and the
   table where `typing` sits and types, the bed as high as `liedown` lies, the car's seat where `carin`
-  sits. The lip by the wall and the chair are written by hand: the lip is where `bracedjump` ends the
+  sits, the beam's line where `sneakwalk` stands the ankles over its top. The lip by the wall and the chair are written by hand: the lip is where `bracedjump` ends the
   wrists, 2.154 m up; the wall's top is 0.218 m over it, where `bracedclimb` ends the feet; the seat is
   where `seated` holds the hips, 0.61 m up.
 - The car is the game's own `car` kind (`car.sim.ts`): it makes its parts and its space, drives by its

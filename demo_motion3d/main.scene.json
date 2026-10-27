@@ -149,6 +149,12 @@
           "shape": { "box": { "size": [3, 5, 1] } },
           "points": { "Face": { "plane": { "at": [0, 2.5, 1.41], "size": [3, 5.321], "turn": [0, -70, 0], "normal": [0, 0.342, -0.94] } } },
           "activities": ["climb"]
+        },
+        "beam": { "shape": { "box": { "size": [0.2, 0.3, 6] } }, "look": { "colour": "#b08a5a", "roughness": 0.8 } },
+        "beamzone": {
+          "shape": { "box": { "size": [1.4, 2, 1.4] } },
+          "points": { "Beam": { "line": { "from": [0, 0.427, 0.5], "to": [0, 0.427, 6.5] } } },
+          "activities": ["beam"]
         }
       },
       "mods": { "height": "terrain3d" }
@@ -178,26 +184,12 @@
     "kinematics3d": {
       "kinds": {
         "xbot": {
-          "radius": 0.3,
-          "height": 1.8,
-          "accel": 12,
-          "airAccel": 2,
-          "turnRate": 12,
-          "gravity": 20,
-          "jumpH": 1.1,
-          "step": 0.45,
-          "maxSlope": 0.9,
-          "slopeBand": 0.2,
-          "slide": 4,
-          "wade": 0.8,
-          "span": 0.3,
-          "probe": 0.5,
-          "seekSpeed": 1.7,
-          "fall": 4.3,
-          "still": 0.05
+          "triangles": { "radius": 0.3, "height": 1.8, "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5 },
+          "move": { "accel": 12, "turnRate": 12, "still": 0.05 },
+          "fall": { "gravity": 20, "jumpH": 2, "airAccel": 2, "fall": 4.3 }
         }
       },
-      "mods": { "behaviors": ["shapes3d"], "footprints": ["shapes3d"], "ground": "shapes3d", "states": ["yard"] }
+      "mods": { "behaviors": ["shapes3d", "terrain3d", "motion3d"], "solids": ["shapes3d"], "footprints": ["shapes3d"], "states": ["motion3d", "yard"] }
     }
   },
   "plugins": ["loader", "scenemanager", "player", "terrain3d", "solids", "shipped", "motion3d", "environment3d", "render3d", "chasecamera3d", "stats"],
@@ -304,7 +296,9 @@
     "carwheel": { "pos": [0, 0, 0], "yaw": 0 },
     "carzone": { "pos": [0, 0, 0], "yaw": 0, "car": null },
     "slabwall": { "pos": [0, 0, 0], "yaw": 0 },
-    "tiltzone": { "pos": [0, 0, 0], "yaw": 0 }
+    "tiltzone": { "pos": [0, 0, 0], "yaw": 0 },
+    "beam": { "pos": [0, 0, 0], "yaw": 0 },
+    "beamzone": { "pos": [0, 0, 0], "yaw": 0 }
   },
   "actors": [
     { "is": "scenemanager" },
@@ -377,6 +371,8 @@
     { "is": "bedzone", "pos": [-7, 0, 44.97] },
     { "is": "car", "pos": [5, 0, 46], "yaw": 0 },
     { "is": "slabwall", "pos": [14, 2.5, 44.91] },
-    { "is": "tiltzone", "pos": [14, 0, 43.5] }
+    { "is": "tiltzone", "pos": [14, 0, 43.5] },
+    { "is": "beam", "pos": [-14, 0, 59] },
+    { "is": "beamzone", "pos": [-14, 0, 55.5] }
   ]
 }
