@@ -30,10 +30,7 @@
         "wall": { "shape": { "box": { "size": [4, 2.372, 1.2] } }, "look": { "colour": "#d08a40", "roughness": 0.8 } },
         "ledgezone": {
           "shape": { "box": { "size": [4, 2.872, 1.2] } },
-          "points": {
-            "Lip": { "line": { "from": [-2, 2.654, 0.6], "to": [2, 2.654, 0.6] } },
-            "Drop": { "line": { "from": [-2, 0.484, -0.075], "to": [2, 0.484, -0.075], "turn": [-36.6, 0, 0] } }
-          },
+          "points": { "Lip": { "line": { "from": [-2, 2.654, 0.6], "to": [2, 2.654, 0.6] } } },
           "activities": ["ledge"]
         },
         "chair": { "shape": { "box": { "size": [0.5, 0.437, 0.552] } }, "look": { "colour": "#40b0a0", "roughness": 0.8 } },
@@ -48,10 +45,7 @@
         "bar": { "shape": { "box": { "size": [4, 0.06, 0.06] } }, "look": { "colour": "#b0b8c0", "roughness": 0.8 } },
         "barzone": {
           "shape": { "box": { "size": [4, 2.69, 1.4] } },
-          "points": {
-            "Bar": { "line": { "from": [-2, 2.295, 0.263], "to": [2, 2.295, 0.263] } },
-            "Drop": { "line": { "from": [-2, -0.013, -0.116], "to": [2, -0.013, -0.116], "turn": [-44.9, 0, 0] } }
-          },
+          "points": { "Bar": { "line": { "from": [-2, 2.295, 0.263], "to": [2, 2.295, 0.263] } } },
           "activities": ["bar"]
         },
         "ropepost": { "shape": { "box": { "size": [0.12, 6.12, 0.12] } }, "look": { "colour": "#b08a5a", "roughness": 0.8 } },
@@ -88,10 +82,7 @@
         "edgestep": { "shape": { "box": { "size": [1.2, 0.306, 0.5] } }, "look": { "colour": "#d0b070", "roughness": 0.8 } },
         "edgezone": {
           "shape": { "box": { "size": [3, 2.3, 0.8] } },
-          "points": {
-            "Edge": { "line": { "from": [-1.5, 0.521, -0.234], "to": [1.5, 0.521, -0.234], "turn": [180, 0, 0] } },
-            "Drop": { "line": { "from": [-1.5, -0.33, -1.495], "to": [1.5, -0.33, -1.495], "turn": [180, 0, 0] } }
-          },
+          "points": { "Edge": { "line": { "from": [-1.5, 0.521, -0.234], "to": [1.5, 0.521, -0.234], "turn": [180, 0, 0] } } },
           "activities": ["edge"]
         },
         "stair1": { "shape": { "box": { "size": [1.6, 0.248, 0.259] } }, "look": { "colour": "#f0a060", "roughness": 0.8 } },
@@ -128,25 +119,18 @@
         "deskchairback": { "shape": { "box": { "size": [0.45, 0.9, 0.05] } }, "look": { "colour": "#40b0a0", "roughness": 0.8 } },
         "desktop": { "shape": { "box": { "size": [1.2, 0.04, 0.6] } }, "look": { "colour": "#9a7a5a", "roughness": 0.8 } },
         "deskleg": { "shape": { "box": { "size": [0.05, 0.641, 0.6] } }, "look": { "colour": "#9a7a5a", "roughness": 0.8 } },
-        "deskzone": {
-          "shape": { "box": { "size": [1.2, 2, 1.2] } },
-          "points": { "Seat": { "point": { "at": [-0.9, 0.574, 0] } }, "Side": { "point": { "at": [-0.1, 0, 0], "turn": [90, 0, 0] } } },
-          "activities": ["desk"]
-        },
+        "deskzone": { "shape": { "box": { "size": [1.2, 2, 1.2] } }, "points": { "Seat": { "point": { "at": [-0.9, 0.574, 0] } } }, "activities": ["desk"] },
         "hallpost": { "shape": { "box": { "size": [0.15, 2.54, 0.15] } }, "look": { "colour": "#8a8f98", "roughness": 0.8 } },
         "hallceiling": { "shape": { "box": { "size": [4, 0.1, 4] } }, "look": { "colour": "#8a8f98", "roughness": 0.8 } },
         "hallzone": {
           "shape": { "box": { "size": [4, 2.44, 4] } },
-          "points": {
-            "Ceiling": { "plane": { "at": [0, 2.295, 0], "size": [3.6, 3.6], "turn": [0, 180, 0] } },
-            "Drop": { "plane": { "at": [0, -0.013, 0], "size": [3.6, 3.6], "turn": [0, 0, 0] } }
-          },
+          "points": { "Ceiling": { "plane": { "at": [0, 2.295, 0], "size": [3.6, 3.6], "turn": [0, 180, 0] } } },
           "activities": ["ceiling"]
         },
         "bed": { "shape": { "box": { "size": [1, 0.603, 1.88] } }, "look": { "colour": "#9fb4d8", "roughness": 0.8 } },
         "bedzone": {
           "shape": { "box": { "size": [1.4, 2, 1.4] } },
-          "points": { "Bed": { "point": { "at": [0.02, 0.752, -1.437], "turn": [0, 0, 0] } }, "Foot": { "point": { "at": [0, 0, -0.2] } } },
+          "points": { "Bed": { "point": { "at": [0.02, 0.752, -1.437], "turn": [0, 0, 0] } } },
           "activities": ["bed"]
         },
         "carhood": { "shape": { "box": { "size": [1.8, 0.805, 1.26] } }, "look": { "colour": "#c05050", "roughness": 0.8 } },
@@ -157,15 +141,7 @@
         "carpillar": { "shape": { "box": { "size": [0.08, 0.8, 0.08] } }, "look": { "colour": "#c05050", "roughness": 0.8 } },
         "carseat": { "shape": { "box": { "size": [0.5, 0.12, 0.5] } }, "look": { "colour": "#404850", "roughness": 0.8 } },
         "carwheel": { "shape": { "box": { "size": [0.4, 0.05, 0.05] } }, "look": { "colour": "#303030", "roughness": 0.8 } },
-        "carzone": {
-          "shape": { "box": { "size": [2, 2.4, 2.4] } },
-          "points": {
-            "Seat": { "point": { "at": [-1.888, 0.857, -0.383] } },
-            "WheelL": { "point": { "at": [-1.744, 1.177, -0.073] } },
-            "WheelR": { "point": { "at": [-2.127, 1.162, -0.078] } }
-          },
-          "activities": ["car"]
-        },
+        "carzone": { "shape": { "box": { "size": [2, 2.4, 2.4] } }, "points": { "Seat": { "point": { "at": [-1.888, 0.857, -0.383] } } }, "activities": ["car"] },
         "slabwall": { "shape": { "plane": { "size": [3, 1.82], "tilt": 1.221730476 } }, "look": { "colour": "#c9a27e", "roughness": 0.8, "thick": 0.3 } },
         "tiltzone": {
           "shape": { "box": { "size": [3, 5, 1] } },
@@ -179,7 +155,6 @@
     "motion3d": {
       "kinds": {
         "xbot": {
-          "anywhere": ["walk"],
           "motion": "xbot-motion3d",
           "baked": "xbot-motion3d-baked",
           "rig": "xbot-rig",
@@ -191,7 +166,6 @@
         }
       },
       "ease": 0.15,
-      "still": 0.05,
       "mods": { "spaces": "shapes3d", "object": "yard" }
     },
     "shipped": { "plugins": ["yard"] },
@@ -212,27 +186,16 @@
           "wade": 0.8,
           "span": 0.3,
           "probe": 0.5,
-          "seekSpeed": 1.7
+          "seekSpeed": 1.7,
+          "fall": 4.3,
+          "still": 0.05
         }
       },
-      "mods": { "behaviors": ["shapes3d"], "footprints": ["shapes3d"] }
+      "mods": { "behaviors": ["shapes3d"], "footprints": ["shapes3d"], "ground": "shapes3d", "states": ["yard"] }
     },
     "ik3d": { "kinds": {}, "mods": { "body": "motion3d", "limbs": "motion3d" } }
   },
-  "plugins": [
-    "loader",
-    "scenemanager",
-    "player",
-    "terrain3d",
-    "solids",
-    "shipped",
-    "motion3d",
-    "ik3d",
-    "environment3d",
-    "render3d",
-    "chasecamera3d",
-    "stats"
-  ],
+  "plugins": ["loader", "scenemanager", "player", "terrain3d", "solids", "shipped", "motion3d", "ik3d", "environment3d", "render3d", "chasecamera3d", "stats"],
   "seats": 1,
   "prefabs": {
     "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
@@ -262,33 +225,11 @@
       "seat": 0,
       "stood": false,
       "as": "xbot",
-      "pos": [0, 0, 0],
-      "yaw": 0,
-      "vel": [0, 0, 0],
-      "grounded": false,
-      "sliding": false,
-      "speed": 0,
-      "side": 0,
-      "turned": 0,
-      "want": [0, 0],
-      "face": null,
-      "jump": false,
       "stick": [0, 0],
       "turning": [0, 0],
       "fast": false,
       "look": { "yaw": 0, "pitch": 0.35, "dist": 5 },
-      "lift": 1.4,
-      "activity": "walk",
-      "motion": null,
-      "space": null,
-      "root": null,
-      "ik": null,
-      "along": null,
-      "eased": null,
-      "layer": null,
-      "offered": [],
-      "tilt": null,
-      "stuck": 0
+      "lift": 1.4
     },
     "car": { "pos": [0, 0, 0], "yaw": 0, "speed": 0, "parts": [], "zone": null },
     "partyzone": { "pos": [0, 0, 0], "yaw": 0 },

@@ -43,16 +43,14 @@
 //               it where `tread` floats, and its `Lip` line along the far wall where `bracedclimb` starts
 //               the wrists
 //   desk        a chair as high as `typing` sits and a table where it types, offering `desk`: its `Seat`
-//               point where `typing` holds the hips, and its `Side` point, where the body stands by the
-//               chair
+//               point where `typing` holds the hips
 //   ceiling     a slab on four posts as high as `freejump` ends the hands gripping, offering `ceiling`:
 //               its `Ceiling` plane, turned face down where the wrists hold it
 //   bed         a bed as high as `liedown` lies on, offering `bed` at its foot: its `Bed` point where
-//               `liedown` ends the hips and `bedidle` holds them, and its `Foot` point, where `liedown`
-//               starts the root
+//               `liedown` ends the hips and `bedidle` holds them
 //   car         a car of the parts `carin` climbs into, offering `car` at its door: its `Seat` point where
-//               `carin` ends the hips and `drive` holds them, and `WheelL` and `WheelR`, where `drive`
-//               holds the wrists; the car is the game's `car` kind, which stands its parts and its space
+//               `carin` ends the hips and `drive` holds them, its wheel where `drive` holds the wrists;
+//               the car is the game's `car` kind, which stands its parts and its space
 //               about it (`car.sim.ts`), so the parts and the space are written into its definition
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
@@ -213,14 +211,8 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
   box('bar', [4, 2 * r, 2 * r], '#b0b8c0', x, bar[1] - r, z)
   // The wrists from the bar's middle, the body facing +z.
   const at = [x + wrists[0] - bar[0], wrists[1], z + wrists[2] - bar[2]]
-  // The `Drop` line where `freedrop` ends the root, begun with the wrists on the bar, as high as puts
-  // the toes' tips it ends on on the floor.
-  const w0 = bones('freedrop', HANDS, 0)
-  const fall = travelled('freedrop', [at[0] - w0[0], 0, at[2] - w0[2]], 0)
-  const floor = round(-Math.min(ends.freedrop.footL.at(-1)[4], ends.freedrop.footR.at(-1)[4]))
   space('barzone', [4, bar[1] + 0.3, 1.4], [x, 0, z - 0.3], ['bar'], {
     Bar: { line: { from: [x - 2, at[1], at[2]], to: [x + 2, at[1], at[2]] } },
-    Drop: { line: { from: [x - 2, floor, fall.root[2]], to: [x + 2, floor, fall.root[2]], turn: [fall.yaw / DEG, 0, 0] } },
   })
 }
 
@@ -303,15 +295,8 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
   const q = [mean(balls.map(b => b.at))[0], start, Math.max(...balls.map(b => b.at[2]))]
   const stand = anchor(q, 0, [x, top, front], Math.PI)
   const ankles = world(stand.root, stand.yaw, bones('teeter', FEET, 0))
-  // The `Drop` line where `jumpdown` ends the root, begun with the ankles on the `Edge`, as high as puts
-  // the toes' tips it ends on on the floor.
-  const j0 = bones('jumpdown', FEET, 0)
-  const down = travelled('jumpdown', world([ankles[0], 0, ankles[2]], Math.PI, [-j0[0], 0, -j0[2]]), Math.PI)
-  const low = round(-Math.min(ends.jumpdown.footL.at(-1)[4], ends.jumpdown.footR.at(-1)[4]))
-  const lands = down.root
   space('edgezone', [3, 2.3, 0.8], [x, round(top / 2), front + 0.4], ['edge'], {
     Edge: { line: { from: [x - 1.5, ankles[1], ankles[2]], to: [x + 1.5, ankles[1], ankles[2]], turn: [180, 0, 0] } },
-    Drop: { line: { from: [x - 1.5, low, lands[2]], to: [x + 1.5, low, lands[2]], turn: [down.yaw / DEG, 0, 0] } },
   })
 }
 
@@ -366,7 +351,7 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
 
 // The desk: the body seated facing +z, its root at the cell, the chair's seat under `typing`'s seat
 // and its back behind the sitter, the table where it types (its palms' height and middle), the `Seat`
-// point where `typing` holds the hips and the `Side` point beside the chair.
+// point where `typing` holds the hips.
 {
   const [x, z] = [14, 28]
   const seat = t('typing').things.seat[0]
@@ -380,7 +365,7 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
   box('deskleg', [0.05, top - 0.04, 0.6], '#9a7a5a', x - 0.575, 0, z + ahead)
   box('deskleg', [0.05, top - 0.04, 0.6], '#9a7a5a', x + 0.575, 0, z + ahead)
   const hips = world([x, 0, z], 0, bone('typing', 'Hips', 0))
-  space('deskzone', [1.2, 2, 1.2], [x + 0.9, 0, z], ['desk'], { Seat: { point: { at: hips } }, Side: { point: { at: [x + 0.8, 0, z], turn: [90, 0, 0] } } })
+  space('deskzone', [1.2, 2, 1.2], [x + 0.9, 0, z], ['desk'], { Seat: { point: { at: hips } } })
 }
 
 // ---------------------------------------------------------------- row three
@@ -396,18 +381,13 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
   const size = 4
   for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) box('hallpost', [0.15, grip + 0.1, 0.15], '#8a8f98', x + (dx * size) / 2, 0, z + (dz * size) / 2)
   box('hallceiling', [size, 0.1, size], '#8a8f98', x, grip, z)
-  // The `Drop` plane where `freedrop` ends the root, as high as puts the toes' tips it ends on on the
-  // floor.
-  const floor = round(-Math.min(ends.freedrop.footL.at(-1)[4], ends.freedrop.footR.at(-1)[4]))
   space('hallzone', [size, grip, size], [x, 0, z], ['ceiling'], {
     Ceiling: { plane: { at: [x, w[1], z], size: [size - 0.4, size - 0.4], turn: [0, 180, 0] } },
-    Drop: { plane: { at: [x, floor, z], size: [size - 0.4, size - 0.4], turn: [0, 0, 0] } },
   })
 }
 
 // The bed: as high as `liedown` lies on (its lowest floor once lying), its `Bed` point where `liedown`
-// ends the hips, under the body as it lies there, and its `Foot` point where `liedown` starts the root,
-// past the bed's foot.
+// ends the hips, under the body as it lies there.
 {
   const [x, z] = [-7, 44]
   const lie = t('liedown')
@@ -424,14 +404,14 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
   const from = Math.min(headTop[2], feet[2]) - 0.25, to = Math.max(headTop[2], feet[2]) - 0.05
   box('bed', [1, top, to - from], '#9fb4d8', hips[0], 0, (from + to) / 2)
   // The space past the bed's foot, where a body stands to lie down, `liedown`'s start at its edge.
-  space('bedzone', [1.4, 2, 1.4], [start[0], 0, round(to + 0.6)], ['bed'], { Bed: { point: { at: hips, turn: [finish.yaw / DEG, 0, 0] } }, Foot: { point: { at: [start[0], 0, round(to + 0.4)] } } })
+  space('bedzone', [1.4, 2, 1.4], [start[0], 0, round(to + 0.6)], ['bed'], { Bed: { point: { at: hips, turn: [finish.yaw / DEG, 0, 0] } } })
 }
 
 // The car: its parts in its own frame (x its left, y up, z ahead, from its middle on the ground), the
 // driver's seat where `carin` ends the seat (the middle of the seat's skin) on a block the car's floor
-// as high as `carin` steps onto, the `Seat` point where `carin` ends the hips, `WheelL` and `WheelR`
-// where `drive` holds the wrists with its hips on the seat. The car faces +z; the driver's door is on
-// its left, where `carin` starts.
+// as high as `carin` steps onto, the `Seat` point where `carin` ends the hips, and the wheel where `drive`
+// holds the wrists with its hips on the seat. The car faces +z; the driver's door is on its left, where
+// `carin` starts.
 {
   const size = [1.8, 4.2]
   const [w, l] = size
@@ -465,13 +445,9 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
     { kind: 'carwheel', size: [0.4, 0.05, 0.05], at: mean([wheel('LeftHand'), wheel('RightHand')]).map((v, i) => (i === 1 ? v - 0.025 : v)) },
   ]
   for (const p of parts) kind(p.kind, { shape: { box: { size: r3(p.size) } }, look: look(p.kind === 'carwheel' ? '#303030' : p.kind === 'carseat' ? '#404850' : '#c05050') })
-  // The space by the driver's door, round where `carin` starts, and the points.
+  // The space by the driver's door, round where `carin` starts, and its point.
   const zone = { kind: 'carzone', size: [2, 2.4, 2.4], at: [round(startAt[0]), 0, round(startAt[2])] }
-  const points = {
-    Seat: { point: { at: r3(hipsAt.map((v, i) => v - zone.at[i])) } },
-    WheelL: { point: { at: r3(wheel('LeftHand').map((v, i) => v - zone.at[i])) } },
-    WheelR: { point: { at: r3(wheel('RightHand').map((v, i) => v - zone.at[i])) } },
-  }
+  const points = { Seat: { point: { at: r3(hipsAt.map((v, i) => v - zone.at[i])) } } }
   kind('carzone', { shape: { box: { size: zone.size } }, points, activities: ['car'] })
   defs.car = { ...defs.car, parts: parts.map(p => ({ kind: p.kind, at: r3(p.at) })), zone: { kind: zone.kind, at: zone.at } }
   actors.push({ is: 'car', pos: [5, 0, 46], yaw: 0 })

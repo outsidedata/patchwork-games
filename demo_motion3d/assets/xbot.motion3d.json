@@ -2,26 +2,27 @@
  "rig": "xbot.rig.json",
  "moves": 0.05,
  "turns": 30,
+ "anywhere": ["walk"],
  "activities": {
   "walk": {
    "normal": [0, 1, 0],
    "motions": {
-    "stand": { "target": "plane", "clips": ["idle"] },
-    "walk": { "target": "plane", "clips": ["walk"] },
-    "run": { "target": "plane", "clips": ["run"] },
-    "jump": { "target": "plane", "clips": ["jump"] },
-    "fall": { "target": "plane", "clips": ["fall"] },
-    "land": { "target": "plane", "clips": ["land"] }
+    "jump": { "target": "plane", "clips": ["jump"], "when": ["rising"], "then": "fall" },
+    "fall": { "target": "plane", "clips": ["fall"], "when": ["falling"] },
+    "land": { "target": "plane", "clips": ["land"], "from": ["jump", "fall"], "when": ["landed"] },
+    "run": { "target": "plane", "clips": ["run"], "when": ["ground", "moving", "fast"] },
+    "walk": { "target": "plane", "clips": ["walk"], "when": ["ground", "moving"] },
+    "stand": { "target": "plane", "clips": ["idle"], "when": ["ground", "still"] }
    }
   },
   "party": {
    "motions": {
-    "use": { "target": "plane", "clips": ["backflip"] }
+    "use": { "target": "plane", "clips": ["backflip"], "press": "use" }
    }
   },
   "sad": {
    "motions": {
-    "use": { "target": "plane", "clips": ["pickup"] }
+    "use": { "target": "plane", "clips": ["pickup"], "press": "use" }
    }
   },
   "cold": {
@@ -32,99 +33,105 @@
   },
   "ledge": {
    "motions": {
-    "use": { "target": "line", "clips": ["bracedjump"] },
-    "hang": { "target": "line", "clips": ["bracedidle"] },
-    "move": { "target": "line", "clips": ["bracedleft", "bracedright"] },
-    "climb": { "target": "line", "clips": ["bracedclimb"] },
-    "drop": { "target": "line", "clips": ["braceddrop"] }
+    "use": { "target": "line", "clips": ["bracedjump"], "press": "use", "then": "hang" },
+    "hang": { "target": "line", "clips": ["bracedidle"], "from": ["move"], "when": ["still"] },
+    "move": { "target": "line", "clips": ["bracedleft", "bracedright"], "stick": "across", "from": ["hang", "move"], "when": ["!stopped"] },
+    "climb": { "target": "line", "clips": ["bracedclimb"], "press": "use", "stick": "forward", "from": ["hang", "move"] },
+    "drop": { "target": "plane", "clips": ["braceddrop"], "press": "use", "stick": "back", "from": ["hang", "move"] }
    }
   },
   "bar": {
    "motions": {
-    "use": { "target": "line", "clips": ["freejump"] },
-    "hang": { "target": "line", "clips": ["freeidle"] },
-    "move": { "target": "line", "clips": ["barmove", "barleft"] },
-    "drop": { "target": "line", "clips": ["freedrop"] }
+    "use": { "target": "line", "clips": ["freejump"], "press": "use", "then": "hang" },
+    "hang": { "target": "line", "clips": ["freeidle"], "from": ["move"], "when": ["still"] },
+    "move": { "target": "line", "clips": ["barmove", "barleft"], "stick": "across", "from": ["hang", "move"], "when": ["!stopped"] },
+    "drop": { "target": "plane", "clips": ["freedrop"], "press": "use", "from": ["hang", "move"] }
    }
   },
   "ceiling": {
    "motions": {
-    "use": { "target": "plane", "clips": ["freejump"] },
-    "hang": { "target": "plane", "clips": ["freeidle"] },
-    "move": { "target": "plane", "clips": ["freeleft", "freeright"] },
-    "drop": { "target": "plane", "clips": ["freedrop"] }
+    "use": { "target": "plane", "clips": ["freejump"], "press": "use", "then": "hang" },
+    "hang": { "target": "plane", "clips": ["freeidle"], "from": ["move"], "when": ["still"] },
+    "move": { "target": "plane", "clips": ["freeleft", "freeright"], "stick": "across", "from": ["hang", "move"], "when": ["!stopped"] },
+    "drop": { "target": "plane", "clips": ["freedrop"], "press": "use", "from": ["hang", "move"] }
    }
   },
   "rope": {
    "motions": {
-    "use": { "target": "line", "clips": ["ropeclimb"] }
+    "use": { "target": "line", "clips": ["ropeclimb"], "press": "use" },
+    "letgo": { "clips": [], "press": "use", "from": ["use"] }
    }
   },
   "swing": {
    "motions": {
-    "use": { "target": "point", "clips": ["ropeswing"] }
+    "use": { "target": "point", "clips": ["ropeswing"], "press": "use" }
    }
   },
   "climb": {
    "motions": {
-    "use": { "target": "plane", "clips": ["wallclimb"] },
-    "down": { "target": "plane", "clips": ["walldown"] }
+    "use": { "target": "plane", "clips": ["wallclimb"], "press": "use" },
+    "down": { "target": "plane", "clips": ["walldown"], "stick": "back", "from": ["use", "up"] },
+    "up": { "target": "plane", "clips": ["wallclimb"], "stick": "forward", "from": ["down"] },
+    "letgo": { "clips": [], "press": "use", "from": ["use", "down", "up"] }
    }
   },
   "wallrun": {
    "motions": {
-    "use": { "target": "plane", "clips": ["wallside"] },
-    "land": { "target": "plane", "clips": ["land"] }
+    "use": { "target": "plane", "clips": ["wallside"], "press": "use" }
    }
   },
   "vault": {
    "motions": {
-    "use": { "target": "point", "clips": ["vaultone"] }
+    "use": { "target": "point", "clips": ["vaultone"], "press": "use" }
    }
   },
   "edge": {
    "motions": {
-    "use": { "target": "line", "clips": ["teeter"] },
-    "down": { "target": "line", "clips": ["jumpdown"] }
+    "use": { "target": "line", "clips": ["teeter"], "press": "use" },
+    "down": { "target": "plane", "clips": ["jumpdown"], "press": "use", "from": ["use"] },
+    "away": { "clips": [], "stick": "back", "from": ["use"] }
    }
   },
   "stairs": {
    "motions": {
-    "use": { "target": "line", "clips": ["stairsup"] }
+    "use": { "target": "line", "clips": ["stairsup"], "press": "use" },
+    "off": { "clips": [], "from": ["use"], "when": ["stopped"] }
    }
   },
   "pool": {
    "motions": {
-    "use": { "target": "plane", "clips": ["poolin"] },
-    "float": { "target": "plane", "clips": ["tread"] },
-    "swim": { "target": "plane", "clips": ["swimunder"] },
-    "out": { "target": "line", "clips": ["bracedclimb"] }
+    "use": { "target": "plane", "clips": ["poolin"], "press": "use", "then": "float" },
+    "float": { "target": "plane", "clips": ["tread"], "from": ["swim"], "when": ["still"] },
+    "swim": { "target": "plane", "clips": ["swimunder"], "stick": "forward", "from": ["float", "swim"], "when": ["!stopped"] },
+    "out": { "target": "line", "clips": ["bracedclimb"], "press": "use", "from": ["float", "swim"], "when": ["stopped"] }
    }
   },
   "desk": {
    "motions": {
-    "use": { "target": "point", "clips": ["typing"] }
+    "use": { "target": "point", "clips": ["typing"], "press": "use" },
+    "stand": { "clips": [], "press": "use", "from": ["use"] }
    }
   },
   "bed": {
    "motions": {
-    "use": { "target": "point", "clips": ["liedown"] },
-    "lie": { "target": "point", "clips": ["bedidle"] }
+    "use": { "target": "point", "clips": ["liedown"], "press": "use", "then": "lie" },
+    "lie": { "target": "point", "clips": ["bedidle"] },
+    "up": { "clips": [], "press": "use", "from": ["lie"] }
    }
   },
   "car": {
    "motions": {
-    "use": { "target": "point", "clips": ["carin"] },
+    "use": { "target": "point", "clips": ["carin"], "press": "use", "then": "pilot" },
     "pilot": { "target": "point", "clips": ["drive"] },
-    "honk": { "target": "point", "clips": ["honk"] },
-    "out": { "target": "point", "clips": ["carout"] }
+    "honk": { "target": "point", "clips": ["honk"], "press": "jump", "from": ["pilot"], "then": "pilot" },
+    "out": { "target": "point", "clips": ["carout"], "press": "use", "from": ["pilot"] }
    }
   },
   "chair": {
    "motions": {
-    "use": { "target": "point", "clips": ["sitdown"] },
+    "use": { "target": "point", "clips": ["sitdown"], "press": "use", "then": "seated" },
     "seated": { "target": "point", "clips": ["seated"] },
-    "stand": { "target": "point", "clips": ["standup"] }
+    "stand": { "target": "point", "clips": ["standup"], "press": "use", "from": ["seated"] }
    }
   }
  }

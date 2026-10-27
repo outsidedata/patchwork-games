@@ -30,7 +30,7 @@
   },
   "pickup": {
    "spot": ["LeftFoot", "RightFoot"],
-   "on": "both"
+   "on": "begin"
   },
   "bracedjump": {
    "spot": ["LeftHand", "RightHand"],
@@ -53,6 +53,7 @@
    "on": "begin"
   },
   "braceddrop": {
+   "spot": ["LeftFoot", "RightFoot"],
    "on": "end"
   },
   "sitdown": {
@@ -92,6 +93,7 @@
    "on": "both"
   },
   "freedrop": {
+   "spot": ["LeftFoot", "RightFoot"],
    "on": "end"
   },
   "barmove": {
@@ -132,6 +134,7 @@
    "on": "both"
   },
   "jumpdown": {
+   "spot": ["LeftFoot", "RightFoot"],
    "on": "end"
   },
   "stairsup": {
@@ -181,8 +184,8 @@
  "offsets": {
   "xbot": {
    "idle": {
-    "beginOffset": [0, 0, 0],
-    "endOffset": [0, 0, 0],
+    "beginOffset": [0, 0.066, 0],
+    "endOffset": [0, 0.066, 0],
     "beginTurn": 0
    },
    "walk": {
@@ -206,18 +209,18 @@
     "beginTurn": 0
    },
    "land": {
-    "beginOffset": [-0.085, 1.036, 0.099],
-    "endOffset": [0, 0, 0],
+    "beginOffset": [-0.085, 1.114, 0.099],
+    "endOffset": [0, 0.078, 0],
     "beginTurn": 0
    },
    "backflip": {
-    "beginOffset": [0, 0, 0],
-    "endOffset": [0, 0, 0],
+    "beginOffset": [0, 0.076, 0],
+    "endOffset": [0, 0.076, 0],
     "beginTurn": 0
    },
    "pickup": {
-    "beginOffset": [0, 0, 0],
-    "endOffset": [0, 0, 0],
+    "beginOffset": [0, 0.074, 0],
+    "endOffset": [0.039, 0.073, -0.002],
     "beginTurn": 0
    },
    "bracedjump": {
@@ -246,8 +249,8 @@
     "beginTurn": 0
    },
    "braceddrop": {
-    "beginOffset": [-0.044, 0, 0.461],
-    "endOffset": [0, 0, 0],
+    "beginOffset": [0.076, 1.303, 0.716],
+    "endOffset": [0, 0.076, 0],
     "beginTurn": 36.6
    },
    "sitdown": {
@@ -266,13 +269,13 @@
     "beginTurn": 0
    },
    "coldrub": {
-    "beginOffset": [0, 0, 0],
-    "endOffset": [0, 0, 0],
+    "beginOffset": [0, 0.066, 0],
+    "endOffset": [0, 0.066, 0],
     "beginTurn": 0
    },
    "coldlook": {
-    "beginOffset": [0, 0, 0],
-    "endOffset": [0, 0, 0],
+    "beginOffset": [0, 0.073, 0],
+    "endOffset": [0, 0.073, 0],
     "beginTurn": 0
    },
    "freejump": {
@@ -296,8 +299,8 @@
     "beginTurn": 0
    },
    "freedrop": {
-    "beginOffset": [0.327, 0, 0.314],
-    "endOffset": [0, 0, 0],
+    "beginOffset": [0.263, 0.599, 0.275],
+    "endOffset": [0, 0.076, 0],
     "beginTurn": 44.9
    },
    "barmove": {
@@ -349,8 +352,8 @@
     "beginTurn": 0
    },
    "jumpdown": {
-    "beginOffset": [0.05, 0, -1.256],
-    "endOffset": [0, 0, 0],
+    "beginOffset": [0.058, 0.715, -1.196],
+    "endOffset": [0, 0.082, 0],
     "beginTurn": 0
    },
    "stairsup": {

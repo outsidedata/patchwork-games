@@ -173,12 +173,16 @@ test('the use key plays each zone\'s own clip in it, holding the body still, and
     truth.step(DT)
     expect(me().data.activity).toBe(word)
     expect(me().data.clip).toBe(clipsOf(word, 'use')[0])
-    const at = [...me().data.pos]
+    // Eased onto the floor where it stood over the fade, then held there, placed by the clip's offsets.
     const dur = measured.table[me().data.clip as keyof typeof measured.table].dur
-    for (let i = 0; i < Math.floor(dur / DT) - 1; i++) {
+    let left = Math.floor(dur / DT) - 1
+    for (; left > 0 && me().data.eased !== null; left--) truth.step(DT)
+    const at = [...me().data.pos]
+    for (; left > 0; left--) {
       truth.step(DT)
       expect(me().data.activity).toBe(word)
-      expect(me().data.pos.slice(0, 3)).toEqual(at)
+      // Held where it stood: within a millimetre.
+      expect(Math.hypot(me().data.pos[0] - at[0], me().data.pos[1] - at[1], me().data.pos[2] - at[2])).toBeLessThan(0.001)
     }
     until(() => me().data.activity === 'walk', 3)
   }
@@ -546,7 +550,7 @@ test('at the stairs\' foot it climbs them to the landing, falls into the pool, f
   expect(me().data.pos[1]).toBeCloseTo(kinds.poolfar.shape.box.size[1], 2)
 })
 
-test('by the desk it sits at it typing, its hips on the seat, and stands up beside the chair', async () => {
+test('by the desk it sits at it typing, its hips on the seat, and stands up where it sat', async () => {
   const { truth, send, me, until, row, route, middle, pointOf } = await joined()
   const zone = row('deskzone').data.pos
   route([[LANE, ROW2], [zone[0], ROW2], [zone[0], zone[2]]], 0.3)
@@ -557,13 +561,15 @@ test('by the desk it sits at it typing, its hips on the seat, and stands up besi
   const seat = pointOf('deskzone', 'Seat').at!
   const hips = middle(['Hips'])
   for (let i = 0; i < 3; i++) expect(hips[i]).toBeCloseTo(seat[i], 2)
+  // Handed back to walking where it sits, its feet on the ground beneath.
+  const sat = [...me().data.pos]
   send('press', 'use')
   until(() => me().data.activity === 'walk' && me().data.eased === null, 30)
-  const side = pointOf('deskzone', 'Side').at!
-  expect(Math.hypot(me().data.pos[0] - side[0], me().data.pos[2] - side[2])).toBeLessThan(1e-6)
+  expect(Math.hypot(me().data.pos[0] - sat[0], me().data.pos[2] - sat[2])).toBeLessThan(0.5)
+  until(() => me().data.grounded, 60)
 })
 
-test('at the bed\'s foot it lies down on it, its hips where it lies, and gets up at its foot', async () => {
+test('at the bed\'s foot it lies down on it, its hips where it lies, and gets up where it lies', async () => {
   const { truth, send, me, until, row, route, middle, pointOf } = await joined()
   // Round the bed to its foot.
   const zone = row('bedzone').data.pos
@@ -576,10 +582,12 @@ test('at the bed\'s foot it lies down on it, its hips where it lies, and gets up
   const bed = pointOf('bedzone', 'Bed').at!
   const hips = middle(['Hips'])
   for (let i = 0; i < 3; i++) expect(hips[i]).toBeCloseTo(bed[i], 2)
+  // Handed back to walking where it lies, its feet on the ground beneath.
+  const lay = [...me().data.pos]
   send('press', 'use')
   until(() => me().data.activity === 'walk' && me().data.eased === null, 30)
-  const foot = pointOf('bedzone', 'Foot').at!
-  expect(Math.hypot(me().data.pos[0] - foot[0], me().data.pos[2] - foot[2])).toBeLessThan(1e-6)
+  expect(Math.hypot(me().data.pos[0] - lay[0], me().data.pos[2] - lay[2])).toBeLessThan(0.5)
+  until(() => me().data.grounded, 60)
 })
 
 test('at the car\'s door it gets in, its hips on the seat; drives it, held on the seat; honks; and gets out', async () => {
