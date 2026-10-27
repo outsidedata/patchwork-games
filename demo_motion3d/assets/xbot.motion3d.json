@@ -2,7 +2,6 @@
  "rig": "xbot.rig.json",
  "moves": 0.05,
  "turns": 30,
- "anywhere": ["walk"],
  "carries": {
   "cup": {
    "prop": "cup",

@@ -191,6 +191,7 @@
           ]
         }
       },
+      "anywhere": { "shape": { "box": { "size": [1e9, 1e9, 1e9] } }, "activities": ["walk"], "priority": 0, "data": { "motion3d": { "autoChange": true } } },
       "ease": 0.15,
       "mods": { "spaces": "shapes3d", "object": "yard" }
     },
