@@ -683,6 +683,7 @@
               if (!(await stepOnce())) break
               handBot()
               placeCamera()
+              placeBounds()
               await page.frame()
               sampleReach()
               if (i % 30 === 0) await breathe()
@@ -830,6 +831,50 @@
         }))
       }
 
+      // ---------- the zone bounds ----------
+
+      // Every row of a shapes3d kind that offers activities, drawn as the outline of its box, seen through
+      // whatever stands in front of it: its foot's middle on the row's place, turned by its yaw, as
+      // shapes3d holds a body in it. Built again for each client, whose scene is new.
+      const bounds = { on: true }
+      let boundsOf, boundLines
+      function placeBounds() {
+        const plugins = page.client?.plugins
+        const r3 = plugins?.render3d
+        if (!r3?.scene) return
+        if (boundsOf !== page.client) {
+          boundsOf = page.client
+          boundLines = new Map()
+        }
+        const kinds = plugins.wire.scene.world.shapes3d.kinds
+        const T = r3.THREE
+        const seen = new Set()
+        for (const r of plugins.wire.rows) {
+          const k = kinds[r.kind]
+          if (!k?.activities) continue
+          seen.add(r.id)
+          let lines = boundLines.get(r.id)
+          if (!lines) {
+            const [x, y, z] = k.shape.box.size
+            const geometry = new T.EdgesGeometry(new T.BoxGeometry(x, y, z).translate(0, y / 2, 0))
+            lines = new T.LineSegments(geometry, new T.LineBasicMaterial({ color: '#ffe14d', depthTest: false, transparent: true }))
+            lines.renderOrder = 999
+            r3.scene.add(lines)
+            boundLines.set(r.id, lines)
+          }
+          lines.visible = bounds.on
+          lines.position.fromArray(r.data.pos)
+          lines.rotation.set(0, r.data.yaw ?? 0, 0)
+        }
+        for (const [id, lines] of boundLines) {
+          if (seen.has(id)) continue
+          lines.removeFromParent()
+          lines.geometry.dispose()
+          lines.material.dispose()
+          boundLines.delete(id)
+        }
+      }
+
       // ---------- the panel's stations, time and camera ----------
 
       const sf = gui.addFolder('stations')
@@ -846,6 +891,7 @@
       cf.add(orbit, 'mode', ['station', 'body', 'part', 'seat']).name('camera').listen()
       cf.add(orbit, 'part', Object.keys(PARTS)).name('part (camera on a part)').listen()
       cf.add({ go: () => { if (run) orbit.at = { ...run.camera } } }, 'go').name('the station\'s view again')
+      cf.add(bounds, 'on').name('zone bounds')
       addEventListener('keydown', e => {
         if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return
         if (e.target?.tagName === 'INPUT' || e.target?.tagName === 'SELECT') return
@@ -1178,6 +1224,7 @@
             handBot()
             const between = clock.paused ? undefined : owed / dt
             placeCamera(between)
+            placeBounds()
             await page.frame(between)
             placeTag()
             sampleReach()
