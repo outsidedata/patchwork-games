@@ -44,6 +44,17 @@ Every command below is one plain command. The scripts are beside this file.
    hands frame by frame, and what it plants). The cause is arithmetic on those numbers, written down:
    a wrong spot or end in `CLIPS`, a point in the wrong place or facing the wrong way, or a missing
    normal. Never an offset typed by hand, and never a point moved to make up for one.
+
+   Tilt. A clip measured against a wall (`on: 'face'`) carries that wall's `normal` in its offsets, the
+   way the wall faced the body when the clip was made. Held to a point whose `normal` is another way,
+   the body is leaned about its root by the turn between the two: on a slab leaning back 20°, the
+   climber leans 20° onto it. The row carries it as `tilt`, eased in with the root as the clip fades in
+   and eased out as the body is handed back to walking; the page draws it, and `dev.html` measures the
+   hips and toes with it. A body leaning the wrong way, or not leaning, is the point's `normal` in
+   `yard.mjs` (missing, or not out of the thing toward the body) or the clip's line in `CLIPS` (not
+   `on: 'face'`, so measured against straight up); a body that stays leaned after it lets go is the
+   ease-out. A clip held to a wall and not measured against one (`land` after `wallside`) takes the wall
+   clip's normal through `after`.
 5. **Fix it in the game.** Fix `CLIPS` in `offsets.mjs` or the point in `yard.mjs`, then run
    `node games/demo_motion3d/assets/yard.mjs` and `node games/demo_motion3d/assets/offsets.mjs`, and
    `git -C games diff demo_motion3d/main.scene.json` must show only the change meant. Never in core's
