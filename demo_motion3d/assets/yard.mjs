@@ -24,14 +24,15 @@
 //   rope swing  a beam on two posts where `ropeswing` swings from (its swing's pivot on the beam's
 //               underside) and the platform it lands on, offering `swing`: its `Start` point, where the
 //               swing starts the root
-//   climb wall  a wall 5 m high, offering `climb`: its `Face` plane, stood up on the wall's face where
-//               `wallclimb` holds its hands and feet
-//   run wall    a wall 8 m long, offering `wallrun`: its `Run` point, where `wallside` starts the root so
-//               its kicks land on the wall, and its `Land` point, on the ground where `wallside` ends the
-//               root, where `land` comes down from the air the run ends in
+//   climb wall  a wall 5 m high, offering `climb`: its `Face` plane, stood up on the wall's face, facing
+//               out of it, which `wallclimb` holds its hands and feet on
+//   tilted wall a slab 5 m high leaning back 20°, offering `climb` the same: its `Face` plane on its face,
+//               facing out of it and up, the climber leaning onto it
+//   run wall    a wall 8 m long, offering `wallrun`: its `Wall` plane on its face, facing out of it, which
+//               `wallside`'s feet kick off and `land` comes down from (their offsets, `offsets.mjs`)
 //   vault       a low wall as high as `vaultone` sets its palm, offering `vault`: its `Vault` point, where
 //               the vault starts the root so the palm lands on the wall's top
-//   edge        a block as high as `jumpdown` starts, with a step up onto it, offering `edge` on its top at
+//   edge        a block as high as `jumpdown` steps down, with a step up onto it, offering `edge` on its top at
 //               its front: its `Edge` line along the front, where `teeter` stands the ankles with the toes
 //               at the edge
 //   stairs      a flight of steps up to a landing, each step as high and as deep as half `stairsup`'s
@@ -183,7 +184,7 @@ function space(name, size, at, activities, points = {}, colour) {
   const placed = Object.fromEntries(Object.entries(points).map(([n, c]) => {
     if (c.point) return [n, { point: { at: local(c.point.at), ...(c.point.turn ? { turn: c.point.turn.map(round) } : {}) } }]
     if (c.line) return [n, { line: { from: local(c.line.from), to: local(c.line.to), ...(c.line.turn ? { turn: c.line.turn.map(round) } : {}) } }]
-    return [n, { plane: { at: local(c.plane.at), size: r3(c.plane.size), turn: c.plane.turn.map(round) } }]
+    return [n, { plane: { at: local(c.plane.at), size: r3(c.plane.size), turn: c.plane.turn.map(round), ...(c.plane.normal ? { normal: c.plane.normal } : {}) } }]
   }))
   kind(name, { shape: { box: { size: r3(size) } }, ...(colour ? { look: look(colour) } : {}), ...(Object.keys(placed).length ? { points: placed } : {}), activities })
   actors.push({ is: name, pos: r3(at) })
@@ -211,7 +212,15 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
   box('bar', [4, 2 * r, 2 * r], '#b0b8c0', x, bar[1] - r, z)
   // The wrists from the bar's middle, the body facing +z.
   const at = [x + wrists[0] - bar[0], wrists[1], z + wrists[2] - bar[2]]
-  space('barzone', [4, bar[1] + 0.3, 1.4], [x, 0, z - 0.3], ['bar'], { Bar: { line: { from: [x - 2, at[1], at[2]], to: [x + 2, at[1], at[2]] } } })
+  // The `Drop` line where `freedrop` ends the root, begun with the wrists on the bar, as high as puts
+  // the toes' tips it ends on on the floor.
+  const w0 = bones('freedrop', HANDS, 0)
+  const fall = travelled('freedrop', [at[0] - w0[0], 0, at[2] - w0[2]], 0)
+  const floor = round(-Math.min(ends.freedrop.footL.at(-1)[4], ends.freedrop.footR.at(-1)[4]))
+  space('barzone', [4, bar[1] + 0.3, 1.4], [x, 0, z - 0.3], ['bar'], {
+    Bar: { line: { from: [x - 2, at[1], at[2]], to: [x + 2, at[1], at[2]] } },
+    Drop: { line: { from: [x - 2, floor, fall.root[2]], to: [x + 2, floor, fall.root[2]], turn: [fall.yaw / DEG, 0, 0] } },
+  })
 }
 
 // The rope: 6 m up to a beam, the `Rope` line straight up the rope where `ropeclimb` holds the wrists,
@@ -243,32 +252,27 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
   defs.swingzone = { ...defs.swingzone, pivot: r3([x - start.root[0], swing.pivot[1], z - start.root[2]]), length: swing.radius }
 }
 
-// The climbing wall: its face on z, the `Face` plane stood up on it where `wallclimb` holds the hands
-// and the feet (their middle), the root where the kicks land on the face at the ground.
+// The climbing wall: its face on z, the `Face` plane stood up on it, facing out of it, which `wallclimb`'s
+// hands and feet are on (their offsets, `offsets.mjs`).
 {
   const [x, z] = [14, 18]
   box('climbwall', [3, 5, 1.2], '#c9a27e', x, 0, z + 0.6)
-  const face = t('wallclimb').things.face
-  const start = anchor([face.at[0], 0, face.at[1]], face.normal + 180, [x, 0, z], 0)
-  const held = world(start.root, start.yaw, bones('wallclimb', [...HANDS, ...FEET], 0))
-  space('climbzone', [3, 5, 1], [x, 0, z - 0.5], ['climb'], { Face: { plane: { at: [x, 2.5, held[2]], size: [3, 5], turn: [0, -90, 0] } } })
+  space('climbzone', [3, 5, 1], [x, 0, z - 0.5], ['climb'], { Face: { plane: { at: [x, 2.5, z], size: [3, 5], turn: [0, -90, 0], normal: [0, 0, -1] } } })
 }
 
 // ---------------------------------------------------------------- row two
 
-// The run wall: 8 m long, the `Run` point the root where `wallside`'s kicks land on its face at the
-// ground, a third of the way along it, and the `Land` point the root on the ground where `wallside`
-// ends it, facing the way it ends, where `land` comes down from the air the run ends in.
+// The run wall: 8 m long, its `Wall` plane on its face, facing out of it (its normal) and along it the
+// way `wallside` runs, −x; the space before it where the feet's kicks land on its face a third of the
+// way along it.
 {
   const [x, z] = [-14, 28]
-  const wall = { x: x + 1, z: z + 2, long: 8, deep: 0.6 }
-  box('runwall', [wall.long, 3.5, wall.deep], '#c9a27e', wall.x, 0, wall.z + wall.deep / 2)
+  const wall = { x: x + 1, z: z + 2, long: 8, deep: 0.6, tall: 3.5 }
+  box('runwall', [wall.long, wall.tall, wall.deep], '#c9a27e', wall.x, 0, wall.z + wall.deep / 2)
   const face = t('wallside').things.face
   const start = anchor([face.at[0], 0, face.at[1]], face.normal + 180, [wall.x - wall.long / 2 + 0.3 * wall.long, 0, wall.z], 0)
-  const end = travelled('wallside', start.root, start.yaw)
   space('runzone', [2, 2.4, 2], [start.root[0], 0, start.root[2]], ['wallrun'], {
-    Run: { point: { at: start.root, turn: [start.yaw / DEG, 0, 0] } },
-    Land: { point: { at: end.root, turn: [end.yaw / DEG, 0, 0] } },
+    Wall: { plane: { at: [wall.x, wall.tall / 2, wall.z], size: [wall.tall, wall.long], turn: [-90, 0, 90], normal: [0, 0, -1] } },
   })
 }
 
@@ -288,7 +292,8 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
 // at the edge, the body facing out over it.
 {
   const [x, z] = [0, 28]
-  const top = t('jumpdown').things.start
+  // As high over the floor as the soles start over the toes' tips it ends on.
+  const top = round(t('jumpdown').things.start - Math.min(ends.jumpdown.footL.at(-1)[4], ends.jumpdown.footR.at(-1)[4]))
   const front = z - 1.5
   box('edge', [3, top, 2], '#d0b070', x, 0, front + 1)
   box('edgestep', [1.2, round(top / 2), 0.5], '#d0b070', x, 0, front + 2.25)
@@ -297,7 +302,16 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
   const q = [mean(balls.map(b => b.at))[0], start, Math.max(...balls.map(b => b.at[2]))]
   const stand = anchor(q, 0, [x, top, front], Math.PI)
   const ankles = world(stand.root, stand.yaw, bones('teeter', FEET, 0))
-  space('edgezone', [3, 2.3, 0.8], [x, round(top / 2), front + 0.4], ['edge'], { Edge: { line: { from: [x - 1.5, ankles[1], ankles[2]], to: [x + 1.5, ankles[1], ankles[2]], turn: [180, 0, 0] } } })
+  // The `Drop` line where `jumpdown` ends the root, begun with the ankles on the `Edge`, as high as puts
+  // the toes' tips it ends on on the floor.
+  const j0 = bones('jumpdown', FEET, 0)
+  const down = travelled('jumpdown', world([ankles[0], 0, ankles[2]], Math.PI, [-j0[0], 0, -j0[2]]), Math.PI)
+  const low = round(-Math.min(ends.jumpdown.footL.at(-1)[4], ends.jumpdown.footR.at(-1)[4]))
+  const lands = down.root
+  space('edgezone', [3, 2.3, 0.8], [x, round(top / 2), front + 0.4], ['edge'], {
+    Edge: { line: { from: [x - 1.5, ankles[1], ankles[2]], to: [x + 1.5, ankles[1], ankles[2]], turn: [180, 0, 0] } },
+    Drop: { line: { from: [x - 1.5, low, lands[2]], to: [x + 1.5, low, lands[2]], turn: [down.yaw / DEG, 0, 0] } },
+  })
 }
 
 // The stairs and the pool beside their landing.
@@ -381,7 +395,13 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
   const size = 4
   for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) box('hallpost', [0.15, grip + 0.1, 0.15], '#8a8f98', x + (dx * size) / 2, 0, z + (dz * size) / 2)
   box('hallceiling', [size, 0.1, size], '#8a8f98', x, grip, z)
-  space('hallzone', [size, grip, size], [x, 0, z], ['ceiling'], { Ceiling: { plane: { at: [x, w[1], z], size: [size - 0.4, size - 0.4], turn: [0, 180, 0] } } })
+  // The `Drop` plane where `freedrop` ends the root, as high as puts the toes' tips it ends on on the
+  // floor.
+  const floor = round(-Math.min(ends.freedrop.footL.at(-1)[4], ends.freedrop.footR.at(-1)[4]))
+  space('hallzone', [size, grip, size], [x, 0, z], ['ceiling'], {
+    Ceiling: { plane: { at: [x, w[1], z], size: [size - 0.4, size - 0.4], turn: [0, 180, 0] } },
+    Drop: { plane: { at: [x, floor, z], size: [size - 0.4, size - 0.4], turn: [0, 0, 0] } },
+  })
 }
 
 // The bed: as high as `liedown` lies on (its lowest floor once lying), its `Bed` point where `liedown`
@@ -454,6 +474,22 @@ space('coldroom', [5, 0.04, 5], [-14, -0.02, 18], ['cold'], {}, '#a8d0f0')
   kind('carzone', { shape: { box: { size: zone.size } }, points, activities: ['car'] })
   defs.car = { ...defs.car, parts: parts.map(p => ({ kind: p.kind, at: r3(p.at) })), zone: { kind: zone.kind, at: zone.at } }
   actors.push({ is: 'car', pos: [5, 0, 46], yaw: 0 })
+}
+
+// The tilted climbing wall: a slab 5 m high leaning back 20° from upright, its foot on z, rising away
+// along +z, and its `Face` plane on its face, facing out of it toward the climber and up, which the same
+// `wallclimb` and `walldown` the upright wall's measures climb, the body leaning onto it (motion3d's
+// Tilt).
+{
+  const [x, z] = [14, 44]
+  const tall = 5, lean = 20 * DEG
+  const rise = Math.PI / 2 - lean
+  const run = tall / Math.tan(rise)
+  kind('slabwall', { shape: { plane: { size: r3([3, run]), tilt: round(rise * 1e6) / 1e6 } }, look: look('#c9a27e', { thick: 0.3 }) })
+  actors.push({ is: 'slabwall', pos: r3([x, tall / 2, z + run / 2]) })
+  space('tiltzone', [3, 5, 1], [x, 0, z - 0.5], ['climb'], {
+    Face: { plane: { at: [x, tall / 2, z + run / 2], size: [3, tall / Math.sin(rise)], turn: [0, -rise / DEG, 0], normal: r3([0, Math.sin(lean), -Math.cos(lean)]) } },
+  })
 }
 
 // ---------------------------------------------------------------- the scene

@@ -187,13 +187,23 @@
           if (toes.length < 2) throw new Error(`the X Bot's pose has no toes or feet: ${names.join(', ')}`)
         }
         const d = me.data
+        // A bone drawn at [x, y, z] in the body's frame, in the world: turned by its yaw, then by the tilt
+        // motion3d leans it by, when it has one.
+        const inWorld = ([x, y, z]) => {
+          const v = [z * Math.sin(d.yaw) + x * Math.cos(d.yaw), y, z * Math.cos(d.yaw) - x * Math.sin(d.yaw)]
+          if (!d.tilt) return [d.pos[0] + v[0], d.pos[1] + v[1], d.pos[2] + v[2]]
+          const [qx, qy, qz, qw] = d.tilt
+          // v + 2w(q × v) + 2q × (q × v)
+          const c = [qy * v[2] - qz * v[1], qz * v[0] - qx * v[2], qx * v[1] - qy * v[0]]
+          const cc = [qy * c[2] - qz * c[1], qz * c[0] - qx * c[2], qx * c[1] - qy * c[0]]
+          return [0, 1, 2].map(i => d.pos[i] + v[i] + 2 * qw * c[i] + 2 * cc[i])
+        }
         // The ground under the drawn toes, found at their height: a held clip can draw the body on the top
         // of a wall while its root stands low by the wall.
-        const toe = d.pos[1] + Math.min(...toes.map(n => pose.get(n).elements[13]))
+        const toe = Math.min(...toes.map(n => { const e = pose.get(n).elements; return inWorld([e[12], e[13], e[14]])[1] }))
         const foot = toe - underfoot(me, w, toe).height(d.pos[0], d.pos[2])
         const h = pose.get('Hips').elements
-        const [x, y, z] = [h[12], h[13], h[14]]
-        const hips = [d.pos[0] + z * Math.sin(d.yaw) + x * Math.cos(d.yaw), d.pos[1] + y, d.pos[2] + z * Math.cos(d.yaw) - x * Math.sin(d.yaw)]
+        const hips = inWorld([h[12], h[13], h[14]])
         const runs = Object.values(plantsOf(w, me, d.clip))
         const held = runs.some(limb => limb.some(([a, b]) => d.clipT >= a && d.clipT <= b))
         return { foot, hips, held }
@@ -358,6 +368,17 @@
               send('stick', 0, 1), motion('down', 1), wait(1.5), send('stick', 0, 0), wait(0.5), use, walking, grounded, wait(1.5),
             ],
             camera: { zone: 'climbzone', look: [0, 2.2, 0.3], yaw: Math.PI * 0.7, pitch: 0.1, dist: 9 },
+          }
+        },
+        'tilted climbing wall': () => {
+          const [x, , z] = pos('tiltzone')
+          return {
+            at: [x, 0, z - 3, 0],
+            stages: [
+              walk(x, z, 0.3), still, use, activity('climb'), send('stick', 0, -1), wait(1), until('at the top', d => d.rate === 0, 12), wait(0.5),
+              send('stick', 0, 1), motion('down', 1), wait(1.5), send('stick', 0, 0), wait(0.5), use, walking, grounded, wait(1.5),
+            ],
+            camera: { zone: 'tiltzone', look: [0, 2.2, 0.8], yaw: Math.PI * 0.6, pitch: 0.1, dist: 9 },
           }
         },
         'run wall': () => {

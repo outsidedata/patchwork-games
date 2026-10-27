@@ -27,7 +27,10 @@
         "wall": { "shape": { "box": { "size": [4, 2.372, 1.2] } }, "look": { "colour": "#d08a40", "roughness": 0.8 } },
         "ledgezone": {
           "shape": { "box": { "size": [4, 2.872, 1.2] } },
-          "points": { "Lip": { "line": { "from": [-2, 2.654, 0.6], "to": [2, 2.654, 0.6] } } },
+          "points": {
+            "Lip": { "line": { "from": [-2, 2.654, 0.6], "to": [2, 2.654, 0.6] } },
+            "Drop": { "line": { "from": [-2, 0.484, -0.075], "to": [2, 0.484, -0.075], "turn": [-36.6, 0, 0] } }
+          },
           "activities": ["ledge"]
         },
         "chair": { "shape": { "box": { "size": [0.5, 0.437, 0.552] } }, "look": { "colour": "#40b0a0", "roughness": 0.8 } },
@@ -42,7 +45,10 @@
         "bar": { "shape": { "box": { "size": [4, 0.06, 0.06] } }, "look": { "colour": "#b0b8c0", "roughness": 0.8 } },
         "barzone": {
           "shape": { "box": { "size": [4, 2.69, 1.4] } },
-          "points": { "Bar": { "line": { "from": [-2, 2.295, 0.263], "to": [2, 2.295, 0.263] } } },
+          "points": {
+            "Bar": { "line": { "from": [-2, 2.295, 0.263], "to": [2, 2.295, 0.263] } },
+            "Drop": { "line": { "from": [-2, -0.013, -0.116], "to": [2, -0.013, -0.116], "turn": [-44.9, 0, 0] } }
+          },
           "activities": ["bar"]
         },
         "ropepost": { "shape": { "box": { "size": [0.12, 6.12, 0.12] } }, "look": { "colour": "#b08a5a", "roughness": 0.8 } },
@@ -60,16 +66,13 @@
         "climbwall": { "shape": { "box": { "size": [3, 5, 1.2] } }, "look": { "colour": "#c9a27e", "roughness": 0.8 } },
         "climbzone": {
           "shape": { "box": { "size": [3, 5, 1] } },
-          "points": { "Face": { "plane": { "at": [0, 2.5, 0.36], "size": [3, 5], "turn": [0, -90, 0] } } },
+          "points": { "Face": { "plane": { "at": [0, 2.5, 0.5], "size": [3, 5], "turn": [0, -90, 0], "normal": [0, 0, -1] } } },
           "activities": ["climb"]
         },
         "runwall": { "shape": { "box": { "size": [8, 3.5, 0.6] } }, "look": { "colour": "#c9a27e", "roughness": 0.8 } },
         "runzone": {
           "shape": { "box": { "size": [2, 2.4, 2] } },
-          "points": {
-            "Run": { "point": { "at": [0, 0, 0], "turn": [-50.95, 0, 0] } },
-            "Land": { "point": { "at": [-2.948, 0, -0.007], "turn": [-146.35, 0, 0] } }
-          },
+          "points": { "Wall": { "plane": { "at": [0.039, 1.75, 1.125], "size": [3.5, 8], "turn": [-90, 0, 90], "normal": [0, 0, -1] } } },
           "activities": ["wallrun"]
         },
         "vaultwall": { "shape": { "box": { "size": [2.5, 0.784, 0.4] } }, "look": { "colour": "#60c0c0", "roughness": 0.8 } },
@@ -78,11 +81,14 @@
           "points": { "Vault": { "point": { "at": [0, 0, 0], "turn": [-0.16, 0, 0] } } },
           "activities": ["vault"]
         },
-        "edge": { "shape": { "box": { "size": [3, 0.635, 2] } }, "look": { "colour": "#d0b070", "roughness": 0.8 } },
-        "edgestep": { "shape": { "box": { "size": [1.2, 0.318, 0.5] } }, "look": { "colour": "#d0b070", "roughness": 0.8 } },
+        "edge": { "shape": { "box": { "size": [3, 0.611, 2] } }, "look": { "colour": "#d0b070", "roughness": 0.8 } },
+        "edgestep": { "shape": { "box": { "size": [1.2, 0.306, 0.5] } }, "look": { "colour": "#d0b070", "roughness": 0.8 } },
         "edgezone": {
           "shape": { "box": { "size": [3, 2.3, 0.8] } },
-          "points": { "Edge": { "line": { "from": [-1.5, 0.533, -0.234], "to": [1.5, 0.533, -0.234], "turn": [180, 0, 0] } } },
+          "points": {
+            "Edge": { "line": { "from": [-1.5, 0.521, -0.234], "to": [1.5, 0.521, -0.234], "turn": [180, 0, 0] } },
+            "Drop": { "line": { "from": [-1.5, -0.33, -1.495], "to": [1.5, -0.33, -1.495], "turn": [180, 0, 0] } }
+          },
           "activities": ["edge"]
         },
         "stair1": { "shape": { "box": { "size": [1.6, 0.248, 0.259] } }, "look": { "colour": "#f0a060", "roughness": 0.8 } },
@@ -128,7 +134,10 @@
         "hallceiling": { "shape": { "box": { "size": [4, 0.1, 4] } }, "look": { "colour": "#8a8f98", "roughness": 0.8 } },
         "hallzone": {
           "shape": { "box": { "size": [4, 2.44, 4] } },
-          "points": { "Ceiling": { "plane": { "at": [0, 2.295, 0], "size": [3.6, 3.6], "turn": [0, 180, 0] } } },
+          "points": {
+            "Ceiling": { "plane": { "at": [0, 2.295, 0], "size": [3.6, 3.6], "turn": [0, 180, 0] } },
+            "Drop": { "plane": { "at": [0, -0.013, 0], "size": [3.6, 3.6], "turn": [0, 0, 0] } }
+          },
           "activities": ["ceiling"]
         },
         "bed": { "shape": { "box": { "size": [1, 0.603, 1.88] } }, "look": { "colour": "#9fb4d8", "roughness": 0.8 } },
@@ -153,6 +162,12 @@
             "WheelR": { "point": { "at": [-2.127, 1.162, -0.078] } }
           },
           "activities": ["car"]
+        },
+        "slabwall": { "shape": { "plane": { "size": [3, 1.82], "tilt": 1.221730476 } }, "look": { "colour": "#c9a27e", "roughness": 0.8, "thick": 0.3 } },
+        "tiltzone": {
+          "shape": { "box": { "size": [3, 5, 1] } },
+          "points": { "Face": { "plane": { "at": [0, 2.5, 1.41], "size": [3, 5.321], "turn": [0, -70, 0], "normal": [0, 0.342, -0.94] } } },
+          "activities": ["climb"]
         }
       },
       "mods": { "height": "terrain3d" }
@@ -201,7 +216,45 @@
     "motion3d": {
       "kinds": { "xbot": { "anywhere": ["walk"] } },
       "ease": 0.15,
-      "mods": { "spaces": "shapes3d", "behaviors": ["walker", "zones"], "body": "anim", "object": "zones" }
+      "mods": { "spaces": "shapes3d", "behaviors": ["walker", "zones"], "body": "anim", "object": "zones" },
+      "offsets": {
+        "bracedjump": { "beginOffset": [0.319, -1.28, -0.408], "endOffset": [0, 0, 0], "beginTurn": -38.5 },
+        "bracedidle": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "bracedleft": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "bracedright": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "bracedclimb": { "beginOffset": [0, 0, 0], "endOffset": [-0.134, 0.511, 0.574], "beginTurn": 0 },
+        "braceddrop": { "beginOffset": [-0.044, 0, 0.461], "endOffset": [0, 0, 0], "beginTurn": 36.6 },
+        "freejump": { "beginOffset": [0.4, -1.421, -0.055], "endOffset": [0, 0, 0], "beginTurn": -44.9 },
+        "freeidle": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "barmove": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "barleft": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "freeleft": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "freeright": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "freedrop": { "beginOffset": [0.327, 0, 0.314], "endOffset": [0, 0, 0], "beginTurn": 44.9 },
+        "ropeclimb": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "ropeswing": { "beginOffset": [0, 0, 0], "endOffset": [0.033, 0, 5.948], "beginTurn": 0 },
+        "wallclimb": { "beginOffset": [0, 0.14, 0], "endOffset": [0, 0.14, 0], "beginTurn": -1.22, "normal": [-0.021, 0, -1] },
+        "walldown": { "beginOffset": [0, 0.166, 0], "endOffset": [0, 0.166, 0], "beginTurn": 1.54, "normal": [0.027, 0, -1] },
+        "wallside": { "beginOffset": [0, 1.243, 0], "endOffset": [0.844, 1.179, 3.241], "beginTurn": 39.05, "normal": [-0.777, 0, -0.63] },
+        "land": { "beginOffset": [-0.226, 1.132, 3.064], "endOffset": [-0.226, 1.175, 3.155], "beginTurn": -56.35, "normal": [-0.554, 0, 0.832] },
+        "vaultone": { "beginOffset": [0, 0, 0], "endOffset": [0.014, 0, 5.093], "beginTurn": 0 },
+        "teeter": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "jumpdown": { "beginOffset": [0.05, 0, -1.256], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "stairsup": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "poolin": { "beginOffset": [-0.156, 2.579, -1.018], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "tread": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "swimunder": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "typing": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "liedown": { "beginOffset": [-0.02, 0.067, 0.467], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "bedidle": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "carin": { "beginOffset": [1.888, 0.126, 0.382], "endOffset": [0, 0, 0], "beginTurn": -97.4 },
+        "drive": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "honk": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "carout": { "beginOffset": [0, 0, 0], "endOffset": [1.984, 0.16, 0.188], "beginTurn": 0 },
+        "sitdown": { "beginOffset": [0.002, 0.413, 0.479], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "seated": { "beginOffset": [0, 0, 0], "endOffset": [0, 0, 0], "beginTurn": 0 },
+        "standup": { "beginOffset": [0, 0, 0], "endOffset": [0.005, 0.413, 0.473], "beginTurn": 0 }
+      }
     },
     "ik3d": { "kinds": {}, "mods": { "body": "anim", "limbs": "motion3d" } },
     "shipped": { "plugins": ["zones"] }
@@ -275,6 +328,7 @@
       "eased": null,
       "layer": null,
       "offered": [],
+      "tilt": null,
       "stuck": 0
     },
     "car": { "pos": [0, 0, 0], "yaw": 0, "speed": 0, "parts": [], "zone": null },
@@ -343,7 +397,9 @@
     "carpillar": { "pos": [0, 0, 0], "yaw": 0 },
     "carseat": { "pos": [0, 0, 0], "yaw": 0 },
     "carwheel": { "pos": [0, 0, 0], "yaw": 0 },
-    "carzone": { "pos": [0, 0, 0], "yaw": 0, "car": null }
+    "carzone": { "pos": [0, 0, 0], "yaw": 0, "car": null },
+    "slabwall": { "pos": [0, 0, 0], "yaw": 0 },
+    "tiltzone": { "pos": [0, 0, 0], "yaw": 0 }
   },
   "actors": [
     { "is": "scenemanager" },
@@ -380,7 +436,7 @@
     { "is": "vaultzone", "pos": [-7.305, 0, 27.773] },
     { "is": "edge", "pos": [0, 0, 27.5] },
     { "is": "edgestep", "pos": [0, 0, 28.75] },
-    { "is": "edgezone", "pos": [0, 0.318, 26.9] },
+    { "is": "edgezone", "pos": [0, 0.306, 26.9] },
     { "is": "stair1", "pos": [7, 0, 26.13] },
     { "is": "stair2", "pos": [7, 0, 26.389] },
     { "is": "stair3", "pos": [7, 0, 26.648] },
@@ -415,6 +471,8 @@
     { "is": "hallzone", "pos": [-14, 0, 44] },
     { "is": "bed", "pos": [-6.98, 0, 43.43] },
     { "is": "bedzone", "pos": [-7, 0, 44.97] },
-    { "is": "car", "pos": [5, 0, 46], "yaw": 0 }
+    { "is": "car", "pos": [5, 0, 46], "yaw": 0 },
+    { "is": "slabwall", "pos": [14, 2.5, 44.91] },
+    { "is": "tiltzone", "pos": [14, 0, 43.5] }
   ]
 }

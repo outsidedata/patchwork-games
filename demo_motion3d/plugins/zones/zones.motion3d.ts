@@ -1,7 +1,8 @@
 // zones' mod for motion3d: the activities demo_motion3d's yard offers (`world.motion3d.mods.behaviors:
 // ['walker', 'zones']`, with `zones` in `world.shipped.plugins`). Each activity is its motions, the
 // clips of the X Bot's rig (`assets/xbot.rig.json`) they play and the points of its space they are
-// held to, and its logic. The keys press `use` (E) and `jump` (Space); the stick is the `player` row's
+// held to, the bones of its `ik` on its root point the spot each clip's offsets place
+// (`world.motion3d.offsets`, written by `assets/offsets.mjs`), and its logic. The keys press `use` (E) and `jump` (Space); the stick is the `player` row's
 // own `stick` [x, forward]. Every limb a motion bends onto a point is bent as its clip bends it
 // (motion3d's `asDrawn`).
 //   walk     walking on the yard's shapes and land (`zones.sim.ts`'s `stride`), in the place of walker's
@@ -17,29 +18,32 @@
 //              move   along the lip the way the stick pushes, until the hands would leave it (`hanging`)
 //              climb  `bracedclimb`, `use` with the stick forward while hanging: up onto the wall's top,
 //                     then walking
-//              drop   `braceddrop`, `use` with the stick back while hanging: down to the ground, then
-//                     walking
+//              drop   `braceddrop`, `use` with the stick back while hanging: down to the ground, ending
+//                     on its `Drop` line, then walking
 //   bar      offered by `barzone`, under the bar, its `Bar` line where the wrists hold it, and
 //   ceiling  offered by `hallzone`, under the slab, its `Ceiling` plane face down where they hold it:
 //              use    `freejump`, up into the hang, ending on it; then `hang`
 //              hang   `freeidle`, hanging still
 //              move   `barmove` and `barleft` along the bar, `freeleft` and `freeright` across the
 //                     ceiling, the way the stick pushes, until the hands would leave it
-//              drop   `freedrop`, `use` while hanging: down to the ground, then walking
+//              drop   `freedrop`, `use` while hanging: down to the ground, ending on its `Drop` line or
+//                     plane, then walking
 //   rope     offered by `ropezone`: `use` takes hold of the `Rope` line where the wrists hold it,
 //            `ropeclimb` playing while the stick is forward and held still while not, up to the top;
 //            `use` again lets go, to fall
 //   swing    offered by `swingzone`: `use` swings from its `Start` (`ropeswing`) onto the platform
-//   climb    offered by `climbzone`: `use` takes hold of the wall's `Face` plane where the hands and
+//   climb    offered by `climbzone`, and by `tiltzone` on a wall leaning back, the body leaning onto it
+//            (motion3d's Tilt): `use` takes hold of the wall's `Face` plane where the hands and
 //            the feet hold it, `wallclimb` up while the stick is forward, `walldown` down while it is
 //            back, held still while it is neither, stopping at its top and its foot; `use` again lets go
-//   wallrun  offered by `runzone`: `use` runs along the wall from its `Run` (`wallside`), which ends in the
-//            air off the wall; then `land`, down onto the ground at its `Land` (`land`), picked up where
-//            its hips come down as low as the run ends them, then walking
+//   wallrun  offered by `runzone`: `use` runs along the wall's `Wall` plane (`wallside`), the feet kicking
+//            off its face, from where the body stands along it, ending in the air off the wall; then
+//            `land`, down onto the ground where the run ends the root, still held to the `Wall`,
+//            picked up where its hips come down as low as the run ends them, then walking
 //   vault    offered by `vaultzone`: `use` vaults the low wall from its `Vault` (`vaultone`)
 //   edge     offered by `edgezone`, on the block's top at its front, its `Edge` line where the ankles
-//            stand: `use` teeters at it (`teeter`); `use` again steps down off it (`jumpdown`), then
-//            walking; the stick back steps away, walking
+//            stand: `use` teeters at it (`teeter`); `use` again steps down off it (`jumpdown`), ending
+//            on its `Drop` line on the ground, then walking; the stick back steps away, walking
 //   stairs   offered by `stairzone`, at the stairs' foot: `use` climbs the `Flight` (`stairsup`) while
 //            the stick is forward, standing while it is not, and walks from the landing at its top
 //   pool     offered by `pool`, on the deck at the water's edge: `use` falls in (`poolin`), ending on
@@ -101,10 +105,10 @@ function hanging(me: Row, w: W, handed: Handed, move: Motion) {
 function freehang(p: string, across: string[]): Activity {
   const move: Motion = { clips: across, root: p, ik: hands(p) }
   return {
-    use: { clips: ['freejump'], root: p, travel: 'to', ik: hands(p) },
+    use: { clips: ['freejump'], root: p, ik: hands(p) },
     hang: { clips: ['freeidle'], root: p, ik: hands(p) },
     move,
-    drop: { clips: ['freedrop'], root: p, travel: 'from', ik: hands(p) },
+    drop: { clips: ['freedrop'], root: 'Drop' },
     pole: asDrawn,
     press(me, _w, motion, handed) {
       if (motion === 'use' && (me.data.motion === 'hang' || me.data.motion === 'move')) handed.go('drop')
@@ -176,11 +180,11 @@ export const behaviors = (): Record<string, Activity> => {
     sad: { use: { clips: ['pickup'] } },
     cold: { idle: { clips: ['coldrub', 'coldlook'] } },
     ledge: {
-      use: { clips: ['bracedjump'], root: 'Lip', travel: 'to', ik: hands('Lip') },
+      use: { clips: ['bracedjump'], root: 'Lip', ik: hands('Lip') },
       hang: { clips: ['bracedidle'], root: 'Lip', ik: hands('Lip') },
       move: ledgeMove,
-      climb: { clips: ['bracedclimb'], root: 'Lip', travel: 'from', ik: hands('Lip') },
-      drop: { clips: ['braceddrop'], root: 'Lip', travel: 'from', ik: hands('Lip') },
+      climb: { clips: ['bracedclimb'], root: 'Lip', ik: hands('Lip') },
+      drop: { clips: ['braceddrop'], root: 'Drop' },
       pole: asDrawn,
       press(me, _w, motion, handed) {
         const d = me.data
@@ -213,7 +217,7 @@ export const behaviors = (): Record<string, Activity> => {
         pace(me, me.data.stick[1] > 0 && !stopped)
       },
     },
-    swing: { use: { clips: ['ropeswing'], root: 'Start', travel: 'from' } },
+    swing: { use: { clips: ['ropeswing'], root: 'Start' } },
     climb: {
       use: { clips: ['wallclimb'], root: 'Face', ik: { ...hands('Face'), ...feet('Face') } },
       down: { clips: ['walldown'], root: 'Face', ik: { ...hands('Face'), ...feet('Face') } },
@@ -232,8 +236,9 @@ export const behaviors = (): Record<string, Activity> => {
       },
     },
     wallrun: {
-      use: { clips: ['wallside'], root: 'Run', travel: 'from' },
-      land: { clips: ['land'], root: 'Land' },
+      use: { clips: ['wallside'], root: 'Wall', ik: feet('Wall') },
+      land: { clips: ['land'], root: 'Wall' },
+      pole: asDrawn,
       step(me, w, _dt, handed) {
         const { ended } = handed.hold()
         if (!ended) return
@@ -243,10 +248,10 @@ export const behaviors = (): Record<string, Activity> => {
         me.data.clipT = pickUp(me, w, ran, me.data.clip)
       },
     },
-    vault: { use: { clips: ['vaultone'], root: 'Vault', travel: 'from' } },
+    vault: { use: { clips: ['vaultone'], root: 'Vault' } },
     edge: {
       use: { clips: ['teeter'], root: 'Edge', ik: feet('Edge') },
-      down: { clips: ['jumpdown'], root: 'Edge', travel: 'from', ik: feet('Edge') },
+      down: { clips: ['jumpdown'], root: 'Drop' },
       pole: asDrawn,
       press(me, _w, motion, handed) {
         if (motion === 'use' && me.data.motion === 'use') handed.go('down')
@@ -274,10 +279,10 @@ export const behaviors = (): Record<string, Activity> => {
       },
     },
     pool: {
-      use: { clips: ['poolin'], root: 'Float', travel: 'to', ik: hips('Float') },
+      use: { clips: ['poolin'], root: 'Float', ik: hips('Float') },
       float: { clips: ['tread'], root: 'Float', ik: hips('Float') },
       swim: { clips: ['swimunder'], root: 'Float', ik: hips('Float') },
-      out: { clips: ['bracedclimb'], root: 'Lip', travel: 'from', ik: hands('Lip') },
+      out: { clips: ['bracedclimb'], root: 'Lip', ik: hands('Lip') },
       pole: asDrawn,
       press(me, _w, motion, handed) {
         const d = me.data
@@ -313,7 +318,7 @@ export const behaviors = (): Record<string, Activity> => {
       step(_me, _w, _dt, handed) { handed.hold() },
     },
     bed: {
-      use: { clips: ['liedown'], root: 'Bed', travel: 'to', ik: hips('Bed') },
+      use: { clips: ['liedown'], root: 'Bed', ik: hips('Bed') },
       lie: { clips: ['bedidle'], root: 'Bed', ik: hips('Bed') },
       press(me, _w, motion, handed) {
         if (motion === 'use' && me.data.motion === 'lie') {
@@ -328,10 +333,10 @@ export const behaviors = (): Record<string, Activity> => {
       },
     },
     car: {
-      use: { clips: ['carin'], root: 'Seat', travel: 'to', ik: hips('Seat') },
+      use: { clips: ['carin'], root: 'Seat', ik: hips('Seat') },
       pilot: { clips: ['drive'], root: 'Seat', ik: { ...hips('Seat'), LeftHand: 'WheelL', RightHand: 'WheelR' } },
       honk: { clips: ['honk'], root: 'Seat', ik: hips('Seat') },
-      out: { clips: ['carout'], root: 'Seat', travel: 'from', ik: hips('Seat') },
+      out: { clips: ['carout'], root: 'Seat', ik: hips('Seat') },
       pole: asDrawn,
       press(me, _w, motion, handed) {
         const d = me.data
@@ -347,9 +352,9 @@ export const behaviors = (): Record<string, Activity> => {
       },
     },
     chair: {
-      use: { clips: ['sitdown'], root: 'Seat', travel: 'to', ik: hips('Seat') },
+      use: { clips: ['sitdown'], root: 'Seat', ik: hips('Seat') },
       seated: { clips: ['seated'], root: 'Seat', ik: hips('Seat') },
-      stand: { clips: ['standup'], root: 'Seat', travel: 'from', ik: hips('Seat') },
+      stand: { clips: ['standup'], root: 'Seat', ik: hips('Seat') },
       press(me, _w, motion, handed) {
         if (motion === 'use' && me.data.motion === 'seated') handed.go('stand')
         return true
