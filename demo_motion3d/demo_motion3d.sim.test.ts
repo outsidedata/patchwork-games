@@ -390,6 +390,8 @@ async function freehang(kind: string, point: string, across: (p: Point) => numbe
   until(() => me().data.motion === 'hang', 60 * 12)
   const [lo, hi] = across(p)
   for (const b of HANDS) expect(boneAt(j.room, me(), b)[0]).toBeGreaterThanOrEqual(lo - 0.05)
+  // Held there half a second, the stick still pushing into the end, as a player does.
+  for (let i = 0; i < 30; i++) truth.step(DT)
   // The stick left: back along it to the body's left, to its other end.
   send('stick', -1, 0)
   until(() => me().data.motion === 'move', 10)
@@ -476,6 +478,24 @@ test('at the climbing wall it takes hold, climbs up while the stick is forward t
   send('stick', 0, 0)
   send('press', 'use')
   until(() => me().data.activity === 'walk' && me().data.grounded && Math.abs(me().data.pos[1]) < 1e-6, 60 * 4)
+})
+
+test('at the wall leaning back it climbs at its clip\'s own rate, the stick forward, up along the slab', async () => {
+  const { truth, send, me, until, row, route } = await joined()
+  const zone = row('tiltzone').data.pos
+  route([[LANE, ROW3 - 2], [zone[0], ROW3 - 2], [zone[0], zone[2]]], 0.3)
+  send('press', 'use')
+  truth.step(DT)
+  expect(me().data.activity).toBe('climb')
+  send('stick', 0, -1)
+  for (let i = 0; i < 60; i++) truth.step(DT)
+  const low = me().data.along[1]
+  for (let i = 0; i < 60; i++) truth.step(DT)
+  // A slab is no ground: the stick climbs it at the clip's own rate, not the share of it a walk across the
+  // ground would lay along the slab.
+  expect(me().data.rate).toBeCloseTo(1, 2)
+  expect(me().data.along[1] - low).toBeGreaterThan(0.5)
+  until(() => me().data.rate === 0, 60 * 12)
 })
 
 // A one-shot from a point of the station's space: played from the point, then walking on its feet.
