@@ -49,7 +49,7 @@
           "points": { "Seat": { "point": { "at": [0, 0.61, 1], "turn": [180, 0, 0] } } },
           "activities": ["chair"]
         },
-        "coldroom": { "shape": { "box": { "size": [5, 0.04, 5] } }, "look": { "colour": "#a8d0f0", "roughness": 0.8 }, "activities": ["cold"] },
+        "coldroom": { "shape": { "box": { "size": [5, 0.04, 5] } }, "look": { "colour": "#a8d0f0", "roughness": 0.8 }, "activities": ["cold"], "data": { "motion3d": { "autoChange": true } } },
         "barpost": { "shape": { "box": { "size": [0.1, 2.49, 0.1] } }, "look": { "colour": "#b0b8c0", "roughness": 0.8 } },
         "bar": { "shape": { "box": { "size": [4, 0.06, 0.06] } }, "look": { "colour": "#b0b8c0", "roughness": 0.8 } },
         "barzone": {
@@ -191,7 +191,7 @@
           ]
         }
       },
-      "anywhere": { "shape": { "box": { "size": [1e9, 1e9, 1e9] } }, "activities": ["walk"], "priority": 0, "data": { "motion3d": { "autoChange": true } } },
+      "anywhere": { "shape": { "box": { "size": [1e9, 1e9, 1e9] } }, "activities": ["walk", "roll", "fight", "hurt", "cup"], "priority": 0, "data": { "motion3d": { "autoChange": true } } },
       "ease": 0.15,
       "mods": { "spaces": "shapes3d", "object": "yard" }
     },

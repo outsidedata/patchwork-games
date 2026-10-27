@@ -111,7 +111,7 @@ function buffered(me: Row, w: W, dt: number, k: any) {
 // buffer as a body's one-shot does.
 function upperBusy(me: Row, w: W): boolean {
   const d = me.data
-  const m = motionOf(activityOf(w, me, d.activity), d.upperMotion)
+  const m = d.upperActivity === null ? undefined : motionOf(activityOf(w, me, d.upperActivity), d.upperMotion)
   return !!m?.clips.length && typeof d.upper === 'string' && !clipOf(rigOf(w, playKind(me)), d.upper).loop
 }
 
@@ -124,7 +124,7 @@ function act(me: Row, w: W, key: string, k: any): boolean {
   if (key === 'draw') return press(me, w, `draw.${d.weapon}`, d.stick)
   if (key !== 'switch') return press(me, w, key, d.stick)
   // No weapon in the hands, nor one being drawn or put away (the upper half's move carries none).
-  const up = motionOf(activityOf(w, me, d.activity), d.upperMotion)
+  const up = d.upperActivity === null ? undefined : motionOf(activityOf(w, me, d.upperActivity), d.upperMotion)
   if (!weapons.includes(up?.carry ?? '')) {
     d.weapon = next
     return true

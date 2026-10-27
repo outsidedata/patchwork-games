@@ -348,7 +348,7 @@
           const [x, , z] = pos('coldroom')
           return {
             at: [x, 0, z - 3, 0],
-            stages: [walk(x, z, 0.4), still, until('shivering', d => d.layer !== null, 2), wait(4), walk(x, z - 3, 0.4), still, wait(1)],
+            stages: [walk(x, z, 0.4), still, until('shivering', d => d.activity === 'cold', 4), wait(4), walk(x, z - 3, 0.4), still, wait(1)],
             camera: { zone: 'coldroom', look: [0, 1, -1], yaw: Math.PI / 2, pitch: 0.2, dist: 7 },
           }
         },
@@ -1065,7 +1065,7 @@
         const s = samples.get(rec.n)
         const lines = [
           `${d.activity}${d.motion ? `.${d.motion}` : ''}   ${d.clip ?? ''}   ${offered}`,
-          `space ${d.space ?? 'none'}   along ${d.along === null ? 'none' : fixed(d.along)}   ${d.eased ? (d.eased.to ? 'easing under its feet' : 'easing from the last clip') : 'not eased'}   ${d.layer ? `layer ${d.layer.activity}` : 'no layer'}`,
+          `space ${d.space ?? 'anywhere'}   along ${d.along === null ? 'none' : fixed(d.along)}   ${d.eased ? 'easing from the last clip' : 'not eased'}   upper half ${d.upperActivity ? `${d.upperActivity} in ${d.upperSpace ?? 'anywhere'}` : 'free'}`,
           `clip ${d.clip ?? 'none'} at ${fixed(d.clipT ?? 0)} s (${d.state})   ${d.from != null && d.blend < 1 ? `fading from ${d.from}, ${fixed(d.blend)} in` : 'no crossfade'}`,
           `place ${fixed(d.pos)}   way ${fixed(d.yaw)}   speed ${fixed(d.speed)}   ${d.grounded ? 'on the ground' : 'in the air'}   lowest foot ${s?.foot == null ? '-' : `${(s.foot * 100).toFixed(1)} cm`} over the ground`,
         ]
