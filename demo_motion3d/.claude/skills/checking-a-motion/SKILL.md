@@ -31,12 +31,23 @@ Every command below is one plain command. The scripts are beside this file.
    that ends a jump is not on the bar until its end). A shot that does not show the thing (a post in
    the way, the camera under the floor) is taken again from another side, `hands@120` (degrees round
    from the way the body faces, to its left), before anything is said about it.
-4. **Find the cause in the code and the rig's measures.** The activity is `plugins/zones/zones.motion3d.ts`;
-   the points are written by `assets/yard.mjs` (run `node games/demo_motion3d/assets/yard.mjs`, then
-   `git -C games diff demo_motion3d/main.scene.json` must show only the change meant); what a clip does
-   is `node games/demo_motion3d/.claude/skills/checking-a-motion/clip.mjs <clip>` (the toes, hips and
-   hands frame by frame, and what it plants). The cause is arithmetic on those numbers, written down.
-5. **Fix it in the game.** Never in core's plugins without asking Bill first (prime-directive).
+4. **Find the cause in the code and the rig's measures.** How motion3d places a held body is its
+   header's Offsets and Tilt: each clip has a `beginOffset` and an `endOffset`, where the motion's spot
+   (the bones its `ik` names to its root point: hands on a bar, hips on a seat, feet against a wall;
+   the root with none) stands from the point at the clip's first frame and at its last, and the body
+   is placed by those two alone. The offsets are written by `assets/offsets.mjs` from the rig's
+   measures, one line per clip in its `CLIPS`: which spot matters, and whether the clip is on the
+   point at its start, its end, all through, or measured against the wall its hands or feet are on.
+   The points, and each point's `normal` (the way the thing faces out), are written by
+   `assets/yard.mjs`. The activity is `plugins/zones/zones.motion3d.ts`. What a clip does is
+   `node games/demo_motion3d/.claude/skills/checking-a-motion/clip.mjs <clip>` (the toes, hips and
+   hands frame by frame, and what it plants). The cause is arithmetic on those numbers, written down:
+   a wrong spot or end in `CLIPS`, a point in the wrong place or facing the wrong way, or a missing
+   normal. Never an offset typed by hand, and never a point moved to make up for one.
+5. **Fix it in the game.** Fix `CLIPS` in `offsets.mjs` or the point in `yard.mjs`, then run
+   `node games/demo_motion3d/assets/yard.mjs` and `node games/demo_motion3d/assets/offsets.mjs`, and
+   `git -C games diff demo_motion3d/main.scene.json` must show only the change meant. Never in core's
+   plugins without asking Bill first (prime-directive).
 6. **Run step 2 and step 3 again** until the station has no faults and every confirmation's shot shows it.
 7. **Pin it.** Add the confirmation to that station's test in `demo_motion3d.sim.test.ts` and run that
    one test: `yarn vitest run games/demo_motion3d/demo_motion3d.sim.test.ts -t "<words of its name>"`.
@@ -49,7 +60,17 @@ Every command below is one plain command. The scripts are beside this file.
 
 Before anything else: its rows in the checklist (each confirmation: when, passes if, how), and its
 station in `dev.html`'s `STATIONS` (where the body is put down, the stages the playtester plays, the
-camera). Then the loop.
+camera). Then:
+
+1. Bake the new clip into the rig (`yarn bake demo_motion3d`), so its measures are there.
+2. Give it one line in `CLIPS` in `assets/offsets.mjs`: the spot that matters, and how it meets its
+   point. A new wall run is `{ spot: FEET, on: 'face', facing: 'along' }`; a new climb
+   `{ spot: [...HANDS, ...FEET], on: 'face', facing: 'into' }`; a new hang `{ spot: HANDS, on: 'both' }`;
+   a new sit-down `{ spot: HIPS, on: 'end' }`. Its `ik` in `zones.motion3d.ts` names the same bones.
+3. Give its space a point in `assets/yard.mjs` from a shapes3d shape: a point, a line or a plane, with
+   a `normal` where the thing faces anything but straight up (a wall faces out of it). A clip measured
+   once works on any point of that kind, turned or tilted any way: the offsets are in the point's frame.
+4. Run `yard.mjs` and `offsets.mjs`, then the loop.
 
 ## What the checks catch (`dev.html`'s `LIMITS`)
 
