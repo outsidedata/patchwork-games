@@ -33,7 +33,9 @@ places, and the readout shows where you stand and where each visitor is going.
 from each end, and a road under it. Its people walk over the bridge, under it on the ground and up and
 down its ramps, along a graph written by hand (`assets/bridge.nav.json`), each link one straight
 stretch of ground: up a ramp, across the deck, along the road. It shows npc3d's people on routes that
-climb, with people at two heights at one place on the ground.
+climb, with people at two heights at one place on the ground. Beside the bridge a man goes up and down a
+spiral, three turns rising 3 m, a link of the graph whose course is a shapes3d spline: he walks its
+curve, as crowd3d walks a spline a straight piece at a time.
 
 ## How it is made
 
