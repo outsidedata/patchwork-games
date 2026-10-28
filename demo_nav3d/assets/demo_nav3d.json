@@ -1,0 +1,37 @@
+{
+  "player": {
+    "speed": 5,
+    "fast": 3,
+    "pitch": 1.5,
+    "sens": 0.0025
+  },
+  "cube": {
+    "size": 12,
+    "at": [0, 0, 0],
+    "colour": "#9fd3ff",
+    "opacity": 0.16,
+    "edges": "#e8f4ff",
+    "roughness": 0.15
+  },
+  "wanderer": {
+    "body": "crowd3d",
+    "sight": { "eye": 1.6, "at": 1.4, "cone": 110, "range": 10, "kinds": [] },
+    "look": { "rate": 3, "reach": 0 },
+    "notice": { "time": 1, "fall": 1 },
+    "memory": 1,
+    "think": 1,
+    "stay": 0.5,
+    "whim": 1,
+    "react": [0.3, 1],
+    "behaviors": {
+      "wander": {
+        "weight": 1,
+        "graph": "cube",
+        "clip": "walk",
+        "speed": 1.6686,
+        "stand": "idle",
+        "stay": [1, 4]
+      }
+    }
+  }
+}

@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demo_nav3d dev</title>
+    <style>
+      body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      canvas { grid-area: 1 / 1 }
+      .lil-gui.root { max-height: 100vh; overflow-y: auto }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      // The demo of nav3d's ups: index.html, the manager truth and the scenes its row names all in this
+      // tab, one seat on them over a loopback, stepped on the page's clock, and a panel that turns on
+      // nav3d's view of the cube's graph (its links, its nodes and each node's up) and npc3d's view of
+      // every person's route. `?scene=<scene>` enters that scene. The truths are kept on
+      // `window.__scenes` and the page on `window.__page` for the profilers (benchmarking-a-game). The
+      // frame rate is three's stats panel, the stats plugin, at the top left.
+      //
+      // The controls are the seat's own: a click on the game takes the mouse to look with, Escape gives
+      // it back; W and S fly the way it looks, A and D across, E and Q up and down, Shift held flies
+      // fast, and the wheel, turned anywhere but over the panel, paces.
+      import { boot } from '#engine/engine.ts'
+      import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
+      import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import GUI from 'lil-gui'
+      import { sim } from './demo_nav3d.sim.ts'
+      import file from './demo_nav3d.scene.json'
+
+      const params = new URLSearchParams(location.search)
+      file.prefabs.scenemanager.entry = params.get('scene') ?? file.prefabs.scenemanager.entry
+
+      const dt = file.prefabs.engine.dt
+      const truth = boot(file, sim)
+      window.__scenes = await load(truth, import.meta.url)
+      let client
+      const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+        client = me
+        for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
+          if (!surface) continue
+          const canvas = document.createElement('canvas')
+          canvas.width = scene.prefabs.engine.width
+          canvas.height = scene.prefabs.engine.height
+          document.body.appendChild(canvas)
+          surface.mount(canvas)
+        }
+        me.plugins.stats?.mount(document.body)
+        for (const [plugin, flag] of [['nav3d', 'graphs'], ['npc3d', 'routes']]) if (me.plugins[plugin]) me.plugins[plugin][flag] = views[`${plugin} ${flag}`]
+      })
+      window.__page = page
+
+      // The panel. Keys typed into it and the wheel turned over it reach neither this page nor the eye.
+      const gui = new GUI({ title: 'demo_nav3d dev' })
+      for (const type of ['keydown', 'keyup', 'wheel', 'click', 'mousedown']) gui.domElement.addEventListener(type, e => e.stopPropagation())
+      const chosen = { scene: file.prefabs.scenemanager.entry }
+      gui.add(chosen, 'scene', Object.keys(file.prefabs.scenemanager.scenes)).onChange(s => {
+        const url = new URL(location.href)
+        url.searchParams.set('scene', s)
+        location.href = url.href
+      })
+      const views = { 'nav3d graphs': params.get('graphs') === '1', 'npc3d routes': params.get('routes') === '1' }
+      for (const key of Object.keys(views)) gui.add(views, key).onChange(on => {
+        const [plugin, flag] = key.split(' ')
+        if (client?.plugins[plugin]) client.plugins[plugin][flag] = on
+      })
+
+      let last = performance.now(), owed = 0
+      const loop = async now => {
+        owed += Math.min((now - last) / 1000, 0.25)
+        last = now
+        // A frame that throws is logged, and the next frame goes on.
+        try {
+          page.input()
+          while (owed >= dt) { truth.step(dt); owed -= dt }
+          await page.frame(owed / dt)
+        } catch (e) { console.error(e) }
+        requestAnimationFrame(loop)
+      }
+      requestAnimationFrame(loop)
+    </script>
+  </body>
+</html>
