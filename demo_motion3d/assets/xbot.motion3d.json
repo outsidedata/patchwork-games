@@ -445,6 +445,13 @@
     "putaway": { "clips": ["bwsheath"], "over": "Spine", "carry": "torch" }
    }
   },
+  "jumppad": {
+   "normal": [0, 1, 0],
+   "motions": {
+    "launch": { "target": "triangles", "behavior": "launch", "clips": ["jump"], "press": "jumppad", "then": "fall" },
+    "fall": { "target": "triangles", "clips": ["fall"], "when": ["falling"] }
+   }
+  },
   "cold": {
    "normal": [0, 1, 0],
    "motions": {

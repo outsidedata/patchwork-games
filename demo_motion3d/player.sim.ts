@@ -52,6 +52,7 @@ import * as math from '#plugins/math/math.sim.ts'
 import { activityOf, drive, motionOf, press } from '#plugins/motion3d/motion3d.sim.ts'
 import { clipOf, playKind, rigOf } from '#plugins/motion3d/motion3d.play.ts'
 import { nearest, relative } from '#plugins/kinematics3d/kinematics3d.sim.ts'
+import { pads } from './plugins/jumppad/jumppad.sim.ts'
 
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
@@ -170,6 +171,8 @@ export const player: Kind = {
     press(me, w, d.guard ? 'guard' : 'unguard', d.stick)
     buffered(me, w, dt, k)
     drive(me, w, dt, d.stick)
+    // The jump pad the body has just come onto, if any, throws it (`plugins/jumppad`).
+    pads(me, w)
   },
   acts: {
     stick(me, _w, _seat, x: unknown, y: unknown) {
