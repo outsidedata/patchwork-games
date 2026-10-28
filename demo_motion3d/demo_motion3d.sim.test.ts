@@ -214,6 +214,16 @@ test('the use key plays each zone\'s own clip in it, holding the body still, and
   }
 })
 
+test('standing at rest, the idle plays on at its own rate', async () => {
+  const { truth, me } = await joined()
+  for (let i = 0; i < 10; i++) truth.step(DT)
+  expect(me().data.clip).toBe(clipsOf('walk', 'stand')[0])
+  const t = me().data.clipT
+  for (let i = 0; i < 60; i++) truth.step(DT)
+  expect(me().data.rate).toBe(1)
+  expect(me().data.clipT).toBeCloseTo(t + 1, 6)
+})
+
 const HANDS = ['LeftHand', 'RightHand']
 
 // Walks up under the wall's lip and hangs from it, the drawn hands going steadily from the jump into the
