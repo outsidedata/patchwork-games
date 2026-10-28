@@ -5,7 +5,7 @@
     "keys": {
       "stick": [["a", "ArrowLeft", "PadStickLeft"], ["d", "ArrowRight", "PadStickRight"], ["w", "ArrowUp", "PadStickUp"], ["s", "ArrowDown", "PadStickDown"]],
       "look": ["PadRightStickLeft", "PadRightStickRight", "PadRightStickUp", "PadRightStickDown"],
-      "fast": ["Shift", "Pad10"],
+      "fast": ["Shift", "Pad7"],
       "guard": ["f", "Pad4"],
       "motions": {
         "jump": [" ", "Pad0"],
@@ -14,7 +14,7 @@
         "switch": ["q", "Pad3"],
         "light": ["j", "Mouse0", "Pad5"],
         "skill": ["r", "Pad6"],
-        "heavy": ["k", "Pad7"],
+        "heavy": ["k", "Pad10"],
         "cup": ["c", "Pad8"],
         "die": ["x", "Pad9"],
         "draw": ["g", "Pad11"],
