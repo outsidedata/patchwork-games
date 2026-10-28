@@ -1,0 +1,265 @@
+{
+  "world": {
+    "seed": 5,
+    "defs": "web",
+    "loader": {
+      "assets": {
+        "web": {
+          "type": "json",
+          "url": "/games/demo_nav3d/assets/web.json",
+          "preload": true
+        },
+        "webNav": {
+          "type": "json",
+          "url": "/games/demo_nav3d/assets/web.nav.json",
+          "preload": true
+        },
+        "ribbonsShape": {
+          "type": "json",
+          "url": "/games/demo_nav3d/assets/ribbons.json",
+          "preload": true
+        },
+        "farmer_man": {
+          "type": "model",
+          "url": "/games/demo_nav3d/assets/farmer_man.glb",
+          "preload": true
+        }
+      }
+    },
+    "nav3d": {
+      "graphs": {
+        "web": {
+          "asset": "webNav"
+        }
+      }
+    },
+    "crowd3d": {
+      "bodies": {
+        "farmer_man": "farmer_man"
+      },
+      "clips": ["idle", "walk", "run"],
+      "rate": 30,
+      "kinds": ["wanderer"]
+    },
+    "npc3d": {
+      "mods": {
+        "route": "nav3d",
+        "behaviors": "wander"
+      }
+    },
+    "shipped": {
+      "plugins": ["wander"]
+    }
+  },
+  "plugins": ["loader", "scenemanager", "player", "crowd3d", "npc3d", "nav3d", "environment3d", "render3d", "stats"],
+  "seats": 1,
+  "prefabs": {
+    "engine": {
+      "dt": 0.016666666666666666,
+      "width": 960,
+      "height": 540
+    },
+    "scenemanager": {
+      "out": {}
+    },
+    "loader": {},
+    "render3d": {
+      "camera": {
+        "fov": 55,
+        "near": 0.1,
+        "far": 400,
+        "at": [0, 3, -16],
+        "look": [0, 0, 0]
+      },
+      "pixelRatio": 2,
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "background": "#1b2230"
+    },
+    "environment3d": {
+      "sun": {
+        "at": [12, 30, -18],
+        "color": "#fff1dc",
+        "power": 2.4,
+        "shadow": {
+          "map": 2048,
+          "half": 12,
+          "near": 1,
+          "far": 100,
+          "distance": 50,
+          "bias": -0.0004,
+          "normalBias": 0.03
+        }
+      },
+      "sky": {
+        "color": "#cfe0ff",
+        "ground": "#5a5466",
+        "power": 1.3
+      }
+    },
+    "player": {
+      "seat": 0,
+      "pos": [0, 3, -16],
+      "view": [0, 0],
+      "stick": [0, 0],
+      "rise": 0,
+      "fast": false,
+      "pace": 0,
+      "placed": false
+    },
+    "start": {
+      "slot": 0,
+      "pos": [0, 3, -16],
+      "view": [0, -0.2]
+    },
+    "npc3d": {
+      "time": 0,
+      "sounds": [],
+      "next": 1
+    },
+    "wanderer": {
+      "pos": [0, 0, 0],
+      "to": [0, 0, 0],
+      "through": null,
+      "normal": [0, 1, 0],
+      "normalTo": [0, 1, 0],
+      "yaw": 0,
+      "speed": 0,
+      "since": 0,
+      "body": "farmer_man",
+      "clip": "idle",
+      "holding": {},
+      "look": 0,
+      "gaze": null,
+      "seen": [],
+      "noticing": {},
+      "facts": [],
+      "doing": "",
+      "until": 0,
+      "wake": 0,
+      "arrived": false,
+      "told": null,
+      "route": null,
+      "home": 0,
+      "going": null
+    },
+    "ribbons": {}
+  },
+  "actors": [
+    {
+      "is": "scenemanager"
+    },
+    {
+      "is": "loader"
+    },
+    {
+      "is": "npc3d"
+    },
+    {
+      "is": "ribbons"
+    },
+    {
+      "is": "start",
+      "slot": 0,
+      "pos": [0, 3, -16],
+      "view": [0, -0.2]
+    },
+    {
+      "is": "wanderer",
+      "home": 0
+    },
+    {
+      "is": "wanderer",
+      "home": 22
+    },
+    {
+      "is": "wanderer",
+      "home": 45
+    },
+    {
+      "is": "wanderer",
+      "home": 67
+    },
+    {
+      "is": "wanderer",
+      "home": 90
+    },
+    {
+      "is": "wanderer",
+      "home": 112
+    },
+    {
+      "is": "wanderer",
+      "home": 135
+    },
+    {
+      "is": "wanderer",
+      "home": 157
+    },
+    {
+      "is": "wanderer",
+      "home": 180
+    },
+    {
+      "is": "wanderer",
+      "home": 202
+    },
+    {
+      "is": "wanderer",
+      "home": 225
+    },
+    {
+      "is": "wanderer",
+      "home": 247
+    },
+    {
+      "is": "wanderer",
+      "home": 270
+    },
+    {
+      "is": "wanderer",
+      "home": 292
+    },
+    {
+      "is": "wanderer",
+      "home": 315
+    },
+    {
+      "is": "wanderer",
+      "home": 337
+    },
+    {
+      "is": "wanderer",
+      "home": 360
+    },
+    {
+      "is": "wanderer",
+      "home": 382
+    },
+    {
+      "is": "wanderer",
+      "home": 405
+    },
+    {
+      "is": "wanderer",
+      "home": 427
+    },
+    {
+      "is": "wanderer",
+      "home": 450
+    },
+    {
+      "is": "wanderer",
+      "home": 472
+    },
+    {
+      "is": "wanderer",
+      "home": 495
+    },
+    {
+      "is": "wanderer",
+      "home": 517
+    }
+  ]
+}

@@ -3,7 +3,8 @@
     "speed": 5,
     "fast": 3,
     "pitch": 1.5,
-    "sens": 0.0025
+    "sens": 0.0025,
+    "follow": { "back": 4, "up": 1.6, "at": 1.1, "ease": 8 }
   },
   "cube": {
     "size": 12,

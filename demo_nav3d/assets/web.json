@@ -1,0 +1,66 @@
+{
+  "player": {
+    "speed": 5,
+    "fast": 3,
+    "pitch": 1.5,
+    "sens": 0.0025,
+    "follow": { "back": 4, "up": 1.6, "at": 1.1, "ease": 8 }
+  },
+  "ribbons": {
+    "at": [0, 0, 0],
+    "shape": "ribbonsShape",
+    "width": 1.6,
+    "thickness": 0.12,
+    "points": 24,
+    "hub": 1.5,
+    "disc": 0.16,
+    "radius": 2.2,
+    "hubs": [
+      [9, 0.5, 0.8],
+      [-8.5, -0.6, 0.4],
+      [0.4, 9.2, -0.7],
+      [-0.3, -8.8, 0.6],
+      [0.7, -0.4, 9],
+      [-0.6, 0.8, -9.3]
+    ],
+    "links": [
+      { "a": 0, "b": 2, "half": 1 },
+      { "a": 0, "b": 3, "half": 0 },
+      { "a": 0, "b": 4, "half": 2 },
+      { "a": 0, "b": 5, "half": 1 },
+      { "a": 1, "b": 2, "half": 0 },
+      { "a": 1, "b": 3, "half": 1 },
+      { "a": 1, "b": 4, "half": 1 },
+      { "a": 1, "b": 5, "half": 2 },
+      { "a": 2, "b": 4, "half": 0 },
+      { "a": 2, "b": 5, "half": 1 },
+      { "a": 3, "b": 4, "half": 1 },
+      { "a": 3, "b": 5, "half": 0 }
+    ],
+    "colours": ["#ff7a59", "#ffc145", "#7bd389", "#4cc9f0", "#9d8cff", "#ff70a6"],
+    "under": "#2a3350",
+    "discs": "#e8ecf5",
+    "roughness": 0.45
+  },
+  "wanderer": {
+    "body": "crowd3d",
+    "sight": { "eye": 1.6, "at": 1.4, "cone": 110, "range": 10, "kinds": [] },
+    "look": { "rate": 3, "reach": 0 },
+    "notice": { "time": 1, "fall": 1 },
+    "memory": 1,
+    "think": 1,
+    "stay": 0.5,
+    "whim": 1,
+    "react": [0.3, 1],
+    "behaviors": {
+      "wander": {
+        "weight": 1,
+        "graph": "web",
+        "clip": "walk",
+        "speed": 1.6686,
+        "stand": "idle",
+        "stay": [1, 4]
+      }
+    }
+  }
+}
