@@ -22,17 +22,44 @@
       // stands on, each visitor's place it is going to and how many places of its route it has still to
       // get to, or the place it stands at, with the height its feet stand at now, and the last five errors
       // the page threw or wrote. Nothing is written to disk.
+      // A click on a visitor picks it: a yellow ring stands at its feet, a line runs along the route it
+      // is walking to the place it was sent, and the panel's `visitor` folder shows what it is doing and
+      // sends it on. With one picked, a click anywhere else sends it there, along npc3d's route over the
+      // graph, and the folder's `send` sends it to the place `to` names. Sent, it walks there on its `go`
+      // (npc3d's), which the page gives the visitor's definition in its own copy, and stands there until
+      // it is sent again; `tour again` puts it back on its `tour`, and `let go` unpicks it. An order is
+      // given in the visitor's `before` of the next step, the page's copy of the kind wrapped for it.
       import { boot } from '#engine/engine.ts'
       import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
       import { loopback } from '#addons/loopback/loopback.addon.ts'
       import GUI from 'lil-gui'
       import { bodies } from '#plugins/npc3d/npc3d.sim.ts'
+      import { prepared } from '#plugins/loader/loader.sim.ts'
       import { sim } from './demo_castle.sim.ts'
+      import { scene as main } from './main.sim.ts'
+      import { visitor } from './visitor.sim.ts'
       import file from './demo_castle.scene.json'
       import fortress from './assets/fortress.nav.json'
       import bridge from './assets/bridge.nav.json'
 
       file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
+
+      // A visitor sent somewhere walks there on npc3d's `go` at its tour's pace, and, committed, stands
+      // there until it is sent again or put back on its tour.
+      const defs = await prepared(main.world, main.world.defs)
+      const tour = defs.visitor.behaviors.tour
+      defs.visitor.behaviors.go = { clip: tour.clip, speed: tour.speed, stand: tour.stand, commit: true }
+      // The orders the panel gives, by the visitor's id: [x, y, z] to go there, 'tour' to tour again.
+      const orders = new Map()
+      const before = visitor.before
+      visitor.before = (me, dt, w) => {
+        before(me, dt, w)
+        const o = orders.get(me.id)
+        if (o === undefined) return
+        orders.delete(me.id)
+        if (o === 'tour') visitor.acts.force(me, w, -1, 'tour')
+        else visitor.acts.order(me, w, -1, 'go', o[0], o[1], o[2])
+      }
 
       const errors = []
       const caught = e => {
@@ -79,6 +106,90 @@
       gui.add(jump, 'place', places)
       gui.add(jump, 'go to')
 
+      // The visitor picked, by its id, and its folder.
+      const time = () => room.rows.find(r => r.kind === 'npc3d')?.data.time ?? 0
+      const visitors = () => room.rows.filter(r => r.kind === 'visitor')
+      const picked = { id: null, to: places[0] }
+      const chosen = () => visitors().find(v => v.id === picked.id)
+      const placeAt = place => graph.nodes.find(n => n.tags?.includes(place)).at
+      const left = v => (v.data.route ? v.data.route.points.length - v.data.route.leg : 1)
+      const said = {
+        get visitor() { const v = chosen(); return v ? `${v.id} ${v.data.body}` : 'none: click one' },
+        get doing() { const v = chosen(); return v ? (v.data.doing === 'go' ? 'sent' : v.data.doing || 'nothing yet') : '' },
+        get place() {
+          const v = chosen()
+          if (!v) return ''
+          if (v.data.doing === 'go') return v.data.told.map(n => n.toFixed(1)).join(', ')
+          return v.data.going ?? ''
+        },
+        get walking() { const v = chosen(); return v ? (v.data.speed > 0 ? `${left(v)} places left` : 'standing') : '' },
+        get feet() { const v = chosen(); return v ? bodies.crowd3d.where(v, time()).map(n => n.toFixed(2)).join(', ') : '' },
+      }
+      const folder = gui.addFolder('visitor')
+      for (const key of Object.keys(said)) folder.add(said, key).listen().disable()
+      folder.add(picked, 'to', places)
+      folder.add({ send: () => { if (chosen()) orders.set(picked.id, [...placeAt(picked.to)]) } }, 'send')
+      folder.add({ 'tour again': () => { if (chosen()) orders.set(picked.id, 'tour') } }, 'tour again')
+      folder.add({ 'let go': () => { picked.id = null } }, 'let go')
+
+      // The click: on a visitor, within 24 pixels of the line from its feet to its head as the camera
+      // sees it, picks the nearest; anywhere else, with one picked, sends it to what the click meets.
+      const marks = { client: null, ring: null, line: null }
+      const pick = e => {
+        if (gui.domElement.contains(e.target) || e.button !== 0) return
+        const r3 = window.__client?.plugins.render3d
+        if (!r3?.camera || !r3.renderer) return
+        const T = r3.THREE
+        const box = r3.renderer.domElement.getBoundingClientRect()
+        const mx = e.clientX - box.left, my = e.clientY - box.top
+        const screen = p => {
+          const v = new T.Vector3(p[0], p[1], p[2]).project(r3.camera)
+          return v.z > 1 ? null : [(v.x + 1) / 2 * box.width, (1 - v.y) / 2 * box.height]
+        }
+        let best = null, near = 24
+        for (const v of visitors()) {
+          const feet = bodies.crowd3d.where(v, time())
+          const a = screen(feet), b = screen([feet[0], feet[1] + 1.7, feet[2]])
+          if (!a || !b) continue
+          const dx = b[0] - a[0], dy = b[1] - a[1]
+          const t = Math.max(0, Math.min(1, ((mx - a[0]) * dx + (my - a[1]) * dy) / (dx * dx + dy * dy || 1)))
+          const far = Math.hypot(mx - a[0] - t * dx, my - a[1] - t * dy)
+          if (far < near) { near = far; best = v }
+        }
+        if (best) { picked.id = best.id; return }
+        if (!chosen()) return
+        const ray = new T.Raycaster()
+        ray.setFromCamera(new T.Vector2(mx / box.width * 2 - 1, 1 - my / box.height * 2), r3.camera)
+        const hit = ray.intersectObject(r3.scene, true).find(h => h.object.isMesh && !h.object.isSkinnedMesh && !h.object.isInstancedMesh && h.object !== marks.ring)
+        if (hit) orders.set(picked.id, [hit.point.x, hit.point.y, hit.point.z])
+      }
+      addEventListener('pointerdown', pick)
+
+      // The ring at the picked visitor's feet and the line along its route, drawn over everything,
+      // made again on a new client.
+      const mark = () => {
+        const r3 = window.__client?.plugins.render3d
+        if (!r3?.scene) return
+        const T = r3.THREE
+        if (marks.client !== window.__client) {
+          marks.client = window.__client
+          const over = { depthTest: false, transparent: true }
+          marks.ring = new T.Mesh(new T.RingGeometry(0.45, 0.6, 32).rotateX(-Math.PI / 2), new T.MeshBasicMaterial({ color: '#ffd400', side: T.DoubleSide, ...over }))
+          marks.line = new T.Line(new T.BufferGeometry(), new T.LineBasicMaterial({ color: '#ffd400', ...over }))
+          for (const o of [marks.ring, marks.line]) { o.renderOrder = 999; o.frustumCulled = false; r3.scene.add(o) }
+        }
+        const v = chosen()
+        marks.ring.visible = marks.line.visible = !!v
+        if (!v) return
+        const feet = bodies.crowd3d.where(v, time())
+        marks.ring.position.set(feet[0], feet[1] + 0.05, feet[2])
+        const path = [feet]
+        const route = v.data.route
+        if (route) for (const leg of route.points.slice(route.leg)) path.push(...(Array.isArray(leg) ? [leg] : leg.spline.points.slice(1)))
+        else if (v.data.speed > 0) path.push(v.data.to)
+        marks.line.geometry.setFromPoints(path.map(p => new T.Vector3(p[0], p[1] + 0.1, p[2])))
+      }
+
       const readout = document.getElementById('readout')
       const frames = []
       let last = performance.now(), owed = 0
@@ -93,16 +204,15 @@
           while (owed >= dt) { truth.step(dt); owed -= dt }
           const nav = window.__client?.plugins.nav3d
           if (nav) Object.assign(nav, views)
+          mark()
           await page.frame(owed / dt)
         } catch (e) { caught(e) }
         const p = me()
-        const visitors = room.rows.filter(r => r.kind === 'visitor')
-        const time = room.rows.find(r => r.kind === 'npc3d')?.data.time ?? 0
-        const left = v => (v.data.route ? v.data.route.points.length - v.data.route.leg : 1)
+        const where = v => (v.data.doing === 'go' ? `sent to ${v.data.told.map(n => n.toFixed(1)).join(', ')}` : v.data.going)
         readout.textContent = [
           `${frames.length} fps  longest frame ${worst.toFixed(1)} ms  step ${truth.n}`,
           p ? `you (${p.data.pos.map(v => v.toFixed(2)).join(', ')}) ${p.data.grounded ? 'on the ground' : 'in the air'}` : '',
-          ...visitors.map(v => `visitor ${v.id} ${v.data.body}: ${v.data.speed > 0 ? `going to ${v.data.going}, ${left(v)} places left` : `standing at ${v.data.going}`} at y ${bodies.crowd3d.where(v, time)[1].toFixed(2)}`),
+          ...visitors().map(v => `${v.id === picked.id ? '> ' : ''}visitor ${v.id} ${v.data.body}: ${v.data.speed > 0 ? `going to ${where(v)}, ${left(v)} places left` : `standing at ${where(v)}`} at y ${bodies.crowd3d.where(v, time())[1].toFixed(2)}`),
           ...errors,
         ].join('\n')
         requestAnimationFrame(loop)
