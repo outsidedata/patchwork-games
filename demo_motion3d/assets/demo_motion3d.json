@@ -41,6 +41,7 @@
     }
   },
   "swingzone": { "rope": { "colour": "#b08a5a", "radius": 0.02 }, "pivot": [0.135, 7.136, 1.603], "length": 4.207 },
+  "lift": { "speed": 1, "wait": 3 },
   "pool": { "look": { "colour": "#3a8fd0", "opacity": 0.55 }, "water": { "at": [0, -1.062, 2.9], "size": [3, 5] } },
   "car": {
     "speed": 6,
