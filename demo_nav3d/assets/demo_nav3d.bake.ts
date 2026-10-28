@@ -1,8 +1,7 @@
 // demo_nav3d's bake, `yarn bake demo_nav3d` (core's `scripts/bake.ts`): every file the scene's catalogue
 // names but the definitions, written beside this file.
 //   cube.nav.json  the cube's graph, by `cube.nav.ts` from the `cube` definition's numbers.
-//   farmer_man.glb, farmer_woman.glb, farmhand.glb, mechworker.glb
-//                  every body of `crowd.rig.json`, a Mixamo character of the library, with every clip of
+//   farmer_man.glb the one body of `crowd.rig.json`, a Mixamo character of the library, with every clip of
 //                  the rig baked onto it by anim's export (`plugins/anim/anim.export.py`), drawn by
 //                  crowd3d. The export measures the rig's table too; crowd3d reads none of it, so it is
 //                  written to the bake's scratch folder and dropped.

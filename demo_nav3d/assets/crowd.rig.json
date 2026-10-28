@@ -1,9 +1,6 @@
 {
  "bodies": {
-  "farmer_man": "characters/farmer_man/farmer_man.fbx",
-  "farmer_woman": "characters/farmer_woman/farmer_woman.fbx",
-  "farmhand": "characters/farmhand/farmhand.fbx",
-  "mechworker": "characters/mechworker/mechworker.fbx"
+  "farmer_man": "characters/farmer_man/farmer_man.fbx"
  },
  "clips": {
   "idle": "packs/mixamo-motions/Breathing Idle.fbx",

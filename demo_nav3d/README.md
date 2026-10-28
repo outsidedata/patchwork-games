@@ -28,8 +28,8 @@ yarn serve demo_nav3d   # then localhost:5173/games/demo_nav3d/client.html
 
 - `assets/cube.nav.json`, the cube's graph, written by `assets/cube.nav.ts` from the `cube`
   definition's `size` and `at` in `assets/demo_nav3d.json`. It reads nothing from the library.
-- `farmer_man.glb`, `farmer_woman.glb`, `farmhand.glb` and `mechworker.glb`: each body of
-  `assets/crowd.rig.json`, a Mixamo character in the library's `characters/`, with the rig's idle, walk
+- `farmer_man.glb`: the one body of `assets/crowd.rig.json`, every person's, a Mixamo character in
+  the library's `characters/`, with the rig's idle, walk
   and run clips from the library's `packs/` baked onto it by anim's export (`plugins/anim/anim.export.py`).
 
 ## Credit
