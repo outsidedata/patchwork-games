@@ -32,7 +32,8 @@
         "pad": { "shape": { "plane": { "size": [6, 6] } }, "look": { "colour": "#e0c060", "roughness": 0.8, "thick": 0.3 } },
         "block": { "shape": { "box": { "size": [1.5, 0.4, 1.5] } }, "look": { "colour": "#88d088", "roughness": 0.8 } },
         "crate": { "shape": { "box": { "size": [1.5, 0.9, 1.5] } }, "look": { "colour": "#c07060", "roughness": 0.8 } },
-        "post": { "shape": { "cylinder": { "radius": 0.25, "height": 3 } }, "look": { "colour": "#7a5636", "roughness": 0.9, "sides": 10 } }
+        "post": { "shape": { "cylinder": { "radius": 0.25, "height": 3 } }, "look": { "colour": "#7a5636", "roughness": 0.9, "sides": 10 } },
+        "lift": { "shape": { "hyperplane": { "size": [3, 3] } }, "look": { "colour": "#e07850", "roughness": 0.7, "thick": 0.2 } }
       },
       "mods": { "height": "terrain3d" }
     },
@@ -108,7 +109,8 @@
     "pad": { "pos": [0, 0, 0], "yaw": 0 },
     "block": { "pos": [0, 0, 0], "yaw": 0 },
     "crate": { "pos": [0, 0, 0], "yaw": 0 },
-    "post": { "pos": [0, 0, 0], "yaw": 0 }
+    "post": { "pos": [0, 0, 0], "yaw": 0 },
+    "lift": { "pos": [0, 0, 0], "rot": [0, 0, 0, 1], "was": null, "low": 0, "high": 0, "going": 1, "held": 0 }
   },
   "actors": [
     { "is": "scenemanager" },
@@ -131,6 +133,9 @@
     { "is": "block", "pos": [5.5, 0, -3] },
     { "is": "crate", "pos": [8.5, 0, -3] },
     { "is": "post", "pos": [-2.5, 0, -4] },
-    { "is": "post", "pos": [2.5, 0, -4] }
+    { "is": "post", "pos": [2.5, 0, -4] },
+    { "is": "lift", "pos": [-6, 0, 12.5], "low": 0, "high": 2.5 },
+    { "is": "lift", "pos": [0, 0, 11.5], "low": 0, "high": 1.8 },
+    { "is": "lift", "pos": [7, 0, 10], "low": 0, "high": 5 }
   ]
 }
