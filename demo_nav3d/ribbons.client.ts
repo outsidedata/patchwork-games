@@ -74,7 +74,7 @@ export function tick(row: Row, plugins: Plugins) {
     // From the rim of the disc it leaves to the rim of the one it meets, so no two cross inside a disc.
     const a = r.points[0], b = r.points[r.points.length - 1]
     const out = (p: V) => Math.hypot(...sub(p, a)) >= d.hub && Math.hypot(...sub(p, b)) >= d.hub
-    const first = r.points.findIndex(out), last = r.points.findLastIndex(out)
+    const first = r.points.findIndex(out), last = (r.points as any).findLastIndex(out) as number
     const points = r.points.slice(Math.max(0, first - 1), last + 2), ups = r.ups.slice(Math.max(0, first - 1), last + 2)
     const mesh = new T.Mesh(slab(T, points, ups, d.width, d.thickness), [material(d.colours[i % d.colours.length]), under])
     mesh.name = `ribbon ${i}`
