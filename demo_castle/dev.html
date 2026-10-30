@@ -20,7 +20,8 @@
       // whatever is there (`go to`). The readout shows the frames drawn in
       // the last second and the longest of them, the step, where the seat's body stands and what it
       // stands on, each visitor's place it is going to and how many places of its route it has still to
-      // get to, or the place it stands at, with the height its feet stand at now, and the last five errors
+      // get to, or the place it stands at, with the height its feet stand at now and how many times it has
+      // switched courses (the place it is going to changed), and the last five errors
       // the page threw or wrote. Nothing is written to disk.
       // A click on a visitor picks it: a yellow ring stands at its feet, a line runs along the route it
       // is walking to the place it was sent, and the panel's `visitor` folder shows what it is doing and
@@ -113,6 +114,16 @@
       const chosen = () => visitors().find(v => v.id === picked.id)
       const placeAt = place => graph.nodes.find(n => n.tags?.includes(place)).at
       const left = v => (v.data.route ? v.data.route.points.length - v.data.route.leg : 1)
+      // how many times each visitor has switched courses: its place it is going to changed, by its id
+      const switches = new Map()
+      const lastGoing = new Map()
+      const count = () => {
+        for (const v of visitors()) {
+          const was = lastGoing.get(v.id)
+          if (was !== undefined && was !== v.data.going) switches.set(v.id, (switches.get(v.id) ?? 0) + 1)
+          lastGoing.set(v.id, v.data.going)
+        }
+      }
       const said = {
         get visitor() { const v = chosen(); return v ? `${v.id} ${v.data.body}` : 'none: click one' },
         get doing() { const v = chosen(); return v ? (v.data.doing === 'go' ? 'sent' : v.data.doing || 'nothing yet') : '' },
@@ -201,7 +212,7 @@
         last = now
         try {
           page.input()
-          while (owed >= dt) { truth.step(dt); owed -= dt }
+          while (owed >= dt) { truth.step(dt); count(); owed -= dt }
           const nav = window.__client?.plugins.nav3d
           if (nav) Object.assign(nav, views)
           mark()
@@ -212,7 +223,7 @@
         readout.textContent = [
           `${frames.length} fps  longest frame ${worst.toFixed(1)} ms  step ${truth.n}`,
           p ? `you (${p.data.pos.map(v => v.toFixed(2)).join(', ')}) ${p.data.grounded ? 'on the ground' : 'in the air'}` : '',
-          ...visitors().map(v => `${v.id === picked.id ? '> ' : ''}visitor ${v.id} ${v.data.body}: ${v.data.speed > 0 ? `going to ${where(v)}, ${left(v)} places left` : `standing at ${where(v)}`} at y ${bodies.crowd3d.where(v, time())[1].toFixed(2)}`),
+          ...visitors().map(v => `${v.id === picked.id ? '> ' : ''}visitor ${v.id} ${v.data.body}: ${v.data.speed > 0 ? `going to ${where(v)}, ${left(v)} places left` : `standing at ${where(v)}`} at y ${bodies.crowd3d.where(v, time())[1].toFixed(2)}, switched courses ${switches.get(v.id) ?? 0}`),
           ...errors,
         ].join('\n')
         requestAnimationFrame(loop)
