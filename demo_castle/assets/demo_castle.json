@@ -20,7 +20,7 @@
       "tour": {
         "weight": 1,
         "graph": "fortress",
-        "places": ["keep", "keep roof", "turret", "great hall", "chapel", "stables", "house west", "house east", "gatehouse", "drum west", "drum east", "drum west roof", "drum east roof", "gate south", "gate north", "keep door", "hall door", "chapel door", "stable door 0", "stable door 1"],
+        "places": ["keep", "keep roof", "turret", "great hall", "chapel", "stables", "house west", "house east", "gatehouse", "gatehouse roof", "drum west", "drum east", "drum west roof", "drum east roof", "gate south", "gate north", "keep door", "hall door", "chapel door", "stable door 0", "stable door 1", "tower north-west", "tower north-west roof", "tower north-east", "tower north-east roof", "tower south-east", "tower south-east roof", "tower south-west", "tower south-west roof", "tower east", "tower east roof", "gallery 1", "lookout"],
         "clip": "walk",
         "speed": 1.4,
         "stand": "idle",

@@ -23,9 +23,10 @@ as a nav3d graph (`procedural-castle/nav.ts`). The game reads those files and no
 | right mouse button, dragged | turn and tilt the camera |
 | wheel | the camera nearer or further |
 
-Every door has steps up to its floor. The keep's stair runs round its inside walls up to its roof, and
-the turret's, the drums' and the towers' are spirals. A tower whose stair you can see has no door to its
-foot: the corner towers and the east tower are closed, as the scene builds them.
+Every door has steps up to its floor, and the lookout's and the gallery's, which stand on supports, come
+down to the ground. Each tower has a door on the ward side. The keep's stair and the gatehouse's run round
+their inside walls up to their roofs, and the turret's, the drums' and the towers' are spirals. Every place
+of the fortress can be reached on foot.
 
 `dev.html` is the testbed: `?graphs=1` draws the scene's graph, the panel puts you on any of its
 places, and the readout shows where you stand and where each visitor is going.
