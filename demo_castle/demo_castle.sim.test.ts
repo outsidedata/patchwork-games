@@ -1,4 +1,4 @@
-// demo_castle: the manager booted as its page boots it and main loaded, on castle-plus's fortress as
+// demo_castle: the manager booted as its page boots it and main loaded, on procedural-castle's fortress as
 // `yarn bake demo_castle` wrote it. A seat joins and runs from its start outside the south gate, up the
 // gate's steps, through the gatehouse on its floor and out of the north gate into the ward; and the
 // visitors go about the fortress until one climbs to a roof along nav3d's route. On bridge, the visitors

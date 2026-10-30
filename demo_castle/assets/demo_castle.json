@@ -30,7 +30,11 @@
     }
   },
   "castle": {
-    "model": "fortress",
+    "solids": { "info": "fortress", "solids": "fortressSolids", "cover": "fortressCover", "timber": "fortressTimber" },
+    "pictures": {
+      "rockCol": "rockCol", "rockDisp": "rockDisp", "rockNrm": "rockNrm", "mortCol": "mortCol", "mortDisp": "mortDisp",
+      "woodCol": "woodCol", "woodDisp": "woodDisp", "woodNrm": "woodNrm", "woodRough": "woodRough"
+    },
     "land": { "size": 600, "colour": "#5d6b43", "roughness": 1 }
   }
 }

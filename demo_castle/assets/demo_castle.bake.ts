@@ -1,12 +1,21 @@
 // demo_castle's bake, `yarn bake demo_castle` (core's `scripts/bake.ts`): every file main's catalogue names
 // but the definitions, written beside this file.
-//   fortress.glb, fortress.partial_scene.json, fortress.nav.json
-//                 castle-plus's fortress (the library's `castle-plus/castle.py`, its scene
-//                 `castle-plus/scenes/fortress.json`), laid in Blender: the castle as a glb, each piece its
-//                 colour, packed by gltfpack; its shapes as a partial scene of shapes3d's, which main
-//                 extends; and its ways as nav3d's graph, worked out for a body of the player's walker
-//                 numbers in main's scene (`step`, `height`, `radius`). Change the fortress in the
-//                 library, or those numbers, and bake again.
+//   fortress.procedural.json, fortress.procedural.bin, fortress.cover.bin, fortress.timber.bin
+//                 the library's procedural-castle's fortress (its scene `procedural-castle/scenes/fortress.json`),
+//                 each building cut into one solid in Blender (`procedural-castle/procedural.py`): the solids'
+//                 layout and every building's courses, and the solids', the roofs' coverings' and the timber's
+//                 vertices, each vertex its floats, drawn by `castle.client.ts` with the stone and the wood of
+//                 `castle.material.ts`
+//   fortress.partial_scene.json
+//                 the fortress's shapes, what a body walks on and round, as a partial scene of shapes3d's, which
+//                 main extends (`procedural-castle/shapes.ts`, no Blender)
+//   fortress.nav.json
+//                 the fortress's ways, as nav3d's graph (`procedural-castle/nav.ts`, no Blender)
+//   rock_colour.webp, rock_height.webp, rock_normal.webp, mortar_colour.webp, mortar_height.webp,
+//   wood_colour.webp, wood_height.webp, wood_normal.webp, wood_roughness.webp
+//                 the pictures the stone and the wood read, the cc0-textures sets procedural-castle's looks wear
+//                 (Rock013, Concrete034, Wood036), cut to castle.material.ts's PICTURE pixels square
+// Change the fortress in the library and bake again.
 //   farmer_man.glb, farmer_woman.glb, farmhand.glb, mechworker.glb
 //                 the visitors, every clip of `crowd.rig.json` baked onto each of its bodies by anim's
 //                 export (`plugins/anim/anim.export.py`), drawn by crowd3d. The export measures the rig's
@@ -20,7 +29,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { execFileSync } from 'node:child_process'
 import type { Tools } from '#scripts/bake.ts'
-import main from '../main.scene.json' with { type: 'json' }
+import { PICTURE } from '../castle.material.ts'
 import crowd from './crowd.rig.json' with { type: 'json' }
 import hero from './player.rig.json' with { type: 'json' }
 
@@ -29,15 +38,32 @@ const root = path.join(here, '..', '..', '..')
 const exporter = path.join(root, 'plugins', 'anim', 'anim.export.py')
 const merge = path.join(root, '.claude', 'skills', 'using-mixamo-assets', 'scripts', 'merge-table.mjs')
 
-export default async ({ blender, pack, scratch, library }: Tools) => {
+// each picture the materials read: its file here, its cc0-textures set, and the set's file it is cut from
+const PICTURES: [string, string, string][] = [
+  ['rock_colour.webp', 'Rock013_4K-JPG', 'Rock013_4K_Color.jpg'],
+  ['rock_height.webp', 'Rock013_4K-JPG', 'Rock013_4K_Displacement.jpg'],
+  ['rock_normal.webp', 'Rock013_4K-JPG', 'Rock013_4K_NormalGL.jpg'],
+  ['mortar_colour.webp', 'Concrete034_4K-JPG', 'Concrete034_4K_Color.jpg'],
+  ['mortar_height.webp', 'Concrete034_4K-JPG', 'Concrete034_4K_Displacement.jpg'],
+  ['wood_colour.webp', 'Wood036_4K-JPG', 'Wood036_4K_Color.jpg'],
+  ['wood_height.webp', 'Wood036_4K-JPG', 'Wood036_4K_Displacement.jpg'],
+  ['wood_normal.webp', 'Wood036_4K-JPG', 'Wood036_4K_NormalGL.jpg'],
+  ['wood_roughness.webp', 'Wood036_4K-JPG', 'Wood036_4K_Roughness.jpg'],
+]
+
+export default async ({ blender, webp, scratch, library, texture }: Tools) => {
+  const castle = path.join(library, 'procedural-castle')
   const out = scratch('fortress')
-  const { step, height, radius } = main.world.walker.kinds.player
-  console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(library, 'castle-plus', 'castle.py'), '--',
-    'scene', 'fortress', 'game', out, String(step), String(height), String(radius)]))
-  await pack(path.join(out, 'fortress.glb'), path.join(here, 'fortress.glb'))
-  console.log('wrote', path.relative(root, path.join(here, 'fortress.glb')))
-  for (const name of ['fortress.partial_scene.json', 'fortress.nav.json']) {
+  console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(castle, 'procedural.py'), '--', 'scene', 'fortress', out]))
+  for (const step of ['shapes.ts', 'nav.ts']) execFileSync(process.execPath, [path.join(castle, step), 'fortress', out], { stdio: 'inherit' })
+  for (const name of ['fortress.procedural.json', 'fortress.procedural.bin', 'fortress.cover.bin', 'fortress.timber.bin', 'fortress.partial_scene.json', 'fortress.nav.json']) {
     fs.copyFileSync(path.join(out, name), path.join(here, name))
+    console.log('wrote', path.relative(root, path.join(here, name)))
+  }
+  for (const [name, set, file] of PICTURES) {
+    // the set downloaded into the library when it is not there; its files beside its maps
+    const maps = await texture(set)
+    await webp(path.join(path.dirname(Object.values(maps)[0]), file), path.join(here, name), PICTURE)
     console.log('wrote', path.relative(root, path.join(here, name)))
   }
   for (const [name, rig] of [['crowd', crowd], ['player', hero]] as const) {

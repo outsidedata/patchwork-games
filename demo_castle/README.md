@@ -1,14 +1,15 @@
 # demo_castle
 
-Run about castle-plus's fortress, and watch its people go about it.
+Run about procedural-castle's fortress, and watch its people go about it.
 
-The fortress is the library's castle-plus (`castle-plus/castle.py`, its scene
-`castle-plus/scenes/fortress.json`): a walled castle of four corner towers and one on the east wall,
-battlemented curtain walls, a gatehouse between two drum towers, a keep with a turret, a great hall, a
-chapel, stables and two houses, a gallery on supports and a lookout on stilts. It is laid stone by stone
-in Blender, and beside the glb castle-plus writes what a body walks on and round, as a few plain shapes,
-and the ways between its places, as a nav3d graph. The game reads all three and nothing else of the
-fortress.
+The fortress is the library's procedural-castle (its scene `procedural-castle/scenes/fortress.json`): a
+walled castle of four corner towers and one on the east wall, battlemented curtain walls, a gatehouse
+between two drum towers, a keep with a turret, a great hall, a chapel, stables and two houses, a gallery on
+supports and a lookout on stilts. Each building is cut into one solid in Blender
+(`procedural-castle/procedural.py`), no stone laid, and the stone and the wood are drawn on its faces by a
+material (`castle.material.ts`). Beside the solids procedural-castle writes, with no Blender, what a body
+walks on and round, as a few plain shapes (`procedural-castle/shapes.ts`), and the ways between its places,
+as a nav3d graph (`procedural-castle/nav.ts`). The game reads those files and nothing else of the fortress.
 
 ## Playing
 
@@ -24,7 +25,7 @@ fortress.
 
 Every door has steps up to its floor. The keep's stair runs round its inside walls up to its roof, and
 the turret's, the drums' and the towers' are spirals. A tower whose stair you can see has no door to its
-foot: the corner towers and the east tower are closed, as castle-plus built them.
+foot: the corner towers and the east tower are closed, as the scene builds them.
 
 `dev.html` is the testbed: `?graphs=1` draws the scene's graph, the panel puts you on any of its
 places, and the readout shows where you stand and where each visitor is going.
@@ -39,10 +40,14 @@ curve, as crowd3d walks a spline a straight piece at a time.
 
 ## How it is made
 
+- **The fortress drawn** (`castle.client.ts`): the solids, the roofs' coverings and the timber from
+  `assets/fortress.procedural.json` and its three `.bin` files, each vertex its floats as procedural.py
+  wrote them; the stone and the wood (`castle.material.ts`, procedural-castle's own materials) cut each
+  face into its courses of stones or boards, with relief, on the pictures in `assets/*.webp`.
 - **The shapes** (`assets/fortress.partial_scene.json`, which `main.scene.json` extends): every wall a
   box, every room's floor one box (a round tower's a cylinder), every stone roof a plane, each stair's
-  straight stretches planes and its low treads boxes, each door's steps boxes. shapes3d holds them. Each
-  of castle-plus's kinds is the `masonry` rule (`main.sim.ts`).
+  straight stretches planes and its low treads boxes, each door's steps boxes, each support's posts and low
+  braces boxes. shapes3d holds them. Each of procedural-castle's kinds is the `masonry` rule (`main.sim.ts`).
 - **You** (`player.sim.ts`): a walker on shapes3d's ground at your own feet, so you stand on whatever
   floor you are on and walk under the one over you, drawn by anim, which plays your rig's idle, walk,
   run and jump (`assets/player.rig.json`).
@@ -61,12 +66,12 @@ curve, as crowd3d walks a spline a straight piece at a time.
 
 ## Baking
 
-`yarn bake demo_castle` (`assets/demo_castle.bake.ts`) lays the fortress with the library's castle.py
-and writes the three files, packs the glb, bakes the visitors' four bodies with their idle and walk
-clips (`assets/crowd.rig.json`), and bakes your body with its rig's clips, writing the table anim plays
-by back into `assets/player.rig.json`. Bodies come from the library, clips from `~/troupe-collection`.
-The ways are worked out for your walker numbers in `main.scene.json`; change them, or the fortress,
-and bake again.
+`yarn bake demo_castle` (`assets/demo_castle.bake.ts`) cuts the fortress's solids with the library's
+procedural.py, writes its shapes and its ways with shapes.ts and nav.ts, cuts the stone's, the mortar's and
+the wood's pictures to 2048 pixels square as WebP, bakes the visitors' four bodies with their idle and walk
+clips (`assets/crowd.rig.json`), and bakes your body with its rig's clips, writing the table anim plays by
+back into `assets/player.rig.json`. Bodies come from the library, clips from `~/troupe-collection`. Change
+the fortress in the library and bake again.
 
 ## Tests
 
