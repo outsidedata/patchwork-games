@@ -50,7 +50,7 @@ test('the crowd stands each person of its file as a person row, once, from its f
   const still = () => people().filter(r => r.data.speed === 0)
   expect(still().length).toBe(standing.people.length)
   const first = at(still(), 0), p = standing.people[0]
-  expect(first.data).toEqual({ pos: p.at, yaw: p.yaw, speed: 0, body: p.body, clip: p.clip, since: DT, ends: 0, holding: p.holding })
+  expect(first.data).toEqual({ pos: p.at, to: p.at, yaw: p.yaw, speed: 0, body: p.body, clip: p.clip, since: DT, ends: 0, holding: p.holding })
   // Every soldier holds the kit, and nobody else anything.
   for (const [i, q] of standing.people.entries()) {
     expect(at(still(), i).data.holding).toEqual(q.body.startsWith('soldier') ? { rightHand: 'sword', leftForearm: 'shield', head: 'helmet' } : {})

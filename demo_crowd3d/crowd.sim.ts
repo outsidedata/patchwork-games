@@ -3,7 +3,7 @@
 // of every step; every person's `since` and `ends` and every gate's `due` are times on it. In its
 // first step it stands a `person` of each person of its definition's `people`, a loader `json`
 // entry, `{ people: [{ body, clip, at, yaw, holding }] }`: at `at`, facing `yaw`, on `clip`, holding
-// what `holding` names (crowd3d's `holding`), at a `speed` of 0, from that step; `placed` says it has. Each step it ends every walker whose `ends` has come.
+// what `holding` names (crowd3d's `holding`), its `to` its `at`, at a `speed` of 0, from that step; `placed` says it has. Each step it ends every walker whose `ends` has come.
 // `kill` is handed a ray, `[x, y, z]` from and `[x, y, z]` along, by the seat's eye, and asks the
 // first living person it meets where they stand now to `die`, with the definition's `die` clip and
 // the clock's time. Each person is an upright cylinder of the definition's `radius` round where its
@@ -53,7 +53,7 @@ export const crowd: Kind = {
     if (me.data.placed) return
     me.data.placed = true
     for (const p of (json(w, def(w, me.kind).people) as { people: Person[] }).people) {
-      w.spawn('person', { pos: [...p.at], yaw: p.yaw, speed: 0, body: p.body, clip: p.clip, since: time, ends: 0, holding: { ...p.holding } })
+      w.spawn('person', { pos: [...p.at], to: [...p.at], yaw: p.yaw, speed: 0, body: p.body, clip: p.clip, since: time, ends: 0, holding: { ...p.holding } })
     }
   },
   acts: {
