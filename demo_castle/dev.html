@@ -40,7 +40,7 @@
       import { scene as main } from './main.sim.ts'
       import { visitor } from './visitor.sim.ts'
       import file from './demo_castle.scene.json'
-      import taxonomy from './assets/taxonomy.nav.json'
+      import town from './assets/smallville.town.nav.json'
       import bridge from './assets/bridge.nav.json'
 
       file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
@@ -89,8 +89,9 @@
       window.__page = page
       const room = window.__scenes.get(file.prefabs.scenemanager.entry)
       // the scene's graph, the one its page draws
-      const graph = { main: taxonomy, bridge }[file.prefabs.scenemanager.entry]
-      const places = [...new Set(graph.nodes.flatMap(n => n.tags ?? []))].sort()
+      const graph = { main: town, bridge }[file.prefabs.scenemanager.entry]
+      const tagsOf = p => p.data?.nav3d?.tags ?? []
+      const places = [...new Set(graph.places.flatMap(tagsOf))].sort()
       const me = () => room.rows.find(r => r.kind === 'player')
 
       // The panel. A press on it stops at it, so the game's keys are the game's.
@@ -100,9 +101,9 @@
       const views = { graphs: new URLSearchParams(location.search).get('graphs') === '1' }
       gui.add(views, 'graphs')
       const jump = { place: places[0], 'go to': () => {
-        const node = graph.nodes.find(n => n.tags?.includes(jump.place))
+        const place = graph.places.find(q => tagsOf(q).includes(jump.place))
         const p = me()
-        if (node && p) { p.data.pos = [...node.at]; p.data.vel = [0, 0, 0] }
+        if (place && p) { p.data.pos = [...place.point.at]; p.data.vel = [0, 0, 0] }
       } }
       gui.add(jump, 'place', places)
       gui.add(jump, 'go to')
@@ -112,7 +113,7 @@
       const visitors = () => room.rows.filter(r => r.kind === 'visitor')
       const picked = { id: null, to: places[0] }
       const chosen = () => visitors().find(v => v.id === picked.id)
-      const placeAt = place => graph.nodes.find(n => n.tags?.includes(place)).at
+      const placeAt = place => graph.places.find(q => tagsOf(q).includes(place)).point.at
       const left = v => (v.data.route ? v.data.route.points.length - v.data.route.leg : 1)
       // how many times each visitor has switched courses: its place it is going to changed, by its id
       const switches = new Map()

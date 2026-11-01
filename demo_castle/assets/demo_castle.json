@@ -19,8 +19,16 @@
     "behaviors": {
       "tour": {
         "weight": 1,
-        "graph": "taxonomy",
-        "places": ["stone box", "stone box battlements", "stone cylinder", "stone wall", "stone enclosure", "stone box open", "wood box", "wood cylinder", "wood wall", "wood enclosure", "gable bare", "hip bare", "half-hip bare", "gambrel bare", "gable shingles", "hip shingles", "half-hip shingles", "gambrel shingles", "gable boards", "hip boards", "half-hip boards", "gambrel boards", "gable slate", "hip slate", "half-hip slate", "gambrel slate", "straight stair", "turning stair", "spiral stair", "framed floor", "raised row fence", "raised box", "raised cylinder", "raised enclosure"],
+        "graph": "town",
+        "places": ["keep/hall/before the dais", "keep/hall/by the hall fire", "keep/hall/hall aisle west", "keep/solar/solar middle", "keep/solar/at the solar desk",
+                   "kitchen/by the kitchen fire", "kitchen/at the oven", "kitchen/at the kneading trough", "chapel/at the altar", "chapel/chapel nave", "chapel/at the font",
+                   "armoury/armoury middle", "armoury/at the polearm rack", "store/at the casks", "stable/stall 1", "stable/stall 2", "stable/stall 3",
+                   "lodging/chamber middle", "lodging/at the prie-dieu", "gate/gate passage", "north west tower/tower roof", "north east tower/tower floor",
+                   "south west tower/tower roof", "south east tower/tower floor", "north walk stair top", "east walk stair top",
+                   "tavern/tavern room", "tavern/behind the counter", "tavern/by the tavern fire", "tavern/loft middle", "tavern/by the bunk",
+                   "workshop/at the workbench", "workshop/at the shave horse", "market/alehouse inside", "hut west 1/by the hut hearth",
+                   "hut west 2/by the hut hearth", "hut west 3/by the hut hearth", "hut east 1/by the hut hearth", "hut east 2/by the hut hearth",
+                   "round hut/by the round hut hearth"],
         "clip": "walk",
         "speed": 1.4,
         "stand": "idle",
@@ -30,7 +38,7 @@
     }
   },
   "castle": {
-    "glb": "taxonomy",
+    "glb": "town",
     "pictures": {
       "rockCol": "rockCol", "rockDisp": "rockDisp", "rockNrm": "rockNrm", "mortCol": "mortCol", "mortDisp": "mortDisp",
       "woodCol": "woodCol", "woodDisp": "woodDisp", "woodNrm": "woodNrm", "woodRough": "woodRough"

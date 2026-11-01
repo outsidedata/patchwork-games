@@ -686,3 +686,184 @@ export function createWood(THREE: T, dress: Dress, { courseTex, pictures, knobs 
   wallShader(THREE, dress, material, uniforms, WOOD_PARS, WOOD_MAIN, 'castle wood')
   return { material, dispose: () => { material.dispose(); (uniforms.csNoise.value as Three.Texture).dispose() } }
 }
+
+// The kit's own materials as pro-ng's viewer draws them (its `material/kit.js`), no picture: iron, thatch, cloth,
+// plaster, rope, glass, slate, shingles and boards, each worked out from the part's uv in metres and its thing's and
+// part's numbers (the kit's `kitInfo`: its material, its thing's row, its part's number), so two cloths are not alike.
+const KIT_LOOKS: Record<string, number> = { iron: 0, thatch: 1, cloth: 2, plaster: 3, rope: 4, glass: 5, slate: 6, shingles: 7, boards: 8 }
+
+const KIT_PARS = /* glsl */`
+uniform float kitKind;
+varying vec2 vKitUv;
+varying vec3 vKitInfo;
+
+float kh(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
+float kh1(float x) { return fract(sin(x * 91.7) * 43758.5453); }
+float kn(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(kh(i), kh(i + vec2(1, 0)), u.x), mix(kh(i + vec2(0, 1)), kh(i + vec2(1, 1)), u.x), u.y);
+}
+float kfbm(vec2 p) {
+  float a = 0.5, s = 0.0;
+  for (int i = 0; i < 4; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }
+  return s;
+}
+float kfade(float f) { float w = fwidth(vKitUv.x) + fwidth(vKitUv.y); return clamp(1.5 - w / f, 0.0, 1.0); }
+float kcell(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  float d = 8.0;
+  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {
+    vec2 o = vec2(x, y);
+    vec2 r = o + vec2(kh(i + o), kh(i + o + 7.3)) - f;
+    d = min(d, dot(r, r));
+  }
+  return sqrt(d);
+}
+vec4 kcourse(vec2 uv, float row, float wide, float jitter, float seed, out vec2 id) {
+  float r = floor(uv.y / row);
+  float shift = kh1(r + seed) * wide;
+  float w = wide * (1.0 - jitter * 0.5 + jitter * kh(vec2(r, floor((uv.x + shift) / wide) + seed)));
+  float x = (uv.x + shift) / w;
+  id = vec2(r, floor(x));
+  return vec4(fract(x), fract(uv.y / row), r, w);
+}
+struct KitLook { vec3 colour; float rough; float metal; float height; float alpha; };
+KitLook kitLook() {
+  vec2 uv = vKitUv;
+  float seed = vKitInfo.y * 7.13 + vKitInfo.z * 1.71;
+  KitLook k;
+  k.alpha = 1.0;
+  int kind = int(kitKind + 0.5);
+  if (kind == 0) {
+    float dim = kcell(uv * 22.0 + seed);
+    float big = kfbm(uv * 3.0 + seed);
+    float rust = smoothstep(0.55, 0.8, kfbm(uv * 1.6 + seed * 3.1)) + smoothstep(0.45, 0.2, dim) * 0.25 * kfade(0.05);
+    vec3 iron = mix(vec3(0.045, 0.047, 0.052), vec3(0.11, 0.11, 0.115), big);
+    vec3 red = mix(vec3(0.19, 0.075, 0.03), vec3(0.32, 0.15, 0.06), kn(uv * 40.0 + seed));
+    k.colour = mix(iron, red, clamp(rust, 0.0, 1.0));
+    k.metal = mix(0.85, 0.15, clamp(rust, 0.0, 1.0));
+    k.rough = mix(0.42 + 0.25 * big, 0.92, clamp(rust, 0.0, 1.0));
+    k.height = -0.0012 * smoothstep(0.5, 0.0, dim) * kfade(0.05);
+  } else if (kind == 1) {
+    float bundle = kn(vec2(uv.x * 2.5, uv.y * 9.0) + seed);
+    float strand = kn(vec2(uv.x * 9.0, uv.y * 260.0) + seed) * kfade(0.004);
+    float age = kfbm(uv * 0.9 + seed);
+    vec3 straw = mix(vec3(0.55, 0.43, 0.22), vec3(0.72, 0.58, 0.32), bundle);
+    straw = mix(straw, vec3(0.36, 0.33, 0.27), smoothstep(0.45, 0.8, age));
+    k.colour = straw * mix(0.55, 1.1, strand);
+    k.rough = 0.95;
+    k.metal = 0.0;
+    k.height = 0.006 * (strand - 0.5) + 0.01 * (bundle - 0.5);
+  } else if (kind == 2) {
+    float pick = kh1(vKitInfo.y * 3.7 + 0.31);
+    vec3 dye = pick < 0.22 ? vec3(0.42, 0.06, 0.05) : pick < 0.4 ? vec3(0.08, 0.13, 0.33) : pick < 0.52 ? vec3(0.62, 0.5, 0.16)
+             : pick < 0.66 ? vec3(0.12, 0.25, 0.1) : pick < 0.84 ? vec3(0.66, 0.6, 0.48) : vec3(0.3, 0.19, 0.11);
+    vec2 t = uv / 0.0015;
+    float warp = sin(t.x * 3.14159), weft = sin(t.y * 3.14159);
+    float over = step(0.0, warp * weft);
+    float weave = mix(0.5, mix(0.82, 1.08, over) * (0.85 + 0.15 * abs(over > 0.5 ? weft : warp)), kfade(0.003));
+    float wear = kfbm(uv * 2.2 + seed);
+    k.colour = dye * weave * mix(0.85, 1.12, kn(uv * 9.0 + seed));
+    k.colour = mix(k.colour, k.colour * 0.7 + vec3(0.05, 0.045, 0.04), smoothstep(0.6, 0.85, wear));
+    k.rough = 0.93;
+    k.metal = 0.0;
+    k.height = 0.0003 * (weave - 0.5);
+  } else if (kind == 3) {
+    float stroke = kn(vec2(uv.x * 1.8 + uv.y * 0.6, uv.y * 7.0) + seed);
+    float grain = kn(uv * 70.0 + seed) * kfade(0.02);
+    float grime = smoothstep(0.55, 0.85, kfbm(uv * 1.2 + seed));
+    k.colour = vec3(0.86, 0.82, 0.72) * (0.92 + 0.08 * stroke + 0.05 * grain);
+    k.colour = mix(k.colour, vec3(0.55, 0.5, 0.42), grime * 0.45);
+    k.rough = 0.92;
+    k.metal = 0.0;
+    k.height = 0.002 * (stroke - 0.5) + 0.0004 * grain;
+  } else if (kind == 4) {
+    float twist = fract(uv.x / 0.018 + uv.y / 0.012);
+    float strand = smoothstep(0.0, 0.25, twist) * smoothstep(1.0, 0.75, twist);
+    float fibre = kn(vec2(uv.x * 300.0, uv.y * 40.0) + seed) * kfade(0.003);
+    k.colour = mix(vec3(0.38, 0.3, 0.17), vec3(0.62, 0.52, 0.32), mix(0.5, strand, kfade(0.01))) * (0.9 + 0.2 * fibre);
+    k.rough = 0.9;
+    k.metal = 0.0;
+    k.height = 0.0015 * mix(0.5, strand, kfade(0.01));
+  } else if (kind == 5) {
+    float wave = kfbm(uv * 14.0 + seed);
+    float seeds = smoothstep(0.08, 0.02, kcell(uv * 60.0 + seed)) * kfade(0.01);
+    k.colour = mix(vec3(0.42, 0.52, 0.42), vec3(0.58, 0.66, 0.55), wave) + seeds * 0.2;
+    k.rough = 0.06 + 0.06 * wave;
+    k.metal = 0.0;
+    k.height = 0.0004 * (wave - 0.5);
+    k.alpha = 0.42 + 0.12 * wave;
+  } else if (kind == 6) {
+    vec2 id;
+    vec4 c = kcourse(uv, 0.17, 0.26, 0.6, seed, id);
+    float tone = kh(id + seed);
+    float edge = smoothstep(0.0, 0.04, c.x) * smoothstep(1.0, 0.96, c.x) * smoothstep(0.0, 0.05, c.y);
+    float split = kn(uv * 30.0 + id * 3.1) * kfade(0.02);
+    k.colour = mix(vec3(0.07, 0.08, 0.095), vec3(0.16, 0.17, 0.19), tone) * mix(0.45, 1.0, mix(1.0, edge, kfade(0.05))) * (0.9 + 0.15 * split);
+    k.rough = 0.72 + 0.15 * split;
+    k.metal = 0.0;
+    k.height = mix(0.0, 0.006 * (1.0 - c.y) * edge, kfade(0.05));
+  } else if (kind == 7) {
+    vec2 id;
+    vec4 c = kcourse(uv, 0.18, 0.22, 0.9, seed, id);
+    float tone = kh(id + seed);
+    float grain = kn(vec2((uv.x + id.x) * 60.0, uv.y * 4.0) + id) * kfade(0.008);
+    float edge = smoothstep(0.0, 0.05, c.x) * smoothstep(1.0, 0.95, c.x) * smoothstep(0.0, 0.06, c.y);
+    vec3 wood = mix(vec3(0.3, 0.2, 0.11), vec3(0.5, 0.37, 0.22), tone);
+    wood = mix(wood, vec3(0.34, 0.33, 0.3), smoothstep(0.55, 0.85, kfbm(uv * 1.5 + seed)) * 0.6);
+    k.colour = wood * mix(0.4, 1.0, mix(1.0, edge, kfade(0.05))) * (0.85 + 0.25 * grain);
+    k.rough = 0.88;
+    k.metal = 0.0;
+    k.height = mix(0.0, 0.008 * (1.0 - c.y) * edge, kfade(0.05)) + 0.0006 * grain;
+  } else {
+    float row = floor(uv.y / 0.25);
+    float inRow = fract(uv.y / 0.25);
+    float tone = kh1(row + seed);
+    float grain = kn(vec2(uv.x * 3.0, (uv.y + row) * 90.0) + row) * kfade(0.006);
+    float edge = smoothstep(0.0, 0.03, inRow) * smoothstep(1.0, 0.97, inRow);
+    vec3 wood = mix(vec3(0.27, 0.17, 0.09), vec3(0.46, 0.31, 0.17), tone);
+    k.colour = wood * mix(0.45, 1.0, mix(1.0, edge, kfade(0.04))) * (0.82 + 0.3 * grain);
+    k.rough = 0.82;
+    k.metal = 0.0;
+    k.height = mix(0.0, -0.003 * (1.0 - edge), kfade(0.04)) + 0.0005 * grain;
+  }
+  return k;
+}
+vec3 kitBump(vec3 pos, vec3 n, float h, float faceDirection) {
+  vec3 sx = dFdx(pos), sy = dFdy(pos);
+  vec3 r1 = cross(sy, n), r2 = cross(n, sx);
+  float det = dot(sx, r1) * faceDirection;
+  vec2 dh = vec2(dFdx(h), dFdy(h));
+  vec3 grad = sign(det) * (dh.x * r1 + dh.y * r2);
+  return normalize(abs(det) * n - grad);
+}
+`
+
+// the kit look of material `name`, dressed by render3d; null for a material that has none
+export function createKitLook(THREE: T, dress: Dress, name: string): Three.MeshStandardMaterial | null {
+  if (!(name in KIT_LOOKS)) return null
+  const glass = name === 'glass'
+  const material = new THREE.MeshStandardMaterial({
+    color: 0xffffff, roughness: 1, metalness: 0, transparent: glass, depthWrite: !glass,
+    side: glass ? THREE.DoubleSide : THREE.FrontSide, shadowSide: THREE.FrontSide,
+  })
+  dress(material)
+  const dressed = material.onBeforeCompile.bind(material)
+  const dressedKey = material.customProgramCacheKey.bind(material)
+  material.customProgramCacheKey = () => `${dressedKey()}|castle kit ${name}`
+  material.onBeforeCompile = (shader, renderer) => {
+    dressed(shader, renderer)
+    shader.uniforms.kitKind = { value: KIT_LOOKS[name] }
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nattribute vec3 kitInfo;\nvarying vec2 vKitUv;\nvarying vec3 vKitInfo;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvKitUv = uv;\nvKitInfo = kitInfo;')
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', `#include <common>\n${KIT_PARS}`)
+      .replace('#include <map_fragment>', '#include <map_fragment>\nKitLook kl = kitLook();\ndiffuseColor.rgb = kl.colour;\ndiffuseColor.a *= kl.alpha;')
+      .replace('#include <roughnessmap_fragment>', 'float roughnessFactor = kl.rough;')
+      .replace('#include <metalnessmap_fragment>', 'float metalnessFactor = kl.metal;')
+      .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\nnormal = kitBump(-vViewPosition, normal, kl.height, faceDirection);')
+  }
+  return material
+}

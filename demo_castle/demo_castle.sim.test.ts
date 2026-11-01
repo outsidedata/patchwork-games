@@ -1,6 +1,6 @@
-// demo_castle: the manager booted as its page boots it and main loaded, on pro-ng's taxonomy as
-// `yarn bake demo_castle` wrote it. A seat joins on row 0's lane and runs along it; and the visitors go
-// about the taxonomy's lanes until one reaches an entry in another row along nav3d's route. On bridge, the visitors
+// demo_castle: the manager booted as its page boots it and main loaded, on pro-ng's town as
+// `yarn bake demo_castle` wrote it. A seat joins on the lane outside the gate and runs north up it on the
+// cobbles; and the visitors go about the town until one reaches a place along nav3d's route. On bridge, the visitors
 // walk over the bridge at its height, under it on the ground, and up and down its ramps.
 import { expect, test } from 'vitest'
 import { boot, type Row, type Scene, type W } from '#engine/engine.ts'
@@ -23,31 +23,32 @@ async function main(entry = 'main') {
   return { truth, room, heard, seat }
 }
 
-test('a seat starts on row 0\'s lane and runs along it on the ground', async () => {
+test('a seat starts on the lane outside the gate and runs north up it into the gatehouse', async () => {
   const { truth, room, heard, seat } = await main()
   const last = heard[heard.length - 1]
   const me = () => room.rows.find(r => r.kind === 'player')!
-  // row 0's lane is 8 m in front of the row (+z), its first node in front of the stone box at x 0
+  // the lane runs north (−z) to the gate's south face at z 19
   expect(me().data.pos[0]).toBeCloseTo(0, 5)
-  expect(me().data.pos[2]).toBeCloseTo(8, 5)
-  // right along the lane, as the D key sends it
-  seat.take({ scene: last.scene, seat: last.seat, msg: { seq: 1, n: last.packet.n, id: me().id, action: 'stick', args: [1, 0] } })
-  for (let i = 0; i < 3 / DT; i++) truth.step(DT)
+  expect(me().data.pos[2]).toBeCloseTo(22, 5)
+  // up the lane, as the W key sends it, facing the gate
+  seat.take({ scene: last.scene, seat: last.seat, msg: { seq: 1, n: last.packet.n, id: me().id, action: 'stick', args: [0, -1] } })
+  for (let i = 0; i < 1 / DT; i++) truth.step(DT)
   const [x, y, z] = me().data.pos
-  expect(Math.abs(x)).toBeGreaterThan(5)
-  expect(z).toBeCloseTo(8, 0)
-  expect(y).toBe(0)
+  // in through the gate's south face (z 19), on the gatehouse's floor, 2 cm up
+  expect(z).toBeLessThan(19)
+  expect(Math.abs(x)).toBeLessThan(1.3)
+  expect(y).toBeCloseTo(0.02, 3)
   expect(me().data.grounded).toBe(true)
 })
 
-test('a visitor walks the lanes to a taxonomy entry in another row and stops on its node, its course written once a leg', async () => {
+test('a visitor walks the town to one of its places and stops on it, its course written once a leg', async () => {
   const { truth, room } = await main()
   // a rule's view of the truth, as far as the loader and nav3d read it
   const w = { world: room.world, find: (kind: string) => room.rows.find(r => r.kind === kind)! } as unknown as W
-  const nodes = graph(w, 'taxonomy').nodes
+  const places = graph(w, 'town').places
   const visitors = room.rows.filter(r => r.kind === 'visitor') as Row[]
   const time = () => room.rows.find(r => r.kind === 'npc3d')!.data.time
-  const node = (name: string) => nodes.find(n => n.tags?.includes(name))!
+  const node = (name: string) => places.find(p => p.data?.nav3d?.tags?.includes(name))!.point
   // each visitor's walk: the row's lane (z) it set out from, how many times its course was written and how many legs
   type Walk = { from: number; writes: number; legs: number; since: number; leg: number }
   const walks = new Map<number, Walk>()
@@ -68,12 +69,12 @@ test('a visitor walks the lanes to a taxonomy entry in another row and stops on 
   }
   expect(arrived).toBeDefined()
   const { v, walk } = arrived!
-  // it stands on its place's node, on the ground
+  // it stands on its place, at its height
   const [x, y, z] = bodies.crowd3d.where(v, time())
   const at = node(v.data.going).at
   expect(x).toBeCloseTo(at[0], 5)
   expect(z).toBeCloseTo(at[2], 5)
-  expect(y).toBe(0)
+  expect(y).toBeCloseTo(at[1], 5)
   // its course was written as it set out on each leg and as it stopped, never every step
   expect(walk.legs).toBeGreaterThan(1)
   expect(walk.writes).toBeLessThanOrEqual(walk.legs + 1)

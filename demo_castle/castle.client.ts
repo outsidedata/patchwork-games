@@ -1,4 +1,4 @@
-// The taxonomy drawn as the library's pro-ng cuts it (its `procedural.py`, the scene `pro-ng/scenes/taxonomy.json`)
+// The town drawn as the library's pro-ng cuts it (its `procedural.py`, the scene `pro-ng/scenes/smallville.town.json`)
 // and packs it (`pack.mjs`), read back as pro-ng's viewer reads it (`pro-ng/viewer/index.html`): the glb the
 // definition names (`glb`), its node `pro-ng`'s extras, and each mesh's attributes, meshopt-decoded, laid back out as
 // the vertex the materials read. Each building one solid, the stone or the wood of `castle.material.ts` on every face,
@@ -12,7 +12,7 @@ import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js'
 import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
-import { createStone, createWood, type Dress, type Pictures } from './castle.material.ts'
+import { createKitLook, createStone, createWood, type Dress, type Pictures } from './castle.material.ts'
 
 type Info = {
   stride: number
@@ -92,7 +92,7 @@ export function setup(row: Row, plugins: Plugins) {
   const dress: Dress = m => plugins.render3d.dress(m)
   const k = def(plugins.wire, row.kind)
   const pictureNames = Object.entries(k.pictures as Record<keyof Pictures, string>)
-  // An actor is set up before the loader's first tick, so the taxonomy is built once every file has landed.
+  // An actor is set up before the loader's first tick, so the town is built once every file has landed.
   Promise.all([k.glb, ...pictureNames.map(([, name]) => name)].map(name => plugins.loader.load(name))).then(async ([glb, ...pics]: any[]) => {
     const pictures = Object.fromEntries(pictureNames.map(([key], i) => [key, pics[i]])) as Pictures
     const unpacked = await unpack(glb.bytes)
@@ -203,10 +203,13 @@ function build(T: typeof THREE, dress: Dress, plugins: Plugins, { info, mesh }: 
     disposers.push(() => woodGeo.dispose())
   }
 
-  // the kit things, sorted by material: each material's run its colour, or the timber's look where it wears it
+  // the kit things, sorted by material: each material's run its kit look (iron, thatch, cloth, plaster, rope, glass,
+  // slate, shingles, boards), the timber's look where it wears it, or its colour
   const kit = mesh('kit', [...BASE, ['_KIT', 0], ['_KIT', 1], ['_KIT', 2]])
   if (kit.floats.length) {
     const kitGeo = plainGeometry(T, kit, info.kit.stride)
+    // each vertex's material, thing and part, which the kit's looks read
+    kitGeo.setAttribute('kitInfo', new T.InterleavedBufferAttribute((kitGeo.getAttribute('position') as THREE.InterleavedBufferAttribute).data, 3, 8))
     let at = 0
     info.kit.materials.forEach((m, n) => {
       if (m.triangles) kitGeo.addGroup(at, m.triangles * 3, n)
@@ -215,6 +218,11 @@ function build(T: typeof THREE, dress: Dress, plugins: Plugins, { info, mesh }: 
     kitGeo.computeBoundingSphere()
     const looks = info.kit.materials.map(m => {
       if (m.look === 'timber') return timberLook(true)
+      const look = createKitLook(T, dress, m.name)
+      if (look) {
+        disposers.push(() => look.dispose())
+        return look
+      }
       const flat = dress(new T.MeshStandardMaterial({ color: new T.Color(m.colour), roughness: 0.85, metalness: 0, shadowSide: T.FrontSide }))
       disposers.push(() => flat.dispose())
       return flat
