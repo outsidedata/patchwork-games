@@ -82,7 +82,6 @@
       blast.add(defs.tnt.blast, 'radius', 0.5, 15, 0.1).name('radius (m)')
       blast.add(defs.tnt.blast, 'falloff', 0, 10, 0.1).name('falloff (m)')
       blast.add({ now: () => { const b = window.__scenes.get('blast')?.rows.find(r => r.kind === 'tnt'); if (b) b.data.fuse = 0 } }, 'now').name('detonate now')
-      blast.add(defs.tnt, 'reach', 0.5, 20, 0.1).name('kills within (m)')
       blast.add(defs.tnt, 'launch', 0, 60, 0.5).name('throws you at (m/s)')
       const dynamite = gui.addFolder('dynamite')
       dynamite.add(defs.dynamite.blast, 'impulse', 0, 5000, 10).name('impulse per area')

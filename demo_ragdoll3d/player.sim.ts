@@ -160,28 +160,28 @@ export const player: Kind = {
   },
 }
 
-// A stick lying across the way `yaw` faces: its long axis (its body's +Y) turned onto the right of
-// (s, 0, c), (−c, 0, s), by a quarter turn about (s, 0, c).
-const across = (s: number, c: number) => [s * Math.SQRT1_2, 0, c * Math.SQRT1_2, Math.SQRT1_2]
+// A stick pointing the way `yaw` faces: its long axis (its body's +Y) turned onto (s, 0, c), fuse
+// first, by a quarter turn about (c, 0, −s), the axis across that way.
+const along = (s: number, c: number) => [c * Math.SQRT1_2, 0, -s * Math.SQRT1_2, Math.SQRT1_2]
 
 // A lit stick of dynamite let go of from the hand: a `dynamite` row spawned the definition's `drop.ahead`
-// metres before the row's feet along its yaw, `drop.height` over the floor, lying across the way the row
-// faces, and tossed on at `drop.toss` [ahead, up] m/s rolling `drop.roll` radians a second about its own
-// length, (c, 0, −s), so it rolls on ahead; box3d takes it from there (`dynamite.sim.ts`).
+// metres before the row's feet along its yaw, `drop.height` over the floor, pointing the way the row
+// faces, and tossed on at `drop.toss` [ahead, up] m/s tumbling end over end, `drop.roll` radians a second
+// about the axis across that way, (c, 0, −s); box3d takes it from there (`dynamite.sim.ts`).
 function drop(me: Row, w: W, k: { ahead: number; height: number; toss: number[]; roll: number }) {
   const d = me.data
   const s = math.sin(d.yaw), c = math.cos(d.yaw)
   w.spawn('dynamite', {
     pos: [d.pos[0] + s * k.ahead, k.height, d.pos[2] + c * k.ahead],
-    rot: across(s, c),
+    rot: along(s, c),
     vel: [s * k.toss[0], k.toss[1], c * k.toss[0]],
     spin: [c * k.roll, 0, -s * k.roll],
   })
 }
 
 // A lit stick thrown along the aim: spawned the definition's `throw.ahead` metres out from the eye along
-// it, lying across it, at `throw.speed` m/s along the aim plus `throw.lift` m/s up, rolling over forward
-// at `throw.roll` radians a second about its own length, (c, 0, −s).
+// it, pointing along it, at `throw.speed` m/s along the aim plus `throw.lift` m/s up, tumbling end over
+// end forward at `throw.roll` radians a second about the axis across it, (c, 0, −s).
 function hurl(me: Row, w: W, k: Record<string, any>) {
   const d = me.data
   const t = k.throw
@@ -192,7 +192,7 @@ function hurl(me: Row, w: W, k: Record<string, any>) {
   const from = eyeOf(d, k.eye)
   w.spawn('dynamite', {
     pos: from.map((v, i) => v + f[i] * t.ahead),
-    rot: across(s, c),
+    rot: along(s, c),
     vel: [f[0] * t.speed, f[1] * t.speed + t.lift, f[2] * t.speed],
     spin: [c * t.roll, 0, -s * t.roll],
   })

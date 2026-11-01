@@ -67,7 +67,7 @@
         "at": [30, 60, 40],
         "color": "#fff4e6",
         "power": 2.2,
-        "shadow": { "map": 2048, "half": 8, "near": 1, "far": 200, "distance": 60, "bias": -0.0002, "normalBias": 0.04 }
+        "shadow": { "map": 1024, "half": 100, "near": 1, "far": 200, "distance": 60, "bias": -0.0002, "normalBias": 0.04 }
       },
       "sky": { "color": "#c9d6e8", "ground": "#4a4036", "power": 1.1 }
     },
@@ -94,8 +94,8 @@
     { "is": "ramp", "pos": [5.5, 2.5, 0], "yaw": 1.5707963267948966 },
     { "is": "start", "slot": 0 },
     { "is": "victim", "pos": [0, 0, -1], "yaw": 0 },
-    { "is": "victim", "pos": [1.9, 0, -0.9], "yaw": -1.3045442776439713 },
-    { "is": "victim", "pos": [0.9, 0, -1.9], "yaw": -0.07677189126977804 },
-    { "is": "tnt", "pos": [0.8, 0, -0.6], "yaw": 0 }
+    { "is": "victim", "pos": [-2, 0, 0], "yaw": 1.5707963267948966 },
+    { "is": "victim", "pos": [3, 0, 0], "yaw": -1.5707963267948966 },
+    { "is": "tnt", "pos": [0, 0, 0], "yaw": 0 }
   ]
 }
