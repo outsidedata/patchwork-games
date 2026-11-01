@@ -40,7 +40,7 @@
       import { scene as main } from './main.sim.ts'
       import { visitor } from './visitor.sim.ts'
       import file from './demo_castle.scene.json'
-      import fortress from './assets/fortress.nav.json'
+      import taxonomy from './assets/taxonomy.nav.json'
       import bridge from './assets/bridge.nav.json'
 
       file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
@@ -89,7 +89,7 @@
       window.__page = page
       const room = window.__scenes.get(file.prefabs.scenemanager.entry)
       // the scene's graph, the one its page draws
-      const graph = { main: fortress, bridge }[file.prefabs.scenemanager.entry]
+      const graph = { main: taxonomy, bridge }[file.prefabs.scenemanager.entry]
       const places = [...new Set(graph.nodes.flatMap(n => n.tags ?? []))].sort()
       const me = () => room.rows.find(r => r.kind === 'player')
 

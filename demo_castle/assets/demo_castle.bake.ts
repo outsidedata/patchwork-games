@@ -1,21 +1,16 @@
 // demo_castle's bake, `yarn bake demo_castle` (core's `scripts/bake.ts`): every file main's catalogue names
 // but the definitions, written beside this file.
-//   fortress.procedural.json, fortress.procedural.bin, fortress.cover.bin, fortress.timber.bin
-//                 the library's procedural-castle's fortress (its scene `procedural-castle/scenes/fortress.json`),
-//                 each building cut into one solid in Blender (`procedural-castle/procedural.py`): the solids'
-//                 layout and every building's courses, and the solids', the roofs' coverings' and the timber's
-//                 vertices, each vertex its floats, drawn by `castle.client.ts` with the stone and the wood of
-//                 `castle.material.ts`
-//   fortress.partial_scene.json
-//                 the fortress's shapes, what a body walks on and round, as a partial scene of shapes3d's, which
-//                 main extends (`procedural-castle/shapes.ts`, no Blender)
-//   fortress.nav.json
-//                 the fortress's ways, as nav3d's graph (`procedural-castle/nav.ts`, no Blender)
+//   taxonomy.glb  the library's pro-ng taxonomy (its scene `pro-ng/scenes/taxonomy.json`), each building cut into
+//                 one solid in Blender (`pro-ng/procedural.py`): the solids, the roofs' coverings, the timber and the
+//                 kit, and on its node `pro-ng` every building's courses, compressed by `pro-ng/pack.mjs`, drawn by
+//                 `castle.client.ts` with the stone and the wood of `castle.material.ts`
+//   taxonomy.nav.json
+//                 the taxonomy's lanes, as nav3d's graph (`pro-ng/taxonomy_nav.mjs`, no Blender)
 //   rock_colour.webp, rock_height.webp, rock_normal.webp, mortar_colour.webp, mortar_height.webp,
 //   wood_colour.webp, wood_height.webp, wood_normal.webp, wood_roughness.webp
-//                 the pictures the stone and the wood read, the cc0-textures sets procedural-castle's looks wear
+//                 the pictures the stone and the wood read, the cc0-textures sets pro-ng's looks wear
 //                 (Rock013, Concrete034, Wood036), cut to castle.material.ts's PICTURE pixels square
-// Change the fortress in the library and bake again.
+// Change the taxonomy in the library and bake again.
 //   farmer_man.glb, farmer_woman.glb, farmhand.glb, mechworker.glb
 //                 the visitors, every clip of `crowd.rig.json` baked onto each of its bodies by anim's
 //                 export (`plugins/anim/anim.export.py`), drawn by crowd3d. The export measures the rig's
@@ -52,11 +47,12 @@ const PICTURES: [string, string, string][] = [
 ]
 
 export default async ({ blender, webp, scratch, library, texture }: Tools) => {
-  const castle = path.join(library, 'procedural-castle')
-  const out = scratch('fortress')
-  console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(castle, 'procedural.py'), '--', 'scene', 'fortress', out]))
-  for (const step of ['shapes.ts', 'nav.ts']) execFileSync(process.execPath, [path.join(castle, step), 'fortress', out], { stdio: 'inherit' })
-  for (const name of ['fortress.procedural.json', 'fortress.procedural.bin', 'fortress.cover.bin', 'fortress.timber.bin', 'fortress.partial_scene.json', 'fortress.nav.json']) {
+  const prong = path.join(library, 'pro-ng')
+  const out = scratch('taxonomy')
+  console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(prong, 'procedural.py'), '--', 'scene', 'taxonomy', out]))
+  execFileSync(process.execPath, [path.join(prong, 'pack.mjs'), path.join(out, 'taxonomy.glb')], { stdio: 'inherit' })
+  execFileSync(process.execPath, [path.join(prong, 'taxonomy_nav.mjs'), out], { stdio: 'inherit' })
+  for (const name of ['taxonomy.glb', 'taxonomy.nav.json']) {
     fs.copyFileSync(path.join(out, name), path.join(here, name))
     console.log('wrote', path.relative(root, path.join(here, name)))
   }

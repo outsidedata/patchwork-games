@@ -1,4 +1,4 @@
-// The fortress's stone and wood, as the library's procedural-castle draws them (its `material/stone.js` and
+// The taxonomy's stone and wood, as the library's pro-ng draws them (its `material/stone.js` and
 // `material/wood.js`), no stone or board laid: on a plain wall, for each pixel, the course it is in (its building's
 // own course heights, a row of the course table), the stone or board it is in along that course, that piece's own
 // number, its edges, its face and its joint. Relief by parallax occlusion with the sun's shadow cast inside it. The
@@ -16,7 +16,7 @@ import type * as Three from 'three'
 // the course table's width: the most courses a building has
 export const COURSES = 256
 // the pictures' size, the bake's: the parallax reads each at the level of detail a pixel covers of it
-export const PICTURE = 2048
+export const PICTURE = 1024
 
 type T = typeof Three
 type Uniforms = Record<string, { value: unknown }>
@@ -98,7 +98,7 @@ function meanLightness(image: CanvasImageSource) {
 // (a stone, a board), its number and its edges
 const LAYOUT = /* glsl */`
 uniform sampler2D csCourses;
-uniform float csDepth, csView;
+uniform float csView;
 uniform float cs_stoneMin, cs_stoneMax, cs_rowMin, cs_rowMax, cs_joint, cs_seed, cs_corner;
 uniform float cs_pomOn, cs_shadowOn;
 varying vec3 vCsT;
@@ -130,6 +130,8 @@ void csCourse(int row, float v, out int c, out float b0, out float b1) {
   b0 = texelFetch(csCourses, ivec2(lo, row), 0).r;
   b1 = texelFetch(csCourses, ivec2(min(lo + 1, ${COURSES - 1}), row), 0).r;
 }
+// the row's building's walls' thickness, kept in the course table after its courses
+float csWallDepth(int row) { return texelFetch(csCourses, ivec2(${COURSES}, row), 0).r; }
 // the k-th of n joints across a stretch cut into n stones, in stones from its start: each inner joint moved by
 // up to jit / 2 of a stone each way, so each stone is (1 ± jit) of the mean
 float csJ(int k, int n, float jit, int s1, int s2) {
@@ -198,6 +200,7 @@ CsCell csCell(vec2 q) {
     } else {
       qx = clamp(q.x, 0.0, W);
       bool through = kind == 3 || (c + f) % 2 == 0;
+      float csDepth = csWallDepth(row);
       if (!through && W < 2.0 * csDepth + 0.3) {
         // a face too short for the corner stones of its sides and a stone between: one stone, both corners'
         x0 = 0.0; x1 = W; aL = true; aR = true;
@@ -439,7 +442,7 @@ CwS cwSample(vec2 uv) {
   CsCell C = csStoneAt(q);
   float d = csEdge(C);
   int kind = int(vCsWall.x + 0.5);
-  bool isEnd = kind == 0 && (C.arris.x > 0.5 || C.arris.y > 0.5) && C.size.x <= csDepth + 0.001;
+  bool isEnd = kind == 0 && (C.arris.x > 0.5 || C.arris.y > 0.5) && C.size.x <= csWallDepth(int(vCsWall.w + 0.5) % 256) + 0.001;
   // the grain along u (up the board on an end, so its rings are drawn instead), each board its own patch
   vec2 tuv = (uv + vec2(C.id * 97.13, fract(C.id * 7.31) * 61.7)) / cs_grainScale;
   float grain = textureLod(cwDisp, tuv, cwLod).r;
@@ -618,15 +621,18 @@ const knobUniforms = (knobs: Record<string, number>): Uniforms => Object.fromEnt
 
 // the stone over a course table of `rows` buildings, `knobs` over procedural-castle's own (a roof's slate its own
 // sizes), `colours` its stone's and mortar's tints (linear). `courses(row, feet)` writes a building's course feet,
-// its heights off the ground; `tick()` each frame works out the pictures' means once they are drawn
-export function createStone(THREE: T, dress: Dress, { rows, depth, pictures, knobs = {}, colours }: {
-  rows: number; depth: number; pictures: Pictures; knobs?: Partial<typeof STONE>; colours?: { stone: Three.Color; mortar: Three.Color }
+// its heights off the ground, and its walls' thickness after them; `tick()` each frame works out the pictures'
+// means once they are drawn
+export function createStone(THREE: T, dress: Dress, { rows, pictures, knobs = {}, colours }: {
+  rows: number; pictures: Pictures; knobs?: Partial<typeof STONE>; colours?: { stone: Three.Color; mortar: Three.Color }
 }) {
-  const data = new Float32Array(COURSES * rows)
-  const courseTex = new THREE.DataTexture(data, COURSES, rows, THREE.RedFormat, THREE.FloatType)
+  const width = COURSES + 1
+  const data = new Float32Array(width * rows)
+  const courseTex = new THREE.DataTexture(data, width, rows, THREE.RedFormat, THREE.FloatType)
   courseTex.minFilter = courseTex.magFilter = THREE.NearestFilter
-  const courses = (row: number, feet: number[]) => {
-    for (let c = 0; c < COURSES; c++) data[row * COURSES + c] = c < feet.length ? feet[c] : 1e4 + c
+  const courses = (row: number, feet: number[], wallDepth: number) => {
+    for (let c = 0; c < COURSES; c++) data[row * width + c] = c < feet.length ? feet[c] : 1e4 + c
+    data[row * width + COURSES] = wallDepth
     courseTex.needsUpdate = true
   }
   const uniforms: Uniforms = {
@@ -639,7 +645,6 @@ export function createStone(THREE: T, dress: Dress, { rows, depth, pictures, kno
     csMortDisp: { value: pictures.mortDisp },
     csRockMean: { value: 0.2 },
     csMortMean: { value: 0.2 },
-    csDepth: { value: depth },
     csView: { value: 0 },
     ...knobUniforms({ ...STONE, ...knobs }),
     // procedural-castle's cc0-textures.json's tints (linear)
@@ -664,8 +669,8 @@ export function createStone(THREE: T, dress: Dress, { rows, depth, pictures, kno
 
 // the wood over the stone's course table (`courseTex`, each building's courses its own), `knobs` over
 // procedural-castle's own (a roof's shingles and boards their own sizes)
-export function createWood(THREE: T, dress: Dress, { courseTex, depth, pictures, knobs = {} }: {
-  courseTex: Three.DataTexture; depth: number; pictures: Pictures; knobs?: Partial<typeof WOOD>
+export function createWood(THREE: T, dress: Dress, { courseTex, pictures, knobs = {} }: {
+  courseTex: Three.DataTexture; pictures: Pictures; knobs?: Partial<typeof WOOD>
 }) {
   const uniforms: Uniforms = {
     csNoise: { value: noiseTexture(THREE) },
@@ -674,7 +679,6 @@ export function createWood(THREE: T, dress: Dress, { courseTex, depth, pictures,
     cwDisp: { value: pictures.woodDisp },
     cwNrm: { value: pictures.woodNrm },
     cwRough: { value: pictures.woodRough },
-    csDepth: { value: depth },
     csView: { value: 0 },
     ...knobUniforms({ ...WOOD, ...knobs }),
   }

@@ -19,8 +19,8 @@
     "behaviors": {
       "tour": {
         "weight": 1,
-        "graph": "fortress",
-        "places": ["keep", "keep roof", "turret", "great hall", "chapel", "stables", "house west", "house east", "gatehouse", "gatehouse roof", "drum west", "drum east", "drum west roof", "drum east roof", "gate south", "gate north", "keep door", "hall door", "chapel door", "stable door 0", "stable door 1", "tower north-west", "tower north-west roof", "tower north-east", "tower north-east roof", "tower south-east", "tower south-east roof", "tower south-west", "tower south-west roof", "tower east", "tower east roof", "gallery 1", "lookout"],
+        "graph": "taxonomy",
+        "places": ["stone box", "stone box battlements", "stone cylinder", "stone wall", "stone enclosure", "stone box open", "wood box", "wood cylinder", "wood wall", "wood enclosure", "gable bare", "hip bare", "half-hip bare", "gambrel bare", "gable shingles", "hip shingles", "half-hip shingles", "gambrel shingles", "gable boards", "hip boards", "half-hip boards", "gambrel boards", "gable slate", "hip slate", "half-hip slate", "gambrel slate", "straight stair", "turning stair", "spiral stair", "framed floor", "raised row fence", "raised box", "raised cylinder", "raised enclosure"],
         "clip": "walk",
         "speed": 1.4,
         "stand": "idle",
@@ -30,7 +30,7 @@
     }
   },
   "castle": {
-    "solids": { "info": "fortress", "solids": "fortressSolids", "cover": "fortressCover", "timber": "fortressTimber" },
+    "glb": "taxonomy",
     "pictures": {
       "rockCol": "rockCol", "rockDisp": "rockDisp", "rockNrm": "rockNrm", "mortCol": "mortCol", "mortDisp": "mortDisp",
       "woodCol": "woodCol", "woodDisp": "woodDisp", "woodNrm": "woodNrm", "woodRough": "woodRough"

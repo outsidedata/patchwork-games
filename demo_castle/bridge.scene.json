@@ -74,7 +74,7 @@
     },
     "render3d": {
       "camera": { "fov": 60, "near": 0.1, "far": 2000, "at": [0, 6, -30], "look": [0, 2, 0] },
-      "pixelRatio": 2,
+      "pixelRatio": 1,
       "tone": "neutral",
       "exposure": 1,
       "shadows": "soft",
