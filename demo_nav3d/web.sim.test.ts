@@ -1,5 +1,5 @@
 // demo_nav3d's web: its graph and its ribbons as the bake writes them, and the manager booted with web
-// loaded: a minute on, every person has stood only on a link of the web's graph, on a unit up, and the
+// loaded: a minute on, every person has stood only on a way of the web's graph, on a unit up, and the
 // people have walked both faces of the ribbons, the outside and the underside.
 import { expect, test } from 'vitest'
 import { boot, type Scene } from '#engine/engine.ts'
@@ -36,16 +36,20 @@ test('the web\'s ribbons: `points` points evenly apart, each up a unit, meeting 
     expect(dot(sub(points[points.length - 1], points[points.length - 2]), b.normal) / steps[0]).toBeCloseTo(0, 1)
     expect(dot(ups[points.length - 2], b.normal)).toBeCloseTo(l.half % 2 ? -1 : 1, 2)
   })
-  for (const n of nav.nodes) expect(Math.hypot(...n.normal)).toBeCloseTo(1, 9)
+  nav.places.forEach((p, k) => {
+    expect(Math.hypot(...p.point.normal)).toBeCloseTo(1, 9)
+    expect(p.data.nav3d.tags).toEqual([`n${k}`])
+  })
+  for (const wy of nav.ways) expect(wy.data).toEqual({ nav3d: { word: 'ground' } })
 })
 
-test('a minute on, every person has stood on a link of the web, on its unit up, and the people have walked both faces', async () => {
+test('a minute on, every person has stood on a way of the web, on its unit up, and the people have walked both faces', async () => {
   const scene = structuredClone(file)
   scene.prefabs.scenemanager.entry = 'web'
   const truth = boot(scene as Scene, sim)
   const room = (await load(truth, import.meta.url)).get('web')!
   connection(manager(truth), () => {})
-  const segments = nav.links.map(l => [nav.nodes[l.a].at, nav.nodes[l.b].at])
+  const segments = nav.ways.map(wy => [wy.line.from, wy.line.to])
   const off = (p: number[]) => Math.min(...segments.map(([a, b]) => {
     const ab = sub(b, a)
     const t = Math.max(0, Math.min(1, dot(sub(p, a), ab) / dot(ab, ab)))

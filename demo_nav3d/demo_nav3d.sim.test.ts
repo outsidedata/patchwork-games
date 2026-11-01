@@ -14,23 +14,29 @@ import { graph } from './assets/cube.nav.ts'
 const DT = file.prefabs.engine.dt
 const H = defs.cube.size / 2
 
-test('the cube\'s graph: 90 nodes on its faces and edges, each on its unit up turned in, 168 links each along one face', () => {
+test('the cube\'s graph: 90 places on its faces and edges, each on its unit up turned in, 168 ground lines each along one face, between two places', () => {
   expect(nav).toEqual(JSON.parse(JSON.stringify(graph(defs.cube.size, defs.cube.at))))
-  expect(nav.nodes).toHaveLength(90)
-  expect(nav.links).toHaveLength(168)
-  for (const n of nav.nodes) {
-    const p = n.at.map((v, i) => v - defs.cube.at[i])
-    expect(Math.hypot(...n.normal)).toBeCloseTo(1, 12)
+  expect(nav.places).toHaveLength(90)
+  expect(nav.ways).toHaveLength(168)
+  nav.places.forEach((pl, k) => {
+    expect(pl.data.nav3d.tags).toEqual([`n${k}`])
+    const p = pl.point.at.map((v, i) => v - defs.cube.at[i])
+    expect(Math.hypot(...pl.point.normal)).toBeCloseTo(1, 12)
     // On a face (one of its places at ± H) or an edge (two), its up turned in from each.
     const out = [0, 1, 2].filter(i => Math.abs(Math.abs(p[i]) - H) < 1e-9)
     expect(out.length === 1 || out.length === 2).toBe(true)
-    for (const i of out) expect(n.normal[i]).toBeCloseTo(-Math.sign(p[i]) / Math.sqrt(out.length), 12)
-  }
-  // Every link lies on one face: some place of both its ends is the same ± H.
-  for (const l of nav.links) {
-    const a = nav.nodes[l.a].at, b = nav.nodes[l.b].at
-    expect([0, 1, 2].some(i => Math.abs(Math.abs(a[i]) - H) < 1e-9 && Math.abs(a[i] - b[i]) < 1e-9)).toBe(true)
-    expect(l.cost).toBeCloseTo(Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]), 12)
+    for (const i of out) expect(pl.point.normal[i]).toBeCloseTo(-Math.sign(p[i]) / Math.sqrt(out.length), 12)
+  })
+  const ats = nav.places.map(p => JSON.stringify(p.point.at))
+  for (const wy of nav.ways) {
+    expect(wy.data).toEqual({ nav3d: { word: 'ground' } })
+    // Each end stands on one place, and no way joins a place to itself.
+    const a = wy.line.from, b = wy.line.to
+    expect(ats.filter(s => s === JSON.stringify(a))).toHaveLength(1)
+    expect(ats.filter(s => s === JSON.stringify(b))).toHaveLength(1)
+    expect(a).not.toEqual(b)
+    // Every way lies on one face: some place of both its ends is the same ± H.
+    expect([0, 1, 2].some(i => Math.abs(Math.abs(a[i] - defs.cube.at[i]) - H) < 1e-9 && Math.abs(a[i] - b[i]) < 1e-9)).toBe(true)
   }
 })
 

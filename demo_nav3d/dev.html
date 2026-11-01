@@ -13,7 +13,7 @@
     <script type="module">
       // The demo of nav3d's ups: index.html, the manager truth and the scenes its row names all in this
       // tab, one seat on them over a loopback, stepped on the page's clock, and a panel that turns on
-      // nav3d's view of the cube's graph (its links, its nodes and each node's up) and npc3d's view of
+      // nav3d's view of the cube's graph (its ways, its places and each place's up) and npc3d's view of
       // every person's route. `?scene=<scene>` enters that scene. For the web, `points` (each ribbon's
       // points) and `walkers` (its wanderers), each loading the page again when changed. The truths are kept on
       // `window.__scenes` and the page on `window.__page` for the profilers (benchmarking-a-game). The
@@ -36,7 +36,7 @@
       file.prefabs.scenemanager.entry = params.get('scene') ?? file.prefabs.scenemanager.entry
 
       // The web's ribbons and graph made here from `?points=` points on each ribbon, in place of the
-      // baked files, and `?walkers=` wanderers spread evenly over its nodes.
+      // baked files, and `?walkers=` wanderers spread evenly over its places.
       const shaped = { ...webDefs.ribbons, points: Number(params.get('points') ?? webDefs.ribbons.points) }
       const walkers = Number(params.get('walkers') ?? web.actors.filter(a => a.is === 'wanderer').length)
       const nav = graph(shaped)
@@ -45,7 +45,7 @@
       web.world.loader.assets.ribbonsShape.url = blob(shape(shaped))
       web.actors = [
         ...web.actors.filter(a => a.is !== 'wanderer'),
-        ...Array.from({ length: walkers }, (_, i) => ({ is: 'wanderer', home: Math.floor((i * nav.nodes.length) / walkers) })),
+        ...Array.from({ length: walkers }, (_, i) => ({ is: 'wanderer', home: Math.floor((i * nav.places.length) / walkers) })),
       ]
 
       const dt = file.prefabs.engine.dt

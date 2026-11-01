@@ -4,35 +4,34 @@
 // (`demo_nav3d.bake.ts`); change the cube's numbers, and bake again.
 //
 // Each of the six faces is the ground of its own people, its up the face's normal turned in. On each,
-// a node in its middle and a square ring of eight about it, halfway out to the face's edges: its four
+// a place in its middle and a square ring of eight about it, halfway out to the face's edges: its four
 // corners and the middles of its sides, every one on the face's up. On each of the twelve edges, three
-// nodes in line with the rings, at the edge's middle and level with the rings' corners, each on the up
+// places in line with the rings, at the edge's middle and level with the rings' corners, each on the up
 // halfway between its two faces'. A face's middle is joined to each of its ring, and each of the ring to
-// the two beside it; each edge node to the ring node of each face that faces it, so a ring's corner
-// reaches both edges it faces. 6 × 9 + 12 × 3 = 90 nodes, 6 × 16 + 36 × 2 = 168 links, each costing its
-// length, every link of the word `ground` and every node tagged with its place in the list.
+// the two beside it; each edge place to the ring place of each face that faces it, so a ring's corner
+// reaches both edges it faces. 6 × 9 + 12 × 3 = 90 places, 6 × 16 + 36 × 2 = 168 ways. Each place is a
+// shapes3d point on its up, tagged with its place in the list (`data.nav3d.tags`); each way a shapes3d
+// line from one place to the other, of the word `ground` (`data.nav3d.word`), costing its length, which
+// nav3d takes as a line's cost when its data gives none.
 import fs from 'node:fs'
 import path from 'node:path'
+import type { Graph, Place, Way } from '#plugins/nav3d/nav3d.sim.ts'
 import defs from './demo_nav3d.json' with { type: 'json' }
-
-type Node = { at: number[]; normal: number[]; tags: string[] }
-type Link = { a: number; b: number; cost: number; ground: Record<string, never> }
 
 // A face: the axis it lies across and the side of the cube it is on, −1 or +1.
 type Face = { axis: number; side: number }
 
-export function graph(size: number, at: number[]): { nodes: Node[]; links: Link[] } {
+export function graph(size: number, at: number[]): Graph {
   const H = size / 2, R = H / 2
-  const nodes: Node[] = []
-  const links: Link[] = []
+  const places: Place[] = []
+  const ways: Way[] = []
   const place = (unit: number[]) => unit.map((v, i) => at[i] + v)
-  const node = (p: number[], n: number[]) => {
-    nodes.push({ at: place(p), normal: n, tags: [`n${nodes.length}`] })
-    return nodes.length - 1
+  const put = (p: number[], n: number[]) => {
+    places.push({ point: { at: place(p), normal: n }, data: { nav3d: { tags: [`n${places.length}`] } } })
+    return places.length - 1
   }
   const join = (a: number, b: number) => {
-    const p = nodes[a].at, q = nodes[b].at
-    links.push({ a, b, cost: Math.hypot(q[0] - p[0], q[1] - p[1], q[2] - p[2]), ground: {} })
+    ways.push({ line: { from: [...places[a].point.at], to: [...places[b].point.at] }, data: { nav3d: { word: 'ground' } } })
   }
 
   // The faces, and on each the ring by its place [u, v] on the face's other two axes, in turn round it.
@@ -51,21 +50,21 @@ export function graph(size: number, at: number[]): { nodes: Node[]; links: Link[
       p[v] = b
       return p
     }
-    const middle = node(on(0, 0), up)
-    const ring = RING.map(([a, b]) => node(on(a * R, b * R), up))
+    const middle = put(on(0, 0), up)
+    const ring = RING.map(([a, b]) => put(on(a * R, b * R), up))
     for (const r of ring) join(middle, r)
     ring.forEach((r, i) => join(r, ring[(i + 1) % ring.length]))
     rings.set(f, ring)
   }
 
-  // The ring node of face `f` at [u, v], by the face's own axes.
+  // The ring place of face `f` at [u, v], by the face's own axes.
   const ringAt = (f: Face, coords: Record<number, number>) => {
     const [u, v] = others(f.axis)
     const i = RING.findIndex(([a, b]) => a * R === coords[u] && b * R === coords[v])
     return rings.get(f)![i]
   }
 
-  // The edges: each pair of faces across two axes, its three nodes along the third.
+  // The edges: each pair of faces across two axes, its three places along the third.
   for (let i = 0; i < faces.length; i++) {
     for (let j = i + 1; j < faces.length; j++) {
       const f = faces[i], g = faces[j]
@@ -79,14 +78,14 @@ export function graph(size: number, at: number[]): { nodes: Node[]; links: Link[
         p[f.axis] = f.side * H
         p[g.axis] = g.side * H
         p[along] = k
-        const e = node(p, up)
-        // On f the ring node by g's side and level k along the edge; on g, by f's side.
+        const e = put(p, up)
+        // On f the ring place by g's side and level k along the edge; on g, by f's side.
         join(e, ringAt(f, { [g.axis]: g.side * R, [along]: k }))
         join(e, ringAt(g, { [f.axis]: f.side * R, [along]: k }))
       }
     }
   }
-  return { nodes, links }
+  return { places, ways }
 }
 
 export function write(): string {

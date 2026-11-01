@@ -3,17 +3,21 @@
 A crowd walking the inside of a glass cube: the floor, the four walls and the ceiling, each person
 standing on the face under them and turning over each edge onto the next.
 
-The people are npc3d NPCs on crowd3d bodies. They walk nav3d's graph of the cube, whose nodes give the
-up of the ground at each one (`normal`). Each face has a middle node and a ring of eight. Each edge
-has three nodes whose up is halfway between its two faces, so a person rolls over the edge in two
-halves. Each person walks to a node picked at random, stands there a moment, and picks again.
+The people are npc3d NPCs on crowd3d bodies. They walk nav3d's graph of the cube: its places are
+shapes3d points, each giving the up of the ground there (`normal`), and its ways are shapes3d lines
+between them, of the word `ground`. Each face has a middle place and a ring of eight. Each edge has
+three places whose up is halfway between its two faces, so a person rolls over the edge in two
+halves. Each person walks to a place picked at random, stands there a moment, and picks again.
+
+The `web` scene is a web of twisted ribbons, some with a half turn like a Möbius band. Its graph walks
+both faces of every ribbon, a place at each of a ribbon's points on the up of that face.
 
 ## Controls
 
 You look in from a flying eye. Click the game to look with the mouse, and Escape to let it go; without
 the lock, drag with the left button held to look. W and S fly the way you look, A and D across, E and
 Q up and down; hold Shift to fly fast, and the wheel paces. `dev.html` adds a panel that turns on
-nav3d's view of the graph, with each node's up, and npc3d's view of every route.
+nav3d's view of the graph, with each place's up, and npc3d's view of every route.
 
 ## Playing it
 
@@ -28,6 +32,8 @@ yarn serve demo_nav3d   # then localhost:5173/games/demo_nav3d/client.html
 
 - `assets/cube.nav.json`, the cube's graph, written by `assets/cube.nav.ts` from the `cube`
   definition's `size` and `at` in `assets/demo_nav3d.json`. It reads nothing from the library.
+- `assets/web.nav.json` and `assets/ribbons.json`, the web's graph and the ribbons it lies on, written
+  by `assets/web.nav.ts` from the `ribbons` definition in `assets/web.json`.
 - `farmer_man.glb`: the one body of `assets/crowd.rig.json`, every person's, a Mixamo character in
   the library's `characters/`, with the rig's idle, walk
   and run clips from the library's `packs/` baked onto it by anim's export (`plugins/anim/anim.export.py`).

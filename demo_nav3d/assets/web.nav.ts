@@ -12,15 +12,17 @@
 // middle, eased in from the rim of a's disc (`hub` metres out) and out to the rim of b's, by the angle that brings it onto b's up, plus `half` half turns:
 // an even `half` meets b on b's top, an odd one meets it on b's underside, as a Möbius band does.
 //
-// The graph walks both faces of every ribbon. Each hub is two nodes, its top and its underside, half the
+// The graph walks both faces of every ribbon. Each hub is two places, its top and its underside, half the
 // thickness out along its up and its down; each ribbon two lanes, one on its up face and one on the face
-// under it, every point a node half the thickness out from the middle, on the up of that face. A lane is
+// under it, every point a place half the thickness out from the middle, on the up of that face. A lane is
 // joined point to point from the hub face it starts on to the one it meets: the top lane of a ribbon with
-// an odd `half` leaves a's top and comes out on b's underside. Every link costs its length, of the word
-// `ground`, every node tagged with its place in the list.
+// an odd `half` leaves a's top and comes out on b's underside. Each place is a shapes3d point on its up,
+// tagged with its place in the list (`data.nav3d.tags`); each way a shapes3d line from one place to the
+// next, of the word `ground` (`data.nav3d.word`), costing its length, which nav3d takes as a line's cost
+// when its data gives none.
+import type { Graph, Place, Way } from '#plugins/nav3d/nav3d.sim.ts'
+
 type V = number[]
-type Node = { at: V; normal: V; tags: string[] }
-type Link = { a: number; b: number; cost: number; ground: Record<string, never> }
 type Web = { at: V; points: number; thickness: number; hub: number; hubs: V[]; links: { a: number; b: number; half: number }[] }
 export type Ribbon = { points: V[]; ups: V[] }
 export type Shape = { ribbons: Ribbon[]; hubs: { at: V; normal: V }[] }
@@ -103,21 +105,21 @@ export function shape(web: Web): Shape {
   return { ribbons, hubs }
 }
 
-export function graph(web: Web): { nodes: Node[]; links: Link[] } {
+export function graph(web: Web): Graph {
   const { ribbons, hubs } = shape(web)
   const T = web.thickness / 2
-  const nodes: Node[] = []
-  const links: Link[] = []
-  const node = (p: V, n: V) => {
-    nodes.push({ at: p, normal: n, tags: [`n${nodes.length}`] })
-    return nodes.length - 1
+  const places: Place[] = []
+  const ways: Way[] = []
+  const put = (p: V, n: V) => {
+    places.push({ point: { at: p, normal: n }, data: { nav3d: { tags: [`n${places.length}`] } } })
+    return places.length - 1
   }
-  const join = (a: number, b: number) => links.push({ a, b, cost: Math.hypot(...sub(nodes[b].at, nodes[a].at)), ground: {} })
+  const join = (a: number, b: number) => ways.push({ line: { from: [...places[a].point.at], to: [...places[b].point.at] }, data: { nav3d: { word: 'ground' } } })
 
-  // Hub h's top is node 2h, its underside 2h + 1.
+  // Hub h's top is place 2h, its underside 2h + 1.
   for (const h of hubs) {
-    node(add(h.at, scale(h.normal, T)), h.normal)
-    node(sub(h.at, scale(h.normal, T)), scale(h.normal, -1))
+    put(add(h.at, scale(h.normal, T)), h.normal)
+    put(sub(h.at, scale(h.normal, T)), scale(h.normal, -1))
   }
   web.links.forEach((l, r) => {
     const { points, ups } = ribbons[r]
@@ -126,7 +128,7 @@ export function graph(web: Web): { nodes: Node[]; links: Link[] } {
       let from = 2 * l.a + (side === 1 ? 0 : 1)
       for (let k = 1; k < last; k++) {
         const up = scale(ups[k], side)
-        const n = node(add(points[k], scale(up, T)), up)
+        const n = put(add(points[k], scale(up, T)), up)
         join(from, n)
         from = n
       }
@@ -134,5 +136,5 @@ export function graph(web: Web): { nodes: Node[]; links: Link[] } {
       join(from, 2 * l.b + (top ? 0 : 1))
     }
   })
-  return { nodes, links }
+  return { places, ways }
 }
