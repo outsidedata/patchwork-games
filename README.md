@@ -44,6 +44,8 @@ what it needs).
   on plinths, a kite with a trail and a ball that throws up dust where it lands.
 - **demo_particle3d**: particle3d's effects fired from a craft you fly over a yard at dusk: a blast,
   sparks, smoke, a gun's tracer, a laser, lit flares, a comet and a rocket.
+- **demo_ragdoll3d**: three X Bots round a block of TNT between ramps, a pump shotgun and sticks of
+  dynamite to drop or throw, and box3d ragdolls left where they are shot or blown up.
 - **demo_rocks**: a lineup of rocks to walk around.
 - **demo_skydome3d**: the sky, the weather and the clouds over flat sand.
 - **demo_terrain3d**: a valley drawn by terrain3d at three tiers, uhd, hd and lofi.
