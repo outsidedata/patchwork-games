@@ -15,7 +15,7 @@
       //
       // The testbed: index.html, entering the HD tier, with three's stats panel (the stats plugin) at
       // the top left, so each tier's frame rate is read as it is flown, and `?tier=<name>` to enter
-      // another tier directly (`uhd` or `lofi`). Three's lil-gui at the top right holds `keep loading
+      // another tier directly (`uhd`, `lofi` or `uhdlod`). Three's lil-gui at the top right holds `keep loading
       // graphic`, which sets the store's `spinner.hold`, so the graphic drawn while the terrain is built
       // (`spinner.client.ts`) stays on screen to be worked on.
       //
@@ -50,7 +50,7 @@
       // The testbed's own keys, bound in place of whatever the seat's look binds, so no click takes the
       // pointer and the panel is clicked freely: W and S fly forward and back, A and D turn left and
       // right, E and Q tilt up and down, Shift climbs and Control sinks, the wheel paces, T tours, and
-      // 1, 2 and 3 move the seat to UHD, HD and lofi.
+      // 1, 2, 3 and 4 move the seat to UHD, HD, lofi and UHD on lod3d.
       const TURN = 1.4, TILT = 0.9 // radians a second
       let turned = performance.now()
       const devBinds = {
@@ -59,7 +59,7 @@
           { keys: ['Shift'], send: v => ['up', v] },
           { keys: ['Control'], send: v => ['down', v] },
         ],
-        press: { t: ['tour'], 1: ['tier', 1], 2: ['tier', 2], 3: ['tier', 3] },
+        press: { t: ['tour'], 1: ['tier', 1], 2: ['tier', 2], 3: ['tier', 3], 4: ['tier', 4] },
         every: held => {
           const now = performance.now(), dt = Math.min((now - turned) / 1000, 0.1)
           turned = now

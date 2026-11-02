@@ -119,6 +119,7 @@
     "scenemanager": {
       "scenes": {
         "uhd": { "file": "uhd.scene.json", "suspend": true },
+        "uhdlod": { "file": "uhdlod.scene.json", "suspend": true },
         "hd": { "file": "hd.scene.json", "suspend": true },
         "lofi": { "file": "lofi.scene.json", "suspend": true }
       },
