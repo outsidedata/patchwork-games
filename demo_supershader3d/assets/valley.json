@@ -1,0 +1,50 @@
+{
+  "program": {
+    "world": 2000,
+    "hscale": 60,
+    "sea": 0.5,
+    "flood": false,
+    "out": "ground",
+    "nodes": [
+      { "id": "roll", "op": "noise", "kind": "simplex", "freq": 6, "seed": 3 },
+      { "id": "ridge", "op": "noise", "kind": "simplex", "freq": 18, "seed": 7 },
+      { "id": "ridged", "op": "fold", "input": "ridge", "kind": "ridge" },
+      { "id": "mixed", "op": "combine", "mode": "lerp", "a": "roll", "b": "ridged", "t": 0.35 },
+      { "id": "flat", "op": "clearing", "input": "mixed", "flat": 60, "floor": 0 },
+      { "id": "ground", "op": "remap", "input": "flat", "inLo": 0, "inHi": 1, "outLo": 0.3, "outHi": 0.9, "ease": "smooth" }
+    ]
+  },
+  "analysis": {
+    "slopeStep": 2,
+    "curveStep": 6,
+    "positionRadius": 30,
+    "occlusionRadius": 60,
+    "occlusionSteps": 6,
+    "cliffProbe": 20,
+    "cliffSlope": 0.6,
+    "cliffDrop": 15,
+    "flatAngle": 0.03,
+    "records": 50000
+  },
+  "ground": {
+    "compose": "stack",
+    "roughness": 0.9,
+    "layers": [
+      { "name": "grass", "look": "grass" },
+      {
+        "name": "sand", "look": "sand",
+        "where": [{ "q": "height", "lo": 30, "hi": 24 }],
+        "noise": { "freq": 0.03, "amp": 0.8 }, "edge": 0.35,
+        "warp": [{ "freq": 0.005, "amp": 20, "stretch": [1, 1, 1], "rotate": 0.4 }, { "freq": 0.04, "amp": 2, "stretch": [1, 1, 1], "rotate": 1.1 }]
+      },
+      {
+        "name": "sandstone", "look": "sandstone",
+        "where": [{ "q": "slope", "lo": 0.3, "hi": 0.5 }],
+        "noise": { "freq": 0.08, "amp": 0.8 }, "edge": 0.35,
+        "warp": [{ "freq": 0.006, "amp": 15, "stretch": [1, 1, 1], "rotate": 0 }, { "freq": 0.05, "amp": 1.5, "stretch": [1, 3, 1], "rotate": 0.6 }]
+      }
+    ]
+  },
+  "surfaces": {},
+  "layers": []
+}

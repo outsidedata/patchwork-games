@@ -1,0 +1,96 @@
+{
+  "world": {
+    "defs": "demo_supershader3d",
+    "loader": {
+      "assets": {
+        "demo_supershader3d": { "type": "json", "url": "/games/demo_supershader3d/assets/demo_supershader3d.json", "preload": true },
+        "valley": { "type": "json", "url": "/games/demo_supershader3d/assets/valley.json", "preload": true },
+        "looks": { "type": "json", "url": "/games/demo_supershader3d/assets/main.looks.json", "preload": true },
+        "Rock013_4K_Color": { "type": "texture", "url": "/games/demo_supershader3d/assets/looks/Rock013_4K_Color.webp", "wrap": "repeat", "preload": true },
+        "Rock013_4K_NormalGL": { "type": "texture", "url": "/games/demo_supershader3d/assets/looks/Rock013_4K_NormalGL.webp", "space": "linear", "wrap": "repeat", "preload": true },
+        "Wood036_4K_Color": { "type": "texture", "url": "/games/demo_supershader3d/assets/looks/Wood036_4K_Color.webp", "wrap": "repeat", "preload": true },
+        "Wood036_4K_NormalGL": { "type": "texture", "url": "/games/demo_supershader3d/assets/looks/Wood036_4K_NormalGL.webp", "space": "linear", "wrap": "repeat", "preload": true },
+        "Wood036_4K_Roughness": { "type": "texture", "url": "/games/demo_supershader3d/assets/looks/Wood036_4K_Roughness.webp", "space": "linear", "wrap": "repeat", "preload": true }
+      }
+    },
+    "supershader3d": { "looks": "looks" },
+    "terrain3d": {
+      "field": "valley",
+      "rings": [
+        { "reach": 160, "seg": 160 },
+        { "reach": 640, "seg": 160 },
+        { "reach": 2560, "seg": 80 }
+      ],
+      "shadowReach": 160,
+      "budget": 6,
+      "seabed": false,
+      "preload": true,
+      "mods": { "behaviors": ["supershader3d"] }
+    },
+    "shapes3d": {
+      "kinds": {
+        "block": { "shape": { "box": { "size": [3, 2, 3] } }, "look": { "look": "sandstone" } },
+        "crate": { "shape": { "box": { "size": [1.2, 1.2, 1.2] } }, "look": { "look": "rock" } },
+        "post": { "shape": { "cylinder": { "radius": 0.4, "height": 4 } }, "look": { "look": "timber", "sides": 12 } },
+        "path": { "shape": { "plane": { "size": [6, 24] } }, "look": { "look": "cobble", "thick": 0.3 } }
+      }
+    },
+    "solids": { "mods": { "models": "shapes3d", "land": "terrain3d", "looks": "supershader3d" } }
+  },
+  "plugins": ["loader", "scenemanager", "player", "supershader3d", "terrain3d", "solids", "environment3d", "render3d", "chasecamera3d", "stats"],
+  "seats": 1,
+  "prefabs": {
+    "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
+    "scenemanager": { "out": {} },
+    "loader": {},
+    "render3d": {
+      "camera": { "fov": 62, "near": 0.1, "far": 6000, "at": [0, 60, 0], "look": [10, 55, 10] },
+      "pixelRatio": 1,
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "background": "#9fb8cf"
+    },
+    "environment3d": {
+      "sun": {
+        "at": [200, 300, -150], "color": "#fff3df", "power": 2.6,
+        "shadow": { "map": 2048, "half": 60, "near": 1, "far": 800, "distance": 400, "bias": -0.0004, "normalBias": 0.03 }
+      },
+      "sky": { "color": "#cfe0f2", "ground": "#5a5048", "power": 0.9 },
+      "ambient": { "color": "#ffffff", "power": 0.15 }
+    },
+    "start": { "slot": 0, "at": [0, 0], "up": 10, "yaw": 0, "pitch": 0.2 },
+    "player": {
+      "seat": 0,
+      "stood": false,
+      "pos": [0, 0, 0],
+      "look": { "yaw": 0, "pitch": 0.2, "dist": 0.1 },
+      "lift": 0,
+      "stick": [0, 0],
+      "up": false,
+      "down": false,
+      "fast": false,
+      "pace": 1
+    },
+    "block": { "pos": [0, 0, 0], "yaw": 0 },
+    "crate": { "pos": [0, 0, 0], "yaw": 0 },
+    "post": { "pos": [0, 0, 0], "yaw": 0 },
+    "path": { "pos": [0, 0, 0], "yaw": 0 }
+  },
+  "actors": [
+    { "is": "scenemanager" },
+    { "is": "loader" },
+    { "is": "start", "slot": 0, "at": [-24, 24], "up": 8, "yaw": 2.36, "pitch": 0.25 },
+    { "is": "block", "pos": [8, 0, 6], "yaw": 0.4 },
+    { "is": "block", "pos": [14, 0, -4], "yaw": 1.9 },
+    { "is": "block", "pos": [-10, 0, -9], "yaw": 0.9 },
+    { "is": "crate", "pos": [-6, 0, 4], "yaw": 0.2 },
+    { "is": "crate", "pos": [-4.5, 0, 5.5], "yaw": 1.1 },
+    { "is": "crate", "pos": [10, 0, 10], "yaw": 2.7 },
+    { "is": "post", "pos": [3, 0, -8], "yaw": 0 },
+    { "is": "post", "pos": [-14, 0, 12], "yaw": 0 },
+    { "is": "post", "pos": [18, 0, 14], "yaw": 0 },
+    { "is": "path", "pos": [0, 0, 16], "yaw": 0.3 },
+    { "is": "path", "pos": [-20, 0, -6], "yaw": -1.2 }
+  ]
+}
