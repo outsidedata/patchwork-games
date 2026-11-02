@@ -1,6 +1,8 @@
 // The row one seat possesses, and the body it runs about the fortress as: a walker (`plugins/walker`, its
 // numbers `world.walker.kinds.player`) on the fortress's shapes, shapes3d's ground at its own feet
-// (`plugins/shapes3d`), so it stands on the floor it is on and walks under the one over it; drawn by anim
+// (`plugins/shapes3d`), so it stands on the floor it is on and walks under the one over it, and round the
+// trees and boulders lod3d stands on the fields in a scene that has them (`world.lod3d`, main's; `plugins/lod3d`'s
+// `solids`, its rows that give `solid`); drawn by anim
 // (`world.anim.kinds.player`), which plays its rig's idle, walk, run and jump by how it moves.
 // `addons/player` spawns it and writes its slot into `seat`; every seat is sent it. Its numbers are the
 // player's definition in `assets/demo_castle.json`. Its own fields, beside walker's and anim's:
@@ -21,6 +23,7 @@ import type { Kind } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
 import { ground } from '#plugins/shapes3d/shapes3d.walker.ts'
+import { solids as trees } from '#plugins/lod3d/lod3d.walker.ts'
 import { numbers, relative, walk } from '#plugins/walker/walker.sim.ts'
 import { animate } from '#plugins/anim/anim.sim.ts'
 
@@ -47,7 +50,8 @@ export const player: Kind = {
     const pace = d.slow ? k.walk : k.run
     d.want = [x * pace, z * pace]
     d.face = null
-    walk(me, w, dt, ground(w, d.pos[1], numbers(me, w)))
+    const on = ground(w, d.pos[1], numbers(me, w))
+    walk(me, w, dt, w.world.lod3d ? { ...on, solids: (x, z, r) => [...on.solids(x, z, r), ...trees(w, x, z, r)] } : on)
     animate(me, w, dt)
   },
   acts: {

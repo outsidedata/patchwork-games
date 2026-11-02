@@ -5,8 +5,8 @@
 // each building's courses and walls' thickness its own; the roofs' coverings, shingles and boards in the wood's
 // material and slate in the stone's, each sized for it; the stairs, timber floors, roofs and supports in the look
 // `timber`; the kit things each in its material's colour, or in the look `timber` where its material wears it, its
-// pictures repeating every `metres`. Everything casts and takes shadows. Under it the land, a square `land.size`
-// metres across in `land.colour` and `land.roughness`, at y = 0.
+// pictures repeating every `metres`. Everything casts and takes shadows. The ground under it is shapes3d's,
+// drawn by solids (`world.shapes3d.kinds` `yard`, `field`, `verge`).
 import type * as THREE from 'three'
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js'
 import type { Row } from '#engine/engine.ts'
@@ -30,7 +30,6 @@ type Gltf = {
 
 let built: THREE.Object3D[] = []
 let disposers: (() => void)[] = []
-let land: THREE.Mesh | undefined
 let ticks: (() => void)[] = []
 let gone = false
 
@@ -98,10 +97,6 @@ export function setup(row: Row, plugins: Plugins) {
     const unpacked = await unpack(glb.bytes)
     if (!gone) build(T, dress, plugins, unpacked, pictures)
   })
-  const skin = dress(new T.MeshStandardMaterial({ color: k.land.colour, roughness: k.land.roughness }))
-  land = new T.Mesh(new T.PlaneGeometry(k.land.size, k.land.size).rotateX(-Math.PI / 2), skin)
-  land.receiveShadow = true
-  plugins.render3d.scene.add(land)
 }
 
 // a geometry of a wall's vertices as the viewer lays them out: place 3, normal 3, uv 2, wT 3, wB 3, wall 4, wfix 2
@@ -240,13 +235,7 @@ export function remove(plugins: Plugins) {
   gone = true
   for (const o of built) plugins.render3d.scene.remove(o)
   for (const f of disposers) f()
-  if (land) {
-    plugins.render3d.scene.remove(land)
-    land.geometry.dispose()
-    ;(land.material as THREE.Material).dispose()
-  }
   built = []
   disposers = []
   ticks = []
-  land = undefined
 }
