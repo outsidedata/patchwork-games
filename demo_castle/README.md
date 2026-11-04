@@ -53,8 +53,12 @@ walks its curve, as crowd3d walks a spline a straight piece at a time.
   stair's straight stretches planes over its treads and its low treads boxes; and each kit part a box from the part
   itself. shapes3d holds them, every kind of them the `masonry` rule (`main.sim.ts`).
 - **You** (`player.sim.ts`): a walker on shapes3d's ground at your own feet, so you stand on whatever floor you are on
-  and walk under the one over you, drawn by anim as the mechworker, the same body as every visitor, playing your
-  rig's idle, walk, run and jump (`assets/player.rig.json`).
+  and walk under the one over you, drawn by anim as castle_walker, carrying a torch from the start: your rig's torch
+  stance (`assets/player.rig.json`), its torch idle, walk, run and jump, and on your left hand anim's prop, the torch
+  stick (`assets/torch.glb`). In the town its flame is particle3d's `handfire` (`assets/effects.json`), with a point
+  light that casts shadows, both moved onto the hand each frame by your look (`player.client.ts`) as your definition's
+  `carry` says; the stick casts no shadow (`propsCast`).
+- **The sky** (main): skydome3d, its clock held at the hour the scene's prefab gives, no weather.
 - **The ways** (`assets/smallville.town.nav.json`): nav3d's graph, made of shapes3d's shapes, written by pro-ng's
   `town_nav.py` from the landmarks' and the town's metadata: in each landmark the places set by hand (by the hall fire,
   behind the tavern's counter, at the altar) and the ways between them, each stair a way up its curve from its foot to
@@ -65,17 +69,18 @@ walks its curve, as crowd3d walks a spline a straight piece at a time.
   `tour` (`plugins/fortress/fortress.npc3d.ts`): it rolls a place from its definition's `places` (`assets/demo_castle.json`,
   forty of the town's places: the hall, the solar, the kitchen, the chapel, the stalls, the towers' roofs, the tavern,
   the huts), walks there along nav3d's route at a steady walk, each leg at the graph's heights so it climbs every stair,
-  and stands a while. crowd3d draws every one of them, in the town and on the bridge, as the one Mixamo body, the
-  library's mechworker. They walk through each other, and through you.
+  and stands a while. crowd3d draws every one of them, in the town and on the bridge, as the one Mixamo body,
+  castle_woman. They walk through each other, and through you.
 
 ## Baking
 
 `yarn bake demo_castle` (`assets/demo_castle.bake.ts`) cuts the town with the library's pro-ng (`procedural.py` in
 Blender, which writes the walk shapes beside the glb), packs the glb with `pack.mjs`, writes the town's ways with
-`town_nav.py`, cuts the stone's, the mortar's and the wood's pictures to 1024 pixels square as WebP, bakes the one
-body every person in the game wears, you and every visitor, the library's mechworker, with your rig's idle, walk, run
-and jump clips (`assets/player.rig.json`), writing the table anim plays by back into the rig. The body comes from the
-library, the clips from `~/troupe-collection`. Change the town in the library and bake again.
+`town_nav.py`, cuts the stone's, the mortar's and the wood's pictures to 1024 pixels square as WebP, bakes the two
+bodies, castle_walker (you) and castle_woman (every visitor), with every clip of your rig (`assets/player.rig.json`),
+writing the table anim plays by back into the rig. The bodies come from the paths the rig's `bodies` give, the clips
+from `~/troupe-collection`. The particle sheet (`assets/particles/`) and the torch stick (`assets/torch.glb`) are
+demo_particle3d's and demo_motion3d's, copied. Change the town in the library and bake again.
 
 ## Tests
 

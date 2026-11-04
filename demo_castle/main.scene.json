@@ -21,12 +21,17 @@
         "townNav": { "type": "json", "url": "/games/demo_castle/assets/smallville.town.nav.json", "preload": true },
         "townShapes": { "type": "json", "url": "/games/demo_castle/assets/smallville.town.shapes3d.json", "preload": true },
         "heroRig": { "type": "json", "url": "/games/demo_castle/assets/player.rig.json", "preload": true },
-        "mechworker": { "type": "model", "url": "/games/demo_castle/assets/mechworker.glb", "preload": true },
+        "castle_walker": { "type": "model", "url": "/games/demo_castle/assets/castle_walker.glb", "preload": true },
+        "castle_woman": { "type": "model", "url": "/games/demo_castle/assets/castle_woman.glb", "preload": true },
         "clumps": { "type": "model", "url": "/games/demo_castle/assets/clumps.glb" },
         "trees": { "type": "model", "url": "/games/demo_castle/assets/trees.glb" },
-        "rocks": { "type": "model", "url": "/games/demo_castle/assets/rocks.glb" }
+        "rocks": { "type": "model", "url": "/games/demo_castle/assets/rocks.glb" },
+        "torch": { "type": "model", "url": "/games/demo_castle/assets/torch.glb", "preload": true },
+        "effects": { "type": "json", "url": "/games/demo_castle/assets/effects.json", "preload": true },
+        "particles": { "type": "sheet", "url": "/games/demo_castle/assets/particles/particles.json", "preload": true }
       }
     },
+    "particle3d": { "effects": "effects" },
     "terrain3d": {
       "field": "field",
       "rings": [
@@ -122,7 +127,8 @@
       "still": 0.05, "shift": 0.75, "leap": 0.5, "landFall": 7.5, "moves": 0.05, "turns": 30,
       "kinds": {
         "player": {
-          "rig": "heroRig", "model": "mechworker", "fade": 0.15,
+          "rig": "heroRig", "model": "castle_walker", "fade": 0.15,
+          "props": [{ "model": "torch", "bone": "LeftHand", "at": [0.175, 0.065, 0.015], "turn": [0, 0, 84] }],
           "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
         }
       }
@@ -131,7 +137,7 @@
       "graphs": { "town": { "asset": "townNav" } }
     },
     "crowd3d": {
-      "bodies": { "mechworker": "mechworker" },
+      "bodies": { "castle_woman": "castle_woman" },
       "clips": ["idle", "walk", "run"],
       "rate": 30,
       "kinds": ["visitor"]
@@ -139,23 +145,29 @@
     "npc3d": {
       "mods": { "route": "nav3d", "behaviors": "fortress" }
     },
-    "shipped": { "plugins": ["fortress"] }
+    "shipped": { "plugins": ["fortress"] },
+    "skydome3d": {
+      "day": 1200,
+      "look": {
+        "dayZenith": "#2a63b8", "nightZenith": "#03050e", "dayHorizon": "#e6d6bd", "nightHorizon": "#0d0e1a",
+        "setZenith": "#47386b", "setHorizon": "#fa7a38", "sunHigh": "#fff4dc", "sunLow": "#ff6b29", "moon": "#8cadff", "ground": "#4a4636",
+        "exposure": 1, "nightOpen": 0.35, "sunIntensity": 2.6, "moonIntensity": 0.88, "hemiDay": 1.1, "hemiNight": 0.12,
+        "stars": 1, "haze": 0.0005, "mist": 0.01, "starSize": 0.15, "twinkle": 0.4, "twinkles": 900, "twinkleSpread": 5,
+        "sunShrink": [0.05, 0.4], "sunEdge": 0.85, "moonEdge": 0.9, "moonSize": 0.0045, "radius": 1800, "overcast": 0.2,
+        "envSun": 0.02, "envMix": 0.05, "envIntensity": 0.25
+      },
+      "shadow": { "map": 2048, "half": 60, "near": 1, "far": 200, "bias": -0.0003, "normalBias": 0.03 },
+      "mods": { "land": "terrain3d" }
+    }
   },
-  "plugins": ["loader", "scenemanager", "player", "terrain3d", "shipped", "crowd3d", "anim", "npc3d", "nav3d", "instances3d", "lod3d", "solids", "environment3d", "render3d", "chasecamera3d"],
+  "plugins": ["loader", "scenemanager", "player", "terrain3d", "shipped", "crowd3d", "anim", "npc3d", "nav3d", "instances3d", "lod3d", "solids", "skydome3d", "particle3d", "render3d", "chasecamera3d"],
   "seats": 1,
   "prefabs": {
     "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
     "scenemanager": { "out": {} },
     "loader": {},
-    "environment3d": {
-      "sun": {
-        "at": [-30, 60, 40],
-        "color": "#fff1dc",
-        "power": 2.6,
-        "shadow": { "map": 4096, "half": 60, "near": 1, "far": 200, "distance": 100, "bias": -0.0003, "normalBias": 0.03 }
-      },
-      "sky": { "color": "#cfdcec", "ground": "#4a4636", "power": 1.1 }
-    },
+    "particle3d": { "next": 1, "live": [] },
+    "skydome3d": { "t": 1167.5, "rate": 0, "doy": 138, "lat": 45, "phase": 0.538 },
     "render3d": {
       "camera": { "fov": 60, "near": 0.1, "far": 2000, "at": [0, 6, 33], "look": [0, 2, 21] },
       "pixelRatio": 1,
@@ -175,10 +187,11 @@
       "stick": [0, 0], "slow": false,
       "look": { "yaw": 0, "pitch": 0.25, "dist": 6 },
       "lift": 1.5,
-      "limp": false
+      "limp": false,
+      "rig": "torch"
     },
     "visitor": {
-      "pos": [0, 0, 0], "to": [0, 0, 0], "yaw": 0, "speed": 0, "since": 0, "body": "mechworker", "clip": "idle", "holding": {},
+      "pos": [0, 0, 0], "to": [0, 0, 0], "yaw": 0, "speed": 0, "since": 0, "body": "castle_woman", "clip": "idle", "holding": {},
       "look": 0, "gaze": null, "seen": [], "noticing": {}, "facts": [], "doing": "", "until": 0, "wake": 0, "arrived": false, "told": null, "route": null,
       "home": "", "going": null
     }
@@ -188,6 +201,8 @@
     { "is": "loader" },
     { "is": "npc3d" },
     { "is": "castle" },
+    { "is": "skydome3d" },
+    { "is": "particle3d" },
     { "is": "start", "slot": 0, "pos": [0, 0.05, 22], "yaw": 3.141592653589793 },
     { "is": "visitor", "home": "" },
     { "is": "visitor", "home": "" },

@@ -6,6 +6,7 @@
     <style>
       body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
       canvas { grid-area: 1 / 1 }
+      .lil-gui.root { max-height: 100vh; overflow-y: auto }
       #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px; max-height: 60vh; overflow: hidden }
     </style>
   </head>
@@ -17,7 +18,9 @@
       // on `window.__scenes`, the page on `window.__page` and the scene's client (its plugins) on
       // `window.__client`. The panel turns nav3d's drawing of the scene's graph on and off (`graphs`,
       // `?graphs=1` on at first), and puts the seat's body on any place of the graph, standing on
-      // whatever is there (`go to`). The readout shows the frames drawn in
+      // whatever is there (`go to`). Its `carry` folder sets the hand and the offset of what the
+      // body carries, and its `stick` folder the hand, offset and turn of the stick it holds. Its `sky` folder sets skydome3d's clock on the truth's row and
+      // its look and shadow on the page's world, copies them as JSON and resets them to the file. The readout shows the frames drawn in
       // the last second and the longest of them, the step, where the seat's body stands and what it
       // stands on, each visitor's place it is going to and how many places of its route it has still to
       // get to, or the place it stands at, with the height its feet stand at now and how many times it has
@@ -98,6 +101,12 @@
       const gui = new GUI({ title: 'demo_castle dev' })
       for (const type of ['keydown', 'keyup', 'click', 'mousedown', 'contextmenu', 'wheel'])
         gui.domElement.addEventListener(type, e => e.stopPropagation())
+      // after a click the focus goes back to the page, but into a number being typed or a list being picked from
+      gui.domElement.addEventListener('pointerup', () => requestAnimationFrame(() => {
+        const at = document.activeElement
+        if (gui.domElement.contains(at) && at.tagName !== 'SELECT' && !(at.tagName === 'INPUT' && (at.type === 'text' || at.type === 'number'))) at.blur()
+      }))
+      addEventListener('change', e => { if (gui.domElement.contains(e.target)) e.target.blur() })
       const views = { graphs: new URLSearchParams(location.search).get('graphs') === '1' }
       gui.add(views, 'graphs')
       const jump = { place: places[0], 'go to': () => {
@@ -107,6 +116,27 @@
       } }
       gui.add(jump, 'place', places)
       gui.add(jump, 'go to')
+
+      // What the body carries in its hand: the player's definition's `carry.at`, metres off the bone in
+      // its own frame, on the tab's one copy of the definitions, which the look reads every frame.
+      // `copy` puts it on the clipboard for `assets/demo_castle.json`.
+      const carry = gui.addFolder('carry')
+      const held = defs.player.carry
+      carry.add(held, 'bone', ['RightHand', 'LeftHand'])
+      for (const [i, axis] of ['x', 'y', 'z'].entries()) carry.add(held.at, i, -0.4, 0.4, 0.005).name(`at ${axis} (m)`)
+      carry.addColor(held.light, 'color').name('light colour')
+      carry.add(held.light, 'intensity', 0, 100, 0.1).name('light intensity')
+      carry.add(held.light, 'distance', 0, 40, 0.1).name('light reach (m, 0 none)')
+      carry.add(held.light, 'decay', 0, 4, 0.05).name('light decay')
+      carry.add(held.light.shadow, 'map', [128, 256, 512, 1024, 2048]).name('light shadow map (texels a side)')
+      carry.add(held.light.shadow, 'near', 0.01, 1, 0.01).name('light shadow near (m)')
+      carry.add(held.light.shadow, 'bias', -0.02, 0.02, 0.0001).name('light shadow bias')
+      carry.add(held.light.shadow, 'normalBias', 0, 0.2, 0.001).name('light shadow normalBias')
+      carry.add({ copy: () => {
+        const out = JSON.stringify({ 'games/demo_castle/assets/demo_castle.json': { player: { carry: held } } }, null, 2)
+        console.log(out)
+        navigator.clipboard?.writeText(out)
+      } }, 'copy').name('copy carry JSON')
 
       // The visitor picked, by its id, and its folder.
       const time = () => room.rows.find(r => r.kind === 'npc3d')?.data.time ?? 0
@@ -202,6 +232,104 @@
         marks.line.geometry.setFromPoints(path.map(p => new T.Vector3(p[0], p[1] + 0.1, p[2])))
       }
 
+      // The sky: skydome3d's clock on the skydome3d row of the truth in this tab (the hour of the day, the
+      // clock's rate, the day of the year, the latitude and the moon's phase, followed as the clock runs),
+      // and every colour and number of `world.skydome3d`'s look and shadow on the page's copy, which the
+      // plugin draws from each frame; each change hands it a new object. Built once the seat's client is
+      // on a scene with a skydome3d row, and again for each new client; a scene without one has no folder.
+      // `copy` puts the clock, the look and the shadow on the clipboard under main.scene.json's keys;
+      // `reset to the file` lays the file's back.
+      const SKY = {
+        exposure: [0, 4, 0.01], nightOpen: [0, 2, 0.01], sunIntensity: [0, 10, 0.05], moonIntensity: [0, 3, 0.01],
+        hemiDay: [0, 3, 0.01], hemiNight: [0, 1, 0.005], stars: [0, 4, 0.01], haze: [0, 0.01, 0.00005], mist: [0, 0.1, 0.0005],
+        starSize: [0.01, 0.5, 0.005], twinkle: [0, 1, 0.01], twinkles: [0, 3000, 10], twinkleSpread: [1, 12, 1],
+        sunEdge: [0, 1, 0.01], moonEdge: [0, 1, 0.01], moonSize: [0.001, 0.05, 0.0005], radius: [200, 1990, 10],
+        overcast: [0, 1, 0.01], envSun: [0.001, 0.5, 0.001], envMix: [0.001, 0.5, 0.001], envIntensity: [0, 2, 0.01],
+      }
+      const SKY_COLOURS = ['dayZenith', 'dayHorizon', 'nightZenith', 'nightHorizon', 'setZenith', 'setHorizon', 'sunHigh', 'sunLow', 'moon', 'ground']
+      const SHADOW = { half: [5, 400, 1], near: [0.1, 50, 0.1], far: [50, 2000, 10], bias: [-0.001, 0.001, 0.000005], normalBias: [0, 0.5, 0.005] }
+      const CLOCK = ['t', 'rate', 'doy', 'lat', 'phase']
+      const lit = { client: null, folder: null }
+      const lighting = () => {
+        const client = window.__client
+        const world = client?.plugins.wire.scene.world
+        const row = () => room.rows.find(r => r.kind === 'skydome3d')
+        if (!client || lit.client === client || !world?.skydome3d || !row()) return
+        lit.client = client
+        lit.folder?.destroy()
+        const f = (lit.folder = gui.addFolder('sky'))
+        const day = world.skydome3d.day
+        const sky = () => row().data
+        const fromFile = { clock: Object.fromEntries(CLOCK.map(k => [k, sky()[k]])), look: structuredClone(world.skydome3d.look), shadow: structuredClone(world.skydome3d.shadow) }
+        const clock = f.addFolder('clock')
+        const at = {
+          get hour() { return (sky().t / day) * 24 }, set hour(h) { sky().t = (h / 24) * day },
+          get rate() { return sky().rate }, set rate(v) { sky().rate = v },
+          get doy() { return sky().doy }, set doy(v) { sky().doy = v },
+          get lat() { return sky().lat }, set lat(v) { sky().lat = v },
+          get phase() { return sky().phase }, set phase(v) { sky().phase = v },
+        }
+        clock.add(at, 'hour', 0, 24, 0.01).name('hour of the day').listen()
+        clock.add(at, 'rate', 0, 200, 0.5).name('clock rate').listen()
+        clock.add(at, 'doy', 1, 365, 1).name('day of the year').listen()
+        clock.add(at, 'lat', -90, 90, 0.5).name('latitude').listen()
+        clock.add(at, 'phase', 0, 0.999, 0.001).name('moon phase').listen()
+        const look = structuredClone(world.skydome3d.look)
+        const setLook = () => { world.skydome3d.look = structuredClone(look) }
+        const lf = f.addFolder('look')
+        for (const key of SKY_COLOURS) lf.addColor(look, key).onChange(setLook)
+        for (const [key, [lo, hi, step]] of Object.entries(SKY)) lf.add(look, key, lo, hi, step).onChange(setLook)
+        lf.add(look.sunShrink, 0, -0.5, 1, 0.01).name('sunShrink lo').onChange(setLook)
+        lf.add(look.sunShrink, 1, -0.5, 1, 0.01).name('sunShrink hi').onChange(setLook)
+        const shadow = structuredClone(world.skydome3d.shadow)
+        const setShadow = () => { world.skydome3d.shadow = structuredClone(shadow) }
+        const sf = f.addFolder('shadow')
+        sf.add(shadow, 'map', [512, 1024, 2048, 4096, 8192]).name('map (texels a side)').onChange(setShadow)
+        for (const [key, [lo, hi, step]] of Object.entries(SHADOW)) sf.add(shadow, key, lo, hi, step).onChange(setShadow)
+        f.add({ copy: () => {
+          const out = { 'games/demo_castle/main.scene.json': {
+            world: { skydome3d: { look, shadow } },
+            prefabs: { skydome3d: Object.fromEntries(CLOCK.map(k => [k, Math.round(sky()[k] * 1000) / 1000])) },
+          } }
+          console.log(JSON.stringify(out, null, 2))
+          navigator.clipboard?.writeText(JSON.stringify(out, null, 2))
+        } }, 'copy').name('copy skydome3d JSON')
+        f.add({ reset: () => {
+          Object.assign(sky(), fromFile.clock)
+          // sunShrink's list kept, since its two sliders are bound to it
+          const shrink = look.sunShrink
+          Object.assign(look, structuredClone(fromFile.look))
+          look.sunShrink = Object.assign(shrink, fromFile.look.sunShrink)
+          Object.assign(shadow, structuredClone(fromFile.shadow))
+          setLook()
+          setShadow()
+          f.controllersRecursive().forEach(c => c.updateDisplay())
+        } }, 'reset').name('reset to the file')
+      }
+
+      // The stick in the hand: the player kind's first prop of `world.anim.kinds.player.props`, on the page's
+      // copy of the scene, its bone, `at` (metres off the bone in its frame) and `turn` (degrees, an XYZ
+      // Euler), which anim hangs it by again the frame they change. Built for each new client whose
+      // player kind has a prop. `copy` puts the props on the clipboard under the scene file they go in.
+      const sceneFile = file.prefabs.scenemanager.scenes[file.prefabs.scenemanager.entry].file
+      const hung = { client: null, folder: null }
+      const stick = () => {
+        const client = window.__client
+        const prop = client?.plugins.wire.scene.world.anim?.kinds.player.props?.[0]
+        if (!client || hung.client === client || !prop) return
+        hung.client = client
+        hung.folder?.destroy()
+        const f = (hung.folder = gui.addFolder('stick'))
+        f.add(prop, 'bone', ['LeftHand', 'RightHand'])
+        for (const [i, axis] of ['x', 'y', 'z'].entries()) f.add(prop.at, i, -0.4, 0.4, 0.005).name(`at ${axis} (m)`)
+        for (const [i, axis] of ['x', 'y', 'z'].entries()) f.add(prop.turn, i, -180, 180, 0.5).name(`turn ${axis} (°)`)
+        f.add({ copy: () => {
+          const out = JSON.stringify({ [`games/demo_castle/${sceneFile}`]: { world: { anim: { kinds: { player: { props: client.plugins.wire.scene.world.anim.kinds.player.props } } } } } }, null, 2)
+          console.log(out)
+          navigator.clipboard?.writeText(out)
+        } }, 'copy').name('copy stick JSON')
+      }
+
       const readout = document.getElementById('readout')
       const frames = []
       let last = performance.now(), owed = 0
@@ -218,6 +346,8 @@
           if (nav) Object.assign(nav, views)
           mark()
           await page.frame(owed / dt)
+          lighting()
+          stick()
         } catch (e) { caught(e) }
         const p = me()
         const where = v => (v.data.doing === 'go' ? `sent to ${v.data.told.map(n => n.toFixed(1)).join(', ')}` : v.data.going)

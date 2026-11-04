@@ -1,5 +1,7 @@
 {
   "player": {
+    "propsCast": false,
+    "carry": { "effect": "handfire", "bone": "LeftHand", "at": [-0.345, 0.125, 0.005], "light": { "color": "#ffb070", "intensity": 6, "distance": 8, "decay": 2, "shadow": { "map": 512, "near": 0.05, "bias": -0.002, "normalBias": 0.02 } } },
     "run": 4.5,
     "walk": 1.5,
     "sens": 0.004,

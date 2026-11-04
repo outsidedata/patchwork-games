@@ -22,13 +22,14 @@
 //                 the pictures the stone and the wood read, the cc0-textures sets pro-ng's looks wear
 //                 (Rock013, Concrete034, Wood036), cut to castle.material.ts's PICTURE pixels square
 // Change the town in the library and bake again.
-//   mechworker.glb
-//                 the one person of every scene: the player, drawn by anim, and every visitor, drawn by
-//                 crowd3d, one body with every clip of `player.rig.json` (idle, walk, run, jump) baked onto
-//                 it by anim's export (`plugins/anim/anim.export.py`). crowd3d plays its idle, walk and run;
-//                 anim plays by the table the export measures, written back into the rig in the rig's own
-//                 layout (`.claude/skills/using-mixamo-assets/scripts/merge-table.mjs`).
-// The rig's clips are read from ~/troupe-collection, its body from the library.
+//   castle_walker.glb, castle_woman.glb
+//                 the people of every scene: the player, castle_walker, drawn by anim, and every visitor,
+//                 castle_woman, drawn by crowd3d, each with every clip of `player.rig.json` (idle, walk, run,
+//                 jump, and the torch stance's tcidle, tcwalk, tcrun, tcjump) baked onto it by anim's export
+//                 (`plugins/anim/anim.export.py`). crowd3d plays idle, walk and run; anim plays by the table
+//                 the export measures on castle_walker, the rig's first body, written back into the rig in
+//                 the rig's own layout (`.claude/skills/using-mixamo-assets/scripts/merge-table.mjs`).
+// The rig's clips are read from ~/troupe-collection, its bodies from the paths its `bodies` give.
 import fs from 'node:fs'
 import path from 'node:path'
 import { execFileSync } from 'node:child_process'

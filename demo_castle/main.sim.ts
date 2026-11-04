@@ -3,17 +3,19 @@
 // body starts is a `start` actor of the scene file, one per slot. The scene extends pro-ng's partial scene of the
 // town's walk shapes (`assets/smallville.town.partial_scene.json`), every kind of which is `masonry`. The ground
 // round them is terrain3d's (`assets/demo_castle.field.json`), which lod3d stands the grass, trees, boulders and
-// stones on.
+// stones on. The sky, its sun and its light are skydome3d's, its row and `world.skydome3d`, with no weather.
 import type { Scene, Sim } from '#engine/engine.ts'
 import { scenemanager } from '#plugins/scenemanager/scenemanager.sim.ts'
 import { loader } from '#plugins/loader/loader.sim.ts'
 import { npc3d } from '#plugins/npc3d/npc3d.sim.ts'
+import { skydome3d } from '#plugins/skydome3d/skydome3d.sim.ts'
+import { particle3d } from '#plugins/particle3d/particle3d.sim.ts'
 import { player } from './player.sim.ts'
 import { start } from './start.sim.ts'
 import { castle } from './castle.sim.ts'
 import { visitor } from './visitor.sim.ts'
 import file from './main.scene.json' with { type: 'json' }
 
-export const sim: Sim = { scenemanager, loader, npc3d, player, start, castle, visitor }
+export const sim: Sim = { scenemanager, loader, npc3d, skydome3d, particle3d, player, start, castle, visitor }
 
 export const scene = file as Scene
