@@ -12,17 +12,8 @@ import { player } from './player.sim.ts'
 import { start } from './start.sim.ts'
 import { castle } from './castle.sim.ts'
 import { visitor } from './visitor.sim.ts'
-import { masonry } from './masonry.sim.ts'
 import file from './main.scene.json' with { type: 'json' }
-import shapes from './assets/smallville.town.partial_scene.json' with { type: 'json' }
 
-const kinds: Sim = { scenemanager, loader, npc3d, player, start, castle, visitor }
-
-// The town's kinds come from pro-ng's file, made outside the program: one named as a kind of the game's would
-// take that kind's rule.
-const town = Object.keys(shapes.world.shapes3d.kinds)
-const taken = town.filter(k => k in kinds)
-if (taken.length) throw new Error(`assets/smallville.town.partial_scene.json names kinds the game has: ${taken.join(', ')}`)
-export const sim: Sim = { ...kinds, ...Object.fromEntries(town.map(k => [k, masonry])) }
+export const sim: Sim = { scenemanager, loader, npc3d, player, start, castle, visitor }
 
 export const scene = file as Scene

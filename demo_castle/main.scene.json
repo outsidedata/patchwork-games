@@ -1,5 +1,4 @@
 {
-  "extends": "assets/smallville.town.partial_scene.json",
   "world": {
     "seed": 11,
     "defs": "demo_castle",
@@ -20,6 +19,7 @@
         "woodNrm": { "type": "texture", "url": "/games/demo_castle/assets/wood_normal.webp", "space": "linear", "wrap": "repeat", "anisotropy": 16, "preload": true },
         "woodRough": { "type": "texture", "url": "/games/demo_castle/assets/wood_roughness.webp", "space": "linear", "wrap": "repeat", "anisotropy": 16, "preload": true },
         "townNav": { "type": "json", "url": "/games/demo_castle/assets/smallville.town.nav.json", "preload": true },
+        "townShapes": { "type": "json", "url": "/games/demo_castle/assets/smallville.town.shapes3d.json", "preload": true },
         "heroRig": { "type": "json", "url": "/games/demo_castle/assets/player.rig.json", "preload": true },
         "mechworker": { "type": "model", "url": "/games/demo_castle/assets/mechworker.glb", "preload": true },
         "clumps": { "type": "model", "url": "/games/demo_castle/assets/clumps.glb" },
@@ -40,7 +40,7 @@
       "seabed": false,
       "preload": true
     },
-    "shapes3d": { "mods": { "height": "terrain3d" } },
+    "shapes3d": { "mods": { "height": "terrain3d" }, "shapes": ["townShapes"] },
     "solids": { "mods": { "models": "shapes3d" } },
     "instances3d": { "cutout": 0.45, "coverage": 0.25 },
     "lod3d": {

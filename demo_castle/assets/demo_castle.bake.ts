@@ -5,9 +5,9 @@
 //                 one solid in Blender (`pro-ng/procedural.py`): the solids, the roofs' coverings, the timber and the
 //                 kit, and on its node `pro-ng` every building's courses, compressed by `pro-ng/pack.mjs`, drawn by
 //                 `castle.client.ts` with the stone and the wood of `castle.material.ts`
-//   smallville.town.partial_scene.json
-//                 what a walker stands on and bumps into, shapes3d's shapes, which procedural.py writes beside the glb
-//                 (`pro-ng/shapes.py`); main.scene.json extends it
+//   smallville.town.shapes3d.json
+//                 what a walker stands on and bumps into, shapes3d's shapes file, which procedural.py writes beside the
+//                 glb (`pro-ng/shapes.py`): `kinds`, every kind's shape, and `shapes`, each one's `kind`, `pos` and `yaw`
 //   smallville.town.nav.json
 //                 the town's ways, nav3d's graph of shapes, from its files' metadata (`pro-ng/town_nav.py`, no Blender)
 //   smallville.town.terrain3d_layers.json
@@ -60,7 +60,7 @@ export default async ({ blender, webp, scratch, library, texture }: Tools) => {
   console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(prong, 'procedural.py'), '--', 'scene', 'smallville.town', out]))
   execFileSync(process.execPath, [path.join(prong, 'pack.mjs'), path.join(out, 'smallville.town.glb')], { stdio: 'inherit' })
   execFileSync('python3', [path.join(prong, 'town_nav.py'), 'smallville.town', out], { stdio: 'inherit' })
-  for (const name of ['smallville.town.glb', 'smallville.town.partial_scene.json', 'smallville.town.nav.json', 'smallville.town.terrain3d_layers.json']) {
+  for (const name of ['smallville.town.glb', 'smallville.town.shapes3d.json','smallville.town.nav.json', 'smallville.town.terrain3d_layers.json']) {
     fs.copyFileSync(path.join(out, name), path.join(here, name))
     console.log('wrote', path.relative(root, path.join(here, name)))
   }
