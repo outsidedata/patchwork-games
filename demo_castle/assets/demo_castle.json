@@ -40,10 +40,6 @@
   },
   "castle": {
     "glb": "town",
-    "pictures": {
-      "rockCol": "rockCol", "rockDisp": "rockDisp", "rockNrm": "rockNrm", "mortCol": "mortCol", "mortDisp": "mortDisp",
-      "woodCol": "woodCol", "woodDisp": "woodDisp", "woodNrm": "woodNrm", "woodRough": "woodRough"
-    },
     "hollows": [
       { "at": [-20, 4.65, -15], "half": [3.5, 5.65, 3.5] },
       { "at": [20, 4.65, -15], "half": [3.5, 5.65, 3.5] },

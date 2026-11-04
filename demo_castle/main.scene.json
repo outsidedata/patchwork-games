@@ -4,110 +4,430 @@
     "defs": "demo_castle",
     "loader": {
       "assets": {
-        "demo_castle": { "type": "json", "url": "/games/demo_castle/assets/demo_castle.json", "preload": true },
-        "field": { "type": "json", "url": "/games/demo_castle/assets/demo_castle.field.json", "preload": true },
-        "grass": { "type": "texture", "url": "/games/demo_castle/assets/ground/grass-color-2048.webp", "wrap": "repeat" },
-        "grassNormal": { "type": "texture", "url": "/games/demo_castle/assets/ground/grass-normal-2048.webp", "space": "linear", "wrap": "repeat" },
-        "town": { "type": "binary", "url": "/games/demo_castle/assets/smallville.town.glb", "preload": true },
-        "rockCol": { "type": "texture", "url": "/games/demo_castle/assets/rock_colour.webp", "wrap": "repeat", "anisotropy": 16, "preload": true },
-        "rockDisp": { "type": "texture", "url": "/games/demo_castle/assets/rock_height.webp", "space": "linear", "wrap": "repeat", "anisotropy": 16, "preload": true },
-        "rockNrm": { "type": "texture", "url": "/games/demo_castle/assets/rock_normal.webp", "space": "linear", "wrap": "repeat", "anisotropy": 16, "preload": true },
-        "mortCol": { "type": "texture", "url": "/games/demo_castle/assets/mortar_colour.webp", "wrap": "repeat", "anisotropy": 16, "preload": true },
-        "mortDisp": { "type": "texture", "url": "/games/demo_castle/assets/mortar_height.webp", "space": "linear", "wrap": "repeat", "anisotropy": 16, "preload": true },
-        "woodCol": { "type": "texture", "url": "/games/demo_castle/assets/wood_colour.webp", "wrap": "repeat", "anisotropy": 16, "preload": true },
-        "woodDisp": { "type": "texture", "url": "/games/demo_castle/assets/wood_height.webp", "space": "linear", "wrap": "repeat", "anisotropy": 16, "preload": true },
-        "woodNrm": { "type": "texture", "url": "/games/demo_castle/assets/wood_normal.webp", "space": "linear", "wrap": "repeat", "anisotropy": 16, "preload": true },
-        "woodRough": { "type": "texture", "url": "/games/demo_castle/assets/wood_roughness.webp", "space": "linear", "wrap": "repeat", "anisotropy": 16, "preload": true },
-        "townNav": { "type": "json", "url": "/games/demo_castle/assets/smallville.town.nav.json", "preload": true },
-        "townShapes": { "type": "json", "url": "/games/demo_castle/assets/smallville.town.shapes3d.json", "preload": true },
-        "heroRig": { "type": "json", "url": "/games/demo_castle/assets/player.rig.json", "preload": true },
-        "castle_walker": { "type": "model", "url": "/games/demo_castle/assets/castle_walker.glb", "preload": true },
-        "castle_woman": { "type": "model", "url": "/games/demo_castle/assets/castle_woman.glb", "preload": true },
-        "clumps": { "type": "model", "url": "/games/demo_castle/assets/clumps.glb" },
-        "trees": { "type": "model", "url": "/games/demo_castle/assets/trees.glb" },
-        "rocks": { "type": "model", "url": "/games/demo_castle/assets/rocks.glb" },
-        "torch": { "type": "model", "url": "/games/demo_castle/assets/torch.glb", "preload": true },
-        "effects": { "type": "json", "url": "/games/demo_castle/assets/effects.json", "preload": true },
-        "particles": { "type": "sheet", "url": "/games/demo_castle/assets/particles/particles.json", "preload": true }
+        "demo_castle": {
+          "type": "json",
+          "url": "/games/demo_castle/assets/demo_castle.json",
+          "preload": true
+        },
+        "field": {
+          "type": "json",
+          "url": "/games/demo_castle/assets/demo_castle.field.json",
+          "preload": true
+        },
+        "grass": {
+          "type": "texture",
+          "url": "/games/demo_castle/assets/ground/grass-color-2048.webp",
+          "wrap": "repeat"
+        },
+        "grassNormal": {
+          "type": "texture",
+          "url": "/games/demo_castle/assets/ground/grass-normal-2048.webp",
+          "space": "linear",
+          "wrap": "repeat"
+        },
+        "town": {
+          "type": "binary",
+          "url": "/games/demo_castle/assets/smallville.town.glb",
+          "preload": true
+        },
+        "townLooks": {
+          "type": "json",
+          "url": "/games/demo_castle/assets/smallville.town.looks.json",
+          "preload": true
+        },
+        "townNav": {
+          "type": "json",
+          "url": "/games/demo_castle/assets/smallville.town.nav.json",
+          "preload": true
+        },
+        "townShapes": {
+          "type": "json",
+          "url": "/games/demo_castle/assets/smallville.town.shapes3d.json",
+          "preload": true
+        },
+        "heroRig": {
+          "type": "json",
+          "url": "/games/demo_castle/assets/player.rig.json",
+          "preload": true
+        },
+        "castle_walker": {
+          "type": "model",
+          "url": "/games/demo_castle/assets/castle_walker.glb",
+          "preload": true
+        },
+        "castle_woman": {
+          "type": "model",
+          "url": "/games/demo_castle/assets/castle_woman.glb",
+          "preload": true
+        },
+        "clumps": {
+          "type": "model",
+          "url": "/games/demo_castle/assets/clumps.glb"
+        },
+        "trees": {
+          "type": "model",
+          "url": "/games/demo_castle/assets/trees.glb"
+        },
+        "rocks": {
+          "type": "model",
+          "url": "/games/demo_castle/assets/rocks.glb"
+        },
+        "torch": {
+          "type": "model",
+          "url": "/games/demo_castle/assets/torch.glb",
+          "preload": true
+        },
+        "effects": {
+          "type": "json",
+          "url": "/games/demo_castle/assets/effects.json",
+          "preload": true
+        },
+        "particles": {
+          "type": "sheet",
+          "url": "/games/demo_castle/assets/particles/particles.json",
+          "preload": true
+        },
+        "Rock013_4K_Color": {
+          "type": "texture",
+          "url": "/games/demo_castle/assets/looks/Rock013_4K_Color.webp",
+          "wrap": "repeat",
+          "preload": true
+        },
+        "Rock013_4K_Displacement": {
+          "type": "texture",
+          "url": "/games/demo_castle/assets/looks/Rock013_4K_Displacement.webp",
+          "space": "linear",
+          "wrap": "repeat",
+          "preload": true
+        },
+        "Rock013_4K_NormalGL": {
+          "type": "texture",
+          "url": "/games/demo_castle/assets/looks/Rock013_4K_NormalGL.webp",
+          "space": "linear",
+          "wrap": "repeat",
+          "preload": true
+        },
+        "Concrete034_4K_Color": {
+          "type": "texture",
+          "url": "/games/demo_castle/assets/looks/Concrete034_4K_Color.webp",
+          "wrap": "repeat",
+          "preload": true
+        },
+        "Concrete034_4K_Displacement": {
+          "type": "texture",
+          "url": "/games/demo_castle/assets/looks/Concrete034_4K_Displacement.webp",
+          "space": "linear",
+          "wrap": "repeat",
+          "preload": true
+        },
+        "Wood036_4K_Color": {
+          "type": "texture",
+          "url": "/games/demo_castle/assets/looks/Wood036_4K_Color.webp",
+          "wrap": "repeat",
+          "preload": true
+        },
+        "Wood036_4K_Displacement": {
+          "type": "texture",
+          "url": "/games/demo_castle/assets/looks/Wood036_4K_Displacement.webp",
+          "space": "linear",
+          "wrap": "repeat",
+          "preload": true
+        },
+        "Wood036_4K_NormalGL": {
+          "type": "texture",
+          "url": "/games/demo_castle/assets/looks/Wood036_4K_NormalGL.webp",
+          "space": "linear",
+          "wrap": "repeat",
+          "preload": true
+        },
+        "Wood036_4K_Roughness": {
+          "type": "texture",
+          "url": "/games/demo_castle/assets/looks/Wood036_4K_Roughness.webp",
+          "space": "linear",
+          "wrap": "repeat",
+          "preload": true
+        }
       }
     },
-    "particle3d": { "effects": "effects" },
+    "particle3d": {
+      "effects": "effects"
+    },
+    "supershader3d": {
+      "looks": "townLooks",
+      "mods": {
+        "behaviors": [
+          "fortress"
+        ]
+      }
+    },
     "terrain3d": {
       "field": "field",
       "rings": [
-        { "reach": 64, "seg": 128 },
-        { "reach": 256, "seg": 128 },
-        { "reach": 1024, "seg": 128 },
-        { "reach": 4096, "seg": 128 }
+        {
+          "reach": 64,
+          "seg": 128
+        },
+        {
+          "reach": 256,
+          "seg": 128
+        },
+        {
+          "reach": 1024,
+          "seg": 128
+        },
+        {
+          "reach": 4096,
+          "seg": 128
+        }
       ],
       "shadowReach": 256,
       "budget": 8,
       "seabed": false,
       "preload": true
     },
-    "shapes3d": { "mods": { "height": "terrain3d" }, "shapes": ["townShapes"] },
-    "solids": { "mods": { "models": "shapes3d" } },
-    "instances3d": { "cutout": 0.45, "coverage": 0.25 },
+    "shapes3d": {
+      "mods": {
+        "height": "terrain3d"
+      },
+      "shapes": [
+        "townShapes"
+      ]
+    },
+    "solids": {
+      "mods": {
+        "models": "shapes3d"
+      }
+    },
+    "instances3d": {
+      "cutout": 0.45,
+      "coverage": 0.25
+    },
     "lod3d": {
       "mods": {
-        "surfaces": ["terrain3d"],
-        "seen": ["terrain3d"],
-        "behaviors": ["terrain3d", "instances3d"],
-        "hollows": ["fortress"]
+        "surfaces": [
+          "terrain3d"
+        ],
+        "seen": [
+          "terrain3d"
+        ],
+        "behaviors": [
+          "terrain3d",
+          "instances3d"
+        ],
+        "hollows": [
+          "fortress"
+        ]
       },
-      "rings": [60, 140, 320, 800],
+      "rings": [
+        60,
+        140,
+        320,
+        800
+      ],
       "budget": 3,
       "hollows": 22,
       "remember": 100000,
       "widest": 6,
       "layers": {
         "grass": {
-          "on": ["land"],
+          "on": [
+            "land"
+          ],
           "cell": 3,
-          "rows": { "grass01": { "weight": 4 }, "grass02": { "weight": 4 }, "grass03": { "weight": 3 }, "dry01": { "weight": 3 }, "dry02": { "weight": 3 }, "flowers03": { "weight": 1 }, "reeds": { "weight": 1 } },
+          "rows": {
+            "grass01": {
+              "weight": 4
+            },
+            "grass02": {
+              "weight": 4
+            },
+            "grass03": {
+              "weight": 3
+            },
+            "dry01": {
+              "weight": 3
+            },
+            "dry02": {
+              "weight": 3
+            },
+            "flowers03": {
+              "weight": 1
+            },
+            "reeds": {
+              "weight": 1
+            }
+          },
           "seed": 311,
           "density": 0.35,
-          "size": [0.55, 0.7],
+          "size": [
+            0.55,
+            0.7
+          ],
           "vary": 0.22,
           "spacing": 3,
-          "mesh": { "asset": "clumps", "lods": [0], "shadow": 0, "leaf": 0.55 }
+          "mesh": {
+            "asset": "clumps",
+            "lods": [
+              0
+            ],
+            "shadow": 0,
+            "leaf": 0.55
+          }
         },
         "copse": {
-          "on": ["land"],
+          "on": [
+            "land"
+          ],
           "cell": 60,
-          "rows": { "birch": { "weight": 2, "solid": 0.3 }, "aspen": { "weight": 2, "solid": 0.3 }, "maple": { "weight": 1, "solid": 0.35 }, "redmaple": { "weight": 1, "solid": 0.3 } },
+          "rows": {
+            "birch": {
+              "weight": 2,
+              "solid": 0.3
+            },
+            "aspen": {
+              "weight": 2,
+              "solid": 0.3
+            },
+            "maple": {
+              "weight": 1,
+              "solid": 0.35
+            },
+            "redmaple": {
+              "weight": 1,
+              "solid": 0.3
+            }
+          },
           "seed": 211,
           "density": 0.4,
-          "size": [0.8, 0.5],
+          "size": [
+            0.8,
+            0.5
+          ],
           "vary": 0.15,
           "spacing": 30,
-          "mesh": { "asset": "trees", "lods": [0, 2, 3, 3], "shadow": 140, "leaf": 0.55 }
+          "mesh": {
+            "asset": "trees",
+            "lods": [
+              0,
+              2,
+              3,
+              3
+            ],
+            "shadow": 140,
+            "leaf": 0.55
+          }
         },
         "boulders": {
-          "on": ["land"],
+          "on": [
+            "land"
+          ],
           "cell": 50,
-          "rows": { "boulder1": { "weight": 3, "solid": 0.45 }, "boulder2": { "weight": 3, "solid": 0.45 }, "boulder3": { "weight": 2, "solid": 0.45 }, "slab1": { "weight": 2, "solid": 0.45 }, "slab2": { "weight": 2, "solid": 0.45 }, "outcrop1": { "weight": 1, "solid": 0.45 } },
+          "rows": {
+            "boulder1": {
+              "weight": 3,
+              "solid": 0.45
+            },
+            "boulder2": {
+              "weight": 3,
+              "solid": 0.45
+            },
+            "boulder3": {
+              "weight": 2,
+              "solid": 0.45
+            },
+            "slab1": {
+              "weight": 2,
+              "solid": 0.45
+            },
+            "slab2": {
+              "weight": 2,
+              "solid": 0.45
+            },
+            "outcrop1": {
+              "weight": 1,
+              "solid": 0.45
+            }
+          },
           "seed": 173,
           "density": 0.5,
-          "size": [0.8, 0.6],
+          "size": [
+            0.8,
+            0.6
+          ],
           "vary": 0.1,
           "spacing": 50,
-          "mesh": { "asset": "rocks", "lods": [0, 1, 2, 3], "shadow": 140, "leaf": 0 }
+          "mesh": {
+            "asset": "rocks",
+            "lods": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "shadow": 140,
+            "leaf": 0
+          }
         },
         "stones": {
-          "on": ["land"],
+          "on": [
+            "land"
+          ],
           "cell": 9,
-          "rows": { "a": { "weight": 1 }, "b": { "weight": 1 }, "c": { "weight": 1 } },
+          "rows": {
+            "a": {
+              "weight": 1
+            },
+            "b": {
+              "weight": 1
+            },
+            "c": {
+              "weight": 1
+            }
+          },
           "seed": 191,
           "density": 0.4,
-          "size": [0.25, 0.9],
+          "size": [
+            0.25,
+            0.9
+          ],
           "vary": 0.3,
           "spacing": 9,
           "mesh": {
-            "shape": { "detail": 1, "lumpy": [0.74, 0.36], "squash": 0.72 },
+            "shape": {
+              "detail": 1,
+              "lumpy": [
+                0.74,
+                0.36
+              ],
+              "squash": 0.72
+            },
             "colour": "#77736a",
-            "surface": { "broad": 1.4, "fine": 5, "lift": 0.78, "range": 0.44, "mix": [0.6, 0.4], "moss": { "from": 0.55, "to": 0.95, "amount": 0.4, "up": [0.2, 0.8], "colour": "#27401d" }, "bump": 0.5, "rough": 0.85 },
-            "lods": [0, 0],
+            "surface": {
+              "broad": 1.4,
+              "fine": 5,
+              "lift": 0.78,
+              "range": 0.44,
+              "mix": [
+                0.6,
+                0.4
+              ],
+              "moss": {
+                "from": 0.55,
+                "to": 0.95,
+                "amount": 0.4,
+                "up": [
+                  0.2,
+                  0.8
+                ],
+                "colour": "#27401d"
+              },
+              "bump": 0.5,
+              "rough": 0.85
+            },
+            "lods": [
+              0,
+              0
+            ],
             "shadow": 60,
             "leaf": 0
           }
@@ -117,122 +437,446 @@
     "walker": {
       "kinds": {
         "player": {
-          "radius": 0.3, "height": 1.75, "accel": 12, "airAccel": 2, "turnRate": 14, "gravity": 20, "jumpH": 1.1,
-          "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5, "seekSpeed": 3
+          "radius": 0.3,
+          "height": 1.75,
+          "accel": 12,
+          "airAccel": 2,
+          "turnRate": 14,
+          "gravity": 20,
+          "jumpH": 1.1,
+          "step": 0.45,
+          "maxSlope": 0.9,
+          "slopeBand": 0.2,
+          "slide": 4,
+          "wade": 0.8,
+          "span": 0.3,
+          "probe": 0.5,
+          "seekSpeed": 3
         }
       },
-      "mods": { "behaviors": "shapes3d" }
+      "mods": {
+        "behaviors": "shapes3d"
+      }
     },
     "anim": {
-      "still": 0.05, "shift": 0.75, "leap": 0.5, "landFall": 7.5, "moves": 0.05, "turns": 30,
+      "still": 0.05,
+      "shift": 0.75,
+      "leap": 0.5,
+      "landFall": 7.5,
+      "moves": 0.05,
+      "turns": 30,
       "kinds": {
         "player": {
-          "rig": "heroRig", "model": "castle_walker", "fade": 0.15,
-          "props": [{ "model": "torch", "bone": "LeftHand", "at": [0.175, 0.065, 0.015], "turn": [0, 0, 84] }],
-          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
+          "rig": "heroRig",
+          "model": "castle_walker",
+          "fade": 0.15,
+          "props": [
+            {
+              "model": "torch",
+              "bone": "LeftHand",
+              "at": [
+                0.175,
+                0.065,
+                0.015
+              ],
+              "turn": [
+                0,
+                0,
+                84
+              ]
+            }
+          ],
+          "reads": {
+            "pos": "pos",
+            "yaw": "yaw",
+            "vel": "vel",
+            "grounded": "grounded",
+            "limp": "limp"
+          }
         }
       }
     },
     "nav3d": {
-      "graphs": { "town": { "asset": "townNav" } }
+      "graphs": {
+        "town": {
+          "asset": "townNav"
+        }
+      }
     },
     "crowd3d": {
-      "bodies": { "castle_woman": "castle_woman" },
-      "clips": ["idle", "walk", "run"],
+      "bodies": {
+        "castle_woman": "castle_woman"
+      },
+      "clips": [
+        "idle",
+        "walk",
+        "run"
+      ],
       "rate": 30,
-      "kinds": ["visitor"]
+      "kinds": [
+        "visitor"
+      ]
     },
     "npc3d": {
-      "mods": { "route": "nav3d", "behaviors": "fortress" }
+      "mods": {
+        "route": "nav3d",
+        "behaviors": "fortress"
+      }
     },
-    "shipped": { "plugins": ["fortress"] },
+    "shipped": {
+      "plugins": [
+        "fortress"
+      ]
+    },
     "skydome3d": {
       "day": 1200,
       "look": {
-        "dayZenith": "#2a63b8", "nightZenith": "#03050e", "dayHorizon": "#e6d6bd", "nightHorizon": "#0d0e1a",
-        "setZenith": "#47386b", "setHorizon": "#fa7a38", "sunHigh": "#fff4dc", "sunLow": "#ff6b29", "moon": "#8cadff", "ground": "#4a4636",
-        "exposure": 1, "nightOpen": 0.35, "sunIntensity": 2.6, "moonIntensity": 0.88, "hemiDay": 1.1, "hemiNight": 0.12,
-        "stars": 1, "haze": 0.0005, "mist": 0.01, "starSize": 0.15, "twinkle": 0.4, "twinkles": 900, "twinkleSpread": 5,
-        "sunShrink": [0.05, 0.4], "sunEdge": 0.85, "moonEdge": 0.9, "moonSize": 0.0045, "radius": 1800, "overcast": 0.2,
-        "envSun": 0.02, "envMix": 0.05, "envIntensity": 0.25
+        "dayZenith": "#2a63b8",
+        "nightZenith": "#03050e",
+        "dayHorizon": "#e6d6bd",
+        "nightHorizon": "#0d0e1a",
+        "setZenith": "#47386b",
+        "setHorizon": "#fa7a38",
+        "sunHigh": "#fff4dc",
+        "sunLow": "#ff6b29",
+        "moon": "#8cadff",
+        "ground": "#4a4636",
+        "exposure": 1,
+        "nightOpen": 0.35,
+        "sunIntensity": 2.6,
+        "moonIntensity": 0.88,
+        "hemiDay": 1.1,
+        "hemiNight": 0.12,
+        "stars": 1,
+        "haze": 0.0005,
+        "mist": 0.01,
+        "starSize": 0.15,
+        "twinkle": 0.4,
+        "twinkles": 900,
+        "twinkleSpread": 5,
+        "sunShrink": [
+          0.05,
+          0.4
+        ],
+        "sunEdge": 0.85,
+        "moonEdge": 0.9,
+        "moonSize": 0.0045,
+        "radius": 1800,
+        "overcast": 0.2,
+        "envSun": 0.02,
+        "envMix": 0.05,
+        "envIntensity": 0.25
       },
-      "shadow": { "map": 2048, "half": 60, "near": 1, "far": 200, "bias": -0.0003, "normalBias": 0.03 },
-      "mods": { "land": "terrain3d" }
+      "shadow": {
+        "map": 2048,
+        "half": 60,
+        "near": 1,
+        "far": 200,
+        "bias": -0.0003,
+        "normalBias": 0.03
+      },
+      "mods": {
+        "land": "terrain3d"
+      }
     }
   },
-  "plugins": ["loader", "scenemanager", "player", "terrain3d", "shipped", "crowd3d", "anim", "npc3d", "nav3d", "instances3d", "lod3d", "solids", "skydome3d", "particle3d", "render3d", "chasecamera3d"],
+  "plugins": [
+    "loader",
+    "scenemanager",
+    "player",
+    "supershader3d",
+    "terrain3d",
+    "shipped",
+    "crowd3d",
+    "anim",
+    "npc3d",
+    "nav3d",
+    "instances3d",
+    "lod3d",
+    "solids",
+    "skydome3d",
+    "particle3d",
+    "render3d",
+    "chasecamera3d"
+  ],
   "seats": 1,
   "prefabs": {
-    "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
-    "scenemanager": { "out": {} },
+    "engine": {
+      "dt": 0.016666666666666666,
+      "width": 1280,
+      "height": 720
+    },
+    "scenemanager": {
+      "out": {}
+    },
     "loader": {},
-    "particle3d": { "next": 1, "live": [] },
-    "skydome3d": { "t": 1167.5, "rate": 0, "doy": 138, "lat": 45, "phase": 0.538 },
+    "particle3d": {
+      "next": 1,
+      "live": []
+    },
+    "skydome3d": {
+      "t": 1167.5,
+      "rate": 0,
+      "doy": 138,
+      "lat": 45,
+      "phase": 0.538
+    },
     "render3d": {
-      "camera": { "fov": 60, "near": 0.1, "far": 2000, "at": [0, 6, 33], "look": [0, 2, 21] },
+      "camera": {
+        "fov": 60,
+        "near": 0.1,
+        "far": 2000,
+        "at": [
+          0,
+          6,
+          33
+        ],
+        "look": [
+          0,
+          2,
+          21
+        ]
+      },
       "pixelRatio": 1,
       "tone": "neutral",
       "exposure": 1,
       "shadows": "soft",
       "background": "#a9c3dc"
     },
-    "start": { "slot": 0, "pos": [0, 0, 0], "yaw": 0 },
-    "npc3d": { "time": 0, "sounds": [], "next": 1 },
+    "start": {
+      "slot": 0,
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0
+    },
+    "npc3d": {
+      "time": 0,
+      "sounds": [],
+      "next": 1
+    },
     "castle": {},
     "player": {
       "seat": 0,
       "stood": false,
-      "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "grounded": false, "sliding": false, "speed": 0, "side": 0, "turned": 0,
-      "want": [0, 0], "face": null, "jump": false,
-      "stick": [0, 0], "slow": false,
-      "look": { "yaw": 0, "pitch": 0.25, "dist": 6 },
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0,
+      "vel": [
+        0,
+        0,
+        0
+      ],
+      "grounded": false,
+      "sliding": false,
+      "speed": 0,
+      "side": 0,
+      "turned": 0,
+      "want": [
+        0,
+        0
+      ],
+      "face": null,
+      "jump": false,
+      "stick": [
+        0,
+        0
+      ],
+      "slow": false,
+      "look": {
+        "yaw": 0,
+        "pitch": 0.25,
+        "dist": 6
+      },
       "lift": 1.5,
       "limp": false,
       "rig": "torch"
     },
     "visitor": {
-      "pos": [0, 0, 0], "to": [0, 0, 0], "yaw": 0, "speed": 0, "since": 0, "body": "castle_woman", "clip": "idle", "holding": {},
-      "look": 0, "gaze": null, "seen": [], "noticing": {}, "facts": [], "doing": "", "until": 0, "wake": 0, "arrived": false, "told": null, "route": null,
-      "home": "", "going": null
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0,
+      "speed": 0,
+      "since": 0,
+      "body": "castle_woman",
+      "clip": "idle",
+      "holding": {},
+      "look": 0,
+      "gaze": null,
+      "seen": [],
+      "noticing": {},
+      "facts": [],
+      "doing": "",
+      "until": 0,
+      "wake": 0,
+      "arrived": false,
+      "told": null,
+      "route": null,
+      "home": "",
+      "going": null
     }
   },
   "actors": [
-    { "is": "scenemanager" },
-    { "is": "loader" },
-    { "is": "npc3d" },
-    { "is": "castle" },
-    { "is": "skydome3d" },
-    { "is": "particle3d" },
-    { "is": "start", "slot": 0, "pos": [0, 0.05, 22], "yaw": 3.141592653589793 },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" },
-    { "is": "visitor", "home": "" }
+    {
+      "is": "scenemanager"
+    },
+    {
+      "is": "loader"
+    },
+    {
+      "is": "npc3d"
+    },
+    {
+      "is": "castle"
+    },
+    {
+      "is": "skydome3d"
+    },
+    {
+      "is": "particle3d"
+    },
+    {
+      "is": "start",
+      "slot": 0,
+      "pos": [
+        0,
+        0.05,
+        22
+      ],
+      "yaw": 3.141592653589793
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    },
+    {
+      "is": "visitor",
+      "home": ""
+    }
   ]
 }

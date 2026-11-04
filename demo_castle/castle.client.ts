@@ -1,26 +1,23 @@
 // The town drawn as the library's pro-ng cuts it (its `procedural.py`, the scene `pro-ng/scenes/smallville.town.json`)
-// and packs it (`pack.mjs`), read back as pro-ng's viewer reads it (`pro-ng/viewer/index.html`): the glb the
-// definition names (`glb`), its node `pro-ng`'s extras, and each mesh's attributes, meshopt-decoded, laid back out as
-// the vertex the materials read. Each building one solid, the stone or the wood of `castle.material.ts` on every face,
-// each building's courses and walls' thickness its own; the roofs' coverings, shingles and boards in the wood's
-// material and slate in the stone's, each sized for it; the stairs, timber floors, roofs and supports in the look
-// `timber`; the kit things each in its material's colour, or in the look `timber` where its material wears it, its
-// pictures repeating every `metres`. Everything casts and takes shadows. The ground under it is terrain3d's
+// and packs it (`pack.mjs`), through supershader3d, the scene's one shader, composed from the materials the town draws
+// (`assets/smallville.town.looks.json`, which the pack writes beside the glb). Nothing here knows a material or a
+// mesh: the glb's node `pro-ng` says it in its extras' `vertex` (pack.mjs, VERTEX): the meshes to draw, each of the
+// shader's vertex inputs as the glb's attributes' numbers, and the number an input reads on a mesh that has not its
+// attribute. Every mesh's vertices go into one geometry, each input its own attribute; every triangle into the run of
+// the draw call that draws its material (its vertices' `lookId`, the looks file's `call`): solid, relief, see-through,
+// at most three calls. The buildings' course table, which the wall looks read, is written into the fortress's
+// (`plugins/fortress/fortress.plugin.ts`). Everything casts and takes shadows. The ground under it is terrain3d's
 // (`assets/demo_castle.field.json`), flattened under the town by the town's layer.
 import type * as THREE from 'three'
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js'
 import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
-import { createKitLook, createStone, createWood, type Dress, type Pictures } from './castle.material.ts'
+import type { Call, Looks } from '#plugins/supershader3d/supershader3d.plugin.ts'
 
-type Info = {
-  stride: number
-  buildings: { name: string; material: 'stone' | 'wood'; triangles: number; courses: number[]; wallDepth: number }[]
-  covers: { covering: 'shingles' | 'boards' | 'slate'; triangles: number }[]
-  timber: { stride: number; metres: [number, number] }
-  kit: { stride: number; materials: { name: string; colour: string; look: string | null; triangles: number }[] }
-}
+// the extras' `vertex`: the meshes drawn, each input's numbers, each input's default
+type Vertex = { meshes: string[]; attributes: Record<string, [string, number][]>; defaults: Record<string, number> }
+type Info = { buildings: { courses: number[]; wallDepth: number }[]; vertex: Vertex }
 type Gltf = {
   nodes: { name: string; mesh?: number; extras?: unknown }[]
   meshes: { primitives: { attributes: Record<string, number>; indices: number }[] }[]
@@ -30,17 +27,19 @@ type Gltf = {
 
 let built: THREE.Object3D[] = []
 let disposers: (() => void)[] = []
-let ticks: (() => void)[] = []
 let gone = false
+// the town once unpacked, waiting for supershader3d's materials
+let waiting: { info: Info; meshes: Mesh[] } | undefined
 
+const CALLS: Call[] = ['solid', 'relief', 'seeThrough']
 const WIDTH: Record<string, number> = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4 }
 const ARRAYS: Record<number, any> = { 5120: Int8Array, 5121: Uint8Array, 5122: Int16Array, 5123: Uint16Array, 5125: Uint32Array, 5126: Float32Array }
 const MOST: Record<number, number> = { 5120: 127, 5121: 255, 5122: 32767, 5123: 65535 }
-const all3 = (key: string): [string, number][] => [[key, 0], [key, 1], [key, 2]]
-const BASE: [string, number][] = [...all3('POSITION'), ...all3('NORMAL'), ['TEXCOORD_0', 0], ['TEXCOORD_0', 1]]
-const SOLID: [string, number][] = [...BASE, ...all3('_WT'), ...all3('_WB'), ['_WALL', 0], ['_WALL', 1], ['_LENGTH', 0], ['_WALL', 2], ['_WFIX', 0], ['_WFIX', 1]]
 
-// the glb's JSON and each mesh's vertices, every vertex the numbers `order` names in turn, and its index
+// a mesh's vertices: each input's numbers, `count` vertices of the input's width, and its index
+type Mesh = { count: number; inputs: Record<string, Float32Array>; index: Uint32Array }
+
+// the glb's extras and each mesh the extras name, every input read off its attributes, or its default
 async function unpack(bytes: Uint8Array) {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
   const jsonLength = view.getUint32(12, true)
@@ -71,171 +70,95 @@ async function unpack(bytes: Uint8Array) {
     }
     return { floats: out, width }
   }
-  const mesh = (name: string, order: [string, number][]) => {
+  const info = gltf.nodes.find(n => n.name === 'pro-ng')!.extras as Info
+  if (!info.vertex) throw new Error('castle: the town glb has no extras `vertex`; bake it again with the library\'s pro-ng/pack.mjs')
+  const meshes = info.vertex.meshes.map((name): Mesh => {
     const node = gltf.nodes.find(n => n.name === name && n.mesh !== undefined)
-    if (!node) return { floats: new Float32Array(0), index: new Uint32Array(0) }
+    if (!node) throw new Error(`castle: the town glb's extras name the mesh ${name}, which it has not`)
     const prim = gltf.meshes[node.mesh!].primitives[0]
+    const count = gltf.accessors[prim.attributes.POSITION].count
     const read: Record<string, { floats: Float32Array; width: number }> = {}
-    for (const [key] of order) read[key] ??= floatsOf(prim.attributes[key])
-    const count = read.POSITION.floats.length / 3
-    const out = new Float32Array(count * order.length)
-    for (let n = 0; n < count; n++) order.forEach(([key, k], j) => { out[n * order.length + j] = read[key].floats[n * read[key].width + k] })
+    const inputs: Record<string, Float32Array> = {}
+    for (const [input, numbers] of Object.entries(info.vertex.attributes)) {
+      const out = new Float32Array(count * numbers.length).fill(info.vertex.defaults[input] ?? 0)
+      if (numbers.every(([key]) => prim.attributes[key] !== undefined)) {
+        for (const [key] of numbers) read[key] ??= floatsOf(prim.attributes[key])
+        for (let n = 0; n < count; n++) numbers.forEach(([key, k], j) => { out[n * numbers.length + j] = read[key].floats[n * read[key].width + k] })
+      }
+      inputs[input] = out
+    }
     const ia = gltf.accessors[prim.indices]
-    return { floats: out, index: Uint32Array.from(new ARRAYS[ia.componentType](views[ia.bufferView].slice().buffer)) }
-  }
-  return { info: gltf.nodes.find(n => n.name === 'pro-ng')!.extras as Info, mesh }
+    return { count, inputs, index: Uint32Array.from(new ARRAYS[ia.componentType](views[ia.bufferView].slice().buffer)) }
+  })
+  return { info, meshes }
 }
 
 export function setup(row: Row, plugins: Plugins) {
-  const T = plugins.render3d.THREE as typeof THREE
-  const dress: Dress = m => plugins.render3d.dress(m)
   const k = def(plugins.wire, row.kind)
-  const pictureNames = Object.entries(k.pictures as Record<keyof Pictures, string>)
-  // An actor is set up before the loader's first tick, so the town is built once every file has landed.
-  Promise.all([k.glb, ...pictureNames.map(([, name]) => name)].map(name => plugins.loader.load(name))).then(async ([glb, ...pics]: any[]) => {
-    const pictures = Object.fromEntries(pictureNames.map(([key], i) => [key, pics[i]])) as Pictures
+  // An actor is set up before the loader's first tick, so the town is built once its glb has landed.
+  plugins.loader.load(k.glb).then(async (glb: any) => {
     const unpacked = await unpack(glb.bytes)
-    if (!gone) build(T, dress, plugins, unpacked, pictures)
+    if (!gone) waiting = unpacked
   })
 }
 
-// a geometry of a wall's vertices as the viewer lays them out: place 3, normal 3, uv 2, wT 3, wB 3, wall 4, wfix 2
-function wallGeometry(T: typeof THREE, { floats, index }: { floats: Float32Array; index: Uint32Array }, stride: number) {
-  const buffer = new T.InterleavedBuffer(floats, stride)
+// Every mesh in one geometry, each triangle in its call's run, drawn by that call's material.
+function build(T: typeof THREE, plugins: Plugins, { info, meshes }: { info: Info; meshes: Mesh[] }) {
+  const looks: Looks = plugins.supershader3d.looks()
+  plugins.fortress.town(T, info.buildings)
+  const total = meshes.reduce((n, m) => n + m.count, 0)
   const geo = new T.BufferGeometry()
-  const at = (name: string, size: number, offset: number) => geo.setAttribute(name, new T.InterleavedBufferAttribute(buffer, size, offset))
-  at('position', 3, 0)
-  at('normal', 3, 3)
-  at('uv', 2, 6)
-  at('wT', 3, 8)
-  at('wB', 3, 11)
-  at('wall', 4, 14)
-  at('wfix', 2, 18)
-  geo.setIndex(new T.BufferAttribute(index, 1))
-  return geo
-}
-
-// a geometry of place, normal and uv, the timber's and the kit's
-function plainGeometry(T: typeof THREE, { floats, index }: { floats: Float32Array; index: Uint32Array }, stride: number) {
-  const buffer = new T.InterleavedBuffer(floats, stride)
-  const geo = new T.BufferGeometry()
-  geo.setAttribute('position', new T.InterleavedBufferAttribute(buffer, 3, 0))
-  geo.setAttribute('normal', new T.InterleavedBufferAttribute(buffer, 3, 3))
-  geo.setAttribute('uv', new T.InterleavedBufferAttribute(buffer, 2, 6))
-  geo.setIndex(new T.BufferAttribute(index, 1))
-  return geo
-}
-
-function build(T: typeof THREE, dress: Dress, plugins: Plugins, { info, mesh }: Awaited<ReturnType<typeof unpack>>, pictures: Pictures) {
-  const scene = plugins.render3d.scene as THREE.Scene
-  const place = (m: THREE.Mesh) => {
-    m.castShadow = m.receiveShadow = true
-    scene.add(m)
-    built.push(m)
+  for (const [input, numbers] of Object.entries(info.vertex.attributes)) {
+    const out = new Float32Array(total * numbers.length)
+    let at = 0
+    for (const m of meshes) { out.set(m.inputs[input], at * numbers.length); at += m.count }
+    geo.setAttribute(input, new T.BufferAttribute(out, numbers.length))
   }
-  // the solids: each building's triangles, in order, drawn by its material, the stone's (0) or the wood's (1)
-  const stone = createStone(T, dress, { rows: info.buildings.length, pictures })
-  info.buildings.forEach((b, row) => stone.courses(row, b.courses, b.wallDepth))
-  const wood = createWood(T, dress, { courseTex: stone.courseTex, pictures })
-  const geo = wallGeometry(T, mesh('solids', SOLID), info.stride)
-  let start = 0
-  for (const b of info.buildings) {
-    geo.addGroup(start, b.triangles * 3, b.material === 'wood' ? 1 : 0)
-    start += b.triangles * 3
+  const lookId = geo.getAttribute('lookId').array as Float32Array
+  const runs: Record<Call, number[]> = { solid: [], relief: [], seeThrough: [] }
+  let base = 0
+  for (const m of meshes) {
+    for (let i = 0; i < m.index.length; i++) {
+      const v = base + m.index[i]
+      const material = looks.materials[Math.round(lookId[v])]
+      if (!material) throw new Error(`castle: a vertex's lookId ${lookId[v]} is no material of the town's looks`)
+      runs[material.call].push(v)
+    }
+    base += m.count
   }
+  const index = new Uint32Array(CALLS.reduce((n, c) => n + runs[c].length, 0))
+  const materials: THREE.Material[] = []
+  let at = 0
+  for (const call of CALLS) {
+    if (!runs[call].length) continue
+    const material = plugins.supershader3d.material(call)
+    if (!material) throw new Error(`castle: the town draws ${call} triangles, and supershader3d has no ${call} material`)
+    index.set(runs[call], at)
+    geo.addGroup(at, runs[call].length, materials.length)
+    materials.push(material)
+    at += runs[call].length
+  }
+  geo.setIndex(new T.BufferAttribute(index, 1))
   geo.computeBoundingSphere()
-  place(new T.Mesh(geo, [stone.material, wood.material]))
-  ticks.push(stone.tick)
-  disposers.push(() => geo.dispose(), stone.dispose, wood.dispose)
-
-  // the roofs' coverings, each its own material on the walls' layout, each sized as the viewer sizes it
-  const coverings = mesh('coverings', SOLID)
-  if (coverings.floats.length) {
-    const kinds = ['shingles', 'boards', 'slate'] as const
-    const shingles = createWood(T, dress, { courseTex: stone.courseTex, pictures, knobs: {
-      stoneMin: 0.14, stoneMax: 0.34, rowMin: 0.18, rowMax: 0.18, joint: 0.006, gap: 0.012, edgeRound: 0.004,
-      edgeDrop: 0.004, corner: 0.002, cup: 0.0, tilt: 0.006, grain: 0.003, valueVar: 0.22, pom: 0.02 } })
-    const boards = createWood(T, dress, { courseTex: stone.courseTex, pictures, knobs: {
-      stoneMin: 100.0, stoneMax: 100.0, rowMin: 0.25, rowMax: 0.25, joint: 0.006, cup: 0.003, pom: 0.02 } })
-    const slate = createStone(T, dress, { rows: 1, pictures, knobs: {
-      stoneMin: 0.2, stoneMax: 0.32, rowMin: 0.17, rowMax: 0.17, joint: 0.004, recess: 0.008, edgeRound: 0.006,
-      edgeDrop: 0.004, corner: 0.01, chip: 0.006, bulge: 0.0, tilt: 0.004, detail: 0.002, valueVar: 0.1, warm: 0.15,
-      dark: 0.12, mottle: 0.1, grime: 0.15, damp: 0.0, moss: 0.15, rockScale: 0.8, pom: 0.015 },
-    colours: { stone: new T.Color(0.075, 0.08, 0.09), mortar: new T.Color(0.05, 0.05, 0.055) } })
-    const coverGeo = wallGeometry(T, coverings, info.stride)
-    let at = 0
-    for (const c of info.covers) {
-      coverGeo.addGroup(at, c.triangles * 3, kinds.indexOf(c.covering))
-      at += c.triangles * 3
-    }
-    coverGeo.computeBoundingSphere()
-    place(new T.Mesh(coverGeo, [shingles.material, boards.material, slate.material]))
-    ticks.push(slate.tick)
-    disposers.push(() => coverGeo.dispose(), shingles.dispose, boards.dispose, slate.dispose)
-  }
-
-  // the look `timber`: on the timber its uv as written, on the kit repeating every `metres`
-  const timberLook = (repeat: boolean) => {
-    const pic = (t: THREE.Texture) => {
-      if (!repeat) return t
-      const c = t.clone()
-      c.repeat.set(1 / info.timber.metres[0], 1 / info.timber.metres[1])
-      disposers.push(() => c.dispose())
-      return c
-    }
-    const m = dress(new T.MeshStandardMaterial({
-      map: pic(pictures.woodCol), normalMap: pic(pictures.woodNrm), roughnessMap: pic(pictures.woodRough), metalness: 0, shadowSide: T.FrontSide,
-    }))
-    disposers.push(() => m.dispose())
-    return m
-  }
-
-  const timber = mesh('timber', BASE)
-  if (timber.floats.length) {
-    const woodGeo = plainGeometry(T, timber, info.timber.stride)
-    woodGeo.computeBoundingSphere()
-    place(new T.Mesh(woodGeo, timberLook(false)))
-    disposers.push(() => woodGeo.dispose())
-  }
-
-  // the kit things, sorted by material: each material's run its kit look (iron, thatch, cloth, plaster, rope, glass,
-  // slate, shingles, boards), the timber's look where it wears it, or its colour
-  const kit = mesh('kit', [...BASE, ['_KIT', 0], ['_KIT', 1], ['_KIT', 2]])
-  if (kit.floats.length) {
-    const kitGeo = plainGeometry(T, kit, info.kit.stride)
-    // each vertex's material, thing and part, which the kit's looks read
-    kitGeo.setAttribute('kitInfo', new T.InterleavedBufferAttribute((kitGeo.getAttribute('position') as THREE.InterleavedBufferAttribute).data, 3, 8))
-    let at = 0
-    info.kit.materials.forEach((m, n) => {
-      if (m.triangles) kitGeo.addGroup(at, m.triangles * 3, n)
-      at += m.triangles * 3
-    })
-    kitGeo.computeBoundingSphere()
-    const looks = info.kit.materials.map(m => {
-      if (m.look === 'timber') return timberLook(true)
-      const look = createKitLook(T, dress, m.name)
-      if (look) {
-        disposers.push(() => look.dispose())
-        return look
-      }
-      const flat = dress(new T.MeshStandardMaterial({ color: new T.Color(m.colour), roughness: 0.85, metalness: 0, shadowSide: T.FrontSide }))
-      disposers.push(() => flat.dispose())
-      return flat
-    })
-    place(new T.Mesh(kitGeo, looks))
-    disposers.push(() => kitGeo.dispose())
-  }
+  const mesh = new T.Mesh(geo, materials)
+  mesh.castShadow = mesh.receiveShadow = true
+  plugins.render3d.scene.add(mesh)
+  built.push(mesh)
+  disposers.push(() => geo.dispose())
 }
 
-export function tick() {
-  for (const f of ticks) f()
+export function tick(_row: Row, plugins: Plugins) {
+  if (!waiting || !plugins.supershader3d.looks()) return
+  const town = waiting
+  waiting = undefined
+  build(plugins.render3d.THREE as typeof THREE, plugins, town)
 }
 
 export function remove(plugins: Plugins) {
   gone = true
+  waiting = undefined
   for (const o of built) plugins.render3d.scene.remove(o)
   for (const f of disposers) f()
   built = []
   disposers = []
-  ticks = []
 }

@@ -42,11 +42,13 @@ walks its curve, as crowd3d walks a spline a straight piece at a time.
 ## How it is made
 
 - **The town drawn** (`castle.client.ts`): `assets/smallville.town.glb` as pro-ng's `procedural.py` cuts it, every
-  building one solid, with its roofs' coverings, its timber and its kit; the stone and the wood (`castle.material.ts`,
-  pro-ng's own materials) cut each face into its courses of stones or boards, with relief, on the pictures in
-  `assets/*.webp`; the kit's iron, thatch, cloth, plaster, rope, glass, slate, shingles and boards each its own look
-  worked out in the shader, the kit's wood the timber's look. The lane's and the bailey's cobbles are drawn in their
-  colour.
+  building one solid, with its roofs' coverings, its timber and its kit, drawn as one geometry by supershader3d, the
+  scene's one shader, in at most three draw calls (solid, relief, see-through). Every material is the library's
+  (`pro-ng/materials.json`, its look in `pro-ng/material/looks/`), composed into `assets/smallville.town.looks.json`
+  with its pictures in `assets/looks/`. Each vertex carries its material's number and what its look reads, and the
+  glb's extras say how its attributes make the shader's inputs, so the game names no material: a material or a look
+  changed in the library shows in the game once it is baked again. The fortress plugin hands the wall looks the
+  buildings' course table (`plugins/fortress/fortress.supershader3d.ts`).
 - **What you walk on** (`assets/smallville.town.partial_scene.json`, which `main.scene.json` extends): shapes3d's
   shapes, written by pro-ng's `shapes.py` from the same numbers each solid is cut from: every wall a box, cut at its
   doors and passages; every floor; every roof that is stood on, cut round the stairs that come up through it; each
@@ -75,12 +77,13 @@ walks its curve, as crowd3d walks a spline a straight piece at a time.
 ## Baking
 
 `yarn bake demo_castle` (`assets/demo_castle.bake.ts`) cuts the town with the library's pro-ng (`procedural.py` in
-Blender, which writes the walk shapes beside the glb), packs the glb with `pack.mjs`, writes the town's ways with
-`town_nav.py`, cuts the stone's, the mortar's and the wood's pictures to 1024 pixels square as WebP, bakes the two
+Blender, which writes the walk shapes beside the glb), packs the glb with `pack.mjs`, which writes the town's shader
+and its pictures beside it (`look_bake.mjs`), copies those in and lists each picture in `main.scene.json`'s catalogue,
+writes the town's ways with `town_nav.py`, bakes the two
 bodies, castle_walker (you) and castle_woman (every visitor), with every clip of your rig (`assets/player.rig.json`),
 writing the table anim plays by back into the rig. The bodies come from the paths the rig's `bodies` give, the clips
 from `~/troupe-collection`. The particle sheet (`assets/particles/`) and the torch stick (`assets/torch.glb`) are
-demo_particle3d's and demo_motion3d's, copied. Change the town in the library and bake again.
+demo_particle3d's and demo_motion3d's, copied. Change the town, a material or a look in the library and bake again.
 
 ## Tests
 
