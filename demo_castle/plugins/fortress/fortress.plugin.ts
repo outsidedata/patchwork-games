@@ -5,7 +5,7 @@
 //
 // The course table: the wall looks read each building's course feet (its courses' heights off the ground) and its
 // walls' thickness from `csCourses`, a float texture of COURSES + 1 columns, a building a row, the row the vertex's
-// `wall` names (its fourth number, % 256). `courses(three)` hands out the one table, made on its first call, ROWS
+// slot `s2` names (its fourth number, % 256). `courses(three)` hands out the one table, made on its first call, ROWS
 // rows so every row a vertex can name is there; `town(buildings)` writes the town's buildings into it, as the town's
 // glb lists them. `close` disposes it.
 import type * as THREE from 'three'
