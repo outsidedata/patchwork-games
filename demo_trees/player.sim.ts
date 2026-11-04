@@ -14,7 +14,7 @@
 //   pace      the fly speed's multiplier, which the wheel moves, from `pace.min` to `pace.max`.
 //   mode      `lineup`, every tree in a row, or `lods`, one tree at each of its levels of detail.
 //   lod       the level of detail the lineup draws every tree at, 0 the nearest; −1 is each tree by its
-//             distance from the eye, as a scatter3d pack draws it.
+//             distance from the eye, as a lod3d layer draws it.
 //   tree      which tree `lods` draws, an index into the lineup's `trees`.
 //
 // `before` stands it once on the scene's `start` actor for its slot, `up` metres over the ground at the

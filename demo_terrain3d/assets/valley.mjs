@@ -1,7 +1,7 @@
 // Writes the valley's three field files, `uhd.json`, `hd.json` and `lofi.json`, from one land. The
 // three share every byte of their `program`, `analysis`, `surfaces` and `layers`, and every rule of
 // their ground layers, so the ground is the same ground in every tier, height for height and layer
-// for layer, and scatter3d places the same trees on it; only the size of the maps the layers are
+// for layer, and lod3d places the same trees on it; only the size of the maps the layers are
 // drawn with differs, and what of the look costs most. The game never reads this script; it is kept
 // so the files can be made again, and so a change to the land is made once:
 //
@@ -25,7 +25,7 @@
 // clears the trees and the grass off it, and which the `road` ground layer lays gravel on.
 //
 // The look. Ten ground layers (`terrain3d.warp.ts`), each over the ones before it where its rules,
-// its noise and its warp put it; scatter3d reads them by name (`layer:<name>`), so a fir stands on
+// its noise and its warp put it; lod3d's rules read them by name (`layer:<name>`), so a fir stands on
 // drawn meadow and a stone on drawn sand.
 import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'

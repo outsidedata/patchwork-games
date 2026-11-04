@@ -2,14 +2,14 @@
 // catalogue names, packed by gltfpack (meshopt geometry, WebP textures) and written where the catalogue
 // reads it.
 //   firs.glb     grown by the library's `trees/trees.py` (Blender's Sapling Tree Gen) from
-//                `firs.trees.json`: scatter3d's trees pack, the tall, mid and small spruces at their four
+//                `firs.trees.json`: the lod3d trees layer's mesh, the tall, mid and small spruces at their four
 //                levels of detail, their leaves and bark wearing the cc0-textures leaf and bark sets their
 //                species name, which `texture` downloads into the library first
 //   woods.glb    grown the same way from `woods.trees.json`: eight trees of the library's species (a
 //                douglas fir, a pine, a birch, an aspen, a maple, a japanese maple, a weeping willow and
-//                a bottlebrush) at four levels of detail, named for a scatter3d pack as firs.glb is
-//   clumps.glb   made by the library's `foliage/foliage.py` from `clumps.foliage.json`: scatter3d's
-//                clumps pack, the nine clumps of the library's `props/lod-grass` (grasses, dry grasses,
+//                a bottlebrush) at four levels of detail, named for a lod3d layer's mesh as firs.glb is
+//   clumps.glb   made by the library's `foliage/foliage.py` from `clumps.foliage.json`: the lod3d
+//                clumps layer's mesh, the nine clumps of the library's `props/lod-grass` (grasses, dry grasses,
 //                flowers and reeds) at their two levels of detail
 // The ground's maps, `ground/<name>-<map>-<size>.webp`, are cut by the bake itself from the cc0-textures
 // sets `cc0-textures.json` names, before this runs, and committed with the game.

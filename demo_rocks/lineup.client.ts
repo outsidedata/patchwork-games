@@ -5,7 +5,7 @@
 // What it draws is what the seat's own `player` row chose:
 //   lineup   every rock of `rocks`, in that order from the left of an eye looking along +z, in a row
 //            along x, each `gap` metres clear of the next by LOD 0's width, the row's middle at x = 0,
-//            every rock at the row's `lod`; at lod −1 each rock at the LOD a scatter3d pack with these
+//            every rock at the row's `lod`; at lod −1 each rock at the LOD a lod3d layer with these
 //            `shells` would draw it at, by its distance from the camera: LOD k inside shells[k], the
 //            last past them all.
 //   lods     the row's `rock` at each of its LODs, 0 to the last, side by side in the same way.
@@ -137,7 +137,7 @@ export function tick(me: Row, plugins: Plugins) {
   text('keys', 'caption.keys', [c.lines[0], c.lines[1] + 2 * c.line + 4], k.help)
 }
 
-// The LOD a scatter3d pack with these shells draws at a distance: k inside shells[k], the last past them.
+// The LOD a lod3d layer with these shells draws at a distance: k inside shells[k], the last past them.
 const by = (distance: number, shells: number[]) => {
   const k = shells.findIndex(r => distance < r)
   return k < 0 ? shells.length : k

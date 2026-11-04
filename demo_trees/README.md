@@ -23,7 +23,7 @@ The spec, the species and what was learned running Sapling are in
 | WASD, Space / C, Shift | fly, rise and sink, faster |
 | right-drag, wheel | look, fly pace |
 | M | the lineup of every tree, or one tree at LOD 0 to 3 |
-| L, 0–3, 9 | the lineup's next LOD, one LOD, or each tree by its distance (scatter3d's shells) |
+| L, 0–3, 9 | the lineup's next LOD, one LOD, or each tree by its distance (lod3d's shells) |
 | [ ] | the tree the LOD view shows |
 
 Each tree is labelled with its name, its LOD and its triangles. The caption gives the triangles of

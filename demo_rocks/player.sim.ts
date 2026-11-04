@@ -14,7 +14,7 @@
 //   pace      the fly speed's multiplier, which the wheel moves, from `pace.min` to `pace.max`.
 //   mode      `lineup`, every rock in a row, or `lods`, one rock at each of its levels of detail.
 //   lod       the level of detail the lineup draws every rock at, 0 the nearest; −1 is each rock by its
-//             distance from the eye, as a scatter3d pack draws it.
+//             distance from the eye, as a lod3d layer draws it.
 //   rock      which rock `lods` draws, an index into the lineup's `rocks`.
 //
 // `before` stands it once on the scene's `start` actor for its slot, `up` metres over the ground at the

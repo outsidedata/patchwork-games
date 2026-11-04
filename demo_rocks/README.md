@@ -24,7 +24,7 @@ The spec, the species and what was learned running the generator are in
 | WASD, Space / C, Shift | fly, rise and sink, faster |
 | right-drag, wheel | look, fly pace |
 | M | the lineup of every rock, or one rock at LOD 0 to 3 |
-| L, 0–3, 9 | the lineup's next LOD, one LOD, or each rock by its distance (scatter3d's shells) |
+| L, 0–3, 9 | the lineup's next LOD, one LOD, or each rock by its distance (lod3d's shells) |
 | [ ] | the rock the LOD view shows |
 
 Each rock is labelled with its name, its LOD and its triangles. The caption gives the triangles of

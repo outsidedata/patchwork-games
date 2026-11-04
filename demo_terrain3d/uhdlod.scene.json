@@ -5,7 +5,7 @@
       "lines": [
         "rings: 1 m cells near the eye, out to 9 km",
         "ground: ten warped photo layers at 2048² to the horizon, alpine and desert, height-blended",
-        "UHD's firs, grass and boulders placed by lod3d and drawn by instances3d, in place of scatter3d"
+        "UHD's firs, grass and boulders placed by lod3d and drawn by instances3d"
       ]
     },
     "shipped": { "plugins": ["seabed"] },
