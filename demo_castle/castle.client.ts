@@ -5,8 +5,8 @@
 // each building's courses and walls' thickness its own; the roofs' coverings, shingles and boards in the wood's
 // material and slate in the stone's, each sized for it; the stairs, timber floors, roofs and supports in the look
 // `timber`; the kit things each in its material's colour, or in the look `timber` where its material wears it, its
-// pictures repeating every `metres`. Everything casts and takes shadows. The ground under it is shapes3d's,
-// drawn by solids (`world.shapes3d.kinds` `yard`, `field`, `verge`).
+// pictures repeating every `metres`. Everything casts and takes shadows. The ground under it is terrain3d's
+// (`assets/demo_castle.field.json`), flattened under the town by the town's layer.
 import type * as THREE from 'three'
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js'
 import type { Row } from '#engine/engine.ts'

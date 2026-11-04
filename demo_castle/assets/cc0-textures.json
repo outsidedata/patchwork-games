@@ -1,0 +1,7 @@
+{
+  "folder": "ground",
+  "sizes": [2048],
+  "sets": {
+    "grass": { "set": "Grass004_4K-JPG", "maps": ["color", "normal"] }
+  }
+}

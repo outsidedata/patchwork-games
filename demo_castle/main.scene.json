@@ -6,6 +6,9 @@
     "loader": {
       "assets": {
         "demo_castle": { "type": "json", "url": "/games/demo_castle/assets/demo_castle.json", "preload": true },
+        "field": { "type": "json", "url": "/games/demo_castle/assets/demo_castle.field.json", "preload": true },
+        "grass": { "type": "texture", "url": "/games/demo_castle/assets/ground/grass-color-2048.webp", "wrap": "repeat" },
+        "grassNormal": { "type": "texture", "url": "/games/demo_castle/assets/ground/grass-normal-2048.webp", "space": "linear", "wrap": "repeat" },
         "town": { "type": "binary", "url": "/games/demo_castle/assets/smallville.town.glb", "preload": true },
         "rockCol": { "type": "texture", "url": "/games/demo_castle/assets/rock_colour.webp", "wrap": "repeat", "anisotropy": 16, "preload": true },
         "rockDisp": { "type": "texture", "url": "/games/demo_castle/assets/rock_height.webp", "space": "linear", "wrap": "repeat", "anisotropy": 16, "preload": true },
@@ -16,6 +19,7 @@
         "woodDisp": { "type": "texture", "url": "/games/demo_castle/assets/wood_height.webp", "space": "linear", "wrap": "repeat", "anisotropy": 16, "preload": true },
         "woodNrm": { "type": "texture", "url": "/games/demo_castle/assets/wood_normal.webp", "space": "linear", "wrap": "repeat", "anisotropy": 16, "preload": true },
         "woodRough": { "type": "texture", "url": "/games/demo_castle/assets/wood_roughness.webp", "space": "linear", "wrap": "repeat", "anisotropy": 16, "preload": true },
+        "townNav": { "type": "json", "url": "/games/demo_castle/assets/smallville.town.nav.json", "preload": true },
         "heroRig": { "type": "json", "url": "/games/demo_castle/assets/player.rig.json", "preload": true },
         "mechworker": { "type": "model", "url": "/games/demo_castle/assets/mechworker.glb", "preload": true },
         "clumps": { "type": "model", "url": "/games/demo_castle/assets/clumps.glb" },
@@ -23,20 +27,27 @@
         "rocks": { "type": "model", "url": "/games/demo_castle/assets/rocks.glb" }
       }
     },
-    "shapes3d": {
-      "kinds": {
-        "yard": { "shape": { "hyperplane": { "size": [64, 92] } }, "look": { "colour": "#5d6b43", "roughness": 1, "thick": 0.2 } },
-        "field": { "shape": { "hyperplane": { "size": [600, 254] } }, "look": { "colour": "#5d6b43", "roughness": 1, "thick": 0.2 } },
-        "verge": { "shape": { "hyperplane": { "size": [268, 92] } }, "look": { "colour": "#5d6b43", "roughness": 1, "thick": 0.2 } }
-      }
+    "terrain3d": {
+      "field": "field",
+      "rings": [
+        { "reach": 64, "seg": 128 },
+        { "reach": 256, "seg": 128 },
+        { "reach": 1024, "seg": 128 },
+        { "reach": 4096, "seg": 128 }
+      ],
+      "shadowReach": 256,
+      "budget": 8,
+      "seabed": false,
+      "preload": true
     },
+    "shapes3d": { "mods": { "height": "terrain3d" } },
     "solids": { "mods": { "models": "shapes3d" } },
     "instances3d": { "cutout": 0.45, "coverage": 0.25 },
     "lod3d": {
       "mods": {
-        "surfaces": ["shapes3d"],
-        "seen": ["shapes3d"],
-        "behaviors": ["shapes3d", "instances3d"],
+        "surfaces": ["terrain3d"],
+        "seen": ["terrain3d"],
+        "behaviors": ["terrain3d", "instances3d"],
         "hollows": ["fortress"]
       },
       "rings": [60, 140, 320, 800],
@@ -46,7 +57,7 @@
       "widest": 6,
       "layers": {
         "grass": {
-          "on": ["yard", "field", "verge"],
+          "on": ["land"],
           "cell": 3,
           "rows": { "grass01": { "weight": 4 }, "grass02": { "weight": 4 }, "grass03": { "weight": 3 }, "dry01": { "weight": 3 }, "dry02": { "weight": 3 }, "flowers03": { "weight": 1 }, "reeds": { "weight": 1 } },
           "seed": 311,
@@ -57,7 +68,7 @@
           "mesh": { "asset": "clumps", "lods": [0], "shadow": 0, "leaf": 0.55 }
         },
         "copse": {
-          "on": ["field", "verge"],
+          "on": ["land"],
           "cell": 60,
           "rows": { "birch": { "weight": 2, "solid": 0.3 }, "aspen": { "weight": 2, "solid": 0.3 }, "maple": { "weight": 1, "solid": 0.35 }, "redmaple": { "weight": 1, "solid": 0.3 } },
           "seed": 211,
@@ -68,7 +79,7 @@
           "mesh": { "asset": "trees", "lods": [0, 2, 3, 3], "shadow": 140, "leaf": 0.55 }
         },
         "boulders": {
-          "on": ["field", "verge"],
+          "on": ["land"],
           "cell": 50,
           "rows": { "boulder1": { "weight": 3, "solid": 0.45 }, "boulder2": { "weight": 3, "solid": 0.45 }, "boulder3": { "weight": 2, "solid": 0.45 }, "slab1": { "weight": 2, "solid": 0.45 }, "slab2": { "weight": 2, "solid": 0.45 }, "outcrop1": { "weight": 1, "solid": 0.45 } },
           "seed": 173,
@@ -79,7 +90,7 @@
           "mesh": { "asset": "rocks", "lods": [0, 1, 2, 3], "shadow": 140, "leaf": 0 }
         },
         "stones": {
-          "on": ["yard", "field", "verge"],
+          "on": ["land"],
           "cell": 9,
           "rows": { "a": { "weight": 1 }, "b": { "weight": 1 }, "c": { "weight": 1 } },
           "seed": 191,
@@ -116,9 +127,21 @@
         }
       }
     },
+    "nav3d": {
+      "graphs": { "town": { "asset": "townNav" } }
+    },
+    "crowd3d": {
+      "bodies": { "mechworker": "mechworker" },
+      "clips": ["idle", "walk", "run"],
+      "rate": 30,
+      "kinds": ["visitor"]
+    },
+    "npc3d": {
+      "mods": { "route": "nav3d", "behaviors": "fortress" }
+    },
     "shipped": { "plugins": ["fortress"] }
   },
-  "plugins": ["loader", "scenemanager", "player", "shipped", "anim", "instances3d", "lod3d", "solids", "environment3d", "render3d", "chasecamera3d"],
+  "plugins": ["loader", "scenemanager", "player", "terrain3d", "shipped", "crowd3d", "anim", "npc3d", "nav3d", "instances3d", "lod3d", "solids", "environment3d", "render3d", "chasecamera3d"],
   "seats": 1,
   "prefabs": {
     "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
@@ -142,10 +165,8 @@
       "background": "#a9c3dc"
     },
     "start": { "slot": 0, "pos": [0, 0, 0], "yaw": 0 },
+    "npc3d": { "time": 0, "sounds": [], "next": 1 },
     "castle": {},
-    "yard": { "pos": [0, 0, 0], "rot": [0, 0, 0, 1] },
-    "field": { "pos": [0, 0, 0], "rot": [0, 0, 0, 1] },
-    "verge": { "pos": [0, 0, 0], "rot": [0, 0, 0, 1] },
     "player": {
       "seat": 0,
       "stood": false,
@@ -155,17 +176,48 @@
       "look": { "yaw": 0, "pitch": 0.25, "dist": 6 },
       "lift": 1.5,
       "limp": false
+    },
+    "visitor": {
+      "pos": [0, 0, 0], "to": [0, 0, 0], "yaw": 0, "speed": 0, "since": 0, "body": "mechworker", "clip": "idle", "holding": {},
+      "look": 0, "gaze": null, "seen": [], "noticing": {}, "facts": [], "doing": "", "until": 0, "wake": 0, "arrived": false, "told": null, "route": null,
+      "home": "", "going": null
     }
   },
   "actors": [
     { "is": "scenemanager" },
     { "is": "loader" },
+    { "is": "npc3d" },
     { "is": "castle" },
-    { "is": "yard", "pos": [0, 0, 18] },
-    { "is": "field", "pos": [0, 0, -155] },
-    { "is": "field", "pos": [0, 0, 191] },
-    { "is": "verge", "pos": [-166, 0, 18] },
-    { "is": "verge", "pos": [166, 0, 18] },
-    { "is": "start", "slot": 0, "pos": [0, 0.05, 22], "yaw": 3.141592653589793 }
+    { "is": "start", "slot": 0, "pos": [0, 0.05, 22], "yaw": 3.141592653589793 },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" },
+    { "is": "visitor", "home": "" }
   ]
 }

@@ -10,6 +10,13 @@
 //                 (`pro-ng/shapes.py`); main.scene.json extends it
 //   smallville.town.nav.json
 //                 the town's ways, nav3d's graph of shapes, from its files' metadata (`pro-ng/town_nav.py`, no Blender)
+//   smallville.town.terrain3d_layers.json
+//                 terrain3d's painted layer that flattens the ground under the whole town to 0, one flatten stroke,
+//                 which procedural.py writes beside the glb
+//   demo_castle.field.json
+//                 terrain3d's field, written by hand but for its `layers`, which the bake sets to the town's layer
+//   ground/grass-color-2048.webp, ground/grass-normal-2048.webp
+//                 the ground's grass, cut by core's bake from `cc0-textures.json` before this file runs
 //   rock_colour.webp, rock_height.webp, rock_normal.webp, mortar_colour.webp, mortar_height.webp,
 //   wood_colour.webp, wood_height.webp, wood_normal.webp, wood_roughness.webp
 //                 the pictures the stone and the wood read, the cc0-textures sets pro-ng's looks wear
@@ -53,10 +60,16 @@ export default async ({ blender, webp, scratch, library, texture }: Tools) => {
   console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(prong, 'procedural.py'), '--', 'scene', 'smallville.town', out]))
   execFileSync(process.execPath, [path.join(prong, 'pack.mjs'), path.join(out, 'smallville.town.glb')], { stdio: 'inherit' })
   execFileSync('python3', [path.join(prong, 'town_nav.py'), 'smallville.town', out], { stdio: 'inherit' })
-  for (const name of ['smallville.town.glb', 'smallville.town.partial_scene.json', 'smallville.town.nav.json']) {
+  for (const name of ['smallville.town.glb', 'smallville.town.partial_scene.json', 'smallville.town.nav.json', 'smallville.town.terrain3d_layers.json']) {
     fs.copyFileSync(path.join(out, name), path.join(here, name))
     console.log('wrote', path.relative(root, path.join(here, name)))
   }
+  // the town's flatten laid into the field, its one painted layer
+  const fieldFile = path.join(here, 'demo_castle.field.json')
+  const field = JSON.parse(fs.readFileSync(fieldFile, 'utf8'))
+  field.layers = [JSON.parse(fs.readFileSync(path.join(here, 'smallville.town.terrain3d_layers.json'), 'utf8'))]
+  fs.writeFileSync(fieldFile, JSON.stringify(field, null, 2) + '\n')
+  console.log('wrote', path.relative(root, fieldFile), 'its layers')
   for (const [name, set, file] of PICTURES) {
     // the set downloaded into the library when it is not there; its files beside its maps
     const maps = await texture(set)

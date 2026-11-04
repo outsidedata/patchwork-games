@@ -1,10 +1,11 @@
 // demo_castle: the manager booted as its page boots it and main loaded, on pro-ng's town as
 // `yarn bake demo_castle` wrote it. A seat joins on the lane outside the gate and runs north up it on the
-// cobbles. On bridge, the visitors
+// cobbles; and the visitors go about the town until one reaches a place along nav3d's route. On bridge, the visitors
 // walk over the bridge at its height, under it on the ground, and up and down its ramps.
 import { expect, test } from 'vitest'
-import { boot, type Row, type Scene } from '#engine/engine.ts'
+import { boot, type Row, type Scene, type W } from '#engine/engine.ts'
 import { connection, load, manager, type Down } from '#addons/scenemanager/scenemanager.addon.ts'
+import { graph } from '#plugins/nav3d/nav3d.sim.ts'
 import { bodies } from '#plugins/npc3d/npc3d.sim.ts'
 import { sim } from './demo_castle.sim.ts'
 import file from './demo_castle.scene.json' with { type: 'json' }
@@ -38,6 +39,45 @@ test('a seat starts on the lane outside the gate and runs north up it into the g
   expect(Math.abs(x)).toBeLessThan(1.3)
   expect(y).toBeCloseTo(0.02, 3)
   expect(me().data.grounded).toBe(true)
+})
+
+test('a visitor walks the town to one of its places and stops on it, its course written once a leg', async () => {
+  const { truth, room } = await main()
+  // a rule's view of the truth, as far as the loader and nav3d read it
+  const w = { world: room.world, find: (kind: string) => room.rows.find(r => r.kind === kind)! } as unknown as W
+  const places = graph(w, 'town').places
+  const visitors = room.rows.filter(r => r.kind === 'visitor') as Row[]
+  const time = () => room.rows.find(r => r.kind === 'npc3d')!.data.time
+  const node = (name: string) => places.find(p => p.data?.nav3d?.tags?.includes(name))!.point
+  // each visitor's walk: the row's lane (z) it set out from, how many times its course was written and how many legs
+  type Walk = { from: number; writes: number; legs: number; since: number; leg: number }
+  const walks = new Map<number, Walk>()
+  let arrived: { v: Row; walk: Walk } | undefined
+  for (let i = 0; i < 120 / DT && !arrived; i++) {
+    truth.step(DT)
+    for (const v of visitors) {
+      let walk = walks.get(v.id)
+      if (typeof v.data.going === 'string' && v.data.speed > 0 && !walk) walks.set(v.id, walk = { from: v.data.pos[2], writes: 1, legs: 1, since: v.data.since, leg: v.data.route?.leg ?? 0 })
+      if (!walk) continue
+      if (v.data.since !== walk.since) { walk.writes++; walk.since = v.data.since }
+      if ((v.data.route?.leg ?? walk.leg) !== walk.leg) { walk.legs++; walk.leg = v.data.route.leg }
+      if (v.data.speed === 0) {
+        walks.delete(v.id)
+        if (Math.abs(node(v.data.going).at[2] - walk.from) > 1) arrived = { v, walk }
+      }
+    }
+  }
+  expect(arrived).toBeDefined()
+  const { v, walk } = arrived!
+  // it stands on its place, at its height
+  const [x, y, z] = bodies.crowd3d.where(v, time())
+  const at = node(v.data.going).at
+  expect(x).toBeCloseTo(at[0], 5)
+  expect(z).toBeCloseTo(at[2], 5)
+  expect(y).toBeCloseTo(at[1], 5)
+  // its course was written as it set out on each leg and as it stopped, never every step
+  expect(walk.legs).toBeGreaterThan(1)
+  expect(walk.writes).toBeLessThanOrEqual(walk.legs + 1)
 })
 
 test('on bridge, visitors walk over the bridge at its height, under it on the ground, and up its ramps', async () => {
