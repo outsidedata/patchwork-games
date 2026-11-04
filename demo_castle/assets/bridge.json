@@ -24,8 +24,7 @@
         "clip": "walk",
         "speed": 1.4,
         "stand": "idle",
-        "stay": [1, 2],
-        "rest": [1, 3]
+        "stay": [1, 2]
       }
     }
   },
@@ -47,8 +46,7 @@
         "clip": "walk",
         "speed": 1.4,
         "stand": "idle",
-        "stay": [2, 8],
-        "rest": [1, 3]
+        "stay": [2, 8]
       }
     }
   }
