@@ -2,9 +2,10 @@
 // but the definitions, written beside this file.
 //   smallville.town.glb
 //                 the library's pro-ng town (its scene `pro-ng/scenes/smallville.town.json`), each building cut into
-//                 one solid in Blender (`pro-ng/procedural.py`): the solids, the roofs' coverings, the timber, the
-//                 kit and the kit's parts in a wall look, each vertex its material's number and what its look reads,
-//                 and on its node `pro-ng` every building's courses and how its attributes make the shader's inputs,
+//                 one solid in Blender (`pro-ng/procedural.py`): the solids, each face in the material its building's
+//                 `material` names for its side, the roofs' coverings, the timber and the kit, each vertex its
+//                 material's number and what its look reads, and on its node `pro-ng` the course table's rows and
+//                 how its attributes make the shader's inputs,
 //                 compressed by `pro-ng/pack.mjs`, drawn by `castle.client.ts` through supershader3d
 //   smallville.town.looks.json, looks/<file>.webp
 //                 the town's one shader, supershader3d's file, and the pictures it reads, which pack.mjs writes

@@ -14,10 +14,11 @@ import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import type { Call, Looks } from '#plugins/supershader3d/supershader3d.plugin.ts'
+import type { CourseRow } from './plugins/fortress/fortress.plugin.ts'
 
 // the extras' `vertex`: the meshes drawn, each input's numbers, each input's default
 type Vertex = { meshes: string[]; attributes: Record<string, [string, number][]>; defaults: Record<string, number> }
-type Info = { buildings: { courses: number[]; wallDepth: number }[]; vertex: Vertex }
+type Info = { courses: CourseRow[]; vertex: Vertex }
 type Gltf = {
   nodes: { name: string; mesh?: number; extras?: unknown }[]
   meshes: { primitives: { attributes: Record<string, number>; indices: number }[] }[]
@@ -105,7 +106,7 @@ export function setup(row: Row, plugins: Plugins) {
 // Every mesh in one geometry, each triangle in its call's run, drawn by that call's material.
 function build(T: typeof THREE, plugins: Plugins, { info, meshes }: { info: Info; meshes: Mesh[] }) {
   const looks: Looks = plugins.supershader3d.looks()
-  plugins.fortress.town(T, info.buildings)
+  plugins.fortress.town(T, info.courses)
   const total = meshes.reduce((n, m) => n + m.count, 0)
   const geo = new T.BufferGeometry()
   for (const [input, numbers] of Object.entries(info.vertex.attributes)) {
