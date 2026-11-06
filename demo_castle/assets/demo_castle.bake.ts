@@ -1,12 +1,19 @@
 // demo_castle's bake, `yarn bake demo_castle` (core's `scripts/bake.ts`): every file main's catalogue names
 // but the definitions, written beside this file.
 //   smallville.town.glb
-//                 the library's pro-ng town (its scene `pro-ng/scenes/smallville.town.json`), each building cut into
+//                 the library's pro-ng town (its scene `pro-ng/scenes/castle/smallville/smallville.town.json`), each building cut into
 //                 one solid in Blender (`pro-ng/procedural.py`): the solids, each face in the material its building's
 //                 `material` names for its side, the roofs' coverings, the timber and the kit, each vertex its
 //                 material's number and what its look reads, and on its node `pro-ng` the course table's rows and
 //                 how its attributes make the shader's inputs,
-//                 compressed by `pro-ng/pack.mjs`, drawn by `castle.client.ts` through supershader3d
+//                 compressed by `pro-ng/pack.mjs`, drawn by `castle.client.ts` through supershader3d. A kit thing
+//                 that moves (the tavern's ceiling fan) skins the mesh `kit`: its joints and weights, the skin's bones
+//                 under the node `kit bones`, an animation `<thing> <clip>` for each clip of bones, morph targets for
+//                 each clip of poses
+//   smallville.town.clips.json
+//                 each moving kit thing's clips as its kind wrote them (about, how, start, loop, seconds, and the
+//                 glTF animation or the poses it plays), which procedural.py writes beside the glb and
+//                 `castle.client.ts` plays (the fortress's `clip`)
 //   smallville.town.looks.json, looks/<file>.webp
 //                 the town's one shader, supershader3d's file, and the pictures it reads, which pack.mjs writes
 //                 beside the glb (`pro-ng/look_bake.mjs`) from the library's looks and `pro-ng/materials.json`: every
@@ -44,16 +51,18 @@ const root = path.join(here, '..', '..', '..')
 const exporter = path.join(root, 'plugins', 'anim', 'anim.export.py')
 const merge = path.join(root, '.claude', 'skills', 'using-mixamo-assets', 'scripts', 'merge-table.mjs')
 const LOOKS_URL = '/games/demo_castle/assets/looks/'
+// the town's scene file in the library's pro-ng/scenes, without its `.json`
+const TOWN = 'castle/smallville/smallville.town'
 
 export default async ({ blender, scratch, library }: Tools) => {
   const prong = path.join(library, 'pro-ng')
   // every cc0-textures set the looks wear, downloaded into the library when it is not there (`pro-ng/textures.mjs`)
   execFileSync(process.execPath, [path.join(prong, 'textures.mjs')], { stdio: 'inherit' })
   const out = scratch('smallville')
-  console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(prong, 'procedural.py'), '--', 'scene', 'smallville.town', out]))
+  console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(prong, 'procedural.py'), '--', 'file', path.join(prong, 'scenes', `${TOWN}.json`), out]))
   execFileSync(process.execPath, [path.join(prong, 'pack.mjs'), path.join(out, 'smallville.town.glb')], { stdio: 'inherit' })
-  execFileSync('python3', [path.join(prong, 'town_nav.py'), 'smallville.town', out], { stdio: 'inherit' })
-  for (const name of ['smallville.town.glb', 'smallville.town.looks.json', 'smallville.town.shapes3d.json', 'smallville.town.nav.json', 'smallville.town.terrain3d_layers.json']) {
+  execFileSync('python3', [path.join(prong, 'town_nav.py'), TOWN, out], { stdio: 'inherit' })
+  for (const name of ['smallville.town.glb', 'smallville.town.looks.json', 'smallville.town.clips.json', 'smallville.town.shapes3d.json', 'smallville.town.nav.json', 'smallville.town.terrain3d_layers.json']) {
     fs.copyFileSync(path.join(out, name), path.join(here, name))
     console.log('wrote', path.relative(root, path.join(here, name)))
   }

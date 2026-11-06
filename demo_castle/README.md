@@ -2,17 +2,18 @@
 
 Run about pro-ng's town, and watch its people go about it.
 
-The town is the library's pro-ng `smallville.town` (its scene `pro-ng/scenes/smallville.town.json`, the game export,
+The town is the library's pro-ng `smallville.town` (its scene `pro-ng/scenes/castle/smallville/smallville.town.json`, the game export,
 `pro-ng/GAME_EXPORT.md`): a castle of curtain walls with battlements, four round towers with spiral stairs up to their
 roofs, a gatehouse with a portcullis, stone stairs up to the walls, and inside the bailey the keep (the great hall with
 its stair up into the solar), joined by a passage to the kitchen, the store, the stable, the chapel, the armoury and
 the lodging, with the bailey's well, cart, smithy and stores. Outside the gate a cobbled lane runs south past the market
-and its alehouse to the tavern (a loft up its stair), the workshop and six huts. Every room is furnished from pro-ng's
+and its alehouse to the tavern (a loft up its stair, and a ceiling fan turning over its tables), the workshop and six huts. Every room is furnished from pro-ng's
 kit. Each landmark is its own file (`.art.json`) placed in the town; beside each, its metadata (`.art.metadata.json`)
 holds where a person stands in it, the ways between those places, its stairs and its exits, and the town's metadata
 holds the streets and which landmarks join which.
 
-The game reads three files of the town and nothing else of it: its geometry, what a body walks on, and its ways.
+The game reads four files of the town and nothing else of it: its geometry, its moving things' clips, what a body
+walks on, and its ways.
 
 ## Playing
 
@@ -49,6 +50,14 @@ walks its curve, as crowd3d walks a spline a straight piece at a time.
   glb's extras say how its attributes make the shader's inputs, so the game names no material: a material or a look
   changed in the library shows in the game once it is baked again. The fortress plugin hands the wall looks the
   buildings' course table (`plugins/fortress/fortress.supershader3d.ts`).
+- **The town's moving things** (`castle.client.ts`, `assets/smallville.town.clips.json`): a kit thing that moves (the
+  tavern's ceiling fan) is skinned in the glb, so the town's one mesh is a skinned mesh, its skeleton the glb's skin,
+  in the same draw calls. Each clip of `smallville.town.clips.json` is played on it by one animation mixer, advanced by
+  the frame's time: a clip of bones from the glb's animation `<thing> <clip>`, a clip of poses as the morph targets'
+  weights, blended linearly from pose to pose. Every clip whose `start` is `on` plays when the town is built, looping
+  where `loop` is true. The game starts and stops one with the fortress plugin's `clip(thing, clip, on)`
+  (`plugins/fortress/fortress.plugin.ts`), `clip('tavern/tavern fan', 'spin', false)` say. Walk shapes stay where they were
+  baked.
 - **What you walk on** (`assets/smallville.town.partial_scene.json`, which `main.scene.json` extends): shapes3d's
   shapes, written by pro-ng's `shapes.py` from the same numbers each solid is cut from: every wall a box, cut at its
   doors and passages; every floor; every roof that is stood on, cut round the stairs that come up through it; each
@@ -77,7 +86,7 @@ walks its curve, as crowd3d walks a spline a straight piece at a time.
 ## Baking
 
 `yarn bake demo_castle` (`assets/demo_castle.bake.ts`) cuts the town with the library's pro-ng (`procedural.py` in
-Blender, which writes the walk shapes beside the glb), packs the glb with `pack.mjs`, which writes the town's shader
+Blender, which writes the walk shapes and the clips beside the glb), packs the glb with `pack.mjs`, which writes the town's shader
 and its pictures beside it (`look_bake.mjs`), copies those in and lists each picture in `main.scene.json`'s catalogue,
 writes the town's ways with `town_nav.py`, bakes the two
 bodies, castle_walker (you) and castle_woman (every visitor), with every clip of your rig (`assets/player.rig.json`),
@@ -90,3 +99,6 @@ demo_particle3d's and demo_motion3d's, copied. Change the town, a material or a 
 `yarn vitest run games/demo_castle/demo_castle.sim.test.ts`: you run north up the lane and in through the gate onto the
 gatehouse's floor; a visitor walks the town to one of its places and stops on it at its height, its course written once
 a leg; and on the bridge, visitors walk over the bridge at its height, under it on the ground, and up its ramps.
+
+`yarn vitest run games/demo_castle/castle.client.test.ts`: the baked glb unpacked as the page does, the tavern fan's
+bone and skin read off it, its `spin` turning once in 1/3 s, and the fortress's `clip` stopping and starting it.

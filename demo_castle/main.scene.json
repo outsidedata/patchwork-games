@@ -35,6 +35,11 @@
           "url": "/games/demo_castle/assets/smallville.town.looks.json",
           "preload": true
         },
+        "townClips": {
+          "type": "json",
+          "url": "/games/demo_castle/assets/smallville.town.clips.json",
+          "preload": true
+        },
         "townNav": {
           "type": "json",
           "url": "/games/demo_castle/assets/smallville.town.nav.json",
