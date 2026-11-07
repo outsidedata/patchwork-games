@@ -1,17 +1,17 @@
 {
   "places": [
-    { "point": { "at": [-20, 0, 0] }, "data": { "nav3d": { "tags": ["west field"] } } },
-    { "point": { "at": [-16, 0, 0] } },
-    { "point": { "at": [-8, 3, 0] }, "data": { "nav3d": { "tags": ["west end"] } } },
-    { "point": { "at": [0, 3, 0] }, "data": { "nav3d": { "tags": ["bridge"] } } },
-    { "point": { "at": [8, 3, 0] }, "data": { "nav3d": { "tags": ["east end"] } } },
-    { "point": { "at": [16, 0, 0] } },
-    { "point": { "at": [20, 0, 0] }, "data": { "nav3d": { "tags": ["east field"] } } },
-    { "point": { "at": [0, 0, -14] }, "data": { "nav3d": { "tags": ["south road"] } } },
-    { "point": { "at": [0, 0, 0] }, "data": { "nav3d": { "tags": ["under the bridge"] } } },
-    { "point": { "at": [0, 0, 14] }, "data": { "nav3d": { "tags": ["north road"] } } },
-    { "point": { "at": [-8, 0, -11.4] }, "data": { "nav3d": { "tags": ["spiral foot"] } } },
-    { "point": { "at": [-8, 3, -6] }, "data": { "nav3d": { "tags": ["spiral top"] } } }
+    { "point": { "at": [-20, 0, 0] }, "data": { "nav3d": { "tags": ["west field"], "moe": 1 } } },
+    { "point": { "at": [-16, 0, 0] }, "data": { "nav3d": { "moe": 1 } } },
+    { "point": { "at": [-8, 3, 0] }, "data": { "nav3d": { "tags": ["west end"], "moe": 1 } } },
+    { "point": { "at": [0, 3, 0] }, "data": { "nav3d": { "tags": ["bridge"], "moe": 1 } } },
+    { "point": { "at": [8, 3, 0] }, "data": { "nav3d": { "tags": ["east end"], "moe": 1 } } },
+    { "point": { "at": [16, 0, 0] }, "data": { "nav3d": { "moe": 1 } } },
+    { "point": { "at": [20, 0, 0] }, "data": { "nav3d": { "tags": ["east field"], "moe": 1 } } },
+    { "point": { "at": [0, 0, -14] }, "data": { "nav3d": { "tags": ["south road"], "moe": 1 } } },
+    { "point": { "at": [0, 0, 0] }, "data": { "nav3d": { "tags": ["under the bridge"], "moe": 1 } } },
+    { "point": { "at": [0, 0, 14] }, "data": { "nav3d": { "tags": ["north road"], "moe": 1 } } },
+    { "point": { "at": [-8, 0, -11.4] }, "data": { "nav3d": { "tags": ["spiral foot"], "moe": 1 } } },
+    { "point": { "at": [-8, 3, -6] }, "data": { "nav3d": { "tags": ["spiral top"], "moe": 1 } } }
   ],
   "ways": [
     { "line": { "from": [-20, 0, 0], "to": [-16, 0, 0] }, "data": { "nav3d": { "word": "walk", "cost": 4 }, "walk": {} } },
