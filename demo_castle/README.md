@@ -34,6 +34,11 @@ the stone stairs to the walls) and onto every roof that is stood on.
 `dev.html` is the testbed: `?graphs=1` draws the town's graph, the panel puts you on any of its places, and the readout
 shows where you stand and where each visitor is going.
 
+`dev.html?scene=village` is the village: stronghold's village solver run once, compiled into the library's pro-ng
+scene `pro-ng/scenes/village/village.art.json` and its metadata, and baked the way the town is, its files in
+`assets/village/`. It is main with the village in place of the town: the same kinds and definitions, its catalogue
+naming the village's files, the player on the start place its metadata marks, the visitors on its graph.
+
 `dev.html?scene=bridge` is the bridge: a field, a bridge 3 m up across it on two piers, a ramp down from each end, and
 a road under it. Its people walk over the bridge, under it on the ground and up and down its ramps, along a graph
 written by hand (`assets/bridge.nav.json`), each way one straight line of shapes3d's: up a ramp, across the deck, along
