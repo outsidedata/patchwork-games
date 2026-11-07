@@ -56,6 +56,9 @@ export type TownClip = {
 }
 export type TownClips = { things: { thing: string; kind: string; clips: Record<string, TownClip> }[] }
 
+// The effects file's spawns: the effect, and its point and way in the world.
+export type TownSpawn = { effect: string; at: number[]; dir: number[] }
+
 // a mesh's vertices: each input's numbers, `count` vertices of the input's width, and its index; on a skinned mesh
 // its joints (the skin's) and weights, four a vertex, and on a mesh with morph targets each target's moves
 type Mesh = {
@@ -79,6 +82,8 @@ let disposers: (() => void)[] = []
 let gone = false
 // the town once unpacked, waiting for supershader3d's materials, and its clips file
 let waiting: { town: Unpacked; clips: TownClips } | undefined
+// the effects file's spawns not yet emitted
+let spawns: TownSpawn[] = []
 
 const CALLS: Call[] = ['solid', 'relief', 'seeThrough']
 const WIDTH: Record<string, number> = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4, MAT4: 16 }
@@ -198,6 +203,7 @@ export async function unpack(bytes: Uint8Array): Promise<Unpacked> {
 export function setup(row: Row, plugins: Plugins) {
   const k = def(plugins.wire, row.kind)
   const clips = json(plugins.wire, k.clips) as TownClips
+  spawns = (json(plugins.wire, k.effects) as { spawns: TownSpawn[] }).spawns
   // An actor is set up before the loader's first tick, so the town is built once its glb has landed.
   plugins.loader.load(k.glb).then(async (glb: any) => {
     const town = await unpack(glb.bytes)
@@ -362,6 +368,10 @@ function build(T: typeof THREE, plugins: Plugins, { town, clips }: { town: Unpac
 }
 
 export function tick(_row: Row, plugins: Plugins) {
+  if (spawns.length && spawns.every(s => plugins.particle3d.has(s.effect))) {
+    for (const s of spawns) plugins.particle3d.emit(s.effect, s.at, { dir: s.dir, life: Infinity })
+    spawns = []
+  }
   if (!waiting || !plugins.supershader3d.looks()) return
   const town = waiting
   waiting = undefined

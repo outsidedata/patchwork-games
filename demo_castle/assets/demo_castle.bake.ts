@@ -64,7 +64,7 @@ const PLACES = [
   { pro: 'village/village.art', folder: 'village', scene: 'village.scene.json', field: 'village/village.field.json' },
 ]
 // what pro-ng's build writes for a scene, each `<name><suffix>`
-const MADE = ['.glb', '.looks.json', '.clips.json', '.shapes3d.json', '.nav.json', '.terrain3d_layers.json', '.hollows.json']
+const MADE = ['.glb', '.looks.json', '.clips.json', '.shapes3d.json', '.nav.json', '.terrain3d_layers.json', '.hollows.json', '.effects.json']
 
 export default async ({ blender, scratch, library }: Tools) => {
   // each place made into every file a game boots from by the library's pro-ng (`pro-ng/build.mjs`), on core's Blender

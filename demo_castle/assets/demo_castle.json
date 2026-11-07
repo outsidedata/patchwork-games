@@ -32,6 +32,7 @@
   "castle": {
     "glb": "town",
     "clips": "townClips",
+    "effects": "townEffects",
     "hollows": "townHollows"
   }
 }

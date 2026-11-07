@@ -2,6 +2,7 @@
   "cap": 2000,
   "alphaTest": 0,
   "ppm": 64,
+  "files": ["smallville.town.effects.json", "village/village.art.effects.json"],
   "effects": {
     "handfire": [
       {

@@ -55,6 +55,11 @@
           "url": "/games/demo_castle/assets/village/village.art.hollows.json",
           "preload": true
         },
+        "townEffects": {
+          "type": "json",
+          "url": "/games/demo_castle/assets/village/village.art.effects.json",
+          "preload": true
+        },
         "heroRig": {
           "type": "json",
           "url": "/games/demo_castle/assets/player.rig.json",

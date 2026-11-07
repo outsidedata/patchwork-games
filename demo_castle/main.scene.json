@@ -55,6 +55,11 @@
           "url": "/games/demo_castle/assets/smallville.town.hollows.json",
           "preload": true
         },
+        "townEffects": {
+          "type": "json",
+          "url": "/games/demo_castle/assets/smallville.town.effects.json",
+          "preload": true
+        },
         "heroRig": {
           "type": "json",
           "url": "/games/demo_castle/assets/player.rig.json",
