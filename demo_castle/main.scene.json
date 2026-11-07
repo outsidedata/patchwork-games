@@ -50,6 +50,11 @@
           "url": "/games/demo_castle/assets/smallville.town.shapes3d.json",
           "preload": true
         },
+        "townHollows": {
+          "type": "json",
+          "url": "/games/demo_castle/assets/smallville.town.hollows.json",
+          "preload": true
+        },
         "heroRig": {
           "type": "json",
           "url": "/games/demo_castle/assets/player.rig.json",
@@ -650,6 +655,7 @@
     },
     "start": {
       "slot": 0,
+      "graph": "",
       "pos": [
         0,
         0,
@@ -756,11 +762,7 @@
     {
       "is": "start",
       "slot": 0,
-      "pos": [
-        0,
-        0.05,
-        22
-      ],
+      "graph": "town",
       "yaw": 3.141592653589793
     },
     {

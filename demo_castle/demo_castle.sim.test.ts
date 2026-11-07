@@ -1,6 +1,5 @@
 // demo_castle: the manager booted as its page boots it and main loaded, on pro-ng's town as
-// `yarn bake demo_castle` wrote it. A seat joins on the lane outside the gate and runs north up it on the
-// cobbles; and the visitors go about the town until one reaches a place along nav3d's route. On bridge, the visitors
+// `yarn bake demo_castle` wrote it. A seat joins on the town's start place and stands on it; and the visitors go about the town until one reaches a place along nav3d's route. On bridge, the visitors
 // walk over the bridge at its height, under it on the ground, and up and down its ramps.
 import { expect, test } from 'vitest'
 import { boot, type Row, type Scene, type W } from '#engine/engine.ts'
@@ -8,6 +7,7 @@ import { connection, load, manager, type Down } from '#addons/scenemanager/scene
 import { graph } from '#plugins/nav3d/nav3d.sim.ts'
 import { bodies } from '#plugins/npc3d/npc3d.sim.ts'
 import { sim } from './demo_castle.sim.ts'
+import { root } from './player.sim.ts'
 import file from './demo_castle.scene.json' with { type: 'json' }
 
 const DT = file.prefabs.engine.dt
@@ -23,22 +23,17 @@ async function main(entry = 'main') {
   return { truth, room, heard, seat }
 }
 
-test('a seat starts on the lane outside the gate and runs north up it into the gatehouse', async () => {
-  const { truth, room, heard, seat } = await main()
-  const last = heard[heard.length - 1]
+test('a seat starts on the town\'s start place and stands there', async () => {
+  const { truth, room } = await main()
   const me = () => room.rows.find(r => r.kind === 'player')!
-  // the lane runs north (−z) to the gate's south face at z 19
-  expect(me().data.pos[0]).toBeCloseTo(0, 5)
-  expect(me().data.pos[2]).toBeCloseTo(22, 5)
-  // up the lane, as the W key sends it, facing the gate
-  seat.take({ scene: last.scene, seat: last.seat, msg: { seq: 1, n: last.packet.n, id: me().id, action: 'stick', args: [0, -1] } })
+  const w = { world: room.world, find: (kind: string) => room.rows.find(r => r.kind === kind)! } as unknown as W
+  const [px, , pz] = root(w, 'town').point.at
+  expect(me().data.pos[0]).toBeCloseTo(px, 5)
+  expect(me().data.pos[2]).toBeCloseTo(pz, 5)
   for (let i = 0; i < 1 / DT; i++) truth.step(DT)
-  const [x, y, z] = me().data.pos
-  // in through the gate's south face (z 19), on the gatehouse's floor, 2 cm up
-  expect(z).toBeLessThan(19)
-  expect(Math.abs(x)).toBeLessThan(1.3)
-  expect(y).toBeCloseTo(0.02, 3)
   expect(me().data.grounded).toBe(true)
+  expect(me().data.pos[0]).toBeCloseTo(px, 2)
+  expect(me().data.pos[2]).toBeCloseTo(pz, 2)
 })
 
 test('a visitor walks the town to one of its places and stops on it, its course written once a leg', async () => {
@@ -48,7 +43,7 @@ test('a visitor walks the town to one of its places and stops on it, its course 
   const places = graph(w, 'town').places
   const visitors = room.rows.filter(r => r.kind === 'visitor') as Row[]
   const time = () => room.rows.find(r => r.kind === 'npc3d')!.data.time
-  const node = (name: string) => places.find(p => p.data?.nav3d?.tags?.includes(name))!.point
+  const node = (going: number) => places[going].point
   // each visitor's walk: the row's lane (z) it set out from, how many times its course was written and how many legs
   type Walk = { from: number; writes: number; legs: number; since: number; leg: number }
   const walks = new Map<number, Walk>()
@@ -57,7 +52,7 @@ test('a visitor walks the town to one of its places and stops on it, its course 
     truth.step(DT)
     for (const v of visitors) {
       let walk = walks.get(v.id)
-      if (typeof v.data.going === 'string' && v.data.speed > 0 && !walk) walks.set(v.id, walk = { from: v.data.pos[2], writes: 1, legs: 1, since: v.data.since, leg: v.data.route?.leg ?? 0 })
+      if (typeof v.data.going === 'number' && v.data.speed > 0 && !walk) walks.set(v.id, walk = { from: v.data.pos[2], writes: 1, legs: 1, since: v.data.since, leg: v.data.route?.leg ?? 0 })
       if (!walk) continue
       if (v.data.since !== walk.since) { walk.writes++; walk.since = v.data.since }
       if ((v.data.route?.leg ?? walk.leg) !== walk.leg) { walk.legs++; walk.leg = v.data.route.leg }

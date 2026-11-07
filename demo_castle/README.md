@@ -12,12 +12,13 @@ kit. Each landmark is its own file (`.art.json`) placed in the town; beside each
 holds where a person stands in it, the ways between those places, its stairs and its exits, and the town's metadata
 holds the streets and which landmarks join which.
 
-The game reads four files of the town and nothing else of it: its geometry, its moving things' clips, what a body
-walks on, and its ways.
+The game reads the town's files as pro-ng's build writes them and nothing else of it: its geometry, its moving
+things' clips, what a body walks on, its ways, and its hollows, a box round each building standing at elevation 0,
+where lod3d draws no grass, trees or stones.
 
 ## Playing
 
-`yarn dev`, then `localhost:5173/games/demo_castle/index.html`. You start on the lane outside the gate, facing it.
+`yarn dev`, then `localhost:5173/games/demo_castle/index.html`. You start on the place the town's metadata marks `start` (its `data`), on the lane outside the gate.
 
 | key | what it does |
 | --- | --- |
@@ -77,18 +78,16 @@ walks its curve, as crowd3d walks a spline a straight piece at a time.
   and the kitchen) or to the street it faces, and along each street a way from place to place. Each place is named
   `<landmark>/<place>`, and each way's word (`room`, `door`, `stair`, `passage`, `street`, `ground`) is in its data.
 - **The people** (`visitor.sim.ts`): 30 npc3d NPCs on its crowd3d body, not walkers. Each goes on the fortress plugin's
-  `tour` (`plugins/fortress/fortress.npc3d.ts`): it rolls a place from its definition's `places` (`assets/demo_castle.json`,
-  forty of the town's places: the hall, the solar, the kitchen, the chapel, the stalls, the towers' roofs, the tavern,
-  the huts), walks there along nav3d's route at a steady walk, each leg at the graph's heights so it climbs every stair,
+  `tour` (`plugins/fortress/fortress.npc3d.ts`): each starts on one of the graph's places, the 30 spread evenly over every place
+  it has, then rolls any other place of the graph, walks there along nav3d's route at a steady walk, each leg at the graph's heights so it climbs every stair,
   and stands a while. crowd3d draws every one of them, in the town and on the bridge, as the one Mixamo body,
   castle_woman. They walk through each other, and through you.
 
 ## Baking
 
-`yarn bake demo_castle` (`assets/demo_castle.bake.ts`) cuts the town with the library's pro-ng (`procedural.py` in
-Blender, which writes the walk shapes and the clips beside the glb), packs the glb with `pack.mjs`, which writes the town's shader
-and its pictures beside it (`look_bake.mjs`), copies those in and lists each picture in `main.scene.json`'s catalogue,
-writes the town's ways with `town_nav.py`, bakes the two
+`yarn bake demo_castle` (`assets/demo_castle.bake.ts`) has the library's pro-ng make the town in one build
+(`pro-ng/build.mjs`: it fetches the texture sets, cuts the town in Blender, packs the glb with its shader and pictures,
+and writes its ways), copies what it wrote in and lists each picture in `main.scene.json`'s catalogue, bakes the two
 bodies, castle_walker (you) and castle_woman (every visitor), with every clip of your rig (`assets/player.rig.json`),
 writing the table anim plays by back into the rig. The bodies come from the paths the rig's `bodies` give, the clips
 from `~/troupe-collection`. The particle sheet (`assets/particles/`) and the torch stick (`assets/torch.glb`) are
@@ -96,8 +95,7 @@ demo_particle3d's and demo_motion3d's, copied. Change the town, a material or a 
 
 ## Tests
 
-`yarn vitest run games/demo_castle/demo_castle.sim.test.ts`: you run north up the lane and in through the gate onto the
-gatehouse's floor; a visitor walks the town to one of its places and stops on it at its height, its course written once
+`yarn vitest run games/demo_castle/demo_castle.sim.test.ts`: you start on the town's start place and stand on it; a visitor walks the town to one of its places and stops on it at its height, its course written once
 a leg; and on the bridge, visitors walk over the bridge at its height, under it on the ground, and up its ramps.
 
 `yarn vitest run games/demo_castle/castle.client.test.ts`: the baked glb unpacked as the page does, the tavern fan's

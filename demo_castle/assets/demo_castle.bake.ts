@@ -1,5 +1,7 @@
 // demo_castle's bake, `yarn bake demo_castle` (core's `scripts/bake.ts`): every file main's catalogue names
-// but the definitions, written beside this file.
+// but the definitions, written beside this file. The town's six files and its pictures are made by the library's
+// pro-ng in one build (`pro-ng/build.mjs`: the textures, the cut, the pack and the ways), run on core's Blender, and
+// copied in.
 //   smallville.town.glb
 //                 the library's pro-ng town (its scene `pro-ng/scenes/castle/smallville/smallville.town.json`), each building cut into
 //                 one solid in Blender (`pro-ng/procedural.py`): the solids, each face in the material its building's
@@ -27,6 +29,9 @@
 //   smallville.town.terrain3d_layers.json
 //                 terrain3d's painted layer that flattens the ground under the whole town to 0, one flatten stroke,
 //                 which procedural.py writes beside the glb
+//   smallville.town.hollows.json
+//                 the boxes lod3d draws no grass, trees or stones in: one round each building standing at elevation 0,
+//                 which procedural.py writes beside the glb, handed to lod3d by the fortress (`fortress.lod3d.ts`)
 //   demo_castle.field.json
 //                 terrain3d's field, written by hand but for its `layers`, which the bake sets to the town's layer
 //   ground/grass-color-2048.webp, ground/grass-normal-2048.webp
@@ -43,6 +48,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { execFileSync } from 'node:child_process'
+import { pathToFileURL } from 'node:url'
 import type { Looks, Tools } from '#scripts/bake.ts'
 import player from './player.rig.json' with { type: 'json' }
 
@@ -55,14 +61,11 @@ const LOOKS_URL = '/games/demo_castle/assets/looks/'
 const TOWN = 'castle/smallville/smallville.town'
 
 export default async ({ blender, scratch, library }: Tools) => {
-  const prong = path.join(library, 'pro-ng')
-  // every cc0-textures set the looks wear, downloaded into the library when it is not there (`pro-ng/textures.mjs`)
-  execFileSync(process.execPath, [path.join(prong, 'textures.mjs')], { stdio: 'inherit' })
+  // the town made into every file a game boots from by the library's pro-ng (`pro-ng/build.mjs`), on core's Blender
+  const { build } = await import(pathToFileURL(path.join(library, 'pro-ng', 'build.mjs')).href)
   const out = scratch('smallville')
-  console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(prong, 'procedural.py'), '--', 'file', path.join(prong, 'scenes', `${TOWN}.json`), out]))
-  execFileSync(process.execPath, [path.join(prong, 'pack.mjs'), path.join(out, 'smallville.town.glb')], { stdio: 'inherit' })
-  execFileSync('python3', [path.join(prong, 'town_nav.py'), TOWN, out], { stdio: 'inherit' })
-  for (const name of ['smallville.town.glb', 'smallville.town.looks.json', 'smallville.town.clips.json', 'smallville.town.shapes3d.json', 'smallville.town.nav.json', 'smallville.town.terrain3d_layers.json']) {
+  await build(TOWN, out, blender)
+  for (const name of ['smallville.town.glb', 'smallville.town.looks.json', 'smallville.town.clips.json', 'smallville.town.shapes3d.json', 'smallville.town.nav.json', 'smallville.town.terrain3d_layers.json', 'smallville.town.hollows.json']) {
     fs.copyFileSync(path.join(out, name), path.join(here, name))
     console.log('wrote', path.relative(root, path.join(here, name)))
   }
