@@ -33,6 +33,7 @@
       import { loopback } from '#addons/loopback/loopback.addon.ts'
       import GUI from 'lil-gui'
       import { imported } from '#engine/browser.ts'
+      import { prepared } from '#plugins/loader/loader.sim.ts'
       import { sim } from './demo_lights3d.sim.ts'
       import file from './demo_lights3d.scene.json'
 
@@ -123,6 +124,32 @@
         ff.add({ copy: () => navigator.clipboard.writeText(JSON.stringify(fog, null, 2)) }, 'copy').name('copy fog JSON')
       }
 
+      // The panels, live, in a scene whose stage has them: each number is the stage's definition in the
+      // tab's one copy of `assets/demo_lights3d.json`, read by the stage every frame, and arealight's
+      // `blur` on the page's own copy of the scene, read by arealight every frame.
+      const defs = await prepared(entered.world, entered.world.defs)
+      // kept for the console: __defs.stage.<set> is what the stage draws from
+      window.__defs = defs
+      const set = defs.stage[entered.prefabs.stage.set]
+      if (set.panels) {
+        const pf = gui.addFolder('panels')
+        pf.add(set, 'floorRoughness', 0, 1, 0.01).name('floor roughness')
+        set.panels.forEach((pn, i) => {
+          const f = pf.addFolder(`panel ${i}`)
+          f.add(pn.at, '0', -8, 8, 0.05).name('x (m)')
+          f.add(pn.at, '1', 0, 6, 0.05).name('y (m)')
+          f.add(pn.at, '2', -8, 8, 0.05).name('z (m)')
+          f.add(pn, 'turn', -180, 180, 1).name('turn (degrees)')
+          f.add(pn.size, '0', 0.2, 12, 0.1).name('width (m)')
+          f.add(pn.size, '1', 0.2, 6, 0.1).name('height (m)')
+          f.add(pn, 'intensity', 0, 40, 0.1).name('light intensity')
+          f.add(pn, 'glow', 0, 4, 0.01).name('glow (its own brightness)')
+          f.addColor(pn, 'colour').name('light colour')
+        })
+        const al = entered.world.arealight
+        if (al) pf.add(al, 'blur', 0.05, 4, 0.01).name('blur (share of the picture a unit of distance over size)')
+      }
+
       let last = performance.now(), owed = 0
       const loop = async now => {
         owed += Math.min((now - last) / 1000, 0.25)
@@ -134,7 +161,9 @@
           await page.frame(owed / dt)
         } catch (e) { caught(e) }
         const l3 = page.client?.plugins.lights3d
-        const lit = l3 ? `lit by lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} still tiles drawn this frame, ${l3.moving} moving tiles, ${l3.entries} in cells` : 'lit by three'
+        const al = page.client?.plugins.arealight
+        const lit = (l3 ? `lit by lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} still tiles drawn this frame, ${l3.moving} moving tiles, ${l3.entries} in cells` : 'lit by three')
+          + (al ? `; arealight: ${al.count} lights, ${al.pictures} shining a picture, filtered ${al.filtered} times` : '')
         readout.textContent = [`${chosen.scene}  step ${truth.n}  ${lit}`, ...errors].join('\n')
         requestAnimationFrame(loop)
       }

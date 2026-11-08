@@ -31,7 +31,8 @@
 //               its own brightness (unlit: it is drawn as bright as the picture whatever lights it),
 //               and a three `RectAreaLight` the panel's size over its face, shining out of it, of
 //               `colour` and `intensity`, shining its picture (`userData.picture`), which the game's
-//               arealight plugin lights the room with
+//               arealight plugin lights the room with; each of these, and `floorRoughness`, read every
+//               frame, so the dev page moves them while the page runs
 //   ambient     a faint light everywhere
 // The floor, the walls, the things and the ball cast shadows and take them; a bulb and a panel do
 // neither.
@@ -48,9 +49,13 @@ let made: THREE.Object3D[] = []
 let spots: { light: THREE.SpotLight; x: number; z: number; phase: number }[] = []
 let field: { light: THREE.PointLight; x: number; z: number; phase: number }[] = []
 let ball: THREE.Mesh | undefined
+let ground: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshStandardMaterial> | undefined
+let panels: { mesh: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>; light: THREE.RectAreaLight; i: number }[] = []
 let weaver: { light: THREE.PointLight; loop: THREE.CatmullRomCurve3; length: number } | undefined
 // The axes turns are made about, every turn set as a whole quaternion.
 let X: THREE.Vector3, Y: THREE.Vector3
+// half a turn about the up axis
+let half: THREE.Quaternion
 
 // The set the row names.
 const setOf = (row: Row, plugins: Plugins) => {
@@ -69,6 +74,7 @@ export function setup(row: Row, plugins: Plugins) {
   const d = setOf(row, plugins)
   X = new T.Vector3(1, 0, 0)
   Y = new T.Vector3(0, 1, 0)
+  half = new T.Quaternion().setFromAxisAngle(Y, Math.PI)
   const lit = (colour: string, roughness = 0.8, metalness = 0) => dress(new T.MeshStandardMaterial({ color: colour, roughness, metalness }))
   made = [new T.AmbientLight(0xffffff, d.ambient)]
   spots = []
@@ -79,6 +85,7 @@ export function setup(row: Row, plugins: Plugins) {
   const floor = new T.Mesh(new T.PlaneGeometry(w, dp), lit(d.floorColour, d.floorRoughness))
   floor.quaternion.setFromAxisAngle(X, -Math.PI / 2)
   floor.castShadow = floor.receiveShadow = true
+  ground = floor
   made.push(floor)
   if (d.room) {
     const wall = lit(d.wallColour)
@@ -168,24 +175,22 @@ export function setup(row: Row, plugins: Plugins) {
     made.push(light)
   }
 
-  // the glowing panels, each showing its picture once the loader has it
-  for (const pn of d.panels ?? []) {
-    const shown = new T.MeshBasicMaterial({ color: new T.Color(1, 1, 1).multiplyScalar(pn.glow) })
-    const panel = new T.Mesh(new T.PlaneGeometry(pn.size[0], pn.size[1]), shown)
-    panel.position.set(pn.at[0], pn.at[1], pn.at[2])
-    panel.quaternion.setFromAxisAngle(Y, (pn.turn * Math.PI) / 180)
-    // the light over its face, turned half round, since a RectAreaLight shines along its own −z and the
-    // panel faces its +z; it shines the picture once the loader has it
-    const light = new T.RectAreaLight(pn.colour, pn.intensity, pn.size[0], pn.size[1])
-    light.position.copy(panel.position)
-    light.quaternion.copy(panel.quaternion).multiply(new T.Quaternion().setFromAxisAngle(Y, Math.PI))
+  // the glowing panels, each showing its picture once the loader has it, placed by `tick`
+  panels = []
+  ;(d.panels ?? []).forEach((pn: any, i: number) => {
+    const shown = new T.MeshBasicMaterial()
+    const panel = new T.Mesh(new T.PlaneGeometry(1, 1), shown)
+    // the light over its face, turned half round by `tick`, since a RectAreaLight shines along its own
+    // −z and the panel faces its +z; it shines the picture once the loader has it
+    const light = new T.RectAreaLight()
+    panels.push({ mesh: panel, light, i })
     plugins.loader.on(pn.picture, (picture: THREE.Texture) => {
       shown.map = picture
       shown.needsUpdate = true
       light.userData.picture = picture
     })
     made.push(panel, light)
-  }
+  })
 
   const o = d.orbiter
   if (o) {
@@ -214,6 +219,22 @@ export function tick(row: Row, plugins: Plugins) {
     const a = t * fl.driftSpeed * Math.PI * 2 + lamp.phase
     lamp.light.position.set(lamp.x + Math.cos(a) * fl.drift / 2, fl.height + Math.sin(a * 2) * fl.bob, lamp.z + Math.sin(a) * fl.drift / 2)
   }
+  // the floor's roughness and every panel read from the definition each frame, so the dev page's panel
+  // moves them while the page runs
+  if (ground) ground.material.roughness = d.floorRoughness
+  for (const p of panels) {
+    const pn = d.panels[p.i]
+    p.mesh.position.set(pn.at[0], pn.at[1], pn.at[2])
+    p.mesh.scale.set(pn.size[0], pn.size[1], 1)
+    p.mesh.quaternion.setFromAxisAngle(Y, (pn.turn * Math.PI) / 180)
+    p.mesh.material.color.setScalar(pn.glow)
+    p.light.position.copy(p.mesh.position)
+    p.light.quaternion.copy(p.mesh.quaternion).multiply(half)
+    p.light.width = pn.size[0]
+    p.light.height = pn.size[1]
+    p.light.color.set(pn.colour)
+    p.light.intensity = pn.intensity
+  }
   if (weaver) weaver.loop.getPointAt(((t * d.weaver.speed) / weaver.length) % 1, weaver.light.position)
   const o = d.orbiter
   if (ball) {
@@ -228,5 +249,7 @@ export function remove(plugins: Plugins) {
   spots = []
   field = []
   ball = undefined
+  ground = undefined
+  panels = []
   weaver = undefined
 }
