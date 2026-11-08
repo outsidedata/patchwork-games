@@ -39,7 +39,9 @@
 //   kit         a pro-ng glb drawn through supershader3d by the game's prong plugin: `glb` its catalogue name,
 //               standing at `at`, turned `turn` degrees about the up axis and on round it `spin` turns a second,
 //               and rising and falling `bob` metres every `bobSeconds`, so what it lights is seen to follow it;
-//               every one read every frame
+//               with `sway: { above, degrees, seconds }`, it is a SkinnedMesh of two bones, every vertex above
+//               `above` metres hanging from the upper one, which swings `degrees` to and fro every `seconds`, so a
+//               glowing part that is posed is seen to light where it swings; every one read every frame
 //   ambient     a faint light everywhere
 // The floor, the walls, the things and the ball cast shadows and take them; a bulb and a panel do
 // neither.
@@ -84,6 +86,31 @@ const setOf = (row: Row, plugins: Plugins) => {
 // newest (`engine/browser.ts`, Drawing between steps), so what moves moves by the steps' clock and is
 // drawn where render3d draws everything else.
 const drawn = (plugins: Plugins) => (plugins.wire.n - 1 + (plugins.wire.between ?? 1)) * plugins.wire.scene.prefabs.engine.dt
+
+// `drawn` made a SkinnedMesh of two bones in its own space: one at its foot, and one `above` metres up that every
+// vertex above it hangs from, so what is above swings when that bone turns. Its materials, attributes and geometry
+// are drawn's own, its weights added.
+function swaying(T: typeof THREE, drawn: THREE.Mesh, above: number) {
+  const geometry = drawn.geometry
+  const position = geometry.getAttribute('position')
+  const index = new Uint16Array(position.count * 4), weight = new Float32Array(position.count * 4)
+  for (let v = 0; v < position.count; v++) {
+    index[v * 4] = position.getY(v) > above ? 1 : 0
+    weight[v * 4] = 1
+  }
+  geometry.setAttribute('skinIndex', new T.Uint16BufferAttribute(index, 4))
+  geometry.setAttribute('skinWeight', new T.Float32BufferAttribute(weight, 4))
+  const mesh = new T.SkinnedMesh(geometry, drawn.material)
+  const foot = new T.Bone(), upper = new T.Bone()
+  upper.position.set(0, above, 0)
+  foot.add(upper)
+  mesh.add(foot)
+  mesh.bind(new T.Skeleton([foot, upper]))
+  // a body that bends leaves its rest bounds: drawn wherever it is
+  mesh.frustumCulled = false
+  mesh.userData.moving = true
+  return mesh
+}
 
 export function setup(row: Row, plugins: Plugins) {
   const { THREE: T, scene, dress } = plugins.render3d
@@ -281,8 +308,9 @@ export function tick(row: Row, plugins: Plugins) {
   if (d.kit && !asked && plugins.prong) {
     asked = true
     const was = made
-    plugins.prong.mesh(d.kit.glb).then((mesh: THREE.Mesh) => {
+    plugins.prong.mesh(d.kit.glb).then((drawn: THREE.Mesh) => {
       if (made !== was) return
+      const mesh = d.kit.sway ? swaying(plugins.render3d.THREE as typeof THREE, drawn, d.kit.sway.above) : drawn
       mesh.castShadow = mesh.receiveShadow = true
       kit = mesh
       made.push(mesh)
@@ -293,6 +321,9 @@ export function tick(row: Row, plugins: Plugins) {
     const k = d.kit
     kit.position.set(k.at[0], k.at[1] + k.bob * Math.sin((t / k.bobSeconds) * Math.PI * 2), k.at[2])
     kit.quaternion.setFromAxisAngle(Y, ((k.turn + t * k.spin * 360) * Math.PI) / 180)
+    // the upper bone swung to and fro about the thing's own x
+    const s = k.sway
+    if (s) (kit as THREE.SkinnedMesh).skeleton.bones[1].quaternion.setFromAxisAngle(X, ((s.degrees * Math.sin((t / s.seconds) * Math.PI * 2)) * Math.PI) / 180)
   }
   if (weaver) weaver.loop.getPointAt(((t * d.weaver.speed) / weaver.length) % 1, weaver.light.position)
   const o = d.orbiter
