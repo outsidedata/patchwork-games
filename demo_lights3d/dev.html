@@ -145,6 +145,7 @@
           f.add(pn, 'intensity', 0, 40, 0.1).name('light intensity')
           f.add(pn, 'glow', 0, 4, 0.01).name('glow (its own brightness)')
           f.addColor(pn, 'colour').name('light colour')
+          if (pn.scroll !== undefined) f.add(pn, 'scroll', -1, 1, 0.01).name('scroll (picture widths a second)')
         })
         const al = entered.world.arealight
         if (al) pf.add(al, 'blur', 0.05, 4, 0.01).name('blur (share of the picture a unit of distance over size)')

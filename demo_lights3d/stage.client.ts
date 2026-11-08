@@ -31,8 +31,10 @@
 //               its own brightness (unlit: it is drawn as bright as the picture whatever lights it),
 //               and a three `RectAreaLight` the panel's size over its face, shining out of it, of
 //               `colour` and `intensity`, shining its picture (`userData.picture`), which the game's
-//               arealight plugin lights the room with; each of these, and `floorRoughness`, read every
-//               frame, so the dev page moves them while the page runs
+//               arealight plugin lights the room with; with `scroll`, the picture plays, sliding left
+//               that many of its widths a second and coming round again, so the light it shines moves;
+//               each of these, and `floorRoughness`, read every frame, so the dev page moves them while
+//               the page runs
 //   ambient     a faint light everywhere
 // The floor, the walls, the things and the ball cast shadows and take them; a bulb and a panel do
 // neither.
@@ -50,7 +52,13 @@ let spots: { light: THREE.SpotLight; x: number; z: number; phase: number }[] = [
 let field: { light: THREE.PointLight; x: number; z: number; phase: number }[] = []
 let ball: THREE.Mesh | undefined
 let ground: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshStandardMaterial> | undefined
-let panels: { mesh: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>; light: THREE.RectAreaLight; i: number }[] = []
+let panels: {
+  mesh: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>
+  light: THREE.RectAreaLight
+  i: number
+  // the picture played: drawn each frame into a canvas from the loader's picture, scrolled
+  played?: { from: ImageBitmap; canvas: HTMLCanvasElement; pen: CanvasRenderingContext2D; texture: THREE.CanvasTexture }
+}[] = []
 let weaver: { light: THREE.PointLight; loop: THREE.CatmullRomCurve3; length: number } | undefined
 // The axes turns are made about, every turn set as a whole quaternion.
 let X: THREE.Vector3, Y: THREE.Vector3
@@ -183,11 +191,26 @@ export function setup(row: Row, plugins: Plugins) {
     // the light over its face, turned half round by `tick`, since a RectAreaLight shines along its own
     // −z and the panel faces its +z; it shines the picture once the loader has it
     const light = new T.RectAreaLight()
-    panels.push({ mesh: panel, light, i })
+    const held: (typeof panels)[number] = { mesh: panel, light, i }
+    panels.push(held)
     plugins.loader.on(pn.picture, (picture: THREE.Texture) => {
-      shown.map = picture
+      let shines = picture
+      // a panel that scrolls plays its picture through a canvas of its own: the loader's bitmap was
+      // turned over as it was decoded, a canvas drawn from it holds it the right way up again (as seen
+      // in Chrome, 2026-11-08), so the canvas is turned over as it is uploaded, as three does a picture
+      if (pn.scroll !== undefined) {
+        const from = picture.image as ImageBitmap
+        const canvas = document.createElement('canvas')
+        canvas.width = from.width
+        canvas.height = from.height
+        const texture = new T.CanvasTexture(canvas)
+        texture.colorSpace = T.SRGBColorSpace
+        held.played = { from, canvas, pen: canvas.getContext('2d')!, texture }
+        shines = texture
+      }
+      shown.map = shines
       shown.needsUpdate = true
-      light.userData.picture = picture
+      light.userData.picture = shines
     })
     made.push(panel, light)
   })
@@ -234,6 +257,13 @@ export function tick(row: Row, plugins: Plugins) {
     p.light.height = pn.size[1]
     p.light.color.set(pn.colour)
     p.light.intensity = pn.intensity
+    if (p.played) {
+      const { from, pen, texture } = p.played
+      const by = (((t * pn.scroll) % 1) + 1) % 1 * from.width
+      pen.drawImage(from, -by, 0)
+      pen.drawImage(from, from.width - by, 0)
+      texture.needsUpdate = true
+    }
   }
   if (weaver) weaver.loop.getPointAt(((t * d.weaver.speed) / weaver.length) % 1, weaver.light.position)
   const o = d.orbiter
