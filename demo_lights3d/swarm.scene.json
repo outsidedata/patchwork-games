@@ -1,0 +1,68 @@
+{
+  "world": {
+    "defs": "demo_lights3d",
+    "loader": {
+      "assets": {
+        "demo_lights3d": {
+          "type": "json",
+          "url": "/games/demo_lights3d/assets/demo_lights3d.json",
+          "preload": true
+        }
+      }
+    },
+    "lights3d": {
+      "grid": [16, 9],
+      "slices": 24
+    }
+  },
+  "plugins": [
+    "loader",
+    "scenemanager",
+    "player",
+    "render3d",
+    "lights3d",
+    "stats"
+  ],
+  "seats": 1,
+  "prefabs": {
+    "engine": {
+      "dt": 0.016666666666666666,
+      "width": 1280,
+      "height": 720
+    },
+    "scenemanager": {
+      "out": {}
+    },
+    "loader": {},
+    "player": {
+      "seat": 0
+    },
+    "render3d": {
+      "camera": {
+        "fov": 55,
+        "near": 0.1,
+        "far": 300,
+        "at": [0, 26, 48],
+        "look": [0, 0, 2]
+      },
+      "pixelRatio": 1,
+      "tone": "neutral",
+      "exposure": 1,
+      "background": "#05060a"
+    },
+    "stage": {
+      "set": "swarm"
+    }
+  },
+  "actors": [
+    {
+      "is": "scenemanager"
+    },
+    {
+      "is": "loader"
+    },
+    {
+      "is": "stage"
+    }
+  ]
+}

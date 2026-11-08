@@ -1,0 +1,191 @@
+{
+  "stage": {
+    "room": {
+      "room": [30, 8, 20],
+      "wallColour": "#d9d3c7",
+      "floorColour": "#b8b0a2",
+      "floorRoughness": 0.18,
+      "ambient": 0.05,
+      "things": [
+        { "shape": "box", "size": [2.4, 2.4, 2.4], "at": [-9, 0, -4], "turn": 20, "colour": "#c0392b" },
+        { "shape": "box", "size": [1.6, 3.6, 1.6], "at": [-3, 0, -6], "turn": 0, "colour": "#2e86c1" },
+        { "shape": "box", "size": [3, 1.2, 1.8], "at": [5, 0, -5], "turn": -15, "colour": "#e6b422" },
+        { "shape": "box", "size": [1.4, 1.4, 1.4], "at": [10, 0, 2], "turn": 35, "colour": "#27ae60" },
+        { "shape": "box", "size": [2, 5, 2], "at": [0, 0, 1], "turn": 45, "colour": "#ecf0f1" },
+        { "shape": "box", "size": [1.2, 1.2, 1.2], "at": [-6, 0, 4], "turn": 10, "colour": "#8e44ad" },
+        { "shape": "sphere", "size": [2.2], "at": [-11, 0, 3], "colour": "#f0c070", "roughness": 0.08, "metalness": 1 },
+        { "shape": "sphere", "size": [1.6], "at": [7, 0, -1], "colour": "#16a085" },
+        { "shape": "sphere", "size": [2.8], "at": [12, 0, -6], "colour": "#d8d8de", "roughness": 0.05, "metalness": 1 },
+        { "shape": "sphere", "size": [1.2], "at": [3, 0, 5], "colour": "#2980b9" },
+        { "shape": "sphere", "size": [1.8], "at": [-1, 0, -8], "colour": "#c2185b" }
+      ],
+      "lamps": {
+        "bulb": 0.18,
+        "glow": 6,
+        "wall": {
+          "every": 5,
+          "height": 4.5,
+          "out": 0.6,
+          "intensity": 40,
+          "distance": 12,
+          "decay": 2,
+          "shadow": true,
+          "colours": ["#ffb86b", "#7fb8ff", "#ff6b8a", "#9cff7f", "#f4f0ff"]
+        },
+        "spots": {
+          "at": [[-8, -3], [0, -3], [8, -3], [-8, 4], [0, 4], [8, 4]],
+          "height": 7.6,
+          "angle": 0.42,
+          "penumbra": 0.4,
+          "intensity": 90,
+          "distance": 14,
+          "decay": 2,
+          "colours": ["#fff3e0"],
+          "shadow": true,
+          "sweep": 3,
+          "sweepSpeed": 0.12
+        }
+      },
+      "weaver": {
+        "path": [[-13, 0], [-7, -1.5], [-4.5, -3], [-1, -4.5], [2, -2.5], [3.5, -7.5], [8, -4], [10, -1.5], [12.5, -2], [12, 4], [8.5, 3.5], [5, 2.5], [1, 3.5], [-3, 6], [-8, 6.5], [-8, 1.5]],
+        "height": 1.1,
+        "speed": 3,
+        "colour": "#ffd27a",
+        "intensity": 22,
+        "distance": 14,
+        "decay": 2,
+        "shadow": true
+      },
+      "orbiter": {
+        "radius": 8,
+        "squash": 0.6,
+        "height": 1.6,
+        "bob": 0.9,
+        "speed": 0.08,
+        "size": 1.2,
+        "colour": "#f5f5f5",
+        "roughness": 0.35,
+        "metalness": 0
+      }
+    },
+    "swarm": {
+      "floor": 90,
+      "floorColour": "#6f6a62",
+      "floorRoughness": 0.7,
+      "ambient": 0.02,
+      "things": [
+        { "shape": "box", "size": [1.2, 4, 1.2], "at": [-30, 0, -30], "colour": "#b9b2a6", "repeat": { "across": 6, "deep": 6, "spacing": [12, 12] } }
+      ],
+      "lamps": {
+        "bulb": 0.12,
+        "glow": 5,
+        "field": {
+          "across": 20,
+          "deep": 20,
+          "spacing": 3.6,
+          "height": 1.3,
+          "intensity": 5,
+          "distance": 4.5,
+          "decay": 2,
+          "drift": 1.4,
+          "driftSpeed": 0.18,
+          "bob": 0.5,
+          "colours": ["#ffb86b", "#7fb8ff", "#ff6b8a", "#9cff7f", "#f4f0ff", "#c38bff", "#ffe36b"]
+        }
+      }
+    },
+    "hall": {
+      "room": [16, 12, 60],
+      "wallColour": "#8d877d",
+      "floorColour": "#5f5a52",
+      "floorRoughness": 0.6,
+      "ambient": 0.05,
+      "things": [
+        { "shape": "box", "size": [1.4, 12, 1.4], "at": [-5.5, 0, -27], "colour": "#a8a196", "repeat": { "across": 2, "deep": 9, "spacing": [11, 6] } },
+        { "shape": "box", "size": [3, 1.6, 2], "at": [-2, 0, -12], "turn": 15, "colour": "#7a5c3e" },
+        { "shape": "box", "size": [2, 2.4, 2], "at": [2.5, 0, 4], "turn": -20, "colour": "#6e6a78" },
+        { "shape": "sphere", "size": [1.8], "at": [-1, 0, 14], "colour": "#9a8f80" }
+      ],
+      "lamps": {
+        "bulb": 0.2,
+        "glow": 6,
+        "wall": {
+          "every": 6,
+          "height": 3.2,
+          "out": 0.4,
+          "intensity": 6,
+          "distance": 7,
+          "decay": 2,
+          "shadow": false,
+          "colours": ["#ffb070"]
+        },
+        "spots": {
+          "at": [[-3, -24], [3, -16], [-3, -8], [3, 0], [-3, 8], [3, 16]],
+          "height": 11.4,
+          "angle": 0.28,
+          "penumbra": 0.35,
+          "intensity": 600,
+          "distance": 22,
+          "decay": 2,
+          "colours": ["#fff1d6", "#8fc4ff", "#ffb07a", "#d6b0ff", "#9cffc8", "#ff8fa3"],
+          "shadow": true,
+          "sweep": 4.5,
+          "sweepSpeed": 0.07
+        }
+      }
+    },
+    "gallery": {
+      "room": [24, 8, 22],
+      "wallColour": "#cfcac0",
+      "floorColour": "#1c1c20",
+      "floorRoughness": 0.04,
+      "ambient": 0.03,
+      "things": [
+        { "shape": "sphere", "size": [1.6], "at": [-8, 0, -3], "colour": "#dcdce2", "roughness": 0, "metalness": 1 },
+        { "shape": "sphere", "size": [1.6], "at": [-5, 0, -3], "colour": "#dcdce2", "roughness": 0.15, "metalness": 1 },
+        { "shape": "sphere", "size": [1.6], "at": [-2, 0, -3], "colour": "#dcdce2", "roughness": 0.3, "metalness": 1 },
+        { "shape": "sphere", "size": [1.6], "at": [1, 0, -3], "colour": "#dcdce2", "roughness": 0.45, "metalness": 1 },
+        { "shape": "sphere", "size": [1.6], "at": [4, 0, -3], "colour": "#dcdce2", "roughness": 0.6, "metalness": 1 },
+        { "shape": "sphere", "size": [1.6], "at": [7, 0, -3], "colour": "#dcdce2", "roughness": 0.8, "metalness": 1 },
+        { "shape": "sphere", "size": [3], "at": [-6, 0, 4], "colour": "#f0c070", "roughness": 0.05, "metalness": 1 },
+        { "shape": "box", "size": [2, 4, 2], "at": [6, 0, 4], "turn": 30, "colour": "#e8e8ee", "roughness": 0.08, "metalness": 1 },
+        { "shape": "box", "size": [1.6, 1.6, 1.6], "at": [0, 0, 6], "turn": 15, "colour": "#c0392b", "roughness": 0.2 }
+      ],
+      "lamps": {
+        "bulb": 0.18,
+        "glow": 6,
+        "wall": {
+          "every": 6,
+          "height": 5,
+          "out": 0.6,
+          "intensity": 45,
+          "distance": 14,
+          "decay": 2,
+          "shadow": true,
+          "colours": ["#ffb86b", "#7fb8ff", "#ff6b8a", "#9cff7f", "#f4f0ff"]
+        }
+      },
+      "weaver": {
+        "path": [[-10, 0], [-6, -6], [0, -7], [6, -6], [10, 0], [6, 8], [0, 9], [-6, 8]],
+        "height": 1.4,
+        "speed": 4,
+        "colour": "#9fd8ff",
+        "intensity": 30,
+        "distance": 14,
+        "decay": 2,
+        "shadow": true
+      },
+      "orbiter": {
+        "radius": 5,
+        "squash": 1,
+        "height": 2.4,
+        "bob": 1.2,
+        "speed": 0.1,
+        "size": 1.4,
+        "colour": "#ff5c8a",
+        "roughness": 0.3,
+        "metalness": 0
+      }
+    }
+  }
+}

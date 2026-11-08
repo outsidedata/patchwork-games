@@ -1,0 +1,83 @@
+{
+  "world": {
+    "defs": "demo_lights3d",
+    "loader": {
+      "assets": {
+        "demo_lights3d": {
+          "type": "json",
+          "url": "/games/demo_lights3d/assets/demo_lights3d.json",
+          "preload": true
+        }
+      }
+    },
+    "lights3d": {
+      "grid": [16, 9],
+      "slices": 24,
+      "shadows": {
+        "atlas": 4096,
+        "tile": 512,
+        "bias": 0.04,
+        "normalBias": 0.05
+      },
+      "fog": {
+        "density": 0.035,
+        "colour": "#030407",
+        "steps": 40,
+        "resolution": 0.5,
+        "g": 0.5,
+        "far": 80
+      }
+    }
+  },
+  "plugins": [
+    "loader",
+    "scenemanager",
+    "player",
+    "render3d",
+    "lights3d",
+    "stats"
+  ],
+  "seats": 1,
+  "prefabs": {
+    "engine": {
+      "dt": 0.016666666666666666,
+      "width": 1280,
+      "height": 720
+    },
+    "scenemanager": {
+      "out": {}
+    },
+    "loader": {},
+    "player": {
+      "seat": 0
+    },
+    "render3d": {
+      "camera": {
+        "fov": 60,
+        "near": 0.1,
+        "far": 300,
+        "at": [5, 5, 31],
+        "look": [-1.5, 4, -2]
+      },
+      "pixelRatio": 1,
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "background": "#030407"
+    },
+    "stage": {
+      "set": "hall"
+    }
+  },
+  "actors": [
+    {
+      "is": "scenemanager"
+    },
+    {
+      "is": "loader"
+    },
+    {
+      "is": "stage"
+    }
+  ]
+}
