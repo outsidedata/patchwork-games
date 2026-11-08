@@ -37,7 +37,8 @@
 //                 `{"people": []}` when it has none, which town_nav.py writes beside the nav graph
 //   smallville.town.terrain3d_layers.json
 //                 terrain3d's painted layer that flattens the ground under the whole town to 0, one flatten stroke,
-//                 which procedural.py writes beside the glb
+//                 which procedural.py writes beside the glb; for a place laid on the land (`at`, below), what its
+//                 solver cut into the land instead: its streets benched, its pads flattened, its ways painted
 //   smallville.town.hollows.json
 //                 the boxes lod3d draws no grass, trees or stones in: one round each building standing at elevation 0,
 //                 which procedural.py writes beside the glb, handed to lod3d by world3d (`world3d.lod3d.ts`)
@@ -71,11 +72,16 @@ const merge = path.join(root, '.claude', 'skills', 'using-mixamo-assets', 'scrip
 // `.json`) built by pro-ng's build, or a stronghold solver's run (`stronghold`, the solver's key) built by stronghold's
 // (`stronghold/build.mjs`: the run, compiled into a pro-ng scene, then pro-ng's steps); its files written into
 // `folder` (under this one), its pictures into `folder/looks/`, listed in the catalogue of the game's scene file
-// `scene`, and its flatten laid into the field `field` (under this folder)
-const PLACES: { pro?: string; stronghold?: string; folder: string; scene: string; field: string }[] = [
+// `scene`, and its flatten laid into the field `field` (under this folder). A stronghold place with `at` is laid on
+// the land of its field: its solver is handed the field, its own earlier layers taken out, and the point [x, z] on it
+// its (0, 0) stands at (its asks' `ground`, the library's stronghold/src/lib/util/ground.mjs, which makes the land
+// with core's own terrain3d, `PATCHWORK_CORE`), and the layer it hands back, what it cut into the land, is the place's
+// painted layer in place of one flatten under the whole place.
+const PLACES: { pro?: string; stronghold?: string; folder: string; scene: string; field: string; at?: [number, number] }[] = [
   { pro: 'castle/smallville/smallville.town', folder: '', scene: 'main.scene.json', field: 'demo_world3d.field.json' },
   { stronghold: 'winterfell/village', folder: 'village', scene: 'village.scene.json', field: 'village/village.field.json' },
   { stronghold: 'winterfell/tavern', folder: 'tavern', scene: 'tavern.scene.json', field: 'tavern/tavern.field.json' },
+  { stronghold: 'winterfell/village-terrain3d', folder: 'hills', scene: 'hills.scene.json', field: 'hills/hills.field.json', at: [0, 0] },
 ]
 // what pro-ng's build writes for a scene, each `<name><suffix>`
 const MADE = ['.glb', '.looks.json', '.clips.json', '.shapes3d.json', '.nav.json', '.terrain3d_layers.json', '.hollows.json', '.effects.json', '.crowd.json']
@@ -88,6 +94,14 @@ export default async ({ blender, scratch, library }: Tools) => {
     const name = place.pro ? path.basename(place.pro) : `${path.basename(place.stronghold!)}.art`
     const out = scratch(name)
     if (place.pro) await build(place.pro, out, blender)
+    else if (place.at) {
+      // the land the solver is laid on: the field with no layers, every one of them the place's own from a bake before
+      const land = scratch(`${name}.land.json`)
+      fs.writeFileSync(land, JSON.stringify({ ...JSON.parse(fs.readFileSync(path.join(here, place.field), 'utf8')), layers: [] }))
+      const asks = scratch(`${name}.asks.json`)
+      fs.writeFileSync(asks, JSON.stringify({ ground: { field: land, at: place.at } }))
+      execFileSync(process.execPath, [path.join(library, 'stronghold', 'build.mjs'), place.stronghold!, out, '--config', asks], { stdio: 'inherit', env: { ...process.env, PATCHWORK_CORE: root } })
+    }
     else execFileSync(process.execPath, [path.join(library, 'stronghold', 'build.mjs'), place.stronghold!, out], { stdio: 'inherit' })
     const into = path.join(here, place.folder)
     fs.mkdirSync(into, { recursive: true })
