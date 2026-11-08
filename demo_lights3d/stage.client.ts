@@ -30,7 +30,8 @@
 // The floor, the walls, the things and the ball cast shadows and take them; a bulb does neither.
 // Every light is an ordinary three light; lights3d lights them when the scene lists it, and three does
 // when it does not. Every lit material is dressed by render3d, so lights3d's splice reaches it. What
-// moves moves on the page's clock: it is only drawn, and no rule reads it.
+// moves moves by the steps' clock, the moment drawn (`(n − 1 + between) × dt`), so it is drawn smooth at
+// any display's rate: it is only drawn, and no rule reads it. Every turn is set as a whole quaternion.
 import type * as THREE from 'three'
 import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
@@ -41,6 +42,8 @@ let spots: { light: THREE.SpotLight; x: number; z: number; phase: number }[] = [
 let field: { light: THREE.PointLight; x: number; z: number; phase: number }[] = []
 let ball: THREE.Mesh | undefined
 let weaver: { light: THREE.PointLight; loop: THREE.CatmullRomCurve3; length: number } | undefined
+// The axes turns are made about, every turn set as a whole quaternion.
+let X: THREE.Vector3, Y: THREE.Vector3
 
 // The set the row names.
 const setOf = (row: Row, plugins: Plugins) => {
@@ -49,9 +52,16 @@ const setOf = (row: Row, plugins: Plugins) => {
   return set
 }
 
+// The moment drawn, in seconds: a step behind the clock, `between` of the way past the step before the
+// newest (`engine/browser.ts`, Drawing between steps), so what moves moves by the steps' clock and is
+// drawn where render3d draws everything else.
+const drawn = (plugins: Plugins) => (plugins.wire.n - 1 + (plugins.wire.between ?? 1)) * plugins.wire.scene.prefabs.engine.dt
+
 export function setup(row: Row, plugins: Plugins) {
   const { THREE: T, scene, dress } = plugins.render3d
   const d = setOf(row, plugins)
+  X = new T.Vector3(1, 0, 0)
+  Y = new T.Vector3(0, 1, 0)
   const lit = (colour: string, roughness = 0.8, metalness = 0) => dress(new T.MeshStandardMaterial({ color: colour, roughness, metalness }))
   made = [new T.AmbientLight(0xffffff, d.ambient)]
   spots = []
@@ -60,7 +70,7 @@ export function setup(row: Row, plugins: Plugins) {
   // the floor, and the walls where the set has a room
   const [w, h, dp] = d.room ?? [d.floor, 0, d.floor]
   const floor = new T.Mesh(new T.PlaneGeometry(w, dp), lit(d.floorColour, d.floorRoughness))
-  floor.rotation.x = -Math.PI / 2
+  floor.quaternion.setFromAxisAngle(X, -Math.PI / 2)
   floor.castShadow = floor.receiveShadow = true
   made.push(floor)
   if (d.room) {
@@ -69,10 +79,10 @@ export function setup(row: Row, plugins: Plugins) {
     back.position.set(0, h / 2, -dp / 2)
     const left = new T.Mesh(new T.PlaneGeometry(dp, h), wall)
     left.position.set(-w / 2, h / 2, 0)
-    left.rotation.y = Math.PI / 2
+    left.quaternion.setFromAxisAngle(Y, Math.PI / 2)
     const right = new T.Mesh(new T.PlaneGeometry(dp, h), wall)
     right.position.set(w / 2, h / 2, 0)
-    right.rotation.y = -Math.PI / 2
+    right.quaternion.setFromAxisAngle(Y, -Math.PI / 2)
     for (const m of [back, left, right]) m.castShadow = m.receiveShadow = true
     made.push(back, left, right)
   }
@@ -86,7 +96,7 @@ export function setup(row: Row, plugins: Plugins) {
     for (let i = 0; i < r.across; i++) for (let j = 0; j < r.deep; j++) {
       const m = new T.Mesh(geometry, material)
       m.position.set(t.at[0] + i * r.spacing[0], t.at[1] + up, t.at[2] + j * r.spacing[1])
-      m.rotation.y = ((t.turn ?? 0) * Math.PI) / 180
+      m.quaternion.setFromAxisAngle(Y, ((t.turn ?? 0) * Math.PI) / 180)
       m.castShadow = m.receiveShadow = true
       made.push(m)
     }
@@ -164,7 +174,7 @@ export function setup(row: Row, plugins: Plugins) {
 
 export function tick(row: Row, plugins: Plugins) {
   const d = setOf(row, plugins)
-  const t = performance.now() / 1000
+  const t = drawn(plugins)
   const sp = d.lamps?.spots
   for (const spot of spots) {
     const a = t * sp.sweepSpeed * Math.PI * 2 + spot.phase
