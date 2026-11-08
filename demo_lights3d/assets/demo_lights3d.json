@@ -250,7 +250,10 @@
         { "shape": "sphere", "size": [1.2], "at": [2, 0, 2], "colour": "#dcdce2", "roughness": 0.1, "metalness": 1 }
       ],
       "panels": [
-        { "at": [0, 3, -7.97], "size": [6, 3], "turn": 0, "picture": "panel", "glow": 1, "colour": "#ffffff", "intensity": 6, "scroll": 0.05 }
+        { "at": [0, 3, -7.97], "size": [6, 3], "turn": 0, "picture": "panel", "glow": 1, "colour": "#ffffff", "intensity": 6, "scroll": 0.05 },
+        { "at": [-7.97, 2.5, -1], "size": [4, 2], "turn": 90, "picture": "panel", "glow": 1, "colour": "#ffffff", "intensity": 5 },
+        { "at": [7.97, 2.5, -1], "size": [4, 2], "turn": -90, "picture": "panel", "glow": 1, "colour": "#ffffff", "intensity": 5, "scroll": -0.12 },
+        { "at": [-4, 1.6, 4.5], "size": [1.6, 0.9], "turn": 150, "picture": "panel", "glow": 1, "colour": "#ffe0c0", "intensity": 10 }
       ]
     }
   }
