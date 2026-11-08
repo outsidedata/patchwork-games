@@ -32,7 +32,13 @@ You walk on every floor, up every stair (the towers' spirals, the hall's stair t
 the stone stairs to the walls) and onto every roof that is stood on.
 
 `dev.html` is the testbed: `?graphs=1` draws the town's graph, the panel puts you on any of its places, and the readout
-shows where you stand and where each visitor is going.
+shows where you stand and where each visitor is going, and lights3d's lights and the still and moving shadow tiles it
+drew this frame. Its `lights` folder starts main cut down, to be built back a piece at a time: one torch (`?torches=n`,
+`all` every one), one visitor (`?people=n`, `all`), no fog (`?fog=1` keeps it); `?atlas=` and `?tile=` set the shadow
+atlases' size, `?torchshadow=0` takes the torch's shadow off and `?lights3d=0` takes lights3d out. Live, it sets the
+torch lamp's intensity, reach, decay, flicker and shadow, the carried light on and off, the exposure, the fog's
+numbers, and the castle drawn in one flat grey material in place of its relief looks; "copy lights JSON" copies the
+lamp and the fog for the files.
 
 `dev.html?scene=village` is the village: stronghold's village solver run once, compiled into the library's pro-ng
 scene `pro-ng/scenes/village/village.art.json` and its metadata, and baked the way the town is, its files in
@@ -73,9 +79,15 @@ walks its curve, as crowd3d walks a spline a straight piece at a time.
   and walk under the one over you, drawn by anim as castle_walker, carrying a torch from the start: your rig's torch
   stance (`assets/player.rig.json`), its torch idle, walk, run and jump, and on your left hand anim's prop, the torch
   stick (`assets/torch.glb`). In the town its flame is particle3d's `handfire` (`assets/effects.json`), with a point
-  light that casts shadows, both moved onto the hand each frame by your look (`player.client.ts`) as your definition's
+  light that casts shadows (lights3d's where the scene lists it, three's own where it does not), both moved onto the hand each frame by your look (`player.client.ts`) as your definition's
   `carry` says; the stick casts no shadow (`propsCast`).
 - **The sky** (main): skydome3d, its clock held at the hour the scene's prefab gives, no weather.
+- **The town's lights** (main, `torch.sim.ts`, `torch.client.ts`): twenty wall torches, at the gate, along the lane,
+  round the square and up on the towers, each a `torch` actor whose look plays particle3d's `walltorch` effect
+  (`assets/effects.json`): a flickering, shadowed lamp and the `handfire` flames. lights3d lights them, the light you
+  carry and the fog (`world.lights3d`). Every shadow of what never moves (the town) is drawn once into lights3d's
+  still atlas; what anim and crowd3d move, your body and the visitors, is drawn each frame into its moving atlas. The
+  light you carry moves with you, so its shadow of the town stays as it was first drawn.
 - **The ways** (`assets/smallville.town.nav.json`): nav3d's graph, made of shapes3d's shapes, written by pro-ng's
   `town_nav.py` from the landmarks' and the town's metadata: in each landmark the places set by hand (by the hall fire,
   behind the tavern's counter, at the altar) and the ways between them, each stair a way up its curve from its foot to

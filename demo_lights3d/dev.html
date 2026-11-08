@@ -132,7 +132,7 @@
           await page.frame(owed / dt)
         } catch (e) { caught(e) }
         const l3 = page.client?.plugins.lights3d
-        const lit = l3 ? `lit by lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} tiles drawn again this frame, ${l3.entries} in cells` : 'lit by three'
+        const lit = l3 ? `lit by lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} still tiles drawn this frame, ${l3.moving} moving tiles, ${l3.entries} in cells` : 'lit by three'
         readout.textContent = [`${chosen.scene}  step ${truth.n}  ${lit}`, ...errors].join('\n')
         requestAnimationFrame(loop)
       }

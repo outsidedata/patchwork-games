@@ -15,10 +15,12 @@
 // row's `pos`, at the feet, in that `afterTick`; it runs without end and is stopped, its life set to
 // its age, the first tick or remove of a player that finds its row gone from the page's rows.
 //   Beside it, `carry.light`, `{ color, intensity, distance, decay, shadow }`, one three.js point light on
-// render3d's scene at the same point, lit by three's own light loop (no lights3d), taken off the
-// scene when the effect stops. It casts a shadow, `shadow` `{ map, near, bias, normalBias }`: a cube
-// of `map` texels a side from `near` metres out to the light's `distance` (50 m when it has none),
-// six more draws of the shadow casters a frame.
+// render3d's scene at the same point, taken off the scene when the effect stops. It casts a shadow,
+// `shadow` `{ map, near, bias, normalBias }`, from `near` metres out to the light's `distance` (50 m
+// when it has none). In a scene that lists lights3d, lights3d draws it and its shadow from its
+// atlases, `map` unused: what never moves drawn once, so as the light moves with the hand that shadow
+// stays as it was first drawn, and what moves drawn each frame. In one that does not, three's own
+// loop draws it, its shadow a cube of `map` texels a side, six more draws of the casters a frame.
 import * as THREE from 'three'
 import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'

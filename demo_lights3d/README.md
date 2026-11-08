@@ -1,7 +1,10 @@
 # demo_lights3d
 
-The demo of the `lights3d` plugin: many point and spot lights, every shadow from one atlas, lit fog
-and reflection probes, in four scenes. Nothing is played: the camera stands still and the scene moves.
+The demo of the `lights3d` plugin: many point and spot lights, every shadow from a still atlas drawn
+once and a moving atlas drawn each frame, lit fog and reflection probes, in four scenes. Nothing is
+played: the camera stands still and the scene moves. The orbiting ball is marked moving
+(`userData.moving`), so its shadow follows it. A light that moves (the weaving lamp, the sweeping
+spots, the drifting lamps, the wandering lantern) keeps the still shadow it was first drawn with.
 
 | scene | what it shows |
 |---|---|
@@ -21,7 +24,7 @@ None: the scene plays itself.
 `?three=1`, the panel's "lit by lights3d" box unticked, takes lights3d out, so three's own loop lights
 the same lamps: with 18 shadowed lights the room fails to compile in three alone. The fog folder, in
 a scene with fog, tunes its numbers live and copies them as JSON. The readout shows the lights, those
-with shadows and their tiles, the tiles drawn again this frame, and the cells.
+with shadows and their tiles, the still and the moving tiles drawn this frame, and the cells.
 
 ## Playing it
 

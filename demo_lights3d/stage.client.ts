@@ -165,6 +165,8 @@ export function setup(row: Row, plugins: Plugins) {
   if (o) {
     const orb = new T.Mesh(new T.SphereGeometry(o.size / 2, 48, 24), lit(o.colour, o.roughness, o.metalness))
     orb.castShadow = orb.receiveShadow = true
+    // it moves every frame: lights3d draws its shadow into the moving atlas
+    orb.userData.moving = true
     ball = orb
     made.push(orb)
   }
