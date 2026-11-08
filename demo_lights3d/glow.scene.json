@@ -65,15 +65,6 @@
           "most": 256
         }
       },
-      "fog": {
-        "density": 0.08,
-        "colour": "#010203",
-        "steps": 32,
-        "g": 0.2,
-        "far": 20,
-        "resolution": 0.4,
-        "blend": 0.1
-      },
       "probes": {
         "size": 128,
         "intensity": 1,
@@ -81,7 +72,21 @@
         "far": 30,
         "refresh": 2,
         "places": [
-          { "at": [0, 1.4, 2], "box": [-4, 0, -4, 4, 4, 4] }
+          {
+            "at": [
+              0,
+              1.4,
+              2
+            ],
+            "box": [
+              -4,
+              0,
+              -4,
+              4,
+              4,
+              4
+            ]
+          }
         ]
       },
       "mods": {
@@ -139,7 +144,12 @@
       "exposure": 1,
       "shadows": "soft",
       "background": "#05060a",
-      "ssr": { "steps": 32, "distance": 6, "thickness": 0.3, "roughness": 0.4 }
+      "ssr": {
+        "steps": 32,
+        "distance": 6,
+        "thickness": 0.3,
+        "roughness": 0.4
+      }
     },
     "stage": {
       "set": "glow"

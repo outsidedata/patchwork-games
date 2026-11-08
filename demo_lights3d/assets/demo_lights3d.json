@@ -279,7 +279,7 @@
       ],
       "kit": { "glb": "kitGlow", "at": [0, 0, 0], "turn": 0, "spin": 0.05, "bob": 0, "bobSeconds": 4, "sway": { "above": 0.9, "degrees": 35, "seconds": 3 } },
       "people": [
-        { "model": "woman", "clip": "walk", "at": [2.2, 0, 0.4], "turn": -30, "speed": 1, "wear": { "look": "slime", "uvScale": 3 } },
+        { "model": "woman", "clip": "idle", "at": [2.2, 0, 0.4], "turn": -30, "speed": 1, "wear": { "look": "spirit_glow", "uvScale": 1 } },
         { "model": "walker", "clip": "idle", "at": [-1.3, 0, 1.6], "turn": 20, "speed": 1, "wear": { "chrome": "#e8eaf0", "roughness": 0.04 } }
       ]
     }
