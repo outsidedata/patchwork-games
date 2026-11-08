@@ -13,6 +13,8 @@ spots, the drifting lamps, the wandering lantern) keeps the still shadow it was 
 | hall | a long hall of pillars, warm sconces on the walls and coloured spot beams sweeping through fog, the beams shadowed |
 | mist | a moor at night of standing stones and lamps on posts, ground fog clumping and drifting through their light, thick on the ground and thinning with height, a lantern wandering between the stones |
 | gallery | a mirror-polished floor, metal balls from smooth to rough, a gold ball, a moving lamp and ball, reflected by a probe drawn again a face at a time |
+| panel | lights3d's area lights: four panels (three's `RectAreaLight`) each shining a picture (`assets/panel.png`, drawn by `assets/panel.png.mjs`), two playing it as it scrolls, the back one casting the pillar's shadow, an orbiting ball in the moving atlas |
+| glow | a pro-ng rune pillar (`kit_demos/kit-glow` in the library, baked by `assets/demo_lights3d.bake.ts`, drawn by the game's `prong` plugin through supershader3d) whose glowing runes light the room by being drawn: supershader3d's glowmap, lit by lights3d from each glowing triangle or from the glow the camera sees |
 
 ## Controls
 
@@ -41,7 +43,13 @@ yarn serve demo_lights3d
 
 then open `/games/demo_lights3d/client.html`.
 
+The panel scene's panels folder moves, turns, sizes and brightens each panel, plays its picture, sets the floor's
+roughness, and the areas' `blur` and `cutoff`. The glow scene's controls set the glow's gain, its reach and whether
+it lights from the glowing triangles or the screen's cells.
+
 ## Remaking the art
 
-There is none: everything in the scenes is drawn from three.js shapes by `stage.client.ts`, from the
-sets in `assets/demo_lights3d.json`.
+Everything but the panel's picture and the glow scene's pillar is drawn from three.js shapes by `stage.client.ts`,
+from the sets in `assets/demo_lights3d.json`. `node games/demo_lights3d/assets/panel.png.mjs` draws the picture
+again. `yarn bake demo_lights3d` builds the pillar again from the library's pro-ng (`assets/demo_lights3d.bake.ts`):
+its glb and its looks.

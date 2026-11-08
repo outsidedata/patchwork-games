@@ -125,8 +125,8 @@
       }
 
       // The panels, live, in a scene whose stage has them: each number is the stage's definition in the
-      // tab's one copy of `assets/demo_lights3d.json`, read by the stage every frame, and arealight's
-      // `blur` on the page's own copy of the scene, read by arealight every frame.
+      // tab's one copy of `assets/demo_lights3d.json`, read by the stage every frame, and lights3d's areas'
+      // `blur` and `cutoff` on the page's own copy of the scene, read by lights3d every frame.
       const defs = await prepared(entered.world, entered.world.defs)
       // kept for the console: __defs.stage.<set> is what the stage draws from
       window.__defs = defs
@@ -147,15 +147,21 @@
           f.addColor(pn, 'colour').name('light colour')
           if (pn.scroll !== undefined) f.add(pn, 'scroll', -1, 1, 0.01).name('scroll (picture widths a second)')
         })
-        const al = entered.world.arealight
-        if (al) pf.add(al, 'blur', 0.05, 4, 0.01).name('blur (share of the picture a unit of distance over size)')
+        const ar = entered.world.lights3d?.areas
+        if (ar) {
+          pf.add(ar, 'blur', 0.05, 4, 0.01).name('blur (share of the picture a unit of distance over size)')
+          pf.add(ar, 'cutoff', 0.0001, 0.05, 0.0001).name('cutoff (light an area reaches to)')
+        }
       }
 
-      // arealight's light from glowing materials, live: `glow` on the page's own copy of the scene, read every frame
-      if (entered.world.arealight) {
-        gui.add(entered.world.arealight, 'glow', 0, 100, 0.1).name('glow lights the room (times its glow)')
-        gui.add(entered.world.arealight, 'from', ['triangles', 'screen', 'both']).name('glow lights from')
-        window.__arealight = entered.world.arealight
+      // lights3d's light from glowing materials, live: `areas.glow` on the page's own copy of the scene, read every frame
+      const glowing = entered.world.lights3d?.areas?.glow
+      if (glowing) {
+        gui.add(glowing, 'gain', 0, 100, 0.1).name('glow lights the room (times its glow)')
+        gui.add(glowing, 'from', ['triangles', 'screen', 'both']).name('glow lights from')
+        gui.add(glowing, 'reach', 0, 20, 0.1).name('glow reach (m past its things)')
+        // kept for the console: __glow.gain, __glow.from
+        window.__glow = glowing
       }
 
       let last = performance.now(), owed = 0
@@ -169,9 +175,9 @@
           await page.frame(owed / dt)
         } catch (e) { caught(e) }
         const l3 = page.client?.plugins.lights3d
-        const al = page.client?.plugins.arealight
+        const ar = l3?.areas?.()
         const lit = (l3 ? `lit by lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} still tiles drawn this frame, ${l3.moving} moving tiles, ${l3.entries} in cells` : 'lit by three')
-          + (al ? `; arealight: ${al.count} lights, ${al.pictures} shining a picture, filtered ${al.filtered} times, lit from ${al.glowing} glowing triangles and ${al.cells} screen cells` : '')
+          + (ar ? `; areas: ${ar.pictures} shining a picture, filtered ${ar.filtered} times, ${ar.glowing} glowing triangles and ${ar.cells} screen cells` : '')
         readout.textContent = [`${chosen.scene}  step ${truth.n}  ${lit}`, ...errors].join('\n')
         requestAnimationFrame(loop)
       }
