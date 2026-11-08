@@ -22,7 +22,8 @@
       // The address:
       //   ?scene=<scene>   enters that scene: main (the room: everything at once), swarm (400 drifting
       //                    lamps, no shadows), hall (spot beams sweeping through fog, shadowed),
-      //                    gallery (a mirror floor, metal balls smooth to rough, a refreshing probe)
+      //                    gallery (a mirror floor, metal balls smooth to rough, a refreshing probe),
+      //                    mist (ground fog clumping and drifting through lamps on a moor of stones)
       //   ?three=1         takes lights3d out of the scene entered, so three's own loop lights every
       //                    lamp: the same stage drawn both ways, to be compared
       import { boot } from '#engine/engine.ts'
@@ -103,6 +104,20 @@
         ff.add(fog, 'g', -0.95, 0.95, 0.01).name('g (throws light on toward the eye)')
         ff.add(fog, 'far', 1, 200, 1).name('far (m, a ray that meets nothing)')
         ff.addColor(fog, 'colour').name('colour (its own light)')
+        if (fog.noise) {
+          const nf = ff.addFolder('noise')
+          nf.add(fog.noise, 'size', 2, 200, 0.5).name('size (m it repeats over)')
+          nf.add(fog.noise, 'layers', 1, 4, 1).name('layers')
+          nf.add(fog.noise, 'strength', 0, 1, 0.01).name('strength (0 even, 1 clumps)')
+          nf.add(fog.noise.wind, '0', -10, 10, 0.05).name('wind x (m/s)')
+          nf.add(fog.noise.wind, '1', -5, 5, 0.05).name('wind y (m/s)')
+          nf.add(fog.noise.wind, '2', -10, 10, 0.05).name('wind z (m/s)')
+        }
+        if (fog.height) {
+          const hf = ff.addFolder('height')
+          hf.add(fog.height, 'floor', -5, 20, 0.1).name('floor (m, full below)')
+          hf.add(fog.height, 'thinning', 0.2, 30, 0.1).name('thinning (m to halve)')
+        }
         ff.add({ copy: () => navigator.clipboard.writeText(JSON.stringify(fog, null, 2)) }, 'copy').name('copy fog JSON')
       }
 

@@ -8,6 +8,7 @@ and reflection probes, in four scenes. Nothing is played: the camera stands stil
 | main | a room of 12 coloured wall lamps, 6 sweeping overhead spots, a lamp weaving between boxes and spheres and an orbiting ball, every light shadowed, lit fog, a polished floor and metal balls reflected by a probe |
 | swarm | 400 lamps drifting over a field of pillars, no shadows |
 | hall | a long hall of pillars, warm sconces on the walls and coloured spot beams sweeping through fog, the beams shadowed |
+| mist | a moor at night of standing stones and lamps on posts, ground fog clumping and drifting through their light, thick on the ground and thinning with height, a lantern wandering between the stones |
 | gallery | a mirror-polished floor, metal balls from smooth to rough, a gold ball, a moving lamp and ball, reflected by a probe drawn again a face at a time |
 
 ## Controls
