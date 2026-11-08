@@ -38,6 +38,10 @@
 //               arealight shadows the panel's light by (lights3d draws its shadow);
 //               each of these, and `floorRoughness`, read every frame, so the dev page moves them while
 //               the page runs
+//   kit         a pro-ng glb drawn through supershader3d by the game's prong plugin: `glb` its catalogue name,
+//               standing at `at`, turned `turn` degrees about the up axis and on round it `spin` turns a second,
+//               and rising and falling `bob` metres every `bobSeconds`, so what it lights is seen to follow it;
+//               every one read every frame
 //   ambient     a faint light everywhere
 // The floor, the walls, the things and the ball cast shadows and take them; a bulb and a panel do
 // neither.
@@ -55,6 +59,9 @@ let spots: { light: THREE.SpotLight; x: number; z: number; phase: number }[] = [
 let field: { light: THREE.PointLight; x: number; z: number; phase: number }[] = []
 let ball: THREE.Mesh | undefined
 let ground: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshStandardMaterial> | undefined
+let kit: THREE.Mesh | undefined
+// whether the kit thing has been asked of prong
+let asked = false
 let panels: {
   mesh: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>
   light: THREE.RectAreaLight
@@ -225,6 +232,7 @@ export function setup(row: Row, plugins: Plugins) {
     made.push(panel, light)
   })
 
+  asked = false
   const o = d.orbiter
   if (o) {
     const orb = new T.Mesh(new T.SphereGeometry(o.size / 2, 48, 24), lit(o.colour, o.roughness, o.metalness))
@@ -282,6 +290,24 @@ export function tick(row: Row, plugins: Plugins) {
       texture.needsUpdate = true
     }
   }
+  // the kit thing asked of prong once `shipped` has loaded it, and drawn once prong has made it, unless the stage
+  // was taken away first
+  if (d.kit && !asked && plugins.prong) {
+    asked = true
+    const was = made
+    plugins.prong.mesh(d.kit.glb).then((mesh: THREE.Mesh) => {
+      if (made !== was) return
+      mesh.castShadow = mesh.receiveShadow = true
+      kit = mesh
+      made.push(mesh)
+      plugins.render3d.scene.add(mesh)
+    })
+  }
+  if (kit) {
+    const k = d.kit
+    kit.position.set(k.at[0], k.at[1] + k.bob * Math.sin((t / k.bobSeconds) * Math.PI * 2), k.at[2])
+    kit.quaternion.setFromAxisAngle(Y, ((k.turn + t * k.spin * 360) * Math.PI) / 180)
+  }
   if (weaver) weaver.loop.getPointAt(((t * d.weaver.speed) / weaver.length) % 1, weaver.light.position)
   const o = d.orbiter
   if (ball) {
@@ -297,6 +323,7 @@ export function remove(plugins: Plugins) {
   field = []
   ball = undefined
   ground = undefined
+  kit = undefined
   panels = []
   weaver = undefined
 }

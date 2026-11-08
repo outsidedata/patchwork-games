@@ -1,0 +1,107 @@
+{
+  "world": {
+    "defs": "demo_lights3d",
+    "loader": {
+      "assets": {
+        "demo_lights3d": {
+          "type": "json",
+          "url": "/games/demo_lights3d/assets/demo_lights3d.json",
+          "preload": true
+        },
+        "kitGlow": {
+          "type": "binary",
+          "url": "/games/demo_lights3d/assets/kit-glow.glb",
+          "preload": true
+        },
+        "kitGlowLooks": {
+          "type": "json",
+          "url": "/games/demo_lights3d/assets/kit-glow.looks.json",
+          "preload": true
+        }
+      }
+    },
+    "supershader3d": {
+      "looks": "kitGlowLooks"
+    },
+    "lights3d": {
+      "grid": [
+        16,
+        9
+      ],
+      "slices": 24
+    },
+    "shipped": {
+      "plugins": [
+        "prong",
+        "arealight"
+      ]
+    },
+    "arealight": {
+      "size": 256,
+      "levels": 8,
+      "blur": 0.5,
+      "glow": 1
+    }
+  },
+  "plugins": [
+    "loader",
+    "scenemanager",
+    "player",
+    "render3d",
+    "supershader3d",
+    "lights3d",
+    "shipped",
+    "stats"
+  ],
+  "seats": 1,
+  "prefabs": {
+    "engine": {
+      "dt": 0.016666666666666666,
+      "width": 1280,
+      "height": 720
+    },
+    "scenemanager": {
+      "out": {}
+    },
+    "loader": {},
+    "player": {
+      "seat": 0
+    },
+    "render3d": {
+      "camera": {
+        "fov": 50,
+        "near": 0.05,
+        "far": 100,
+        "at": [
+          0,
+          1.9,
+          5.5
+        ],
+        "look": [
+          0,
+          1.2,
+          0
+        ]
+      },
+      "pixelRatio": 1,
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "background": "#05060a"
+    },
+    "stage": {
+      "set": "glow"
+    }
+  },
+  "actors": [
+    {
+      "is": "scenemanager"
+    },
+    {
+      "is": "loader"
+    },
+    {
+      "is": "stage"
+    }
+  ]
+}
