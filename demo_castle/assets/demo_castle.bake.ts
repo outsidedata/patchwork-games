@@ -19,7 +19,8 @@
 //   smallville.town.looks.json, looks/<file>.webp
 //                 the town's one shader, supershader3d's file, and the pictures it reads, which pack.mjs writes
 //                 beside the glb (`pro-ng/look_bake.mjs`) from the library's looks and `pro-ng/materials.json`: every
-//                 material the town draws. Each picture is listed in main's catalogue (`main.scene.json`) by its
+//                 material the town draws, its settings then moved out of uniforms into supershader3d's settings
+//                 table by core's `packLooks` (`scripts/pack-looks.ts`). Each picture is listed in main's catalogue (`main.scene.json`) by its
 //                 name, the entries of an earlier bake's pictures taken out first.
 //   smallville.town.shapes3d.json
 //                 what a walker stands on and bumps into, shapes3d's shapes file, which procedural.py writes beside the
@@ -53,6 +54,7 @@ import path from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 import type { Looks, Tools } from '#scripts/bake.ts'
+import { packLooks } from '#scripts/pack-looks.ts'
 import player from './player.rig.json' with { type: 'json' }
 
 const here = import.meta.dirname
@@ -82,8 +84,11 @@ export default async ({ blender, scratch, library }: Tools) => {
       fs.copyFileSync(path.join(out, name + suffix), path.join(into, name + suffix))
       console.log('wrote', path.relative(root, path.join(into, name + suffix)))
     }
+    // the looks file made supershader3d's, its settings in the table, not uniforms (`packLooks`)
+    const looksFile = path.join(into, `${name}.looks.json`)
+    const looks: Looks = packLooks(JSON.parse(fs.readFileSync(looksFile, 'utf8')))
+    fs.writeFileSync(looksFile, JSON.stringify(looks, null, 1) + '\n')
     // the looks' pictures, the folder made again so no picture of an earlier bake is left
-    const looks: Looks = JSON.parse(fs.readFileSync(path.join(into, `${name}.looks.json`), 'utf8'))
     fs.rmSync(path.join(into, 'looks'), { recursive: true, force: true })
     fs.mkdirSync(path.join(into, 'looks'))
     for (const p of looks.pictures) {

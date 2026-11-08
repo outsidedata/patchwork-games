@@ -5,7 +5,7 @@
 //                     the library's and its settings: the ground's grass, sand and sandstone, the kit's
 //                     rock (Rock013's pictures, taken grey and tinted) and timber (Wood036's pictures),
 //                     and the cobbles, a relief look with the sun's shadow marched inside it; the GLSL
-//                     of each draw call, every setting's uniform, the shared textures it reads and its
+//                     of each draw call, every setting in the settings table, the shared textures it reads and its
 //                     pictures in the stack's order
 //   looks/<file>.webp the pictures those looks read, each cut from its cc0-textures set in the library
 //                     to 1024 pixels square, named after the set's file, which the scene's catalogue
