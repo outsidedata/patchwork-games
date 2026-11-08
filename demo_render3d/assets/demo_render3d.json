@@ -1,0 +1,50 @@
+{
+  "stage": {
+    "mirrors": {
+      "room": [20, 8, 20],
+      "wallColour": "#3a3d48",
+      "wallRoughness": 0.85,
+      "floor": { "colour": "#141418", "roughness": 0.06, "metalness": 0, "mirror": 0.5 },
+      "ambient": 0.15,
+      "sky": ["#8fa8d8", "#2a2420", 0.6],
+      "lights": [
+        { "colour": "#ffd2a0", "intensity": 60, "distance": 30, "at": [-6, 6, 4] },
+        { "colour": "#a0c8ff", "intensity": 60, "distance": 30, "at": [6, 6, 4] }
+      ],
+      "mirrors": [
+        { "name": "back wall mirror", "size": [14, 6], "at": [0, 3.6, -9.95], "turn": [0, 0, 0], "colour": "#ffffff", "roughness": 0, "metalness": 1, "resolution": 0.5 },
+        { "name": "side wall mirror", "size": [6, 5], "at": [-9.95, 3.2, 1], "turn": [0, 90, 0], "colour": "#d8e0ff", "roughness": 0.12, "metalness": 1, "resolution": 0.35 }
+      ],
+      "things": [
+        { "shape": "box", "size": [1.2, 1.2, 1.2], "at": [-4, 0, -2], "colour": "#d9d3c7", "roughness": 0.6 },
+        { "shape": "box", "size": [1.2, 1.2, 1.2], "at": [4, 0, -2], "colour": "#d9d3c7", "roughness": 0.6 },
+        { "shape": "box", "size": [1.2, 1.2, 1.2], "at": [0, 0, 3], "colour": "#d9d3c7", "roughness": 0.6 }
+      ],
+      "movers": [
+        { "shape": "sphere", "size": [1], "colour": "#ff5c8a", "glow": 2, "radius": 5, "height": 2.4, "bob": 0.8, "speed": 0.09, "phase": 0 },
+        { "shape": "sphere", "size": [0.8], "colour": "#5cc8ff", "glow": 2, "radius": 5, "height": 3.2, "bob": 0.6, "speed": 0.09, "phase": 2.1 },
+        { "shape": "sphere", "size": [0.9], "colour": "#ffd25c", "glow": 2, "radius": 5, "height": 1.6, "bob": 0.7, "speed": 0.09, "phase": 4.2 },
+        { "shape": "box", "size": [1.4, 1.4, 1.4], "colour": "#e8e8ee", "roughness": 0.1, "metalness": 1, "radius": 0, "height": 2.6, "bob": 0.4, "speed": 0.05, "spin": 0.3, "phase": 0 }
+      ]
+    },
+    "glossy": {
+      "floorSize": 70,
+      "floor": { "colour": "#1a1a20", "roughness": 0.12, "metalness": 0 },
+      "ambient": 0.1,
+      "sky": ["#6c84b4", "#1e1a16", 0.5],
+      "lights": [
+        { "colour": "#ffe0c0", "intensity": 120, "distance": 50, "at": [0, 10, 0] }
+      ],
+      "things": [
+        { "shape": "box", "size": [1.2, 7, 1.2], "at": [-15, 0, -15], "colour": "#c9c2b6", "roughness": 0.5, "repeat": { "across": 4, "deep": 4, "spacing": [10, 10] } }
+      ],
+      "movers": [
+        { "shape": "box", "size": [0.5, 3, 0.5], "colour": "#ff3b6b", "glow": 4, "radius": 8, "height": 1.5, "bob": 0, "speed": 0.06, "phase": 0 },
+        { "shape": "box", "size": [0.5, 3, 0.5], "colour": "#3bd8ff", "glow": 4, "radius": 8, "height": 1.5, "bob": 0, "speed": 0.06, "phase": 1.57 },
+        { "shape": "box", "size": [0.5, 3, 0.5], "colour": "#b6ff3b", "glow": 4, "radius": 8, "height": 1.5, "bob": 0, "speed": 0.06, "phase": 3.14 },
+        { "shape": "box", "size": [0.5, 3, 0.5], "colour": "#ffb43b", "glow": 4, "radius": 8, "height": 1.5, "bob": 0, "speed": 0.06, "phase": 4.71 },
+        { "shape": "sphere", "size": [2], "colour": "#e8e8ee", "roughness": 0.05, "metalness": 1, "radius": 3, "height": 1.4, "bob": 0.5, "speed": -0.1, "phase": 0 }
+      ]
+    }
+  }
+}

@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demo_render3d dev</title>
+    <style>
+      body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      canvas { grid-area: 1 / 1 }
+      .lil-gui.root { max-height: 100vh; overflow-y: auto }
+      #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px; pointer-events: none }
+    </style>
+  </head>
+  <body>
+    <div id="readout"></div>
+    <script type="module">
+      // The testbed: index.html, the manager truth and the scenes its row names all in this tab, one
+      // seat on them over a loopback, stepped on the page's clock. The truths are kept on
+      // `window.__scenes` and the page on `window.__page` for the profilers (benchmarking-a-game). The
+      // frame rate is the stats plugin's panel at the top left. The readout shows the scene and the
+      // step, and the last five errors the page threw or wrote.
+      // The address:
+      //   ?scene=<scene>   enters that scene: main (a room of mirrors: a mirror floor, a wall mirror and
+      //                    a rough mirror, glowing things circling), glossy (a polished yard of pillars and
+      //                    glowing movers under screen-space reflections)
+      //   ?ssr=0           takes the scene's screen-space reflections out, to compare
+      // The panel tunes, live: the exposure, each mirror's resolution and material, the floor's material
+      // where it is no mirror, each light, and the screen-space reflections' numbers.
+      import { boot } from '#engine/engine.ts'
+      import { imported } from '#engine/browser.ts'
+      import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
+      import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import GUI from 'lil-gui'
+      import { sim } from './demo_render3d.sim.ts'
+      import file from './demo_render3d.scene.json'
+
+      // Every error the page throws or writes, the last five, shown under the readout.
+      const errors = []
+      const caught = e => {
+        errors.push(String(e?.message ?? e))
+        if (errors.length > 5) errors.shift()
+      }
+      addEventListener('error', e => caught(e.error ?? e.message))
+      addEventListener('unhandledrejection', e => caught(e.reason))
+      const written = console.error.bind(console)
+      console.error = (...a) => { caught(a.map(x => x?.message ?? x).join(' ')); written(...a) }
+
+      const params = new URLSearchParams(location.search)
+      file.prefabs.scenemanager.entry = params.get('scene') ?? file.prefabs.scenemanager.entry
+      // The scene entered, from its own sim module at the url the scenemanager imports it at, so the
+      // truth and the page read the one object.
+      const entry = file.prefabs.scenemanager.scenes[file.prefabs.scenemanager.entry]
+      if (!entry) throw new Error(`demo_render3d has no scene ${file.prefabs.scenemanager.entry}: ${Object.keys(file.prefabs.scenemanager.scenes).join(', ')}`)
+      const { scene: entered } = await imported(new URL(entry.file.replace(/\.scene\.json$/, '.sim.ts'), import.meta.url).href)
+      // The screen-space reflections are fixed when the composer is made, so they are taken out by a reload.
+      const ssr = params.get('ssr') !== '0'
+      if (!ssr) delete entered.prefabs.render3d.ssr
+
+      const dt = file.prefabs.engine.dt
+      const truth = boot(file, sim)
+      window.__scenes = await load(truth, import.meta.url)
+      const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+        for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
+          if (!surface) continue
+          const canvas = document.createElement('canvas')
+          canvas.width = scene.prefabs.engine.width
+          canvas.height = scene.prefabs.engine.height
+          document.body.appendChild(canvas)
+          surface.mount(canvas)
+        }
+        me.plugins.stats?.mount(document.body)
+      })
+      window.__page = page
+      const readout = document.getElementById('readout')
+
+      // The panel. A press on it stops at it, a release never does, and after a click the focus goes
+      // back to the page unless it went into a number to type or a list to pick from.
+      const gui = new GUI({ title: 'demo_render3d dev' })
+      for (const type of ['keydown', 'keyup', 'click', 'mousedown', 'contextmenu', 'wheel'])
+        gui.domElement.addEventListener(type, e => e.stopPropagation())
+      gui.domElement.addEventListener('pointerup', () => requestAnimationFrame(() => {
+        const at = document.activeElement
+        if (gui.domElement.contains(at) && at.tagName !== 'SELECT' && !(at.tagName === 'INPUT' && (at.type === 'text' || at.type === 'number'))) at.blur()
+      }))
+      addEventListener('change', e => { if (gui.domElement.contains(e.target)) e.target.blur() })
+
+      // The scene, chosen from the manager's table, the page loaded again on it.
+      const chosen = { scene: file.prefabs.scenemanager.entry }
+      const reload = (key, value) => { const url = new URL(location.href); url.searchParams.set(key, value); location.href = url.href }
+      gui.add(chosen, 'scene', Object.keys(file.prefabs.scenemanager.scenes)).onChange(s => reload('scene', s))
+
+      // The screen-space reflections: on or off (a reload), and each number live, render3d reading the
+      // prefab's `ssr` every frame. "copy ssr JSON" copies them for the scene file.
+      const s = entered.prefabs.render3d.ssr
+      if (s || !ssr) {
+        const sf = gui.addFolder('screen-space reflections')
+        sf.add({ on: ssr }, 'on').name('on (reloads)').onChange(v => reload('ssr', v ? '1' : '0'))
+        if (s) {
+          sf.add(s, 'steps', 4, 256, 1).name('steps a ray')
+          sf.add(s, 'distance', 1, 100, 0.5).name('distance (m a ray goes)')
+          sf.add(s, 'thickness', 0.05, 5, 0.05).name('thickness (m behind the depth)')
+          sf.add(s, 'roughness', 0.05, 1, 0.01).name('roughness (rougher reflects nothing)')
+          sf.add({ copy: () => navigator.clipboard.writeText(JSON.stringify(s, null, 2)) }, 'copy').name('copy ssr JSON')
+        }
+      }
+
+      // What the stage drew, tuned live once the renderer and the stage are on the page: the exposure;
+      // each mirror's picture's resolution (render3d reads it every frame) and its material; the floor's
+      // material where it is no mirror; each light's strength and reach. Each changes the page's own
+      // object, drawn from the next frame, and nothing is written to a file.
+      let tuned = false
+      const tune = () => {
+        const r3 = page.client?.plugins.render3d
+        if (tuned || !r3?.renderer) return
+        const meshes = [], lights = []
+        r3.scene.traverse(o => { if (o.isMesh) meshes.push(o); if (o.isPointLight) lights.push(o) })
+        if (!meshes.length) return
+        tuned = true
+        const rf = gui.addFolder('render3d')
+        rf.add(r3.renderer, 'toneMappingExposure', 0.1, 4, 0.01).name('exposure')
+        const surface = (folder, m) => {
+          folder.add(m, 'roughness', 0, 1, 0.01).name('roughness')
+          folder.add(m, 'metalness', 0, 1, 0.01).name('metalness')
+          folder.addColor(m, 'color').name('colour')
+        }
+        const mirrors = meshes.filter(m => m.userData.mirror)
+        if (mirrors.length) {
+          const mf = gui.addFolder('mirrors')
+          for (const m of mirrors) {
+            const f = mf.addFolder(m.name)
+            f.add(m.userData.mirror, 'resolution', 0.1, 1, 0.05).name('resolution (share of the frame)')
+            surface(f, m.material)
+          }
+        }
+        const floor = meshes.find(m => m.name === 'floor' && !m.userData.mirror)
+        if (floor) surface(gui.addFolder('floor'), floor.material)
+        if (lights.length) {
+          const lf = gui.addFolder('lights')
+          lights.forEach((l, i) => {
+            const f = lf.addFolder(`light ${i + 1}`)
+            f.add(l, 'intensity', 0, 400, 1).name('strength')
+            f.add(l, 'distance', 1, 100, 0.5).name('reach (m)')
+            f.addColor(l, 'color').name('colour')
+          })
+        }
+      }
+
+      let last = performance.now(), owed = 0
+      const loop = async now => {
+        owed += Math.min((now - last) / 1000, 0.25)
+        last = now
+        // A frame that throws is shown, and the next frame goes on.
+        try {
+          page.input()
+          while (owed >= dt) { truth.step(dt); owed -= dt }
+          await page.frame(owed / dt)
+        } catch (e) { caught(e) }
+        tune()
+        readout.textContent = [`${chosen.scene}  step ${truth.n}`, ...errors].join('\n')
+        requestAnimationFrame(loop)
+      }
+      requestAnimationFrame(loop)
+    </script>
+  </body>
+</html>

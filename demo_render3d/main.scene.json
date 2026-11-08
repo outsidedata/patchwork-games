@@ -1,0 +1,64 @@
+{
+  "world": {
+    "defs": "demo_render3d",
+    "loader": {
+      "assets": {
+        "demo_render3d": {
+          "type": "json",
+          "url": "/games/demo_render3d/assets/demo_render3d.json",
+          "preload": true
+        }
+      }
+    }
+  },
+  "plugins": [
+    "loader",
+    "scenemanager",
+    "player",
+    "render3d",
+    "stats"
+  ],
+  "seats": 1,
+  "prefabs": {
+    "engine": {
+      "dt": 0.016666666666666666,
+      "width": 1280,
+      "height": 720
+    },
+    "scenemanager": {
+      "out": {}
+    },
+    "loader": {},
+    "player": {
+      "seat": 0
+    },
+    "render3d": {
+      "camera": {
+        "fov": 55,
+        "near": 0.1,
+        "far": 200,
+        "at": [6, 4.5, 16],
+        "look": [-1, 2.4, -2]
+      },
+      "pixelRatio": 1,
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "background": "#0a0b10"
+    },
+    "stage": {
+      "set": "mirrors"
+    }
+  },
+  "actors": [
+    {
+      "is": "scenemanager"
+    },
+    {
+      "is": "loader"
+    },
+    {
+      "is": "stage"
+    }
+  ]
+}
