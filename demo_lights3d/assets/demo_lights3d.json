@@ -277,10 +277,10 @@
         { "shape": "box", "size": [0.6, 0.6, 0.6], "at": [1.4, 0, 0.6], "turn": 20, "colour": "#e8e8e8" },
         { "shape": "sphere", "size": [0.7], "at": [-1.3, 0, 0.8], "colour": "#e8e8e8" }
       ],
-      "kit": { "glb": "kitGlow", "at": [0, 0, 0], "turn": 0, "spin": 0.05, "bob": 0, "bobSeconds": 4, "sway": { "above": 0.9, "degrees": 35, "seconds": 3 } },
+      "kit": { "glb": "kitGlow", "shown": true, "at": [0, 0, 0], "turn": 0, "spin": 0.05, "bob": 0, "bobSeconds": 4 },
       "people": [
-        { "model": "woman", "clip": "idle", "at": [2.2, 0, 0.4], "turn": -30, "speed": 1, "wear": { "look": "spirit_glow", "uvScale": 1 } },
-        { "model": "walker", "clip": "idle", "at": [-1.3, 0, 1.6], "turn": 20, "speed": 1, "wear": { "chrome": "#e8eaf0", "roughness": 0.04 } }
+        { "model": "woman", "shown": true, "clip": "salsa", "at": [2.2, 0, 0.4], "turn": -30, "speed": 1, "wear": { "look": "spirit_glow", "uvScale": 1 } },
+        { "model": "walker", "shown": true, "clip": "hiphop", "at": [-1.3, 0, 1.6], "turn": 20, "speed": 1, "wear": { "chrome": "#e8eaf0", "roughness": 0.04 } }
       ]
     }
   }

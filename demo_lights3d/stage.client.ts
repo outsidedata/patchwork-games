@@ -65,7 +65,7 @@ let ball: THREE.Mesh | undefined
 let ground: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshStandardMaterial> | undefined
 let kit: THREE.Mesh | undefined
 // the people, each its model and the mixer that plays its clip, and whether they have been made
-let people: { mixer: THREE.AnimationMixer; speed: number }[] = []
+let people: { mixer: THREE.AnimationMixer; speed: number; root: THREE.Object3D; p: { shown: boolean } }[] = []
 let peopleMade = false
 // whether the kit thing has been asked of prong
 let asked = false
@@ -96,7 +96,7 @@ const drawn = (plugins: Plugins) => (plugins.wire.n - 1 + (plugins.wire.between 
 
 // What a person wears, handed each of its meshes' geometry: with `look`, that material of supershader3d's, every
 // vertex tagged with it (its `lookId`, its `lookInfo` the person's own row so no two people's glow is one thing, its uv
-// times `uvScale`, since a look's uv is metres) so the glowmap finds it, poses it and lights from it; with `chrome`,
+// times `uvScale`, since a look's uv is metres) so the glowmap's pass draws its glow where it is posed; with `chrome`,
 // a mirror metal of that colour and `roughness`, dressed by render3d so the probes and the screen's reflections reach it.
 function wearing(T: typeof THREE, plugins: Plugins, wear: any, person: number) {
   if (wear.chrome) {
@@ -378,13 +378,18 @@ export function tick(row: Row, plugins: Plugins) {
       if (!clip) throw new Error(`the stage's person ${i} plays ${p.clip}, which ${p.model} has not: ${animations.map((a: THREE.AnimationClip) => a.name).join(', ')}`)
       const mixer = new T.AnimationMixer(root)
       mixer.clipAction(clip).play()
-      people.push({ mixer, speed: p.speed })
+      people.push({ mixer, speed: p.speed, root, p })
       made.push(root)
       plugins.render3d.scene.add(root)
     })
   }
-  for (const p of people) p.mixer.setTime(t * p.speed)
+  // each person and the kit thing drawn while its definition's `shown` is true (the dev panel's toggles)
+  for (const p of people) {
+    p.root.visible = p.p.shown
+    p.mixer.setTime(t * p.speed)
+  }
   if (kit) {
+    kit.visible = d.kit.shown
     const k = d.kit
     kit.position.set(k.at[0], k.at[1] + k.bob * Math.sin((t / k.bobSeconds) * Math.PI * 2), k.at[2])
     kit.quaternion.setFromAxisAngle(Y, ((k.turn + t * k.spin * 360) * Math.PI) / 180)

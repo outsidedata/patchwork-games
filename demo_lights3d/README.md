@@ -14,7 +14,7 @@ spots, the drifting lamps, the wandering lantern) keeps the still shadow it was 
 | mist | a moor at night of standing stones and lamps on posts, ground fog clumping and drifting through their light, thick on the ground and thinning with height, a lantern wandering between the stones |
 | gallery | a mirror-polished floor, metal balls from smooth to rough, a gold ball, a moving lamp and ball, reflected by a probe drawn again a face at a time |
 | panel | lights3d's area lights: four panels (three's `RectAreaLight`) each shining a picture (`assets/panel.png`, drawn by `assets/panel.png.mjs`), two playing it as it scrolls, the back one casting the pillar's shadow, an orbiting ball in the moving atlas |
-| glow | a pro-ng rune pillar (`kit_demos/kit-glow` in the library, baked by `assets/demo_lights3d.bake.ts`, drawn by the game's `prong` plugin through supershader3d) whose glowing runes light the room by being drawn: supershader3d's glowmap, lit by lights3d from each glowing triangle or from the glow the camera sees |
+| glow | a pro-ng rune pillar (`kit_demos/kit-glow` in the library, baked by `assets/demo_lights3d.bake.ts`, drawn by the game's `prong` plugin through supershader3d) whose glowing runes light the room by being drawn: supershader3d's glowmap, the glow the camera sees summed into screen cells that lights3d lights from; a woman in the `spirit_glow` look dancing salsa beside it, and a chrome man dancing hip hop |
 
 ## Controls
 
@@ -44,8 +44,10 @@ yarn serve demo_lights3d
 then open `/games/demo_lights3d/client.html`.
 
 The panel scene's panels folder moves, turns, sizes and brightens each panel, plays its picture, sets the floor's
-roughness, and the areas' `blur` and `cutoff`. The glow scene's controls set the glow's gain, its reach and whether
-it lights from the glowing triangles or the screen's cells.
+roughness, and the areas' `blur` and `cutoff`. The glow scene's controls set the glow's gain and the glow pass's
+resolution, and show or hide the pillar, the woman and the man. The live folder sets the screen's reflections and the
+probes' refresh; the reloads folder turns shadows, probes, fog, reflections and the glowmap on or off, and sets the
+shadow atlas, its tiles, the probes' size and the pixel ratio, each loading the page again with it in the address.
 
 ## Remaking the art
 

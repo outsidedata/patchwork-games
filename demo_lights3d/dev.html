@@ -60,6 +60,35 @@
         entered.plugins = entered.plugins.filter(p => p !== 'lights3d')
         delete entered.world.lights3d
       }
+      // What is built once, set from the address before the boot, each switched on, off or sized so its cost can be
+      // seen (the "reloads" folder writes these and loads the page again):
+      //   shadows=0|1, atlas=, tile=   lights3d's shadows, and its atlases' and tiles' texels
+      //   probes=0|1, probeSize=       lights3d's probes, and a face's texels
+      //   fog=0|1                      lights3d's fog (a scene with none is given a thin one)
+      //   ssr=0|1                      render3d's screen-space reflections
+      //   glow=0|1                     supershader3d's glowmap, the pass lights3d lights the glow from
+      //   ratio=                       the pixel ratio drawn at
+      const wanted = k => params.get(k)
+      const number = k => (params.has(k) ? Number(params.get(k)) : undefined)
+      const l3world = entered.world.lights3d
+      if (l3world) {
+        if (wanted('shadows') === '0') delete l3world.shadows
+        if (wanted('shadows') === '1' && !l3world.shadows) l3world.shadows = { atlas: 2048, tile: 512, bias: 0.06, normalBias: 0.12, budget: 8 }
+        if (l3world.shadows && number('atlas')) l3world.shadows.atlas = number('atlas')
+        if (l3world.shadows && number('tile')) l3world.shadows.tile = number('tile')
+        if (wanted('probes') === '0') delete l3world.probes
+        if (l3world.probes && number('probeSize')) l3world.probes.size = number('probeSize')
+        if (wanted('fog') === '0') delete l3world.fog
+        if (wanted('fog') === '1' && !l3world.fog) l3world.fog = { density: 0.03, colour: '#020304', steps: 32, g: 0.3, far: 30, resolution: 0.4, blend: 0.1 }
+      }
+      const r3prefab = entered.prefabs.render3d
+      if (r3prefab) {
+        if (wanted('ssr') === '0') delete r3prefab.ssr
+        if (wanted('ssr') === '1' && !r3prefab.ssr) r3prefab.ssr = { steps: 32, distance: 6, thickness: 0.3, roughness: 0.4 }
+        if (number('ratio')) r3prefab.pixelRatio = number('ratio')
+      }
+      if (wanted('glow') === '0' && entered.world.supershader3d) delete entered.world.supershader3d.glowmap
+      const glowmap = entered.world.supershader3d?.glowmap
 
       const dt = file.prefabs.engine.dt
       const truth = boot(file, sim)
@@ -102,10 +131,10 @@
         const ff = gui.addFolder('fog')
         ff.add(fog, 'density', 0, 0.3, 0.001).name('density (share a metre)')
         ff.add(fog, 'steps', 4, 256, 1).name('steps a ray')
-        ff.add(fog, 'resolution', 0.1, 1, 0.05).name('resolution (share of the frame)')
-        ff.add(fog, 'blend', 0.02, 1, 0.01).name('blend (share of a new frame; 1 none)')
-        ff.add(fog, 'g', -0.95, 0.95, 0.01).name('g (throws light on toward the eye)')
-        ff.add(fog, 'far', 1, 200, 1).name('far (m, a ray that meets nothing)')
+        ff.add(fog, 'resolution', 0.1, 1, 0.05).name('resolution')
+        ff.add(fog, 'blend', 0.02, 1, 0.01).name('blend')
+        ff.add(fog, 'g', -0.95, 0.95, 0.01).name('g')
+        ff.add(fog, 'far', 1, 200, 1).name('far (m)')
         ff.addColor(fog, 'colour').name('colour (its own light)')
         if (fog.noise) {
           const nf = ff.addFolder('noise')
@@ -131,6 +160,11 @@
       // kept for the console: __defs.stage.<set> is what the stage draws from
       window.__defs = defs
       const set = defs.stage[entered.prefabs.stage.set]
+      if (set.kit || set.people) {
+        const sf = gui.addFolder('show')
+        if (set.kit) sf.add(set.kit, 'shown').name('pillar + stone ring')
+        for (const p of set.people ?? []) sf.add(p, 'shown').name(p.model)
+      }
       if (set.panels) {
         const pf = gui.addFolder('panels')
         pf.add(set, 'floorRoughness', 0, 1, 0.01).name('floor roughness')
@@ -145,40 +179,79 @@
           f.add(pn, 'intensity', 0, 40, 0.1).name('light intensity')
           f.add(pn, 'glow', 0, 4, 0.01).name('glow (its own brightness)')
           f.addColor(pn, 'colour').name('light colour')
-          if (pn.scroll !== undefined) f.add(pn, 'scroll', -1, 1, 0.01).name('scroll (picture widths a second)')
+          if (pn.scroll !== undefined) f.add(pn, 'scroll', -1, 1, 0.01).name('scroll')
         })
         const ar = entered.world.lights3d?.areas
         if (ar) {
-          pf.add(ar, 'blur', 0.05, 4, 0.01).name('blur (share of the picture a unit of distance over size)')
-          pf.add(ar, 'cutoff', 0.0001, 0.05, 0.0001).name('cutoff (light an area reaches to)')
+          pf.add(ar, 'blur', 0.05, 4, 0.01).name('blur')
+          pf.add(ar, 'cutoff', 0.0001, 0.05, 0.0001).name('cutoff')
         }
       }
 
       // lights3d's light from glowing materials, live: `areas.glow` on the page's own copy of the scene, read every frame
       const glowing = entered.world.lights3d?.areas?.glow
       if (glowing) {
-        gui.add(glowing, 'gain', 0, 100, 0.1).name('glow lights the room (times its glow)')
-        gui.add(glowing, 'from', ['triangles', 'screen', 'both']).name('glow lights from')
-        gui.add(glowing, 'reach', 0, 20, 0.1).name('glow reach (m past its things)')
-        // kept for the console: __glow.gain, __glow.from
+        gui.add(glowing, 'gain', 0, 100, 0.1).name('glow gain')
+        // kept for the console: __glow.gain
         window.__glow = glowing
       }
+
+      // Live, read every frame: render3d's screen-space reflections, lights3d's probes' refresh and the glowmap's pass's
+      // resolution, each on the page's own copy of the scene.
+      const live = gui.addFolder('live')
+      const ssr = entered.prefabs.render3d?.ssr
+      if (ssr) {
+        live.add(ssr, 'steps', 1, 128, 1).name('ssr steps')
+        live.add(ssr, 'distance', 0.5, 30, 0.1).name('ssr distance')
+        live.add(ssr, 'thickness', 0.02, 2, 0.01).name('ssr thickness')
+        live.add(ssr, 'roughness', 0.02, 1, 0.01).name('ssr max rough')
+      }
+      const probes = entered.world.lights3d?.probes
+      if (probes) {
+        live.add(probes, 'refresh', 0, 6, 1).name('probe faces/frame')
+        live.add({ capture: () => page.client?.plugins.lights3d?.capture() }, 'capture').name('recapture probes')
+      }
+      if (glowmap) live.add(glowmap, 'resolution', 0.05, 1, 0.05).name('glow pass res')
+
+      // Built once: each switched or sized here loads the page again with it in the address, so what each costs is seen
+      // by the frame rate before and after.
+      const reloads = gui.addFolder('reloads')
+      reloads.close()
+      const r = {
+        shadows: !!l3world?.shadows, atlas: l3world?.shadows?.atlas ?? 2048, tile: l3world?.shadows?.tile ?? 512,
+        probes: !!l3world?.probes, probeSize: l3world?.probes?.size ?? 128,
+        fog: !!l3world?.fog, ssr: !!r3prefab?.ssr,
+        glow: !!glowmap,
+        ratio: r3prefab?.pixelRatio ?? 1,
+      }
+      reloads.add(r, 'shadows').name('shadows').onChange(v => reload('shadows', v ? '1' : '0'))
+      reloads.add(r, 'atlas', [512, 1024, 2048, 4096]).name('shadow atlas (texels)').onChange(v => reload('atlas', v))
+      reloads.add(r, 'tile', [128, 256, 512, 1024]).name('shadow tile (texels)').onChange(v => reload('tile', v))
+      reloads.add(r, 'probes').name('probes').onChange(v => reload('probes', v ? '1' : '0'))
+      reloads.add(r, 'probeSize', [32, 64, 128, 256, 512]).name('probe face (texels)').onChange(v => reload('probeSize', v))
+      reloads.add(r, 'fog').name('fog').onChange(v => reload('fog', v ? '1' : '0'))
+      reloads.add(r, 'ssr').name('ssr').onChange(v => reload('ssr', v ? '1' : '0'))
+      if (entered.world.lights3d?.areas?.glow) reloads.add(r, 'glow').name('glowmap').onChange(v => reload('glow', v ? '1' : '0'))
+      reloads.add(r, 'ratio', [0.5, 0.75, 1, 1.5, 2]).name('pixel ratio').onChange(v => reload('ratio', v))
 
       let last = performance.now(), owed = 0
       const loop = async now => {
         owed += Math.min((now - last) / 1000, 0.25)
         last = now
         // A frame that throws is shown, and the next frame goes on.
+        // every draw call and triangle of the whole frame, every render in it counted (three resets its counts at each
+        // render by itself: here once a frame)
+        const info = page.client?.plugins.render3d?.renderer?.info
+        if (info) { info.autoReset = false; info.reset() }
         try {
           page.input()
           while (owed >= dt) { truth.step(dt); owed -= dt }
           await page.frame(owed / dt)
         } catch (e) { caught(e) }
+        const drawn = info ? `  frame: ${info.render.calls} draw calls, ${(info.render.triangles / 1e6).toFixed(2)} M triangles, ${info.programs?.length ?? 0} programs` : ''
         const l3 = page.client?.plugins.lights3d
-        const ar = l3?.areas?.()
-        const lit = (l3 ? `lit by lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} still tiles drawn this frame, ${l3.moving} moving tiles, ${l3.entries} in cells` : 'lit by three')
-          + (ar ? `; areas: ${ar.pictures} shining a picture, filtered ${ar.filtered} times, ${ar.glowing} glowing triangles and ${ar.cells} screen cells` : '')
-        readout.textContent = [`${chosen.scene}  step ${truth.n}  ${lit}`, ...errors].join('\n')
+        const lit = l3 ? `lit by lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} still tiles drawn this frame, ${l3.moving} moving tiles, ${l3.entries} in cells` : 'lit by three'
+        readout.textContent = [`${chosen.scene}  step ${truth.n}  ${lit}`, drawn, ...errors].join('\n')
         requestAnimationFrame(loop)
       }
       requestAnimationFrame(loop)

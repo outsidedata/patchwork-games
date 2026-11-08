@@ -20,12 +20,12 @@
         },
         "woman": {
           "type": "model",
-          "url": "/games/demo_lights3d/assets/castle_woman.glb",
+          "url": "/games/demo_lights3d/assets/farmer_woman.glb",
           "preload": true
         },
         "walker": {
           "type": "model",
-          "url": "/games/demo_lights3d/assets/castle_walker.glb",
+          "url": "/games/demo_lights3d/assets/farmer_man.glb",
           "preload": true
         }
       }
@@ -33,16 +33,11 @@
     "supershader3d": {
       "looks": "kitGlowLooks",
       "glowmap": {
-        "triangles": {
-          "side": 2
-        },
-        "screen": {
-          "resolution": 0.25,
-          "cells": [
-            16,
-            9
-          ]
-        }
+        "resolution": 0.25,
+        "cells": [
+          16,
+          9
+        ]
       }
     },
     "lights3d": {
@@ -59,10 +54,7 @@
         "angle": 1.2,
         "near": 0.05,
         "glow": {
-          "reach": 4,
-          "gain": 8,
-          "from": "triangles",
-          "most": 256
+          "gain": 8
         }
       },
       "probes": {
