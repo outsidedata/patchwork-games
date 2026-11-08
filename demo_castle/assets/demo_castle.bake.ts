@@ -26,6 +26,9 @@
 //                 glb (`pro-ng/shapes.py`): `kinds`, every kind's shape, and `shapes`, each one's `kind`, `pos` and `yaw`
 //   smallville.town.nav.json
 //                 the town's ways, nav3d's graph of shapes, from its files' metadata (`pro-ng/town_nav.py`, no Blender)
+//   smallville.town.crowd.json
+//                 the people standing at the town's landmarks, `{"people": [{landmark, model, clips, at, yaw}]}`,
+//                 `{"people": []}` when it has none, which town_nav.py writes beside the nav graph
 //   smallville.town.terrain3d_layers.json
 //                 terrain3d's painted layer that flattens the ground under the whole town to 0, one flatten stroke,
 //                 which procedural.py writes beside the glb
@@ -64,7 +67,7 @@ const PLACES = [
   { pro: 'village/village.art', folder: 'village', scene: 'village.scene.json', field: 'village/village.field.json' },
 ]
 // what pro-ng's build writes for a scene, each `<name><suffix>`
-const MADE = ['.glb', '.looks.json', '.clips.json', '.shapes3d.json', '.nav.json', '.terrain3d_layers.json', '.hollows.json', '.effects.json']
+const MADE = ['.glb', '.looks.json', '.clips.json', '.shapes3d.json', '.nav.json', '.terrain3d_layers.json', '.hollows.json', '.effects.json', '.crowd.json']
 
 export default async ({ blender, scratch, library }: Tools) => {
   // each place made into every file a game boots from by the library's pro-ng (`pro-ng/build.mjs`), on core's Blender
