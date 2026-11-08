@@ -14,13 +14,15 @@
           "preload": true
         }
       }
-    }
+    },
+    "shipped": { "plugins": ["arealight"] }
   },
   "plugins": [
     "loader",
     "scenemanager",
     "player",
     "render3d",
+    "shipped",
     "stats"
   ],
   "seats": 1,

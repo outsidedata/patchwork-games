@@ -250,7 +250,7 @@
         { "shape": "sphere", "size": [1.2], "at": [2, 0, 2], "colour": "#dcdce2", "roughness": 0.1, "metalness": 1 }
       ],
       "panels": [
-        { "at": [0, 3, -7.97], "size": [6, 3], "turn": 0, "picture": "panel", "glow": 1 }
+        { "at": [0, 3, -7.97], "size": [6, 3], "turn": 0, "picture": "panel", "glow": 1, "colour": "#ffffff", "intensity": 6 }
       ]
     }
   }
