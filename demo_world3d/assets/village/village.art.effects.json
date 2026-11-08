@@ -1,0 +1,562 @@
+{
+ "effects": {
+  "chimney/core": [
+   {
+    "n": [
+     2,
+     3
+    ],
+    "every": 0.025,
+    "life": [
+     1,
+     1.6
+    ],
+    "size": [
+     0.06,
+     0.1
+    ],
+    "grow": 3,
+    "spread": 0.15,
+    "speed": [
+     0.8,
+     1.1
+    ],
+    "drag": 0.3,
+    "jitter": [
+     0.03,
+     0,
+     0.03
+    ],
+    "tint": 5920595,
+    "tint1": 9078658,
+    "a0": 0.2,
+    "a1": 0,
+    "spin": 1.2
+   }
+  ],
+  "chimney/column": [
+   {
+    "n": [
+     3,
+     4
+    ],
+    "every": 0.03,
+    "life": [
+     7,
+     10
+    ],
+    "size": [
+     0.08,
+     0.14
+    ],
+    "grow": 7,
+    "dir": [
+     0.25,
+     1,
+     0
+    ],
+    "spread": 0.18,
+    "speed": [
+     0.7,
+     1
+    ],
+    "g": -0.08,
+    "drag": 0.12,
+    "jitter": [
+     0.05,
+     0,
+     0.05
+    ],
+    "tint": 9210503,
+    "tint1": 13158600,
+    "a0": 0.09,
+    "a1": 0,
+    "spin": 0.5
+   }
+  ],
+  "chimney/haze": [
+   {
+    "every": 0.1,
+    "life": [
+     9,
+     13
+    ],
+    "size": [
+     0.3,
+     0.45
+    ],
+    "grow": 6,
+    "dir": [
+     0.25,
+     1,
+     0
+    ],
+    "spread": 0.3,
+    "speed": [
+     0.5,
+     0.7
+    ],
+    "g": -0.06,
+    "drag": 0.12,
+    "jitter": [
+     0.1,
+     0,
+     0.1
+    ],
+    "tint": 10921638,
+    "tint1": 13421772,
+    "a0": 0.035,
+    "a1": 0,
+    "spin": 0.3
+   }
+  ],
+  "chimney/gust": [
+   {
+    "n": [
+     3,
+     4
+    ],
+    "every": 1.4,
+    "life": [
+     3,
+     5
+    ],
+    "size": [
+     0.1,
+     0.16
+    ],
+    "grow": 6,
+    "dir": [
+     0.25,
+     1,
+     0
+    ],
+    "spread": 0.25,
+    "speed": [
+     0.9,
+     1.2
+    ],
+    "g": -0.1,
+    "drag": 0.2,
+    "jitter": [
+     0.05,
+     0,
+     0.05
+    ],
+    "tint": 7236455,
+    "tint1": 11184810,
+    "a0": 0.14,
+    "a1": 0,
+    "spin": 0.8
+   }
+  ],
+  "chimney/puff": [
+   {
+    "effect": "chimney/core"
+   },
+   {
+    "effect": "chimney/column"
+   },
+   {
+    "effect": "chimney/haze"
+   },
+   {
+    "effect": "chimney/gust"
+   }
+  ]
+ },
+ "spawns": [
+  {
+   "thing": "smithy/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    103.465,
+    9.25,
+    -119.1
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "smithy/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    104.015,
+    9.25,
+    -119.1
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "bakehouse/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    78.74,
+    8.49,
+    -80.105
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "bakehouse/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    78.74,
+    8.49,
+    -80.455
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "house 1/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    74.8564,
+    8.58,
+    -59.3852
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "house 1/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    74.8141,
+    8.58,
+    -58.9875
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "longhouse 1/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    126.1579,
+    8.73,
+    -58.1554
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "longhouse 1/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    126.1972,
+    8.73,
+    -57.7573
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "hallhouse 1/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    65.1423,
+    9.1,
+    -74.0824
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "hallhouse 1/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    65.1068,
+    9.1,
+    -74.4808
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "lofthouse 1/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    83.232,
+    9.94,
+    -104.3297
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "lofthouse 1/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    83.4195,
+    9.94,
+    -103.9763
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "house 2/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    66.2075,
+    9.3,
+    -59.1209
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "house 2/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    66.1641,
+    9.3,
+    -59.5185
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "longhouse 2/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    113.666,
+    8.94,
+    -26.1483
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "longhouse 2/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    113.787,
+    8.94,
+    -26.5296
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "hallhouse 2/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    168.6401,
+    8.75,
+    -71.9986
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "hallhouse 2/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    168.7176,
+    8.75,
+    -72.391
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "lofthouse 2/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    91.3536,
+    10.77,
+    -31.0759
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "lofthouse 2/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    91.3601,
+    10.77,
+    -31.4758
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "house 3/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    151.1571,
+    8.74,
+    -58.9187
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "house 3/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    151.1687,
+    8.74,
+    -58.5188
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "house 4/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    43.4179,
+    8.7,
+    -97.1367
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "house 4/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    43.0194,
+    8.7,
+    -97.1028
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "house 5/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    169.0493,
+    8.45,
+    -105.2009
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "house 5/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    169.4165,
+    8.45,
+    -105.3595
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "house 6/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    172.935,
+    8.49,
+    -98.7222
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "house 6/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    172.5803,
+    8.49,
+    -98.5374
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  }
+ ]
+}

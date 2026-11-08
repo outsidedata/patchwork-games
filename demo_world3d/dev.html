@@ -1,0 +1,493 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demo_world3d dev</title>
+    <style>
+      body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      canvas { grid-area: 1 / 1 }
+      .lil-gui.root { max-height: 100vh; overflow-y: auto }
+      #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px; max-height: 60vh; overflow: hidden }
+    </style>
+  </head>
+  <body>
+    <div id="readout"></div>
+    <script type="module">
+      // The testbed: index.html, the manager truth and main in this tab (or the scene `?scene=` names:
+      // `?scene=bridge`, `?scene=village`), one seat on it over a loopback, stepped on the page's clock. The truths are kept
+      // on `window.__scenes`, the page on `window.__page` and the scene's client (its plugins) on
+      // `window.__client`. The panel turns nav3d's drawing of the scene's graph on and off (`graphs`,
+      // `?graphs=1` on at first), and puts the seat's body on any place of the graph, standing on
+      // whatever is there (`go to`). Its `carry` folder sets the hand and the offset of what the
+      // body carries, and its `stick` folder the hand, offset and turn of the stick it holds. Its `sky` folder sets skydome3d's clock on the truth's row and
+      // its look and shadow on the page's world, copies them as JSON and resets them to the file. Its `lights` folder,
+      // in main, keeps the first `?torches=n` torches and `?people=n` visitors (1 of each at first),
+      // lights3d's fog only with `?fog=1`, sets the shadow atlases' `?atlas=` and `?tile=`, takes the
+      // torch's shadow off with `?torchshadow=0` and lights3d out with `?lights3d=0`, and sets the torch
+      // lamp, the carried light, the exposure, the fog and the castle's flat material live (Lights,
+      // below). The readout shows lights3d's lights, shadows, tiles, the still and moving tiles drawn this
+      // frame and the still ones owed, and shows the frames drawn in
+      // the last second and the longest of them, the step, where the seat's body stands and what it
+      // stands on, each visitor's place it is going to and how many places of its route it has still to
+      // get to, or the place it stands at, with the height its feet stand at now and how many times it has
+      // switched courses (the place it is going to changed), and the last five errors
+      // the page threw or wrote. Nothing is written to disk.
+      // A click on a visitor picks it: a yellow ring stands at its feet, a line runs along the route it
+      // is walking to the place it was sent, and the panel's `visitor` folder shows what it is doing and
+      // sends it on. With one picked, a click anywhere else sends it there, along npc3d's route over the
+      // graph, and the folder's `send` sends it to the place `to` names. Sent, it walks there on its `go`
+      // (npc3d's), which the page gives the visitor's definition in its own copy, and stands there until
+      // it is sent again; `tour again` puts it back on its `tour`, and `let go` unpicks it. An order is
+      // given in the visitor's `before` of the next step, the page's copy of the kind wrapped for it.
+      import { boot } from '#engine/engine.ts'
+      import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
+      import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import GUI from 'lil-gui'
+      import { bodies } from '#plugins/npc3d/npc3d.sim.ts'
+      import { prepared } from '#plugins/loader/loader.sim.ts'
+      import { sim } from './demo_world3d.sim.ts'
+      import { scene as main } from './main.sim.ts'
+      import { visitor } from './visitor.sim.ts'
+      import file from './demo_world3d.scene.json'
+      import town from './assets/smallville.town.nav.json'
+      import bridge from './assets/bridge.nav.json'
+      import village from './assets/village/village.art.nav.json'
+      import tavern from './assets/tavern/tavern.art.nav.json'
+
+      file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
+
+      // The town's lights, cut down before the boot so each can be put back one at a time: `?torches=n`
+      // keeps the first n of main's torch actors (1 when left out, the gate's; `all` every one), and
+      // `?fog=1` keeps lights3d's fog, which is off when left out. Both reload the page.
+      const query = new URLSearchParams(location.search)
+      const reload = (key, value) => { query.set(key, value); location.search = query.toString() }
+      const torches = main.actors.filter(a => a.is === 'torch')
+      const kept = query.get('torches') === 'all' ? torches.length : Number(query.get('torches') ?? 1)
+      main.actors = main.actors.filter(a => a.is !== 'torch' || torches.indexOf(a) < kept)
+      // `?people=n` keeps the first n of main's visitors (1 when left out; `all` every one)
+      const people = main.actors.filter(a => a.is === 'visitor')
+      const met = query.get('people') === 'all' ? people.length : Number(query.get('people') ?? 1)
+      main.actors = main.actors.filter(a => a.is !== 'visitor' || people.indexOf(a) < met)
+      // `?atlas=n` and `?tile=n`, lights3d's shadow atlas and each tile of it, texels a side (the file's when left out)
+      const shadows = main.world.lights3d.shadows
+      if (query.get('atlas')) shadows.atlas = Number(query.get('atlas'))
+      if (query.get('tile')) shadows.tile = Number(query.get('tile'))
+      const fogged = query.get('fog') === '1'
+      if (!fogged) delete main.world.lights3d.fog
+      // `?torchshadow=0` turns the torch lamp's shadow off as the folder is built; `?lights3d=0` takes
+      // lights3d out of main, so the torches are not lit and the carried light is three's own again
+      const torchShadow = query.get('torchshadow') !== '0'
+      if (query.get('lights3d') === '0') {
+        main.plugins = main.plugins.filter(p => p !== 'lights3d')
+        delete main.world.lights3d
+      }
+
+      // A visitor sent somewhere walks there on npc3d's `go` at its tour's pace, and, committed, stands
+      // there until it is sent again or put back on its tour.
+      const defs = await prepared(main.world, main.world.defs)
+      const tour = defs.visitor.behaviors.tour
+      defs.visitor.behaviors.go = { clip: tour.clip, speed: tour.speed, stand: tour.stand, commit: true }
+      // The orders the panel gives, by the visitor's id: [x, y, z] to go there, 'tour' to tour again.
+      const orders = new Map()
+      const before = visitor.before
+      visitor.before = (me, dt, w) => {
+        before(me, dt, w)
+        const o = orders.get(me.id)
+        if (o === undefined) return
+        orders.delete(me.id)
+        if (o === 'tour') visitor.acts.force(me, w, -1, 'tour')
+        else visitor.acts.order(me, w, -1, 'go', o[0], o[1], o[2])
+      }
+
+      const errors = []
+      const caught = e => {
+        errors.push(String(e?.message ?? e))
+        if (errors.length > 5) errors.shift()
+      }
+      addEventListener('error', e => caught(e.error ?? e.message))
+      addEventListener('unhandledrejection', e => caught(e.reason))
+      const written = console.error.bind(console)
+      console.error = (...a) => { caught(a.map(x => x?.message ?? x).join(' ')); written(...a) }
+
+      const dt = file.prefabs.engine.dt
+      const truth = boot(file, sim)
+      window.__scenes = await load(truth, import.meta.url)
+      const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+        window.__client = me
+        for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
+          if (!surface) continue
+          const canvas = document.createElement('canvas')
+          canvas.width = scene.prefabs.engine.width
+          canvas.height = scene.prefabs.engine.height
+          document.body.appendChild(canvas)
+          surface.mount(canvas)
+        }
+      })
+      window.__page = page
+      const room = window.__scenes.get(file.prefabs.scenemanager.entry)
+      // the scene's graph, the one its page draws
+      const graph = { main: town, bridge, village, tavern }[file.prefabs.scenemanager.entry]
+      const tagsOf = p => p.data?.nav3d?.tags ?? []
+      const places = [...new Set(graph.places.flatMap(tagsOf))].sort()
+      const me = () => room.rows.find(r => r.kind === 'player')
+
+      // The panel. A press on it stops at it, so the game's keys are the game's.
+      const gui = new GUI({ title: 'demo_world3d dev' })
+      for (const type of ['keydown', 'keyup', 'click', 'mousedown', 'contextmenu', 'wheel'])
+        gui.domElement.addEventListener(type, e => e.stopPropagation())
+      // after a click the focus goes back to the page, but into a number being typed or a list being picked from
+      gui.domElement.addEventListener('pointerup', () => requestAnimationFrame(() => {
+        const at = document.activeElement
+        if (gui.domElement.contains(at) && at.tagName !== 'SELECT' && !(at.tagName === 'INPUT' && (at.type === 'text' || at.type === 'number'))) at.blur()
+      }))
+      addEventListener('change', e => { if (gui.domElement.contains(e.target)) e.target.blur() })
+      const views = { graphs: new URLSearchParams(location.search).get('graphs') === '1' }
+      gui.add(views, 'graphs')
+      const jump = { place: places[0], 'go to': () => {
+        const place = graph.places.find(q => tagsOf(q).includes(jump.place))
+        const p = me()
+        if (place && p) { p.data.pos = [...place.point.at]; p.data.vel = [0, 0, 0] }
+      } }
+      gui.add(jump, 'place', places)
+      gui.add(jump, 'go to')
+
+      // What the body carries in its hand: the player's definition's `carry.at`, metres off the bone in
+      // its own frame, on the tab's one copy of the definitions, which the look reads every frame.
+      // `copy` puts it on the clipboard for `assets/demo_world3d.json`.
+      const carry = gui.addFolder('carry')
+      const held = defs.player.carry
+      carry.add(held, 'bone', ['RightHand', 'LeftHand'])
+      for (const [i, axis] of ['x', 'y', 'z'].entries()) carry.add(held.at, i, -0.4, 0.4, 0.005).name(`at ${axis} (m)`)
+      carry.addColor(held.light, 'color').name('light colour')
+      carry.add(held.light, 'intensity', 0, 100, 0.1).name('light intensity')
+      carry.add(held.light, 'distance', 0, 40, 0.1).name('light reach (m, 0 none)')
+      carry.add(held.light, 'decay', 0, 4, 0.05).name('light decay')
+      carry.add(held.light.shadow, 'map', [128, 256, 512, 1024, 2048]).name('light shadow map (texels a side)')
+      carry.add(held.light.shadow, 'near', 0.01, 1, 0.01).name('light shadow near (m)')
+      carry.add(held.light.shadow, 'bias', -0.02, 0.02, 0.0001).name('light shadow bias')
+      carry.add(held.light.shadow, 'normalBias', 0, 0.2, 0.001).name('light shadow normalBias')
+      carry.add({ copy: () => {
+        const out = JSON.stringify({ 'games/demo_world3d/assets/demo_world3d.json': { player: { carry: held } } }, null, 2)
+        console.log(out)
+        navigator.clipboard?.writeText(out)
+      } }, 'copy').name('copy carry JSON')
+
+      // The visitor picked, by its id, and its folder.
+      const time = () => room.rows.find(r => r.kind === 'npc3d')?.data.time ?? 0
+      const visitors = () => room.rows.filter(r => r.kind === 'visitor')
+      const picked = { id: null, to: places[0] }
+      const chosen = () => visitors().find(v => v.id === picked.id)
+      const placeAt = place => graph.places.find(q => tagsOf(q).includes(place)).point.at
+      const left = v => (v.data.route ? v.data.route.points.length - v.data.route.leg : 1)
+      // how many times each visitor has switched courses: its place it is going to changed, by its id
+      const switches = new Map()
+      const lastGoing = new Map()
+      const count = () => {
+        for (const v of visitors()) {
+          const was = lastGoing.get(v.id)
+          if (was !== undefined && was !== v.data.going) switches.set(v.id, (switches.get(v.id) ?? 0) + 1)
+          lastGoing.set(v.id, v.data.going)
+        }
+      }
+      const said = {
+        get visitor() { const v = chosen(); return v ? `${v.id} ${v.data.body}` : 'none: click one' },
+        get doing() { const v = chosen(); return v ? (v.data.doing === 'go' ? 'sent' : v.data.doing || 'nothing yet') : '' },
+        get place() {
+          const v = chosen()
+          if (!v) return ''
+          if (v.data.doing === 'go') return v.data.told.map(n => n.toFixed(1)).join(', ')
+          return v.data.going ?? ''
+        },
+        get walking() { const v = chosen(); return v ? (v.data.speed > 0 ? `${left(v)} places left` : 'standing') : '' },
+        get feet() { const v = chosen(); return v ? bodies.crowd3d.where(v, time()).map(n => n.toFixed(2)).join(', ') : '' },
+      }
+      const folder = gui.addFolder('visitor')
+      for (const key of Object.keys(said)) folder.add(said, key).listen().disable()
+      folder.add(picked, 'to', places)
+      folder.add({ send: () => { if (chosen()) orders.set(picked.id, [...placeAt(picked.to)]) } }, 'send')
+      folder.add({ 'tour again': () => { if (chosen()) orders.set(picked.id, 'tour') } }, 'tour again')
+      folder.add({ 'let go': () => { picked.id = null } }, 'let go')
+
+      // The click: on a visitor, within 24 pixels of the line from its feet to its head as the camera
+      // sees it, picks the nearest; anywhere else, with one picked, sends it to what the click meets.
+      const marks = { client: null, ring: null, line: null }
+      const pick = e => {
+        if (gui.domElement.contains(e.target) || e.button !== 0) return
+        const r3 = window.__client?.plugins.render3d
+        if (!r3?.camera || !r3.renderer) return
+        const T = r3.THREE
+        const box = r3.renderer.domElement.getBoundingClientRect()
+        const mx = e.clientX - box.left, my = e.clientY - box.top
+        const screen = p => {
+          const v = new T.Vector3(p[0], p[1], p[2]).project(r3.camera)
+          return v.z > 1 ? null : [(v.x + 1) / 2 * box.width, (1 - v.y) / 2 * box.height]
+        }
+        let best = null, near = 24
+        for (const v of visitors()) {
+          const feet = bodies.crowd3d.where(v, time())
+          const a = screen(feet), b = screen([feet[0], feet[1] + 1.7, feet[2]])
+          if (!a || !b) continue
+          const dx = b[0] - a[0], dy = b[1] - a[1]
+          const t = Math.max(0, Math.min(1, ((mx - a[0]) * dx + (my - a[1]) * dy) / (dx * dx + dy * dy || 1)))
+          const far = Math.hypot(mx - a[0] - t * dx, my - a[1] - t * dy)
+          if (far < near) { near = far; best = v }
+        }
+        if (best) { picked.id = best.id; return }
+        if (!chosen()) return
+        const ray = new T.Raycaster()
+        ray.setFromCamera(new T.Vector2(mx / box.width * 2 - 1, 1 - my / box.height * 2), r3.camera)
+        const hit = ray.intersectObject(r3.scene, true).find(h => h.object.isMesh && !h.object.isSkinnedMesh && !h.object.isInstancedMesh && h.object !== marks.ring)
+        if (hit) orders.set(picked.id, [hit.point.x, hit.point.y, hit.point.z])
+      }
+      addEventListener('pointerdown', pick)
+
+      // The ring at the picked visitor's feet and the line along its route, drawn over everything,
+      // made again on a new client.
+      const mark = () => {
+        const r3 = window.__client?.plugins.render3d
+        if (!r3?.scene) return
+        const T = r3.THREE
+        if (marks.client !== window.__client) {
+          marks.client = window.__client
+          const over = { depthTest: false, transparent: true }
+          marks.ring = new T.Mesh(new T.RingGeometry(0.45, 0.6, 32).rotateX(-Math.PI / 2), new T.MeshBasicMaterial({ color: '#ffd400', side: T.DoubleSide, ...over }))
+          marks.line = new T.Line(new T.BufferGeometry(), new T.LineBasicMaterial({ color: '#ffd400', ...over }))
+          for (const o of [marks.ring, marks.line]) { o.renderOrder = 999; o.frustumCulled = false; r3.scene.add(o) }
+        }
+        const v = chosen()
+        marks.ring.visible = marks.line.visible = !!v
+        if (!v) return
+        const feet = bodies.crowd3d.where(v, time())
+        marks.ring.position.set(feet[0], feet[1] + 0.05, feet[2])
+        const path = [feet]
+        const route = v.data.route
+        if (route) for (const leg of route.points.slice(route.leg)) path.push(...(Array.isArray(leg) ? [leg] : leg.spline.points.slice(1)))
+        else if (v.data.speed > 0) path.push(v.data.to)
+        marks.line.geometry.setFromPoints(path.map(p => new T.Vector3(p[0], p[1] + 0.1, p[2])))
+      }
+
+      // The sky: skydome3d's clock on the skydome3d row of the truth in this tab (the hour of the day, the
+      // clock's rate, the day of the year, the latitude and the moon's phase, followed as the clock runs),
+      // and every colour and number of `world.skydome3d`'s look and shadow on the page's copy, which the
+      // plugin draws from each frame; each change hands it a new object. Built once the seat's client is
+      // on a scene with a skydome3d row, and again for each new client; a scene without one has no folder.
+      // `copy` puts the clock, the look and the shadow on the clipboard under main.scene.json's keys;
+      // `reset to the file` lays the file's back.
+      const SKY = {
+        exposure: [0, 4, 0.01], nightOpen: [0, 2, 0.01], sunIntensity: [0, 10, 0.05], moonIntensity: [0, 3, 0.01],
+        hemiDay: [0, 3, 0.01], hemiNight: [0, 1, 0.005], stars: [0, 4, 0.01], haze: [0, 0.01, 0.00005], mist: [0, 0.1, 0.0005],
+        starSize: [0.01, 0.5, 0.005], twinkle: [0, 1, 0.01], twinkles: [0, 3000, 10], twinkleSpread: [1, 12, 1],
+        sunEdge: [0, 1, 0.01], moonEdge: [0, 1, 0.01], moonSize: [0.001, 0.05, 0.0005], radius: [200, 1990, 10],
+        overcast: [0, 1, 0.01], envSun: [0.001, 0.5, 0.001], envMix: [0.001, 0.5, 0.001], envIntensity: [0, 2, 0.01],
+      }
+      const SKY_COLOURS = ['dayZenith', 'dayHorizon', 'nightZenith', 'nightHorizon', 'setZenith', 'setHorizon', 'sunHigh', 'sunLow', 'moon', 'ground']
+      const SHADOW = { half: [5, 400, 1], near: [0.1, 50, 0.1], far: [50, 2000, 10], bias: [-0.001, 0.001, 0.000005], normalBias: [0, 0.5, 0.005] }
+      const CLOCK = ['t', 'rate', 'doy', 'lat', 'phase']
+      const lit = { client: null, folder: null }
+      const lighting = () => {
+        const client = window.__client
+        const world = client?.plugins.wire.scene.world
+        const row = () => room.rows.find(r => r.kind === 'skydome3d')
+        if (!client || lit.client === client || !world?.skydome3d || !row()) return
+        lit.client = client
+        lit.folder?.destroy()
+        const f = (lit.folder = gui.addFolder('sky'))
+        const day = world.skydome3d.day
+        const sky = () => row().data
+        const fromFile = { clock: Object.fromEntries(CLOCK.map(k => [k, sky()[k]])), look: structuredClone(world.skydome3d.look), shadow: structuredClone(world.skydome3d.shadow) }
+        const clock = f.addFolder('clock')
+        const at = {
+          get hour() { return (sky().t / day) * 24 }, set hour(h) { sky().t = (h / 24) * day },
+          get rate() { return sky().rate }, set rate(v) { sky().rate = v },
+          get doy() { return sky().doy }, set doy(v) { sky().doy = v },
+          get lat() { return sky().lat }, set lat(v) { sky().lat = v },
+          get phase() { return sky().phase }, set phase(v) { sky().phase = v },
+        }
+        clock.add(at, 'hour', 0, 24, 0.01).name('hour of the day').listen()
+        clock.add(at, 'rate', 0, 200, 0.5).name('clock rate').listen()
+        clock.add(at, 'doy', 1, 365, 1).name('day of the year').listen()
+        clock.add(at, 'lat', -90, 90, 0.5).name('latitude').listen()
+        clock.add(at, 'phase', 0, 0.999, 0.001).name('moon phase').listen()
+        const look = structuredClone(world.skydome3d.look)
+        const setLook = () => { world.skydome3d.look = structuredClone(look) }
+        const lf = f.addFolder('look')
+        for (const key of SKY_COLOURS) lf.addColor(look, key).onChange(setLook)
+        for (const [key, [lo, hi, step]] of Object.entries(SKY)) lf.add(look, key, lo, hi, step).onChange(setLook)
+        lf.add(look.sunShrink, 0, -0.5, 1, 0.01).name('sunShrink lo').onChange(setLook)
+        lf.add(look.sunShrink, 1, -0.5, 1, 0.01).name('sunShrink hi').onChange(setLook)
+        const shadow = structuredClone(world.skydome3d.shadow)
+        const setShadow = () => { world.skydome3d.shadow = structuredClone(shadow) }
+        const sf = f.addFolder('shadow')
+        sf.add(shadow, 'map', [512, 1024, 2048, 4096, 8192]).name('map (texels a side)').onChange(setShadow)
+        for (const [key, [lo, hi, step]] of Object.entries(SHADOW)) sf.add(shadow, key, lo, hi, step).onChange(setShadow)
+        f.add({ copy: () => {
+          const out = { 'games/demo_world3d/main.scene.json': {
+            world: { skydome3d: { look, shadow } },
+            prefabs: { skydome3d: Object.fromEntries(CLOCK.map(k => [k, Math.round(sky()[k] * 1000) / 1000])) },
+          } }
+          console.log(JSON.stringify(out, null, 2))
+          navigator.clipboard?.writeText(JSON.stringify(out, null, 2))
+        } }, 'copy').name('copy skydome3d JSON')
+        f.add({ reset: () => {
+          Object.assign(sky(), fromFile.clock)
+          // sunShrink's list kept, since its two sliders are bound to it
+          const shrink = look.sunShrink
+          Object.assign(look, structuredClone(fromFile.look))
+          look.sunShrink = Object.assign(shrink, fromFile.look.sunShrink)
+          Object.assign(shadow, structuredClone(fromFile.shadow))
+          setLook()
+          setShadow()
+          f.controllersRecursive().forEach(c => c.updateDisplay())
+        } }, 'reset').name('reset to the file')
+      }
+
+      // The stick in the hand: the player kind's first prop of `world.anim.kinds.player.props`, on the page's
+      // copy of the scene, its bone, `at` (metres off the bone in its frame) and `turn` (degrees, an XYZ
+      // Euler), which anim hangs it by again the frame they change. Built for each new client whose
+      // player kind has a prop. `copy` puts the props on the clipboard under the scene file they go in.
+      const sceneFile = file.prefabs.scenemanager.scenes[file.prefabs.scenemanager.entry].file
+      const hung = { client: null, folder: null }
+      const stick = () => {
+        const client = window.__client
+        const prop = client?.plugins.wire.scene.world.anim?.kinds.player.props?.[0]
+        if (!client || hung.client === client || !prop) return
+        hung.client = client
+        hung.folder?.destroy()
+        const f = (hung.folder = gui.addFolder('stick'))
+        f.add(prop, 'bone', ['LeftHand', 'RightHand'])
+        for (const [i, axis] of ['x', 'y', 'z'].entries()) f.add(prop.at, i, -0.4, 0.4, 0.005).name(`at ${axis} (m)`)
+        for (const [i, axis] of ['x', 'y', 'z'].entries()) f.add(prop.turn, i, -180, 180, 0.5).name(`turn ${axis} (°)`)
+        f.add({ copy: () => {
+          const out = JSON.stringify({ [`games/demo_world3d/${sceneFile}`]: { world: { anim: { kinds: { player: { props: client.plugins.wire.scene.world.anim.kinds.player.props } } } } } }, null, 2)
+          console.log(out)
+          navigator.clipboard?.writeText(out)
+        } }, 'copy').name('copy stick JSON')
+      }
+
+      // The lights, each switched on and off by itself. `torches` and `fog` reload the page (above). The
+      // torch's lamp is the walltorch effect's lamp layer, the one object every torch's light reads each
+      // frame on this page's copy of the effects file, so its numbers and its shadow show at once; the
+      // carried light is the player's `carry.light`, off by its strength put to 0 and back; the exposure
+      // is the renderer's. The fog's numbers are `world.lights3d.fog` on the page's copy of the scene,
+      // read by the fog every frame. `copy` puts the lamp and the fog on the clipboard under the files
+      // they go in. Built for each new client of main once its effects file has landed.
+      const lamps = { client: null, folder: null }
+      const lights = () => {
+        const client = window.__client
+        if (!client || lamps.client === client || client.plugins.wire.scene.world.lights3d === undefined) return
+        const effects = client.plugins.loader.get('effects')
+        const lamp = effects?.effects.walltorch?.find(l => 'lamp' in l)?.lamp
+        if (!lamp) return
+        lamps.client = client
+        lamps.folder?.destroy()
+        if (!torchShadow) lamp.shadow = false
+        const f = (lamps.folder = gui.addFolder('lights'))
+        f.add({ torches: kept }, 'torches', 0, torches.length, 1).name(`torches (of ${torches.length}, reloads)`).onFinishChange(n => reload('torches', n))
+        f.add({ people: met }, 'people', 0, people.length, 1).name(`people (of ${people.length}, reloads)`).onFinishChange(n => reload('people', n))
+        f.add({ atlas: shadows.atlas }, 'atlas', [512, 1024, 2048, 4096]).name('shadow atlas (texels a side, reloads)').onChange(n => reload('atlas', n))
+        f.add({ tile: shadows.tile }, 'tile', [64, 128, 256, 512]).name('shadow tile (texels a side, reloads)').onChange(n => reload('tile', n))
+        f.add({ fog: fogged }, 'fog').name('fog (reloads)').onChange(on => reload('fog', on ? '1' : '0'))
+        const tf = f.addFolder('torch lamp')
+        tf.add(lamp, 'intensity', 0, 60, 0.1).name('intensity (candela)')
+        tf.add(lamp, 'distance', 0, 40, 0.1).name('distance (m, 0 none)')
+        tf.add(lamp, 'decay', 0, 4, 0.05)
+        tf.add(lamp, 'flicker', 0, 1, 0.01)
+        tf.add(lamp, 'shadow').name('shadow')
+        const carried = defs.player.carry.light
+        const on = { carry: carried.intensity > 0, strength: carried.intensity || 6 }
+        f.add(on, 'carry').name('carried light').onChange(v => {
+          if (v) carried.intensity = on.strength
+          else { on.strength = carried.intensity || on.strength; carried.intensity = 0 }
+          carry.controllersRecursive().forEach(c => c.updateDisplay())
+        })
+        const r3 = client.plugins.render3d
+        // The castle drawn flat: every mesh wearing supershader3d's relief material, alone or in its list, (the castle's stone,
+        // the slate and the shingle roofs) put in one plain grey MeshStandardMaterial dressed by render3d,
+        // so lights3d still lights it, and put back in its own when switched off.
+        const ss = client.plugins.supershader3d
+        const flat = r3.dress(new r3.THREE.MeshStandardMaterial({ color: '#8a8580', roughness: 0.9, metalness: 0 }))
+        const worn = new Map()
+        f.add({ flat: false }, 'flat').name('castle flat material').onChange(on => {
+          if (on) {
+            const relief = ss?.material('relief')
+            // the town is one mesh of many materials, a group a draw call: the relief one swapped in its list
+            r3.scene.traverse(o => {
+              if (!o.isMesh || !relief) return
+              const list = Array.isArray(o.material) ? o.material : [o.material]
+              if (!list.includes(relief)) return
+              worn.set(o, o.material)
+              o.material = Array.isArray(o.material) ? list.map(m => (m === relief ? flat : m)) : flat
+            })
+          } else {
+            for (const [o, m] of worn) o.material = m
+            worn.clear()
+          }
+        })
+        f.add({ get exposure() { return r3.renderer?.toneMappingExposure ?? 1 }, set exposure(v) { if (r3.renderer) r3.renderer.toneMappingExposure = v } }, 'exposure', 0, 4, 0.01).name('exposure')
+        const fog = client.plugins.wire.scene.world.lights3d.fog
+        if (fog) {
+          const ff = f.addFolder('fog')
+          ff.add(fog, 'density', 0, 0.3, 0.001).name('density (share a metre)')
+          ff.add(fog, 'steps', 4, 256, 1).name('steps a ray')
+          ff.add(fog, 'resolution', 0.1, 1, 0.05).name('resolution (share of the frame)')
+          ff.add(fog, 'blend', 0.02, 1, 0.01).name('blend (share of a new frame; 1 none)')
+          ff.add(fog, 'g', -0.95, 0.95, 0.01).name('g (throws light on toward the eye)')
+          ff.add(fog, 'far', 1, 200, 1).name('far (m, a ray that meets nothing)')
+          ff.addColor(fog, 'colour').name('colour (its own light)')
+          if (fog.noise) {
+            const nf = ff.addFolder('noise')
+            nf.add(fog.noise, 'size', 2, 200, 0.5).name('size (m it repeats over)')
+            nf.add(fog.noise, 'layers', 1, 4, 1).name('layers')
+            nf.add(fog.noise, 'strength', 0, 1, 0.01).name('strength (0 even, 1 clumps)')
+          }
+          if (fog.height) {
+            const hf = ff.addFolder('height')
+            hf.add(fog.height, 'floor', -5, 20, 0.1).name('floor (m, full below)')
+            hf.add(fog.height, 'thinning', 0.2, 30, 0.1).name('thinning (m to halve)')
+          }
+        }
+        f.add({ copy: () => {
+          const out = JSON.stringify({
+            'games/demo_world3d/assets/effects.json': { effects: { walltorch: [{ lamp }] } },
+            ...(fog ? { 'games/demo_world3d/main.scene.json': { world: { lights3d: { fog } } } } : {}),
+          }, null, 2)
+          console.log(out)
+          navigator.clipboard?.writeText(out)
+        } }, 'copy').name('copy lights JSON')
+      }
+
+      const readout = document.getElementById('readout')
+      const frames = []
+      let last = performance.now(), owed = 0
+      const loop = async now => {
+        frames.push(now)
+        while (frames[0] < now - 1000) frames.shift()
+        const worst = frames.slice(1).reduce((m, t, i) => Math.max(m, t - frames[i]), 0)
+        owed += Math.min((now - last) / 1000, 0.25)
+        last = now
+        try {
+          page.input()
+          while (owed >= dt) { truth.step(dt); count(); owed -= dt }
+          const nav = window.__client?.plugins.nav3d
+          if (nav) Object.assign(nav, views)
+          mark()
+          await page.frame(owed / dt)
+          lighting()
+          stick()
+          lights()
+        } catch (e) { caught(e) }
+        const p = me()
+        const where = v => (v.data.doing === 'go' ? `sent to ${v.data.told.map(n => n.toFixed(1)).join(', ')}` : v.data.going)
+        readout.textContent = [
+          `${frames.length} fps  longest frame ${worst.toFixed(1)} ms  step ${truth.n}`,
+          (l3 => l3 ? `lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} still tiles drawn this frame, ${l3.moving} moving tiles, ${l3.owed} faces owed` : '')(window.__client?.plugins.lights3d),
+          p ? `you (${p.data.pos.map(v => v.toFixed(2)).join(', ')}) ${p.data.grounded ? 'on the ground' : 'in the air'}` : '',
+          ...visitors().map(v => `${v.id === picked.id ? '> ' : ''}visitor ${v.id} ${v.data.body}: ${v.data.speed > 0 ? `going to ${where(v)}, ${left(v)} places left` : `standing at ${where(v)}`} at y ${bodies.crowd3d.where(v, time())[1].toFixed(2)}, switched courses ${switches.get(v.id) ?? 0}`),
+          ...errors,
+        ].join('\n')
+        requestAnimationFrame(loop)
+      }
+      requestAnimationFrame(loop)
+    </script>
+  </body>
+</html>

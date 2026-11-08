@@ -29,7 +29,6 @@ what it needs).
   drive, a ragdoll, a rope and a piston, with spawning, explosions and wind.
 - **demo_box3d**: box3d's bodies and joints in an arena: piles to knock over, every shape, a hinged
   door, a pendulum, a sprung plank and a welded chain, with a ball to fire and an explosion.
-- **demo_castle**: a lineup of structures to walk around.
 - **demo_gamepads**: what the player plugin reads of every gamepad, drawn live.
 - **demo_gameui**: the conventions of the `ui` plugin, each shown by a kind of its own.
 - **demo_motion3d**: an X Bot on motion3d over a checkerboard yard: zones where the use key plays
@@ -53,5 +52,7 @@ what it needs).
 - **demo_walker**: an X Bot on walker over a checkerboard course of stairs, ramps, a pond, a ladder
   and a parkour yard, and the game's own plugins that extend walker with climbing, sitting, cover,
   vaults, wall runs, rolls, slides and flips.
+- **demo_world3d**: pro-ng's castle town and a village, each a place world3d draws and hands to the
+  plugins that walk, route and shade it, with people going about it and torches at night; and a bridge.
 
 MIT, Outside Data, but for art a demo credits to someone else under its own licence.

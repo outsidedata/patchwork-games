@@ -1,0 +1,560 @@
+{
+ "about": "the shader of tavern.art.looks.json, put together from its materials' looks by the library's pro-ng/material/compose.js",
+ "picture": 1024,
+ "materials": [
+  {
+   "name": "timber_frame",
+   "look": "timber_frame",
+   "call": "solid",
+   "colour": [
+    0.7912979403326302,
+    0.019382360956935723,
+    0.06662593864377289
+   ]
+  },
+  {
+   "name": "daub",
+   "look": "daub",
+   "call": "solid",
+   "colour": [
+    0.019382360956935723,
+    0.3467040563550296,
+    0.7912979403326302
+   ]
+  },
+  {
+   "name": "flagstone_worn",
+   "look": "flagstone_worn",
+   "call": "solid",
+   "colour": [
+    0.14995978981060856,
+    0.7912979403326302,
+    0.019382360956935723
+   ]
+  },
+  {
+   "name": "boards",
+   "look": "boards",
+   "call": "solid",
+   "colour": [
+    0.39157247774972326,
+    0.14126329114027164,
+    0.028426039504420793
+   ]
+  },
+  {
+   "name": "roof_slate",
+   "look": "wall_stone",
+   "call": "relief",
+   "colour": [
+    0.042311410620809675,
+    0.05780543019106723,
+    0.08437621154414882
+   ]
+  },
+  {
+   "name": "timber",
+   "look": "timber",
+   "call": "solid",
+   "colour": [
+    0.25415209433082675,
+    0.10224173308810132,
+    0.024157632448504756
+   ]
+  },
+  {
+   "name": "stone",
+   "look": "rock",
+   "call": "solid",
+   "colour": [
+    0.26225065752969623,
+    0.26225065752969623,
+    0.26225065752969623
+   ]
+  },
+  {
+   "name": "wood",
+   "look": "timber",
+   "call": "solid",
+   "colour": [
+    0.25415209433082675,
+    0.10224173308810132,
+    0.024157632448504756
+   ]
+  },
+  {
+   "name": "iron",
+   "look": "iron",
+   "call": "solid",
+   "colour": [
+    0.013702083047289686,
+    0.11443537382697373,
+    1
+   ]
+  },
+  {
+   "name": "plaster",
+   "look": "plaster",
+   "call": "solid",
+   "colour": [
+    0.8631572134541023,
+    0.7912979403326302,
+    0.6239603916750761
+   ]
+  },
+  {
+   "name": "glass",
+   "look": "glass",
+   "call": "seeThrough",
+   "colour": [
+    0.12213877222960187,
+    0.7454042095403874,
+    1
+   ]
+  },
+  {
+   "name": "terracotta",
+   "look": "terracotta",
+   "call": "solid",
+   "colour": [
+    0.3049873140698863,
+    0.7912979403326302,
+    0.019382360956935723
+   ]
+  },
+  {
+   "name": "chimney_stone",
+   "look": "chimney_stone",
+   "call": "solid",
+   "colour": [
+    0.10224173308810132,
+    0.08437621154414882,
+    0.06480326669290577
+   ]
+  },
+  {
+   "name": "flue_soot",
+   "look": "flue_soot",
+   "call": "solid",
+   "colour": [
+    0.042311410620809675,
+    0.02315336617811041,
+    0.014443843596092545
+   ]
+  },
+  {
+   "name": "lime_mortar",
+   "look": "lime_mortar",
+   "call": "solid",
+   "colour": [
+    0.6866853124353135,
+    0.5840784178911641,
+    0.35153259950043936
+   ]
+  }
+ ],
+ "vertexPars": "\nattribute float lookId;\nattribute vec3 lookInfo;\nattribute vec3 s0;\nattribute vec3 s1;\nattribute vec4 s2;\nattribute vec2 s3;\nflat varying float vLookId;\nvarying vec3 vLookInfo;\nvarying vec2 vLookUv;\nvarying vec3 vLookWorld;\nvarying vec3 vLookWN;\nvarying vec3 vS0;\nvarying vec3 vS1;\nvarying vec4 vS2;\nvarying vec2 vS3;\nvoid lookVertex_4() {\n\n  vS0 = dot(s0, s0) > 0.0 ? normalize((modelViewMatrix * vec4(s0, 0.0)).xyz) : vec3(0.0);\n  vS1 = dot(s1, s1) > 0.0 ? normalize((modelViewMatrix * vec4(s1, 0.0)).xyz) : vec3(0.0);\n\n}\n",
+ "vertexMain": "\nvLookId = lookId;\nvLookInfo = lookInfo;\nvLookUv = uv;\nvLookWorld = (modelMatrix * vec4(position, 1.0)).xyz;\nvLookWN = normalize(mat3(modelMatrix) * normal);\nvS0 = s0;\nvS1 = s1;\nvS2 = s2;\nvS3 = s3;\nswitch (int(lookId + 0.5)) {\n  case 4: lookVertex_4(); break;\n}\n",
+ "calls": {
+  "solid": {
+   "ids": [
+    0,
+    1,
+    2,
+    3,
+    5,
+    6,
+    7,
+    8,
+    9,
+    11,
+    12,
+    13,
+    14
+   ],
+   "fragmentPars": "uniform highp sampler2D lookSettings;\n\nflat varying float vLookId;\nvarying vec3 vLookInfo;\nvarying vec2 vLookUv;\nvarying vec3 vLookWorld;\nvarying vec3 vLookWN;\nvarying vec3 vS0;\nvarying vec3 vS1;\nvarying vec4 vS2;\nvarying vec2 vS3;\n#define s0 vS0\n#define s1 vS1\n#define s2 vS2\n#define s3 vS3\nuniform float lookView;\nuniform float lookDebug;\n// the uv's change across the pixel, worked out once where every pixel of the quad runs it, so a picture read inside a\n// look's branch still knows its sharpness\nvec2 lookGx, lookGy;\n\nfloat kh(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }\nfloat kh1(float x) { return fract(sin(x * 91.7) * 43758.5453); }\nfloat kn(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  vec2 u = f * f * (3.0 - 2.0 * f);\n  return mix(mix(kh(i), kh(i + vec2(1, 0)), u.x), mix(kh(i + vec2(0, 1)), kh(i + vec2(1, 1)), u.x), u.y);\n}\nfloat kfbm(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 5; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s / 0.97;\n}\nfloat kfbm4(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 4; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s;\n}\n// a feature f metres across fades to its mean where it is finer than a pixel\nfloat kfade(float f) { vec2 fw = abs(lookGx) + abs(lookGy); return clamp(1.5 - (fw.x + fw.y) / f, 0.0, 1.0); }\n// cells of jittered seeds: the distance to the nearest, its number (0 to 1), and how far the second is past it\nfloat kvor(vec2 p, out float id, out float edge) {\n  vec2 i = floor(p), f = fract(p);\n  float d1 = 8.0, d2 = 8.0;\n  vec2 best = vec2(0.0);\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 c = i + o;\n    vec2 r = o + vec2(kh(c), kh(c + 7.3)) - f;\n    float d = dot(r, r);\n    if (d < d1) { d2 = d1; d1 = d; best = c; } else if (d < d2) { d2 = d; }\n  }\n  id = kh(best + 3.7);\n  edge = sqrt(d2) - sqrt(d1);\n  return sqrt(d1);\n}\n// a dimple field: the distance to the nearest of jittered cells' seeds\nfloat kcell(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  float d = 8.0;\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 r = o + vec2(kh(i + o), kh(i + o + 7.3)) - f;\n    d = min(d, dot(r, r));\n  }\n  return sqrt(d);\n}\n// courses: the row along v, the piece in it along u (each row offset), where in the piece (0 to 1 each way)\nvec4 kcourse(vec2 uv, float row, float wide, float jitter, float seed, out vec2 id) {\n  float r = floor(uv.y / row);\n  float shift = kh1(r + seed) * wide;\n  float w = wide * (1.0 - jitter * 0.5 + jitter * kh(vec2(r, floor((uv.x + shift) / wide) + seed)));\n  float x = (uv.x + shift) / w;\n  id = vec2(r, floor(x));\n  return vec4(fract(x), fract(uv.y / row), r, w);\n}\n// marble's veins: thin lines wandering through a warped field, the main ones and finer ones across them\nfloat kveins(vec2 p, float seed) {\n  float w = kfbm(p * 1.3 + seed) * 4.0;\n  float a = pow(1.0 - abs(sin((p.x * 1.6 + p.y * 0.6 + w) * 3.14159)), 22.0);\n  float b = pow(1.0 - abs(sin((p.y * 2.7 - p.x * 1.1 + kfbm(p * 2.6 + seed + 7.0) * 3.0) * 3.14159)), 50.0);\n  return clamp(a + 0.6 * b, 0.0, 1.0);\n}\n// wood's grain along u: its rings' lines (late wood 1, early 0) wandering across v, and its fibres\nfloat kring(vec2 uv, float seed, float rings) {\n  float w = kfbm(vec2(uv.x * 0.35, uv.y * 2.0) + seed) * 1.6;\n  return smoothstep(0.5, 0.95, fract(uv.y * rings + w + uv.x * 0.04));\n}\nfloat kfibre(vec2 uv, float seed) { return kn(vec2(uv.x * 3.0, uv.y * 420.0) + seed) * kfade(0.003); }\n// how strongly a cloth's weave shows: a plain weave of threads t metres across, over and under\nfloat kweave(vec2 uv, float t) {\n  vec2 q = uv / t;\n  float warp = sin(q.x * 3.14159), weft = sin(q.y * 3.14159);\n  float over = step(0.0, warp * weft);\n  return mix(0.5, mix(0.8, 1.08, over) * (0.85 + 0.15 * abs(over > 0.5 ? weft : warp)), kfade(t * 2.0));\n}\n// the normal bent by a height field, as three's bump map bends it (perturbNormalArb)\nvec3 kitBump(vec3 pos, vec3 n, float h, float faceDirection) {\n  vec3 sx = dFdx(pos), sy = dFdy(pos);\n  vec3 r1 = cross(sy, n), r2 = cross(n, sx);\n  float det = dot(sx, r1) * faceDirection;\n  vec2 dh = vec2(dFdx(h), dFdy(h));\n  vec3 grad = sign(det) * (dh.x * r1 + dh.y * r2);\n  return normalize(abs(det) * n - grad);\n}\n// a normal in the surface's own ways (u, v, out) turned into the view's, the ways found from the uv's change across\n// the pixel, as three's normal map without tangents finds them (getTangentFrame)\nvec3 lookPerturb(vec3 n, vec3 nts, float faceDirection) {\n  vec3 q0 = dFdx(-vViewPosition), q1 = dFdy(-vViewPosition);\n  vec3 q1perp = cross(q1, n), q0perp = cross(n, q0);\n  vec3 T = q1perp * lookGx.x + q0perp * lookGy.x;\n  vec3 B = q1perp * lookGx.y + q0perp * lookGy.y;\n  float det = max(dot(T, T), dot(B, B));\n  float scale = det == 0.0 ? 0.0 : faceDirection * inversesqrt(det);\n  return normalize(T * (nts.x * scale) + B * (nts.y * scale) + n * nts.z);\n}\n\nstruct Look {\n  vec3 colour; float rough; float metal; float height; vec3 nts; vec3 normal; bool ownNormal;\n  float ao; float aoDirect; float alpha; vec3 glow;\n  float clearcoat; float clearcoatRough; vec3 sheen; float sheenRough; float iridescence; float iridIor; float iridThick;\n  float transmission; float thickness; vec3 attColour; float attDist; float ior; float dispersion;\n};\nLook lookStart() {\n  Look k;\n  k.colour = vec3(0.5); k.rough = 0.8; k.metal = 0.0; k.height = 0.0; k.nts = vec3(0.0, 0.0, 1.0);\n  k.normal = vec3(0.0, 0.0, 1.0); k.ownNormal = false; k.ao = 1.0; k.aoDirect = 0.0; k.alpha = 1.0; k.glow = vec3(0.0);\n  k.clearcoat = 0.0; k.clearcoatRough = 0.1; k.sheen = vec3(0.0); k.sheenRough = 0.5;\n  k.iridescence = 0.0; k.iridIor = 1.3; k.iridThick = 400.0;\n  k.transmission = 0.0; k.thickness = 0.0; k.attColour = vec3(1.0); k.attDist = 1e9; k.ior = 1.5; k.dispersion = 0.0;\n  return k;\n}\n\n\nuniform highp sampler2DArray lookPictures;\nuniform float lookMeans[8];\nvec3 lookSrgb(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }\nvec4 picData(int t, vec2 uv, float scale) { return textureGrad(lookPictures, vec3(uv, float(t)), lookGx * scale, lookGy * scale); }\nvec3 picColour(int t, vec2 uv, float scale) { return lookSrgb(picData(t, uv, scale).rgb); }\nvec4 picDataLod(int t, vec2 uv, float lod) { return textureLod(lookPictures, vec3(uv, float(t)), lod); }\nvec3 picColourLod(int t, vec2 uv, float lod) { return lookSrgb(picDataLod(t, uv, lod).rgb); }\nfloat picMean(int t) { return lookMeans[t]; }\n\nfloat p_stoneMin;\nfloat p_stoneMax;\nfloat p_rowMin;\nfloat p_rowMax;\nfloat p_joint;\nfloat p_seed;\nfloat p_recess;\nfloat p_edgeRound;\nfloat p_edgeDrop;\nfloat p_corner;\nfloat p_chip;\nfloat p_bulge;\nfloat p_tilt;\nfloat p_detail;\nfloat p_detailNormal;\nfloat p_valueVar;\nfloat p_warm;\nfloat p_dark;\nfloat p_mottle;\nfloat p_grime;\nfloat p_damp;\nfloat p_moss;\nfloat p_rockContrast;\nfloat p_rockScale;\nfloat p_mortScale;\nfloat p_pom;\nfloat p_pomOn;\nfloat p_shadowOn;\nvec3 p_stoneTint;\nvec3 p_mortTint;\nfloat p_repeat;\nvec3 p_tint;\nfloat p_contrast;\nfloat p_metres;\nvec3 p_glTint;\nvec3 p_glTint2;\nfloat p_glWaves;\nfloat p_glWaveDepth;\nfloat p_glSeeds;\nfloat p_glRough;\nfloat p_glAlpha;\nfloat p_glAlphaVar;\nint t_rockCol;\nint t_rockDisp;\nint t_rockNrm;\nint t_mortCol;\nint t_mortDisp;\nint t_col;\nint t_nrm;\nint t_rough;\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nvoid look_0(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float post = step(fract(uv.x / 1.2), 0.15);\n    float rail = step(fract(wp.y / 1.4), 0.12);\n    float brace = smoothstep(0.08, 0.06, abs(fract((uv.x + wp.y) / 1.2) - 0.5) * 1.2) * (1.0 - rail);\n    float timber = max(max(post, rail), brace);\n    vec3 wood = vec3(0.18, 0.11, 0.06) * (0.8 + 0.3 * kn(vec2(uv.x * 2.0, wp.y * 30.0) + seed));\n    vec3 infill = vec3(0.85, 0.8, 0.7) * (0.92 + 0.1 * kfbm(uv * 4.0 + seed));\n    k.colour = mix(infill, wood, timber);\n    k.rough = mix(0.95, 0.8, timber);\n    k.height = 0.01 * timber;\n\n}\n\nvoid look_1(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float lump = kfbm(uv * 4.0 + seed);\n    float straw = smoothstep(0.75, 0.9, kn(vec2(uv.x * 60.0 + uv.y * 20.0, uv.y * 6.0) + seed)) * kfade(0.006);\n    k.colour = mix(vec3(0.42, 0.33, 0.22), vec3(0.58, 0.48, 0.34), lump) * (1.0 - 0.1 * straw) + vec3(0.12, 0.1, 0.03) * straw;\n    k.rough = 0.98;\n    k.height = 0.006 * (lump - 0.5) + 0.0006 * straw;\n\n}\n\nvoid look_2(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float id, e;\n    float d = kvor(uv * 1.6 + seed, id, e);\n    float joint = smoothstep(0.02, 0.05, e);\n    float path = smoothstep(0.6, 0.0, abs(wp.x - floor(wp.x / 3.0) * 3.0 - 1.5)) * smoothstep(0.5, 0.9, wn.y);\n    vec3 c = mix(vec3(0.42, 0.4, 0.36), vec3(0.55, 0.52, 0.46), id) * (0.88 + 0.2 * kfbm(uv * 5.0 + id * 9.0));\n    k.colour = mix(vec3(0.25, 0.23, 0.2), c * (1.0 + 0.12 * path), joint);\n    k.rough = mix(0.95, mix(0.8, 0.45, path), joint);\n    k.height = mix(-0.008, 0.002 * (kfbm(uv * 4.0 + id) - 0.5) * (1.0 - path), joint);\n\n}\n\nvoid look_3(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float row = floor(uv.y / 0.25);\n    float inRow = fract(uv.y / 0.25);\n    float tone = kh1(row + seed);\n    float grain = kn(vec2(uv.x * 3.0, (uv.y + row) * 90.0) + row) * kfade(0.006);\n    float edge = smoothstep(0.0, 0.03, inRow) * smoothstep(1.0, 0.97, inRow);\n    vec3 wood = mix(vec3(0.27, 0.17, 0.09), vec3(0.46, 0.31, 0.17), tone);\n    k.colour = wood * mix(0.45, 1.0, mix(1.0, edge, kfade(0.04))) * (0.82 + 0.3 * grain);\n    k.rough = 0.82;\n    k.metal = 0.0;\n    k.height = mix(0.0, -0.003 * (1.0 - edge), kfade(0.04)) + 0.0005 * grain;\n\n}\n\nvoid look_5(inout Look k) {\n  p_repeat = texelFetch(lookSettings, ivec2(0, 5), 0).r;\n  t_col = 5;\n  t_nrm = 6;\n  t_rough = 7;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n  vec2 tuv = uv * p_repeat;\n  k.colour = picColour(t_col, tuv, p_repeat);\n  k.nts = picData(t_nrm, tuv, p_repeat).xyz * 2.0 - 1.0;\n  k.rough = picData(t_rough, tuv, p_repeat).r;\n\n}\n\nvoid look_6(inout Look k) {\n  p_tint = texelFetch(lookSettings, ivec2(0, 6), 0).rgb;\n  p_contrast = texelFetch(lookSettings, ivec2(1, 6), 0).r;\n  p_metres = texelFetch(lookSettings, ivec2(2, 6), 0).r;\n  t_col = 0;\n  t_nrm = 2;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n  // each part on its own patch of the pictures, from its thing's and its part's numbers\n  vec2 kitPatch = vec2(fract(vLookInfo.y * 0.61803 + vLookInfo.z * 0.137) * 37.0, fract(vLookInfo.y * 0.75488 + vLookInfo.z * 0.291) * 23.0);\n  vec2 tuv = uv / p_metres + kitPatch;\n  vec3 picC = picColour(t_col, tuv, 1.0 / p_metres);\n  float kitL = dot(picC, vec3(0.2126, 0.7152, 0.0722)) / picMean(t_col);\n  vec3 kitN = picData(t_nrm, tuv, 1.0 / p_metres).xyz * 2.0 - 1.0;\n  float kitSteep = 1.0 - clamp(kitN.z, 0.0, 1.0);\n  float kitCav = clamp(smoothstep(0.05, 0.4, kitSteep) * 0.7 + smoothstep(0.7, 0.35, kitL) * 0.3, 0.0, 1.0);\n  float kitBend = length(fwidth(wn)) / max(length(fwidth(wp)), 1e-5);\n  float kitEdge = smoothstep(20.0, 70.0, kitBend) * (0.6 + 0.4 * kn(uv * 40.0 + seed));\n  float kitUp = smoothstep(0.55, 0.95, wn.y);\n  float kitDamp = 1.0 - smoothstep(0.0, 0.35 + 0.3 * kn(wp.xz * 2.0), wp.y);\n  float kitMoss = clamp(smoothstep(0.55, 0.8, kfbm4(uv * 2.3 + seed * 1.7)) * (kitUp * 0.7 + kitDamp * 0.5) * (0.4 + kitCav), 0.0, 1.0) * 0.8;\n  float kitV = 1.0 + (kh1(seed + 0.37) - 0.5) * 0.3;\n  float kitWarm = (kh1(seed + 5.1) - 0.5) * 0.5;\n  float kitMott = 1.0 + (kfbm4(uv * 1.3 + seed) - 0.5) * 0.35;\n  vec3 kitC = p_tint * mix(1.0, kitL, p_contrast) * kitV * kitMott * vec3(1.0 + 0.16 * kitWarm, 1.0 + 0.02 * kitWarm, 1.0 - 0.2 * kitWarm);\n  kitC *= mix(1.0, 0.75, kitCav);\n  kitC = mix(kitC, kitC * vec3(0.8, 0.74, 0.64), kitCav * 0.6);\n  kitC *= 1.0 - 0.35 * kitDamp;\n  kitC = mix(kitC, min(kitC * 1.45 + 0.03, vec3(1.0)), kitEdge * (1.0 - kitCav));\n  kitC = mix(kitC, vec3(0.05, 0.075, 0.02) * (0.7 + 0.6 * kitL), kitMoss);\n  k.colour = kitC;\n  // the roughness from the same: the cavity and the moss rougher, the worn edges smoother\n  k.rough = clamp(0.8 + 0.18 * kitCav + 0.2 * kitMoss - 0.22 * kitEdge, 0.5, 1.0);\n  // the relief: the normal picture, and over it the rock's lightness as a height, its dark sunk\n  k.nts = kitN;\n  k.height = (kitL - 1.0) * 0.003;\n  // the cavity shades the light that comes from everywhere\n  k.ao = mix(1.0, 0.7, kitCav);\n\n}\n\nvoid look_7(inout Look k) {\n  p_repeat = texelFetch(lookSettings, ivec2(0, 7), 0).r;\n  t_col = 5;\n  t_nrm = 6;\n  t_rough = 7;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n  vec2 tuv = uv * p_repeat;\n  k.colour = picColour(t_col, tuv, p_repeat);\n  k.nts = picData(t_nrm, tuv, p_repeat).xyz * 2.0 - 1.0;\n  k.rough = picData(t_rough, tuv, p_repeat).r;\n\n}\n\nvoid look_8(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float dim = kcell(uv * 22.0 + seed);\n    float big = kfbm4(uv * 3.0 + seed);\n    float rust = smoothstep(0.5, 0.78, kfbm4(uv * 2.2 + seed * 3.1)) * 0.85 + smoothstep(0.45, 0.2, dim) * 0.06 * kfade(0.05);\n    vec3 iron = mix(vec3(0.1, 0.095, 0.09), vec3(0.21, 0.2, 0.19), big);\n    vec3 red = mix(vec3(0.14, 0.065, 0.03), vec3(0.24, 0.12, 0.055), kn(uv * 40.0 + seed));\n    k.colour = mix(iron, red, clamp(rust, 0.0, 1.0));\n    k.metal = mix(0.3, 0.05, clamp(rust, 0.0, 1.0));\n    k.rough = mix(0.45 + 0.25 * big, 0.92, clamp(rust, 0.0, 1.0));\n    k.height = -0.0012 * smoothstep(0.5, 0.0, dim) * kfade(0.05);\n\n}\n\nvoid look_9(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float stroke = kn(vec2(uv.x * 1.8 + uv.y * 0.6, uv.y * 7.0) + seed);\n    float grain = kn(uv * 70.0 + seed) * kfade(0.02);\n    float grime = smoothstep(0.55, 0.85, kfbm4(uv * 1.2 + seed));\n    k.colour = vec3(0.86, 0.82, 0.72) * (0.92 + 0.08 * stroke + 0.05 * grain);\n    k.colour = mix(k.colour, vec3(0.55, 0.5, 0.42), grime * 0.45);\n    k.rough = 0.92;\n    k.metal = 0.0;\n    k.height = 0.002 * (stroke - 0.5) + 0.0004 * grain;\n\n}\n\nvoid look_11(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float grain = kn(uv * 600.0 + seed) * kfade(0.002);\n    float blush = kfbm(uv * 2.0 + seed);\n    k.colour = mix(vec3(0.52, 0.22, 0.12), vec3(0.66, 0.34, 0.2), blush) * (0.9 + 0.15 * grain);\n    k.rough = 0.88;\n    k.height = 0.0002 * grain + 0.0006 * (kn(vec2(uv.x * 4.0, uv.y * 60.0) + seed) - 0.5);\n\n}\n\nvoid look_12(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    // the courses: u runs level along the face, v up or down it; each stone its id\n    vec2 id;\n    vec4 c = kcourse(uv, 0.28, 0.52, 0.45, seed, id);\n    float jx = min(c.x, 1.0 - c.x) * c.w, jy = min(c.y, 1.0 - c.y) * 0.28;\n    float edge = min(jx, jy);\n    // a stone's arris rounded and chipped, the joint recessed\n    float chip = (kn(uv * 38.0 + id * 7.0) - 0.5) * 0.008;\n    float joint = smoothstep(0.006, 0.016, edge + chip);\n    // each stone its own lightness and warmth, its face mottled and pitted\n    float h1 = kh(id + seed), h2 = kh(id + seed + 5.0), h3 = kh(id + seed + 9.0);\n    float val = 0.82 + 0.36 * h1;\n    if (h3 < 0.08) val *= 0.66;\n    float warm = (h2 - 0.5) * 0.8;\n    vec3 stoneC = vec3(0.34, 0.32, 0.29) * val * vec3(1.0 + 0.14 * warm, 1.0 + 0.02 * warm, 1.0 - 0.18 * warm);\n    float mott = kfbm(uv * 3.5 + id * 3.1);\n    float pit = smoothstep(0.62, 0.7, kn(uv * 70.0 + id * 11.0)) * kfade(0.004);\n    stoneC *= (0.84 + 0.3 * mott) * (1.0 - 0.3 * pit);\n    vec3 mortC = vec3(0.4, 0.38, 0.34) * (0.85 + 0.25 * kn(uv * 160.0 + seed) * kfade(0.003));\n    vec3 col = mix(mortC * 0.75, stoneC, joint);\n    // grime run down from the joints and the cap: streaks along the face, slow up it\n    float streak = smoothstep(0.52, 0.85, kfbm(vec2(uv.x * 3.0, uv.y * 0.25) + seed + 2.0));\n    col *= 1.0 - 0.32 * streak;\n    col = mix(col, col * vec3(0.9, 0.86, 0.78), streak * 0.5);\n    // lichen in patches on the stones\n    float lich = smoothstep(0.66, 0.8, kfbm(uv * 2.6 + seed + 4.0)) * joint;\n    col = mix(col, vec3(0.52, 0.5, 0.36), lich * 0.45);\n    k.colour = col;\n    k.rough = mix(0.98, 0.9, joint);\n    k.height = mix(-0.01, 0.0, joint) - 0.0015 * pit + 0.0012 * (mott - 0.5);\n\n}\n\nvoid look_13(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    // a velvety near-black crust, browner where tar has run and glazed, flaking in places to a lighter grey ash\n    float crust = kfbm(uv * 9.0 + seed);\n    float tar = smoothstep(0.55, 0.8, kfbm(vec2(uv.x * 3.0, uv.y * 0.8) + seed + 3.0));\n    float flake = smoothstep(0.72, 0.78, kfbm(uv * 14.0 + seed + 9.0));\n    vec3 c = mix(vec3(0.016, 0.015, 0.015), vec3(0.04, 0.038, 0.036), crust);\n    c = mix(c, vec3(0.05, 0.035, 0.022), tar * 0.5);\n    c = mix(c, vec3(0.1, 0.098, 0.095), flake * 0.5);\n    k.colour = c * (0.8 + 0.4 * kn(uv * 220.0 + seed) * kfade(0.003));\n    k.rough = mix(1.0, 0.7, tar);\n    k.height = 0.0012 * crust - 0.0006 * flake;\n\n}\n\nvoid look_14(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    // a warm off-white lime with sharp sand and grit through it, trowel strokes in its face, darkened by rain and\n    // soot running down it, with fine shrinkage cracks\n    float grit = kn(uv * 520.0 + seed) * kfade(0.002);\n    float pebble = smoothstep(0.78, 0.84, kn(uv * 140.0 + seed + 4.0)) * kfade(0.006);\n    float trowel = kn(vec2(uv.x * 2.5, uv.y * 26.0) + seed) * kfade(0.01);\n    float dirt = smoothstep(0.45, 0.85, kfbm(uv * 2.5 + seed + 1.0));\n    float id, e;\n    kvor(uv * 7.0 + seed, id, e);\n    float crack = smoothstep(0.012, 0.0, e) * step(0.6, kh1(id * 7.0)) * kfade(0.004);\n    vec3 c = mix(vec3(0.74, 0.71, 0.64), vec3(0.62, 0.58, 0.5), trowel);\n    c *= 0.9 + 0.16 * grit;\n    c = mix(c, vec3(0.45, 0.41, 0.36), pebble * 0.6);\n    c = mix(c, vec3(0.3, 0.29, 0.27), dirt * 0.55);\n    k.colour = c * (1.0 - 0.55 * crack);\n    k.rough = 0.93;\n    k.height = 0.0006 * grit + 0.0008 * trowel + 0.0006 * pebble - 0.0008 * crack;\n\n}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLook lookRun(int id) {\n  Look k = lookStart();\n  switch (id) {\n    case 0: look_0(k); break;\n    case 1: look_1(k); break;\n    case 2: look_2(k); break;\n    case 3: look_3(k); break;\n    case 5: look_5(k); break;\n    case 6: look_6(k); break;\n    case 7: look_7(k); break;\n    case 8: look_8(k); break;\n    case 9: look_9(k); break;\n    case 11: look_11(k); break;\n    case 12: look_12(k); break;\n    case 13: look_13(k); break;\n    case 14: look_14(k); break;\n  }\n  if (lookDebug > 0.5) {\n    switch (id) {\n      case 0: k.colour = vec3(0.7912979403326302, 0.019382360956935723, 0.06662593864377289); break;\n      case 1: k.colour = vec3(0.019382360956935723, 0.3467040563550296, 0.7912979403326302); break;\n      case 2: k.colour = vec3(0.14995978981060856, 0.7912979403326302, 0.019382360956935723); break;\n      case 3: k.colour = vec3(0.39157247774972326, 0.14126329114027164, 0.028426039504420793); break;\n      case 5: k.colour = vec3(0.25415209433082675, 0.10224173308810132, 0.024157632448504756); break;\n      case 6: k.colour = vec3(0.26225065752969623, 0.26225065752969623, 0.26225065752969623); break;\n      case 7: k.colour = vec3(0.25415209433082675, 0.10224173308810132, 0.024157632448504756); break;\n      case 8: k.colour = vec3(0.013702083047289686, 0.11443537382697373, 1.0); break;\n      case 9: k.colour = vec3(0.8631572134541023, 0.7912979403326302, 0.6239603916750761); break;\n      case 11: k.colour = vec3(0.3049873140698863, 0.7912979403326302, 0.019382360956935723); break;\n      case 12: k.colour = vec3(0.10224173308810132, 0.08437621154414882, 0.06480326669290577); break;\n      case 13: k.colour = vec3(0.042311410620809675, 0.02315336617811041, 0.014443843596092545); break;\n      case 14: k.colour = vec3(0.6866853124353135, 0.5840784178911641, 0.35153259950043936); break;\n    }\n  }\n  return k;\n}\nfloat lookShadow(int id, vec3 Lview) {\n  \n  return 1.0;\n}\n",
+   "features": {
+    "clearcoat": false,
+    "sheen": false,
+    "iridescence": false,
+    "dispersion": false,
+    "transmission": false
+   }
+  },
+  "relief": {
+   "ids": [
+    4
+   ],
+   "fragmentPars": "uniform highp sampler2D lookSettings;\n\nflat varying float vLookId;\nvarying vec3 vLookInfo;\nvarying vec2 vLookUv;\nvarying vec3 vLookWorld;\nvarying vec3 vLookWN;\nvarying vec3 vS0;\nvarying vec3 vS1;\nvarying vec4 vS2;\nvarying vec2 vS3;\n#define s0 vS0\n#define s1 vS1\n#define s2 vS2\n#define s3 vS3\nuniform float lookView;\nuniform float lookDebug;\n// the uv's change across the pixel, worked out once where every pixel of the quad runs it, so a picture read inside a\n// look's branch still knows its sharpness\nvec2 lookGx, lookGy;\n\nfloat kh(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }\nfloat kh1(float x) { return fract(sin(x * 91.7) * 43758.5453); }\nfloat kn(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  vec2 u = f * f * (3.0 - 2.0 * f);\n  return mix(mix(kh(i), kh(i + vec2(1, 0)), u.x), mix(kh(i + vec2(0, 1)), kh(i + vec2(1, 1)), u.x), u.y);\n}\nfloat kfbm(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 5; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s / 0.97;\n}\nfloat kfbm4(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 4; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s;\n}\n// a feature f metres across fades to its mean where it is finer than a pixel\nfloat kfade(float f) { vec2 fw = abs(lookGx) + abs(lookGy); return clamp(1.5 - (fw.x + fw.y) / f, 0.0, 1.0); }\n// cells of jittered seeds: the distance to the nearest, its number (0 to 1), and how far the second is past it\nfloat kvor(vec2 p, out float id, out float edge) {\n  vec2 i = floor(p), f = fract(p);\n  float d1 = 8.0, d2 = 8.0;\n  vec2 best = vec2(0.0);\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 c = i + o;\n    vec2 r = o + vec2(kh(c), kh(c + 7.3)) - f;\n    float d = dot(r, r);\n    if (d < d1) { d2 = d1; d1 = d; best = c; } else if (d < d2) { d2 = d; }\n  }\n  id = kh(best + 3.7);\n  edge = sqrt(d2) - sqrt(d1);\n  return sqrt(d1);\n}\n// a dimple field: the distance to the nearest of jittered cells' seeds\nfloat kcell(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  float d = 8.0;\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 r = o + vec2(kh(i + o), kh(i + o + 7.3)) - f;\n    d = min(d, dot(r, r));\n  }\n  return sqrt(d);\n}\n// courses: the row along v, the piece in it along u (each row offset), where in the piece (0 to 1 each way)\nvec4 kcourse(vec2 uv, float row, float wide, float jitter, float seed, out vec2 id) {\n  float r = floor(uv.y / row);\n  float shift = kh1(r + seed) * wide;\n  float w = wide * (1.0 - jitter * 0.5 + jitter * kh(vec2(r, floor((uv.x + shift) / wide) + seed)));\n  float x = (uv.x + shift) / w;\n  id = vec2(r, floor(x));\n  return vec4(fract(x), fract(uv.y / row), r, w);\n}\n// marble's veins: thin lines wandering through a warped field, the main ones and finer ones across them\nfloat kveins(vec2 p, float seed) {\n  float w = kfbm(p * 1.3 + seed) * 4.0;\n  float a = pow(1.0 - abs(sin((p.x * 1.6 + p.y * 0.6 + w) * 3.14159)), 22.0);\n  float b = pow(1.0 - abs(sin((p.y * 2.7 - p.x * 1.1 + kfbm(p * 2.6 + seed + 7.0) * 3.0) * 3.14159)), 50.0);\n  return clamp(a + 0.6 * b, 0.0, 1.0);\n}\n// wood's grain along u: its rings' lines (late wood 1, early 0) wandering across v, and its fibres\nfloat kring(vec2 uv, float seed, float rings) {\n  float w = kfbm(vec2(uv.x * 0.35, uv.y * 2.0) + seed) * 1.6;\n  return smoothstep(0.5, 0.95, fract(uv.y * rings + w + uv.x * 0.04));\n}\nfloat kfibre(vec2 uv, float seed) { return kn(vec2(uv.x * 3.0, uv.y * 420.0) + seed) * kfade(0.003); }\n// how strongly a cloth's weave shows: a plain weave of threads t metres across, over and under\nfloat kweave(vec2 uv, float t) {\n  vec2 q = uv / t;\n  float warp = sin(q.x * 3.14159), weft = sin(q.y * 3.14159);\n  float over = step(0.0, warp * weft);\n  return mix(0.5, mix(0.8, 1.08, over) * (0.85 + 0.15 * abs(over > 0.5 ? weft : warp)), kfade(t * 2.0));\n}\n// the normal bent by a height field, as three's bump map bends it (perturbNormalArb)\nvec3 kitBump(vec3 pos, vec3 n, float h, float faceDirection) {\n  vec3 sx = dFdx(pos), sy = dFdy(pos);\n  vec3 r1 = cross(sy, n), r2 = cross(n, sx);\n  float det = dot(sx, r1) * faceDirection;\n  vec2 dh = vec2(dFdx(h), dFdy(h));\n  vec3 grad = sign(det) * (dh.x * r1 + dh.y * r2);\n  return normalize(abs(det) * n - grad);\n}\n// a normal in the surface's own ways (u, v, out) turned into the view's, the ways found from the uv's change across\n// the pixel, as three's normal map without tangents finds them (getTangentFrame)\nvec3 lookPerturb(vec3 n, vec3 nts, float faceDirection) {\n  vec3 q0 = dFdx(-vViewPosition), q1 = dFdy(-vViewPosition);\n  vec3 q1perp = cross(q1, n), q0perp = cross(n, q0);\n  vec3 T = q1perp * lookGx.x + q0perp * lookGy.x;\n  vec3 B = q1perp * lookGx.y + q0perp * lookGy.y;\n  float det = max(dot(T, T), dot(B, B));\n  float scale = det == 0.0 ? 0.0 : faceDirection * inversesqrt(det);\n  return normalize(T * (nts.x * scale) + B * (nts.y * scale) + n * nts.z);\n}\n\nstruct Look {\n  vec3 colour; float rough; float metal; float height; vec3 nts; vec3 normal; bool ownNormal;\n  float ao; float aoDirect; float alpha; vec3 glow;\n  float clearcoat; float clearcoatRough; vec3 sheen; float sheenRough; float iridescence; float iridIor; float iridThick;\n  float transmission; float thickness; vec3 attColour; float attDist; float ior; float dispersion;\n};\nLook lookStart() {\n  Look k;\n  k.colour = vec3(0.5); k.rough = 0.8; k.metal = 0.0; k.height = 0.0; k.nts = vec3(0.0, 0.0, 1.0);\n  k.normal = vec3(0.0, 0.0, 1.0); k.ownNormal = false; k.ao = 1.0; k.aoDirect = 0.0; k.alpha = 1.0; k.glow = vec3(0.0);\n  k.clearcoat = 0.0; k.clearcoatRough = 0.1; k.sheen = vec3(0.0); k.sheenRough = 0.5;\n  k.iridescence = 0.0; k.iridIor = 1.3; k.iridThick = 400.0;\n  k.transmission = 0.0; k.thickness = 0.0; k.attColour = vec3(1.0); k.attDist = 1e9; k.ior = 1.5; k.dispersion = 0.0;\n  return k;\n}\n\n\nuniform highp sampler2DArray lookPictures;\nuniform float lookMeans[8];\nvec3 lookSrgb(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }\nvec4 picData(int t, vec2 uv, float scale) { return textureGrad(lookPictures, vec3(uv, float(t)), lookGx * scale, lookGy * scale); }\nvec3 picColour(int t, vec2 uv, float scale) { return lookSrgb(picData(t, uv, scale).rgb); }\nvec4 picDataLod(int t, vec2 uv, float lod) { return textureLod(lookPictures, vec3(uv, float(t)), lod); }\nvec3 picColourLod(int t, vec2 uv, float lod) { return lookSrgb(picDataLod(t, uv, lod).rgb); }\nfloat picMean(int t) { return lookMeans[t]; }\n\nfloat p_stoneMin;\nfloat p_stoneMax;\nfloat p_rowMin;\nfloat p_rowMax;\nfloat p_joint;\nfloat p_seed;\nfloat p_recess;\nfloat p_edgeRound;\nfloat p_edgeDrop;\nfloat p_corner;\nfloat p_chip;\nfloat p_bulge;\nfloat p_tilt;\nfloat p_detail;\nfloat p_detailNormal;\nfloat p_valueVar;\nfloat p_warm;\nfloat p_dark;\nfloat p_mottle;\nfloat p_grime;\nfloat p_damp;\nfloat p_moss;\nfloat p_rockContrast;\nfloat p_rockScale;\nfloat p_mortScale;\nfloat p_pom;\nfloat p_pomOn;\nfloat p_shadowOn;\nvec3 p_stoneTint;\nvec3 p_mortTint;\nfloat p_repeat;\nvec3 p_tint;\nfloat p_contrast;\nfloat p_metres;\nvec3 p_glTint;\nvec3 p_glTint2;\nfloat p_glWaves;\nfloat p_glWaveDepth;\nfloat p_glSeeds;\nfloat p_glRough;\nfloat p_glAlpha;\nfloat p_glAlphaVar;\nint t_rockCol;\nint t_rockDisp;\nint t_rockNrm;\nint t_mortCol;\nint t_mortDisp;\nint t_col;\nint t_nrm;\nint t_rough;\n\n\nuniform sampler2D csNoise;\nfloat csTN(vec2 p) { return texture(csNoise, p / 32.0).r; }\n\n\nuniform sampler2D csCourses;\n\nuint csU(uint x) { x ^= x >> 16u; x *= 0x7feb352du; x ^= x >> 15u; x *= 0x846ca68bu; x ^= x >> 16u; return x; }\n// a number from 0 to 1 drawn from four whole numbers and the seed\nfloat csH(int a, int b, int c, int d) {\n  uint h = csU(uint(a + 0x40000000) ^ csU(uint(b + 0x40000000) ^ csU(uint(c + 0x40000000) ^ csU(uint(d + 0x40000000) + uint(p_seed) * 0x9e3779b9u))));\n  return float(h) / 4294967295.0;\n}\n\n// the course holding height v in the row's table: its number, its foot and the next one's foot\nvoid csCourse(int row, float v, out int c, out float b0, out float b1) {\n  int lo = 0;\n  int hi = 255;\n  for (int s = 0; s < 8; s++) {\n    int mid = (lo + hi + 1) / 2;\n    if (texelFetch(csCourses, ivec2(mid, row), 0).r <= v) lo = mid; else hi = mid - 1;\n  }\n  c = lo;\n  b0 = texelFetch(csCourses, ivec2(lo, row), 0).r;\n  b1 = texelFetch(csCourses, ivec2(min(lo + 1, 255), row), 0).r;\n}\n// the row's building's walls' thickness, kept in the course table after its courses\nfloat csWallDepth(int row) { return texelFetch(csCourses, ivec2(256, row), 0).r; }\n// the k-th of n joints across a stretch cut into n stones, in stones from its start: each inner joint moved by\n// up to jit / 2 of a stone each way, so each stone is (1 ± jit) of the mean\nfloat csJ(int k, int n, float jit, int s1, int s2) {\n  if (k <= 0) return 0.0;\n  if (k >= n) return float(n);\n  return float(k) + (csH(k, s1, s2, 3) - 0.5) * jit;\n}\n// the stretch from a to b cut into stones of mean length (1 ± jit): the stone i holding x, of n, from s0 to e0\nvoid csPart(float a, float b, float x, float mean, float jit, int s1, int s2, out int i, out int n, out float s0, out float e0) {\n  float L = b - a;\n  n = max(1, int(floor(L / mean + 0.5)));\n  float t = (x - a) / L * float(n);\n  i = clamp(int(floor(t)), 0, n - 1);\n  if (t < csJ(i, n, jit, s1, s2)) i = max(i - 1, 0);\n  else if (t > csJ(i + 1, n, jit, s1, s2)) i = min(i + 1, n - 1);\n  s0 = a + csJ(i, n, jit, s1, s2) * L / float(n);\n  e0 = a + csJ(i + 1, n, jit, s1, s2) * L / float(n);\n}\n\nstruct CsCell { float id; vec4 box; float off; vec4 arris; vec2 p; vec2 size; };\n// the place along the face the stones are cut on: a round wall's turned by its course's start, a box's face held\n// to its length\nfloat csQx(float x, float off) {\n  int kind = int(s2.x + 0.5);\n  if (kind == 2) return mod(x + off, s2.z);\n  if (kind == 1 || kind == 4) return x;\n  return clamp(x, 0.0, s2.z);\n}\n// the stone at the place q on this face: its number, its box on the face (x0, y0, x1, y1, along the place\n// csQx gives), its course's start round a round wall, and which of its sides (left, right, foot, top) are the\n// building's corner or a cut, not a joint\nCsCell csCell(vec2 q) {\n  CsCell C;\n  int kind = int(s2.x + 0.5);\n  int f = int(s2.y + 0.5);\n  float W = s2.z;\n  int w = int(s2.w + 0.5);\n  int row = w % 256;\n  float mean = 0.5 * (p_stoneMin + p_stoneMax);\n  float jit = clamp((p_stoneMax - p_stoneMin) / max(p_stoneMax + p_stoneMin, 1e-3), 0.0, 0.95);\n  bool aL = false, aR = false;\n  float x0, x1, y0, y1, qx = q.x;\n  int i, n;\n  float id;\n  C.off = 0.0;\n  if (kind == 4) {\n    // a face of an arch's stone: the stone from 0 to s3.x up v, and along u from 0 to s2.z at its foot and s3.y at\n    // its top, straight between (csStoneAt takes its length at the place); its number the stone's times 16 and which\n    // of its sides are an arris (left 1, right 2, foot 4, top 8), the rest joints\n    int a = f % 16;\n    C.id = csH(w, f / 16, 0, 25);\n    C.box = vec4(0.0, 0.0, max(W, s3.y), s3.x);\n    C.arris = vec4(float(a & 1), float((a >> 1) & 1), float((a >> 2) & 1), float((a >> 3) & 1));\n    return C;\n  }\n  if (kind == 1) {\n    // a slab: rows up its v, stones along its u, in 16 m squares\n    float mr = 0.5 * (p_rowMin + p_rowMax);\n    float jr = clamp((p_rowMax - p_rowMin) / max(p_rowMax + p_rowMin, 1e-3), 0.0, 0.95);\n    int ci = int(floor(q.y / 16.0));\n    csPart(float(ci) * 16.0, float(ci) * 16.0 + 16.0, q.y, mr, jr, w, ci * 7 + 1, i, n, y0, y1);\n    int r = ci * 64 + i;\n    int ui = int(floor(q.x / 16.0));\n    int k;\n    csPart(float(ui) * 16.0, float(ui) * 16.0 + 16.0, q.x, mean, jit, w, r * 131 + ui + 5, k, n, x0, x1);\n    id = csH(w, r, ui * 256 + k, 21);\n  } else {\n    int c;\n    csCourse(row, q.y, c, y0, y1);\n    if (kind == 2) {\n      // round: the whole way round, from a place drawn for each course\n      C.off = csH(w, c * 16 + f, 0, 41) * W;\n      qx = mod(q.x + C.off, W);\n      csPart(0.0, W, qx, mean, jit, w, c * 16 + f, i, n, x0, x1);\n      id = csH(w, c * 16 + f, i, 22);\n    } else {\n      qx = clamp(q.x, 0.0, W);\n      bool through = kind == 3 || (c + f) % 2 == 0;\n      float depth = csWallDepth(row);\n      if (!through && W < 2.0 * depth + 0.3) {\n        // a face too short for the corner stones of its sides and a stone between: one stone, both corners'\n        x0 = 0.0; x1 = W; aL = true; aR = true;\n        id = csH(w, c, 1000 + f, 23);\n      } else if (through) {\n        csPart(0.0, W, qx, mean, jit, w, c * 16 + f, i, n, x0, x1);\n        aL = kind == 0 && i == 0;\n        aR = kind == 0 && i == n - 1;\n        id = aL ? csH(w, c, 1000 + f, 23) : aR ? csH(w, c, 1000 + (f + 1) % 4, 23) : csH(w, c, f * 512 + i, 24);\n      } else if (qx < depth) {\n        // the end of the corner stone that runs through on the face before\n        x0 = 0.0; x1 = depth; aL = true;\n        id = csH(w, c, 1000 + f, 23);\n      } else if (qx > W - depth) {\n        x0 = W - depth; x1 = W; aR = true;\n        id = csH(w, c, 1000 + (f + 1) % 4, 23);\n      } else {\n        csPart(depth, W - depth, qx, mean, jit, w, c * 16 + f, i, n, x0, x1);\n        id = csH(w, c, f * 512 + i, 24);\n      }\n    }\n  }\n  C.id = id;\n  C.box = vec4(x0, y0, x1, y1);\n  C.arris = vec4(aL ? 1.0 : 0.0, aR ? 1.0 : 0.0, 0.0, 0.0);\n  if (s3.x > -1e3) C.arris.xy = vec2(1.0);\n  if (s3.y > -1e3) C.arris.zw = vec2(1.0);\n  return C;\n}\n// the stone last found, kept while the places asked for stay in its box: the parallax's steps and the shadow's\n// march mostly stay in one stone, so its course and its joints are worked out once\nCsCell csCache;\nbool csHave = false;\nCsCell csStoneAt(vec2 q) {\n  float qx = csQx(q.x, csCache.off);\n  if (!csHave || qx < csCache.box.x || qx > csCache.box.z || q.y < csCache.box.y || q.y > csCache.box.w) {\n    csCache = csCell(q);\n    csHave = true;\n    qx = csQx(q.x, csCache.off);\n  }\n  CsCell C = csCache;\n  C.size = C.box.zw - C.box.xy;\n  C.p = vec2(qx, q.y) - C.box.xy;\n  if (int(s2.x + 0.5) == 4) {\n    // an arch's stone: its length along u at this place up it\n    C.size.x = mix(s2.z, s3.y, clamp(C.p.y / max(C.size.y, 1e-6), 0.0, 1.0));\n  } else {\n    if (s3.x > -1e3) C.p.x = 0.5 * C.size.x;\n    if (s3.y > -1e3) C.p.y = 0.5 * C.size.y;\n  }\n  return C;\n}\n// how far in from its nearest joint a place in the stone is, its corners rounded, less half the joint\nfloat csEdge(CsCell C) {\n  float dl = C.arris.x > 0.5 ? 1e3 : C.p.x;\n  float dr = C.arris.y > 0.5 ? 1e3 : C.size.x - C.p.x;\n  float db = C.arris.z > 0.5 ? 1e3 : C.p.y;\n  float dt = C.arris.w > 0.5 ? 1e3 : C.size.y - C.p.y;\n  float dx = min(dl, dr), dy = min(db, dt);\n  float r = p_corner;\n  float d = (dx < r && dy < r) ? r - length(vec2(r - dx, r - dy)) : min(dx, dy);\n  return d - 0.5 * p_joint;\n}\n// a building's own colour for the solids view: a hue from its row, castle-ng's saturation and brightness\nvec3 csSolidColour(int row) {\n  float h = fract(float(row) * 0.61803 + 0.13);\n  vec3 k = clamp(abs(mod(h * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);\n  vec3 srgb = 0.85 * mix(vec3(1.0), k, 0.6);\n  return pow(srgb, vec3(2.2));\n}\n// what a wall look works out for the lighting: the face's ways, its normal, the normal found, the place the\n// parallax found and its height, the parallax's fade\nvec3 csT, csB, csNg, csNts;\nvec2 csUvP;\nfloat csZ, csFade;\n\n\nfloat csRockLod, csMortLod;\nstruct CsS { float h; float d; float id; vec2 tuv; float stone; };\n// the wall's height at the place uv on this face (0 its proudest, down to -Relief depth): the stone's face, its\n// rounded and chipped edges, its bulge and tilt and the rock's grain; the mortar's recess between\nCsS csSample(vec2 uv) {\n  // a cut's place where it gives one; an arch's stone's face (kind 4) its own place, s3 its stone's box\n  vec2 q = int(s2.x + 0.5) == 4 ? uv : vec2(s3.x > -1e3 ? s3.x : uv.x, s3.y > -1e3 ? s3.y : uv.y);\n  CsCell C = csStoneAt(q);\n  // the edges' chips: the rock's own relief, on a patch of its own for each stone\n  vec2 g = uv + vec2(C.id * 53.0, fract(C.id * 7.31) * 41.0);\n  float warp = (textureLod(csNoise, g * 0.6, 0.0).r - 0.5) * 3.0 * p_chip;\n  float d = csEdge(C) + warp;\n  vec2 tuv = (uv + vec2(C.id * 97.13, fract(C.id * 7.31) * 61.7)) / p_rockScale;\n  float rock = picDataLod(t_rockDisp, tuv, csRockLod).r;\n  vec2 n01 = clamp(C.p / max(C.size, vec2(1e-3)), 0.0, 1.0) * 2.0 - 1.0;\n  float pillow = (1.0 - 0.6 * n01.x * n01.x) * (1.0 - n01.y * n01.y);\n  // the face: its proudest place at 0, rounded down at its edges, bulged, tilted, grained\n  float hs = -p_edgeDrop * pow(1.0 - smoothstep(0.0, p_edgeRound, d), 2.0)\n             - p_bulge * (1.0 - pillow)\n             + (rock - 0.5) * p_detail - 0.5 * p_detail\n             + ((fract(C.id * 131.7) - 0.5) + (fract(C.id * 71.3) - 0.5) * n01.x + (fract(C.id * 37.9) - 0.5) * n01.y - 1.0) * p_tilt;\n  float hm = -p_recess + (picDataLod(t_mortDisp, uv / p_mortScale, csMortLod).r - 0.5) * 0.006;\n  CsS S;\n  // a stone where it is in from its joint\n  S.stone = d > 0.0 ? 1.0 : 0.0;\n  S.h = clamp(d > 0.0 ? max(hs, hm) : hm, -p_pom, 0.0);\n  S.d = d;\n  S.id = C.id;\n  S.tuv = tuv;\n  return S;\n}\n\nvoid look_4(inout Look k) {\n  p_stoneMin = texelFetch(lookSettings, ivec2(0, 4), 0).r;\n  p_stoneMax = texelFetch(lookSettings, ivec2(1, 4), 0).r;\n  p_rowMin = texelFetch(lookSettings, ivec2(2, 4), 0).r;\n  p_rowMax = texelFetch(lookSettings, ivec2(3, 4), 0).r;\n  p_joint = texelFetch(lookSettings, ivec2(4, 4), 0).r;\n  p_seed = texelFetch(lookSettings, ivec2(5, 4), 0).r;\n  p_recess = texelFetch(lookSettings, ivec2(6, 4), 0).r;\n  p_edgeRound = texelFetch(lookSettings, ivec2(7, 4), 0).r;\n  p_edgeDrop = texelFetch(lookSettings, ivec2(8, 4), 0).r;\n  p_corner = texelFetch(lookSettings, ivec2(9, 4), 0).r;\n  p_chip = texelFetch(lookSettings, ivec2(10, 4), 0).r;\n  p_bulge = texelFetch(lookSettings, ivec2(11, 4), 0).r;\n  p_tilt = texelFetch(lookSettings, ivec2(12, 4), 0).r;\n  p_detail = texelFetch(lookSettings, ivec2(13, 4), 0).r;\n  p_detailNormal = texelFetch(lookSettings, ivec2(14, 4), 0).r;\n  p_valueVar = texelFetch(lookSettings, ivec2(15, 4), 0).r;\n  p_warm = texelFetch(lookSettings, ivec2(16, 4), 0).r;\n  p_dark = texelFetch(lookSettings, ivec2(17, 4), 0).r;\n  p_mottle = texelFetch(lookSettings, ivec2(18, 4), 0).r;\n  p_grime = texelFetch(lookSettings, ivec2(19, 4), 0).r;\n  p_damp = texelFetch(lookSettings, ivec2(20, 4), 0).r;\n  p_moss = texelFetch(lookSettings, ivec2(21, 4), 0).r;\n  p_rockContrast = texelFetch(lookSettings, ivec2(22, 4), 0).r;\n  p_rockScale = texelFetch(lookSettings, ivec2(23, 4), 0).r;\n  p_mortScale = texelFetch(lookSettings, ivec2(24, 4), 0).r;\n  p_pom = texelFetch(lookSettings, ivec2(25, 4), 0).r;\n  p_pomOn = texelFetch(lookSettings, ivec2(26, 4), 0).r;\n  p_shadowOn = texelFetch(lookSettings, ivec2(27, 4), 0).r;\n  p_stoneTint = texelFetch(lookSettings, ivec2(28, 4), 0).rgb;\n  p_mortTint = texelFetch(lookSettings, ivec2(29, 4), 0).rgb;\n  t_rockCol = 0;\n  t_rockDisp = 1;\n  t_rockNrm = 2;\n  t_mortCol = 3;\n  t_mortDisp = 4;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n  csNg = normalize(vNormal);\n  csT = normalize(s0 - csNg * dot(s0, csNg));\n  csB = normalize(s1 - csNg * dot(s1, csNg) - csT * dot(s1, csT));\n  vec3 Vv = normalize(vViewPosition);\n  vec3 Vts = vec3(dot(Vv, csT), dot(Vv, csB), dot(Vv, csNg));\n  vec2 uv0 = vLookUv;\n  vec2 fw = abs(lookGx) + abs(lookGy);\n  float fp = max(max(fw.x, fw.y), 1e-6);\n  csRockLod = log2(max(fp / p_rockScale * 1024.0, 1.0));\n  csMortLod = log2(max(fp / p_mortScale * 1024.0, 1.0));\n  csFade = p_pomOn * (1.0 - smoothstep(0.006, 0.03, fp));\n  uv = uv0;\n  float zr = 0.0;\n  CsS S = csSample(uv);\n  if (csFade > 0.0) {\n    float vz = max(Vts.z, 0.1);\n    // march down in coarse steps to the first below the surface, then halve the step four times between the\n    // last above and the first below\n    int steps = int(mix(14.0, 4.0, clamp(Vts.z, 0.0, 1.0)));\n    float dz = p_pom / float(steps);\n    vec2 duv = -Vts.xy / vz * dz * csFade;\n    vec2 puv = uv;\n    float pz = 0.0;\n    for (int i = 0; i < 14; i++) {\n      if (i >= steps || zr <= S.h) break;\n      puv = uv; pz = zr;\n      uv += duv; zr -= dz;\n      S = csSample(uv);\n    }\n    if (zr <= S.h) {\n      vec2 lo = puv, hi = uv;\n      float zlo = pz, zhi = zr;\n      for (int i = 0; i < 4; i++) {\n        vec2 mu = 0.5 * (lo + hi);\n        float mz = 0.5 * (zlo + zhi);\n        CsS M = csSample(mu);\n        if (mz <= M.h) { hi = mu; zhi = mz; S = M; } else { lo = mu; zlo = mz; }\n      }\n      uv = hi;\n      zr = zhi;\n    }\n    S = csSample(uv);\n  }\n  csUvP = uv;\n  csZ = S.h;\n  // the normal from the height round the place, no finer than a pixel\n  float e = max(0.002, fp * 0.75);\n  float hx = csSample(uv + vec2(e, 0.0)).h - S.h;\n  float hy = csSample(uv + vec2(0.0, e)).h - S.h;\n  vec3 rn = picDataLod(t_rockNrm, S.tuv, csRockLod).xyz * 2.0 - 1.0;\n  csNts = normalize(vec3(-hx / e, -hy / e, 1.0) + vec3(rn.xy * p_detailNormal * S.stone, 0.0));\n\n  // the colour: the rock's picture taken grey, tinted, each stone its own lightness and warmth; the mortar's the same\n  vec3 rockC = picColourLod(t_rockCol, S.tuv, csRockLod);\n  float rl = mix(1.0, dot(rockC, vec3(0.2126, 0.7152, 0.0722)) / picMean(t_rockCol), p_rockContrast);\n  float h1 = fract(S.id * 913.7), h2 = fract(S.id * 271.3), h3 = fract(S.id * 517.9);\n  float val = 1.0 + (h1 - 0.5) * 2.0 * p_valueVar;\n  if (h3 < p_dark) val *= 0.62;\n  float warm = (h2 - 0.5) * 2.0 * p_warm;\n  float mott = 1.0 + (csTN(uv * 0.9 + S.id * 13.0) - 0.5) * 2.0 * p_mottle;\n  vec3 stoneC = p_stoneTint * rl * val * mott * vec3(1.0 + 0.16 * warm, 1.0 + 0.02 * warm, 1.0 - 0.2 * warm);\n  vec3 mortC = p_mortTint * dot(picColourLod(t_mortCol, uv / p_mortScale, csMortLod), vec3(0.2126, 0.7152, 0.0722)) / picMean(t_mortCol);\n  float sm = S.stone * smoothstep(-fp, fp, S.d);\n  vec3 col = mix(mortC, stoneC, sm);\n  // the cavity: the mortar darker toward the stones' edges, the stones' edges darker as they round down\n  float aoM = mix(0.4, 0.85, smoothstep(0.0, 0.6 * p_joint + 0.004, -S.d));\n  float aoS = mix(0.65, 1.0, smoothstep(0.0, p_edgeRound * 1.5, S.d));\n  k.ao = mix(aoM, aoS, sm);\n  k.aoDirect = 0.35;\n  // streaks run down the walls, rising damp darkens their feet, moss in the damp and on the slabs\n  int kind = int(s2.x + 0.5);\n  float streak = kind == 1 ? 0.0 : smoothstep(0.5, 0.85, csTN(vec2(uv.x * 2.2, uv.y * 0.1 + csTN(vec2(uv.x * 0.5, 7.0)) * 3.0)));\n  col *= 1.0 - p_grime * streak * 0.45;\n  col = mix(col, col * vec3(0.92, 0.86, 0.76), p_grime * streak * 0.6);\n  float dampM = 1.0 - smoothstep(0.0, 0.5 + 1.6 * csTN(vec2(uv.x * 0.45, 3.0)), vLookWorld.y);\n  col *= 1.0 - 0.45 * p_damp * dampM;\n  col = mix(col, col * vec3(0.85, 0.95, 0.75), p_damp * dampM * 0.5);\n  float mossM = smoothstep(0.52, 0.78, csTN(uv * 1.7 + 3.1)) * clamp(dampM * 0.9 + (kind == 1 ? 0.7 : 0.0) + (1.0 - sm) * 0.4, 0.0, 1.0);\n  mossM = clamp(mossM * p_moss * 1.6, 0.0, 1.0);\n  col = mix(col, vec3(0.05, 0.075, 0.02) * (0.7 + 0.6 * rl), mossM);\n  k.rough = mix(mix(0.96, 0.86, sm), 1.0, mossM);\n\n  if (lookView > 0.5 && lookView < 1.5) col = mix(vec3(0.6), vec3(h1, h2, h3), sm);\n  if (lookView > 1.5 && lookView < 2.5) col = vec3((S.h + p_pom) / p_pom);\n  if (lookView > 3.5) col = csSolidColour(int(s2.w + 0.5) % 256);\n  k.colour = col;\n  k.normal = normalize(mat3(csT, csB, csNg) * csNts);\n  k.ownNormal = true;\n\n}\n\nfloat lookShadow_4(vec3 Lview) {\n\n  if (p_shadowOn < 0.5 || csFade <= 0.0) return 1.0;\n  vec3 L = vec3(dot(Lview, csT), dot(Lview, csB), dot(Lview, csNg));\n  if (L.z <= 0.0) return 1.0;\n  float span = -csZ + 0.002;\n  vec2 duv = L.xy / max(L.z, 0.06) * span / 6.0;\n  float dz = span / 6.0;\n  vec2 u = csUvP;\n  float z = csZ + 0.0015;\n  float s = 1.0;\n  for (int i = 0; i < 6; i++) {\n    u += duv;\n    z += dz;\n    s = min(s, clamp(1.0 - (csSample(u).h - z) * 250.0, 0.0, 1.0));\n  }\n  return mix(1.0, s, csFade);\n\n}\n\nLook lookRun(int id) {\n  Look k = lookStart();\n  switch (id) {\n    case 4: look_4(k); break;\n  }\n  if (lookDebug > 0.5) {\n    switch (id) {\n      case 4: k.colour = vec3(0.042311410620809675, 0.05780543019106723, 0.08437621154414882); break;\n    }\n  }\n  return k;\n}\nfloat lookShadow(int id, vec3 Lview) {\n  switch (id) {\n    case 4: return lookShadow_4(Lview);\n  }\n  return 1.0;\n}\n",
+   "features": {
+    "clearcoat": false,
+    "sheen": false,
+    "iridescence": false,
+    "dispersion": false,
+    "transmission": false
+   }
+  },
+  "seeThrough": {
+   "ids": [
+    10
+   ],
+   "fragmentPars": "uniform highp sampler2D lookSettings;\n\nflat varying float vLookId;\nvarying vec3 vLookInfo;\nvarying vec2 vLookUv;\nvarying vec3 vLookWorld;\nvarying vec3 vLookWN;\nvarying vec3 vS0;\nvarying vec3 vS1;\nvarying vec4 vS2;\nvarying vec2 vS3;\n#define s0 vS0\n#define s1 vS1\n#define s2 vS2\n#define s3 vS3\nuniform float lookView;\nuniform float lookDebug;\n// the uv's change across the pixel, worked out once where every pixel of the quad runs it, so a picture read inside a\n// look's branch still knows its sharpness\nvec2 lookGx, lookGy;\n\nfloat kh(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }\nfloat kh1(float x) { return fract(sin(x * 91.7) * 43758.5453); }\nfloat kn(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  vec2 u = f * f * (3.0 - 2.0 * f);\n  return mix(mix(kh(i), kh(i + vec2(1, 0)), u.x), mix(kh(i + vec2(0, 1)), kh(i + vec2(1, 1)), u.x), u.y);\n}\nfloat kfbm(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 5; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s / 0.97;\n}\nfloat kfbm4(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 4; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s;\n}\n// a feature f metres across fades to its mean where it is finer than a pixel\nfloat kfade(float f) { vec2 fw = abs(lookGx) + abs(lookGy); return clamp(1.5 - (fw.x + fw.y) / f, 0.0, 1.0); }\n// cells of jittered seeds: the distance to the nearest, its number (0 to 1), and how far the second is past it\nfloat kvor(vec2 p, out float id, out float edge) {\n  vec2 i = floor(p), f = fract(p);\n  float d1 = 8.0, d2 = 8.0;\n  vec2 best = vec2(0.0);\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 c = i + o;\n    vec2 r = o + vec2(kh(c), kh(c + 7.3)) - f;\n    float d = dot(r, r);\n    if (d < d1) { d2 = d1; d1 = d; best = c; } else if (d < d2) { d2 = d; }\n  }\n  id = kh(best + 3.7);\n  edge = sqrt(d2) - sqrt(d1);\n  return sqrt(d1);\n}\n// a dimple field: the distance to the nearest of jittered cells' seeds\nfloat kcell(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  float d = 8.0;\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 r = o + vec2(kh(i + o), kh(i + o + 7.3)) - f;\n    d = min(d, dot(r, r));\n  }\n  return sqrt(d);\n}\n// courses: the row along v, the piece in it along u (each row offset), where in the piece (0 to 1 each way)\nvec4 kcourse(vec2 uv, float row, float wide, float jitter, float seed, out vec2 id) {\n  float r = floor(uv.y / row);\n  float shift = kh1(r + seed) * wide;\n  float w = wide * (1.0 - jitter * 0.5 + jitter * kh(vec2(r, floor((uv.x + shift) / wide) + seed)));\n  float x = (uv.x + shift) / w;\n  id = vec2(r, floor(x));\n  return vec4(fract(x), fract(uv.y / row), r, w);\n}\n// marble's veins: thin lines wandering through a warped field, the main ones and finer ones across them\nfloat kveins(vec2 p, float seed) {\n  float w = kfbm(p * 1.3 + seed) * 4.0;\n  float a = pow(1.0 - abs(sin((p.x * 1.6 + p.y * 0.6 + w) * 3.14159)), 22.0);\n  float b = pow(1.0 - abs(sin((p.y * 2.7 - p.x * 1.1 + kfbm(p * 2.6 + seed + 7.0) * 3.0) * 3.14159)), 50.0);\n  return clamp(a + 0.6 * b, 0.0, 1.0);\n}\n// wood's grain along u: its rings' lines (late wood 1, early 0) wandering across v, and its fibres\nfloat kring(vec2 uv, float seed, float rings) {\n  float w = kfbm(vec2(uv.x * 0.35, uv.y * 2.0) + seed) * 1.6;\n  return smoothstep(0.5, 0.95, fract(uv.y * rings + w + uv.x * 0.04));\n}\nfloat kfibre(vec2 uv, float seed) { return kn(vec2(uv.x * 3.0, uv.y * 420.0) + seed) * kfade(0.003); }\n// how strongly a cloth's weave shows: a plain weave of threads t metres across, over and under\nfloat kweave(vec2 uv, float t) {\n  vec2 q = uv / t;\n  float warp = sin(q.x * 3.14159), weft = sin(q.y * 3.14159);\n  float over = step(0.0, warp * weft);\n  return mix(0.5, mix(0.8, 1.08, over) * (0.85 + 0.15 * abs(over > 0.5 ? weft : warp)), kfade(t * 2.0));\n}\n// the normal bent by a height field, as three's bump map bends it (perturbNormalArb)\nvec3 kitBump(vec3 pos, vec3 n, float h, float faceDirection) {\n  vec3 sx = dFdx(pos), sy = dFdy(pos);\n  vec3 r1 = cross(sy, n), r2 = cross(n, sx);\n  float det = dot(sx, r1) * faceDirection;\n  vec2 dh = vec2(dFdx(h), dFdy(h));\n  vec3 grad = sign(det) * (dh.x * r1 + dh.y * r2);\n  return normalize(abs(det) * n - grad);\n}\n// a normal in the surface's own ways (u, v, out) turned into the view's, the ways found from the uv's change across\n// the pixel, as three's normal map without tangents finds them (getTangentFrame)\nvec3 lookPerturb(vec3 n, vec3 nts, float faceDirection) {\n  vec3 q0 = dFdx(-vViewPosition), q1 = dFdy(-vViewPosition);\n  vec3 q1perp = cross(q1, n), q0perp = cross(n, q0);\n  vec3 T = q1perp * lookGx.x + q0perp * lookGy.x;\n  vec3 B = q1perp * lookGx.y + q0perp * lookGy.y;\n  float det = max(dot(T, T), dot(B, B));\n  float scale = det == 0.0 ? 0.0 : faceDirection * inversesqrt(det);\n  return normalize(T * (nts.x * scale) + B * (nts.y * scale) + n * nts.z);\n}\n\nstruct Look {\n  vec3 colour; float rough; float metal; float height; vec3 nts; vec3 normal; bool ownNormal;\n  float ao; float aoDirect; float alpha; vec3 glow;\n  float clearcoat; float clearcoatRough; vec3 sheen; float sheenRough; float iridescence; float iridIor; float iridThick;\n  float transmission; float thickness; vec3 attColour; float attDist; float ior; float dispersion;\n};\nLook lookStart() {\n  Look k;\n  k.colour = vec3(0.5); k.rough = 0.8; k.metal = 0.0; k.height = 0.0; k.nts = vec3(0.0, 0.0, 1.0);\n  k.normal = vec3(0.0, 0.0, 1.0); k.ownNormal = false; k.ao = 1.0; k.aoDirect = 0.0; k.alpha = 1.0; k.glow = vec3(0.0);\n  k.clearcoat = 0.0; k.clearcoatRough = 0.1; k.sheen = vec3(0.0); k.sheenRough = 0.5;\n  k.iridescence = 0.0; k.iridIor = 1.3; k.iridThick = 400.0;\n  k.transmission = 0.0; k.thickness = 0.0; k.attColour = vec3(1.0); k.attDist = 1e9; k.ior = 1.5; k.dispersion = 0.0;\n  return k;\n}\n\n\nuniform highp sampler2DArray lookPictures;\nuniform float lookMeans[8];\nvec3 lookSrgb(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }\nvec4 picData(int t, vec2 uv, float scale) { return textureGrad(lookPictures, vec3(uv, float(t)), lookGx * scale, lookGy * scale); }\nvec3 picColour(int t, vec2 uv, float scale) { return lookSrgb(picData(t, uv, scale).rgb); }\nvec4 picDataLod(int t, vec2 uv, float lod) { return textureLod(lookPictures, vec3(uv, float(t)), lod); }\nvec3 picColourLod(int t, vec2 uv, float lod) { return lookSrgb(picDataLod(t, uv, lod).rgb); }\nfloat picMean(int t) { return lookMeans[t]; }\n\nfloat p_stoneMin;\nfloat p_stoneMax;\nfloat p_rowMin;\nfloat p_rowMax;\nfloat p_joint;\nfloat p_seed;\nfloat p_recess;\nfloat p_edgeRound;\nfloat p_edgeDrop;\nfloat p_corner;\nfloat p_chip;\nfloat p_bulge;\nfloat p_tilt;\nfloat p_detail;\nfloat p_detailNormal;\nfloat p_valueVar;\nfloat p_warm;\nfloat p_dark;\nfloat p_mottle;\nfloat p_grime;\nfloat p_damp;\nfloat p_moss;\nfloat p_rockContrast;\nfloat p_rockScale;\nfloat p_mortScale;\nfloat p_pom;\nfloat p_pomOn;\nfloat p_shadowOn;\nvec3 p_stoneTint;\nvec3 p_mortTint;\nfloat p_repeat;\nvec3 p_tint;\nfloat p_contrast;\nfloat p_metres;\nvec3 p_glTint;\nvec3 p_glTint2;\nfloat p_glWaves;\nfloat p_glWaveDepth;\nfloat p_glSeeds;\nfloat p_glRough;\nfloat p_glAlpha;\nfloat p_glAlphaVar;\nint t_rockCol;\nint t_rockDisp;\nint t_rockNrm;\nint t_mortCol;\nint t_mortDisp;\nint t_col;\nint t_nrm;\nint t_rough;\n\n\n\nvoid look_10(inout Look k) {\n  p_glTint = texelFetch(lookSettings, ivec2(0, 10), 0).rgb;\n  p_glTint2 = texelFetch(lookSettings, ivec2(1, 10), 0).rgb;\n  p_glWaves = texelFetch(lookSettings, ivec2(2, 10), 0).r;\n  p_glWaveDepth = texelFetch(lookSettings, ivec2(3, 10), 0).r;\n  p_glSeeds = texelFetch(lookSettings, ivec2(4, 10), 0).r;\n  p_glRough = texelFetch(lookSettings, ivec2(5, 10), 0).r;\n  p_glAlpha = texelFetch(lookSettings, ivec2(6, 10), 0).r;\n  p_glAlphaVar = texelFetch(lookSettings, ivec2(7, 10), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float wave = kfbm4(uv * p_glWaves + seed);\n    float seeds = smoothstep(0.08, 0.02, kcell(uv * 60.0 + seed)) * kfade(0.01);\n    k.colour = mix(p_glTint, p_glTint2, wave) + seeds * p_glSeeds;\n    k.rough = p_glRough + p_glRough * wave;\n    k.metal = 0.0;\n    k.height = p_glWaveDepth * (wave - 0.5);\n    k.alpha = p_glAlpha + p_glAlphaVar * wave;\n\n}\n\n\nLook lookRun(int id) {\n  Look k = lookStart();\n  switch (id) {\n    case 10: look_10(k); break;\n  }\n  if (lookDebug > 0.5) {\n    switch (id) {\n      case 10: k.colour = vec3(0.12213877222960187, 0.7454042095403874, 1.0); break;\n    }\n  }\n  return k;\n}\nfloat lookShadow(int id, vec3 Lview) {\n  \n  return 1.0;\n}\n",
+   "features": {
+    "clearcoat": false,
+    "sheen": false,
+    "iridescence": false,
+    "dispersion": false,
+    "transmission": false
+   }
+  },
+  "all": {
+   "ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "fragmentPars": "uniform highp sampler2D lookSettings;\n\nflat varying float vLookId;\nvarying vec3 vLookInfo;\nvarying vec2 vLookUv;\nvarying vec3 vLookWorld;\nvarying vec3 vLookWN;\nvarying vec3 vS0;\nvarying vec3 vS1;\nvarying vec4 vS2;\nvarying vec2 vS3;\n#define s0 vS0\n#define s1 vS1\n#define s2 vS2\n#define s3 vS3\nuniform float lookView;\nuniform float lookDebug;\n// the uv's change across the pixel, worked out once where every pixel of the quad runs it, so a picture read inside a\n// look's branch still knows its sharpness\nvec2 lookGx, lookGy;\n\nfloat kh(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }\nfloat kh1(float x) { return fract(sin(x * 91.7) * 43758.5453); }\nfloat kn(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  vec2 u = f * f * (3.0 - 2.0 * f);\n  return mix(mix(kh(i), kh(i + vec2(1, 0)), u.x), mix(kh(i + vec2(0, 1)), kh(i + vec2(1, 1)), u.x), u.y);\n}\nfloat kfbm(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 5; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s / 0.97;\n}\nfloat kfbm4(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 4; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s;\n}\n// a feature f metres across fades to its mean where it is finer than a pixel\nfloat kfade(float f) { vec2 fw = abs(lookGx) + abs(lookGy); return clamp(1.5 - (fw.x + fw.y) / f, 0.0, 1.0); }\n// cells of jittered seeds: the distance to the nearest, its number (0 to 1), and how far the second is past it\nfloat kvor(vec2 p, out float id, out float edge) {\n  vec2 i = floor(p), f = fract(p);\n  float d1 = 8.0, d2 = 8.0;\n  vec2 best = vec2(0.0);\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 c = i + o;\n    vec2 r = o + vec2(kh(c), kh(c + 7.3)) - f;\n    float d = dot(r, r);\n    if (d < d1) { d2 = d1; d1 = d; best = c; } else if (d < d2) { d2 = d; }\n  }\n  id = kh(best + 3.7);\n  edge = sqrt(d2) - sqrt(d1);\n  return sqrt(d1);\n}\n// a dimple field: the distance to the nearest of jittered cells' seeds\nfloat kcell(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  float d = 8.0;\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 r = o + vec2(kh(i + o), kh(i + o + 7.3)) - f;\n    d = min(d, dot(r, r));\n  }\n  return sqrt(d);\n}\n// courses: the row along v, the piece in it along u (each row offset), where in the piece (0 to 1 each way)\nvec4 kcourse(vec2 uv, float row, float wide, float jitter, float seed, out vec2 id) {\n  float r = floor(uv.y / row);\n  float shift = kh1(r + seed) * wide;\n  float w = wide * (1.0 - jitter * 0.5 + jitter * kh(vec2(r, floor((uv.x + shift) / wide) + seed)));\n  float x = (uv.x + shift) / w;\n  id = vec2(r, floor(x));\n  return vec4(fract(x), fract(uv.y / row), r, w);\n}\n// marble's veins: thin lines wandering through a warped field, the main ones and finer ones across them\nfloat kveins(vec2 p, float seed) {\n  float w = kfbm(p * 1.3 + seed) * 4.0;\n  float a = pow(1.0 - abs(sin((p.x * 1.6 + p.y * 0.6 + w) * 3.14159)), 22.0);\n  float b = pow(1.0 - abs(sin((p.y * 2.7 - p.x * 1.1 + kfbm(p * 2.6 + seed + 7.0) * 3.0) * 3.14159)), 50.0);\n  return clamp(a + 0.6 * b, 0.0, 1.0);\n}\n// wood's grain along u: its rings' lines (late wood 1, early 0) wandering across v, and its fibres\nfloat kring(vec2 uv, float seed, float rings) {\n  float w = kfbm(vec2(uv.x * 0.35, uv.y * 2.0) + seed) * 1.6;\n  return smoothstep(0.5, 0.95, fract(uv.y * rings + w + uv.x * 0.04));\n}\nfloat kfibre(vec2 uv, float seed) { return kn(vec2(uv.x * 3.0, uv.y * 420.0) + seed) * kfade(0.003); }\n// how strongly a cloth's weave shows: a plain weave of threads t metres across, over and under\nfloat kweave(vec2 uv, float t) {\n  vec2 q = uv / t;\n  float warp = sin(q.x * 3.14159), weft = sin(q.y * 3.14159);\n  float over = step(0.0, warp * weft);\n  return mix(0.5, mix(0.8, 1.08, over) * (0.85 + 0.15 * abs(over > 0.5 ? weft : warp)), kfade(t * 2.0));\n}\n// the normal bent by a height field, as three's bump map bends it (perturbNormalArb)\nvec3 kitBump(vec3 pos, vec3 n, float h, float faceDirection) {\n  vec3 sx = dFdx(pos), sy = dFdy(pos);\n  vec3 r1 = cross(sy, n), r2 = cross(n, sx);\n  float det = dot(sx, r1) * faceDirection;\n  vec2 dh = vec2(dFdx(h), dFdy(h));\n  vec3 grad = sign(det) * (dh.x * r1 + dh.y * r2);\n  return normalize(abs(det) * n - grad);\n}\n// a normal in the surface's own ways (u, v, out) turned into the view's, the ways found from the uv's change across\n// the pixel, as three's normal map without tangents finds them (getTangentFrame)\nvec3 lookPerturb(vec3 n, vec3 nts, float faceDirection) {\n  vec3 q0 = dFdx(-vViewPosition), q1 = dFdy(-vViewPosition);\n  vec3 q1perp = cross(q1, n), q0perp = cross(n, q0);\n  vec3 T = q1perp * lookGx.x + q0perp * lookGy.x;\n  vec3 B = q1perp * lookGx.y + q0perp * lookGy.y;\n  float det = max(dot(T, T), dot(B, B));\n  float scale = det == 0.0 ? 0.0 : faceDirection * inversesqrt(det);\n  return normalize(T * (nts.x * scale) + B * (nts.y * scale) + n * nts.z);\n}\n\nstruct Look {\n  vec3 colour; float rough; float metal; float height; vec3 nts; vec3 normal; bool ownNormal;\n  float ao; float aoDirect; float alpha; vec3 glow;\n  float clearcoat; float clearcoatRough; vec3 sheen; float sheenRough; float iridescence; float iridIor; float iridThick;\n  float transmission; float thickness; vec3 attColour; float attDist; float ior; float dispersion;\n};\nLook lookStart() {\n  Look k;\n  k.colour = vec3(0.5); k.rough = 0.8; k.metal = 0.0; k.height = 0.0; k.nts = vec3(0.0, 0.0, 1.0);\n  k.normal = vec3(0.0, 0.0, 1.0); k.ownNormal = false; k.ao = 1.0; k.aoDirect = 0.0; k.alpha = 1.0; k.glow = vec3(0.0);\n  k.clearcoat = 0.0; k.clearcoatRough = 0.1; k.sheen = vec3(0.0); k.sheenRough = 0.5;\n  k.iridescence = 0.0; k.iridIor = 1.3; k.iridThick = 400.0;\n  k.transmission = 0.0; k.thickness = 0.0; k.attColour = vec3(1.0); k.attDist = 1e9; k.ior = 1.5; k.dispersion = 0.0;\n  return k;\n}\n\n\nuniform highp sampler2DArray lookPictures;\nuniform float lookMeans[8];\nvec3 lookSrgb(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }\nvec4 picData(int t, vec2 uv, float scale) { return textureGrad(lookPictures, vec3(uv, float(t)), lookGx * scale, lookGy * scale); }\nvec3 picColour(int t, vec2 uv, float scale) { return lookSrgb(picData(t, uv, scale).rgb); }\nvec4 picDataLod(int t, vec2 uv, float lod) { return textureLod(lookPictures, vec3(uv, float(t)), lod); }\nvec3 picColourLod(int t, vec2 uv, float lod) { return lookSrgb(picDataLod(t, uv, lod).rgb); }\nfloat picMean(int t) { return lookMeans[t]; }\n\nfloat p_stoneMin;\nfloat p_stoneMax;\nfloat p_rowMin;\nfloat p_rowMax;\nfloat p_joint;\nfloat p_seed;\nfloat p_recess;\nfloat p_edgeRound;\nfloat p_edgeDrop;\nfloat p_corner;\nfloat p_chip;\nfloat p_bulge;\nfloat p_tilt;\nfloat p_detail;\nfloat p_detailNormal;\nfloat p_valueVar;\nfloat p_warm;\nfloat p_dark;\nfloat p_mottle;\nfloat p_grime;\nfloat p_damp;\nfloat p_moss;\nfloat p_rockContrast;\nfloat p_rockScale;\nfloat p_mortScale;\nfloat p_pom;\nfloat p_pomOn;\nfloat p_shadowOn;\nvec3 p_stoneTint;\nvec3 p_mortTint;\nfloat p_repeat;\nvec3 p_tint;\nfloat p_contrast;\nfloat p_metres;\nvec3 p_glTint;\nvec3 p_glTint2;\nfloat p_glWaves;\nfloat p_glWaveDepth;\nfloat p_glSeeds;\nfloat p_glRough;\nfloat p_glAlpha;\nfloat p_glAlphaVar;\nint t_rockCol;\nint t_rockDisp;\nint t_rockNrm;\nint t_mortCol;\nint t_mortDisp;\nint t_col;\nint t_nrm;\nint t_rough;\n\n\n\n\n\n\n\n\n\n\n\n\nuniform sampler2D csNoise;\nfloat csTN(vec2 p) { return texture(csNoise, p / 32.0).r; }\n\n\nuniform sampler2D csCourses;\n\nuint csU(uint x) { x ^= x >> 16u; x *= 0x7feb352du; x ^= x >> 15u; x *= 0x846ca68bu; x ^= x >> 16u; return x; }\n// a number from 0 to 1 drawn from four whole numbers and the seed\nfloat csH(int a, int b, int c, int d) {\n  uint h = csU(uint(a + 0x40000000) ^ csU(uint(b + 0x40000000) ^ csU(uint(c + 0x40000000) ^ csU(uint(d + 0x40000000) + uint(p_seed) * 0x9e3779b9u))));\n  return float(h) / 4294967295.0;\n}\n\n// the course holding height v in the row's table: its number, its foot and the next one's foot\nvoid csCourse(int row, float v, out int c, out float b0, out float b1) {\n  int lo = 0;\n  int hi = 255;\n  for (int s = 0; s < 8; s++) {\n    int mid = (lo + hi + 1) / 2;\n    if (texelFetch(csCourses, ivec2(mid, row), 0).r <= v) lo = mid; else hi = mid - 1;\n  }\n  c = lo;\n  b0 = texelFetch(csCourses, ivec2(lo, row), 0).r;\n  b1 = texelFetch(csCourses, ivec2(min(lo + 1, 255), row), 0).r;\n}\n// the row's building's walls' thickness, kept in the course table after its courses\nfloat csWallDepth(int row) { return texelFetch(csCourses, ivec2(256, row), 0).r; }\n// the k-th of n joints across a stretch cut into n stones, in stones from its start: each inner joint moved by\n// up to jit / 2 of a stone each way, so each stone is (1 ± jit) of the mean\nfloat csJ(int k, int n, float jit, int s1, int s2) {\n  if (k <= 0) return 0.0;\n  if (k >= n) return float(n);\n  return float(k) + (csH(k, s1, s2, 3) - 0.5) * jit;\n}\n// the stretch from a to b cut into stones of mean length (1 ± jit): the stone i holding x, of n, from s0 to e0\nvoid csPart(float a, float b, float x, float mean, float jit, int s1, int s2, out int i, out int n, out float s0, out float e0) {\n  float L = b - a;\n  n = max(1, int(floor(L / mean + 0.5)));\n  float t = (x - a) / L * float(n);\n  i = clamp(int(floor(t)), 0, n - 1);\n  if (t < csJ(i, n, jit, s1, s2)) i = max(i - 1, 0);\n  else if (t > csJ(i + 1, n, jit, s1, s2)) i = min(i + 1, n - 1);\n  s0 = a + csJ(i, n, jit, s1, s2) * L / float(n);\n  e0 = a + csJ(i + 1, n, jit, s1, s2) * L / float(n);\n}\n\nstruct CsCell { float id; vec4 box; float off; vec4 arris; vec2 p; vec2 size; };\n// the place along the face the stones are cut on: a round wall's turned by its course's start, a box's face held\n// to its length\nfloat csQx(float x, float off) {\n  int kind = int(s2.x + 0.5);\n  if (kind == 2) return mod(x + off, s2.z);\n  if (kind == 1 || kind == 4) return x;\n  return clamp(x, 0.0, s2.z);\n}\n// the stone at the place q on this face: its number, its box on the face (x0, y0, x1, y1, along the place\n// csQx gives), its course's start round a round wall, and which of its sides (left, right, foot, top) are the\n// building's corner or a cut, not a joint\nCsCell csCell(vec2 q) {\n  CsCell C;\n  int kind = int(s2.x + 0.5);\n  int f = int(s2.y + 0.5);\n  float W = s2.z;\n  int w = int(s2.w + 0.5);\n  int row = w % 256;\n  float mean = 0.5 * (p_stoneMin + p_stoneMax);\n  float jit = clamp((p_stoneMax - p_stoneMin) / max(p_stoneMax + p_stoneMin, 1e-3), 0.0, 0.95);\n  bool aL = false, aR = false;\n  float x0, x1, y0, y1, qx = q.x;\n  int i, n;\n  float id;\n  C.off = 0.0;\n  if (kind == 4) {\n    // a face of an arch's stone: the stone from 0 to s3.x up v, and along u from 0 to s2.z at its foot and s3.y at\n    // its top, straight between (csStoneAt takes its length at the place); its number the stone's times 16 and which\n    // of its sides are an arris (left 1, right 2, foot 4, top 8), the rest joints\n    int a = f % 16;\n    C.id = csH(w, f / 16, 0, 25);\n    C.box = vec4(0.0, 0.0, max(W, s3.y), s3.x);\n    C.arris = vec4(float(a & 1), float((a >> 1) & 1), float((a >> 2) & 1), float((a >> 3) & 1));\n    return C;\n  }\n  if (kind == 1) {\n    // a slab: rows up its v, stones along its u, in 16 m squares\n    float mr = 0.5 * (p_rowMin + p_rowMax);\n    float jr = clamp((p_rowMax - p_rowMin) / max(p_rowMax + p_rowMin, 1e-3), 0.0, 0.95);\n    int ci = int(floor(q.y / 16.0));\n    csPart(float(ci) * 16.0, float(ci) * 16.0 + 16.0, q.y, mr, jr, w, ci * 7 + 1, i, n, y0, y1);\n    int r = ci * 64 + i;\n    int ui = int(floor(q.x / 16.0));\n    int k;\n    csPart(float(ui) * 16.0, float(ui) * 16.0 + 16.0, q.x, mean, jit, w, r * 131 + ui + 5, k, n, x0, x1);\n    id = csH(w, r, ui * 256 + k, 21);\n  } else {\n    int c;\n    csCourse(row, q.y, c, y0, y1);\n    if (kind == 2) {\n      // round: the whole way round, from a place drawn for each course\n      C.off = csH(w, c * 16 + f, 0, 41) * W;\n      qx = mod(q.x + C.off, W);\n      csPart(0.0, W, qx, mean, jit, w, c * 16 + f, i, n, x0, x1);\n      id = csH(w, c * 16 + f, i, 22);\n    } else {\n      qx = clamp(q.x, 0.0, W);\n      bool through = kind == 3 || (c + f) % 2 == 0;\n      float depth = csWallDepth(row);\n      if (!through && W < 2.0 * depth + 0.3) {\n        // a face too short for the corner stones of its sides and a stone between: one stone, both corners'\n        x0 = 0.0; x1 = W; aL = true; aR = true;\n        id = csH(w, c, 1000 + f, 23);\n      } else if (through) {\n        csPart(0.0, W, qx, mean, jit, w, c * 16 + f, i, n, x0, x1);\n        aL = kind == 0 && i == 0;\n        aR = kind == 0 && i == n - 1;\n        id = aL ? csH(w, c, 1000 + f, 23) : aR ? csH(w, c, 1000 + (f + 1) % 4, 23) : csH(w, c, f * 512 + i, 24);\n      } else if (qx < depth) {\n        // the end of the corner stone that runs through on the face before\n        x0 = 0.0; x1 = depth; aL = true;\n        id = csH(w, c, 1000 + f, 23);\n      } else if (qx > W - depth) {\n        x0 = W - depth; x1 = W; aR = true;\n        id = csH(w, c, 1000 + (f + 1) % 4, 23);\n      } else {\n        csPart(depth, W - depth, qx, mean, jit, w, c * 16 + f, i, n, x0, x1);\n        id = csH(w, c, f * 512 + i, 24);\n      }\n    }\n  }\n  C.id = id;\n  C.box = vec4(x0, y0, x1, y1);\n  C.arris = vec4(aL ? 1.0 : 0.0, aR ? 1.0 : 0.0, 0.0, 0.0);\n  if (s3.x > -1e3) C.arris.xy = vec2(1.0);\n  if (s3.y > -1e3) C.arris.zw = vec2(1.0);\n  return C;\n}\n// the stone last found, kept while the places asked for stay in its box: the parallax's steps and the shadow's\n// march mostly stay in one stone, so its course and its joints are worked out once\nCsCell csCache;\nbool csHave = false;\nCsCell csStoneAt(vec2 q) {\n  float qx = csQx(q.x, csCache.off);\n  if (!csHave || qx < csCache.box.x || qx > csCache.box.z || q.y < csCache.box.y || q.y > csCache.box.w) {\n    csCache = csCell(q);\n    csHave = true;\n    qx = csQx(q.x, csCache.off);\n  }\n  CsCell C = csCache;\n  C.size = C.box.zw - C.box.xy;\n  C.p = vec2(qx, q.y) - C.box.xy;\n  if (int(s2.x + 0.5) == 4) {\n    // an arch's stone: its length along u at this place up it\n    C.size.x = mix(s2.z, s3.y, clamp(C.p.y / max(C.size.y, 1e-6), 0.0, 1.0));\n  } else {\n    if (s3.x > -1e3) C.p.x = 0.5 * C.size.x;\n    if (s3.y > -1e3) C.p.y = 0.5 * C.size.y;\n  }\n  return C;\n}\n// how far in from its nearest joint a place in the stone is, its corners rounded, less half the joint\nfloat csEdge(CsCell C) {\n  float dl = C.arris.x > 0.5 ? 1e3 : C.p.x;\n  float dr = C.arris.y > 0.5 ? 1e3 : C.size.x - C.p.x;\n  float db = C.arris.z > 0.5 ? 1e3 : C.p.y;\n  float dt = C.arris.w > 0.5 ? 1e3 : C.size.y - C.p.y;\n  float dx = min(dl, dr), dy = min(db, dt);\n  float r = p_corner;\n  float d = (dx < r && dy < r) ? r - length(vec2(r - dx, r - dy)) : min(dx, dy);\n  return d - 0.5 * p_joint;\n}\n// a building's own colour for the solids view: a hue from its row, castle-ng's saturation and brightness\nvec3 csSolidColour(int row) {\n  float h = fract(float(row) * 0.61803 + 0.13);\n  vec3 k = clamp(abs(mod(h * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);\n  vec3 srgb = 0.85 * mix(vec3(1.0), k, 0.6);\n  return pow(srgb, vec3(2.2));\n}\n// what a wall look works out for the lighting: the face's ways, its normal, the normal found, the place the\n// parallax found and its height, the parallax's fade\nvec3 csT, csB, csNg, csNts;\nvec2 csUvP;\nfloat csZ, csFade;\n\n\n\n\n\n\nfloat csRockLod, csMortLod;\nstruct CsS { float h; float d; float id; vec2 tuv; float stone; };\n// the wall's height at the place uv on this face (0 its proudest, down to -Relief depth): the stone's face, its\n// rounded and chipped edges, its bulge and tilt and the rock's grain; the mortar's recess between\nCsS csSample(vec2 uv) {\n  // a cut's place where it gives one; an arch's stone's face (kind 4) its own place, s3 its stone's box\n  vec2 q = int(s2.x + 0.5) == 4 ? uv : vec2(s3.x > -1e3 ? s3.x : uv.x, s3.y > -1e3 ? s3.y : uv.y);\n  CsCell C = csStoneAt(q);\n  // the edges' chips: the rock's own relief, on a patch of its own for each stone\n  vec2 g = uv + vec2(C.id * 53.0, fract(C.id * 7.31) * 41.0);\n  float warp = (textureLod(csNoise, g * 0.6, 0.0).r - 0.5) * 3.0 * p_chip;\n  float d = csEdge(C) + warp;\n  vec2 tuv = (uv + vec2(C.id * 97.13, fract(C.id * 7.31) * 61.7)) / p_rockScale;\n  float rock = picDataLod(t_rockDisp, tuv, csRockLod).r;\n  vec2 n01 = clamp(C.p / max(C.size, vec2(1e-3)), 0.0, 1.0) * 2.0 - 1.0;\n  float pillow = (1.0 - 0.6 * n01.x * n01.x) * (1.0 - n01.y * n01.y);\n  // the face: its proudest place at 0, rounded down at its edges, bulged, tilted, grained\n  float hs = -p_edgeDrop * pow(1.0 - smoothstep(0.0, p_edgeRound, d), 2.0)\n             - p_bulge * (1.0 - pillow)\n             + (rock - 0.5) * p_detail - 0.5 * p_detail\n             + ((fract(C.id * 131.7) - 0.5) + (fract(C.id * 71.3) - 0.5) * n01.x + (fract(C.id * 37.9) - 0.5) * n01.y - 1.0) * p_tilt;\n  float hm = -p_recess + (picDataLod(t_mortDisp, uv / p_mortScale, csMortLod).r - 0.5) * 0.006;\n  CsS S;\n  // a stone where it is in from its joint\n  S.stone = d > 0.0 ? 1.0 : 0.0;\n  S.h = clamp(d > 0.0 ? max(hs, hm) : hm, -p_pom, 0.0);\n  S.d = d;\n  S.id = C.id;\n  S.tuv = tuv;\n  return S;\n}\n\n\n\n\n\n\n\n\n\n\nvoid look_0(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float post = step(fract(uv.x / 1.2), 0.15);\n    float rail = step(fract(wp.y / 1.4), 0.12);\n    float brace = smoothstep(0.08, 0.06, abs(fract((uv.x + wp.y) / 1.2) - 0.5) * 1.2) * (1.0 - rail);\n    float timber = max(max(post, rail), brace);\n    vec3 wood = vec3(0.18, 0.11, 0.06) * (0.8 + 0.3 * kn(vec2(uv.x * 2.0, wp.y * 30.0) + seed));\n    vec3 infill = vec3(0.85, 0.8, 0.7) * (0.92 + 0.1 * kfbm(uv * 4.0 + seed));\n    k.colour = mix(infill, wood, timber);\n    k.rough = mix(0.95, 0.8, timber);\n    k.height = 0.01 * timber;\n\n}\n\nvoid look_1(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float lump = kfbm(uv * 4.0 + seed);\n    float straw = smoothstep(0.75, 0.9, kn(vec2(uv.x * 60.0 + uv.y * 20.0, uv.y * 6.0) + seed)) * kfade(0.006);\n    k.colour = mix(vec3(0.42, 0.33, 0.22), vec3(0.58, 0.48, 0.34), lump) * (1.0 - 0.1 * straw) + vec3(0.12, 0.1, 0.03) * straw;\n    k.rough = 0.98;\n    k.height = 0.006 * (lump - 0.5) + 0.0006 * straw;\n\n}\n\nvoid look_2(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float id, e;\n    float d = kvor(uv * 1.6 + seed, id, e);\n    float joint = smoothstep(0.02, 0.05, e);\n    float path = smoothstep(0.6, 0.0, abs(wp.x - floor(wp.x / 3.0) * 3.0 - 1.5)) * smoothstep(0.5, 0.9, wn.y);\n    vec3 c = mix(vec3(0.42, 0.4, 0.36), vec3(0.55, 0.52, 0.46), id) * (0.88 + 0.2 * kfbm(uv * 5.0 + id * 9.0));\n    k.colour = mix(vec3(0.25, 0.23, 0.2), c * (1.0 + 0.12 * path), joint);\n    k.rough = mix(0.95, mix(0.8, 0.45, path), joint);\n    k.height = mix(-0.008, 0.002 * (kfbm(uv * 4.0 + id) - 0.5) * (1.0 - path), joint);\n\n}\n\nvoid look_3(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float row = floor(uv.y / 0.25);\n    float inRow = fract(uv.y / 0.25);\n    float tone = kh1(row + seed);\n    float grain = kn(vec2(uv.x * 3.0, (uv.y + row) * 90.0) + row) * kfade(0.006);\n    float edge = smoothstep(0.0, 0.03, inRow) * smoothstep(1.0, 0.97, inRow);\n    vec3 wood = mix(vec3(0.27, 0.17, 0.09), vec3(0.46, 0.31, 0.17), tone);\n    k.colour = wood * mix(0.45, 1.0, mix(1.0, edge, kfade(0.04))) * (0.82 + 0.3 * grain);\n    k.rough = 0.82;\n    k.metal = 0.0;\n    k.height = mix(0.0, -0.003 * (1.0 - edge), kfade(0.04)) + 0.0005 * grain;\n\n}\n\nvoid look_4(inout Look k) {\n  p_stoneMin = texelFetch(lookSettings, ivec2(0, 4), 0).r;\n  p_stoneMax = texelFetch(lookSettings, ivec2(1, 4), 0).r;\n  p_rowMin = texelFetch(lookSettings, ivec2(2, 4), 0).r;\n  p_rowMax = texelFetch(lookSettings, ivec2(3, 4), 0).r;\n  p_joint = texelFetch(lookSettings, ivec2(4, 4), 0).r;\n  p_seed = texelFetch(lookSettings, ivec2(5, 4), 0).r;\n  p_recess = texelFetch(lookSettings, ivec2(6, 4), 0).r;\n  p_edgeRound = texelFetch(lookSettings, ivec2(7, 4), 0).r;\n  p_edgeDrop = texelFetch(lookSettings, ivec2(8, 4), 0).r;\n  p_corner = texelFetch(lookSettings, ivec2(9, 4), 0).r;\n  p_chip = texelFetch(lookSettings, ivec2(10, 4), 0).r;\n  p_bulge = texelFetch(lookSettings, ivec2(11, 4), 0).r;\n  p_tilt = texelFetch(lookSettings, ivec2(12, 4), 0).r;\n  p_detail = texelFetch(lookSettings, ivec2(13, 4), 0).r;\n  p_detailNormal = texelFetch(lookSettings, ivec2(14, 4), 0).r;\n  p_valueVar = texelFetch(lookSettings, ivec2(15, 4), 0).r;\n  p_warm = texelFetch(lookSettings, ivec2(16, 4), 0).r;\n  p_dark = texelFetch(lookSettings, ivec2(17, 4), 0).r;\n  p_mottle = texelFetch(lookSettings, ivec2(18, 4), 0).r;\n  p_grime = texelFetch(lookSettings, ivec2(19, 4), 0).r;\n  p_damp = texelFetch(lookSettings, ivec2(20, 4), 0).r;\n  p_moss = texelFetch(lookSettings, ivec2(21, 4), 0).r;\n  p_rockContrast = texelFetch(lookSettings, ivec2(22, 4), 0).r;\n  p_rockScale = texelFetch(lookSettings, ivec2(23, 4), 0).r;\n  p_mortScale = texelFetch(lookSettings, ivec2(24, 4), 0).r;\n  p_pom = texelFetch(lookSettings, ivec2(25, 4), 0).r;\n  p_pomOn = texelFetch(lookSettings, ivec2(26, 4), 0).r;\n  p_shadowOn = texelFetch(lookSettings, ivec2(27, 4), 0).r;\n  p_stoneTint = texelFetch(lookSettings, ivec2(28, 4), 0).rgb;\n  p_mortTint = texelFetch(lookSettings, ivec2(29, 4), 0).rgb;\n  t_rockCol = 0;\n  t_rockDisp = 1;\n  t_rockNrm = 2;\n  t_mortCol = 3;\n  t_mortDisp = 4;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n  csNg = normalize(vNormal);\n  csT = normalize(s0 - csNg * dot(s0, csNg));\n  csB = normalize(s1 - csNg * dot(s1, csNg) - csT * dot(s1, csT));\n  vec3 Vv = normalize(vViewPosition);\n  vec3 Vts = vec3(dot(Vv, csT), dot(Vv, csB), dot(Vv, csNg));\n  vec2 uv0 = vLookUv;\n  vec2 fw = abs(lookGx) + abs(lookGy);\n  float fp = max(max(fw.x, fw.y), 1e-6);\n  csRockLod = log2(max(fp / p_rockScale * 1024.0, 1.0));\n  csMortLod = log2(max(fp / p_mortScale * 1024.0, 1.0));\n  csFade = p_pomOn * (1.0 - smoothstep(0.006, 0.03, fp));\n  uv = uv0;\n  float zr = 0.0;\n  CsS S = csSample(uv);\n  if (csFade > 0.0) {\n    float vz = max(Vts.z, 0.1);\n    // march down in coarse steps to the first below the surface, then halve the step four times between the\n    // last above and the first below\n    int steps = int(mix(14.0, 4.0, clamp(Vts.z, 0.0, 1.0)));\n    float dz = p_pom / float(steps);\n    vec2 duv = -Vts.xy / vz * dz * csFade;\n    vec2 puv = uv;\n    float pz = 0.0;\n    for (int i = 0; i < 14; i++) {\n      if (i >= steps || zr <= S.h) break;\n      puv = uv; pz = zr;\n      uv += duv; zr -= dz;\n      S = csSample(uv);\n    }\n    if (zr <= S.h) {\n      vec2 lo = puv, hi = uv;\n      float zlo = pz, zhi = zr;\n      for (int i = 0; i < 4; i++) {\n        vec2 mu = 0.5 * (lo + hi);\n        float mz = 0.5 * (zlo + zhi);\n        CsS M = csSample(mu);\n        if (mz <= M.h) { hi = mu; zhi = mz; S = M; } else { lo = mu; zlo = mz; }\n      }\n      uv = hi;\n      zr = zhi;\n    }\n    S = csSample(uv);\n  }\n  csUvP = uv;\n  csZ = S.h;\n  // the normal from the height round the place, no finer than a pixel\n  float e = max(0.002, fp * 0.75);\n  float hx = csSample(uv + vec2(e, 0.0)).h - S.h;\n  float hy = csSample(uv + vec2(0.0, e)).h - S.h;\n  vec3 rn = picDataLod(t_rockNrm, S.tuv, csRockLod).xyz * 2.0 - 1.0;\n  csNts = normalize(vec3(-hx / e, -hy / e, 1.0) + vec3(rn.xy * p_detailNormal * S.stone, 0.0));\n\n  // the colour: the rock's picture taken grey, tinted, each stone its own lightness and warmth; the mortar's the same\n  vec3 rockC = picColourLod(t_rockCol, S.tuv, csRockLod);\n  float rl = mix(1.0, dot(rockC, vec3(0.2126, 0.7152, 0.0722)) / picMean(t_rockCol), p_rockContrast);\n  float h1 = fract(S.id * 913.7), h2 = fract(S.id * 271.3), h3 = fract(S.id * 517.9);\n  float val = 1.0 + (h1 - 0.5) * 2.0 * p_valueVar;\n  if (h3 < p_dark) val *= 0.62;\n  float warm = (h2 - 0.5) * 2.0 * p_warm;\n  float mott = 1.0 + (csTN(uv * 0.9 + S.id * 13.0) - 0.5) * 2.0 * p_mottle;\n  vec3 stoneC = p_stoneTint * rl * val * mott * vec3(1.0 + 0.16 * warm, 1.0 + 0.02 * warm, 1.0 - 0.2 * warm);\n  vec3 mortC = p_mortTint * dot(picColourLod(t_mortCol, uv / p_mortScale, csMortLod), vec3(0.2126, 0.7152, 0.0722)) / picMean(t_mortCol);\n  float sm = S.stone * smoothstep(-fp, fp, S.d);\n  vec3 col = mix(mortC, stoneC, sm);\n  // the cavity: the mortar darker toward the stones' edges, the stones' edges darker as they round down\n  float aoM = mix(0.4, 0.85, smoothstep(0.0, 0.6 * p_joint + 0.004, -S.d));\n  float aoS = mix(0.65, 1.0, smoothstep(0.0, p_edgeRound * 1.5, S.d));\n  k.ao = mix(aoM, aoS, sm);\n  k.aoDirect = 0.35;\n  // streaks run down the walls, rising damp darkens their feet, moss in the damp and on the slabs\n  int kind = int(s2.x + 0.5);\n  float streak = kind == 1 ? 0.0 : smoothstep(0.5, 0.85, csTN(vec2(uv.x * 2.2, uv.y * 0.1 + csTN(vec2(uv.x * 0.5, 7.0)) * 3.0)));\n  col *= 1.0 - p_grime * streak * 0.45;\n  col = mix(col, col * vec3(0.92, 0.86, 0.76), p_grime * streak * 0.6);\n  float dampM = 1.0 - smoothstep(0.0, 0.5 + 1.6 * csTN(vec2(uv.x * 0.45, 3.0)), vLookWorld.y);\n  col *= 1.0 - 0.45 * p_damp * dampM;\n  col = mix(col, col * vec3(0.85, 0.95, 0.75), p_damp * dampM * 0.5);\n  float mossM = smoothstep(0.52, 0.78, csTN(uv * 1.7 + 3.1)) * clamp(dampM * 0.9 + (kind == 1 ? 0.7 : 0.0) + (1.0 - sm) * 0.4, 0.0, 1.0);\n  mossM = clamp(mossM * p_moss * 1.6, 0.0, 1.0);\n  col = mix(col, vec3(0.05, 0.075, 0.02) * (0.7 + 0.6 * rl), mossM);\n  k.rough = mix(mix(0.96, 0.86, sm), 1.0, mossM);\n\n  if (lookView > 0.5 && lookView < 1.5) col = mix(vec3(0.6), vec3(h1, h2, h3), sm);\n  if (lookView > 1.5 && lookView < 2.5) col = vec3((S.h + p_pom) / p_pom);\n  if (lookView > 3.5) col = csSolidColour(int(s2.w + 0.5) % 256);\n  k.colour = col;\n  k.normal = normalize(mat3(csT, csB, csNg) * csNts);\n  k.ownNormal = true;\n\n}\n\nvoid look_5(inout Look k) {\n  p_repeat = texelFetch(lookSettings, ivec2(0, 5), 0).r;\n  t_col = 5;\n  t_nrm = 6;\n  t_rough = 7;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n  vec2 tuv = uv * p_repeat;\n  k.colour = picColour(t_col, tuv, p_repeat);\n  k.nts = picData(t_nrm, tuv, p_repeat).xyz * 2.0 - 1.0;\n  k.rough = picData(t_rough, tuv, p_repeat).r;\n\n}\n\nvoid look_6(inout Look k) {\n  p_tint = texelFetch(lookSettings, ivec2(0, 6), 0).rgb;\n  p_contrast = texelFetch(lookSettings, ivec2(1, 6), 0).r;\n  p_metres = texelFetch(lookSettings, ivec2(2, 6), 0).r;\n  t_col = 0;\n  t_nrm = 2;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n  // each part on its own patch of the pictures, from its thing's and its part's numbers\n  vec2 kitPatch = vec2(fract(vLookInfo.y * 0.61803 + vLookInfo.z * 0.137) * 37.0, fract(vLookInfo.y * 0.75488 + vLookInfo.z * 0.291) * 23.0);\n  vec2 tuv = uv / p_metres + kitPatch;\n  vec3 picC = picColour(t_col, tuv, 1.0 / p_metres);\n  float kitL = dot(picC, vec3(0.2126, 0.7152, 0.0722)) / picMean(t_col);\n  vec3 kitN = picData(t_nrm, tuv, 1.0 / p_metres).xyz * 2.0 - 1.0;\n  float kitSteep = 1.0 - clamp(kitN.z, 0.0, 1.0);\n  float kitCav = clamp(smoothstep(0.05, 0.4, kitSteep) * 0.7 + smoothstep(0.7, 0.35, kitL) * 0.3, 0.0, 1.0);\n  float kitBend = length(fwidth(wn)) / max(length(fwidth(wp)), 1e-5);\n  float kitEdge = smoothstep(20.0, 70.0, kitBend) * (0.6 + 0.4 * kn(uv * 40.0 + seed));\n  float kitUp = smoothstep(0.55, 0.95, wn.y);\n  float kitDamp = 1.0 - smoothstep(0.0, 0.35 + 0.3 * kn(wp.xz * 2.0), wp.y);\n  float kitMoss = clamp(smoothstep(0.55, 0.8, kfbm4(uv * 2.3 + seed * 1.7)) * (kitUp * 0.7 + kitDamp * 0.5) * (0.4 + kitCav), 0.0, 1.0) * 0.8;\n  float kitV = 1.0 + (kh1(seed + 0.37) - 0.5) * 0.3;\n  float kitWarm = (kh1(seed + 5.1) - 0.5) * 0.5;\n  float kitMott = 1.0 + (kfbm4(uv * 1.3 + seed) - 0.5) * 0.35;\n  vec3 kitC = p_tint * mix(1.0, kitL, p_contrast) * kitV * kitMott * vec3(1.0 + 0.16 * kitWarm, 1.0 + 0.02 * kitWarm, 1.0 - 0.2 * kitWarm);\n  kitC *= mix(1.0, 0.75, kitCav);\n  kitC = mix(kitC, kitC * vec3(0.8, 0.74, 0.64), kitCav * 0.6);\n  kitC *= 1.0 - 0.35 * kitDamp;\n  kitC = mix(kitC, min(kitC * 1.45 + 0.03, vec3(1.0)), kitEdge * (1.0 - kitCav));\n  kitC = mix(kitC, vec3(0.05, 0.075, 0.02) * (0.7 + 0.6 * kitL), kitMoss);\n  k.colour = kitC;\n  // the roughness from the same: the cavity and the moss rougher, the worn edges smoother\n  k.rough = clamp(0.8 + 0.18 * kitCav + 0.2 * kitMoss - 0.22 * kitEdge, 0.5, 1.0);\n  // the relief: the normal picture, and over it the rock's lightness as a height, its dark sunk\n  k.nts = kitN;\n  k.height = (kitL - 1.0) * 0.003;\n  // the cavity shades the light that comes from everywhere\n  k.ao = mix(1.0, 0.7, kitCav);\n\n}\n\nvoid look_7(inout Look k) {\n  p_repeat = texelFetch(lookSettings, ivec2(0, 7), 0).r;\n  t_col = 5;\n  t_nrm = 6;\n  t_rough = 7;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n  vec2 tuv = uv * p_repeat;\n  k.colour = picColour(t_col, tuv, p_repeat);\n  k.nts = picData(t_nrm, tuv, p_repeat).xyz * 2.0 - 1.0;\n  k.rough = picData(t_rough, tuv, p_repeat).r;\n\n}\n\nvoid look_8(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float dim = kcell(uv * 22.0 + seed);\n    float big = kfbm4(uv * 3.0 + seed);\n    float rust = smoothstep(0.5, 0.78, kfbm4(uv * 2.2 + seed * 3.1)) * 0.85 + smoothstep(0.45, 0.2, dim) * 0.06 * kfade(0.05);\n    vec3 iron = mix(vec3(0.1, 0.095, 0.09), vec3(0.21, 0.2, 0.19), big);\n    vec3 red = mix(vec3(0.14, 0.065, 0.03), vec3(0.24, 0.12, 0.055), kn(uv * 40.0 + seed));\n    k.colour = mix(iron, red, clamp(rust, 0.0, 1.0));\n    k.metal = mix(0.3, 0.05, clamp(rust, 0.0, 1.0));\n    k.rough = mix(0.45 + 0.25 * big, 0.92, clamp(rust, 0.0, 1.0));\n    k.height = -0.0012 * smoothstep(0.5, 0.0, dim) * kfade(0.05);\n\n}\n\nvoid look_9(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float stroke = kn(vec2(uv.x * 1.8 + uv.y * 0.6, uv.y * 7.0) + seed);\n    float grain = kn(uv * 70.0 + seed) * kfade(0.02);\n    float grime = smoothstep(0.55, 0.85, kfbm4(uv * 1.2 + seed));\n    k.colour = vec3(0.86, 0.82, 0.72) * (0.92 + 0.08 * stroke + 0.05 * grain);\n    k.colour = mix(k.colour, vec3(0.55, 0.5, 0.42), grime * 0.45);\n    k.rough = 0.92;\n    k.metal = 0.0;\n    k.height = 0.002 * (stroke - 0.5) + 0.0004 * grain;\n\n}\n\nvoid look_10(inout Look k) {\n  p_glTint = texelFetch(lookSettings, ivec2(0, 10), 0).rgb;\n  p_glTint2 = texelFetch(lookSettings, ivec2(1, 10), 0).rgb;\n  p_glWaves = texelFetch(lookSettings, ivec2(2, 10), 0).r;\n  p_glWaveDepth = texelFetch(lookSettings, ivec2(3, 10), 0).r;\n  p_glSeeds = texelFetch(lookSettings, ivec2(4, 10), 0).r;\n  p_glRough = texelFetch(lookSettings, ivec2(5, 10), 0).r;\n  p_glAlpha = texelFetch(lookSettings, ivec2(6, 10), 0).r;\n  p_glAlphaVar = texelFetch(lookSettings, ivec2(7, 10), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float wave = kfbm4(uv * p_glWaves + seed);\n    float seeds = smoothstep(0.08, 0.02, kcell(uv * 60.0 + seed)) * kfade(0.01);\n    k.colour = mix(p_glTint, p_glTint2, wave) + seeds * p_glSeeds;\n    k.rough = p_glRough + p_glRough * wave;\n    k.metal = 0.0;\n    k.height = p_glWaveDepth * (wave - 0.5);\n    k.alpha = p_glAlpha + p_glAlphaVar * wave;\n\n}\n\nvoid look_11(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float grain = kn(uv * 600.0 + seed) * kfade(0.002);\n    float blush = kfbm(uv * 2.0 + seed);\n    k.colour = mix(vec3(0.52, 0.22, 0.12), vec3(0.66, 0.34, 0.2), blush) * (0.9 + 0.15 * grain);\n    k.rough = 0.88;\n    k.height = 0.0002 * grain + 0.0006 * (kn(vec2(uv.x * 4.0, uv.y * 60.0) + seed) - 0.5);\n\n}\n\nvoid look_12(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    // the courses: u runs level along the face, v up or down it; each stone its id\n    vec2 id;\n    vec4 c = kcourse(uv, 0.28, 0.52, 0.45, seed, id);\n    float jx = min(c.x, 1.0 - c.x) * c.w, jy = min(c.y, 1.0 - c.y) * 0.28;\n    float edge = min(jx, jy);\n    // a stone's arris rounded and chipped, the joint recessed\n    float chip = (kn(uv * 38.0 + id * 7.0) - 0.5) * 0.008;\n    float joint = smoothstep(0.006, 0.016, edge + chip);\n    // each stone its own lightness and warmth, its face mottled and pitted\n    float h1 = kh(id + seed), h2 = kh(id + seed + 5.0), h3 = kh(id + seed + 9.0);\n    float val = 0.82 + 0.36 * h1;\n    if (h3 < 0.08) val *= 0.66;\n    float warm = (h2 - 0.5) * 0.8;\n    vec3 stoneC = vec3(0.34, 0.32, 0.29) * val * vec3(1.0 + 0.14 * warm, 1.0 + 0.02 * warm, 1.0 - 0.18 * warm);\n    float mott = kfbm(uv * 3.5 + id * 3.1);\n    float pit = smoothstep(0.62, 0.7, kn(uv * 70.0 + id * 11.0)) * kfade(0.004);\n    stoneC *= (0.84 + 0.3 * mott) * (1.0 - 0.3 * pit);\n    vec3 mortC = vec3(0.4, 0.38, 0.34) * (0.85 + 0.25 * kn(uv * 160.0 + seed) * kfade(0.003));\n    vec3 col = mix(mortC * 0.75, stoneC, joint);\n    // grime run down from the joints and the cap: streaks along the face, slow up it\n    float streak = smoothstep(0.52, 0.85, kfbm(vec2(uv.x * 3.0, uv.y * 0.25) + seed + 2.0));\n    col *= 1.0 - 0.32 * streak;\n    col = mix(col, col * vec3(0.9, 0.86, 0.78), streak * 0.5);\n    // lichen in patches on the stones\n    float lich = smoothstep(0.66, 0.8, kfbm(uv * 2.6 + seed + 4.0)) * joint;\n    col = mix(col, vec3(0.52, 0.5, 0.36), lich * 0.45);\n    k.colour = col;\n    k.rough = mix(0.98, 0.9, joint);\n    k.height = mix(-0.01, 0.0, joint) - 0.0015 * pit + 0.0012 * (mott - 0.5);\n\n}\n\nvoid look_13(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    // a velvety near-black crust, browner where tar has run and glazed, flaking in places to a lighter grey ash\n    float crust = kfbm(uv * 9.0 + seed);\n    float tar = smoothstep(0.55, 0.8, kfbm(vec2(uv.x * 3.0, uv.y * 0.8) + seed + 3.0));\n    float flake = smoothstep(0.72, 0.78, kfbm(uv * 14.0 + seed + 9.0));\n    vec3 c = mix(vec3(0.016, 0.015, 0.015), vec3(0.04, 0.038, 0.036), crust);\n    c = mix(c, vec3(0.05, 0.035, 0.022), tar * 0.5);\n    c = mix(c, vec3(0.1, 0.098, 0.095), flake * 0.5);\n    k.colour = c * (0.8 + 0.4 * kn(uv * 220.0 + seed) * kfade(0.003));\n    k.rough = mix(1.0, 0.7, tar);\n    k.height = 0.0012 * crust - 0.0006 * flake;\n\n}\n\nvoid look_14(inout Look k) {\n\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    // a warm off-white lime with sharp sand and grit through it, trowel strokes in its face, darkened by rain and\n    // soot running down it, with fine shrinkage cracks\n    float grit = kn(uv * 520.0 + seed) * kfade(0.002);\n    float pebble = smoothstep(0.78, 0.84, kn(uv * 140.0 + seed + 4.0)) * kfade(0.006);\n    float trowel = kn(vec2(uv.x * 2.5, uv.y * 26.0) + seed) * kfade(0.01);\n    float dirt = smoothstep(0.45, 0.85, kfbm(uv * 2.5 + seed + 1.0));\n    float id, e;\n    kvor(uv * 7.0 + seed, id, e);\n    float crack = smoothstep(0.012, 0.0, e) * step(0.6, kh1(id * 7.0)) * kfade(0.004);\n    vec3 c = mix(vec3(0.74, 0.71, 0.64), vec3(0.62, 0.58, 0.5), trowel);\n    c *= 0.9 + 0.16 * grit;\n    c = mix(c, vec3(0.45, 0.41, 0.36), pebble * 0.6);\n    c = mix(c, vec3(0.3, 0.29, 0.27), dirt * 0.55);\n    k.colour = c * (1.0 - 0.55 * crack);\n    k.rough = 0.93;\n    k.height = 0.0006 * grit + 0.0008 * trowel + 0.0006 * pebble - 0.0008 * crack;\n\n}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLook lookRun(int id) {\n  Look k = lookStart();\n  switch (id) {\n    case 0: look_0(k); break;\n    case 1: look_1(k); break;\n    case 2: look_2(k); break;\n    case 3: look_3(k); break;\n    case 4: look_4(k); break;\n    case 5: look_5(k); break;\n    case 6: look_6(k); break;\n    case 7: look_7(k); break;\n    case 8: look_8(k); break;\n    case 9: look_9(k); break;\n    case 10: look_10(k); break;\n    case 11: look_11(k); break;\n    case 12: look_12(k); break;\n    case 13: look_13(k); break;\n    case 14: look_14(k); break;\n  }\n  if (lookDebug > 0.5) {\n    switch (id) {\n      case 0: k.colour = vec3(0.7912979403326302, 0.019382360956935723, 0.06662593864377289); break;\n      case 1: k.colour = vec3(0.019382360956935723, 0.3467040563550296, 0.7912979403326302); break;\n      case 2: k.colour = vec3(0.14995978981060856, 0.7912979403326302, 0.019382360956935723); break;\n      case 3: k.colour = vec3(0.39157247774972326, 0.14126329114027164, 0.028426039504420793); break;\n      case 4: k.colour = vec3(0.042311410620809675, 0.05780543019106723, 0.08437621154414882); break;\n      case 5: k.colour = vec3(0.25415209433082675, 0.10224173308810132, 0.024157632448504756); break;\n      case 6: k.colour = vec3(0.26225065752969623, 0.26225065752969623, 0.26225065752969623); break;\n      case 7: k.colour = vec3(0.25415209433082675, 0.10224173308810132, 0.024157632448504756); break;\n      case 8: k.colour = vec3(0.013702083047289686, 0.11443537382697373, 1.0); break;\n      case 9: k.colour = vec3(0.8631572134541023, 0.7912979403326302, 0.6239603916750761); break;\n      case 10: k.colour = vec3(0.12213877222960187, 0.7454042095403874, 1.0); break;\n      case 11: k.colour = vec3(0.3049873140698863, 0.7912979403326302, 0.019382360956935723); break;\n      case 12: k.colour = vec3(0.10224173308810132, 0.08437621154414882, 0.06480326669290577); break;\n      case 13: k.colour = vec3(0.042311410620809675, 0.02315336617811041, 0.014443843596092545); break;\n      case 14: k.colour = vec3(0.6866853124353135, 0.5840784178911641, 0.35153259950043936); break;\n    }\n  }\n  return k;\n}\nfloat lookShadow_4(vec3 Lview) {\n\n  if (p_shadowOn < 0.5 || csFade <= 0.0) return 1.0;\n  vec3 L = vec3(dot(Lview, csT), dot(Lview, csB), dot(Lview, csNg));\n  if (L.z <= 0.0) return 1.0;\n  float span = -csZ + 0.002;\n  vec2 duv = L.xy / max(L.z, 0.06) * span / 6.0;\n  float dz = span / 6.0;\n  vec2 u = csUvP;\n  float z = csZ + 0.0015;\n  float s = 1.0;\n  for (int i = 0; i < 6; i++) {\n    u += duv;\n    z += dz;\n    s = min(s, clamp(1.0 - (csSample(u).h - z) * 250.0, 0.0, 1.0));\n  }\n  return mix(1.0, s, csFade);\n\n}\nfloat lookShadow(int id, vec3 Lview) {\n  switch (id) {\n    case 4: return lookShadow_4(Lview);\n  }\n  return 1.0;\n}\n",
+   "features": {
+    "clearcoat": false,
+    "sheen": false,
+    "iridescence": false,
+    "dispersion": false,
+    "transmission": false
+   }
+  }
+ },
+ "needs": [
+  "noise",
+  "courses"
+ ],
+ "pictures": [
+  {
+   "asset": "Rock013_4K_Color",
+   "file": "Rock013_4K_Color.webp",
+   "set": "Rock013_4K-JPG",
+   "source": "Rock013_4K_Color.jpg",
+   "colour": true
+  },
+  {
+   "asset": "Rock013_4K_Displacement",
+   "file": "Rock013_4K_Displacement.webp",
+   "set": "Rock013_4K-JPG",
+   "source": "Rock013_4K_Displacement.jpg",
+   "colour": false
+  },
+  {
+   "asset": "Rock013_4K_NormalGL",
+   "file": "Rock013_4K_NormalGL.webp",
+   "set": "Rock013_4K-JPG",
+   "source": "Rock013_4K_NormalGL.jpg",
+   "colour": false
+  },
+  {
+   "asset": "Concrete034_4K_Color",
+   "file": "Concrete034_4K_Color.webp",
+   "set": "Concrete034_4K-JPG",
+   "source": "Concrete034_4K_Color.jpg",
+   "colour": true
+  },
+  {
+   "asset": "Concrete034_4K_Displacement",
+   "file": "Concrete034_4K_Displacement.webp",
+   "set": "Concrete034_4K-JPG",
+   "source": "Concrete034_4K_Displacement.jpg",
+   "colour": false
+  },
+  {
+   "asset": "Wood036_4K_Color",
+   "file": "Wood036_4K_Color.webp",
+   "set": "Wood036_4K-JPG",
+   "source": "Wood036_4K_Color.jpg",
+   "colour": true
+  },
+  {
+   "asset": "Wood036_4K_NormalGL",
+   "file": "Wood036_4K_NormalGL.webp",
+   "set": "Wood036_4K-JPG",
+   "source": "Wood036_4K_NormalGL.jpg",
+   "colour": false
+  },
+  {
+   "asset": "Wood036_4K_Roughness",
+   "file": "Wood036_4K_Roughness.webp",
+   "set": "Wood036_4K-JPG",
+   "source": "Wood036_4K_Roughness.jpg",
+   "colour": false
+  }
+ ],
+ "settings": {
+  "width": 30,
+  "materials": [
+   [],
+   [],
+   [],
+   [],
+   [
+    {
+     "name": "stoneMin",
+     "type": "float",
+     "value": 0.2
+    },
+    {
+     "name": "stoneMax",
+     "type": "float",
+     "value": 0.32
+    },
+    {
+     "name": "rowMin",
+     "type": "float",
+     "value": 0.17
+    },
+    {
+     "name": "rowMax",
+     "type": "float",
+     "value": 0.17
+    },
+    {
+     "name": "joint",
+     "type": "float",
+     "value": 0.004
+    },
+    {
+     "name": "seed",
+     "type": "float",
+     "value": 1
+    },
+    {
+     "name": "recess",
+     "type": "float",
+     "value": 0.008
+    },
+    {
+     "name": "edgeRound",
+     "type": "float",
+     "value": 0.006
+    },
+    {
+     "name": "edgeDrop",
+     "type": "float",
+     "value": 0.004
+    },
+    {
+     "name": "corner",
+     "type": "float",
+     "value": 0.01
+    },
+    {
+     "name": "chip",
+     "type": "float",
+     "value": 0.006
+    },
+    {
+     "name": "bulge",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "tilt",
+     "type": "float",
+     "value": 0.004
+    },
+    {
+     "name": "detail",
+     "type": "float",
+     "value": 0.002
+    },
+    {
+     "name": "detailNormal",
+     "type": "float",
+     "value": 0.5
+    },
+    {
+     "name": "valueVar",
+     "type": "float",
+     "value": 0.1
+    },
+    {
+     "name": "warm",
+     "type": "float",
+     "value": 0.15
+    },
+    {
+     "name": "dark",
+     "type": "float",
+     "value": 0.12
+    },
+    {
+     "name": "mottle",
+     "type": "float",
+     "value": 0.1
+    },
+    {
+     "name": "grime",
+     "type": "float",
+     "value": 0.15
+    },
+    {
+     "name": "damp",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "moss",
+     "type": "float",
+     "value": 0.15
+    },
+    {
+     "name": "rockContrast",
+     "type": "float",
+     "value": 0.45
+    },
+    {
+     "name": "rockScale",
+     "type": "float",
+     "value": 0.8
+    },
+    {
+     "name": "mortScale",
+     "type": "float",
+     "value": 1
+    },
+    {
+     "name": "pom",
+     "type": "float",
+     "value": 0.015
+    },
+    {
+     "name": "pomOn",
+     "type": "float",
+     "value": 1
+    },
+    {
+     "name": "shadowOn",
+     "type": "float",
+     "value": 1
+    },
+    {
+     "name": "stoneTint",
+     "type": "vec3",
+     "value": [
+      0.075,
+      0.08,
+      0.09
+     ]
+    },
+    {
+     "name": "mortTint",
+     "type": "vec3",
+     "value": [
+      0.05,
+      0.05,
+      0.055
+     ]
+    }
+   ],
+   [
+    {
+     "name": "repeat",
+     "type": "float",
+     "value": 1
+    }
+   ],
+   [
+    {
+     "name": "tint",
+     "type": "vec3",
+     "value": [
+      0.3,
+      0.28,
+      0.25
+     ]
+    },
+    {
+     "name": "contrast",
+     "type": "float",
+     "value": 0.3
+    },
+    {
+     "name": "metres",
+     "type": "float",
+     "value": 1.6
+    }
+   ],
+   [
+    {
+     "name": "repeat",
+     "type": "float",
+     "value": 0.6666666666666666
+    }
+   ],
+   [],
+   [],
+   [
+    {
+     "name": "glTint",
+     "type": "vec3",
+     "value": [
+      0.42,
+      0.52,
+      0.42
+     ]
+    },
+    {
+     "name": "glTint2",
+     "type": "vec3",
+     "value": [
+      0.58,
+      0.66,
+      0.55
+     ]
+    },
+    {
+     "name": "glWaves",
+     "type": "float",
+     "value": 14
+    },
+    {
+     "name": "glWaveDepth",
+     "type": "float",
+     "value": 0.0004
+    },
+    {
+     "name": "glSeeds",
+     "type": "float",
+     "value": 0.2
+    },
+    {
+     "name": "glRough",
+     "type": "float",
+     "value": 0.06
+    },
+    {
+     "name": "glAlpha",
+     "type": "float",
+     "value": 0.42
+    },
+    {
+     "name": "glAlphaVar",
+     "type": "float",
+     "value": 0.12
+    }
+   ],
+   [],
+   [],
+   [],
+   []
+  ]
+ }
+}
