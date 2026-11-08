@@ -30,7 +30,8 @@
 //               `turn` degrees about the up axis, showing the loader's texture `picture` at `glow` times
 //               its own brightness (unlit: it is drawn as bright as the picture whatever lights it),
 //               and a three `RectAreaLight` the panel's size over its face, shining out of it, of
-//               `colour` and `intensity`, which the game's arealight plugin lights the room with
+//               `colour` and `intensity`, shining its picture (`userData.picture`), which the game's
+//               arealight plugin lights the room with
 //   ambient     a faint light everywhere
 // The floor, the walls, the things and the ball cast shadows and take them; a bulb and a panel do
 // neither.
@@ -173,15 +174,16 @@ export function setup(row: Row, plugins: Plugins) {
     const panel = new T.Mesh(new T.PlaneGeometry(pn.size[0], pn.size[1]), shown)
     panel.position.set(pn.at[0], pn.at[1], pn.at[2])
     panel.quaternion.setFromAxisAngle(Y, (pn.turn * Math.PI) / 180)
-    plugins.loader.on(pn.picture, (picture: THREE.Texture) => {
-      shown.map = picture
-      shown.needsUpdate = true
-    })
     // the light over its face, turned half round, since a RectAreaLight shines along its own −z and the
-    // panel faces its +z
+    // panel faces its +z; it shines the picture once the loader has it
     const light = new T.RectAreaLight(pn.colour, pn.intensity, pn.size[0], pn.size[1])
     light.position.copy(panel.position)
     light.quaternion.copy(panel.quaternion).multiply(new T.Quaternion().setFromAxisAngle(Y, Math.PI))
+    plugins.loader.on(pn.picture, (picture: THREE.Texture) => {
+      shown.map = picture
+      shown.needsUpdate = true
+      light.userData.picture = picture
+    })
     made.push(panel, light)
   }
 
