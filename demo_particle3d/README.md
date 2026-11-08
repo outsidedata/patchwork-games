@@ -14,6 +14,8 @@ marks. Each number key fires one:
 | 6 | flares | coloured flares that each carry a real point light (lights3d), lighting the ground and the blocks round them |
 | 7 | comet | a comet row that spirals out and circles the aim; its trail is an effect that rides the row, and when the row ends the trail throws a burst where it was |
 | 8 | rocket | a rocket that flies from the gun to the aim and throws a blast and smoke where it lands |
+| 9 | torch | twenty seconds of a torch: flames, embers and smoke over a `lamp` layer, one flickering light at the effect that casts shadows of the blocks round it (lights3d) |
+| 0 | searchlight | twelve seconds of a spot `lamp` hung twelve metres over the aim, shining straight down, the blocks under it casting shadows (lights3d) |
 
 All the effects are in `assets/effects.json`, drawn from one sheet, `assets/particles/`.
 
@@ -22,7 +24,7 @@ All the effects are in `assets/effects.json`, drawn from one sheet, `assets/part
 - W and S fly forward and back; A and D turn; Q and E tilt up and down
 - Space climbs, C sinks, Shift boosts
 - the right mouse button dragged looks; the wheel changes the flying pace
-- 1 to 8 fire the effects
+- 1 to 9 and 0 fire the effects
 
 ## The dev page
 

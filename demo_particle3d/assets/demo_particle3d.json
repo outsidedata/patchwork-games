@@ -61,6 +61,14 @@
           { "effect": "muzzle", "at": "gun", "dir": "aim" },
           { "effect": "rocket", "at": "gun", "to": "aim", "dir": "aim", "fly": 32, "land": [{ "effect": "blast", "floor": 0 }, { "effect": "smoke", "life": 3 }] }
         ]
+      },
+      "torch": {
+        "key": "9",
+        "emits": [{ "effect": "torch", "at": "aim", "lift": [0, 0.3, 0], "life": 20 }]
+      },
+      "searchlight": {
+        "key": "0",
+        "emits": [{ "effect": "searchlight", "at": "aim", "lift": [0, 12, 0], "dir": [0, -1, 0], "life": 12 }]
       }
     },
     "craft": {
