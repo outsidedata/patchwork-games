@@ -45,6 +45,19 @@
 // is under way, however deep, and off once the outermost has finished, so any other scene through the
 // same renderer is left as three lights it.
 //
+// Shadows are lights3d's. A light whose `userData.shadow` is a three `SpotLight` that casts a shadow,
+// hung at its middle and aimed the way it shines (its own light given nothing, intensity 0), is shadowed
+// by that spot's shadow: lights3d gives the spot its tiles in the still atlas and the moving one as it
+// gives any lamp, draws what never moves into the first once and what is marked moving
+// (`userData.moving`) into the second each frame, and the splice reads them through lights3d's own
+// `lights3dShadow`, the two shares multiplied, from the panel's middle, so the shadow is a point light's,
+// hard at the tiles' texels, not an area light's that softens with distance. The splice finds the spot
+// in lights3d's light texture by its place in lights3d's list, which it works out by lights3d's own
+// rule: the scene's visible point and spot lights in the order the scene is walked, on a layer the
+// camera sees (this hook runs before lights3d's, the scene listing lights3d before `shipped`, so it sees
+// each light's layers before lights3d takes them). A point outside the spot's cone, or a spot given no
+// tiles, is lit unshadowed. With no lights3d in the scene there are no shadows.
+//
 // It reads `count`, the lights lit the last draw, and `pictures`, those that shine a picture, and
 // `filtered`, the times a picture has been prefiltered. `close` gives every light its layers back, frees
 // its textures and gives the scene its hooks back.
@@ -131,9 +144,25 @@ const GLSL = (levels: number) => ({
       for ( int i = 0; i < uArealightCount; i ++ ) {
         vec4 alA = texelFetch( uArealightLights, ivec2( 0, i ), 0 );
         vec3 alAt = ( viewMatrix * vec4( alA.xyz, 1.0 ) ).xyz;
-        vec3 alW = mat3( viewMatrix ) * texelFetch( uArealightLights, ivec2( 1, i ), 0 ).xyz;
+        vec4 alWk = texelFetch( uArealightLights, ivec2( 1, i ), 0 );
+        vec3 alW = mat3( viewMatrix ) * alWk.xyz;
         vec3 alH = mat3( viewMatrix ) * texelFetch( uArealightLights, ivec2( 2, i ), 0 ).xyz;
         vec3 alColour = texelFetch( uArealightLights, ivec2( 3, i ), 0 ).rgb;
+        #ifdef LIGHTS3D_ROW
+        // its shadow: lights3d's own for the spot at its middle, lights3d's light alWk.w, read from its
+        // tiles in the still atlas and the moving one as lights3d reads a lamp's
+        if ( alWk.w >= 0.0 && uLights3dOn > 0.5 ) {
+          int alK = int( alWk.w );
+          ivec2 alT = ivec2( alK % LIGHTS3D_ROW, ( alK / LIGHTS3D_ROW ) * LIGHTS3D_TEXELS );
+          vec3 alSpot = texelFetch( uLights3dLights, alT, 0 ).xyz;
+          vec4 alP = texelFetch( uLights3dLights, alT + ivec2( 0, 3 ), 0 );
+          vec4 alQ = texelFetch( uLights3dLights, alT + ivec2( 0, 4 ), 0 );
+          if ( alP.z > 0.0 ) {
+            vec3 alMoved = geometryPosition + geometryNormal * alQ.z;
+            alColour *= lights3dShadow( alMoved, length( alSpot - alMoved ), alP, alQ );
+          }
+        }
+        #endif
         // counterclockwise seen from the side it shines on, as three's RE_Direct_RectArea_Physical: the
         // light's +x and −y, −x and −y, −x and +y, +x and +y; seen from in front, its +x is on the left
         vec3 alRect[ 4 ];
@@ -200,6 +229,9 @@ export function arealight() {
   // Each picture's place in the array, counted in pictures, and the version of it last filtered there.
   const slots = new Map<THREE.Texture, { slot: number; version: number }>()
   const uniforms: Record<string, THREE.IUniform> = {}
+  // Each point and spot light's layers as first seen, and its place in lights3d's list this draw.
+  const masks = new Map<THREE.Light, number>()
+  const place = new Map<THREE.Light, number>()
   // How many draws of the scene are under way, one inside another.
   let depth = 0
 
@@ -253,7 +285,7 @@ export function arealight() {
       const s = checked(plugins.wire.scene.world?.arealight as Settings | undefined)
       const T = render3d.THREE as typeof THREE
       const scene = render3d.scene as THREE.Scene
-      RectAreaLightTexturesLib.init()
+      const ltc = RectAreaLightTexturesLib.init()
       const lights = new T.DataTexture(new Float32Array(TEXELS * 4), TEXELS, 1, T.RGBAFormat, T.FloatType)
       lights.needsUpdate = true
       const pictures = array(T, s, 1)
@@ -270,8 +302,8 @@ export function arealight() {
         uArealightLights: { value: lights },
         uArealightPictures: { value: pictures.texture },
         uArealightBlur: { value: s.blur },
-        uArealightLtc1: { value: RectAreaLightTexturesLib.LTC_FLOAT_1 },
-        uArealightLtc2: { value: RectAreaLightTexturesLib.LTC_FLOAT_2 },
+        uArealightLtc1: { value: ltc.LTC_FLOAT_1 },
+        uArealightLtc2: { value: ltc.LTC_FLOAT_2 },
       })
       render3d.splice('arealight', { uniforms, fragment: GLSL(s.levels) })
       const { before, after } = built
@@ -314,6 +346,18 @@ export function arealight() {
             held.version = picture.version
           }
           me.pictures = shown.size
+          // where lights3d writes each light: its visible point and spot lights in the scene's order, on a
+          // layer the camera sees, by the layers each had before lights3d took them (seen here first,
+          // since this hook runs before lights3d's; one first seen already taken had three's default)
+          place.clear()
+          let k = 0
+          scene.traverseVisible(o => {
+            const lamp = o as THREE.PointLight | THREE.SpotLight
+            if (!(lamp as THREE.PointLight).isPointLight && !(lamp as THREE.SpotLight).isSpotLight) return
+            if (!masks.has(lamp)) masks.set(lamp, lamp.layers.mask || 1)
+            if (!(masks.get(lamp)! & camera.layers.mask)) return
+            place.set(lamp, k++)
+          })
           if (b.lights.image.height < found.length) {
             b.lights.dispose()
             b.lights = new b.T.DataTexture(new Float32Array(TEXELS * 4 * found.length), TEXELS, found.length, b.T.RGBAFormat, b.T.FloatType)
@@ -327,8 +371,10 @@ export function arealight() {
             h.set(0, light.height / 2, 0).applyMatrix4(turn)
             const held = slots.get(light.userData.picture)
             const first = held ? held.slot * b.s.levels : -1
+            const shadow = light.userData.shadow as THREE.SpotLight | undefined
+            const k = shadow ? place.get(shadow) ?? -1 : -1
             const o = i * TEXELS * 4
-            data.set([at.x, at.y, at.z, first, w.x, w.y, w.z, 0, h.x, h.y, h.z, 0], o)
+            data.set([at.x, at.y, at.z, first, w.x, w.y, w.z, k, h.x, h.y, h.z, 0], o)
             data.set([light.color.r * light.intensity, light.color.g * light.intensity, light.color.b * light.intensity, 1], o + 12)
           })
           b.lights.needsUpdate = true
@@ -348,6 +394,8 @@ export function arealight() {
       for (const [light, mask] of taken) light.layers.mask = mask
       taken.clear()
       slots.clear()
+      masks.clear()
+      place.clear()
       built.scene.onBeforeRender = built.before
       built.scene.onAfterRender = built.after
       built.lights.dispose()

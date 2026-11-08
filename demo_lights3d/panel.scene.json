@@ -15,6 +15,17 @@
         }
       }
     },
+    "lights3d": {
+      "grid": [16, 9],
+      "slices": 24,
+      "shadows": {
+        "atlas": 2048,
+        "tile": 512,
+        "bias": 0.06,
+        "normalBias": 0.12,
+        "budget": 8
+      }
+    },
     "shipped": { "plugins": ["arealight"] },
     "arealight": { "size": 256, "levels": 8, "blur": 0.5 }
   },
@@ -23,6 +34,7 @@
     "scenemanager",
     "player",
     "render3d",
+    "lights3d",
     "shipped",
     "stats"
   ],

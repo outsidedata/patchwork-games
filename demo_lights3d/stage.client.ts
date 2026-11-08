@@ -33,6 +33,9 @@
 //               `colour` and `intensity`, shining its picture (`userData.picture`), which the game's
 //               arealight plugin lights the room with; with `scroll`, the picture plays, sliding left
 //               that many of its widths a second and coming round again, so the light it shines moves;
+//               with `shadow: { reach, angle }`, a spot light at its middle aimed out of its face, `reach`
+//               metres and `angle` radians off its aim, casting a shadow and giving no light, which
+//               arealight shadows the panel's light by (lights3d draws its shadow);
 //               each of these, and `floorRoughness`, read every frame, so the dev page moves them while
 //               the page runs
 //   ambient     a faint light everywhere
@@ -191,6 +194,13 @@ export function setup(row: Row, plugins: Plugins) {
     // the light over its face, turned half round by `tick`, since a RectAreaLight shines along its own
     // −z and the panel faces its +z; it shines the picture once the loader has it
     const light = new T.RectAreaLight()
+    // with `shadow`, a spot at its middle that casts the shadow and gives no light of its own
+    if (pn.shadow) {
+      const spot = new T.SpotLight(0xffffff, 0, pn.shadow.reach, pn.shadow.angle)
+      spot.castShadow = true
+      light.userData.shadow = spot
+      made.push(spot, spot.target)
+    }
     const held: (typeof panels)[number] = { mesh: panel, light, i }
     panels.push(held)
     plugins.loader.on(pn.picture, (picture: THREE.Texture) => {
@@ -257,6 +267,13 @@ export function tick(row: Row, plugins: Plugins) {
     p.light.height = pn.size[1]
     p.light.color.set(pn.colour)
     p.light.intensity = pn.intensity
+    const spot = p.light.userData.shadow as THREE.SpotLight | undefined
+    if (spot) {
+      // at the panel's middle, aimed out of its face
+      spot.position.copy(p.mesh.position)
+      spot.target.position.set(0, 0, 1).applyQuaternion(p.mesh.quaternion).add(p.mesh.position)
+      spot.target.updateMatrixWorld()
+    }
     if (p.played) {
       const { from, pen, texture } = p.played
       const by = (((t * pn.scroll) % 1) + 1) % 1 * from.width
