@@ -236,6 +236,22 @@
         "roughness": 0.3,
         "metalness": 0
       }
+    },
+    "panel": {
+      "room": [16, 6, 16],
+      "wallColour": "#bdb8ae",
+      "floorColour": "#3a3836",
+      "floorRoughness": 0.35,
+      "ambient": 0.08,
+      "things": [
+        { "shape": "box", "size": [0.8, 3.2, 0.8], "at": [0, 0, -4], "colour": "#d8d4cc" },
+        { "shape": "box", "size": [1.4, 1.4, 1.4], "at": [-4.5, 0, -2], "turn": 25, "colour": "#e8e8e8" },
+        { "shape": "sphere", "size": [1.6], "at": [4.5, 0, -2], "colour": "#e8e8e8" },
+        { "shape": "sphere", "size": [1.2], "at": [2, 0, 2], "colour": "#dcdce2", "roughness": 0.1, "metalness": 1 }
+      ],
+      "panels": [
+        { "at": [0, 3, -7.97], "size": [6, 3], "turn": 0, "picture": "panel", "glow": 1 }
+      ]
     }
   }
 }

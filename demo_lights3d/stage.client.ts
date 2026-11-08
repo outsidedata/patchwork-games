@@ -26,8 +26,12 @@
 //   orbiter     a ball of `size` across, `colour`, `roughness` and `metalness`, circling the middle
 //               `radius` out (its depth times `squash`) at `speed` turns a second, `height` up and
 //               rising and falling by `bob`
+//   panels      glowing panels, each `size` [width, height] metres, its middle at `at`, facing +z turned
+//               `turn` degrees about the up axis, showing the loader's texture `picture` at `glow` times
+//               its own brightness (unlit: it is drawn as bright as the picture whatever lights it)
 //   ambient     a faint light everywhere
-// The floor, the walls, the things and the ball cast shadows and take them; a bulb does neither.
+// The floor, the walls, the things and the ball cast shadows and take them; a bulb and a panel do
+// neither.
 // Every light is an ordinary three light; lights3d lights them when the scene lists it, and three does
 // when it does not. Every lit material is dressed by render3d, so lights3d's splice reaches it. What
 // moves moves by the steps' clock, the moment drawn (`(n − 1 + between) × dt`), so it is drawn smooth at
@@ -159,6 +163,19 @@ export function setup(row: Row, plugins: Plugins) {
     glow(light)
     weaver = { light, loop, length: loop.getLength() }
     made.push(light)
+  }
+
+  // the glowing panels, each showing its picture once the loader has it
+  for (const pn of d.panels ?? []) {
+    const shown = new T.MeshBasicMaterial({ color: new T.Color(1, 1, 1).multiplyScalar(pn.glow) })
+    const panel = new T.Mesh(new T.PlaneGeometry(pn.size[0], pn.size[1]), shown)
+    panel.position.set(pn.at[0], pn.at[1], pn.at[2])
+    panel.quaternion.setFromAxisAngle(Y, (pn.turn * Math.PI) / 180)
+    plugins.loader.on(pn.picture, (picture: THREE.Texture) => {
+      shown.map = picture
+      shown.needsUpdate = true
+    })
+    made.push(panel)
   }
 
   const o = d.orbiter
