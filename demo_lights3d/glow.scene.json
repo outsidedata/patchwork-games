@@ -21,7 +21,11 @@
       }
     },
     "supershader3d": {
-      "looks": "kitGlowLooks"
+      "looks": "kitGlowLooks",
+      "glowmap": {
+        "triangles": { "side": 4 },
+        "screen": { "resolution": 0.25, "cells": [16, 9] }
+      }
     },
     "lights3d": {
       "grid": [
@@ -40,7 +44,9 @@
       "size": 256,
       "levels": 8,
       "blur": 0.5,
-      "glow": 1
+      "glow": 1,
+      "from": "triangles",
+      "mods": { "glow": "supershader3d" }
     }
   },
   "plugins": [

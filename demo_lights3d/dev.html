@@ -154,6 +154,7 @@
       // arealight's light from glowing materials, live: `glow` on the page's own copy of the scene, read every frame
       if (entered.world.arealight) {
         gui.add(entered.world.arealight, 'glow', 0, 100, 0.1).name('glow lights the room (times its glow)')
+        gui.add(entered.world.arealight, 'from', ['triangles', 'screen', 'both']).name('glow lights from')
         window.__arealight = entered.world.arealight
       }
 
@@ -170,7 +171,7 @@
         const l3 = page.client?.plugins.lights3d
         const al = page.client?.plugins.arealight
         const lit = (l3 ? `lit by lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} still tiles drawn this frame, ${l3.moving} moving tiles, ${l3.entries} in cells` : 'lit by three')
-          + (al ? `; arealight: ${al.count} lights, ${al.pictures} shining a picture, filtered ${al.filtered} times, ${al.glowing} glowing triangles of ${al.glowGroups} things' materials` : '')
+          + (al ? `; arealight: ${al.count} lights, ${al.pictures} shining a picture, filtered ${al.filtered} times, lit from ${al.glowing} glowing triangles and ${al.cells} screen cells` : '')
         readout.textContent = [`${chosen.scene}  step ${truth.n}  ${lit}`, ...errors].join('\n')
         requestAnimationFrame(loop)
       }

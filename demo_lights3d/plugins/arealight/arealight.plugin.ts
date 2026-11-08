@@ -1,6 +1,6 @@
 // arealight: every three.js `RectAreaLight` in render3d's scene lit by this plugin's own splice in place
-// of three's, and a light may be a picture: the experiment of the panel scene, before it moves into
-// lights3d. It has no row and no server half.
+// of three's, a light may be a picture, and what glows lights the room: the experiment of the panel and glow
+// scenes, before it moves into lights3d. It has no row and no server half.
 //
 // A light is added the ordinary three.js way: a `RectAreaLight` of `color`, `intensity`, `width` and
 // `height` on the scene, shining along its own −z, its middle where it stands. A light whose
@@ -10,13 +10,25 @@
 // panel facing +z, its light turned half round to shine out of it, shows the picture and lights with it
 // the same way round.
 //
-// `world.arealight` holds its numbers: `{ size, levels, blur }`. Each picture is prefiltered into
+// `world.arealight` holds its numbers: `{ size, levels, blur, glow, from, mods }`. Each picture is prefiltered into
 // `levels` layers of `size` × `size` texels of a texture array: the picture in the middle, a border of
 // its own edge round it a share `PAD` of the layer wide each side, so a blur reaching past the light's
 // edge fades out instead of wrapping; layer 0 the picture as it is, and each layer after blurred by a
 // Gaussian twice as wide as the one before, layer k's spread 2^k / 2^levels of the picture's width, so the
 // last is the picture's average. It is filtered again whenever its texture's `version` changes, so a
 // picture that is drawn into or played (a canvas, a video) lights the room as it is now.
+//
+// What glows. With `mods: { glow: 'supershader3d' }` (`supershader3d.arealight.ts`, beside this file), the room is
+// also lit by supershader3d's glowmap (`plugins/supershader3d/supershader3d.glowmap.ts`), `glow` times as bright as
+// the glow itself, from what `from` names, read every frame:
+//   triangles  every glowing triangle, each its own light, lit as a rectangle is (below) over its three edges, of its
+//              glow this frame, where its mesh stands this frame: glow off the screen or behind something lights too
+//   screen     every cell of the glow the camera sees, each a small light of its power, at its place, facing its way,
+//              falling off with the square of its distance (softened by its own size, so a surface close by is not
+//              lit past the light it covers) and with how far off its facing a point lies: glow off the screen or
+//              behind something lights nothing
+//   both       the two at once
+// No glowing light casts a shadow.
 //
 // Each time the scene is drawn (three calls the scene's `onBeforeRender`):
 //
@@ -29,9 +41,9 @@
 //    camera reads the same texture: the splice puts each into the view of whichever camera is drawing by
 //    that program's own `viewMatrix`.
 //
-// A splice (render3d's `splice`, under `arealight`, only into the shaders that light, and there only into
-// standard and physical ones, which three's LTC code is written for) evaluates each light by three's own
-// Linearly Transformed Cosines (Heitz et al. 2016), as three's `RE_Direct_RectArea_Physical` does: the
+// A splice (render3d's `splice`, under `arealight`, only into the shaders that light, and the rectangles and the
+// triangles there only into standard and physical ones, which three's LTC code is written for) evaluates each light by
+// three's own Linearly Transformed Cosines (Heitz et al. 2016), as three's `RE_Direct_RectArea_Physical` does: the
 // rectangle's four corners turned into the space where the surface's lobe is a plain cosine, the
 // specular lobe fitted from the LTC tables (`RectAreaLightTexturesLib`) by the surface's roughness and
 // the angle it is seen at, the diffuse the same rectangle untransformed. A picture is read as Heitz's
@@ -41,7 +53,8 @@
 // that point's distance from the plane over the square root of the light's area there gives how blurred:
 // a lobe close to a big light sees a small piece of it sharp, one far off or wide (a rough or a diffuse
 // surface) sees the whole light averaged. The spread read is `blur` times that ratio, as a share of the
-// picture's width, between the two layers either side of it. The splice is on while a draw of the scene
+// picture's width, between the two layers either side of it. The screen's cells go to the shader's own `RE_Direct`,
+// as a point light does, so every shader that lights takes them. The splice is on while a draw of the scene
 // is under way, however deep, and off once the outermost has finished, so any other scene through the
 // same renderer is left as three lights it.
 //
@@ -58,15 +71,19 @@
 // each light's layers before lights3d takes them). A point outside the spot's cone, or a spot given no
 // tiles, is lit unshadowed. With no lights3d in the scene there are no shadows.
 //
-// It reads `count`, the lights lit the last draw, and `pictures`, those that shine a picture, and
-// `filtered`, the times a picture has been prefiltered. `close` gives every light its layers back, frees
-// its textures and gives the scene its hooks back.
+// It reads `count`, the lights lit the last draw, `pictures`, those that shine a picture, `filtered`, the times a
+// picture has been prefiltered, and `glowing` and `cells`, the glowing triangles and the screen's cells it lit from.
+// `close` gives every light its layers back, frees its textures and gives the scene its hooks back.
 import type * as THREE from 'three'
 import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js'
 import type { Plugins } from '#engine/browser.ts'
+import { mod, provided } from '#addons/scenemanager/scenemanager.addon.ts'
 import { RectAreaLightTexturesLib } from 'three/addons/lights/RectAreaLightTexturesLib.js'
+import type { Glowmap } from '#plugins/supershader3d/supershader3d.plugin.ts'
+import { ROW } from '#plugins/supershader3d/supershader3d.glowmap.ts'
 
-export type Settings = { size: number; levels: number; blur: number; glow: number }
+export type From = 'triangles' | 'screen' | 'both'
+export type Settings = { size: number; levels: number; blur: number; glow: number; from: From; mods?: { glow?: string } }
 
 // Texels a light: middle and its picture's first layer, half width, half height, colour.
 const TEXELS = 4
@@ -74,22 +91,15 @@ const TEXELS = 4
 const PAD = 0.125
 // Taps each side of the middle in a blur pass.
 const TAPS = 6
-// The glowing triangles. A catalogued triangle is a row of `corners`: each of its three corners CORNER texels, (its
-// lookInfo, its lookId), (uv, s3), (s0, 0), (s1, 0), s2, (position as cut, 1), (normal as cut, 0); then one texel,
-// (its mesh's number, 0, 0, 0), at MESH. Each mesh's matrix is a row of the lights texture after the rectangles',
-// its four columns its first four texels. The glow is ROW texels across.
-const CORNER = 7
-const MESH = 3 * CORNER
-const ROW = 256
-// The glow of a triangle is read at SIDE × SIDE points over it.
-const SIDE = 4
+const FROM: From[] = ['triangles', 'screen', 'both']
 
 const checked = (s: Settings | undefined): Settings => {
-  if (!s) throw new Error('arealight reads world.arealight, { size, levels, blur }, which this scene does not give')
+  if (!s) throw new Error('arealight reads world.arealight, { size, levels, blur, glow, from }, which this scene does not give')
   if (!(Number.isInteger(s.size) && s.size >= 8)) throw new Error(`arealight size ${s.size} is not a whole number of texels from 8`)
   if (!(Number.isInteger(s.levels) && s.levels >= 2)) throw new Error(`arealight levels ${s.levels} is not a whole number from 2`)
   if (!(s.blur > 0)) throw new Error(`arealight blur ${s.blur} is not above 0`)
   if (!(s.glow >= 0)) throw new Error(`arealight glow ${s.glow} is not 0 or more`)
+  if (!FROM.includes(s.from)) throw new Error(`arealight from ${s.from} is none of ${FROM.join(', ')}`)
   return s
 }
 
@@ -101,11 +111,10 @@ const GLSL = (levels: number) => ({
     uniform highp sampler2DArray uArealightPictures;
     uniform float uArealightBlur;
     uniform sampler2D uArealightLtc1; uniform sampler2D uArealightLtc2;
-    uniform int uArealightGlowCount; uniform int uArealightMeshRow; uniform float uArealightGlowGain;
-    uniform highp sampler2D uArealightCorners; uniform highp sampler2D uArealightGlow;
+    uniform highp sampler2D uArealightGlowmap;
+    uniform int uArealightTriangles; uniform ivec2 uArealightCells; uniform int uArealightCellRow;
+    uniform float uArealightGlowGain;
     #define AREALIGHT_ROW ${ROW}
-    #define AREALIGHT_CORNER ${CORNER}
-    #define AREALIGHT_MESH ${MESH}
     #define AREALIGHT_LEVELS ${levels}.0
     #define AREALIGHT_PAD ${PAD}`,
   '?lights_physical_pars_fragment': `
@@ -158,14 +167,10 @@ const GLSL = (levels: number) => ({
       vec3 c0 = normalize( m * ( t0 - P ) ), c1 = normalize( m * ( t1 - P ) ), c2 = normalize( m * ( t2 - P ) );
       vec3 f = LTC_EdgeVectorFormFactor( c0, c1 ) + LTC_EdgeVectorFormFactor( c1, c2 ) + LTC_EdgeVectorFormFactor( c2, c0 );
       return LTC_ClippedSphereFormFactor( f );
-    }
-    // A glowing triangle's corner \`c\` in the view: triangle \`i\`'s corner as cut, put through its mesh's matrix.
-    vec3 arealightCorner( int i, int c, mat4 toView ) {
-      return ( toView * vec4( texelFetch( uArealightCorners, ivec2( c * AREALIGHT_CORNER + 5, i ), 0 ).xyz, 1.0 ) ).xyz;
     }`,
   '?lights_fragment_begin': `
-    #ifdef STANDARD
     if ( uArealightOn > 0.5 ) {
+      #ifdef STANDARD
       vec2 alUv = LTC_Uv( geometryNormal, geometryViewDir, material.roughness );
       vec4 alT1 = texture2D( uArealightLtc1, alUv );
       vec4 alT2 = texture2D( uArealightLtc2, alUv );
@@ -203,66 +208,35 @@ const GLSL = (levels: number) => ({
         reflectedLight.directSpecular += alColour * alFresnel * arealightEvaluate( geometryNormal, geometryViewDir, geometryPosition, alInv, alRect, alA.w );
         reflectedLight.directDiffuse += alColour * material.diffuseContribution * arealightEvaluate( geometryNormal, geometryViewDir, geometryPosition, mat3( 1.0 ), alRect, alA.w );
       }
-      // every glowing triangle, by its own glow this frame, where its mesh stands
-      for ( int i = 0; i < uArealightGlowCount; i ++ ) {
-        int alMesh = uArealightMeshRow + int( texelFetch( uArealightCorners, ivec2( AREALIGHT_MESH, i ), 0 ).x );
-        mat4 alToView = viewMatrix * mat4( texelFetch( uArealightLights, ivec2( 0, alMesh ), 0 ), texelFetch( uArealightLights, ivec2( 1, alMesh ), 0 ),
-          texelFetch( uArealightLights, ivec2( 2, alMesh ), 0 ), texelFetch( uArealightLights, ivec2( 3, alMesh ), 0 ) );
-        vec3 t0 = arealightCorner( i, 0, alToView ), t1 = arealightCorner( i, 1, alToView ), t2 = arealightCorner( i, 2, alToView );
-        vec3 alGlow = uArealightGlowGain * texelFetch( uArealightGlow, ivec2( i % AREALIGHT_ROW, i / AREALIGHT_ROW ), 0 ).rgb;
+      // every glowing triangle, by its own glow this frame, its corners where its mesh stands this frame
+      for ( int i = 0; i < uArealightTriangles; i ++ ) {
+        int alX = ( i % AREALIGHT_ROW ) * 4, alY = i / AREALIGHT_ROW;
+        vec3 alGlow = uArealightGlowGain * texelFetch( uArealightGlowmap, ivec2( alX, alY ), 0 ).rgb;
+        vec3 t0 = ( viewMatrix * vec4( texelFetch( uArealightGlowmap, ivec2( alX + 1, alY ), 0 ).xyz, 1.0 ) ).xyz;
+        vec3 t1 = ( viewMatrix * vec4( texelFetch( uArealightGlowmap, ivec2( alX + 2, alY ), 0 ).xyz, 1.0 ) ).xyz;
+        vec3 t2 = ( viewMatrix * vec4( texelFetch( uArealightGlowmap, ivec2( alX + 3, alY ), 0 ).xyz, 1.0 ) ).xyz;
         reflectedLight.directSpecular += alGlow * alFresnel * arealightTriangle( geometryNormal, geometryViewDir, geometryPosition, alInv, t0, t1, t2 );
         reflectedLight.directDiffuse += alGlow * material.diffuseContribution * arealightTriangle( geometryNormal, geometryViewDir, geometryPosition, mat3( 1.0 ), t0, t1, t2 );
       }
-    }
-    #endif`,
+      #endif
+      // every cell of the glow the camera sees, a small light at its place facing its way: its power over the square
+      // of its distance (and its area over pi, so a surface close by is not lit past the light it covers), times how
+      // squarely it faces the point, handed to the shader's own RE_Direct
+      for ( int j = 0; j < uArealightCells.y; j ++ ) for ( int i = 0; i < uArealightCells.x; i ++ ) {
+        ivec2 alC = ivec2( i * 3, uArealightCellRow + j );
+        vec4 alPower = texelFetch( uArealightGlowmap, alC, 0 );
+        if ( alPower.r + alPower.g + alPower.b <= 0.0 ) continue;
+        vec3 alPlace = ( viewMatrix * vec4( texelFetch( uArealightGlowmap, alC + ivec2( 1, 0 ), 0 ).xyz, 1.0 ) ).xyz;
+        vec3 alFacing = mat3( viewMatrix ) * texelFetch( uArealightGlowmap, alC + ivec2( 2, 0 ), 0 ).xyz;
+        vec3 alTo = alPlace - geometryPosition;
+        float alD2 = dot( alTo, alTo ) + alPower.a / PI;
+        directLight.direction = normalize( alTo );
+        directLight.color = uArealightGlowGain * alPower.rgb * max( dot( alFacing, - directLight.direction ), 0.0 ) / alD2;
+        directLight.visible = true;
+        RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );
+      }
+    }`,
 })
-
-// The glow of every catalogued triangle: a texel each, ROW across, the mean of the material's own glow at SAMPLES
-// points spread over it, each point given what a vertex there hands the look (its corners' inputs weighted by where
-// it lies), put through its mesh's matrix as it stands, then the material's own `lookRun`. The look's screen
-// derivatives are nought, so it reads its finest detail.
-const SAMPLE = (pars: string) => `
-  #include <common>
-  vec3 vNormal;
-  vec3 vViewPosition;
-  ${pars}
-  uniform highp sampler2D alCorners;
-  uniform highp sampler2D alMatrices;
-  uniform int alMeshRow;
-  uniform int alCount;
-  vec4 alAt( int i, int c, int k ) { return texelFetch( alCorners, ivec2( c * ${CORNER} + k, i ), 0 ); }
-  void main() {
-    int i = int( gl_FragCoord.x ) + int( gl_FragCoord.y ) * ${ROW};
-    if ( i >= alCount ) { gl_FragColor = vec4( 0.0 ); return; }
-    int mesh = alMeshRow + int( texelFetch( alCorners, ivec2( ${MESH}, i ), 0 ).x );
-    mat4 M = mat4( texelFetch( alMatrices, ivec2( 0, mesh ), 0 ), texelFetch( alMatrices, ivec2( 1, mesh ), 0 ),
-      texelFetch( alMatrices, ivec2( 2, mesh ), 0 ), texelFetch( alMatrices, ivec2( 3, mesh ), 0 ) );
-    vec3 sum = vec3( 0.0 );
-    for ( int a = 0; a < ${SIDE}; a ++ ) for ( int b = 0; b < ${SIDE}; b ++ ) {
-      // a point of a grid over the square, folded into the triangle
-      float u = ( float( a ) + 0.5 ) / ${SIDE}.0, v = ( float( b ) + 0.5 ) / ${SIDE}.0;
-      if ( u + v > 1.0 ) { u = 1.0 - u; v = 1.0 - v; }
-      vec3 w = vec3( 1.0 - u - v, u, v );
-      vec4 t[ ${CORNER} ];
-      for ( int k = 0; k < ${CORNER}; k ++ ) t[ k ] = w.x * alAt( i, 0, k ) + w.y * alAt( i, 1, k ) + w.z * alAt( i, 2, k );
-      vLookId = alAt( i, 0, 0 ).w;
-      vLookInfo = alAt( i, 0, 0 ).xyz;
-      vLookUv = t[ 1 ].xy;
-      vS3 = t[ 1 ].zw;
-      vS0 = t[ 2 ].xyz;
-      vS1 = t[ 3 ].xyz;
-      vS2 = t[ 4 ];
-      vLookWorld = ( M * vec4( t[ 5 ].xyz, 1.0 ) ).xyz;
-      vLookWN = normalize( mat3( M ) * t[ 6 ].xyz );
-      vNormal = vLookWN;
-      vViewPosition = vec3( 0.0, 0.0, 1.0 );
-      lookGx = vec2( 0.0 );
-      lookGy = vec2( 0.0 );
-      Look k = lookRun( int( vLookId + 0.5 ) );
-      sum += k.glow;
-    }
-    gl_FragColor = vec4( sum / float( ${SIDE * SIDE} ), 1.0 );
-  }`
 
 // The picture laid into a layer with its border: its own edge carried out to the layer's edge.
 const LAY = `
@@ -310,6 +284,8 @@ export function arealight() {
     across: THREE.ShaderMaterial
     down: THREE.ShaderMaterial
     quad: FullScreenQuad
+    // the glowmap's stand-in, bound while there is none
+    stand: THREE.DataTexture
   } | undefined
   // Each light whose layers this turned off, and the layers it had.
   const taken = new Map<THREE.RectAreaLight, number>()
@@ -323,140 +299,6 @@ export function arealight() {
   let depth = 0
   // The page's plugins, as the last tick handed them.
   let plugins: Plugins | undefined
-  // The glowing triangles: the meshes drawn by supershader3d's materials, catalogued, each by its number; their
-  // triangles rows of `corners`, every one of them until the first glow has been read back (`decided` false), then
-  // only those of every thing's material that glows; each triangle's glow this frame in `target`, drawn by `sample`.
-  let glowing: {
-    meshes: THREE.Mesh[]
-    count: number
-    corners: THREE.DataTexture
-    target: THREE.WebGLRenderTarget
-    sample: THREE.ShaderMaterial
-    quad: FullScreenQuad
-    // each thing's material on each mesh, by its key, its triangles' rows
-    groups: Map<string, number[]>
-    decided: boolean
-  } | undefined
-  // the stand-ins bound before there are glowing triangles, so every sampler is bound
-  let stand: THREE.DataTexture | undefined
-
-  // The meshes of the scene drawn by supershader3d's materials, in the order the scene is walked.
-  const drawnBySupershader = (scene: THREE.Scene, p: Plugins): THREE.Mesh[] => {
-    const ss = p.supershader3d
-    if (!ss?.looks()) return []
-    const own = new Set((['solid', 'relief', 'seeThrough'] as const).map(c => ss.material(c)).filter(Boolean))
-    const found: THREE.Mesh[] = []
-    scene.traverseVisible(o => {
-      const m = o as THREE.Mesh
-      if (!m.isMesh || !m.geometry.getAttribute('lookId') || !m.geometry.getAttribute('lookInfo')) return
-      const mats = Array.isArray(m.material) ? m.material : [m.material]
-      if (mats.some(x => own.has(x))) found.push(m)
-    })
-    return found
-  }
-
-  // The glowing triangles catalogued again from `meshes`: each triangle a row of the corners texture (every one, or
-  // with `keep` only those of the things' materials it names), and the sampling pass made with the composed shader's
-  // preamble.
-  const catalogue = (renderer: THREE.WebGLRenderer, meshes: THREE.Mesh[], p: Plugins, keep?: Set<string>) => {
-    const T = built!.T
-    drop()
-    const groups = new Map<string, number[]>()
-    const rows: number[] = []
-    let count = 0
-    meshes.forEach((m, mi) => {
-      const g = m.geometry
-      // an attribute's kth number at vertex v, 0 where the geometry has not the attribute
-      const read = (name: string) => {
-        const a = g.getAttribute(name)
-        return (v: number, k: number) => (a && k < a.itemSize ? a.array[v * a.itemSize + k] : 0)
-      }
-      const pos = read('position'), nrm = read('normal'), uv = read('uv'), id = read('lookId'), info = read('lookInfo')
-      const s0 = read('s0'), s1 = read('s1'), s2 = read('s2'), s3 = read('s3')
-      const index = g.getIndex()
-      const n = index ? index.count : g.getAttribute('position').count
-      for (let t = 0; t < n; t += 3) {
-        const first = index ? index.array[t] : t
-        const key = `${mi} ${Math.round(id(first, 0))} ${Math.round(info(first, 1))}`
-        if (keep && !keep.has(key)) continue
-        const row: number[] = []
-        for (let c = 0; c < 3; c++) {
-          const v = index ? index.array[t + c] : t + c
-          row.push(info(v, 0), info(v, 1), info(v, 2), id(v, 0))
-          row.push(uv(v, 0), uv(v, 1), s3(v, 0), s3(v, 1))
-          row.push(s0(v, 0), s0(v, 1), s0(v, 2), 0)
-          row.push(s1(v, 0), s1(v, 1), s1(v, 2), 0)
-          row.push(s2(v, 0), s2(v, 1), s2(v, 2), s2(v, 3))
-          row.push(pos(v, 0), pos(v, 1), pos(v, 2), 1)
-          row.push(nrm(v, 0), nrm(v, 1), nrm(v, 2), 0)
-        }
-        row.push(mi, 0, 0, 0)
-        rows.push(...row)
-        if (!groups.has(key)) groups.set(key, [])
-        groups.get(key)!.push(count)
-        count++
-      }
-    })
-    if (!count) return
-    const most = renderer.capabilities.maxTextureSize
-    if (count > most) throw new Error(`arealight: ${count} triangles drawn by supershader3d, and a texture holds ${most} rows`)
-    const corners = new T.DataTexture(Float32Array.from(rows), MESH + 1, Math.max(1, count), T.RGBAFormat, T.FloatType)
-    corners.needsUpdate = true
-    const target = new T.WebGLRenderTarget(ROW, Math.max(1, Math.ceil(count / ROW)), { type: T.FloatType, minFilter: T.NearestFilter, magFilter: T.NearestFilter, generateMipmaps: false, depthBuffer: false })
-    const sample = new T.ShaderMaterial({
-      vertexShader: VERTEX,
-      fragmentShader: SAMPLE(p.supershader3d.glsl()),
-      uniforms: { ...p.supershader3d.uniforms, alCorners: { value: corners }, alMatrices: { value: built!.lights }, alMeshRow: { value: 0 }, alCount: { value: count } },
-      depthTest: false,
-      depthWrite: false,
-    })
-    glowing = { meshes, count, corners, target, sample, quad: new FullScreenQuad(sample), groups, decided: !!keep }
-    me.glowing = keep ? count : 0
-    me.glowGroups = keep ? keep.size : 0
-  }
-
-  // Every catalogued triangle's glow drawn this frame, its mesh's matrix in row `meshRow` of the lights texture on;
-  // on the first, the glow read back and the catalogue made again of the things' materials that glow anywhere.
-  const glow = (renderer: THREE.WebGLRenderer, meshRow: number) => {
-    const draw = () => {
-      const g = glowing!
-      g.sample.uniforms.alMatrices.value = built!.lights
-      g.sample.uniforms.alMeshRow.value = meshRow
-      const was = renderer.getRenderTarget(), face = renderer.getActiveCubeFace(), level = renderer.getActiveMipmapLevel()
-      renderer.setRenderTarget(g.target)
-      g.quad.render(renderer)
-      renderer.setRenderTarget(was, face, level)
-    }
-    draw()
-    if (!glowing!.decided) {
-      const g = glowing!
-      const h = g.target.height
-      const read = new Float32Array(ROW * h * 4)
-      renderer.readRenderTargetPixels(g.target, 0, 0, ROW, h, read)
-      const keep = new Set<string>()
-      for (const [key, tris] of g.groups) if (tris.some(t => read[t * 4] + read[t * 4 + 1] + read[t * 4 + 2] > 1e-4)) keep.add(key)
-      catalogue(renderer, g.meshes, plugins!, keep)
-      draw()
-    }
-    const g = glowing!
-    uniforms.uArealightGlowCount.value = g.count
-    uniforms.uArealightMeshRow.value = meshRow
-    uniforms.uArealightCorners.value = g.corners
-    uniforms.uArealightGlow.value = g.target.texture
-  }
-
-  // The catalogue let go of.
-  const drop = () => {
-    if (!glowing) return
-    glowing.corners.dispose()
-    glowing.target.dispose()
-    glowing.sample.dispose()
-    glowing.quad.dispose()
-    glowing = undefined
-    uniforms.uArealightGlowCount.value = 0
-    uniforms.uArealightCorners.value = stand
-    uniforms.uArealightGlow.value = stand
-  }
 
   // Filters `picture` into its slot's layers.
   const filter = (renderer: THREE.WebGLRenderer, picture: THREE.Texture, slot: number) => {
@@ -496,20 +338,35 @@ export function arealight() {
     for (const held of slots.values()) held.version = -1
   }
 
+  // What glows, from the glowmap the scene's mod hands over as this frame drew it, by `from`.
+  const glowing = (p: Plugins, s: Settings) => {
+    const take = mod<(plugins: Plugins) => Glowmap | undefined>(p.wire.scene.world!, 'arealight', 'glow')
+    const map = take?.(p)
+    const triangles = map && s.from !== 'screen' ? map.triangles : 0
+    const cells: [number, number] = map && s.from !== 'triangles' ? map.cells : [0, 0]
+    uniforms.uArealightGlowmap.value = map ? map.texture : built!.stand
+    uniforms.uArealightTriangles.value = triangles
+    ;(uniforms.uArealightCells.value as THREE.Vector2).set(cells[0], cells[1])
+    uniforms.uArealightCellRow.value = map ? map.cellRow : 0
+    me.glowing = triangles
+    me.cells = cells[0] * cells[1]
+  }
+
   const me = {
     uniforms,
     count: 0,
     pictures: 0,
     filtered: 0,
-    // the glowing triangles lit, and the things' materials they are of
+    // the glowing triangles and the screen's cells lit from
     glowing: 0,
-    glowGroups: 0,
+    cells: 0,
     tick(p: Plugins) {
       plugins = p
       if (built) return
       const render3d = p.render3d
       if (!render3d) throw new Error('arealight needs render3d, which this scene does not name')
       const s = checked(p.wire.scene.world?.arealight as Settings | undefined)
+      provided(p.wire.scene, 'arealight', 'glow')
       const T = render3d.THREE as typeof THREE
       const scene = render3d.scene as THREE.Scene
       const ltc = RectAreaLightTexturesLib.init()
@@ -522,7 +379,9 @@ export function arealight() {
       const lay = shader(LAY, { picture: { value: null } })
       const across = shader(BLUR(true), { from: { value: pictures.texture }, layer: { value: 0 }, way: { value: new T.Vector2(1, 0) }, spread: { value: 0 } })
       const down = shader(BLUR(false), { from: { value: half.texture }, way: { value: new T.Vector2(0, 1) }, spread: { value: 0 } })
-      built = { T, s, scene, before: scene.onBeforeRender, after: scene.onAfterRender, lights, pictures, half, lay, across, down, quad: new FullScreenQuad(lay) }
+      const stand = new T.DataTexture(new Float32Array(4), 1, 1, T.RGBAFormat, T.FloatType)
+      stand.needsUpdate = true
+      built = { T, s, scene, before: scene.onBeforeRender, after: scene.onAfterRender, lights, pictures, half, lay, across, down, quad: new FullScreenQuad(lay), stand }
       Object.assign(uniforms, {
         uArealightOn: { value: 0 },
         uArealightCount: { value: 0 },
@@ -531,15 +390,11 @@ export function arealight() {
         uArealightBlur: { value: s.blur },
         uArealightLtc1: { value: ltc.LTC_FLOAT_1 },
         uArealightLtc2: { value: ltc.LTC_FLOAT_2 },
-      })
-      stand = new T.DataTexture(new Float32Array(4), 1, 1, T.RGBAFormat, T.FloatType)
-      stand.needsUpdate = true
-      Object.assign(uniforms, {
-        uArealightGlowCount: { value: 0 },
-        uArealightMeshRow: { value: 0 },
+        uArealightGlowmap: { value: stand },
+        uArealightTriangles: { value: 0 },
+        uArealightCells: { value: new T.Vector2(0, 0) },
+        uArealightCellRow: { value: 0 },
         uArealightGlowGain: { value: s.glow },
-        uArealightCorners: { value: stand },
-        uArealightGlow: { value: stand },
       })
       render3d.splice('arealight', { uniforms, fragment: GLSL(s.levels) })
       const { before, after } = built
@@ -552,6 +407,7 @@ export function arealight() {
         // the lights are written once, by the outermost draw, before whatever it draws inside
         if (depth === 1) {
           const b = built!
+          checked(b.s)
           uniforms.uArealightBlur.value = b.s.blur
           uniforms.uArealightGlowGain.value = b.s.glow
           found.length = 0
@@ -595,17 +451,9 @@ export function arealight() {
             if (!(masks.get(lamp)! & camera.layers.mask)) return
             place.set(lamp, k++)
           })
-          // the meshes drawn by supershader3d's materials, catalogued again when they change
-          const meshes = drawnBySupershader(scene, plugins!)
-          const had = glowing?.meshes ?? []
-          if (meshes.length !== had.length || meshes.some((m, i) => m !== had[i])) {
-            if (meshes.length) catalogue(renderer, meshes, plugins!)
-            else drop()
-          }
-          const rows = found.length + meshes.length
-          if (b.lights.image.height < rows) {
+          if (b.lights.image.height < found.length) {
             b.lights.dispose()
-            b.lights = new b.T.DataTexture(new Float32Array(TEXELS * 4 * rows), TEXELS, rows, b.T.RGBAFormat, b.T.FloatType)
+            b.lights = new b.T.DataTexture(new Float32Array(TEXELS * 4 * found.length), TEXELS, found.length, b.T.RGBAFormat, b.T.FloatType)
             uniforms.uArealightLights.value = b.lights
           }
           const data = b.lights.image.data as Float32Array
@@ -622,12 +470,10 @@ export function arealight() {
             data.set([at.x, at.y, at.z, first, w.x, w.y, w.z, k, h.x, h.y, h.z, 0], o)
             data.set([light.color.r * light.intensity, light.color.g * light.intensity, light.color.b * light.intensity, 1], o + 12)
           })
-          // each mesh's matrix as it stands, a row after the rectangles'
-          meshes.forEach((m, i) => data.set(m.matrixWorld.elements, (found.length + i) * TEXELS * 4))
           b.lights.needsUpdate = true
           uniforms.uArealightCount.value = found.length
           me.count = found.length
-          if (glowing) glow(renderer, found.length)
+          glowing(plugins!, b.s)
         }
         before.call(this, renderer, s3, camera, target, material, group)
       }
@@ -647,15 +493,13 @@ export function arealight() {
       built.scene.onBeforeRender = built.before
       built.scene.onAfterRender = built.after
       built.lights.dispose()
-      drop()
-      stand?.dispose()
-      stand = undefined
-      plugins = undefined
+      built.stand.dispose()
       for (const t of [built.pictures, built.half]) t.dispose()
       for (const m of [built.lay, built.across, built.down]) m.dispose()
       built.quad.dispose()
       uniforms.uArealightOn.value = 0
       depth = 0
+      plugins = undefined
       built = undefined
     },
   }
