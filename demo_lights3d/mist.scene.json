@@ -17,7 +17,8 @@
         "atlas": 4096,
         "tile": 512,
         "bias": 0.04,
-        "normalBias": 0.05
+        "normalBias": 0.05,
+        "budget": 24
       },
       "fog": {
         "density": 0.06,

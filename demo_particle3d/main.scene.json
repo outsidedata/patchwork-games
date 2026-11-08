@@ -9,7 +9,7 @@
       }
     },
     "particle3d": { "effects": "effects", "hold": 0.25 },
-    "lights3d": { "grid": [16, 9], "slices": 24, "shadows": { "atlas": 4096, "tile": 256, "bias": 0.05, "normalBias": 0.06 } }
+    "lights3d": { "grid": [16, 9], "slices": 24, "shadows": { "atlas": 4096, "tile": 256, "bias": 0.05, "normalBias": 0.06, "budget": 24 } }
   },
   "plugins": ["loader", "scenemanager", "player", "particle3d", "render3d", "lights3d", "chasecamera3d", "stats"],
   "seats": 1,

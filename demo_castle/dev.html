@@ -20,7 +20,10 @@
       // `?graphs=1` on at first), and puts the seat's body on any place of the graph, standing on
       // whatever is there (`go to`). Its `carry` folder sets the hand and the offset of what the
       // body carries, and its `stick` folder the hand, offset and turn of the stick it holds. Its `sky` folder sets skydome3d's clock on the truth's row and
-      // its look and shadow on the page's world, copies them as JSON and resets them to the file. The readout shows the frames drawn in
+      // its look and shadow on the page's world, copies them as JSON and resets them to the file. Its `lights` folder,
+      // in main, keeps the first `?torches=n` torches (1 at first) and lights3d's fog only with `?fog=1`, and
+      // sets the torch lamp, the carried light, the exposure and the fog live (Lights, below). The readout
+      // shows lights3d's lights, shadows, tiles and the shadow faces still owed, and shows the frames drawn in
       // the last second and the longest of them, the step, where the seat's body stands and what it
       // stands on, each visitor's place it is going to and how many places of its route it has still to
       // get to, or the place it stands at, with the height its feet stand at now and how many times it has
@@ -48,6 +51,25 @@
       import village from './assets/village/village.art.nav.json'
 
       file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
+
+      // The town's lights, cut down before the boot so each can be put back one at a time: `?torches=n`
+      // keeps the first n of main's torch actors (1 when left out, the gate's; `all` every one), and
+      // `?fog=1` keeps lights3d's fog, which is off when left out. Both reload the page.
+      const query = new URLSearchParams(location.search)
+      const reload = (key, value) => { query.set(key, value); location.search = query.toString() }
+      const torches = main.actors.filter(a => a.is === 'torch')
+      const kept = query.get('torches') === 'all' ? torches.length : Number(query.get('torches') ?? 1)
+      main.actors = main.actors.filter(a => a.is !== 'torch' || torches.indexOf(a) < kept)
+      // `?people=n` keeps the first n of main's visitors (1 when left out; `all` every one)
+      const people = main.actors.filter(a => a.is === 'visitor')
+      const met = query.get('people') === 'all' ? people.length : Number(query.get('people') ?? 1)
+      main.actors = main.actors.filter(a => a.is !== 'visitor' || people.indexOf(a) < met)
+      // `?atlas=n` and `?tile=n`, lights3d's shadow atlas and each tile of it, texels a side (the file's when left out)
+      const shadows = main.world.lights3d.shadows
+      if (query.get('atlas')) shadows.atlas = Number(query.get('atlas'))
+      if (query.get('tile')) shadows.tile = Number(query.get('tile'))
+      const fogged = query.get('fog') === '1'
+      if (!fogged) delete main.world.lights3d.fog
 
       // A visitor sent somewhere walks there on npc3d's `go` at its tour's pace, and, committed, stands
       // there until it is sent again or put back on its tour.
@@ -331,6 +353,97 @@
         } }, 'copy').name('copy stick JSON')
       }
 
+      // The lights, each switched on and off by itself. `torches` and `fog` reload the page (above). The
+      // torch's lamp is the walltorch effect's lamp layer, the one object every torch's light reads each
+      // frame on this page's copy of the effects file, so its numbers and its shadow show at once; the
+      // carried light is the player's `carry.light`, off by its strength put to 0 and back; the exposure
+      // is the renderer's. The fog's numbers are `world.lights3d.fog` on the page's copy of the scene,
+      // read by the fog every frame. `copy` puts the lamp and the fog on the clipboard under the files
+      // they go in. Built for each new client of main once its effects file has landed.
+      const lamps = { client: null, folder: null }
+      const lights = () => {
+        const client = window.__client
+        if (!client || lamps.client === client || client.plugins.wire.scene.world.lights3d === undefined) return
+        const effects = client.plugins.loader.get('effects')
+        const lamp = effects?.effects.walltorch?.find(l => 'lamp' in l)?.lamp
+        if (!lamp) return
+        lamps.client = client
+        lamps.folder?.destroy()
+        const f = (lamps.folder = gui.addFolder('lights'))
+        f.add({ torches: kept }, 'torches', 0, torches.length, 1).name(`torches (of ${torches.length}, reloads)`).onFinishChange(n => reload('torches', n))
+        f.add({ people: met }, 'people', 0, people.length, 1).name(`people (of ${people.length}, reloads)`).onFinishChange(n => reload('people', n))
+        f.add({ atlas: shadows.atlas }, 'atlas', [512, 1024, 2048, 4096]).name('shadow atlas (texels a side, reloads)').onChange(n => reload('atlas', n))
+        f.add({ tile: shadows.tile }, 'tile', [64, 128, 256, 512]).name('shadow tile (texels a side, reloads)').onChange(n => reload('tile', n))
+        f.add({ fog: fogged }, 'fog').name('fog (reloads)').onChange(on => reload('fog', on ? '1' : '0'))
+        const tf = f.addFolder('torch lamp')
+        tf.add(lamp, 'intensity', 0, 60, 0.1).name('intensity (candela)')
+        tf.add(lamp, 'distance', 0, 40, 0.1).name('distance (m, 0 none)')
+        tf.add(lamp, 'decay', 0, 4, 0.05)
+        tf.add(lamp, 'flicker', 0, 1, 0.01)
+        tf.add(lamp, 'shadow').name('shadow')
+        const carried = defs.player.carry.light
+        const on = { carry: carried.intensity > 0, strength: carried.intensity || 6 }
+        f.add(on, 'carry').name('carried light').onChange(v => {
+          if (v) carried.intensity = on.strength
+          else { on.strength = carried.intensity || on.strength; carried.intensity = 0 }
+          carry.controllersRecursive().forEach(c => c.updateDisplay())
+        })
+        const r3 = client.plugins.render3d
+        // The castle drawn flat: every mesh wearing supershader3d's relief material, alone or in its list, (the castle's stone,
+        // the slate and the shingle roofs) put in one plain grey MeshStandardMaterial dressed by render3d,
+        // so lights3d still lights it, and put back in its own when switched off.
+        const ss = client.plugins.supershader3d
+        const flat = r3.dress(new r3.THREE.MeshStandardMaterial({ color: '#8a8580', roughness: 0.9, metalness: 0 }))
+        const worn = new Map()
+        f.add({ flat: false }, 'flat').name('castle flat material').onChange(on => {
+          if (on) {
+            const relief = ss?.material('relief')
+            // the town is one mesh of many materials, a group a draw call: the relief one swapped in its list
+            r3.scene.traverse(o => {
+              if (!o.isMesh || !relief) return
+              const list = Array.isArray(o.material) ? o.material : [o.material]
+              if (!list.includes(relief)) return
+              worn.set(o, o.material)
+              o.material = Array.isArray(o.material) ? list.map(m => (m === relief ? flat : m)) : flat
+            })
+          } else {
+            for (const [o, m] of worn) o.material = m
+            worn.clear()
+          }
+        })
+        f.add({ get exposure() { return r3.renderer?.toneMappingExposure ?? 1 }, set exposure(v) { if (r3.renderer) r3.renderer.toneMappingExposure = v } }, 'exposure', 0, 4, 0.01).name('exposure')
+        const fog = client.plugins.wire.scene.world.lights3d.fog
+        if (fog) {
+          const ff = f.addFolder('fog')
+          ff.add(fog, 'density', 0, 0.3, 0.001).name('density (share a metre)')
+          ff.add(fog, 'steps', 4, 256, 1).name('steps a ray')
+          ff.add(fog, 'resolution', 0.1, 1, 0.05).name('resolution (share of the frame)')
+          ff.add(fog, 'blend', 0.02, 1, 0.01).name('blend (share of a new frame; 1 none)')
+          ff.add(fog, 'g', -0.95, 0.95, 0.01).name('g (throws light on toward the eye)')
+          ff.add(fog, 'far', 1, 200, 1).name('far (m, a ray that meets nothing)')
+          ff.addColor(fog, 'colour').name('colour (its own light)')
+          if (fog.noise) {
+            const nf = ff.addFolder('noise')
+            nf.add(fog.noise, 'size', 2, 200, 0.5).name('size (m it repeats over)')
+            nf.add(fog.noise, 'layers', 1, 4, 1).name('layers')
+            nf.add(fog.noise, 'strength', 0, 1, 0.01).name('strength (0 even, 1 clumps)')
+          }
+          if (fog.height) {
+            const hf = ff.addFolder('height')
+            hf.add(fog.height, 'floor', -5, 20, 0.1).name('floor (m, full below)')
+            hf.add(fog.height, 'thinning', 0.2, 30, 0.1).name('thinning (m to halve)')
+          }
+        }
+        f.add({ copy: () => {
+          const out = JSON.stringify({
+            'games/demo_castle/assets/effects.json': { effects: { walltorch: [{ lamp }] } },
+            ...(fog ? { 'games/demo_castle/main.scene.json': { world: { lights3d: { fog } } } } : {}),
+          }, null, 2)
+          console.log(out)
+          navigator.clipboard?.writeText(out)
+        } }, 'copy').name('copy lights JSON')
+      }
+
       const readout = document.getElementById('readout')
       const frames = []
       let last = performance.now(), owed = 0
@@ -349,11 +462,13 @@
           await page.frame(owed / dt)
           lighting()
           stick()
+          lights()
         } catch (e) { caught(e) }
         const p = me()
         const where = v => (v.data.doing === 'go' ? `sent to ${v.data.told.map(n => n.toFixed(1)).join(', ')}` : v.data.going)
         readout.textContent = [
           `${frames.length} fps  longest frame ${worst.toFixed(1)} ms  step ${truth.n}`,
+          (l3 => l3 ? `lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} tiles drawn again this frame, ${l3.owed} faces owed` : '')(window.__client?.plugins.lights3d),
           p ? `you (${p.data.pos.map(v => v.toFixed(2)).join(', ')}) ${p.data.grounded ? 'on the ground' : 'in the air'}` : '',
           ...visitors().map(v => `${v.id === picked.id ? '> ' : ''}visitor ${v.id} ${v.data.body}: ${v.data.speed > 0 ? `going to ${where(v)}, ${left(v)} places left` : `standing at ${where(v)}`} at y ${bodies.crowd3d.where(v, time())[1].toFixed(2)}, switched courses ${switches.get(v.id) ?? 0}`),
           ...errors,

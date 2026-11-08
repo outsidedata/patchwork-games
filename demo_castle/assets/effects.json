@@ -4,6 +4,10 @@
   "ppm": 64,
   "files": ["smallville.town.effects.json", "village/village.art.effects.json"],
   "effects": {
+    "walltorch": [
+      { "lamp": { "at": [0, 0.15, 0], "tint": 16757575, "intensity": 30, "distance": 11, "decay": 2, "shadow": true, "flicker": 0.3 } },
+      { "effect": "handfire" }
+    ],
     "handfire": [
       {
         "sheet": "particles",
