@@ -163,6 +163,134 @@
    {
     "effect": "chimney/gust"
    }
+  ],
+  "forge/flame": [
+   {
+    "n": [
+     4,
+     6
+    ],
+    "every": 0.03,
+    "life": [
+     0.2,
+     0.4
+    ],
+    "size": [
+     0.015,
+     0.03
+    ],
+    "grow": -1.5,
+    "spread": 0.3,
+    "speed": [
+     0.2,
+     0.45
+    ],
+    "g": -0.5,
+    "jitter": [
+     0.16,
+     0.01,
+     0.13
+    ],
+    "tint": 16762928,
+    "tint1": 14694400,
+    "a0": 0.7,
+    "a1": 0,
+    "add": true,
+    "gain": 1.4
+   }
+  ],
+  "forge/sparks": [
+   {
+    "every": 0.12,
+    "life": [
+     0.5,
+     1.1
+    ],
+    "size": [
+     0.006,
+     0.01
+    ],
+    "spread": 0.5,
+    "speed": [
+     0.8,
+     1.6
+    ],
+    "g": 0.6,
+    "drag": 0.4,
+    "jitter": [
+     0.1,
+     0,
+     0.08
+    ],
+    "tint": 16773280,
+    "tint1": 16742400,
+    "a0": 1,
+    "a1": 0,
+    "add": true,
+    "gain": 2
+   }
+  ],
+  "forge/glow": [
+   {
+    "lamp": {
+     "at": [
+      0,
+      0.4,
+      0.15
+     ],
+     "tint": 16742954,
+     "intensity": 3,
+     "distance": 7,
+     "decay": 2,
+     "flicker": 0.3
+    }
+   }
+  ],
+  "forge/fire": [
+   {
+    "effect": "forge/glow"
+   },
+   {
+    "effect": "forge/flame"
+   },
+   {
+    "effect": "forge/sparks"
+   }
+  ],
+  "forge/smoke": [
+   {
+    "n": [
+     1,
+     2
+    ],
+    "every": 0.12,
+    "life": [
+     2.5,
+     4
+    ],
+    "size": [
+     0.12,
+     0.2
+    ],
+    "grow": 3,
+    "spread": 0.3,
+    "speed": [
+     0.4,
+     0.7
+    ],
+    "g": -0.15,
+    "drag": 0.4,
+    "jitter": [
+     0.1,
+     0,
+     0.1
+    ],
+    "tint": 6316128,
+    "tint1": 9474192,
+    "a0": 0.35,
+    "a1": 0,
+    "spin": 0.5
+   }
   ]
  },
  "spawns": [
@@ -187,6 +315,34 @@
     104.015,
     9.25,
     -119.1
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "smithy/forge",
+   "effect": "forge/fire",
+   "at": [
+    103.902,
+    0.78,
+    -117.277
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "smithy/forge",
+   "effect": "forge/smoke",
+   "at": [
+    103.902,
+    4.0,
+    -117.537
    ],
    "dir": [
     0.0,

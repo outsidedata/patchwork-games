@@ -227,6 +227,134 @@
     "fade": 0.1,
     "spin": 3
    }
+  ],
+  "forge/flame": [
+   {
+    "n": [
+     4,
+     6
+    ],
+    "every": 0.03,
+    "life": [
+     0.2,
+     0.4
+    ],
+    "size": [
+     0.015,
+     0.03
+    ],
+    "grow": -1.5,
+    "spread": 0.3,
+    "speed": [
+     0.2,
+     0.45
+    ],
+    "g": -0.5,
+    "jitter": [
+     0.16,
+     0.01,
+     0.13
+    ],
+    "tint": 16762928,
+    "tint1": 14694400,
+    "a0": 0.7,
+    "a1": 0,
+    "add": true,
+    "gain": 1.4
+   }
+  ],
+  "forge/sparks": [
+   {
+    "every": 0.12,
+    "life": [
+     0.5,
+     1.1
+    ],
+    "size": [
+     0.006,
+     0.01
+    ],
+    "spread": 0.5,
+    "speed": [
+     0.8,
+     1.6
+    ],
+    "g": 0.6,
+    "drag": 0.4,
+    "jitter": [
+     0.1,
+     0,
+     0.08
+    ],
+    "tint": 16773280,
+    "tint1": 16742400,
+    "a0": 1,
+    "a1": 0,
+    "add": true,
+    "gain": 2
+   }
+  ],
+  "forge/glow": [
+   {
+    "lamp": {
+     "at": [
+      0,
+      0.4,
+      0.15
+     ],
+     "tint": 16742954,
+     "intensity": 3,
+     "distance": 7,
+     "decay": 2,
+     "flicker": 0.3
+    }
+   }
+  ],
+  "forge/fire": [
+   {
+    "effect": "forge/glow"
+   },
+   {
+    "effect": "forge/flame"
+   },
+   {
+    "effect": "forge/sparks"
+   }
+  ],
+  "forge/smoke": [
+   {
+    "n": [
+     1,
+     2
+    ],
+    "every": 0.12,
+    "life": [
+     2.5,
+     4
+    ],
+    "size": [
+     0.12,
+     0.2
+    ],
+    "grow": 3,
+    "spread": 0.3,
+    "speed": [
+     0.4,
+     0.7
+    ],
+    "g": -0.15,
+    "drag": 0.4,
+    "jitter": [
+     0.1,
+     0,
+     0.1
+    ],
+    "tint": 6316128,
+    "tint1": 9474192,
+    "a0": 0.35,
+    "a1": 0,
+    "spin": 0.5
+   }
   ]
  },
  "spawns": [
@@ -335,6 +463,34 @@
     -16.6,
     0.4016,
     -4.6
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "bailey/forge",
+   "effect": "forge/fire",
+   "at": [
+    6.55,
+    0.78,
+    9.5
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "bailey/forge",
+   "effect": "forge/smoke",
+   "at": [
+    6.81,
+    3.6,
+    9.5
    ],
    "dir": [
     0.0,
