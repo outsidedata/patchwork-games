@@ -42,6 +42,10 @@
 //               with `sway: { above, degrees, seconds }`, it is a SkinnedMesh of two bones, every vertex above
 //               `above` metres hanging from the upper one, which swings `degrees` to and fro every `seconds`, so a
 //               glowing part that is posed is seen to light where it swings; every one read every frame
+//   people      people, each the loader's `model` (cloned with its skeleton) at `at`, turned `turn` degrees, playing
+//               its `clip` at `speed` by the steps' clock, and wearing `wear`: `{ look, uvScale }`, a glowing material
+//               of supershader3d's, so it lights the room from where it is posed, or `{ chrome, roughness }`, a mirror
+//               metal, so it shows the room, its lights and what glows
 //   ambient     a faint light everywhere
 // The floor, the walls, the things and the ball cast shadows and take them; a bulb and a panel do
 // neither.
@@ -60,6 +64,9 @@ let field: { light: THREE.PointLight; x: number; z: number; phase: number }[] = 
 let ball: THREE.Mesh | undefined
 let ground: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshStandardMaterial> | undefined
 let kit: THREE.Mesh | undefined
+// the people, each its model and the mixer that plays its clip, and whether they have been made
+let people: { mixer: THREE.AnimationMixer; speed: number }[] = []
+let peopleMade = false
 // whether the kit thing has been asked of prong
 let asked = false
 let panels: {
@@ -86,6 +93,35 @@ const setOf = (row: Row, plugins: Plugins) => {
 // newest (`engine/browser.ts`, Drawing between steps), so what moves moves by the steps' clock and is
 // drawn where render3d draws everything else.
 const drawn = (plugins: Plugins) => (plugins.wire.n - 1 + (plugins.wire.between ?? 1)) * plugins.wire.scene.prefabs.engine.dt
+
+// What a person wears, handed each of its meshes' geometry: with `look`, that material of supershader3d's, every
+// vertex tagged with it (its `lookId`, its `lookInfo` the person's own row so no two people's glow is one thing, its uv
+// times `uvScale`, since a look's uv is metres) so the glowmap finds it, poses it and lights from it; with `chrome`,
+// a mirror metal of that colour and `roughness`, dressed by render3d so the probes and the screen's reflections reach it.
+function wearing(T: typeof THREE, plugins: Plugins, wear: any, person: number) {
+  if (wear.chrome) {
+    const metal = plugins.render3d.dress(new T.MeshStandardMaterial({ color: wear.chrome, metalness: 1, roughness: wear.roughness }))
+    return () => metal
+  }
+  const ss = plugins.supershader3d
+  const id = ss.idOf(wear.look)
+  if (id === undefined) throw new Error(`a person wears the look ${wear.look}, which the looks file does not hold`)
+  const material = ss.material(ss.callOf(wear.look))
+  return (geometry: THREE.BufferGeometry) => {
+    const n = geometry.getAttribute('position').count
+    geometry.setAttribute('lookId', new T.Float32BufferAttribute(new Float32Array(n).fill(id), 1))
+    const info = new Float32Array(n * 3)
+    for (let v = 0; v < n; v++) { info[v * 3] = id; info[v * 3 + 1] = 1000 + person; info[v * 3 + 2] = 0 }
+    geometry.setAttribute('lookInfo', new T.Float32BufferAttribute(info, 3))
+    const uv = geometry.getAttribute('uv')
+    if (uv) {
+      const scaled = new Float32Array(uv.count * 2)
+      for (let v = 0; v < uv.count; v++) { scaled[v * 2] = uv.getX(v) * wear.uvScale; scaled[v * 2 + 1] = uv.getY(v) * wear.uvScale }
+      geometry.setAttribute('uv', new T.Float32BufferAttribute(scaled, 2))
+    }
+    return material
+  }
+}
 
 // `drawn` made a SkinnedMesh of two bones in its own space: one at its foot, and one `above` metres up that every
 // vertex above it hangs from, so what is above swings when that bone turns. Its materials, attributes and geometry
@@ -253,6 +289,8 @@ export function setup(row: Row, plugins: Plugins) {
   })
 
   asked = false
+  peopleMade = false
+  people = []
   const o = d.orbiter
   if (o) {
     const orb = new T.Mesh(new T.SphereGeometry(o.size / 2, 48, 24), lit(o.colour, o.roughness, o.metalness))
@@ -317,6 +355,35 @@ export function tick(row: Row, plugins: Plugins) {
       plugins.render3d.scene.add(mesh)
     })
   }
+  // the people, made once their models and supershader3d's looks have landed
+  if (d.people && !peopleMade && plugins.supershader3d?.looks() && d.people.every((p: any) => plugins.loader.ready(p.model))) {
+    peopleMade = true
+    const T = plugins.render3d.THREE as typeof THREE
+    d.people.forEach((p: any, i: number) => {
+      const { scene: root, animations } = plugins.loader.model(p.model)
+      root.position.set(p.at[0], p.at[1], p.at[2])
+      root.quaternion.setFromAxisAngle(Y, (p.turn * Math.PI) / 180)
+      const worn = wearing(T, plugins, p.wear, i)
+      root.traverse((o: THREE.Object3D) => {
+        const m = o as THREE.Mesh
+        if (!m.isMesh) return
+        m.geometry = m.geometry.clone()
+        m.material = worn(m.geometry)
+        m.castShadow = m.receiveShadow = true
+        // a posed body leaves its rest bounds; anim marks what it poses moving, and so does this
+        m.frustumCulled = false
+        m.userData.moving = true
+      })
+      const clip = animations.find((a: THREE.AnimationClip) => a.name === p.clip)
+      if (!clip) throw new Error(`the stage's person ${i} plays ${p.clip}, which ${p.model} has not: ${animations.map((a: THREE.AnimationClip) => a.name).join(', ')}`)
+      const mixer = new T.AnimationMixer(root)
+      mixer.clipAction(clip).play()
+      people.push({ mixer, speed: p.speed })
+      made.push(root)
+      plugins.render3d.scene.add(root)
+    })
+  }
+  for (const p of people) p.mixer.setTime(t * p.speed)
   if (kit) {
     const k = d.kit
     kit.position.set(k.at[0], k.at[1] + k.bob * Math.sin((t / k.bobSeconds) * Math.PI * 2), k.at[2])

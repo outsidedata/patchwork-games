@@ -17,18 +17,39 @@
           "type": "json",
           "url": "/games/demo_lights3d/assets/kit-glow.looks.json",
           "preload": true
+        },
+        "woman": {
+          "type": "model",
+          "url": "/games/demo_lights3d/assets/castle_woman.glb",
+          "preload": true
+        },
+        "walker": {
+          "type": "model",
+          "url": "/games/demo_lights3d/assets/castle_walker.glb",
+          "preload": true
         }
       }
     },
     "supershader3d": {
       "looks": "kitGlowLooks",
       "glowmap": {
-        "triangles": { "side": 4 },
-        "screen": { "resolution": 0.25, "cells": [16, 9] }
+        "triangles": {
+          "side": 2
+        },
+        "screen": {
+          "resolution": 0.25,
+          "cells": [
+            16,
+            9
+          ]
+        }
       }
     },
     "lights3d": {
-      "grid": [16, 9],
+      "grid": [
+        16,
+        9
+      ],
       "slices": 24,
       "areas": {
         "size": 256,
@@ -37,13 +58,40 @@
         "cutoff": 0.002,
         "angle": 1.2,
         "near": 0.05,
-        "glow": { "reach": 4, "gain": 1, "from": "triangles" }
+        "glow": {
+          "reach": 4,
+          "gain": 8,
+          "from": "triangles",
+          "most": 256
+        }
       },
-      "fog": { "density": 0.08, "colour": "#010203", "steps": 32, "g": 0.2, "far": 20, "resolution": 0.4, "blend": 0.1 },
-      "mods": { "glow": "supershader3d" }
+      "fog": {
+        "density": 0.08,
+        "colour": "#010203",
+        "steps": 32,
+        "g": 0.2,
+        "far": 20,
+        "resolution": 0.4,
+        "blend": 0.1
+      },
+      "probes": {
+        "size": 128,
+        "intensity": 1,
+        "near": 0.1,
+        "far": 30,
+        "refresh": 2,
+        "places": [
+          { "at": [0, 1.4, 2], "box": [-4, 0, -4, 4, 4, 4] }
+        ]
+      },
+      "mods": {
+        "glow": "supershader3d"
+      }
     },
     "shipped": {
-      "plugins": ["prong"]
+      "plugins": [
+        "prong"
+      ]
     }
   },
   "plugins": [
@@ -90,7 +138,8 @@
       "tone": "neutral",
       "exposure": 1,
       "shadows": "soft",
-      "background": "#05060a"
+      "background": "#05060a",
+      "ssr": { "steps": 32, "distance": 6, "thickness": 0.3, "roughness": 0.4 }
     },
     "stage": {
       "set": "glow"
