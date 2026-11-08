@@ -7,7 +7,17 @@
     "walk": 1.5,
     "sens": 0.004,
     "camera": { "minPitch": -0.4, "maxPitch": 1.3, "minDist": 1.5, "maxDist": 30, "zoom": 0.001 },
-    "keys": { "stick": ["a", "d", "w", "s"], "slow": "Shift", "jump": " ", "drag": "Mouse2" }
+    "keys": { "stick": ["a", "d", "w", "s"], "slow": "Shift", "jump": " ", "drag": "Mouse2", "use": "e", "leave": "Escape" },
+    "reach": 2.5
+  },
+  "story": {
+    "file": "quests",
+    "hud": {
+      "prompt": { "at": [300, 20], "anchor": 0.5, "text": "[E]  {verb} {name}", "talk": "Talk to" },
+      "talk": { "size": [800, 280], "fill": { "color": 1118481, "alpha": 0.88 }, "who": [24, 16], "say": [24, 48], "replies": [24, 150], "gap": 38, "leave": "Goodbye" },
+      "journal": { "at": [0, 0], "gap": 24, "entry": 76, "heading": "Quests", "carrying": "Carrying", "count": "{name}  {n}" },
+      "mark": { "lift": 2.2 }
+    }
   },
   "visitor": {
     "body": "crowd3d",
@@ -41,7 +51,8 @@
     "whim": 1,
     "react": [0.3, 1],
     "behaviors": {
-      "linger": { "weight": 1, "for": [4, 10] }
+      "linger": { "weight": 1, "for": [4, 10] },
+      "attend": { "clips": ["sittingTalking", "talking"], "face": false, "commit": true }
     }
   },
   "wanderer": {
@@ -55,7 +66,8 @@
     "whim": 1,
     "react": [0.3, 1],
     "behaviors": {
-      "roam": { "weight": 1, "speed": 1.4, "for": [4, 10] }
+      "roam": { "weight": 1, "speed": 1.4, "for": [4, 10] },
+      "attend": { "clips": ["talking"], "face": true, "commit": true }
     }
   }
 }

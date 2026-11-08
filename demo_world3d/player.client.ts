@@ -1,7 +1,8 @@
 // One seat's `player` row (`player.sim.ts`). anim draws the body, every seat's. For the
 // seat's own row, the one that is `mine`, its keys and mouse, and the camera, which chasecamera3d holds on
 // the row. Every key is the player's definition's `keys`, each naming the act of its name: the stick
-// (left, right, forward and back), `slow` held and `jump`. The mouse dragged with `drag` held sends `look`
+// (left, right, forward and back), `slow` held, `jump`, `use` (talk to or use what is nearest) and `leave` (the
+// talk over; the ui's `back`, so it reaches the game while the talk's modal is up). The mouse dragged with `drag` held sends `look`
 // with its pixels times `sens`, right turning the view right and down tilting it down; the wheel sends
 // `zoom` with the pixels it turned.
 //   The props anim hangs on every body (`world.anim.kinds.player.props`, the stick) cast shadows as the
@@ -57,7 +58,7 @@ export function setup(row: Row, plugins: Plugins) {
   plugins.player.bind({
     stick: [{ keys: k.keys.stick, send: (x, y) => ['stick', x, y] }],
     hold: [{ keys: [k.keys.slow], send: v => ['slow', v > 0 ? 1 : 0] }],
-    press: { [k.keys.jump]: ['jump'] },
+    press: { [k.keys.jump]: ['jump'], [k.keys.use]: ['use'], [k.keys.leave]: ['leave'] },
     drag: { key: k.keys.drag, send: look },
     wheel: dy => ['zoom', dy],
   } satisfies Binds)

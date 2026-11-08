@@ -1,0 +1,59 @@
+{
+  "about": "The tavern's quests, its people's talk and what can be carried, written against the place's own files: the crowd file's residents and the nav graph's places. The quest plugin (plugins/quest/quest.sim.ts) says every part.",
+  "crowd": "tavern.art.crowd",
+  "graph": "place",
+  "clips": "tavern.art.clips",
+  "people": {
+    "edith": { "name": "Edith", "resident": "tavern_bar" },
+    "wat": { "name": "Wat", "resident": "tavern_seat_9b" },
+    "hal": { "name": "Hal", "resident": "tavern_seat_1b" }
+  },
+  "spots": {
+    "hearth": { "name": "the back hearth", "at": "before the back hearth", "verb": "Warm your hands at" }
+  },
+  "items": {
+    "tankard": { "name": "Wat's ale" },
+    "penny": { "name": "Pennies" }
+  },
+  "quests": {
+    "ale": {
+      "title": "Wat's ale",
+      "stages": {
+        "1": "Carry the ale to Wat, at the far table by the back hearth.",
+        "2": "Wat has his ale. Tell Edith.",
+        "3": "Edith paid you for your legs."
+      }
+    }
+  },
+  "lines": [
+    { "to": "edith", "ask": "hello", "say": "What'll it be?" },
+    {
+      "to": "edith", "ask": "hello", "if": { "ale": 0 },
+      "say": "Wat's been shouting for another this half hour. Carry this to him, will you? Far table, by the back hearth.",
+      "replies": [ { "say": "I'll take it.", "ask": "carry" }, { "say": "Not me.", "ask": "bye" } ]
+    },
+    { "to": "edith", "ask": "carry", "say": "Don't spill it. He'll know.", "set": { "ale": 1 }, "add": { "tankard": 1 } },
+    { "to": "edith", "ask": "hello", "if": { "ale": 1 }, "say": "He's at the far table. You'll hear him." },
+    { "to": "edith", "ask": "hello", "if": { "ale": 2 }, "say": "He said that? He owes for six. Here, a penny for your legs.", "set": { "ale": 3 }, "add": { "penny": 1 } },
+
+    { "to": "wat", "ask": "hello", "say": "Mm." },
+    {
+      "to": "wat", "ask": "hello", "if": { "ale": 1 },
+      "say": "Is that mine?",
+      "replies": [ { "say": "From Edith.", "ask": "give tankard", "if": { "tankard": [1, null] } }, { "say": "No.", "ask": "bye" } ]
+    },
+    { "to": "wat", "ask": "give tankard", "say": "About time. Tell Edith she's a saint.", "set": { "ale": 2 }, "add": { "tankard": -1, "wat.tankard": 1 } },
+    { "to": "wat", "ask": "hello", "if": { "ale": [2, null] }, "say": "Leave a man to his drink." },
+
+    { "to": "hal", "ask": "hello", "say": "Sit down, sit down. No? Suit yourself." },
+    { "to": "hal", "ask": "hello", "if": { "ale": [1, 2] }, "say": "Wat'll drink the cellar dry, that one." },
+
+    { "to": "hearth", "ask": "use", "say": "The fire is low, but it's warm." }
+  ],
+  "marks": [
+    { "who": "edith", "if": { "ale": 0 }, "show": "!" },
+    { "who": "edith", "if": { "ale": 2 }, "show": "?" },
+    { "who": "wat", "if": { "ale": 1 }, "show": "?" }
+  ],
+  "watch": []
+}

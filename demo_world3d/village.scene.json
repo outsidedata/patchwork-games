@@ -166,6 +166,11 @@
           "space": "linear",
           "wrap": "repeat",
           "preload": true
+        },
+        "quests": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/village/village.art.quests.json",
+          "preload": true
         }
       }
     },
@@ -557,13 +562,15 @@
         "route": "nav3d",
         "behaviors": [
           "fortress",
-          "world3d"
+          "world3d",
+          "quest"
         ]
       }
     },
     "shipped": {
       "plugins": [
-        "fortress"
+        "fortress",
+        "quest"
       ]
     },
     "skydome3d": {
@@ -616,6 +623,157 @@
       "mods": {
         "land": "terrain3d"
       }
+    },
+    "ui": {
+      "panels": {
+        "quest.marks": {
+          "anchor": "top-left",
+          "size": [
+            1280,
+            720
+          ]
+        },
+        "quest.prompt": {
+          "anchor": "bottom",
+          "at": [
+            0,
+            -110
+          ],
+          "size": [
+            600,
+            40
+          ]
+        },
+        "quest.journal": {
+          "anchor": "top-right",
+          "at": [
+            -16,
+            16
+          ],
+          "size": [
+            380,
+            600
+          ]
+        },
+        "quest.talk": {
+          "anchor": "bottom",
+          "at": [
+            0,
+            -24
+          ],
+          "size": [
+            800,
+            280
+          ],
+          "modal": true,
+          "layer": 1
+        }
+      },
+      "keys": {
+        "up": "ArrowUp",
+        "down": "ArrowDown",
+        "left": "ArrowLeft",
+        "right": "ArrowRight",
+        "press": [
+          "Enter",
+          " "
+        ],
+        "back": "Escape"
+      },
+      "styles": {
+        "quest.prompt": {
+          "fontFamily": "Georgia",
+          "fontSize": 22,
+          "fill": 16777215,
+          "stroke": {
+            "color": 0,
+            "width": 4,
+            "join": "round"
+          }
+        },
+        "quest.who": {
+          "fontFamily": "Georgia",
+          "fontSize": 20,
+          "fill": 15254855,
+          "stroke": {
+            "color": 0,
+            "width": 3,
+            "join": "round"
+          }
+        },
+        "quest.say": {
+          "fontFamily": "Georgia",
+          "fontSize": 18,
+          "fill": 15920612,
+          "stroke": {
+            "color": 0,
+            "width": 3,
+            "join": "round"
+          },
+          "wordWrap": true,
+          "wordWrapWidth": 752
+        },
+        "quest.reply": {
+          "size": [
+            752,
+            32
+          ],
+          "radius": 4,
+          "fill": {
+            "color": 2829099
+          },
+          "focus": {
+            "color": 7035434
+          },
+          "text": {
+            "fontFamily": "Georgia",
+            "fontSize": 16,
+            "fill": 16777215
+          }
+        },
+        "quest.heading": {
+          "fontFamily": "Georgia",
+          "fontSize": 18,
+          "fill": 15254855,
+          "stroke": {
+            "color": 0,
+            "width": 3,
+            "join": "round"
+          }
+        },
+        "quest.title": {
+          "fontFamily": "Georgia",
+          "fontSize": 16,
+          "fill": 16777215,
+          "stroke": {
+            "color": 0,
+            "width": 3,
+            "join": "round"
+          }
+        },
+        "quest.text": {
+          "fontFamily": "Georgia",
+          "fontSize": 14,
+          "fill": 14540253,
+          "stroke": {
+            "color": 0,
+            "width": 3,
+            "join": "round"
+          },
+          "wordWrap": true,
+          "wordWrapWidth": 380
+        },
+        "quest.mark": {
+          "fontFamily": "Georgia",
+          "fontSize": 40,
+          "fill": 16765503,
+          "stroke": {
+            "color": 0,
+            "width": 5,
+            "join": "round"
+          }
+        }
+      }
     }
   },
   "plugins": [
@@ -624,6 +782,7 @@
     "player",
     "supershader3d",
     "terrain3d",
+    "ui",
     "shipped",
     "crowd3d",
     "anim",
@@ -734,7 +893,10 @@
       },
       "lift": 1.5,
       "limp": false,
-      "rig": "torch"
+      "rig": "torch",
+      "state": {},
+      "near": null,
+      "talk": null
     },
     "visitor": {
       "pos": [
@@ -798,7 +960,10 @@
       "wake": 0,
       "arrived": false,
       "told": null,
-      "route": null
+      "route": null,
+      "who": null,
+      "known": false,
+      "state": {}
     },
     "wanderer": {
       "pos": [
@@ -831,7 +996,13 @@
       "wake": 0,
       "arrived": false,
       "told": null,
-      "route": null
+      "route": null,
+      "who": null,
+      "known": false,
+      "state": {}
+    },
+    "story": {
+      "state": {}
     }
   },
   "actors": [
@@ -983,6 +1154,9 @@
     },
     {
       "is": "world3d"
+    },
+    {
+      "is": "story"
     }
   ]
 }

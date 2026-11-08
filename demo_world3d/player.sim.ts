@@ -15,10 +15,17 @@
 // the start's `graph` names (`root`), else at the start's `pos`; facing its `yaw`, and the camera behind it. Each step it walks the definition's `run` metres a second (`walk` while `slow`) the way the
 // stick points from the camera's yaw, jumps on the jump key, and is animated.
 //
+// In a scene whose place has a quests file (a `story` row), it is the quest plugin's too
+// (`plugins/quest/quest.sim.ts`): its `state`, the seat's own named numbers (a quest's stage, the items it carries);
+// `near`, what it could talk to or use now, worked out each tick within the definition's `reach` metres; and `talk`,
+// the line it is on while it talks.
+//
 // The acts are the page's keys: `stick(x, y)` (y down, as a stick reads), `look(dyaw, dpitch)` within
 // the camera's `minPitch` and `maxPitch`, `zoom(d)` the wheel, the camera's distance times e to the
-// d·`zoom`, within `minDist` and `maxDist`, `slow(held)`, 1 held and 0 let go, and `jump`. A seat's message
-// arrives from outside the program, so each act refuses arguments of the wrong kind and writes nothing.
+// d·`zoom`, within `minDist` and `maxDist`, `slow(held)`, 1 held and 0 let go, and `jump`; and the quest
+// plugin's: `use`, talking to or using what is nearest, `reply(n)`, the line's reply numbered `n` of those it offers
+// now, and `leave`, the talk over. A seat's message arrives from outside the program, so each act refuses
+// arguments of the wrong kind and writes nothing.
 import type { Kind, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
@@ -27,6 +34,7 @@ import { solids as trees } from '#plugins/lod3d/lod3d.walker.ts'
 import { numbers, relative, walk } from '#plugins/walker/walker.sim.ts'
 import { animate } from '#plugins/anim/anim.sim.ts'
 import { graph } from '#plugins/nav3d/nav3d.sim.ts'
+import { leave, look, reply, use } from './plugins/quest/quest.sim.ts'
 
 const wrap = (a: number) => math.atan2(math.sin(a), math.cos(a))
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
@@ -62,6 +70,7 @@ export const player: Kind = {
     const on = ground(w, d.pos[1], numbers(me, w))
     walk(me, w, dt, w.world.lod3d ? { ...on, solids: (x, z, r) => [...on.solids(x, z, r), ...trees(w, x, z, r)] } : on)
     animate(me, w, dt)
+    look(me, w)
   },
   acts: {
     stick(me, _w, _seat, x: unknown, y: unknown) {
@@ -84,6 +93,15 @@ export const player: Kind = {
     },
     jump(me) {
       me.data.jump = true
+    },
+    use(me, w) {
+      use(me, w)
+    },
+    reply(me, w, _seat, n: unknown) {
+      if (typeof n === 'number' && Number.isInteger(n) && n >= 0) reply(me, w, n)
+    },
+    leave(me) {
+      leave(me)
     },
   },
 }

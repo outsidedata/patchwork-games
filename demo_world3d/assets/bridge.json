@@ -4,7 +4,8 @@
     "walk": 1.5,
     "sens": 0.004,
     "camera": { "minPitch": -0.4, "maxPitch": 1.3, "minDist": 1.5, "maxDist": 30, "zoom": 0.001 },
-    "keys": { "stick": ["a", "d", "w", "s"], "slow": "Shift", "jump": " ", "drag": "Mouse2" }
+    "keys": { "stick": ["a", "d", "w", "s"], "slow": "Shift", "jump": " ", "drag": "Mouse2", "use": "e", "leave": "Escape" },
+    "reach": 2.5
   },
   "spiraller": {
     "body": "crowd3d",

@@ -1,0 +1,107 @@
+{
+  "about": "The village's quests, its people's talk, what can be carried and the switches, written against the place's own files: the crowd file's resident and wanderers, the nav graph's places, the clips file's bellcote. The quest plugin (plugins/quest/quest.sim.ts) says every part.",
+  "crowd": "village.art.crowd",
+  "graph": "place",
+  "clips": "village.art.clips",
+  "people": {
+    "osric": { "name": "Osric the smith", "resident": "smithy/smithy_anvil" },
+    "agnes": { "name": "Old Agnes", "wanderer": "old_woman" },
+    "maud": { "name": "Maud", "wanderer": "old_woman_nochurch" }
+  },
+  "spots": {
+    "rope": { "name": "the bell rope", "at": "chapel/upper floor/floor middle", "verb": "Pull" },
+    "shelf": { "name": "the bread shelf", "at": "bakehouse/behind the counter", "verb": "Search" }
+  },
+  "items": {
+    "pot": { "name": "Maud's pot" },
+    "loaf": { "name": "A loaf" },
+    "penny": { "name": "Pennies" }
+  },
+  "quests": {
+    "bell": {
+      "title": "The evening bell",
+      "stages": {
+        "1": "Agnes wants the evening bell rung. The rope hangs in the chapel loft.",
+        "2": "The bell is ringing. Tell Agnes.",
+        "3": "Agnes heard the bell."
+      }
+    },
+    "mend": {
+      "title": "Maud's pot",
+      "stages": {
+        "1": "Osric has mended Maud's pot. Take it to her; she goes about the houses.",
+        "2": "Maud has her pot back. Tell Osric.",
+        "3": "Maud has her pot, and Osric knows it."
+      }
+    },
+    "supper": {
+      "title": "Maud's supper",
+      "stages": {
+        "1": "Fetch Maud a loaf from the shelf behind the bakehouse counter.",
+        "2": "Take the loaf to Maud.",
+        "3": "Maud has her supper."
+      }
+    }
+  },
+  "lines": [
+    { "to": "agnes", "ask": "hello", "say": "Mind the step, dear. These old legs have walked this village sixty years." },
+    {
+      "to": "agnes", "ask": "hello", "if": { "bell": 0 },
+      "say": "You there. My knees won't take the chapel stair today, and the evening bell wants ringing. Would you pull the rope for me?",
+      "replies": [ { "say": "I'll ring it.", "ask": "ring" }, { "say": "Not today.", "ask": "bye" } ]
+    },
+    { "to": "agnes", "ask": "ring", "say": "Bless you. The rope hangs in the loft, up the stair at the back.", "set": { "bell": 1 } },
+    { "to": "agnes", "ask": "hello", "if": { "bell": 1 }, "say": "The rope's up in the chapel loft, dear. Up the stair at the back." },
+    { "to": "agnes", "ask": "hello", "if": { "bell": 2 }, "say": "I heard it! Sweet as ever. Here, for your trouble.", "set": { "bell": 3 }, "add": { "penny": 3 } },
+
+    { "to": "rope", "ask": "use", "say": "You haul on the rope, and up in the bellcote the bells swing out.", "set": { "world.bell": 1 } },
+    { "to": "rope", "ask": "use", "if": { "world.bell": 1 }, "say": "You catch the rope, and the bells fall still.", "set": { "world.bell": 0 } },
+    { "to": "rope", "ask": "use", "if": { "bell": 1, "world.bell": 0 }, "say": "You haul on the rope, and up in the bellcote the bells swing out for evening.", "set": { "world.bell": 1, "bell": 2 } },
+
+    { "to": "osric", "ask": "hello", "say": "Can't stop. The fire won't keep." },
+    {
+      "to": "osric", "ask": "hello", "if": { "mend": 0 },
+      "say": "Maud's cooking pot. Cracked clean through, and I've brazed it whole. I've no time to walk it over. Will you take it?",
+      "replies": [ { "say": "I'll take it to her.", "ask": "take pot" }, { "say": "Not now.", "ask": "bye" } ]
+    },
+    { "to": "osric", "ask": "take pot", "say": "She wanders, Maud. You'll find her about the houses.", "set": { "mend": 1 }, "add": { "pot": 1 } },
+    { "to": "osric", "ask": "hello", "if": { "mend": 1 }, "say": "Maud's still waiting on that pot." },
+    { "to": "osric", "ask": "hello", "if": { "mend": 2 }, "say": "She has it? Good. Here, that's yours.", "set": { "mend": 3 }, "add": { "penny": 2 } },
+
+    { "to": "maud", "ask": "hello", "say": "Morning. Or is it evening. One loses track." },
+    {
+      "to": "maud", "ask": "hello", "if": { "mend": 1 },
+      "say": "Is that my pot? Oh, Osric's a marvel.",
+      "replies": [ { "say": "Here it is.", "ask": "give pot", "if": { "pot": [1, null] } }, { "say": "Not yet.", "ask": "bye" } ]
+    },
+    { "to": "maud", "ask": "give pot", "say": "Not a drip from it now. Tell Osric I'm grateful.", "set": { "mend": 2 }, "add": { "pot": -1, "maud.pot": 1 } },
+    {
+      "to": "maud", "ask": "hello", "if": { "supper": 0, "mend": [2, null] },
+      "say": "I've a pot and nothing to put in it. Would you fetch me a loaf from the bakehouse?",
+      "replies": [ { "say": "I'll fetch one.", "ask": "fetch" }, { "say": "Not now.", "ask": "bye" } ]
+    },
+    { "to": "maud", "ask": "fetch", "say": "The baker leaves them on the shelf behind the counter.", "set": { "supper": 1 } },
+    { "to": "maud", "ask": "hello", "if": { "supper": 1 }, "say": "The shelf behind the bakehouse counter, love." },
+    {
+      "to": "maud", "ask": "hello", "if": { "supper": 2 },
+      "say": "You found one!",
+      "replies": [ { "say": "Here, still warm.", "ask": "give loaf", "if": { "loaf": [1, null] } } ]
+    },
+    { "to": "maud", "ask": "give loaf", "say": "Warm still. Thank you, love. Take a penny.", "set": { "supper": 3 }, "add": { "loaf": -1, "maud.loaf": 1, "penny": 1 } },
+
+    { "to": "shelf", "ask": "use", "say": "Nothing on the shelf but flour dust." },
+    { "to": "shelf", "ask": "use", "if": { "supper": 1 }, "say": "One loaf left at the back of the shelf. You take it.", "set": { "supper": 2 }, "add": { "loaf": 1 } }
+  ],
+  "marks": [
+    { "who": "agnes", "if": { "bell": 0 }, "show": "!" },
+    { "who": "agnes", "if": { "bell": 2 }, "show": "?" },
+    { "who": "osric", "if": { "mend": 0 }, "show": "!" },
+    { "who": "osric", "if": { "mend": 2 }, "show": "?" },
+    { "who": "maud", "if": { "mend": 1 }, "show": "?" },
+    { "who": "maud", "if": { "supper": 0, "mend": [2, null] }, "show": "!" },
+    { "who": "maud", "if": { "supper": 2 }, "show": "?" }
+  ],
+  "watch": [
+    { "if": { "world.bell": 1 }, "clip": { "thing": "chapel/upper floor/bellcote", "clip": "ring" } }
+  ]
+}

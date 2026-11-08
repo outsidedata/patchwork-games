@@ -54,6 +54,24 @@ the road. It shows npc3d's people on routes that climb, with people at two heigh
 the bridge a man goes up and down a spiral, three turns rising 3 m, a way of the graph that is a shapes3d spline: he
 walks its curve, as crowd3d walks a spline a straight piece at a time.
 
+## Quests
+
+In the village and the tavern you talk to people, carry things from one to another and work the place's switches. E
+talks to, or uses, whatever is nearest within reach; a talk opens a box of what is said and the replies, picked with
+the arrows and Enter or the mouse; Escape ends it. A "!" stands over someone with a quest for you and a "?" over someone
+waiting on one, and the corner lists your quests and what you carry.
+
+All of it is one file per place beside the files pro-ng's build writes, its quests file
+(`assets/village/village.art.quests.json`, `assets/tavern/tavern.art.quests.json`), written against the names those
+files already give: a resident by the landmark it is planted at, a wanderer by its name (the crowd file), a spot by the
+tag of a place of the nav graph, a switch by its kit thing's clip (the clips file). Everything that changes is a named
+number on the row of whoever owns it: yours on your row, the place's on the `story` row, a person's on theirs, so a
+thing given is one number down on the giver and one up on the taker. What is said is a pool of lines, the one whose
+conditions name the most numbers winning. The quest plugin (`plugins/quest/quest.sim.ts`) says every part of the
+file. In the village, Agnes wants the chapel bell rung (its rope in the loft plays the bellcote's `ring` clip), Osric
+sends you to Maud with her mended pot, and Maud wants a loaf from the bakehouse shelf; in the tavern, Edith sends you to
+Wat with his ale.
+
 ## How it is made
 
 - **The town drawn** (world3d): `assets/smallville.town.glb` as pro-ng's `procedural.py` cuts it, every
@@ -117,6 +135,10 @@ demo_particle3d's and demo_motion3d's, copied. Change the town, a material or a 
 
 `yarn vitest run games/demo_world3d/demo_world3d.sim.test.ts`: you start on the town's start place and stand on it; a visitor walks the town to one of its places and stops on it at its height, its course written once
 a leg; and on the bridge, visitors walk over the bridge at its height, under it on the ground, and up its ramps.
+
+`yarn vitest run games/demo_world3d/plugins/quest/quest.sim.test.ts`: every person of each quests file is found on
+one row; the bell, the pot and the ale go from start to end; a person talked to stops and listens until you leave; and
+a seat cannot write the place's state or a person's itself.
 
 How world3d draws a place, plays its clips and hands its files on is proven by world3d's own tests
 (`plugins/world3d/*.test.ts`).
