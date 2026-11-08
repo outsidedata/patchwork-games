@@ -34,6 +34,7 @@
         "colour": "#04050a",
         "steps": 32,
         "resolution": 0.4,
+        "blend": 0.1,
         "g": 0.35,
         "far": 60
       }

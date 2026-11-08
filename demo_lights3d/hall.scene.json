@@ -24,6 +24,7 @@
         "colour": "#030407",
         "steps": 40,
         "resolution": 0.5,
+        "blend": 0.1,
         "g": 0.5,
         "far": 80
       }

@@ -99,6 +99,7 @@
         ff.add(fog, 'density', 0, 0.3, 0.001).name('density (share a metre)')
         ff.add(fog, 'steps', 4, 256, 1).name('steps a ray')
         ff.add(fog, 'resolution', 0.1, 1, 0.05).name('resolution (share of the frame)')
+        ff.add(fog, 'blend', 0.02, 1, 0.01).name('blend (share of a new frame; 1 none)')
         ff.add(fog, 'g', -0.95, 0.95, 0.01).name('g (throws light on toward the eye)')
         ff.add(fog, 'far', 1, 200, 1).name('far (m, a ray that meets nothing)')
         ff.addColor(fog, 'colour').name('colour (its own light)')
