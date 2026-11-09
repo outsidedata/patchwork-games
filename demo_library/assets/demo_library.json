@@ -1,7 +1,11 @@
 {
  "library": {
   "address": "place",
-  "scene": "main",
+  "glow": {
+   "areas": { "size": 256, "levels": 8, "blur": 0.5, "cutoff": 0.002, "angle": 1.2, "near": 0.05, "glow": { "gain": 8 } },
+   "glowmap": { "resolution": 0.25, "cells": [16, 9] }
+  },
+  "scenes": { "scene": "art", "kit": "kit", "material": "materials" },
   "bar": [0, 0, 1280, 36],
   "panel": [960, 36, 320, 684],
   "stats": [8, 650, 940, 64],
@@ -16,8 +20,10 @@
   "frame": { "fill": 1.1, "yaw": 2.356194490192345, "pitch": 0.45 },
   "turn": 0.005,
   "pitchMost": 1.5,
-  "pan": 0.0015,
   "zoom": 0.001,
+  "smooth": 14,
+  "twice": 0.35,
+  "still": 4,
   "nearest": 0.05,
   "fly": 1,
   "flyLeast": 1,
@@ -35,7 +41,7 @@
    "curveLeast": 16,
    "point": 7,
    "over": 10,
-   "ground": { "across": 8, "least": 2, "colour": "#33422a" }
+   "ground": { "across": 8, "least": 2, "below": 0.02, "colour": "#33422a" }
   }
  }
 }

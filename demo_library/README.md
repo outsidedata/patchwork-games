@@ -13,7 +13,9 @@ the library is read and never written, but for the effects editor's Save, which 
 
 ## Playing it
 
-`yarn serve demo_library`, then `/games/demo_library/dev.html?server&place=<place>` on the address it prints. The
+`yarn serve demo_library`, then `/games/demo_library/client.html?scene=<scene>&place=<place>` on the address it prints
+(the dev page on the server: the readout, the errors, the frame rate, every address key below; `dev.html?server` is
+the same). The
 server builds what the page asks for (Blender runs on node), writes pro-ng's list of every kit kind and landmark as it
 starts, and watches pro-ng: a change to its `kit/`, `scenes/`, `material/`, `materials.json`, `procedural.py` or
 `pack.mjs` builds the place on the page again, and the page reloads onto it.
@@ -22,32 +24,46 @@ The address (`dev.html`):
 
 | key | what it does |
 | --- | --- |
-| `place=<place>` | the build drawn: a folder of `assets/builds/` |
+| `scene=<scene>` | the scene entered: `art` (the first), `kit` or `materials` |
+| `place=<place>` | the build the scene entered draws: a folder of `assets/builds/` |
 | `server` | play against `yarn serve demo_library`, which builds |
 | `eye=x,y,z&look=x,y,z` | where the camera stands and looks, metres, y up |
 | `shapes`, `nav` | the walk shapes and the nav graph drawn from the start |
 | `view=<view>`, `flat` | supershader3d's view (shaded, pieces, height, normal, solids), every material in its flat colour |
 | `clip=<clip>`, `at=<seconds>` | a clip played on every moving thing that has it; the clips and the looks' clock held at that moment |
 | `noeffects` | none of the build's effects thrown |
+| `ssr=0` | every scene drawn without the screen-space reflections |
+| `glow=1` | lights3d's area lights, the room lit by what glows (`library.glow` in `assets/demo_library.json`); off without it |
+
+Both dev pages (`dev.html`, `client.html`) have a panel at the top right (`demo_library.dev.ts`): the scene, the
+screen-space reflections (on or off, and their numbers live), the exposure and tone, the area lights and glow (on or off, and the glow's gain), and `copy
+changed values`, which puts every number moved on the clipboard under the scene file it goes in.
 | `proof` | the place alone, for a shot |
-| `material=<name>` | on the catalogue (`place=materials`), the material drawn alone; written as one is picked |
+| `material=<name>` | in the materials scene, the material drawn alone; written as one is picked |
 
-Three tools, one up at a time, picked on the bar across the top. The tool up at first is the one that holds the place
-drawn; a tool picked that does not hide the place and shows its picker alone. The bar's right end shows what the
-server is building and the last failed build's last line.
+Three scenes, each one tool, gone between on the bar across the top. Each scene draws its own place, `tavern.art`,
+`barrel` and `materials` unless the address names another, and keeps its own camera, so going to Kit and back to Art
+comes back to where it stood. A scene whose place is not built draws none and shows its picker alone; the materials
+scene builds its catalogue then. Each scene builds for itself, and the bar's right end shows what it is building and its
+last failed build's last line.
 
-| tool | what it is |
-| --- | --- |
-| Scene | a landmark or town flown round. Down the right: the landmark picker (a landmark picked is built and opened), the walk shapes, the nav graph and a ground, the views, every building and kit thing (pressed to put the camera on it), and the check spots, which `]` and `[` step through |
-| Kit | one kit item. Down the right: the kit picker (a kind picked is built and opened), what its header says it is, each key of its studio defaults with its type and what it does, `build` and `reset`, its notes, its effects editor where it has its own effects, and the views |
-| Material | one material, drawn alone on its swatch, out of the catalogue (`place=materials`, built first when it is not there). Down the left: every material by its family, as text, under a filter box (each word typed found in the name, look or family); a press picks one, ↑ and ↓ the one above or below. Down the right: its name, look and family, then each setting, a slider and a number box or a colour and its hex, each change drawn at once, a setting moved off its built value marked, and `reset to the built values` |
+| scene | tool | what it is |
+| --- | --- | --- |
+| `art` | Art | a landmark or town flown round. Down the right: the landmark picker (a landmark picked is built and opened), the walk shapes, the nav graph and a ground, the views, every building and kit thing (pressed to put the camera on it), and the check spots, which `]` and `[` step through |
+| `kit` | Kit | one kit item. Down the right: the kit picker (a kind picked is built and opened), what its header says it is, each key of its studio defaults with its type and what it does, `build` and `reset`, its notes, its effects editor where it has its own effects, and the views |
+| `materials` | Material | one material, drawn alone on its swatch, out of the catalogue (`materials`, built first when it is not there). Down the left: every material by its family, as text, under a filter box (each word typed found in the name, look or family); a press picks one, ↑ and ↓ the one above or below. Down the right: its name, look and family, then each setting, a slider and a number box or a colour and its hex, each change drawn at once, a setting moved off its built value marked, and `reset to the built values` |
 
 | control | what it does |
 | --- | --- |
 | drag | turn round the point looked at |
-| Shift drag | move that point across the view |
-| wheel | nearer or further |
-| W A S D, E, Q | forward, left, back, right, up, down; Shift five times as fast |
+| Alt, Ctrl or ⌘ drag | look round from where the camera stands |
+| Shift drag | move the view with the pointer |
+| wheel | nearer or further, toward the point under the pointer; at the nearest, on through |
+| double click | look at the thing under the pointer |
+| F | frame the whole place again |
+| W A S D, E, Q | forward (where it looks), left, back, right, up, down; Shift five times as fast |
+
+The camera eases onto every move.
 
 ## Building and shooting from the command line
 
@@ -61,15 +77,17 @@ From the repo's root:
 | `... build.ts list` | pro-ng's list of every kit kind and landmark (`builds/library.json`) |
 | `... games/demo_library/assets/shoot.ts <place> [<flags>]` | the build shot view by view in headless Chrome; the flags are its header's (`--views`, `--thing`, `--mode`, `--clip`, `--at`, `--effects`, `--prefill`, `--url`) |
 
-`index.html` and `client.html` draw main as its file names it: the tavern, `build.ts castle/smallville/rooms/tavern.art`
-first.
+`index.html` and `client.html` start in the `art` scene, on the tavern (`build.ts castle/smallville/rooms/tavern.art`
+first); `kit` draws `barrel` (`build.ts kit barrel`) and `materials` the catalogue (`build.ts materials`).
 
 ## How it is made
 
 - `plugins/library/`: the game's plugin, loaded through `shipped`. `library.plugin.ts` the camera, the tool bar and the
   builds; `library.scene.ts`, `library.kit.ts` and `library.material.ts` the three tools; `library.effects.ts` the
   effects editor;
-  `library.things.ts` the place's things off its glb; `library.place.ts` a build made main's place before the boot.
+  `library.things.ts` the place's things off its glb; `library.place.ts` a build made a scene's place before the boot.
+- `art.scene.json`, `kit.scene.json`, `materials.scene.json` and their `.sim.ts`: the three scenes, each naming its
+  tool (`world.library.tool`) and its own place (`world.world3d.place`).
 - `addons/library/`: the builds, run where the truth is: `assets/build.ts` as a child process of the server, pro-ng's
   effects files saved, pro-ng watched.
 - `library.sim.ts`: the `library` row, which every seat sees: what the server builds, has built and last failed.

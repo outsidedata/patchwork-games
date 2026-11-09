@@ -5,6 +5,7 @@
     <title>demo_library dev</title>
     <style>
       body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      body.arriving > * { visibility: hidden }
       canvas { grid-area: 1 / 1 }
       #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px; pointer-events: none }
     </style>
@@ -16,16 +17,22 @@
       // a loopback, stepped on the page's clock, or one seat on the game's server. The truths are kept on
       // `window.__scenes` and the page on `window.__page` for the profilers (benchmarking-a-game). The frame rate is
       // the stats plugin's panel at the top left. The readout shows the scene and the step, and the last five errors
-      // the page threw or wrote. What the viewers do is the game's `library` plugin's (`plugins/library`); main's scene
-      // reads, from the page's address, what it draws (`chosen` in `plugins/library/library.place.ts`, on every page):
-      //   ?scene=<scene>      that scene entered.
-      //   ?place=<name>       main draws the build `assets/builds/<name>/` (`plugins/library/library.place.ts`).
+      // the page threw or wrote. What the viewers do is the game's `library` plugin's (`plugins/library`). There are
+      // three scenes, one a tool: `art` (the scene viewer, the entry), `kit` (the kit studio) and `materials` (the
+      // material studio). The scene entered reads, from the page's address, what it draws (`chosen` in
+      // `plugins/library/library.place.ts`, on every page); the others draw their own files' places:
+      //   ?scene=<scene>      that scene entered: art, kit or materials.
+      //   ?place=<name>       the scene entered draws the build `assets/builds/<name>/` (`plugins/library/library.place.ts`).
       //   ?noeffects          none of the build's effects thrown.
+      //   ?ssr=0              every scene drawn without render3d's screen-space reflections.
+      //   ?glow=1             lights3d's area lights and the glow on (off without it).
+      // The dev panel is at the top right (`demo_library.dev.ts`): the scene, the reflections, the exposure and tone,
+      // the area lights and glow, copy changed values.
       //   ?eye=x,y,z&look=x,y,z  where the library's camera stands and the point it looks at, metres, y up, in place of
-      //                       its framing (main's `world.library`).
+      //                       its framing (the scene's `world.library`).
       //   ?clip=<clip>        that clip played on every moving thing that has it, in place of those that start on.
       //   ?at=<seconds>       the clips and the looks' clock held at that moment.
-      //   ?material=<name>    on the catalogue (`place=materials`), the material the material tool draws alone
+      //   ?material=<name>    in the materials scene, the material the material tool draws alone
       //                       (`plugins/library/library.material.ts`); written by the tool as one is picked.
       //   ?shapes, ?nav       the walk shapes and the nav graph drawn from the start (`plugins/library/library.scene.ts`).
       //   ?view=<view>, ?flat  supershader3d's view (shaded, pieces, height, normal, solids) and the flat colours.
@@ -37,6 +44,7 @@
       import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
       import { loopback } from '#addons/loopback/loopback.addon.ts'
       import { dial } from '#addons/socket/socket.addon.ts'
+      import { panel } from './demo_library.dev.ts'
       import { sim } from './demo_library.sim.ts'
       import file from './demo_library.scene.json'
 
@@ -53,7 +61,9 @@
 
       const ask = new URLSearchParams(location.search)
       file.prefabs.scenemanager.entry = ask.get('scene') ?? file.prefabs.scenemanager.entry
+      if (!(file.prefabs.scenemanager.entry in file.prefabs.scenemanager.scenes)) throw new Error(`demo_library has no scene ${file.prefabs.scenemanager.entry}: ${Object.keys(file.prefabs.scenemanager.scenes).join(', ')}`)
       if (ask.has('proof')) document.getElementById('readout').style.display = 'none'
+      if (ask.has('server')) document.body.classList.add('arriving')
 
       const dt = file.prefabs.engine.dt
       const truth = ask.has('server') ? undefined : boot(file, sim)
@@ -78,7 +88,10 @@
         view: (eye, at) => page.client.plugins.library.proof.view(page.client.plugins, eye, at),
       }
 
-      let last = performance.now(), owed = 0
+      // The dev panel at the top right (`demo_library.dev.ts`), none in a shot.
+      const dev = ask.has('proof') ? undefined : panel(page, file)
+
+      let last = performance.now(), owed = 0, sent = false
       const loop = async now => {
         owed += Math.min((now - last) / 1000, 0.25)
         last = now
@@ -87,8 +100,17 @@
           page.input()
           while (truth && owed >= dt) { truth.step(dt); owed -= dt }
           await (truth ? page.frame(owed / dt) : page.frame())
+          // On the server the seat arrives in the server's entry; the scene the address names is gone to once, as
+          // soon as the first scene's client has ticked.
+          if (!truth && !sent && page.name && page.client) {
+            sent = true
+            if (page.name !== file.prefabs.scenemanager.entry) page.client.plugins.scenemanager.go(file.prefabs.scenemanager.entry)
+          }
+          // hidden until the seat is on the scene the address names, so the server's entry is never seen on the way
+          document.body.classList.toggle('arriving', !truth && page.name !== file.prefabs.scenemanager.entry)
+          dev?.tick()
         } catch (e) { caught(e) }
-        readout.textContent = [`${ask.get('scene') ?? file.prefabs.scenemanager.entry}  step ${truth?.n ?? page.client?.n ?? 0}`, ...errors].join('\n')
+        readout.textContent = [`${page.name ?? file.prefabs.scenemanager.entry}  step ${truth?.n ?? page.client?.n ?? 0}`, ...errors].join('\n')
         requestAnimationFrame(loop)
       }
       requestAnimationFrame(loop)

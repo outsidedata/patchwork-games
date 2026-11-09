@@ -144,6 +144,29 @@ export function scene() {
     })
   }
 
+  // the place's mesh, as the panel was last handed it
+  let placeMesh: THREE.Mesh | undefined
+  // The ground under the place, made once the place is drawn: a square `ground.across` times the place's reach (at
+  // least `ground.least` metres) across, under its middle, `ground.below` metres under its lowest point so the
+// place's own floor there never fights it, dressed by render3d so the scene's
+  // lights, shadows and reflections reach it, and taking the place's shadows.
+  const groundUnder = (plugins: Plugins, v: any) => {
+    if (ground || !placeMesh) return
+    const T = plugins.render3d.THREE as typeof THREE
+    placeMesh.updateWorldMatrix(true, false)
+    const box = new T.Box3().setFromObject(placeMesh)
+    const sphere = box.getBoundingSphere(new T.Sphere())
+    const r = Math.max(sphere.radius, v.ground.least) * v.ground.across
+    const material = plugins.render3d.dress(new T.MeshStandardMaterial({ color: v.ground.colour, roughness: 1 }))
+    ground = new T.Mesh(new T.PlaneGeometry(r, r), material)
+    ground.quaternion.setFromAxisAngle(new T.Vector3(1, 0, 0), -Math.PI / 2)
+    ground.position.set(sphere.center.x, box.min.y - v.ground.below, sphere.center.z)
+    ground.receiveShadow = true
+    ground.userData.library = true
+    ground.visible = overlays.ground
+    plugins.render3d.scene.add(ground)
+  }
+
   // a box the camera is put on: its middle and its reach
   const boxOf = (b: Box) => ({ middle: b.min.map((x, i) => (x + b.max[i]) / 2), reach: Math.hypot(b.max[0] - b.min[0], b.max[1] - b.min[1], b.max[2] - b.min[2]) / 2 })
 
@@ -167,7 +190,8 @@ export function scene() {
     views,
     panel(plugins: Plugins, d: any, show: Show, look: (middle: number[], reach: number) => void, mesh: THREE.Mesh | undefined, go: (landmark: string) => void) {
       const v = d.viewer
-      const T = plugins.render3d.THREE as typeof THREE
+      // the place's mesh as it is this frame, read by the ground's box when it is ticked (made on an earlier frame)
+      placeMesh = mesh
       const made: string | undefined = has(plugins, 'library.made') ? json(plugins.wire, 'library.made').scene : undefined
       const list: { landmarks: string[] } | undefined = has(plugins, 'library') ? json(plugins.wire, 'library') : undefined
       show('pick label', () => Object.assign(document.createElement('label'), { textContent: list ? `landmark (${list.landmarks.length})` : 'landmark' }))
@@ -203,17 +227,11 @@ export function scene() {
       }
       tick('ground', 'ground', () => overlays.ground, on => {
         overlays.ground = on
-        if (on && !ground && mesh) {
-          mesh.geometry.computeBoundingSphere()
-          const r = Math.max(mesh.geometry.boundingSphere!.radius, v.ground.least) * v.ground.across
-          ground = new T.Mesh(new T.PlaneGeometry(r, r), new T.MeshStandardMaterial({ color: v.ground.colour, roughness: 1 }))
-          ground.rotation.x = -Math.PI / 2
-          ground.position.set(mesh.geometry.boundingSphere!.center.x, 0, mesh.geometry.boundingSphere!.center.z)
-          ground.receiveShadow = true
-          plugins.render3d.scene.add(ground)
-        }
+        groundUnder(plugins, v)
         if (ground) ground.visible = on
       })
+      // ticked before the place was drawn: made the first frame it is
+      if (overlays.ground) groundUnder(plugins, v)
 
       views(plugins, show)
 

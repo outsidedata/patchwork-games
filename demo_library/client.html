@@ -5,22 +5,95 @@
     <title>demo_library client</title>
     <style>
       body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      body.arriving > * { visibility: hidden }
       canvas { grid-area: 1 / 1 }
+      .lil-gui.root { max-height: 100vh; overflow-y: auto }
+      #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px; pointer-events: none }
     </style>
   </head>
-  <body>
+  <body class="arriving">
+    <div id="readout"></div>
     <script type="module">
-      // One seat over a socket. The server is `node --experimental-strip-types games/demo_library/demo_library.server.ts`.
-      // The page holds one client, for the scene the seat is on: `view` makes it when the seat
-      // arrives and closes it when the seat leaves, and `mount` gives each one its canvases: the
-      // game's, and the UI's over it in the same grid cell, for a scene that names each. `tap`
-      // records every frame when the page's address asks for it, `?tap=<name>` (addons/simulator).
+      // The dev page on the game's server: one seat over a socket on `yarn serve demo_library`
+      // (`node --experimental-strip-types games/demo_library/demo_library.server.ts`), every build it asks for run
+      // there, on node (`addons/library`). The page holds one client, for the scene the seat is on: `view` makes it
+      // when the seat arrives and closes it when the seat leaves, and `mount` gives each one its canvases (the game's,
+      // and the UI's over it in the same grid cell, for a scene that names each) and the stats plugin's frame-rate
+      // panel at the top left. The page is kept on `window.__page`. The readout shows the scene and the step, and the
+      // last five errors the page threw or wrote. `tap` records every frame when the address asks for it,
+      // `?tap=<name>` (addons/simulator).
+      //
+      // The panel at the top right is the demo games' common one (demo_crowd3d's render3d folder, demo_lights3d's
+      // fog and reloads): the scene; render3d's pixel ratio, exposure, tone and shadows, live; the AO, the bloom and
+      // the screen-space reflections, each on or off (a reload) and its numbers live on its pass; lights3d's shadows,
+      // fog and area lights with the glow, each on or off (a reload), the fog's numbers, its noise and its height
+      // live, and the glow's gain; the sky (demo_skydome3d's panel): its clock, the hour, rate, day of the year,
+      // latitude and moon phase, set on the server, and every colour and number of its look and its shadow; particle3d's
+      // cap, alpha test and pixels a metre (demo_particle3d's). Each on or off is the address, read before the boot into every scene's file, as
+      // the page's own copy (no file is written):
+      //   ?scene=<scene>      that scene: art, kit or materials. The seat arrives in the server's entry and is sent
+      //                       on to it once the first scene's client has ticked; the page is hidden until the seat is
+      //                       on it, so the entry is never seen on the way.
+      //   ?place=<name>       that scene draws the build `assets/builds/<name>/`.
+      //   ?ao=1               render3d's AO (GTAO; it reverses the depth buffer, so it is fixed when the renderer is made).
+      //   ?bloom=1            render3d's bloom.
+      //   ?ssr=0              render3d's screen-space reflections off (on without it).
+      //   ?shadows=0          lights3d's shadows off (on without it).
+      //   ?fog=1              lights3d's lit fog, with its noise and its height.
+      //   ?glow=1             lights3d's area lights and the glow (`plugins/library/library.place.ts`).
+      //   ?ratio=<r>          the pixel ratio drawn at.
+      //   ?noeffects, ?eye=x,y,z&look=x,y,z, ?clip, ?at, ?material, ?shapes, ?nav, ?view, ?flat, ?proof   as on dev.html.
       import { link, view } from '#addons/scenemanager/scenemanager.addon.ts'
       import { tap } from '#addons/simulator/simulator.addon.ts'
       import { dial } from '#addons/socket/socket.addon.ts'
+      import { imported } from '#engine/browser.ts'
+      import GUI from 'lil-gui'
       import file from './demo_library.scene.json'
 
-      const page = tap(dial(`ws://${location.hostname}:${file.prefabs.scenemanager.port}`), wire => view(link(wire), file, import.meta.url, (me, scene) => {
+      // Every error the page throws or writes, the last five, shown under the readout.
+      const errors = []
+      const caught = e => {
+        errors.push(String(e?.message ?? e))
+        if (errors.length > 5) errors.shift()
+      }
+      addEventListener('error', e => caught(e.error ?? e.message))
+      addEventListener('unhandledrejection', e => caught(e.reason))
+      const written = console.error.bind(console)
+      console.error = (...a) => { caught(a.map(x => x?.message ?? x).join(' ')); written(...a) }
+
+      const ask = new URLSearchParams(location.search)
+      const wanted = ask.get('scene') ?? file.prefabs.scenemanager.entry
+      if (!(wanted in file.prefabs.scenemanager.scenes)) throw new Error(`demo_library has no scene ${wanted}: ${Object.keys(file.prefabs.scenemanager.scenes).join(', ')}`)
+      if (ask.has('proof')) document.getElementById('readout').style.display = 'none'
+
+      // What is built once, set from the address before the boot, into each scene's file as the scenemanager imports
+      // it (the one module the page's clients are made from). The numbers a switch turns on are the demo games' own:
+      // the AO and the bloom demo_crowd3d's, the fog demo_lights3d's mist.
+      const AO = { on: true, radius: 0.5, thickness: 1, falloff: 1, scale: 1, intensity: 1, samples: 16 }
+      const BLOOM = { strength: 0.15, radius: 0.4, threshold: 1.5 }
+      const FOG = { density: 0.03, colour: '#020304', steps: 32, g: 0.3, far: 30, resolution: 0.4, blend: 0.1, noise: { size: 16, layers: 3, strength: 1, wind: [0.6, 0, 0.3] }, height: { floor: 0.6, thinning: 1.8 } }
+      const on = k => ask.get(k) === '1'
+      const off = k => ask.get(k) === '0'
+      const scenes = []
+      for (const entry of Object.values(file.prefabs.scenemanager.scenes)) {
+        const { scene } = await imported(new URL(entry.file.replace(/\.scene\.json$/, '.sim.ts'), import.meta.url).href)
+        const r3 = scene.prefabs.render3d
+        const l3 = scene.world.lights3d
+        if (on('ao')) r3.ao = structuredClone(AO)
+        if (on('bloom')) r3.bloom = structuredClone(BLOOM)
+        if (off('ssr')) delete r3.ssr
+        if (ask.has('ratio')) r3.pixelRatio = Number(ask.get('ratio'))
+        if (off('shadows')) delete l3.shadows
+        if (on('fog')) l3.fog = structuredClone(FOG)
+        scenes.push(scene)
+      }
+      const first = scenes[0]
+
+      const url = `ws://${location.hostname}:${file.prefabs.scenemanager.port}`
+      const closed = () => caught('the server closed this seat (yarn serve demo_library stopped, or it had no seat free)')
+      // the view itself, kept for the scene the seat is on (`name`), which `tap`'s recording page does not hand out
+      let seat
+      const page = tap(dial(url, closed), wire => seat = view(link(wire), file, import.meta.url, (me, scene) => {
         for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
           if (!surface) continue
           const canvas = document.createElement('canvas')
@@ -29,10 +102,259 @@
           document.body.appendChild(canvas)
           surface.mount(canvas)
         }
+        if (!ask.has('proof')) me.plugins.stats?.mount(document.body)
       }))
+      window.__page = page
+      const readout = document.getElementById('readout')
+      // What a shot drives (`assets/shoot.ts`): the library plugin's `proof`, handed this page's client's plugins.
+      window.proof = {
+        get ready() { const p = page.client?.plugins; return seat.name === wanted && !!p?.library && p.library.proof.ready(p) },
+        view: (eye, at) => page.client.plugins.library.proof.view(page.client.plugins, eye, at),
+      }
 
+      // ---------- the panel ----------
+      // A press on it stops at it, a release never does, and after a click the focus goes back to the page unless it
+      // went into a number to type or a list to pick from. Every live number is the panel's own, laid into the client
+      // the seat is on each frame (`lay`), so a client made on another scene or build takes it too.
+      const gui = new GUI({ title: 'demo_library' })
+      if (ask.has('proof')) gui.hide()
+      for (const type of ['keydown', 'keyup', 'click', 'mousedown', 'contextmenu', 'wheel'])
+        gui.domElement.addEventListener(type, e => e.stopPropagation())
+      gui.domElement.addEventListener('pointerup', () => requestAnimationFrame(() => {
+        const at = document.activeElement
+        if (gui.domElement.contains(at) && at.tagName !== 'SELECT' && !(at.tagName === 'INPUT' && (at.type === 'text' || at.type === 'number'))) at.blur()
+      }))
+      addEventListener('change', e => { if (gui.domElement.contains(e.target)) e.target.blur() })
+      const reload = (key, value) => {
+        const u = new URL(location.href)
+        if (value === undefined) u.searchParams.delete(key); else u.searchParams.set(key, value)
+        location.href = u.href
+      }
+
+      // The scene, the page loaded again on it, its place and picked material taken off.
+      gui.add({ scene: wanted }, 'scene', Object.keys(file.prefabs.scenemanager.scenes)).onChange(s => {
+        const u = new URL(location.href)
+        u.searchParams.set('scene', s)
+        u.searchParams.delete('place')
+        u.searchParams.delete('material')
+        location.href = u.href
+      })
+
+      const plugins = () => page.client?.plugins
+      const r3d = () => plugins()?.render3d
+      const prefab = () => plugins()?.wire.scene.prefabs.render3d
+      const lights = () => plugins()?.wire.scene.world.lights3d
+      const passOf = has => r3d()?.composer?.passes.find(has)
+      const p3 = first.prefabs.render3d
+
+      // render3d: the pixel ratio, drawn smooth or as blocks; the exposure and the tone mapping; three's shadows.
+      const rf = gui.addFolder('render3d')
+      const look = { ratio: p3.pixelRatio ?? 1, blocks: false, exposure: p3.exposure ?? 1, tone: p3.tone ?? 'none', shadows: !!p3.shadows && p3.shadows !== 'none' }
+      const ratio = () => r3d()?.ratio(look.ratio, look.blocks ? 'blocks' : 'smooth')
+      rf.add(look, 'ratio', 0.1, 3, 0.05).name('pixel ratio').onChange(ratio)
+      rf.add(look, 'blocks').name('pixels as blocks').onChange(ratio)
+      rf.add(look, 'exposure', 0, 4, 0.01)
+      rf.add(look, 'tone', ['neutral', 'none']).name('tone mapping')
+      // three's shadows (the sun's): three builds a material's shader with or without them, so every material is
+      // built again when they change
+      const shade = p3.shadows && p3.shadows !== 'none' ? p3.shadows : 'soft'
+      rf.add(look, 'shadows').name('shadows (the sun\'s)')
+
+      // The AO's numbers on its pass as it draws.
+      const ao = structuredClone(p3.ao ?? AO)
+      const af = rf.addFolder('ao')
+      af.add({ on: on('ao') }, 'on').name('on (reloads)').onChange(v => reload('ao', v ? '1' : undefined))
+      af.add(ao, 'radius', 0.01, 10, 0.01)
+      af.add(ao, 'thickness', 0.01, 5, 0.01)
+      af.add(ao, 'falloff', 0, 5, 0.01)
+      af.add(ao, 'scale', 0, 5, 0.01)
+      af.add(ao, 'intensity', 0, 2, 0.01)
+      af.add(ao, 'samples', 2, 32, 1)
+      if (!on('ao')) af.close()
+
+      // The bloom's numbers on its pass as it draws.
+      const bloom = structuredClone(p3.bloom ?? BLOOM)
+      const bf = rf.addFolder('bloom')
+      bf.add({ on: on('bloom') }, 'on').name('on (reloads)').onChange(v => reload('bloom', v ? '1' : undefined))
+      bf.add(bloom, 'strength', 0, 3, 0.01)
+      bf.add(bloom, 'radius', 0, 1, 0.01)
+      bf.add(bloom, 'threshold', 0, 10, 0.05)
+      if (!on('bloom')) bf.close()
+
+      // The screen-space reflections, render3d reading the prefab's `ssr` every frame.
+      const ssr = structuredClone(p3.ssr ?? { steps: 32, distance: 6, thickness: 0.3, roughness: 0.4 })
+      const sf = rf.addFolder('screen-space reflections')
+      sf.add({ on: !off('ssr') }, 'on').name('on (reloads)').onChange(v => reload('ssr', v ? undefined : '0'))
+      sf.add(ssr, 'steps', 4, 256, 1).name('steps a ray')
+      sf.add(ssr, 'distance', 0.5, 100, 0.5).name('distance (m a ray goes)')
+      sf.add(ssr, 'thickness', 0.05, 5, 0.05).name('thickness (m behind the depth)')
+      sf.add(ssr, 'roughness', 0.05, 1, 0.01).name('roughness (rougher reflects nothing)')
+      if (off('ssr')) sf.close()
+
+      // lights3d: its shadows, its fog (each number read every frame), and its area lights and the glow.
+      const l3 = first.world.lights3d
+      const lf = gui.addFolder('lights3d')
+      lf.add({ on: !off('shadows') }, 'on').name('shadows (reloads)').onChange(v => reload('shadows', v ? undefined : '0'))
+      const fog = structuredClone(l3.fog ?? FOG)
+      const ff = lf.addFolder('fog')
+      ff.add({ on: on('fog') }, 'on').name('on (reloads)').onChange(v => reload('fog', v ? '1' : undefined))
+      ff.add(fog, 'density', 0, 0.3, 0.001).name('density (share a metre)')
+      ff.add(fog, 'steps', 4, 256, 1).name('steps a ray')
+      ff.add(fog, 'resolution', 0.1, 1, 0.05).name('resolution')
+      ff.add(fog, 'blend', 0.02, 1, 0.01).name('blend')
+      ff.add(fog, 'g', -0.95, 0.95, 0.01).name('g')
+      ff.add(fog, 'far', 1, 200, 1).name('far (m)')
+      ff.addColor(fog, 'colour').name('colour (its own light)')
+      const nf = ff.addFolder('noise')
+      nf.add(fog.noise, 'size', 2, 200, 0.5).name('size (m it repeats over)')
+      nf.add(fog.noise, 'layers', 1, 4, 1).name('layers')
+      nf.add(fog.noise, 'strength', 0, 1, 0.01).name('strength (0 even, 1 clumps)')
+      nf.add(fog.noise.wind, '0', -10, 10, 0.05).name('wind x (m/s)')
+      nf.add(fog.noise.wind, '1', -5, 5, 0.05).name('wind y (m/s)')
+      nf.add(fog.noise.wind, '2', -10, 10, 0.05).name('wind z (m/s)')
+      const hf = ff.addFolder('height')
+      hf.add(fog.height, 'floor', -5, 20, 0.1).name('floor (m, full below)')
+      hf.add(fog.height, 'thinning', 0.2, 30, 0.1).name('thinning (m to halve)')
+      if (!on('fog')) ff.close()
+      const glow = { gain: 8 }
+      const gf = lf.addFolder('area lights and glow')
+      gf.add({ on: on('glow') }, 'on').name('on (reloads)').onChange(v => reload('glow', v ? '1' : undefined))
+      gf.add(glow, 'gain', 0, 40, 0.1).name('glow gain (× the glow)')
+      if (!on('glow')) gf.close()
+
+      // The sky, demo_skydome3d's panel. Its clock (the hour, the rate, the day of the year, the latitude, the moon's
+      // phase) is read off the scene's skydome3d row as the seat is sent it, and set on the server through the
+      // `library` row's open `time`, `rate` and `sky` acts (`library.sim.ts`). Its look and its shadow are this
+      // page's own copy of `world.skydome3d`, which skydome3d draws from each frame: each change hands it a new
+      // object, and a client made on another scene or build is handed them too (`lay`).
+      const rowOf = kind => plugins()?.wire.rows.find(r => r.kind === kind)
+      const sky = () => rowOf('skydome3d')?.data
+      const day = () => plugins()?.wire.scene.world.skydome3d.day
+      const send = (act, ...args) => { const lib = rowOf('library'); if (lib) plugins().wire.send(lib.id, act, ...args) }
+      const clock = {
+        get hour() { const s = sky(); return s ? (s.t / day()) * 24 : 0 }, set hour(h) { send('time', h) },
+        get rate() { return sky()?.rate ?? 0 }, set rate(v) { send('rate', v) },
+        get doy() { return sky()?.doy ?? 1 }, set doy(v) { send('sky', 'doy', v) },
+        get lat() { return sky()?.lat ?? 0 }, set lat(v) { send('sky', 'lat', v) },
+        get phase() { return sky()?.phase ?? 0 }, set phase(v) { send('sky', 'phase', v) },
+      }
+      const skyf = gui.addFolder('sky')
+      const cf = skyf.addFolder('clock')
+      cf.add(clock, 'hour', 0, 24, 0.01).name('hour of the day').listen()
+      cf.add(clock, 'rate', 0, 200, 0.5).name('clock rate (× real time)').listen()
+      cf.add(clock, 'doy', 1, 365, 1).name('day of the year').listen()
+      cf.add(clock, 'lat', -90, 90, 0.5).name('latitude').listen()
+      cf.add(clock, 'phase', 0, 0.999, 0.001).name('moon phase').listen()
+      // each number of the look and the shadow, its range and step (demo_skydome3d's)
+      const SKY = {
+        exposure: [0, 4, 0.01], nightOpen: [0, 2, 0.01], sunIntensity: [0, 10, 0.05], moonIntensity: [0, 3, 0.01],
+        hemiDay: [0, 3, 0.01], hemiNight: [0, 1, 0.005], stars: [0, 4, 0.01], haze: [0, 0.01, 0.00005], mist: [0, 0.1, 0.0005],
+        starSize: [0.01, 0.5, 0.005], twinkle: [0, 1, 0.01], twinkles: [0, 3000, 10], twinkleSpread: [1, 12, 1],
+        sunEdge: [0, 1, 0.01], moonEdge: [0, 1, 0.01], moonSize: [0.001, 0.05, 0.0005], radius: [1000, 9000, 50],
+        overcast: [0, 1, 0.01], envSun: [0.001, 0.5, 0.001], envMix: [0.001, 0.5, 0.001], envIntensity: [0, 2, 0.01],
+      }
+      const SKY_COLOURS = ['dayZenith', 'dayHorizon', 'nightZenith', 'nightHorizon', 'setZenith', 'setHorizon', 'sunHigh', 'sunLow', 'moon', 'ground']
+      const SHADOW = { half: [5, 400, 1], near: [0.1, 50, 0.1], far: [100, 6000, 10], bias: [-0.001, 0.001, 0.000005], normalBias: [0, 0.5, 0.005] }
+      const skyLook = structuredClone(first.world.skydome3d.look)
+      const skyShadow = structuredClone(first.world.skydome3d.shadow)
+      // a new object handed to skydome3d on each change, so it builds what it builds from them again
+      let skyMade = 0
+      const setSky = () => { skyMade++ }
+      const lkf = skyf.addFolder('look')
+      for (const key of SKY_COLOURS) lkf.addColor(skyLook, key).onChange(setSky)
+      for (const [key, [lo, hi, step]] of Object.entries(SKY)) lkf.add(skyLook, key, lo, hi, step).onChange(setSky)
+      lkf.add(skyLook.sunShrink, 0, -0.5, 1, 0.01).name('sunShrink lo').onChange(setSky)
+      lkf.add(skyLook.sunShrink, 1, -0.5, 1, 0.01).name('sunShrink hi').onChange(setSky)
+      lkf.close()
+      const shf = skyf.addFolder('shadow')
+      shf.add(skyShadow, 'map', [512, 1024, 2048, 4096]).onChange(setSky)
+      for (const [key, [lo, hi, step]] of Object.entries(SHADOW)) shf.add(skyShadow, key, lo, hi, step).onChange(setSky)
+      shf.close()
+      skyf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({ look: skyLook, shadow: skyShadow }, null, 2)) }, 'copy').name('copy sky JSON')
+      // the client and the change the sky was last handed
+      let skyClient, skyLaid = 0
+
+      // particle3d, demo_particle3d's: the effects file's cap on particles, its alpha test and its pixels a metre,
+      // written into this page's decoded copy of the file (`world.particle3d.effects`), which particle3d reads.
+      const parts = { cap: 0, alphaTest: 0, ppm: 0 }
+      let partsRead = false
+      const pf = gui.addFolder('particle3d')
+      pf.add(parts, 'cap', 100, 20000, 100).name('cap (particles)')
+      pf.add(parts, 'alphaTest', 0, 1, 0.01).name('alphaTest')
+      pf.add(parts, 'ppm', 8, 256, 1).name('ppm (px a metre)')
+      pf.close()
+
+      // Each frame, the panel's live numbers laid into the client the seat is on.
+      let read = false
+      const lay = () => {
+        const r = r3d()
+        if (!r?.renderer) return
+        // the glow's gain the first client was given (`library.place.ts`), where the panel starts
+        if (!read) {
+          read = true
+          const g = lights()?.areas?.glow
+          if (g) glow.gain = g.gain
+          gui.controllersRecursive().forEach(c => c.updateDisplay())
+        }
+        const p = prefab()
+        r.renderer.toneMappingExposure = look.exposure
+        const tone = look.tone === 'neutral' ? r.THREE.NeutralToneMapping : r.THREE.NoToneMapping
+        const shadows = look.shadows
+        if (r.renderer.toneMapping !== tone || r.renderer.shadowMap.enabled !== shadows) {
+          r.renderer.toneMapping = tone
+          r.renderer.shadowMap.enabled = shadows
+          r.renderer.shadowMap.type = shade === 'hard' ? r.THREE.BasicShadowMap : r.THREE.PCFShadowMap
+          p.tone = look.tone
+          p.shadows = shadows ? shade : 'none'
+          r.scene.traverse(o => { for (const m of [o.material ?? []].flat()) m.needsUpdate = true })
+        }
+        if (p.ao) Object.assign(p.ao, ao, { on: true })
+        const gtao = passOf(q => 'updateGtaoMaterial' in q)
+        if (gtao) {
+          gtao.updateGtaoMaterial({ radius: ao.radius, thickness: ao.thickness, distanceFallOff: ao.falloff, scale: ao.scale, samples: ao.samples })
+          gtao.blendIntensity = ao.intensity
+        }
+        if (p.bloom) Object.assign(p.bloom, bloom)
+        const bp = passOf(q => 'strength' in q && 'threshold' in q)
+        if (bp) { bp.strength = bloom.strength; bp.radius = bloom.radius; bp.threshold = bloom.threshold }
+        if (p.ssr) Object.assign(p.ssr, ssr)
+        const l = lights()
+        if (l?.fog) Object.assign(l.fog, fog)
+        if (l?.areas?.glow) l.areas.glow.gain = glow.gain
+        // the effects file's numbers: the first client's own where the panel starts, then the panel's
+        const effects = plugins().loader.get(plugins().wire.scene.world.particle3d?.effects)
+        if (effects) {
+          if (!partsRead) {
+            partsRead = true
+            Object.assign(parts, { cap: effects.cap, alphaTest: effects.alphaTest ?? 0, ppm: effects.ppm })
+            pf.controllersRecursive().forEach(c => c.updateDisplay())
+          }
+          Object.assign(effects, parts)
+        }
+        // the sky's look and shadow handed over once a change, and once to each new client after the first change
+        const w = plugins().wire.scene.world
+        if (w.skydome3d && skyMade && (skyLaid !== skyMade || skyClient !== page.client)) {
+          w.skydome3d.look = structuredClone(skyLook)
+          w.skydome3d.shadow = structuredClone(skyShadow)
+          skyLaid = skyMade
+          skyClient = page.client
+        }
+      }
+
+      let sent = false
       const loop = async () => {
-        await page.frame()
+        // A frame that throws is shown, and the next frame goes on.
+        try {
+          page.input()
+          await page.frame()
+          if (!sent && seat.name && page.client) {
+            sent = true
+            if (seat.name !== wanted) page.client.plugins.scenemanager.go(wanted)
+          }
+          document.body.classList.toggle('arriving', seat.name !== wanted)
+          lay()
+        } catch (e) { caught(e) }
+        readout.textContent = [`${seat.name ?? wanted}  step ${page.client?.n ?? 0}`, ...errors].join('\n')
         requestAnimationFrame(loop)
       }
       requestAnimationFrame(loop)

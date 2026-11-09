@@ -6,13 +6,21 @@
     },
     "scenemanager": {
       "scenes": {
-        "main": {
-          "file": "main.scene.json",
+        "art": {
+          "file": "art.scene.json",
+          "suspend": true
+        },
+        "kit": {
+          "file": "kit.scene.json",
+          "suspend": true
+        },
+        "materials": {
+          "file": "materials.scene.json",
           "suspend": true
         }
       },
       "dt": 0.016666666666666666,
-      "entry": "main",
+      "entry": "art",
       "port": 9145
     }
   },

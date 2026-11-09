@@ -9,7 +9,9 @@
 // many times the library's pro-ng has changed and its last file to, `materials`, every material of pro-ng's
 // `materials.json` the catalogue builds, and `rebuilt`, by place, the newest catalogue build the addon started itself
 // (the addon's `State`). A page reloads onto a build once `done` reaches the number it asked for, or the number
-// `rebuilt` holds for the place it shows.
+// `rebuilt` holds for the place it shows. Its `time(hours)` and `rate(x)` acts, open to every seat, are the sky's
+// clock, forwarded to the scene's `skydome3d` row's own closed acts of those names, and `sky(key, value)` sets its
+// `doy`, `lat` or `phase`, which skydome3d has no act for, so a dev page on the server sets the whole clock.
 import type { Kind } from '#engine/engine.ts'
 import { start, state, watch, type Ask } from './addons/library/library.addon.ts'
 
@@ -17,6 +19,9 @@ const ask = (what: string, name: string, values: string): Ask =>
   what === 'kit' ? { kit: name, values: JSON.parse(values) } : what === 'scene' ? { scene: name }
     : what === 'effects' ? { effects: name, file: JSON.parse(values) }
       : what === 'materials' ? { materials: JSON.parse(values) as string[] } : { list: true }
+
+// the skydome3d row's fields the `sky` act sets
+const SKY = ['doy', 'lat', 'phase']
 
 export const library: Kind = {
   tick(me, _dt, w) {
@@ -32,6 +37,14 @@ export const library: Kind = {
       start(w.world, ask(what, name, values))
       Object.assign(me.data, state(w.world))
     },
+    // the sky's clock, from a dev page's panel: skydome3d's own acts are closed, so they are forwarded here
+    time(_me, w, seat, hours: number) { w.call(w.find('skydome3d'), 'time', seat, hours) },
+    rate(_me, w, seat, x: number) { w.call(w.find('skydome3d'), 'rate', seat, x) },
+    // the rest of the sky's clock, which skydome3d has no act for: the day of the year, the latitude, the moon's phase
+    sky(_me, w, _seat, key: string, value: number) {
+      if (!SKY.includes(key)) throw new Error(`library's sky act sets ${SKY.join(', ')}, not ${key}`)
+      w.find('skydome3d').data[key] = value
+    },
   },
-  open: ['build'],
+  open: ['build', 'time', 'rate', 'sky'],
 }

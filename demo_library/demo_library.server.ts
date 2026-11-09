@@ -1,5 +1,5 @@
-// The manager and main in one process, behind one socket. Each socket is one connection: one
-// seat in main, the scene the manager row names as `entry`.
+// The manager and its three scenes (art, kit, materials) in one process, behind one socket. Each
+// socket is one connection: one seat, in the scene the manager row names as `entry` first.
 import { boot, type Scene } from '#engine/engine.ts'
 import { accept, load, manager, run } from '#addons/scenemanager/scenemanager.addon.ts'
 import { serve } from '#addons/socket/socket.addon.ts'

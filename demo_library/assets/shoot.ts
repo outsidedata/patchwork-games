@@ -1,6 +1,7 @@
 // pro-ng's shots (`pro-ng/proof.mjs`, `yarn thing:view`, `yarn kitbash:view`, `catalogue_materials.mjs --shoot`), taken
 // of the game: a build of `assets/builds/` drawn by the game's own engine on its dev page and shot view by view in
-// headless Chrome, as pro-ng's `headless.mjs` shoots its viewer. From the repo's root, with the game's pages served
+// headless Chrome, as pro-ng's `headless.mjs` shoots its viewer, in the scene whose tool holds it (`kit` for a kit
+// kind's build, `materials` for a catalogue, `art` for the rest). From the repo's root, with the game's pages served
 // (`yarn serve demo_library` for a build's rebuilds, or `yarn dev`):
 //
 //   node --experimental-strip-types games/demo_library/assets/shoot.ts <place> [<flags>]
@@ -55,7 +56,11 @@ export async function shoot(place: string, flags: Record<string, string>): Promi
     if (!fs.existsSync(proof)) throw new Error(`shoot: the build ${place} has no check spots (${proof}); name the views with --views or --thing`)
     views = JSON.parse(fs.readFileSync(proof, 'utf8')).views
   }
-  const query = new URLSearchParams({ server: '', place, proof: '' })
+  // the scene whose tool holds the build: a kit kind's (`<place>.kit.json`), the catalogue (`<place>.studio.json`), a
+  // landmark's or town's otherwise (`art`)
+  const has = (file: string) => fs.existsSync(path.join(builds, `${place}.${file}`))
+  const scene = has('kit.json') ? 'kit' : has('studio.json') ? 'materials' : 'art'
+  const query = new URLSearchParams({ server: '', scene, place, proof: '' })
   if (mode === 'normals') query.set('view', 'normal')
   if (mode === 'flat') query.set('flat', '')
   if (flags.clip !== undefined) query.set('clip', flags.clip)
