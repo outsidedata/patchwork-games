@@ -1,8 +1,17 @@
 {
  "library": {
   "address": "place",
-  "panel": [960, 0, 320, 720],
+  "bar": [0, 0, 1280, 36],
+  "panel": [960, 36, 320, 684],
   "stats": [8, 650, 940, 64],
+  "material": {
+   "address": "material",
+   "list": [0, 36, 240, 684],
+   "knobs": [960, 36, 320, 684],
+   "stats": [248, 650, 700, 64],
+   "fill": 1.5,
+   "rangeOver": 4
+  },
   "frame": { "fill": 1.1, "yaw": 2.356194490192345, "pitch": 0.45 },
   "turn": 0.005,
   "pitchMost": 1.5,
@@ -25,9 +34,7 @@
    "curveLeast": 16,
    "point": 7,
    "over": 10,
-   "ground": { "across": 8, "least": 2, "colour": "#33422a" },
-   "rangeOver": 4,
-   "swatch": 0.7
+   "ground": { "across": 8, "least": 2, "colour": "#33422a" }
   }
  }
 }

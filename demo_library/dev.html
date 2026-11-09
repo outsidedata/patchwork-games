@@ -16,8 +16,8 @@
       // a loopback, stepped on the page's clock, or one seat on the game's server. The truths are kept on
       // `window.__scenes` and the page on `window.__page` for the profilers (benchmarking-a-game). The frame rate is
       // the stats plugin's panel at the top left. The readout shows the scene and the step, and the last five errors
-      // the page threw or wrote. What the viewers do is the game's `library` plugin's (`plugins/library`); this page
-      // sets, from its address, what main draws:
+      // the page threw or wrote. What the viewers do is the game's `library` plugin's (`plugins/library`); main's scene
+      // reads, from the page's address, what it draws (`chosen` in `plugins/library/library.place.ts`, on every page):
       //   ?scene=<scene>      that scene entered.
       //   ?place=<name>       main draws the build `assets/builds/<name>/` (`plugins/library/library.place.ts`).
       //   ?noeffects          none of the build's effects thrown.
@@ -25,7 +25,9 @@
       //                       its framing (main's `world.library`).
       //   ?clip=<clip>        that clip played on every moving thing that has it, in place of those that start on.
       //   ?at=<seconds>       the clips and the looks' clock held at that moment.
-      //   ?shapes, ?nav       the walk shapes and the nav graph drawn from the start (`plugins/library/library.viewer.ts`).
+      //   ?material=<name>    on the catalogue (`place=materials`), the material the material tool draws alone
+      //                       (`plugins/library/library.material.ts`); written by the tool as one is picked.
+      //   ?shapes, ?nav       the walk shapes and the nav graph drawn from the start (`plugins/library/library.scene.ts`).
       //   ?view=<view>, ?flat  supershader3d's view (shaded, pieces, height, normal, solids) and the flat colours.
       //   ?proof              a shot: the place alone, no panel, stats or readout; `window.proof` is what
       //                       `assets/shoot.ts` drives (`ready`, `view(eye, at)`).
@@ -35,9 +37,7 @@
       import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
       import { loopback } from '#addons/loopback/loopback.addon.ts'
       import { dial } from '#addons/socket/socket.addon.ts'
-      import { listed, place } from './plugins/library/library.place.ts'
       import { sim } from './demo_library.sim.ts'
-      import { scene as main } from './main.sim.ts'
       import file from './demo_library.scene.json'
 
       // Every error the page throws or writes, the last five, shown under the readout.
@@ -53,19 +53,6 @@
 
       const ask = new URLSearchParams(location.search)
       file.prefabs.scenemanager.entry = ask.get('scene') ?? file.prefabs.scenemanager.entry
-      if (ask.get('place')) await place(main, ask.get('place'), !ask.has('noeffects'))
-      else await listed(main)
-      const point = key => ask.get(key)?.split(',').map(Number)
-      main.world.library = {
-        ...(ask.has('eye') && ask.has('look') ? { eye: point('eye'), look: point('look') } : {}),
-        ...(ask.has('clip') ? { clip: ask.get('clip') } : {}),
-        ...(ask.has('at') ? { at: Number(ask.get('at')) } : {}),
-        ...(ask.has('view') ? { view: ask.get('view') } : {}),
-        flat: ask.has('flat'),
-        proof: ask.has('proof'),
-        shapes: ask.has('shapes'),
-        nav: ask.has('nav'),
-      }
       if (ask.has('proof')) document.getElementById('readout').style.display = 'none'
 
       const dt = file.prefabs.engine.dt

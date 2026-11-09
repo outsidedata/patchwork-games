@@ -1,9 +1,20 @@
-// demo_library's own plugin, loaded through `shipped`: the page's side of pro-ng's viewers, played in the engine. It
-// has no row; it reads the `library` row (`library.sim.ts`), what the game's addon has built on the server, and the
-// catalogue entries `library.place.ts` writes before the boot. Every number it uses is the `library` definition's
-// (`assets/demo_library.json`). It is listed after render3d and renderdom, and draws through them.
+// demo_library's own plugin, loaded through `shipped`: pro-ng's content shown in the engine, by three tools, one up at a
+// time. It has no row; it reads the `library` row (`library.sim.ts`), what the game's addon has built on the server,
+// and the catalogue entries `library.place.ts` writes before the boot. Every number it uses is the `library`
+// definition's (`assets/demo_library.json`). It is listed after render3d and renderdom, and draws through them.
 //
 // The place. world3d draws the scene's place, `world.world3d.place`, a build of pro-ng's in `assets/builds/`.
+//
+// The tools, each a part of its own:
+//   Scene     (`library.scene.ts`) a landmark or town flown round: its overlays, views, things and check spots.
+//   Kit       (`library.kit.ts`) one kit item: its keys, built again with them, and its effects.
+//   Material  (`library.material.ts`) one material drawn alone, picked from a list, its settings beside it.
+// The tool up is the one that holds the place drawn (a scene's build, a kit kind's, the catalogue of materials), until
+// another is picked on the bar across the game's top (`bar`, [x, y, width, height] in the game's units, renderdom's).
+// Only the tool up has a panel: Scene and Kit down the right (`panel`), Material its list down the left and its knobs
+// down the right (its own boxes, `material`). A tool picked that does not hold the place hides it and shows its picker
+// alone; Material goes to the catalogue (`materials`), built first when it is not there. The bar's right end says what
+// the server builds now, and the last failed build's last line.
 //
 // The camera, the page's (render3d's `claim`): once world3d's mesh is in render3d's scene (the one mesh whose geometry
 // carries `lookId`), it stands round the middle of the place's bounding sphere, `frame.yaw` and `frame.pitch` round
@@ -14,59 +25,49 @@
 // second (at least `flyLeast` metres), Shift `fast` times as fast. A frame is taken as no longer than `longestFrame`
 // seconds. A scene whose `world.library` gives `eye` and `look` ([x, y, z] metres, y up) starts it there instead.
 //
-// The panel, down the game's right (`panel`, [x, y, width, height] in the game's units, renderdom's):
-//   kit, landmark   every kit kind and landmark pro-ng has (the `library` entry, `builds/library.json`, which the
-//                   server writes from pro-ng's own list as it starts); picking one asks the `library` row to build
-//                   it, and the page goes to it once it is built.
-//   the kit's keys  for a place that is a kit kind's build (the `library.kit` entry): what its header says it is, then
-//                   each key of its studio defaults with a box holding the value it was built with, its type and what
-//                   it does beside it, marked when it is not the default; `build` builds it again with every key that
-//                   is not its default, `reset` puts every box back to its default. Its header's notes under them,
-//                   and, for a kind with its own effects file, the effects editor (`library.effects.ts`).
-//   status          what the server builds now, and the last failed build's last lines.
-// A place built from a scene (the `library.made` entry) is built again from that scene, a kit kind with the keys its
-// boxes hold, whenever the library's pro-ng changes (the row's `changed`), as pro-ng's kit studio does.
-//
-// Going to a build: the page loads again with the definition's `address` key of its address set to the place, once
-// the row's `done` reaches the build it asked for; on a failed one it stays, the build's lines in the status.
+// Building. A place built from a scene (the `library.made` entry) is built again from it, a kit kind with the keys its
+// boxes hold, whenever the library's pro-ng changes (the row's `changed`), as pro-ng's kit studio does. Going to a
+// build: the page loads again with the definition's `address` key of its address set to the place, once the row's
+// `done` reaches the build it asked for; on a failed one it stays, the build's last line on the bar.
 import type * as THREE from 'three'
 import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
-import { def, json, written } from '#plugins/loader/loader.sim.ts'
-import { effectsEditor, EFFECTS_STYLE } from './library.effects.ts'
-import { viewer } from './library.viewer.ts'
+import { def, json, jsonAt } from '#plugins/loader/loader.sim.ts'
+import { EFFECTS_STYLE } from './library.effects.ts'
+import { kit, type Kit } from './library.kit.ts'
+import { material, MATERIAL_STYLE } from './library.material.ts'
+import { BUILDS } from './library.place.ts'
+import { scene } from './library.scene.ts'
 
-type Kit = {
-  kind: string
-  defaults: Record<string, unknown>
-  values: Record<string, unknown>
-  about: string
-  keys: { keys: string[]; type: string; does: string }[]
-  notes: string[]
-  effects?: Record<string, Record<string, unknown>[]>
-}
-type List = { kinds: { kind: string; about: string }[]; landmarks: string[] }
-
+type Tool = 'scene' | 'kit' | 'material'
+const TOOLS: [Tool, string][] = [['scene', 'Scene'], ['kit', 'Kit'], ['material', 'Material']]
 const OWNER = 'library'
+// the place the catalogue of materials is built as (`assets/build.ts materials`)
+const CATALOGUE = 'materials'
 
 // main's world: every scene this plugin is listed in has one
 const worldOf = (plugins: Plugins): Record<string, any> => plugins.wire.scene.world!
 const FLY: Record<string, [number, number, number]> = { KeyW: [0, 0, -1], KeyS: [0, 0, 1], KeyA: [-1, 0, 0], KeyD: [1, 0, 0], KeyE: [0, 1, 0], KeyQ: [0, -1, 0] }
 
 const STYLE = `
+  [data-panel="library bar"] { background: #0f1114f2; color: #e8e8e8; font: 13px system-ui; display: flex; align-items: center; gap: 4px; padding: 0 8px; box-sizing: border-box; border-bottom: 1px solid #262b33 }
+  [data-panel="library bar"] button { font: inherit; background: none; color: #9aa3ad; border: 0; border-bottom: 2px solid transparent; padding: 8px 14px; cursor: pointer }
+  [data-panel="library bar"] button:hover { color: #e8e8e8 }
+  [data-panel="library bar"] button.on { color: #fff; border-bottom-color: #4a9eff }
+  [data-panel="library bar"] .place { color: #7d8792; margin-left: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+  [data-panel="library bar"] .status { margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 55%; color: #ff8a80 }
+  [data-panel="library bar"] .status.running { color: #8fd18f }
   [data-panel="library"] { background: #15171bee; color: #e8e8e8; font: 12px system-ui; overflow-y: auto; box-sizing: border-box; padding: 8px }
-  [data-panel="library"] h3 { margin: 10px 0 4px; font-size: 13px }
+  [data-panel="library"] h3 { margin: 12px 0 4px; font-size: 13px }
   [data-panel="library"] p { margin: 2px 0 6px; color: #9aa3ad }
   [data-panel="library"] label { display: block; margin: 6px 0 2px }
   [data-panel="library"] select, [data-panel="library"] input, [data-panel="library"] button { font: inherit; width: 100%; box-sizing: border-box }
   [data-panel="library"] input[type=checkbox] { width: auto }
   [data-panel="library"] .changed { outline: 1px solid #f5a623 }
-  [data-panel="library"] .status { white-space: pre-wrap; color: #ff8a80 }
-  [data-panel="library"] .running { color: #8fd18f }
-  [data-panel="library"] button.half { width: 20%; padding: 2px 0 }
+  [data-panel="library"] .views { display: flex; gap: 2px }
+  [data-panel="library"] .views button { flex: 1; padding: 3px 0 }
+  [data-panel="library"] .views button.on { background: #2d5d8f; color: #fff }
   [data-panel="library"] button.thing { text-align: left; margin: 1px 0 }
-  [data-panel="library"] details { margin: 2px 0 }
-  [data-panel="library"] details label { display: grid; grid-template-columns: 1fr 1.4fr auto; gap: 4px; align-items: center }
   [data-panel="library stats"] { color: #e8e8e8; font: 12px monospace; white-space: pre-wrap; pointer-events: none }
   [data-panel="library stats"] div { background: #000a; padding: 3px 6px; margin-top: 2px; width: fit-content }
   [data-panel="library stats"] .spot:empty { display: none }
@@ -74,12 +75,15 @@ const STYLE = `
 
 export function library() {
   const view = { framed: false, at: [0, 0, 0], dist: 10, yaw: 0, pitch: 0.4, reach: 1 }
-  const scene = viewer()
+  const tools = { scene: scene(), kit: kit(), material: material() }
+  let tool: Tool | undefined
   let mesh: THREE.Mesh | undefined
   // the camera on a point, `reach` metres round it filling the view
   const look = (fov: number, fill: number) => (middle: number[], reach: number) => {
     view.at = [...middle]
     view.dist = Math.max(reach, 0.05) / Math.sin((fov * Math.PI) / 360) * fill
+    view.reach = Math.max(reach, 0.05)
+    view.framed = true
   }
   // the camera at `eye`, looking at `at`
   const put = (eye: number[], at: number[]) => {
@@ -97,8 +101,7 @@ export function library() {
   let waiting = 0
   let going: string | undefined
   let seen: number | undefined
-  let values: Record<string, unknown> | undefined
-  // the last lines of the build this page waited on, when it failed
+  // the last line of the build this page waited on, when it failed
   let failed = ''
 
   const libraryRow = (plugins: Plugins): Row | undefined => plugins.wire.rows.find((r: Row) => r.kind === 'library')
@@ -108,16 +111,32 @@ export function library() {
     if (!lib) return
     waiting = lib.data.asked + 1
     going = to
+    failed = ''
     plugins.wire.send(lib.id, 'build', what, name, JSON.stringify(keys))
   }
+  const goTo = (d: any, place: string) => {
+    const url = new URL(location.href)
+    url.searchParams.set(d.address, place)
+    url.searchParams.delete(d.material.address)
+    location.href = url.href
+  }
 
-  const differing = (kit: Kit) =>
-    Object.fromEntries(Object.entries(values ?? {}).filter(([k, v]) => JSON.stringify(v) !== JSON.stringify(kit.defaults[k])))
+  // the tool that holds the place drawn, if any
+  const holding = (plugins: Plugins): Tool | undefined =>
+    tools.material.holds(plugins) ? 'material' : tools.kit.holds(plugins) ? 'kit' : tools.scene.holds(plugins) ? 'scene' : undefined
+
+  // world3d's mesh of the place shown or hidden
+  const placeShown = (plugins: Plugins, on: boolean) => {
+    plugins.render3d.scene.traverse((o: THREE.Object3D) => {
+      const m = o as THREE.Mesh
+      if (m.isMesh && m.geometry?.getAttribute('lookId') && !m.userData.library) m.visible = on
+    })
+  }
 
   const camera = (plugins: Plugins, d: any, seconds: number) => {
     const r3 = plugins.render3d
     if (!r3?.camera) return
-    if (!mesh) r3.scene.traverse((o: THREE.Object3D) => { if ((o as THREE.Mesh).isMesh && (o as THREE.Mesh).geometry?.getAttribute('lookId')) mesh = o as THREE.Mesh })
+    if (!mesh) r3.scene.traverse((o: THREE.Object3D) => { if ((o as THREE.Mesh).isMesh && (o as THREE.Mesh).geometry?.getAttribute('lookId') && !o.userData.library) mesh = o as THREE.Mesh })
     if (!view.framed) {
       if (!mesh) return
       mesh.geometry.computeBoundingSphere()
@@ -144,126 +163,84 @@ export function library() {
       view.at[2] += (-way[0] * sin + way[2] * cos) * speed
     }
     if (!r3.claim(OWNER)) return
+    // the material tool's view centred on the game between its list and its knobs, so what it frames is not under them
+    const W = plugins.wire.scene.prefabs.engine.width, H = plugins.wire.scene.prefabs.engine.height
+    if (tool === 'material' && holding(plugins) === 'material') {
+      const [lx, , lw] = d.material.list, [kx] = d.material.knobs
+      const shift = W / 2 - (lx + lw + kx) / 2
+      if (r3.camera.view?.offsetX !== shift) r3.camera.setViewOffset(W, H, shift, 0, W, H)
+    } else if (r3.camera.view?.enabled) r3.camera.clearViewOffset()
     const c = Math.cos(view.pitch)
     r3.camera.position.set(view.at[0] + sin * c * view.dist, view.at[1] + Math.sin(view.pitch) * view.dist, view.at[2] + cos * c * view.dist)
     r3.camera.up.set(0, 1, 0)
     r3.camera.lookAt(view.at[0], view.at[1], view.at[2])
   }
 
-  const panel = (plugins: Plugins, d: any) => {
+  // the bar across the top: the three tools, the place drawn, and the server's building
+  const bar = (plugins: Plugins, d: any) => {
     const dom = plugins.renderdom
-    const world = worldOf(plugins)
-    const has = (name: string) => name in world.loader.assets
-    const [, , width, height] = d.panel
-    dom.style(STYLE)
-    dom.style(EFFECTS_STYLE)
-    dom.panel('library', d.panel)
-    const show = (key: string, make: () => HTMLElement) => dom.show('library', key, make) as HTMLElement
-    const lib = libraryRow(plugins)?.data
-
-    const list: List | undefined = has('library') ? json(plugins.wire, 'library') : undefined
-    show('title', () => Object.assign(document.createElement('h3'), { textContent: `pro-ng: ${world.world3d.place}` }))
-    if (list) {
-      for (const [what, names] of [['kit', list.kinds.map(k => k.kind)], ['landmark', list.landmarks]] as const) {
-        show(`${what} label`, () => Object.assign(document.createElement('label'), { textContent: `${what} (${names.length})` }))
-        show(`${what} pick`, () => {
-          const select = document.createElement('select')
-          select.add(new Option('', ''))
-          for (const n of names) select.add(new Option(n, n))
-          select.addEventListener('change', () => {
-            const n = select.value
-            if (!n) return
-            if (what === 'kit') order(plugins, 'kit', n, {}, n.replace(/\//g, '--'))
-            else order(plugins, 'scene', n, {}, n.split('/').pop()!)
-          })
-          return select
-        })
-      }
-      show('materials build', () => {
-        const b = Object.assign(document.createElement('button'), { textContent: 'every material on its swatch (the looks studio)' })
-        b.addEventListener('click', () => order(plugins, 'materials', '', [], 'materials'))
+    dom.panel('library bar', d.bar)
+    for (const [t, text] of TOOLS) {
+      const b = dom.show('library bar', `tool ${t}`, () => {
+        const b = Object.assign(document.createElement('button'), { textContent: text })
+        b.addEventListener('click', () => pickTool(plugins, d, t))
         return b
-      })
-    } else show('no list', () => Object.assign(document.createElement('p'), { textContent: 'pro-ng\'s list is not written yet: the server writes it as it starts (yarn serve demo_library).' }))
-
-    const kit: Kit | undefined = has('library.kit') ? json(plugins.wire, 'library.kit') : undefined
-    if (kit) {
-      values ??= { ...kit.defaults, ...kit.values }
-      show('kit title', () => Object.assign(document.createElement('h3'), { textContent: `kit ${kit.kind}` }))
-      show('kit about', () => Object.assign(document.createElement('p'), { textContent: kit.about }))
-      for (const key of Object.keys(kit.defaults)) {
-        const row = kit.keys.find(r => r.keys.includes(key))
-        show(`key ${key} label`, () => Object.assign(document.createElement('label'), { textContent: key }))
-        const box = show(`key ${key}`, () => {
-          const input = document.createElement('input')
-          const v = values![key]
-          if (typeof v === 'boolean') { input.type = 'checkbox'; input.checked = v }
-          else if (typeof v === 'number') { input.type = 'number'; input.step = 'any'; input.value = String(v) }
-          else input.value = typeof v === 'string' ? v : JSON.stringify(v)
-          input.addEventListener('change', () => {
-            const was = kit.defaults[key]
-            values![key] = input.type === 'checkbox' ? input.checked : input.type === 'number' ? Number(input.value) : typeof was === 'string' ? input.value : JSON.parse(input.value)
-          })
-          return input
-        }) as HTMLInputElement
-        box.classList.toggle('changed', JSON.stringify(values[key]) !== JSON.stringify(kit.defaults[key]))
-        if (row) show(`key ${key} type`, () => Object.assign(document.createElement('p'), { textContent: `${row.type}: ${row.does}` }))
-      }
-      show('build', () => {
-        const b = Object.assign(document.createElement('button'), { textContent: 'build' })
-        b.addEventListener('click', () => order(plugins, 'kit', kit.kind, differing(kit), world.world3d.place))
-        return b
-      })
-      show('reset', () => {
-        const b = Object.assign(document.createElement('button'), { textContent: `reset to ${kit.kind}.studio.defaults.json` })
-        b.addEventListener('click', () => {
-          values = { ...kit.defaults }
-          for (const key of Object.keys(kit.defaults)) {
-            const input = dom.show('library', `key ${key}`, () => document.createElement('input')) as HTMLInputElement
-            const v = kit.defaults[key]
-            if (input.type === 'checkbox') input.checked = !!v
-            else input.value = typeof v === 'string' ? v : JSON.stringify(v)
-          }
-        })
-        return b
-      })
-      kit.notes.forEach((n, i) => show(`note ${i}`, () => Object.assign(document.createElement('p'), { textContent: n })))
-      if (kit.effects) {
-        show('effects title', () => Object.assign(document.createElement('h3'), { textContent: `effects: ${kit.kind}.effects.json` }))
-        show('effects', () => {
-          const host = document.createElement('div')
-          const name = world.particle3d.effects
-          const url = world.loader.assets[name].url
-          // the kind's effects by their full names written into the game's effects file as this page's loader holds
-          // it, which particle3d takes as a written file
-          const write = (effects: Record<string, unknown[]>) => {
-            const base = json(plugins.wire, name)
-            written(url, JSON.stringify({ ...base, effects: { ...base.effects, ...effects } }))
-            void plugins.loader.written(url)
-          }
-          const save = (file: Record<string, unknown>) => {
-            const lib = libraryRow(plugins)
-            if (lib) plugins.wire.send(lib.id, 'build', 'effects', kit.kind, JSON.stringify(file))
-          }
-          effectsEditor(host, kit.kind, kit.effects!, write, save)
-          return host
-        })
-      }
+      }) as HTMLButtonElement
+      b.classList.toggle('on', tool === t)
     }
-
-    const fov = plugins.render3d?.camera?.fov ?? 50
-    scene.panel(plugins, d, show, look(fov, d.frame.fill), mesh)
-
-    const status = show('status', () => Object.assign(document.createElement('p'), { className: 'status' }))
+    const place = dom.show('library bar', 'place', () => Object.assign(document.createElement('span'), { className: 'place' })) as HTMLElement
+    place.textContent = holding(plugins) === tool ? worldOf(plugins).world3d.place : ''
+    const lib = libraryRow(plugins)?.data
+    const status = dom.show('library bar', 'status', () => Object.assign(document.createElement('span'), { className: 'status' })) as HTMLElement
     status.className = lib?.running ? 'status running' : 'status'
-    status.textContent = lib?.running ? `building ${lib.running}` : failed
-    return [width, height]
+    status.textContent = lib?.running ? `building ${lib.running}…` : failed ? failed.trim().split('\n').at(-1)! : ''
+    status.title = lib?.running ? '' : failed
   }
 
-  // the stats line and the check spot's words, over the game's bottom left (`stats`)
+  const pickTool = (plugins: Plugins, d: any, t: Tool) => {
+    if (t === tool) return
+    // the material tool's own meshes taken away and the place given back, when it is left
+    if (tool === 'material') tools.material.close(plugins)
+    tool = t
+    if (t !== 'material' || holding(plugins) === 'material') return
+    // the catalogue: gone to where it is built, else built
+    jsonAt(`${CATALOGUE}.looks`, `${BUILDS}${CATALOGUE}/${CATALOGUE}.looks.json`).then(
+      () => goTo(d, CATALOGUE),
+      () => order(plugins, 'materials', '', [], CATALOGUE),
+    )
+  }
+
+  const panel = (plugins: Plugins, d: any) => {
+    const dom = plugins.renderdom
+    dom.style(STYLE)
+    dom.style(EFFECTS_STYLE)
+    dom.style(MATERIAL_STYLE)
+    bar(plugins, d)
+    const holds = holding(plugins) === tool
+    // the material tool hides the place itself and draws the one material picked
+    if (!(tool === 'material' && holds)) placeShown(plugins, holds)
+    const fov = plugins.render3d?.camera?.fov ?? 50
+    const frame = look(fov, tool === 'material' ? d.material.fill : d.frame.fill)
+    if (tool === 'material') {
+      if (holds) tools.material.panel(plugins, d, frame)
+      else {
+        dom.panel('library', d.panel)
+        dom.show('library', 'waiting', () => Object.assign(document.createElement('p'), { textContent: 'the catalogue of materials is being built: every material of pro-ng/materials.json on its swatch.' }))
+      }
+      return
+    }
+    dom.panel('library', d.panel)
+    const show = (key: string, make: () => HTMLElement) => dom.show('library', key, make) as HTMLElement
+    if (tool === 'kit') {
+      tools.kit.panel(plugins, show, (kind, keys) => order(plugins, 'kit', kind, keys, kind.replace(/\//g, '--')))
+      if (holds) tools.scene.views(plugins, show)
+    } else tools.scene.panel(plugins, d, show, frame, mesh, landmark => order(plugins, 'scene', landmark, {}, landmark.split('/').pop()!))
+  }
+
+  // the stats line and the check spot's words, over the game's bottom left (`stats`, Material's `material.stats`)
   const readouts = (plugins: Plugins, d: any) => {
     const dom = plugins.renderdom
-    dom.panel('library stats', d.stats)
+    dom.panel('library stats', tool === 'material' ? d.material.stats : d.stats)
     const line = dom.show('library stats', 'line', () => Object.assign(document.createElement('div'), { className: 'line' })) as HTMLElement
     const spot = dom.show('library stats', 'spot', () => Object.assign(document.createElement('div'), { className: 'spot' })) as HTMLElement
     return { line, spot }
@@ -296,8 +273,9 @@ export function library() {
       last = now
       const dom = plugins.renderdom
       const W = plugins.wire.scene.prefabs.engine.width, H = plugins.wire.scene.prefabs.engine.height
+      tool ??= holding(plugins) ?? 'scene'
 
-      // the game, under the panel: the camera's drags and wheel
+      // the game, under the panels: the camera's drags and wheel
       dom.panel('library view', [0, 0, W, H])
       dom.surface('library view', 'eye', [0, 0, W, H], {
         down: (x: number, y: number, mods: { shift: boolean }) => { drag = { x, y, shift: mods.shift } },
@@ -318,13 +296,14 @@ export function library() {
         up: () => { drag = undefined },
         wheel: (_x: number, _y: number, _m: unknown, _dx: number, dy: number) => { view.dist = Math.max(d.nearest, view.dist * Math.exp(dy * d.zoom)) },
       })
-      // a shot (`world.library.proof`): the place alone, no panel, no stats line and no keys
+      // a shot (`world.library.proof`): the place alone, no bar, panel, stats line or keys
       const shooting = !!worldOf(plugins).library?.proof
       if (!shooting) {
         const { line, spot } = readouts(plugins, d)
         dom.keys((k: { code: string; mod: boolean; repeat: boolean }) => {
           if (k.mod) return false
-          if (scene.keys.includes(k.code)) { if (!k.repeat) scene.key(plugins, k.code, put, spot); return true }
+          if (tool === 'scene' && tools.scene.keys.includes(k.code)) { if (!k.repeat) tools.scene.key(plugins, k.code, put, spot); return true }
+          if (tool === 'material' && tools.material.keys.includes(k.code)) { tools.material.key(plugins, d, k.code); return true }
           if (!(k.code in FLY || k.code.startsWith('Shift'))) return false
           held.add(k.code)
           return true
@@ -332,10 +311,11 @@ export function library() {
         dom.keyups((k: { code: string }) => { held.delete(k.code); return false })
         panel(plugins, d)
         camera(plugins, d, seconds)
-        scene.tick(plugins, d, line)
+        tools.scene.tick(plugins, d, line)
       } else {
+        if (tools.material.holds(plugins)) tools.material.proof(plugins)
         camera(plugins, d, seconds)
-        scene.tick(plugins, d)
+        tools.scene.tick(plugins, d)
       }
       drawn++
 
@@ -348,8 +328,8 @@ export function library() {
         const world = worldOf(plugins)
         const has = (name: string) => name in world.loader.assets
         if (!waiting && has('library.kit')) {
-          const kit: Kit = json(plugins.wire, 'library.kit')
-          order(plugins, 'kit', kit.kind, differing(kit), world.world3d.place)
+          const k: Kit = json(plugins.wire, 'library.kit')
+          order(plugins, 'kit', k.kind, tools.kit.values(k), world.world3d.place)
         } else if (!waiting && has('library.made')) {
           const made = json(plugins.wire, 'library.made')
           if (made.materials) order(plugins, 'materials', '', made.materials, world.world3d.place)
@@ -362,13 +342,16 @@ export function library() {
         if (failed) return
         const url = new URL(location.href)
         url.searchParams.set(d.address, going!)
+        if (going !== worldOf(plugins).world3d.place) url.searchParams.delete(d.material.address)
         if (url.href === location.href) location.reload()
         else location.href = url.href
       }
     },
     close(plugins: Plugins) {
+      plugins.render3d?.camera?.clearViewOffset()
       plugins.render3d?.release(OWNER)
-      scene.close(plugins)
+      tools.scene.close(plugins)
+      tools.material.close(plugins)
       held.clear()
     },
   }

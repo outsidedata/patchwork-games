@@ -12,13 +12,14 @@
 //     `library.shapes` and `library.nav`, its walk shapes and nav graph (`<place>.shapes3d.json`, `<place>.nav.json`),
 //     `library.studio`, a catalogue build's families and swatches (`<place>.studio.json`, `assets/build.ts`'s
 //     `buildMaterials`), and `library.sidecars`, its looks' own meshes (`<place>.sidecars.json`)
-//     (`library.plugin.ts`, `library.viewer.ts`);
+//     (`library.plugin.ts`, `library.scene.ts`, `library.kit.ts`, `library.material.ts`);
 //   - the game's effects file is handed, in this process alone (`written`), a copy holding the build's effects too,
 //     so particle3d holds them as its own file's: the effects editor (`library.effects.ts`) writes that copy again
 //     with each change, and particle3d takes it as a written file. With `effectsOn` false it holds none of them, so no
 //     effect of the build is thrown (world3d throws a spawn once particle3d holds its effect).
 // `listed(scene)` writes the `library` entry alone, for a page with no place. Both read files with the loader's
-// `jsonAt`, so they are awaited before the boot.
+// `jsonAt`, so they are awaited before the boot: `chosen(scene)`, below, picks between them from the page's address
+// and is awaited by `main.sim.ts` as it is imported.
 import { jsonAt, written } from '#plugins/loader/loader.sim.ts'
 
 export const BUILDS = '/games/demo_library/assets/builds/'
@@ -31,6 +32,30 @@ const there = (name: string, url: string): Promise<any> => jsonAt(name, url).cat
 export async function listed(scene: SceneFile): Promise<void> {
   const url = `${BUILDS}library.json`
   if (await there('library', url)) scene.world.loader.assets.library = { type: 'json', url, preload: true }
+}
+
+// What a page's address asks main to draw, written into main's scene file before anything boots it: run by `main.sim.ts`
+// as it is imported, so the truth in a tab, the server's truth and every page's client (`dev.html`, `client.html`,
+// `index.html`) read the one scene. In a tab: `?place=<name>` that build (`place`, its effects left out with
+// `?noeffects`), else `listed`; and `world.library` from the address (`?eye=x,y,z&look=x,y,z`, `?clip`, `?at`, `?view`,
+// `?flat`, `?proof`, `?shapes`, `?nav`; `library.plugin.ts`, `library.scene.ts`). On node, which has no address, `listed`.
+export async function chosen(scene: SceneFile): Promise<void> {
+  if (typeof location === 'undefined') return listed(scene)
+  const ask = new URLSearchParams(location.search)
+  const name = ask.get('place')
+  if (name) await place(scene, name, !ask.has('noeffects'))
+  else await listed(scene)
+  const point = (key: string) => ask.get(key)!.split(',').map(Number)
+  scene.world.library = {
+    ...(ask.has('eye') && ask.has('look') ? { eye: point('eye'), look: point('look') } : {}),
+    ...(ask.has('clip') ? { clip: ask.get('clip') } : {}),
+    ...(ask.has('at') ? { at: Number(ask.get('at')) } : {}),
+    ...(ask.has('view') ? { view: ask.get('view') } : {}),
+    flat: ask.has('flat'),
+    proof: ask.has('proof'),
+    shapes: ask.has('shapes'),
+    nav: ask.has('nav'),
+  }
 }
 
 export async function place(scene: SceneFile, name: string, effectsOn = true): Promise<void> {

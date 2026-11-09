@@ -192,7 +192,7 @@ export async function buildMaterials(picked: string[] = []): Promise<string> {
       materials: f.materials.map((m, i) => {
         const x = i * SPACING
         // a look with its own mesh (a sidecar, `material/looks/<look>.json`) is drawn on that mesh, by the game
-        // (`library.viewer.ts`); its swatch is cut out of sight, `UNDER` metres down, so the looks file still holds it
+        // (`library.material.ts`); its swatch is cut out of sight, `UNDER` metres down, so the looks file still holds it
         const own = fs.existsSync(path.join(PRONG, 'material', 'looks', `${json.materials[m].look}.json`))
         things.push({ kind: 'swatch', name: m, place: [x, y], ...(own ? { elevation: -UNDER } : {}), Material: m })
         views.push({ name: m, eye: [x - 0.35, y - 2.1, 1.05], at: [x, y, 0.3], expect: `${m} (${json.materials[m].family}): a sphere, a block and a column.` })

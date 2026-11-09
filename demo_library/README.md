@@ -30,11 +30,17 @@ The address (`dev.html`):
 | `clip=<clip>`, `at=<seconds>` | a clip played on every moving thing that has it; the clips and the looks' clock held at that moment |
 | `noeffects` | none of the build's effects thrown |
 | `proof` | the place alone, for a shot |
+| `material=<name>` | on the catalogue (`place=materials`), the material drawn alone; written as one is picked |
 
-The panel down the right: a kit kind or a landmark picked is built and opened; a kit kind's keys (its studio defaults,
-each with its type and what it does), `build` and `reset`, and its effects editor where it has its own effects; the
-walk shapes, the nav graph and a ground; the views; every material's settings; every building and kit thing, pressed
-to put the camera on it; a catalogue's families and materials. `]` and `[` step through the scene's check spots.
+Three tools, one up at a time, picked on the bar across the top. The tool up at first is the one that holds the place
+drawn; a tool picked that does not hide the place and shows its picker alone. The bar's right end shows what the
+server is building and the last failed build's last line.
+
+| tool | what it is |
+| --- | --- |
+| Scene | a landmark or town flown round. Down the right: the landmark picker (a landmark picked is built and opened), the walk shapes, the nav graph and a ground, the views, every building and kit thing (pressed to put the camera on it), and the check spots, which `]` and `[` step through |
+| Kit | one kit item. Down the right: the kit picker (a kind picked is built and opened), what its header says it is, each key of its studio defaults with its type and what it does, `build` and `reset`, its notes, its effects editor where it has its own effects, and the views |
+| Material | one material, drawn alone on its swatch, out of the catalogue (`place=materials`, built first when it is not there). Down the left: every material by its family, as text, under a filter box (each word typed found in the name, look or family); a press picks one, ↑ and ↓ the one above or below. Down the right: its name, look and family, then each setting, a slider and a number box or a colour and its hex, each change drawn at once, a setting moved off its built value marked, and `reset to the built values` |
 
 | control | what it does |
 | --- | --- |
@@ -60,8 +66,9 @@ first.
 
 ## How it is made
 
-- `plugins/library/`: the game's plugin, loaded through `shipped`. `library.plugin.ts` the camera, the panel and the
-  builds; `library.viewer.ts` the scene viewer's and the looks studio's parts; `library.effects.ts` the effects editor;
+- `plugins/library/`: the game's plugin, loaded through `shipped`. `library.plugin.ts` the camera, the tool bar and the
+  builds; `library.scene.ts`, `library.kit.ts` and `library.material.ts` the three tools; `library.effects.ts` the
+  effects editor;
   `library.things.ts` the place's things off its glb; `library.place.ts` a build made main's place before the boot.
 - `addons/library/`: the builds, run where the truth is: `assets/build.ts` as a child process of the server, pro-ng's
   effects files saved, pro-ng watched.
