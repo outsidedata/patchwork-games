@@ -1,0 +1,33 @@
+{
+ "library": {
+  "address": "place",
+  "panel": [960, 0, 320, 720],
+  "stats": [8, 650, 940, 64],
+  "frame": { "fill": 1.1, "yaw": 2.356194490192345, "pitch": 0.45 },
+  "turn": 0.005,
+  "pitchMost": 1.5,
+  "pan": 0.0015,
+  "zoom": 0.001,
+  "nearest": 0.05,
+  "fly": 1,
+  "flyLeast": 1,
+  "fast": 5,
+  "longestFrame": 0.25,
+  "settle": 10,
+  "viewer": {
+   "shapes": { "box": "#ff7a1a", "plane": "#18e0ff", "cylinder": "#ff3cc7" },
+   "words": { "room": "#2bd38f", "door": "#ff5a4f", "stair": "#ffb020", "street": "#5aa8ff", "ground": "#f2f2f2", "passage": "#c77dff" },
+   "wordElse": "#ffffff",
+   "opacity": 0.22,
+   "cylinderSides": 48,
+   "lift": 0.06,
+   "curve": 8,
+   "curveLeast": 16,
+   "point": 7,
+   "over": 10,
+   "ground": { "across": 8, "least": 2, "colour": "#33422a" },
+   "rangeOver": 4,
+   "swatch": 0.7
+  }
+ }
+}

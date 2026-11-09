@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demo_library dev</title>
+    <style>
+      body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      canvas { grid-area: 1 / 1 }
+      #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px; pointer-events: none }
+    </style>
+  </head>
+  <body>
+    <div id="readout"></div>
+    <script type="module">
+      // The testbed: index.html, the manager truth and the scenes its row names all in this tab, one seat on them over
+      // a loopback, stepped on the page's clock, or one seat on the game's server. The truths are kept on
+      // `window.__scenes` and the page on `window.__page` for the profilers (benchmarking-a-game). The frame rate is
+      // the stats plugin's panel at the top left. The readout shows the scene and the step, and the last five errors
+      // the page threw or wrote. What the viewers do is the game's `library` plugin's (`plugins/library`); this page
+      // sets, from its address, what main draws:
+      //   ?scene=<scene>      that scene entered.
+      //   ?place=<name>       main draws the build `assets/builds/<name>/` (`plugins/library/library.place.ts`).
+      //   ?noeffects          none of the build's effects thrown.
+      //   ?eye=x,y,z&look=x,y,z  where the library's camera stands and the point it looks at, metres, y up, in place of
+      //                       its framing (main's `world.library`).
+      //   ?clip=<clip>        that clip played on every moving thing that has it, in place of those that start on.
+      //   ?at=<seconds>       the clips and the looks' clock held at that moment.
+      //   ?shapes, ?nav       the walk shapes and the nav graph drawn from the start (`plugins/library/library.viewer.ts`).
+      //   ?view=<view>, ?flat  supershader3d's view (shaded, pieces, height, normal, solids) and the flat colours.
+      //   ?proof              a shot: the place alone, no panel, stats or readout; `window.proof` is what
+      //                       `assets/shoot.ts` drives (`ready`, `view(eye, at)`).
+      //   ?server             the seat dials the game's server (`yarn serve demo_library`) over a socket in place of
+      //                       a truth in this tab, so a build asked for runs there, on node (`addons/library`).
+      import { boot } from '#engine/engine.ts'
+      import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
+      import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import { dial } from '#addons/socket/socket.addon.ts'
+      import { listed, place } from './plugins/library/library.place.ts'
+      import { sim } from './demo_library.sim.ts'
+      import { scene as main } from './main.sim.ts'
+      import file from './demo_library.scene.json'
+
+      // Every error the page throws or writes, the last five, shown under the readout.
+      const errors = []
+      const caught = e => {
+        errors.push(String(e?.message ?? e))
+        if (errors.length > 5) errors.shift()
+      }
+      addEventListener('error', e => caught(e.error ?? e.message))
+      addEventListener('unhandledrejection', e => caught(e.reason))
+      const written = console.error.bind(console)
+      console.error = (...a) => { caught(a.map(x => x?.message ?? x).join(' ')); written(...a) }
+
+      const ask = new URLSearchParams(location.search)
+      file.prefabs.scenemanager.entry = ask.get('scene') ?? file.prefabs.scenemanager.entry
+      if (ask.get('place')) await place(main, ask.get('place'), !ask.has('noeffects'))
+      else await listed(main)
+      const point = key => ask.get(key)?.split(',').map(Number)
+      main.world.library = {
+        ...(ask.has('eye') && ask.has('look') ? { eye: point('eye'), look: point('look') } : {}),
+        ...(ask.has('clip') ? { clip: ask.get('clip') } : {}),
+        ...(ask.has('at') ? { at: Number(ask.get('at')) } : {}),
+        ...(ask.has('view') ? { view: ask.get('view') } : {}),
+        flat: ask.has('flat'),
+        proof: ask.has('proof'),
+        shapes: ask.has('shapes'),
+        nav: ask.has('nav'),
+      }
+      if (ask.has('proof')) document.getElementById('readout').style.display = 'none'
+
+      const dt = file.prefabs.engine.dt
+      const truth = ask.has('server') ? undefined : boot(file, sim)
+      if (truth) window.__scenes = await load(truth, import.meta.url)
+      const wire = truth ? loopback(accept(manager(truth))) : dial(`ws://${location.hostname}:${file.prefabs.scenemanager.port}`, () => caught('the server closed this seat (yarn serve demo_library stopped, or it had no seat free)'))
+      const page = view(link(wire), file, import.meta.url, (me, scene) => {
+        for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
+          if (!surface) continue
+          const canvas = document.createElement('canvas')
+          canvas.width = scene.prefabs.engine.width
+          canvas.height = scene.prefabs.engine.height
+          document.body.appendChild(canvas)
+          surface.mount(canvas)
+        }
+        if (!ask.has('proof')) me.plugins.stats?.mount(document.body)
+      })
+      window.__page = page
+      const readout = document.getElementById('readout')
+      // What a shot drives (`assets/shoot.ts`): the library plugin's `proof`, handed this page's client's plugins.
+      window.proof = {
+        get ready() { const p = page.client?.plugins; return !!p?.library && p.library.proof.ready(p) },
+        view: (eye, at) => page.client.plugins.library.proof.view(page.client.plugins, eye, at),
+      }
+
+      let last = performance.now(), owed = 0
+      const loop = async now => {
+        owed += Math.min((now - last) / 1000, 0.25)
+        last = now
+        // A frame that throws is shown, and the next frame goes on.
+        try {
+          page.input()
+          while (truth && owed >= dt) { truth.step(dt); owed -= dt }
+          await (truth ? page.frame(owed / dt) : page.frame())
+        } catch (e) { caught(e) }
+        readout.textContent = [`${ask.get('scene') ?? file.prefabs.scenemanager.entry}  step ${truth?.n ?? page.client?.n ?? 0}`, ...errors].join('\n')
+        requestAnimationFrame(loop)
+      }
+      requestAnimationFrame(loop)
+    </script>
+  </body>
+</html>
