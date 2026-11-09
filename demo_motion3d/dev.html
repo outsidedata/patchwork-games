@@ -79,6 +79,10 @@
       //                     page draws the car, or where its row stands (`world.motion3d.mods.object`)
       //   priority          each space's priority (shapes3d's kind's `priority`, 1 where it gives none)
       //   jump height, m    the X Bot's `world.kinematics3d.kinds.xbot.jump.jumpH`, how high a jump rises
+      //   jump speed boost  the X Bot's `world.kinematics3d.kinds.xbot.jump.jumpVelocityBoostMagnitude`, the times
+      //                     its speed across is multiplied by on taking off
+      //   air accel, 1/s   the X Bot's `world.kinematics3d.kinds.xbot.fall.airAccel`, how fast its speed across
+      //                     eases toward the stick's in the air
       // `copy motion3d JSON` copies the panel's numbers, and `reset to the file` puts the file's back.
       //
       // The rifle carry: the rifle's anchor in the X Bot's motion3d file (`at`, metres, and `turn`, degrees,
@@ -1018,6 +1022,8 @@
         fade: main.world.motion3d.kinds.xbot.fade,
         object: main.world.motion3d.mods.object !== undefined,
         jumpH: main.world.kinematics3d.kinds.xbot.jump.jumpH,
+        boost: main.world.kinematics3d.kinds.xbot.jump.jumpVelocityBoostMagnitude,
+        airAccel: main.world.kinematics3d.kinds.xbot.fall.airAccel,
         priority: Object.fromEntries(spaces.map(name => [name, main.world.shapes3d.kinds[name].priority ?? 1])),
       })
       const was = fileOf()
@@ -1030,6 +1036,8 @@
           else delete world.motion3d.mods.object
           for (const name of spaces) world.shapes3d.kinds[name].priority = own.priority[name]
           world.kinematics3d.kinds.xbot.jump.jumpH = own.jumpH
+          world.kinematics3d.kinds.xbot.jump.jumpVelocityBoostMagnitude = own.boost
+          world.kinematics3d.kinds.xbot.fall.airAccel = own.airAccel
         }
       }
       const mf = gui.addFolder('motion3d')
@@ -1037,10 +1045,12 @@
       mf.add(own, 'fade', 0, 1, 0.01).name('crossfade, s').onChange(apply)
       mf.add(own, 'object').name('draw on the car').onChange(apply)
       mf.add(own, 'jumpH', 0, 6, 0.05).name('jump height, m').onChange(apply)
+      mf.add(own, 'boost', 0, 6, 0.05).name('jump speed boost, ×').onChange(apply)
+      mf.add(own, 'airAccel', 0.05, 10, 0.05).name('air accel, 1/s').onChange(apply)
       const pf = mf.addFolder('priority')
       for (const name of spaces) pf.add(own.priority, name, 0, 5, 1).onChange(apply)
       pf.close()
-      mf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({ motion3d: { ease: own.ease, fade: own.fade }, priority: own.priority, kinematics3d: { jump: { jumpH: own.jumpH } } }, null, 2)) }, 'copy').name('copy motion3d JSON')
+      mf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({ motion3d: { ease: own.ease, fade: own.fade }, priority: own.priority, kinematics3d: { jump: { jumpH: own.jumpH, jumpVelocityBoostMagnitude: own.boost }, fall: { airAccel: own.airAccel } } }, null, 2)) }, 'copy').name('copy motion3d JSON')
       mf.add({ reset: () => {
         Object.assign(own, clone(was))
         for (const c of gui.controllersRecursive()) c.updateDisplay()
