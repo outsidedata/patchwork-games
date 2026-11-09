@@ -13,10 +13,9 @@ import { player } from './player.sim.ts'
 import { start } from './start.sim.ts'
 import { world3d } from '#plugins/world3d/world3d.sim.ts'
 import { visitor } from './visitor.sim.ts'
-import { resident } from './resident.sim.ts'
-import { wanderer } from './wanderer.sim.ts'
+import { person } from './person.sim.ts'
 import file from './village.scene.json' with { type: 'json' }
 
-export const sim: Sim = { scenemanager, loader, npc3d, skydome3d, particle3d, world3d, player, start, visitor, resident, wanderer }
+export const sim: Sim = { scenemanager, loader, npc3d, skydome3d, particle3d, world3d, player, start, visitor, person }
 
 export const scene = file as Scene

@@ -33,8 +33,11 @@
 //   smallville.town.nav.json
 //                 the town's ways, nav3d's graph of shapes, from its files' metadata (`pro-ng/town_nav.py`, no Blender)
 //   smallville.town.crowd.json
-//                 the people standing at the town's landmarks, `{"people": [{landmark, model, clips, at, yaw}]}`,
-//                 `{"people": []}` when it has none, which town_nav.py writes beside the nav graph
+//                 the place's people, which town_nav.py writes beside the nav graph: `verbs` (`{id, clips, type}`),
+//                 `activities` (`{id, verbs}`), `landmarks` (`{<whole name>: {at, yaw, activities}}`) and `people`
+//                 (`{person, model, chains, activities?}`); each verb's clips and each person's model, files in
+//                 ~/troupe-collection, written as the names player.rig.json gives the clips and the bodies of those
+//                 files
 //   smallville.town.terrain3d_layers.json
 //                 terrain3d's painted layer that flattens the ground under the whole town to 0, one flatten stroke,
 //                 which procedural.py writes beside the glb; for a place laid on the land (`at`, below), what its
@@ -50,7 +53,8 @@
 //   castle_walker.glb, castle_woman.glb
 //                 the people of every scene: the player, castle_walker, drawn by anim, and every visitor,
 //                 castle_woman, drawn by crowd3d, each with every clip of `player.rig.json` (idle, walk, run,
-//                 jump, and the torch stance's tcidle, tcwalk, tcrun, tcjump) baked onto it by anim's export
+//                 jump, the torch stance's tcidle, tcwalk, tcrun, tcjump, and every clip the crowd files' verbs play)
+//                 baked onto it by anim's export
 //                 (`plugins/anim/anim.export.py`). crowd3d plays idle, walk and run; anim plays by the table
 //                 the export measures on castle_walker, the rig's first body, written back into the rig in
 //                 the rig's own layout (`.claude/skills/using-mixamo-assets/scripts/merge-table.mjs`).
@@ -109,6 +113,24 @@ export default async ({ blender, scratch, library }: Tools) => {
       fs.copyFileSync(path.join(out, name + suffix), path.join(into, name + suffix))
       console.log('wrote', path.relative(root, path.join(into, name + suffix)))
     }
+    // the crowd file's verbs, each clip named as the rig names the clip of that file, the name its bodies play it by
+    const crowdFile = path.join(into, `${name}.crowd.json`)
+    const crowd = JSON.parse(fs.readFileSync(crowdFile, 'utf8'))
+    const clipOf = new Map(Object.entries(player.clips).map(([clip, c]) => [c.file, clip]))
+    for (const verb of crowd.verbs) {
+      verb.clips = verb.clips.map((file: string) => {
+        const clip = clipOf.get(file)
+        if (!clip) throw new Error(`demo_world3d's bake: the verb ${verb.id} plays ${file}, which no clip of player.rig.json is`)
+        return clip
+      })
+    }
+    // each person's model named as the rig names the body of that file, the name the game draws it by
+    for (const person of crowd.people) {
+      const body = Object.entries(player.bodies).find(([, file]) => file.endsWith(`/${person.model}`))?.[0]
+      if (!body) throw new Error(`demo_world3d's bake: the person ${person.person} is ${person.model}, which no body of player.rig.json is`)
+      person.model = body
+    }
+    fs.writeFileSync(crowdFile, JSON.stringify(crowd))
     // the looks file made supershader3d's, its settings in the table, not uniforms (`packLooks`)
     const looksFile = path.join(into, `${name}.looks.json`)
     const looks: Looks = packLooks(JSON.parse(fs.readFileSync(looksFile, 'utf8')))

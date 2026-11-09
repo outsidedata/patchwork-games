@@ -100,6 +100,12 @@ walks its curve, as crowd3d walks a spline a straight piece at a time.
   it has, then rolls any other place of the graph, walks there along nav3d's route at a steady walk, each leg at the graph's heights so it climbs every stair,
   and stands a while. crowd3d draws every one of them, in the town and on the bridge, as the one Mixamo body,
   castle_woman. They walk through each other, and through you.
+- **The place's people** (`person.sim.ts`): in the village, the tavern and on hills, the people the place's stronghold
+  solvers placed, spawned by world3d from the place's crowd file (the library's `stronghold/NAV.md`): the tavern's
+  drinkers and barmaid, the smithy's smith, the village's old women, one of them limping. Each is an npc3d NPC on
+  crowd3d's body, on world3d's `loiter` (parked at a landmark, a loiter verb of its activities) and `transfer` (on to
+  another landmark of its chain, on a transfer verb), every verb playing any one of its clips. The verbs' clips and the
+  people's models are the rig's (`assets/player.rig.json`), named so by the bake.
 
 ## Baking
 

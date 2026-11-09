@@ -30,21 +30,7 @@
       }
     }
   },
-  "resident": {
-    "body": "crowd3d",
-    "sight": { "eye": 1.2, "at": 1.0, "cone": 110, "range": 6, "kinds": [] },
-    "look": { "rate": 3, "reach": 0 },
-    "notice": { "time": 1, "fall": 1 },
-    "memory": 1,
-    "think": 30,
-    "stay": 0.5,
-    "whim": 1,
-    "react": [0.3, 1],
-    "behaviors": {
-      "linger": { "weight": 1, "for": [4, 10] }
-    }
-  },
-  "wanderer": {
+  "person": {
     "body": "crowd3d",
     "sight": { "eye": 1.6, "at": 1.4, "cone": 110, "range": 10, "kinds": [] },
     "look": { "rate": 3, "reach": 0 },
@@ -55,7 +41,8 @@
     "whim": 1,
     "react": [0.3, 1],
     "behaviors": {
-      "roam": { "weight": 1, "speed": 1.4, "for": [4, 10] }
+      "loiter": { "weight": 1, "for": [4, 10] },
+      "transfer": { "weight": 1, "speed": 1.4, "for": [4, 10] }
     }
   }
 }

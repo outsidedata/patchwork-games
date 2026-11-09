@@ -1,7 +1,8 @@
 // demo_world3d: the manager booted as its page boots it and main loaded, on pro-ng's town as
 // `yarn bake demo_world3d` wrote it, which world3d hands shapes3d and nav3d. A seat joins on the town's start place and
 // stands on it; and the visitors go about the town until one reaches a place along nav3d's route. On bridge, the visitors
-// walk over the bridge at its height, under it on the ground, and up and down its ramps.
+// walk over the bridge at its height, under it on the ground, and up and down its ramps. In the tavern, its
+// people loiter on the verbs of its crowd file.
 import { expect, test } from 'vitest'
 import { boot, type Row, type Scene, type W } from '#engine/engine.ts'
 import { connection, load, manager, type Down } from '#addons/scenemanager/scenemanager.addon.ts'
@@ -75,6 +76,21 @@ test('a visitor walks the town to one of its places and stops on it, its course 
   // its course was written as it set out on each leg and as it stopped, never every step
   expect(walk.legs).toBeGreaterThan(1)
   expect(walk.writes).toBeLessThanOrEqual(walk.legs + 1)
+})
+
+test('in the tavern, each person loiters on a clip of a loiter verb of its landmark: a drinker seated, the barmaid serving or talking', async () => {
+  const { truth, room } = await main('tavern')
+  const people = room.rows.filter(r => r.kind === 'person') as Row[]
+  expect(people.length).toBeGreaterThan(1)
+  const SEATED = ['sittingDrinking', 'sittingTalking', 'sittingLaughing']
+  const BAR = ['bartending', 'talking']
+  for (let i = 0; i < 60 / DT; i++) {
+    truth.step(DT)
+    for (const p of people) {
+      expect(p.data.speed).toBe(0)
+      expect(p.data.at === 'tavern_bar' ? BAR : SEATED).toContain(p.data.clip)
+    }
+  }
 })
 
 test('on bridge, visitors walk over the bridge at its height, under it on the ground, and up its ramps', async () => {

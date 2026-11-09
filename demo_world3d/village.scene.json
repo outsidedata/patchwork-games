@@ -171,8 +171,7 @@
     },
     "world3d": {
       "place": "village.art",
-      "residents": "resident",
-      "wanderers": "wanderer"
+      "people": "person"
     },
     "particle3d": {
       "effects": "effects"
@@ -543,13 +542,18 @@
         "bartending",
         "talking",
         "workingOnDevice",
-        "pickingUpObject"
+        "pickingUpObject",
+        "praying",
+        "praying2",
+        "praying3",
+        "praying4",
+        "praying5",
+        "injuredWalk"
       ],
       "rate": 30,
       "kinds": [
         "visitor",
-        "resident",
-        "wanderer"
+        "person"
       ]
     },
     "npc3d": {
@@ -770,7 +774,7 @@
     "world3d": {
       "peopled": false
     },
-    "resident": {
+    "person": {
       "pos": [
         0,
         0,
@@ -787,7 +791,6 @@
       "body": "castle_walker",
       "clip": "idle",
       "holding": {},
-      "clips": [],
       "look": 0,
       "gaze": null,
       "seen": [],
@@ -798,40 +801,12 @@
       "wake": 0,
       "arrived": false,
       "told": null,
-      "route": null
-    },
-    "wanderer": {
-      "pos": [
-        0,
-        0,
-        0
-      ],
-      "to": [
-        0,
-        0,
-        0
-      ],
-      "yaw": 0,
-      "speed": 0,
-      "since": 0,
-      "body": "castle_walker",
-      "clip": "idle",
-      "holding": {},
-      "walk": "walk",
-      "clips": [],
-      "landmarks": [],
-      "going": 0,
-      "look": 0,
-      "gaze": null,
-      "seen": [],
-      "noticing": {},
-      "facts": [],
-      "doing": "",
-      "until": 0,
-      "wake": 0,
-      "arrived": false,
-      "told": null,
-      "route": null
+      "route": null,
+      "chains": [],
+      "activities": {},
+      "at": "",
+      "going": "",
+      "transfer": ""
     }
   },
   "actors": [
