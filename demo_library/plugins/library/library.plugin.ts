@@ -26,9 +26,12 @@
 // seconds. A scene whose `world.library` gives `eye` and `look` ([x, y, z] metres, y up) starts it there instead.
 //
 // Building. A place built from a scene (the `library.made` entry) is built again from it, a kit kind with the keys its
-// boxes hold, whenever the library's pro-ng changes (the row's `changed`), as pro-ng's kit studio does. Going to a
-// build: the page loads again with the definition's `address` key of its address set to the place, once the row's
-// `done` reaches the build it asked for; on a failed one it stays, the build's last line on the bar.
+// boxes hold, whenever the library's pro-ng changes (the row's `changed`), as pro-ng's kit studio does. A catalogue the
+// addon builds again itself; the page goes to it once that build is done (the row's `rebuilt`). Going to a build, once
+// the row's `done` reaches the build asked for, is no reload (`swap`): the build is written into the scene this client
+// was made from, every url of it at a new version, the address's `address` key set to it, the tool up and the camera
+// kept in the link's store, and the seat sent to its own scene (the definition's `scene`), so the next client is made
+// on the build. On a failed build it stays, the build's last line on the bar.
 import type * as THREE from 'three'
 import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
@@ -36,7 +39,7 @@ import { def, json, jsonAt } from '#plugins/loader/loader.sim.ts'
 import { EFFECTS_STYLE } from './library.effects.ts'
 import { kit, type Kit } from './library.kit.ts'
 import { material, MATERIAL_STYLE } from './library.material.ts'
-import { BUILDS } from './library.place.ts'
+import { BUILDS, place } from './library.place.ts'
 import { scene } from './library.scene.ts'
 
 type Tool = 'scene' | 'kit' | 'material'
@@ -44,6 +47,8 @@ const TOOLS: [Tool, string][] = [['scene', 'Scene'], ['kit', 'Kit'], ['material'
 const OWNER = 'library'
 // the place the catalogue of materials is built as (`assets/build.ts materials`)
 const CATALOGUE = 'materials'
+// the link's store key the tool up and the camera are kept under from one client to the next (`swap`)
+const KEPT = 'library.kept'
 
 // main's world: every scene this plugin is listed in has one
 const worldOf = (plugins: Plugins): Record<string, any> => plugins.wire.scene.world!
@@ -101,6 +106,8 @@ export function library() {
   let waiting = 0
   let going: string | undefined
   let seen: number | undefined
+  // the addon's own build of the place shown that this page shows (`rebuilt`)
+  let shown: number | undefined
   // the last line of the build this page waited on, when it failed
   let failed = ''
 
@@ -114,11 +121,20 @@ export function library() {
     failed = ''
     plugins.wire.send(lib.id, 'build', what, name, JSON.stringify(keys))
   }
-  const goTo = (d: any, place: string) => {
+  // The page goes to a build while it runs, with no reload: the build written into the scene this client was made
+  // from (`place`, a new version of every url), the address written so a reload comes back to it, the tool up and the
+  // camera (when the place is the one drawn now) kept in the link's store, and the seat sent to its own scene, so the
+  // next frame closes this client and makes one from the scene as it now is: every plugin made again on the build.
+  const swap = async (plugins: Plugins, d: any, to: string) => {
+    const scene = plugins.wire.scene as unknown as { world: Record<string, any> }
+    const here = scene.world.world3d.place as string | undefined
+    plugins.scenemanager.link.store[KEPT] = { tool, view: to === here ? view : undefined }
+    await place(scene, to, !new URL(location.href).searchParams.has('noeffects'), Date.now())
     const url = new URL(location.href)
-    url.searchParams.set(d.address, place)
-    url.searchParams.delete(d.material.address)
-    location.href = url.href
+    url.searchParams.set(d.address, to)
+    if (to !== here) url.searchParams.delete(d.material.address)
+    history.replaceState(null, '', url.href)
+    plugins.scenemanager.go(d.scene)
   }
 
   // the tool that holds the place drawn, if any
@@ -204,8 +220,8 @@ export function library() {
     tool = t
     if (t !== 'material' || holding(plugins) === 'material') return
     // the catalogue: gone to where it is built, else built
-    jsonAt(`${CATALOGUE}.looks`, `${BUILDS}${CATALOGUE}/${CATALOGUE}.looks.json`).then(
-      () => goTo(d, CATALOGUE),
+    jsonAt(`${CATALOGUE}.looks`, `${BUILDS}${CATALOGUE}/${CATALOGUE}.looks.json?v=${Date.now()}`).then(
+      () => swap(plugins, d, CATALOGUE),
       () => order(plugins, 'materials', '', [], CATALOGUE),
     )
   }
@@ -273,6 +289,16 @@ export function library() {
       last = now
       const dom = plugins.renderdom
       const W = plugins.wire.scene.prefabs.engine.width, H = plugins.wire.scene.prefabs.engine.height
+      // what the last client kept as it went to this build (`swap`): its tool, and its camera on the same place
+      if (tool === undefined) {
+        const store = plugins.scenemanager.link.store
+        const kept = store[KEPT] as { tool: Tool; view?: typeof view } | undefined
+        delete store[KEPT]
+        if (kept) {
+          tool = kept.tool
+          if (kept.view) Object.assign(view, kept.view)
+        }
+      }
       tool ??= holding(plugins) ?? 'scene'
 
       // the game, under the panels: the camera's drags and wheel
@@ -331,20 +357,26 @@ export function library() {
           const k: Kit = json(plugins.wire, 'library.kit')
           order(plugins, 'kit', k.kind, tools.kit.values(k), world.world3d.place)
         } else if (!waiting && has('library.made')) {
+          // a catalogue is built again by the addon itself (`rebuilt`, below); a scene's build is asked for here
           const made = json(plugins.wire, 'library.made')
-          if (made.materials) order(plugins, 'materials', '', made.materials, world.world3d.place)
-          else order(plugins, 'scene', made.scene, {}, world.world3d.place)
+          if (!made.materials) order(plugins, 'scene', made.scene, {}, world.world3d.place)
         }
+      }
+      // the place shown built again by the addon: gone to once that build is done; a build of it already done when the
+      // page loaded is the one it shows, one still to come is gone to when it is done
+      const place = worldOf(plugins).world3d.place as string
+      const rebuilt = (lib.rebuilt as Record<string, number>)[place] ?? 0
+      shown ??= lib.done >= rebuilt ? rebuilt : 0
+      if (!waiting && rebuilt > shown && lib.done >= rebuilt) {
+        shown = rebuilt
+        failed = lib.error
+        if (!failed) void swap(plugins, d, place)
       }
       if (waiting && lib.done >= waiting) {
         waiting = 0
         failed = lib.error
         if (failed) return
-        const url = new URL(location.href)
-        url.searchParams.set(d.address, going!)
-        if (going !== worldOf(plugins).world3d.place) url.searchParams.delete(d.material.address)
-        if (url.href === location.href) location.reload()
-        else location.href = url.href
+        void swap(plugins, d, going!)
       }
     },
     close(plugins: Plugins) {

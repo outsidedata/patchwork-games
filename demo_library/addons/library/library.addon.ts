@@ -8,26 +8,42 @@
 // A truth is known by its `world`, the one object each truth holds for its life, which a rule reaches as `w.world`.
 // `start(world, ask)` starts one and hands back its number; `state(world)` is what the truth's builds have come to:
 // `asked`, the number of the newest build asked for, `done`, the newest that finished, `running`, what runs now ('' for
-// nothing), and `error`, the last failed build's last lines ('' after one that worked). A truth in a tab has no node to
-// run Blender on, so a build asked for there fails, saying so.
+// nothing), `error`, the last failed build's last lines ('' after one that worked), and `materials`, every material of
+// pro-ng's `materials.json` the catalogue builds (`{ name, look, family }`, in the file's order, all but the buildings'
+// walls and roofs, family `buildings`, as `assets/build.ts materials` leaves them out), read when the watch starts and
+// again whenever `materials.json` changes, and `rebuilt`, by place, the number of the newest build of a catalogue this
+// addon started itself (`catalogues`, below), which a page showing that place goes to once `done` reaches it. A truth
+// in a tab has no node to run Blender on or read the library with, so a build asked for there fails, saying so, and its
+// `materials` stays empty.
 export type Ask = { kit: string; values: Record<string, unknown> } | { scene: string } | { list: true } | { effects: string; file: Record<string, unknown> }
   | { materials: string[] }
-export type State = { asked: number; done: number; running: string; error: string; changed: number; file: string }
+export type Material = { name: string; look: string; family: string }
+export type State = { asked: number; done: number; running: string; error: string; changed: number; file: string; materials: Material[]; rebuilt: Record<string, number> }
+type Held = State & { queue: Promise<void>; watching: boolean }
 
-const states = new WeakMap<object, State & { queue: Promise<void>; watching: boolean }>()
+const states = new WeakMap<object, Held>()
 
 const of = (truth: object) => {
   let s = states.get(truth)
-  if (!s) states.set(truth, s = { asked: 0, done: 0, running: '', error: '', changed: 0, file: '', queue: Promise.resolve(), watching: false })
+  if (!s) states.set(truth, s = { asked: 0, done: 0, running: '', error: '', changed: 0, file: '', materials: [], rebuilt: {}, queue: Promise.resolve(), watching: false })
   return s
 }
 
+// pro-ng's files every build reads, which the watch follows: these folders, all through, and these files
+const DIRS = ['kit', 'scenes', 'material']
+const FILES = ['procedural.py', 'pack.mjs', 'materials.json']
+// the places the catalogue is built as (`assets/build.ts materials`): every material, and only those picked
+const CATALOGUES = ['materials', 'materials-pick']
+
 // The library's pro-ng watched as the kit studio and the looks studio watch it (`pro-ng/kit_studio.mjs`,
 // `pro-ng/studio.mjs`): every file under `kit/`, `scenes/` and `material/` (no `__pycache__`), `procedural.py`,
-// `pack.mjs` and `materials.json`. A change, once 150 ms have passed with no other,
-// counts one more on `changed` and names the file in `file`, so a page showing a build of it builds it again. On node
-// alone, once the list is written: pro-ng's folder is the list's `prong` (`builds/library.json`, `assets/build.ts`),
-// where the builds find the library.
+// `pack.mjs` and `materials.json`. A change, once 150 ms have passed with no other, counts one more on `changed` and
+// names the file in `file`, so a page showing a scene's or a kit kind's build builds it again; `materials.json` is read
+// again; and each catalogue there is is built again here, by its own `<place>.scene.json` (`{ materials }`, the ones
+// picked). When the watch starts, a catalogue is built again where pro-ng is newer than it: a file pro-ng's builds read
+// changed after its `<place>.studio.json` was written, or (the whole catalogue) its materials not `materials.json`'s.
+// On node alone, once the list is written: pro-ng's folder is the list's `prong` (`builds/library.json`,
+// `assets/build.ts`), where the builds find the library.
 export function watch(world: object) {
   const s = of(world)
   if (s.watching || typeof process === 'undefined' || !process.versions?.node) return
@@ -35,21 +51,64 @@ export function watch(world: object) {
   s.queue = s.queue.then(() => watching(s))
 }
 
-async function watching(s: State) {
+async function watching(s: Held) {
   const fs = await import('node:fs')
   const os = await import('node:os')
   const path = await import('node:path')
-  const list = path.join(os.tmpdir(), 'demo_library', 'library.json')
+  const builds = path.join(os.tmpdir(), 'demo_library')
+  const list = path.join(builds, 'library.json')
   if (!fs.existsSync(list)) return
   const prong: string = JSON.parse(fs.readFileSync(list, 'utf8')).prong
+  // every material the catalogue builds, live from pro-ng's materials.json
+  const read = () => {
+    const file = JSON.parse(fs.readFileSync(path.join(prong, 'materials.json'), 'utf8')) as { materials: Record<string, { look: string; family: string }> }
+    s.materials = Object.entries(file.materials).filter(([, m]) => m.family !== 'buildings').map(([name, m]) => ({ name, look: m.look, family: m.family }))
+  }
+  // the milliseconds pro-ng's newest file its builds read was written at
+  const newest = () => {
+    let at = 0
+    const walk = (dir: string) => {
+      for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+        if (e.name === '__pycache__') continue
+        const p = path.join(dir, e.name)
+        if (e.isDirectory()) walk(p)
+        else at = Math.max(at, fs.statSync(p).mtimeMs)
+      }
+    }
+    for (const d of DIRS) walk(path.join(prong, d))
+    for (const f of FILES) at = Math.max(at, fs.statSync(path.join(prong, f)).mtimeMs)
+    return at
+  }
+  // each catalogue built, by its place: the materials picked for it and when it was written
+  const catalogues = () => CATALOGUES.flatMap(place => {
+    const studio = path.join(builds, place, `${place}.studio.json`)
+    const made = path.join(builds, place, `${place}.scene.json`)
+    if (!fs.existsSync(studio) || !fs.existsSync(made)) return []
+    const families = (JSON.parse(fs.readFileSync(studio, 'utf8')) as { families: { materials: { name: string }[] }[] }).families
+    return [{ place, picked: JSON.parse(fs.readFileSync(made, 'utf8')).materials as string[], at: fs.statSync(studio).mtimeMs, names: families.flatMap(f => f.materials.map(m => m.name)) }]
+  })
+  const rebuild = (place: string, picked: string[]) => { s.rebuilt[place] = queue(s, { materials: picked }) }
+
+  read()
+  const since = newest()
+  const all = s.materials.map(m => m.name).sort().join('\n')
+  for (const c of catalogues()) {
+    if (c.at < since || (!c.picked.length && [...c.names].sort().join('\n') !== all)) rebuild(c.place, c.picked)
+  }
   let timer: ReturnType<typeof setTimeout> | undefined
   const changed = (file: string) => {
     if (file.includes('__pycache__')) return
     clearTimeout(timer)
-    timer = setTimeout(() => { s.changed++; s.file = file }, 150)
+    timer = setTimeout(() => {
+      // a materials.json caught half written is read again on its next change, the list kept as it was until then
+      if (file === 'materials.json') try { read() } catch {}
+      s.changed++
+      s.file = file
+      for (const c of catalogues()) rebuild(c.place, c.picked)
+    }, 150)
   }
-  for (const dir of ['kit', 'scenes', 'material']) fs.watch(path.join(prong, dir), { recursive: true }, (_e, f) => f && changed(path.join(dir, String(f))))
-  for (const f of ['procedural.py', 'pack.mjs', 'materials.json']) fs.watch(path.join(prong, f), () => changed(f))
+  for (const dir of DIRS) fs.watch(path.join(prong, dir), { recursive: true }, (_e, f) => f && changed(path.join(dir, String(f))))
+  for (const f of FILES) fs.watch(path.join(prong, f), () => changed(f))
 }
 
 const said = (ask: Ask) => ('kit' in ask ? `kit ${ask.kit}` : 'scene' in ask ? ask.scene : 'effects' in ask ? `${ask.effects}.effects.json`
@@ -91,8 +150,8 @@ async function run(ask: Ask): Promise<string> {
   })
 }
 
-export function start(world: object, ask: Ask): number {
-  const s = of(world)
+// A build put behind every one asked before it; its number handed back.
+function queue(s: Held, ask: Ask): number {
   const n = ++s.asked
   s.queue = s.queue.then(async () => {
     s.running = said(ask)
@@ -103,7 +162,9 @@ export function start(world: object, ask: Ask): number {
   return n
 }
 
+export const start = (world: object, ask: Ask): number => queue(of(world), ask)
+
 export function state(world: object): State {
-  const { asked, done, running, error, changed, file } = of(world)
-  return { asked, done, running, error, changed, file }
+  const { asked, done, running, error, changed, file, materials, rebuilt } = of(world)
+  return { asked, done, running, error, changed, file, materials, rebuilt }
 }

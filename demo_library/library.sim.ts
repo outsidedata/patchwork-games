@@ -5,9 +5,11 @@
 // `build('scene', scene)` for a scene of pro-ng's, `build('effects', kind, file)` for a kit kind's effects saved
 // into pro-ng's `kit/<kind>.effects.json` (`file` its JSON), `build('materials', '', names)` for every material on
 // its swatch (`names` a JSON list: only those, when it names any), or `build('list')` for the list again. Each step it copies what the
-// truth's builds have come to onto its fields: `asked`, `done`, `running` and `error`, and `changed` and `file`, how
-// many times the library's pro-ng has changed and its last file to (the addon's `State`). A page
-// reloads onto a build once `done` reaches the number it asked for.
+// truth's builds have come to onto its fields: `asked`, `done`, `running` and `error`, `changed` and `file`, how
+// many times the library's pro-ng has changed and its last file to, `materials`, every material of pro-ng's
+// `materials.json` the catalogue builds, and `rebuilt`, by place, the newest catalogue build the addon started itself
+// (the addon's `State`). A page reloads onto a build once `done` reaches the number it asked for, or the number
+// `rebuilt` holds for the place it shows.
 import type { Kind } from '#engine/engine.ts'
 import { start, state, watch, type Ask } from './addons/library/library.addon.ts'
 

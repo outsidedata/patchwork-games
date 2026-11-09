@@ -4,9 +4,13 @@
 // `material()` hands back `panel(plugins, d, frame)`, called each frame the tool is up, and `close(plugins)`. Its numbers
 // are the `library` definition's `material` (`assets/demo_library.json`).
 //
-//   The list    down the left (`list`, [x, y, width, height], renderdom's), every material of the build by its family
-//               (`library.studio`), as text, under a filter box: a material whose name, look or family holds every word
-//               typed is listed. A press picks it; ↑ and ↓ pick the one listed above or below the picked one.
+//   The list    down the left (`list`, [x, y, width, height], renderdom's), every material of pro-ng's
+//               `materials.json` by its family, as the game's addon reads it live (the `library` row's `materials`,
+//               listed again whenever it changes), as text, under a filter box: a material whose name, look or family
+//               holds every word typed is listed. A press picks it; ↑ and ↓ pick the one listed above or below the
+//               picked one. A truth in a tab reads no library, so there the list is the build's own (`library.studio`).
+//               A material the build does not hold yet is listed dimmed and drawn once the addon has built the
+//               catalogue again with it.
 //   The knobs   down the right (`knobs`): the picked material's name, its look and family, then each of its settings
 //               (`library.knobs`, each look's ranges), a range with its number box beside it, a colour a colour box; a
 //               change is written with supershader3d's `set` and drawn the next frame. A setting not at the value the
@@ -19,16 +23,21 @@
 //               world3d's course table, as pro-ng's looks studio draws them (`lookMesh`). The camera is put on it
 //               (`frame(middle, reach)`) each time one is picked.
 //   The address The picked material is the page's address's `material` key (`d.material.address`), written as it is
-//               picked, so a reload, or the build made again when pro-ng changes, comes back to it. With none, the
-//               first listed is picked.
+//               picked, so the next client, made when the page goes to the build made again, comes back to it, and so
+//               does a reload. With none, the first listed is picked. The filter is kept in the link's store.
 import type * as THREE from 'three'
 import type { Plugins } from '#engine/browser.ts'
 import { json } from '#plugins/loader/loader.sim.ts'
 
+// the link's store key the list's filter is kept under from one client to the next
+const FILTER = 'library.filter'
+
 type Knob = { label: string; min?: number; max?: number; step?: number; colour?: boolean }
 type Studio = { families: { name: string; materials: { name: string; look: string; at: number[] }[] }[] }
 type Sidecar = { faces: { corners: number[][]; normal: number[]; uv: number[][]; attributes?: Record<string, number[] | number[][]> }[]; courses?: { row: number; feet: number[]; wallDepth: number }[] }
-type Entry = { name: string; look: string; family: string; at: number[] }
+// `at`, its swatch's spot, for a material the build holds
+type Entry = { name: string; look: string; family: string; at?: number[] }
+type Row = { kind: string; data: { materials?: { name: string; look: string; family: string }[] } }
 
 export const MATERIAL_STYLE = `
   [data-panel="library list"], [data-panel="library knobs"] { background: #15171bf2; color: #e8e8e8; font: 13px system-ui; box-sizing: border-box; display: flex; flex-direction: column }
@@ -39,6 +48,7 @@ export const MATERIAL_STYLE = `
   [data-panel="library list"] .name { padding: 3px 10px 3px 16px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
   [data-panel="library list"] .name:hover { background: #222831 }
   [data-panel="library list"] .name.picked { background: #2d5d8f; color: #fff }
+  [data-panel="library list"] .name.unbuilt { color: #6b737c; font-style: italic }
   [data-panel="library knobs"] { padding: 12px; overflow-y: auto }
   [data-panel="library knobs"] h2 { margin: 0; font-size: 17px; word-break: break-word }
   [data-panel="library knobs"] .what { color: #9aa3ad; margin: 4px 0 12px }
@@ -68,9 +78,21 @@ export function material() {
 
   const worldOf = (plugins: Plugins): Record<string, any> => plugins.wire.scene.world!
   const has = (plugins: Plugins, name: string) => name in worldOf(plugins).loader.assets
-  // every material of the build, by its family, with its swatch's spot
-  const listOf = (plugins: Plugins): Entry[] =>
-    (json(plugins.wire, 'library.studio') as Studio).families.flatMap(f => f.materials.map(m => ({ name: m.name, look: m.look, family: f.name, at: m.at })))
+  // the row's materials the list was last made from
+  let live: string | undefined
+  const rowMaterials = (plugins: Plugins) => (plugins.wire.rows as Row[]).find(r => r.kind === 'library')?.data.materials
+  // the row's materials as one string, to tell a list read again from the same list sent again
+  const liveKey = (plugins: Plugins) => JSON.stringify(rowMaterials(plugins) ?? [])
+  // every material, by its family as the build lays them out (the kit's first), with its swatch's spot where the
+  // build holds it: the addon's live list, else (a truth in a tab) the build's own
+  const listOf = (plugins: Plugins): Entry[] => {
+    const built = (json(plugins.wire, 'library.studio') as Studio).families.flatMap(f => f.materials.map(m => ({ name: m.name, look: m.look, family: f.name, at: m.at })))
+    const fresh = rowMaterials(plugins)
+    if (!fresh?.length) return built
+    const at = new Map(built.map(e => [e.name, e.at]))
+    const families = [...new Set(fresh.map(m => m.family))].sort((a, b) => (a === 'kit' ? -1 : b === 'kit' ? 1 : 0))
+    return families.flatMap(f => fresh.filter(m => m.family === f).map(m => ({ ...m, at: at.get(m.name) })))
+  }
 
   // A look's own mesh (the looks studio's `lookMesh`): each face two triangles, wound so its front faces along its
   // normal, every attribute it names set by that name, one value the whole face or a list of four, one a corner; with
@@ -126,7 +148,7 @@ export function material() {
     sidecars = new Map()
     for (const e of entries!) {
       const mesh = own[e.look]
-      if (!mesh) continue
+      if (!mesh || !e.at) continue
       const id = ss.idOf(e.name)
       const drawn = new T.Mesh(sidecarMesh(T, mesh, [e.at[0], 0, e.at[2]], id, inputs), ss.material(ss.callOf(e.name)))
       drawn.userData.library = true
@@ -144,6 +166,8 @@ export function material() {
     for (const m of sidecars!.values()) m.visible = false
     if (alone) { plugins.render3d.scene.remove(alone); alone.geometry.dispose(); alone = undefined }
     const name = picked!
+    // a material the build does not hold has nothing to draw until the addon has built it in
+    if (!entries!.find(e => e.name === name)?.at) return
     let shown: THREE.Mesh
     const own = sidecars!.get(name)
     if (own) shown = own
@@ -205,7 +229,7 @@ export function material() {
         family = e.family
         names.append(Object.assign(document.createElement('div'), { className: 'family', textContent: family }))
       }
-      const row = Object.assign(document.createElement('div'), { className: e.name === picked ? 'name picked' : 'name', textContent: e.name, title: `${e.name} (${e.look})` })
+      const row = Object.assign(document.createElement('div'), { className: `name${e.name === picked ? ' picked' : ''}${e.at ? '' : ' unbuilt'}`, textContent: e.name, title: `${e.name} (${e.look})${e.at ? '' : ': not in this build yet'}` })
       row.dataset.name = e.name
       row.addEventListener('click', () => pick(plugins, d, e.name))
       names.append(row)
@@ -216,8 +240,9 @@ export function material() {
   const makeList = (plugins: Plugins, d: any) => {
     const host = document.createElement('div')
     host.style.cssText = 'display: contents'
-    const box = Object.assign(document.createElement('input'), { type: 'search', placeholder: 'filter: name, look or family' })
-    box.addEventListener('input', () => { filter = box.value; fillList(plugins, d) })
+    const box = Object.assign(document.createElement('input'), { type: 'search', placeholder: 'filter: name, look or family', value: filter })
+    // the filter kept in the link's store, so the next client, made when the page goes to a build, keeps it
+    box.addEventListener('input', () => { filter = box.value; plugins.scenemanager.link.store[FILTER] = filter; fillList(plugins, d) })
     host.append(box, Object.assign(document.createElement('div'), { className: 'count' }), Object.assign(document.createElement('div'), { className: 'names' }))
     listEl = host
     fillList(plugins, d)
@@ -229,6 +254,14 @@ export function material() {
     const T = plugins.render3d.THREE as typeof THREE
     const ss = plugins.supershader3d
     const e = entries!.find(q => q.name === picked)!
+    if (!e.at) {
+      knobsEl.replaceChildren(
+        Object.assign(document.createElement('h2'), { textContent: e.name }),
+        Object.assign(document.createElement('div'), { className: 'what', textContent: `${e.look} · ${e.family}` }),
+        Object.assign(document.createElement('p'), { className: 'none', textContent: 'not in this build yet: the server builds the catalogue again with every material of materials.json, and the page goes to it once it is done.' }),
+      )
+      return
+    }
     const knobs: Record<string, Knob> = (json(plugins.wire, 'library.knobs') as Record<string, Record<string, Knob>>)[e.name] ?? {}
     if (!built.has(e.name)) built.set(e.name, Object.fromEntries(Object.keys(knobs).map(k => [k, ss.setting(e.name, k)])))
     const was = built.get(e.name)!
@@ -289,9 +322,19 @@ export function material() {
       const dom = plugins.renderdom
       const ss = plugins.supershader3d
       if (!entries) {
+        filter = (plugins.scenemanager.link.store[FILTER] as string | undefined) ?? ''
+        live = liveKey(plugins)
         entries = listOf(plugins)
         const asked = new URL(location.href).searchParams.get(d.material.address)
         picked = entries.some(e => e.name === asked) ? asked! : entries[0].name
+        framing = true
+      } else if (liveKey(plugins) !== live) {
+        // materials.json read again by the addon (or first read, after the page came up): listed again
+        live = liveKey(plugins)
+        entries = listOf(plugins)
+        if (!entries.some(e => e.name === picked)) picked = entries[0].name
+        if (listEl) fillList(plugins, d)
+        fillKnobs(plugins, d)
         framing = true
       }
       dom.panel('library list', d.material.list)

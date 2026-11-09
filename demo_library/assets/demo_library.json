@@ -1,6 +1,7 @@
 {
  "library": {
   "address": "place",
+  "scene": "main",
   "bar": [0, 0, 1280, 36],
   "panel": [960, 36, 320, 684],
   "stats": [8, 650, 940, 64],

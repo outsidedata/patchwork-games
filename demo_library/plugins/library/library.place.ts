@@ -17,6 +17,10 @@
 //     so particle3d holds them as its own file's: the effects editor (`library.effects.ts`) writes that copy again
 //     with each change, and particle3d takes it as a written file. With `effectsOn` false it holds none of them, so no
 //     effect of the build is thrown (world3d throws a spawn once particle3d holds its effect).
+// `place` is also how a page goes to a build while it runs (`library.plugin.ts`'s `swap`): handed the scene its client
+// was made from, whose `world.loader` and `world.world3d` are the scene file's own objects, and a `version`, so every
+// url of the build carries `?v=<version>` and a build made again is read anew; the seat is then sent to its own scene,
+// and the next client is made from it.
 // `listed(scene)` writes the `library` entry alone, for a page with no place. Both read files with the loader's
 // `jsonAt`, so they are awaited before the boot: `chosen(scene)`, below, picks between them from the page's address
 // and is awaited by `main.sim.ts` as it is imported.
@@ -29,8 +33,8 @@ type SceneFile = { world: Record<string, any> }
 // Whether a file of the builds is there: a json file read, or none.
 const there = (name: string, url: string): Promise<any> => jsonAt(name, url).catch(() => undefined)
 
-export async function listed(scene: SceneFile): Promise<void> {
-  const url = `${BUILDS}library.json`
+export async function listed(scene: SceneFile, version?: number): Promise<void> {
+  const url = `${BUILDS}library.json${version === undefined ? '' : `?v=${version}`}`
   if (await there('library', url)) scene.world.loader.assets.library = { type: 'json', url, preload: true }
 }
 
@@ -58,28 +62,31 @@ export async function chosen(scene: SceneFile): Promise<void> {
   }
 }
 
-export async function place(scene: SceneFile, name: string, effectsOn = true): Promise<void> {
+export async function place(scene: SceneFile, name: string, effectsOn = true, version?: number): Promise<void> {
   const folder = `${BUILDS}${name}/`
+  // every file of the build at its url, with `?v=<version>` when one is given: the loader keeps a file by its url, so
+  // a build made again since the last time it was read is read anew under a version it has not seen
+  const at = (file: string) => `${folder}${file}${version === undefined ? '' : `?v=${version}`}`
   const assets: Record<string, { url: string } & Record<string, unknown>> = scene.world.loader.assets
   for (const [key, a] of Object.entries(assets)) if (a.url.startsWith(BUILDS)) delete assets[key]
   for (const part of ['glb', 'looks', 'clips', 'effects']) {
     const glb = part === 'glb'
-    assets[`${name}.${part}`] = { type: glb ? 'binary' : 'json', url: `${folder}${name}${glb ? '.glb' : `.${part}.json`}`, preload: true }
+    assets[`${name}.${part}`] = { type: glb ? 'binary' : 'json', url: at(`${name}${glb ? '.glb' : `.${part}.json`}`), preload: true }
   }
-  const looks = await jsonAt(`${name}.looks`, `${folder}${name}.looks.json`)
-  for (const p of looks.pictures) assets[p.asset] = { type: 'texture', url: `${folder}looks/${p.file}`, ...(p.colour ? {} : { space: 'linear' }), wrap: 'repeat', preload: true }
+  const looks = await jsonAt(`${name}.looks`, at(`${name}.looks.json`))
+  for (const p of looks.pictures) assets[p.asset] = { type: 'texture', url: at(`looks/${p.file}`), ...(p.colour ? {} : { space: 'linear' }), wrap: 'repeat', preload: true }
   scene.world.world3d.place = name
-  await listed(scene)
+  await listed(scene, version)
   for (const [key, file] of [
     ['library.kit', `${name}.kit.json`], ['library.made', `${name}.scene.json`], ['library.knobs', `${name}.knobs.json`],
     ['library.proof', `${name}.proof.json`], ['library.shapes', `${name}.shapes3d.json`], ['library.nav', `${name}.nav.json`],
     ['library.studio', `${name}.studio.json`], ['library.sidecars', `${name}.sidecars.json`],
   ]) {
-    const url = `${folder}${file}`
+    const url = at(file)
     if (await there(key, url)) assets[key] = { type: 'json', url, preload: true }
   }
   const effectsUrl = assets[scene.world.particle3d.effects].url
   const effects = await jsonAt(scene.world.particle3d.effects, effectsUrl)
-  const built = await jsonAt(`${name}.effects`, `${folder}${name}.effects.json`)
+  const built = await jsonAt(`${name}.effects`, at(`${name}.effects.json`))
   written(effectsUrl, JSON.stringify({ ...effects, effects: effectsOn ? { ...effects.effects, ...built.effects } : effects.effects }))
 }
