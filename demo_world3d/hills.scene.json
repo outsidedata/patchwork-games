@@ -176,6 +176,20 @@
     "particle3d": {
       "effects": "effects"
     },
+    "lights3d": {
+      "grid": [
+        16,
+        9
+      ],
+      "slices": 24,
+      "shadows": {
+        "atlas": 4096,
+        "tile": 256,
+        "bias": 0.04,
+        "normalBias": 0.05,
+        "budget": 48
+      }
+    },
     "supershader3d": {
       "mods": {
         "looks": "world3d",
@@ -640,6 +654,7 @@
     "particle3d",
     "world3d",
     "render3d",
+    "lights3d",
     "chasecamera3d"
   ],
   "seats": 1,
