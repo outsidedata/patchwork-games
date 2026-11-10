@@ -1,5 +1,5 @@
-// The floor's look: a square of `size` metres of `colour` and `roughness`, which takes the shadows and
-// the particles' light, and over it a grid of `grid.size` metres cut `grid.divisions` times, its lines
+// The floor's look: a square of `size` metres of `colour` and `roughness`, which takes the shadows, and over
+// it a grid of `grid.size` metres cut `grid.divisions` times, its lines
 // `grid.lines` and its middle lines `grid.centre`, `grid.lift` metres up so it never fights the floor
 // (`assets/demo_particle3d.json`).
 import type * as THREE from 'three'

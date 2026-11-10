@@ -1,6 +1,5 @@
 // A block's look: a box of its row's `size`, its bottom's middle on its row's `pos`, of the
-// definition's `colour` and `roughness` (`assets/demo_particle3d.json`), casting and taking shadows
-// and lit by the particles' lights.
+// definition's `colour` and `roughness` (`assets/demo_particle3d.json`), casting and taking shadows.
 import type * as THREE from 'three'
 import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'

@@ -6,12 +6,12 @@ marks. Each number key fires one:
 
 | key | effect | what it shows |
 |---|---|---|
-| 1 | blast | an explosion: a flash that lights the yard, a shock ring, a fireball that cools from orange to red, smoke, dust, stretched sparks and debris that fall and come to rest on the ground |
-| 2 | sparks | three seconds of welding sparks: a stream of stretched sparks under gravity, a flickering lit glow, wisps of smoke |
+| 1 | blast | an explosion: a flash, a shock ring, a fireball that cools from orange to red, smoke, dust, stretched sparks and debris that fall and come to rest on the ground |
+| 2 | sparks | three seconds of welding sparks: a stream of stretched sparks under gravity, a flickering glow, wisps of smoke |
 | 3 | smoke | eight seconds of a smoke column: puffs that grow, rise, spin and thin out, a fire at the base, embers |
 | 4 | gun | a muzzle flash at the craft's gun, and a tracer that flies to the aim and throws an impact where it lands |
 | 5 | laser | a beam from the gun to the aim, burning the ground where it hits; the craft keeps it on the gun and the aim, so it sweeps as you turn |
-| 6 | flares | coloured flares that each carry a real point light (lights3d), lighting the ground and the blocks round them |
+| 6 | flares | coloured flares |
 | 7 | comet | a comet row that spirals out and circles the aim; its trail is an effect that rides the row, and when the row ends the trail throws a burst where it was |
 | 8 | rocket | a rocket that flies from the gun to the aim and throws a blast and smoke where it lands |
 | 9 | torch | twenty seconds of a torch: flames, embers and smoke over a `lamp` layer, one flickering light at the effect that casts shadows of the blocks round it (lights3d) |
