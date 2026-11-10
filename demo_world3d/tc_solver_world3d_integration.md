@@ -69,7 +69,19 @@ every person with a class, with their identity, class, record and landmark, in t
 
 The game loads the place and brings each person in at their landmark as their class's kind, and the kind loads their
 record from the TrinityCore-shaped data: the quest giver their quests, the smith their stock, the boss their script.
-Today `assets/hills/hills.mmo3d.json` places the old woman, the smith and the priest by hand; this chain writes them.
+Today `assets/hills/hills.mmo3d.json` places the old woman, the smith and the priest by hand, each at a typed
+position:
+
+```json
+{ "kind": "smith", "at": [71.6, 11.45, -108.4], "yaw": 3.6 }
+```
+
+Each placement's `at` becomes the identity of the person the solvers placed, and the game reads where they stand, and
+which way they face, from the compiled place:
+
+```json
+{ "kind": "smith", "record": "hills", "at": "village-terrain3d.smithy 1.smith 1" }
+```
 
 ## What has to be built
 
