@@ -58,6 +58,9 @@
 //                 (`plugins/anim/anim.export.py`). crowd3d plays idle, walk and run; anim plays by the table
 //                 the export measures on castle_walker, the rig's first body, written back into the rig in
 //                 the rig's own layout (`.claude/skills/using-mixamo-assets/scripts/merge-table.mjs`).
+//   xbot.glb, xbot.rig.baked.json, xbot.motion3d.baked.json
+//                 the hills' hero, as demo_motion3d bakes it: Mixamo's X Bot with every clip of `xbot.rig.json`,
+//                 the rig's measures, and each clip's offsets from `xbot.motion3d.json` (`motion3d.offsets.ts`)
 // The rig's clips are read from ~/troupe-collection, its bodies from the paths its `bodies` give.
 import fs from 'node:fs'
 import path from 'node:path'
@@ -182,4 +185,17 @@ export default async ({ blender, scratch, library }: Tools) => {
   for (const body of Object.keys(player.bodies)) console.log('wrote', path.relative(root, path.join(here, `${body}.glb`)))
   execFileSync(process.execPath, [merge, file, table, file], { stdio: 'inherit' })
   console.log('wrote', path.relative(root, file), 'its table')
+
+  // the hills' hero, copied from demo_motion3d's bake: Mixamo's X Bot with every clip of `xbot.rig.json` baked onto
+  // it, the rig's measures, and each clip's offsets from `xbot.motion3d.json`
+  const xrig = path.join(here, 'xbot.rig.json'), xtable = scratch('xbot.table.json'), xglb = path.join(here, 'xbot.glb')
+  await blender(['--factory-startup', '--python-exit-code', '1', '--python', exporter, '--', xrig, xtable, `xbot=${xglb}`])
+  console.log('wrote', path.relative(root, xglb))
+  const xmerged = scratch('xbot.merged.json')
+  execFileSync(process.execPath, [merge, xrig, xtable, xmerged], { stdio: 'inherit' })
+  const { table: measured, ends, grips, touches } = JSON.parse(fs.readFileSync(xmerged, 'utf8'))
+  const xbaked = path.join(here, 'xbot.rig.baked.json')
+  fs.writeFileSync(xbaked, JSON.stringify({ table: measured, ends, grips, touches }) + '\n')
+  console.log('wrote', path.relative(root, xbaked))
+  execFileSync(process.execPath, ['--experimental-strip-types', path.join(root, 'plugins', 'motion3d', 'motion3d.offsets.ts'), xrig, path.join(here, 'xbot.motion3d.json')], { stdio: 'inherit' })
 }

@@ -1,12 +1,46 @@
 {
   "world": {
     "seed": 11,
-    "defs": "demo_world3d",
+    "defs": "hills",
+    "player": {
+      "deadzone": 0.2,
+      "resolution": 32
+    },
     "loader": {
       "assets": {
-        "demo_world3d": {
+        "hills": {
           "type": "json",
-          "url": "/games/demo_world3d/assets/demo_world3d.json",
+          "url": "/games/demo_world3d/assets/hills/hills.json",
+          "preload": true
+        },
+        "xbot-rig": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/xbot.rig.json",
+          "preload": true
+        },
+        "xbot-rig-baked": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/xbot.rig.baked.json",
+          "preload": true
+        },
+        "xbot": {
+          "type": "model",
+          "url": "/games/demo_world3d/assets/xbot.glb",
+          "preload": true
+        },
+        "xbot-glb": {
+          "type": "binary",
+          "url": "/games/demo_world3d/assets/xbot.glb",
+          "preload": true
+        },
+        "xbot-motion3d": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/xbot.motion3d.json",
+          "preload": true
+        },
+        "xbot-motion3d-baked": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/xbot.motion3d.baked.json",
           "preload": true
         },
         "field": {
@@ -24,11 +58,6 @@
           "url": "/games/demo_world3d/assets/ground/grass-normal-2048.webp",
           "space": "linear",
           "wrap": "repeat"
-        },
-        "heroRig": {
-          "type": "json",
-          "url": "/games/demo_world3d/assets/player.rig.json",
-          "preload": true
         },
         "castle_walker": {
           "type": "model",
@@ -472,58 +501,16 @@
         }
       }
     },
-    "walker": {
+    "motion3d": {
       "kinds": {
-        "player": {
-          "radius": 0.3,
-          "height": 1.75,
-          "accel": 12,
-          "airAccel": 2,
-          "turnRate": 14,
-          "gravity": 20,
-          "jumpH": 1.1,
-          "step": 0.45,
-          "maxSlope": 0.9,
-          "slopeBand": 0.2,
-          "slide": 4,
-          "wade": 0.8,
-          "span": 0.3,
-          "probe": 0.5,
-          "seekSpeed": 3
-        }
-      },
-      "mods": {
-        "behaviors": "shapes3d"
-      }
-    },
-    "anim": {
-      "still": 0.05,
-      "shift": 0.75,
-      "leap": 0.5,
-      "landFall": 7.5,
-      "moves": 0.05,
-      "turns": 30,
-      "kinds": {
-        "player": {
-          "rig": "heroRig",
-          "model": "castle_walker",
-          "fade": 0.15,
-          "props": [
-            {
-              "model": "torch",
-              "bone": "LeftHand",
-              "at": [
-                0.175,
-                0.065,
-                0.015
-              ],
-              "turn": [
-                0,
-                0,
-                84
-              ]
-            }
-          ],
+        "xbot": {
+          "motion": "xbot-motion3d",
+          "baked": "xbot-motion3d-baked",
+          "rig": "xbot-rig",
+          "measured": "xbot-rig-baked",
+          "model": "xbot",
+          "glb": "xbot-glb",
+          "fade": 0.2,
           "reads": {
             "pos": "pos",
             "yaw": "yaw",
@@ -532,6 +519,75 @@
             "limp": "limp"
           }
         }
+      },
+      "anywhere": {
+        "shape": {
+          "box": {
+            "size": [
+              1000000000,
+              1000000000,
+              1000000000
+            ]
+          }
+        },
+        "activities": [
+          "walk",
+          "roll"
+        ],
+        "priority": 0,
+        "data": {
+          "motion3d": {
+            "autoChange": true
+          }
+        }
+      },
+      "ease": 0.15
+    },
+    "kinematics3d": {
+      "kinds": {
+        "xbot": {
+          "triangles": {
+            "radius": 0.3,
+            "height": 1.8,
+            "step": 0.45,
+            "maxSlope": 0.9,
+            "slopeBand": 0.2,
+            "slide": 4,
+            "wade": 0.8,
+            "span": 0.3,
+            "probe": 0.5
+          },
+          "move": {
+            "accel": 12,
+            "turnRate": 12,
+            "still": 0.05
+          },
+          "fall": {
+            "gravity": 20,
+            "airAccel": 2
+          },
+          "jump": {
+            "jumpH": 2,
+            "jumpVelocityBoostMagnitude": 2
+          }
+        }
+      },
+      "mods": {
+        "behaviors": [
+          "shapes3d",
+          "terrain3d",
+          "motion3d"
+        ],
+        "solids": [
+          "shapes3d"
+        ],
+        "footprints": [
+          "shapes3d"
+        ],
+        "states": [
+          "motion3d",
+          "hero"
+        ]
       }
     },
     "nav3d": {
@@ -581,7 +637,8 @@
     },
     "shipped": {
       "plugins": [
-        "fortress"
+        "fortress",
+        "hero"
       ]
     },
     "skydome3d": {
@@ -644,7 +701,7 @@
     "terrain3d",
     "shipped",
     "crowd3d",
-    "anim",
+    "motion3d",
     "npc3d",
     "nav3d",
     "instances3d",
@@ -719,41 +776,25 @@
     "player": {
       "seat": 0,
       "stood": false,
-      "pos": [
-        0,
-        0,
-        0
-      ],
-      "yaw": 0,
-      "vel": [
-        0,
-        0,
-        0
-      ],
-      "grounded": false,
-      "sliding": false,
-      "speed": 0,
-      "side": 0,
-      "turned": 0,
-      "want": [
-        0,
-        0
-      ],
-      "face": null,
-      "jump": false,
+      "as": "xbot",
       "stick": [
         0,
         0
       ],
-      "slow": false,
+      "turning": [
+        0,
+        0
+      ],
+      "fast": false,
+      "guard": false,
+      "weapon": "",
+      "queued": null,
       "look": {
         "yaw": 0,
-        "pitch": 0.25,
-        "dist": 6
+        "pitch": 0.35,
+        "dist": 5
       },
-      "lift": 1.5,
-      "limp": false,
-      "rig": "torch"
+      "lift": 1.4
     },
     "visitor": {
       "pos": [
