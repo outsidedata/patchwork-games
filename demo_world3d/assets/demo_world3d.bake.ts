@@ -88,12 +88,14 @@ const merge = path.join(root, '.claude', 'skills', 'using-mixamo-assets', 'scrip
 // the land of its field: its solver is handed the field, its own earlier layers taken out, and the point [x, z] on it
 // its (0, 0) stands at (its asks' `ground`, the library's stronghold/src/lib/util/ground.mjs, which makes the land
 // with core's own terrain3d, `PATCHWORK_CORE`), and the layer it hands back, what it cut into the land, is the place's
-// painted layer in place of one flatten under the whole place.
-const PLACES: { pro?: string; stronghold?: string; folder: string; scene: string; field: string; at?: [number, number] }[] = [
+// painted layer in place of one flatten under the whole place. A stronghold place's `overrides` (under this folder) is
+// its override strings, `{ "<key chain>": value }`, handed to its solver in its asks: each one either resolves on
+// what the solvers placed or is refused in the run, by its key chain.
+const PLACES: { pro?: string; stronghold?: string; folder: string; scene: string; field: string; at?: [number, number]; overrides?: string }[] = [
   { pro: 'castle/smallville/smallville.town', folder: '', scene: 'main.scene.json', field: 'demo_world3d.field.json' },
   { stronghold: 'winterfell/village', folder: 'village', scene: 'village.scene.json', field: 'village/village.field.json' },
   { stronghold: 'winterfell/tavern', folder: 'tavern', scene: 'tavern.scene.json', field: 'tavern/tavern.field.json' },
-  { stronghold: 'winterfell/village-terrain3d', folder: 'hills', scene: 'hills.scene.json', field: 'hills/hills.field.json', at: [0, 0] },
+  { stronghold: 'winterfell/village-terrain3d', folder: 'hills', scene: 'hills.scene.json', field: 'hills/hills.field.json', at: [0, 0], overrides: 'hills/hills.overrides.json' },
 ]
 // what pro-ng's build writes for a scene, each `<name><suffix>`
 const MADE = ['.glb', '.looks.json', '.clips.json', '.shapes3d.json', '.nav.json', '.terrain3d_layers.json', '.hollows.json', '.effects.json', '.crowd.json']
@@ -111,7 +113,8 @@ export default async ({ blender, scratch, library }: Tools) => {
       const land = scratch(`${name}.land.json`)
       fs.writeFileSync(land, JSON.stringify({ ...JSON.parse(fs.readFileSync(path.join(here, place.field), 'utf8')), layers: [] }))
       const asks = scratch(`${name}.asks.json`)
-      fs.writeFileSync(asks, JSON.stringify({ ground: { field: land, at: place.at } }))
+      const overrides = place.overrides ? JSON.parse(fs.readFileSync(path.join(here, place.overrides), 'utf8')) : {}
+      fs.writeFileSync(asks, JSON.stringify({ ground: { field: land, at: place.at }, overrides }))
       execFileSync(process.execPath, [path.join(library, 'stronghold', 'build.mjs'), place.stronghold!, out, '--config', asks], { stdio: 'inherit', env: { ...process.env, PATCHWORK_CORE: root } })
     }
     else execFileSync(process.execPath, [path.join(library, 'stronghold', 'build.mjs'), place.stronghold!, out], { stdio: 'inherit' })

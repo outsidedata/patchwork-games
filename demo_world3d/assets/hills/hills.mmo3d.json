@@ -2,16 +2,20 @@
   "landmarks": "village-terrain3d.art.crowd",
   "facts": {},
   "placements": [
-    { "kind": "old_woman", "at": [97.79, 11.042, -70.28], "yaw": 1.5708 },
-    { "kind": "smith", "at": [71.6, 11.45, -108.4], "yaw": 3.6 },
-    { "kind": "priest", "at": [73.44, 12.098, -75.81], "yaw": 4.7124 },
-    { "kind": "barrow_king", "at": [31.3, 22.7, -63.3], "yaw": 0.785, "when": "world.barrow.woken == 1" }
-  ],
-  "spawns": [
-    { "kind": "zombie", "at": [100.79, 12, -77.28], "count": 3, "spread": 4, "respawn": 30, "when": "!world.graves.cleared" },
-    { "kind": "zombie_man", "at": [103.29, 12, -77.28], "count": 2, "spread": 4, "respawn": 45, "when": "!world.graves.cleared" }
+    { "kind": "old_woman", "record": "hills", "at": "village-terrain3d.old_woman 1" },
+    { "kind": "smith", "record": "hills", "at": "village-terrain3d.smithy 1.smith 1" },
+    { "kind": "priest", "record": "hills", "at": "village-terrain3d.chapel 1.priest 1" },
+    { "kind": "barrow_king", "record": "hills", "at": "village-terrain3d.barrow 1.barrow_king 1", "when": "world.barrow.woken == 1" },
+    { "kind": "zombie", "at": "village-terrain3d.graveyard 1.zombie 1", "respawn": 30, "when": "!world.graves.cleared" },
+    { "kind": "zombie", "at": "village-terrain3d.graveyard 1.zombie 2", "respawn": 30, "when": "!world.graves.cleared" },
+    { "kind": "zombie", "at": "village-terrain3d.graveyard 1.zombie 3", "respawn": 30, "when": "!world.graves.cleared" },
+    { "kind": "zombie_man", "at": "village-terrain3d.graveyard 1.zombie_man 1", "respawn": 45, "when": "!world.graves.cleared" },
+    { "kind": "zombie_man", "at": "village-terrain3d.graveyard 1.zombie_man 2", "respawn": 45, "when": "!world.graves.cleared" },
+    { "kind": "zombie", "at": "village-terrain3d.barrow 1.zombie 1", "when": "world.barrow.risen == 1" },
+    { "kind": "zombie", "at": "village-terrain3d.barrow 1.zombie 2", "when": "world.barrow.risen == 1" },
+    { "kind": "zombie", "at": "village-terrain3d.barrow 1.zombie 3", "when": "world.barrow.risen == 1" }
   ],
   "zones": [
-    { "name": "barrow", "at": [38.3, 21.7, -56.3], "radius": 8, "set": { "world.barrow.woken": 1 }, "when": "world.barrow.woken == 0" }
+    { "name": "barrow", "at": "village-terrain3d.barrow 1", "radius": 8, "set": { "world.barrow.woken": 1 }, "when": "world.barrow.woken == 0" }
   ]
 }

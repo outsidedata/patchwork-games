@@ -6,7 +6,7 @@
       { "id": 3, "event": { "updateIc": { "min": 4, "max": 6, "repeatMin": 6, "repeatMax": 9 } }, "phases": [1], "chance": 100, "once": false, "action": { "cast": { "ability": "cleave" } }, "target": { "victim": {} }, "link": null },
       { "id": 4, "event": { "healthPct": { "min": 0, "max": 50 } }, "phases": [1], "chance": 100, "once": true, "action": { "setPhase": { "phase": 2 } }, "target": { "self": {} }, "link": 5 },
       { "id": 5, "event": { "link": {} }, "phases": [], "chance": 100, "once": false, "action": { "talk": { "line": "Rise, my servants!", "for": 3 } }, "target": { "self": {} }, "link": 6 },
-      { "id": 6, "event": { "link": {} }, "phases": [], "chance": 100, "once": false, "action": { "summon": { "kind": "zombie", "count": 3, "spread": 4 } }, "target": { "self": {} }, "link": null },
+      { "id": 6, "event": { "link": {} }, "phases": [], "chance": 100, "once": false, "action": { "setFact": { "fact": "world.barrow.risen", "value": 1 } }, "target": { "self": {} }, "link": null },
       { "id": 7, "event": { "updateIc": { "min": 2, "max": 3, "repeatMin": 7, "repeatMax": 9 } }, "phases": [2], "chance": 100, "once": false, "action": { "cast": { "ability": "slam" } }, "target": { "playersNear": { "range": 4 } }, "link": null },
       { "id": 8, "event": { "updateIc": { "min": 5, "max": 7, "repeatMin": 6, "repeatMax": 9 } }, "phases": [2], "chance": 100, "once": false, "action": { "cast": { "ability": "cleave" } }, "target": { "victim": {} }, "link": null },
       { "id": 9, "event": { "death": {} }, "phases": [], "chance": 100, "once": true, "action": { "setFact": { "fact": "world.barrow.woken", "value": 2 } }, "target": { "self": {} }, "link": 10 },

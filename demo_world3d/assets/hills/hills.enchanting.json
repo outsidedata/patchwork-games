@@ -9,6 +9,6 @@
     }
   },
   "enchanters": {
-    "priest": ["blessedEdge"]
+    "priest": { "hills": ["blessedEdge"] }
   }
 }

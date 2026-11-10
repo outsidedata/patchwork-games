@@ -176,6 +176,11 @@ not placed: the story asked for a person this world does not have. Every failure
 - **A key chain names no person.** `tavern 1.tavern_speaker 10.class` in a tavern that placed nine speakers: the
   tavern refuses it, and its check reads `people overridden: 9 of 10`. The run fails.
 
+Either can come first. A story can name people and places no solver places yet (the barrow and its king): the line
+goes into the overrides anyway, the run refuses it by its key chain, and it lands the day a solver places what it
+names. A solver can place people no story names yet: they are part of the living world. Nobody waits on anybody, and
+nothing is lost going back and forth.
+
 A refusal names the exact key chain that missed, so the fix is to nudge one value and solve again: make the tavern
 bigger (`village-terrain3d.tavern 1.width = 24`), tick the smithy on the menu, try the next seed. The run says
 whether the story lands now.

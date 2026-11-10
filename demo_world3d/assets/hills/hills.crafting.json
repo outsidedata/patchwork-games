@@ -4,10 +4,10 @@
       "name": "Iron sword",
       "reagents": [{ "item": "ironBar", "count": 4 }, { "item": "rustySword", "count": 1 }],
       "creates": { "item": "ironSword", "count": 1 },
-      "focus": { "at": "smithy/smithy_anvil", "reach": 5.5 }
+      "focus": { "at": "village-terrain3d.smithy 1.smithy_anvil", "reach": 5.5 }
     }
   },
   "trainers": {
-    "smith": [{ "recipe": "ironSword", "cost": 10 }]
+    "smith": { "hills": [{ "recipe": "ironSword", "cost": 10 }] }
   }
 }

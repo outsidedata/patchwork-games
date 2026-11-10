@@ -3,6 +3,7 @@
     {
       "name": "oldWomanHello",
       "who": "old_woman",
+      "record": "hills",
       "concept": "hello",
       "criteria": [],
       "say": ["Mind the graves east of here, stranger. The dead don't lie still any more.", "Keep away from the graves, if you've any sense."],
@@ -13,6 +14,7 @@
     {
       "name": "oldWomanHelloHeard",
       "who": "old_woman",
+      "record": "hills",
       "concept": "hello",
       "criteria": ["heard.graves", "quest.graves == 0"],
       "say": ["Back again? The graves are still restless."],
@@ -23,6 +25,7 @@
     {
       "name": "oldWomanHelloTaken",
       "who": "old_woman",
+      "record": "hills",
       "concept": "hello",
       "criteria": ["quest.graves == 3"],
       "say": ["The graves are still stirring. Five of them, I said."],
@@ -33,6 +36,7 @@
     {
       "name": "oldWomanHelloDone",
       "who": "old_woman",
+      "record": "hills",
       "concept": "hello",
       "criteria": ["quest.graves == 1"],
       "say": ["I heard you out there, putting them down. Is it done?"],
@@ -43,6 +47,7 @@
     {
       "name": "oldWomanHelloQuiet",
       "who": "old_woman",
+      "record": "hills",
       "concept": "hello",
       "criteria": ["quest.graves == 6"],
       "say": ["The graves are quiet. I slept the whole night through.", "Quiet out east now, thanks to you."],
@@ -53,6 +58,7 @@
     {
       "name": "oldWomanHelloHurt",
       "who": "old_woman",
+      "record": "hills",
       "concept": "hello",
       "criteria": ["gas.health < 4", "!tag.burning"],
       "say": ["You're bleeding! Sit, let me see to it."],
@@ -63,6 +69,7 @@
     {
       "name": "oldWomanHelloBurning",
       "who": "old_woman",
+      "record": "hills",
       "concept": "hello",
       "criteria": ["tag.burning", "gas.health > 0"],
       "say": ["You're on fire! Roll, you fool!"],
@@ -73,6 +80,7 @@
     {
       "name": "oldWomanGraves",
       "who": "old_woman",
+      "record": "hills",
       "concept": "graves",
       "criteria": [],
       "say": ["Something under the barrow to the west wakes them. Put down five of them and they'll trouble us less."],
@@ -83,6 +91,7 @@
     {
       "name": "oldWomanGravesTaken",
       "who": "old_woman",
+      "record": "hills",
       "concept": "graves",
       "criteria": ["quest.graves != 0"],
       "say": ["Something under the barrow to the west wakes them. That's all I know."],
@@ -93,6 +102,7 @@
     {
       "name": "oldWomanTakeGraves",
       "who": "old_woman",
+      "record": "hills",
       "concept": "takeGraves",
       "criteria": ["quest.graves == 0"],
       "say": ["Bless you. Five of them, out in the graves east of here. Come back when it's done."],
@@ -103,6 +113,7 @@
     {
       "name": "oldWomanHandGraves",
       "who": "old_woman",
+      "record": "hills",
       "concept": "handGraves",
       "criteria": ["quest.graves == 1"],
       "say": ["You've done it. Here, it's not much, but take it. The graves will rest now."],
@@ -113,6 +124,7 @@
     {
       "name": "smithHello",
       "who": "smith",
+      "record": "hills",
       "concept": "hello",
       "criteria": [],
       "say": ["Iron, blades, leather. What'll it be?", "Mind the sparks."],
@@ -127,6 +139,7 @@
     {
       "name": "smithShop",
       "who": "smith",
+      "record": "hills",
       "concept": "smithShop",
       "criteria": [],
       "say": ["Have a look. I'll buy your junk too, if it's not too rotten."],
@@ -137,6 +150,7 @@
     {
       "name": "smithTrain",
       "who": "smith",
+      "record": "hills",
       "concept": "smithTrain",
       "criteria": [],
       "say": ["Four bars and an old blade to fold into it, at my anvil. I'll show you how, for a fee."],
@@ -147,6 +161,7 @@
     {
       "name": "smithBye",
       "who": "smith",
+      "record": "hills",
       "concept": "bye",
       "criteria": [],
       "say": ["Come back when that edge dulls."],
@@ -157,6 +172,7 @@
     {
       "name": "priestHello",
       "who": "priest",
+      "record": "hills",
       "concept": "hello",
       "criteria": [],
       "say": ["Peace to you. Bring me a blade and something of the grave's, and I'll bless it."],
@@ -167,6 +183,7 @@
     {
       "name": "priestHelloRestless",
       "who": "priest",
+      "record": "hills",
       "concept": "hello",
       "criteria": ["!world.graves.cleared"],
       "say": ["The graves stir again. A blessed edge puts the dead down quicker."],
@@ -177,6 +194,7 @@
     {
       "name": "priestBless",
       "who": "priest",
+      "record": "hills",
       "concept": "priestBless",
       "criteria": [],
       "say": ["A grave ring and ten gold for the chapel. Show me the blade."],
@@ -187,6 +205,7 @@
     {
       "name": "priestBye",
       "who": "priest",
+      "record": "hills",
       "concept": "bye",
       "criteria": [],
       "say": ["Go in peace."],
@@ -197,6 +216,7 @@
     {
       "name": "oldWomanBye",
       "who": "old_woman",
+      "record": "hills",
       "concept": "bye",
       "criteria": [],
       "say": ["Go carefully.", "Mind yourself."],
