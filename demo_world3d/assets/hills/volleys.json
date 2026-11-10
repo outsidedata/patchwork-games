@@ -1,0 +1,5 @@
+{
+  "patterns": {
+    "firebolt": { "speed": 18, "life": 3, "radius": 0.25, "look": { "body": "firebolt", "trail": "firetrail", "burst": "fireburst" } }
+  }
+}

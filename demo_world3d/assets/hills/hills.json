@@ -10,12 +10,22 @@
       "guard": [],
       "motions": {
         "jump": [" ", "Pad0"],
-        "use": ["e", "Pad2"]
+        "use": ["e", "Pad2"],
+        "light": ["j", "Mouse0", "Pad5"],
+        "heavy": ["k", "Pad10"],
+        "skill": ["r", "Pad6"]
       },
+      "target": ["Tab", "Pad4"],
       "nearer": ["Pad12"],
       "further": ["Pad13"],
       "drag": "Mouse2"
     },
+    "attributes": { "health": 10, "maxHealth": 10, "mana": 60, "maxMana": 60 },
+    "effects": ["manaRegen"],
+    "abilities": ["jab", "kick", "firebolt"],
+    "target": { "range": 30 },
+    "ring": { "inner": 0.45, "outer": 0.6, "colour": "#ffd400" },
+    "cast": { "ahead": 0.6, "up": 1.4, "aimUp": 1.2 },
     "weapons": [],
     "aimOf": {},
     "buffer": {

@@ -38,6 +38,36 @@
           "url": "/games/demo_world3d/assets/xbot.motion3d.json",
           "preload": true
         },
+        "zombie": {
+          "type": "model",
+          "url": "/games/demo_world3d/assets/zombie.glb",
+          "preload": true
+        },
+        "gas3d": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/hills/hills.gas3d.json",
+          "preload": true
+        },
+        "mmo3d": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/hills/hills.mmo3d.json",
+          "preload": true
+        },
+        "volleys": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/hills/volleys.json",
+          "preload": true
+        },
+        "zombie_man": {
+          "type": "model",
+          "url": "/games/demo_world3d/assets/zombie_man.glb",
+          "preload": true
+        },
+        "zombieRig": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/zombie.rig.json",
+          "preload": true
+        },
         "xbot-motion3d-baked": {
           "type": "json",
           "url": "/games/demo_world3d/assets/xbot.motion3d.baked.json",
@@ -204,6 +234,38 @@
     },
     "particle3d": {
       "effects": "effects"
+    },
+    "mmo3d": {
+      "file": "mmo3d"
+    },
+    "gas3d": {
+      "file": "gas3d",
+      "cueUp": 1
+    },
+    "hitscan3d": {
+      "kinds": {
+        "mob": {
+          "off": "dead"
+        }
+      },
+      "rewind": 30,
+      "mods": {
+        "ground": "terrain3d",
+        "solids": [
+          "shapes3d",
+          "lod3d"
+        ],
+        "bodies": "mmo3d",
+        "behaviors": "shapes3d"
+      }
+    },
+    "volley3d": {
+      "patterns": "volleys",
+      "hold": 0.5,
+      "mods": {
+        "shoot": "hitscan3d",
+        "bodies": "hitscan3d"
+      }
     },
     "lights3d": {
       "grid": [
@@ -501,6 +563,81 @@
         }
       }
     },
+    "walker": {
+      "kinds": {
+        "zombie": {
+          "radius": 0.3,
+          "height": 1.75,
+          "accel": 12,
+          "airAccel": 2,
+          "turnRate": 14,
+          "gravity": 20,
+          "jumpH": 1.1,
+          "step": 0.45,
+          "maxSlope": 0.9,
+          "slopeBand": 0.2,
+          "slide": 4,
+          "wade": 0.8,
+          "span": 0.3,
+          "probe": 0.5,
+          "seekSpeed": 3
+        },
+        "zombie_man": {
+          "radius": 0.3,
+          "height": 1.75,
+          "accel": 12,
+          "airAccel": 2,
+          "turnRate": 14,
+          "gravity": 20,
+          "jumpH": 1.1,
+          "step": 0.45,
+          "maxSlope": 0.9,
+          "slopeBand": 0.2,
+          "slide": 4,
+          "wade": 0.8,
+          "span": 0.3,
+          "probe": 0.5,
+          "seekSpeed": 3
+        }
+      },
+      "mods": {
+        "behaviors": "shapes3d"
+      }
+    },
+    "anim": {
+      "still": 0.05,
+      "shift": 0.75,
+      "leap": 0.5,
+      "landFall": 7.5,
+      "moves": 0.05,
+      "turns": 30,
+      "kinds": {
+        "zombie": {
+          "rig": "zombieRig",
+          "model": "zombie",
+          "fade": 0.15,
+          "reads": {
+            "pos": "pos",
+            "yaw": "yaw",
+            "vel": "vel",
+            "grounded": "grounded",
+            "limp": "limp"
+          }
+        },
+        "zombie_man": {
+          "rig": "zombieRig",
+          "model": "zombie_man",
+          "fade": 0.15,
+          "reads": {
+            "pos": "pos",
+            "yaw": "yaw",
+            "vel": "vel",
+            "grounded": "grounded",
+            "limp": "limp"
+          }
+        }
+      }
+    },
     "motion3d": {
       "kinds": {
         "xbot": {
@@ -532,7 +669,8 @@
         },
         "activities": [
           "walk",
-          "roll"
+          "roll",
+          "fight"
         ],
         "priority": 0,
         "data": {
@@ -638,7 +776,9 @@
     "shipped": {
       "plugins": [
         "fortress",
-        "hero"
+        "hero",
+        "mmo3d",
+        "gas3d"
       ]
     },
     "skydome3d": {
@@ -701,6 +841,7 @@
     "terrain3d",
     "shipped",
     "crowd3d",
+    "anim",
     "motion3d",
     "npc3d",
     "nav3d",
@@ -708,6 +849,8 @@
     "lod3d",
     "solids",
     "skydome3d",
+    "hitscan3d",
+    "volley3d",
     "particle3d",
     "world3d",
     "render3d",
@@ -789,12 +932,52 @@
       "guard": false,
       "weapon": "",
       "queued": null,
+      "casts": 0,
+      "gas": null,
+      "casting": null,
+      "target": null,
       "look": {
         "yaw": 0,
         "pitch": 0.35,
         "dist": 5
       },
       "lift": 1.4
+    },
+    "mmo3d": {
+      "placed": false
+    },
+    "mob": {
+      "template": "",
+      "as": "",
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0,
+      "vel": [
+        0,
+        0,
+        0
+      ],
+      "grounded": false,
+      "sliding": false,
+      "speed": 0,
+      "side": 0,
+      "turned": 0,
+      "want": [
+        0,
+        0
+      ],
+      "face": null,
+      "jump": false,
+      "limp": false,
+      "gas": null,
+      "dead": false
+    },
+    "volley3d": {
+      "next": 1,
+      "live": []
     },
     "visitor": {
       "pos": [
@@ -891,6 +1074,12 @@
         -70.28
       ],
       "yaw": 3.141592653589793
+    },
+    {
+      "is": "volley3d"
+    },
+    {
+      "is": "mmo3d"
     },
     {
       "is": "visitor",

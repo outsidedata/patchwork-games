@@ -26,7 +26,7 @@
       // torch's shadow off with `?torchshadow=0` and lights3d out with `?lights3d=0`, and sets the torch
       // lamp, the carried light, the exposure, the fog and the castle's flat material live (Lights,
       // below). The readout shows lights3d's lights, shadows, tiles, the still and moving tiles drawn this
-      // frame and the still ones owed, and shows the frames drawn in
+      // frame and the still ones owed, every body gas3d keeps (its attributes and tags, in the hills), and shows the frames drawn in
       // the last second and the longest of them, the step, where the seat's body stands and what it
       // stands on, each visitor's place it is going to and how many places of its route it has still to
       // get to, or the place it stands at, with the height its feet stand at now and how many times it has
@@ -48,6 +48,7 @@
       import { sim } from './demo_world3d.sim.ts'
       import { scene as main } from './main.sim.ts'
       import { visitor } from './visitor.sim.ts'
+      import { tags } from './plugins/gas3d/gas3d.sim.ts'
       import file from './demo_world3d.scene.json'
       import town from './assets/smallville.town.nav.json'
       import bridge from './assets/bridge.nav.json'
@@ -350,7 +351,7 @@
       const hung = { client: null, folder: null }
       const stick = () => {
         const client = window.__client
-        const prop = client?.plugins.wire.scene.world.anim?.kinds.player.props?.[0]
+        const prop = client?.plugins.wire.scene.world.anim?.kinds.player?.props?.[0]
         if (!client || hung.client === client || !prop) return
         hung.client = client
         hung.folder?.destroy()
@@ -482,7 +483,9 @@
         readout.textContent = [
           `${frames.length} fps  longest frame ${worst.toFixed(1)} ms  step ${truth.n}`,
           (l3 => l3 ? `lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} still tiles drawn this frame, ${l3.moving} moving tiles, ${l3.owed} faces owed` : '')(window.__client?.plugins.lights3d),
-          p?.data.pos ? `you (${p.data.pos.map(v => v.toFixed(2)).join(', ')}) ${p.data.grounded ? 'on the ground' : 'in the air'}${p.data.motion ? `, ${p.data.activity}.${p.data.motion}` : ''}` : '',
+          p?.data.pos ? `you (${p.data.pos.map(v => v.toFixed(2)).join(', ')}) ${p.data.grounded ? 'on the ground' : 'in the air'}${p.data.motion ? `, ${p.data.activity}.${p.data.motion}` : ''}${p.data.target != null ? `, targeting ${p.data.target}` : ''}` : '',
+          // every body gas3d keeps: its attributes and its tags
+          ...room.rows.filter(r => r.data.gas).map(r => `${r.kind} ${r.id}${r.data.template ? ` ${r.data.template}` : ''}: ${Object.entries(r.data.gas.base).map(([a, v]) => `${a} ${(+v).toFixed(1)}`).join(', ')}${r.data.dead ? ', dead' : ''}${(t => t.length ? `; ${t.join(', ')}` : '')(tags(room, r))}`),
           ...visitors().map(v => `${v.id === picked.id ? '> ' : ''}visitor ${v.id} ${v.data.body}: ${v.data.speed > 0 ? `going to ${where(v)}, ${left(v)} places left` : `standing at ${where(v)}`} at y ${bodies.crowd3d.where(v, time())[1].toFixed(2)}, switched courses ${switches.get(v.id) ?? 0}`),
           ...errors,
         ].join('\n')

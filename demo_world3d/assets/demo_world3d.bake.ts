@@ -61,6 +61,11 @@
 //   xbot.glb, xbot.rig.baked.json, xbot.motion3d.baked.json
 //                 the hills' hero, as demo_motion3d bakes it: Mixamo's X Bot with every clip of `xbot.rig.json`,
 //                 the rig's measures, and each clip's offsets from `xbot.motion3d.json` (`motion3d.offsets.ts`)
+//   zombie.glb, zombie_man.glb
+//                 the hills' mobs' bodies, the library's `characters/zombie` and `characters/zombie_man`, each with every
+//                 clip of `zombie.rig.json` (the Scary
+//                 Zombie pack's idle, walk, run and death, the Not So Scary pack's hit reaction) baked onto it by
+//                 anim's export, its table written back into the rig
 // The rig's clips are read from ~/troupe-collection, its bodies from the paths its `bodies` give.
 import fs from 'node:fs'
 import path from 'node:path'
@@ -198,4 +203,15 @@ export default async ({ blender, scratch, library }: Tools) => {
   fs.writeFileSync(xbaked, JSON.stringify({ table: measured, ends, grips, touches }) + '\n')
   console.log('wrote', path.relative(root, xbaked))
   execFileSync(process.execPath, ['--experimental-strip-types', path.join(root, 'plugins', 'motion3d', 'motion3d.offsets.ts'), xrig, path.join(here, 'xbot.motion3d.json')], { stdio: 'inherit' })
+
+  // the hills' mobs: the library's `characters/zombie/zombie.fbx` and `characters/zombie_man/zombie_man.fbx` with every
+  // clip of `zombie.rig.json` baked onto each by anim's export, and the table, measured on the first, written back into
+  // the rig
+  const zrig = path.join(here, 'zombie.rig.json'), ztable = scratch('zombie.table.json'), zglb = path.join(here, 'zombie.glb')
+  const zmglb = path.join(here, 'zombie_man.glb')
+  await blender(['--factory-startup', '--python-exit-code', '1', '--python', exporter, '--', zrig, ztable, `zombie=${zglb}`, `zombie_man=${zmglb}`])
+  console.log('wrote', path.relative(root, zglb))
+  console.log('wrote', path.relative(root, zmglb))
+  execFileSync(process.execPath, [merge, zrig, ztable, zrig], { stdio: 'inherit' })
+  console.log('wrote', path.relative(root, zrig), 'its table')
 }

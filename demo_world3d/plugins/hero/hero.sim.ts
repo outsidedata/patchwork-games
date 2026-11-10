@@ -30,6 +30,26 @@
 // draw key draws; else it is pressed to motion3d and `weapon` follows. Whichever weapon's stance is up is
 // `weapon`.
 //
+// Abilities. What the body can do is gas3d's (`plugins/gas3d/gas3d.sim.ts`): its row's `gas` holds its attributes
+// and the effects on it, started on its first step from the definition's `attributes` with its `effects` on (its
+// mana regeneration), and stepped each step. The definition's `abilities` names the abilities of gas3d's file it
+// has, each played by its `press` key: a key pressed that is one of them starts it only when gas3d says it may (no
+// cooldown on, enough of what it costs), and once its move plays, its cost is paid, its cooldown put on, and it is
+// the one the row is `casting`; one gas3d refuses is dropped.
+//
+// Blows. A move of the X Bot's `fight` activity lands its blow on the step its clip's playhead passes the moment its
+// blow lands: the frame on which the fastest of its hands and feet moves furthest, read off the rig's measured
+// `ends` (the punch's fist, the kick's foot). Then the ability it is `casting` is delivered: by `reach`, the
+// nearest living mob within that many metres in front of the body is struck (hitscan3d's `strike`, its `hit` act,
+// `mob.sim.ts`, handed a `Struck` naming the ability); by `bolt`, a volley3d round of that pattern is fired from
+// `cast.ahead` metres in front of the body and `cast.up` over its feet, at the row's target, or else the nearest
+// living mob in front, within the ability's `range`, `cast.aimUp` over its feet, its hurt naming the ability, so
+// the mob it meets is struck the same way. `casts` on the row counts the rounds it has fired, which names each.
+//
+// Targeting. `target` is the id of the mob the seat has picked, or null. The target key cycles it through the living
+// mobs within the definition's `target.range` metres, nearest first. A bolt flies at it while it lives and is within
+// the ability's range.
+//
 // `before` stands it once on the ground at its slot's start: on the place whose data says `start` in the nav3d
 // graph the start's `graph` names (`player.sim.ts`'s `root`), else at the start's `pos`; facing the start's
 // `yaw`, its look along it. Each step its look turns while `turning` is held, at the definition's `camera.turn`
@@ -38,8 +58,8 @@
 // plays says how fast); and motion3d's `drive`, which moves and plays the body by it.
 //
 // The acts are the page's keys: `stick(x, y)` (y down, as a stick reads), `turn(x, y)` (the right stick, the
-// same), `fast(v)` and `guard(v)` (1 held, 0 let go), `press(key)`, a key pressed, buffered as above;
-// `look(dyaw, dpitch)` and `zoom(by)`, the wheel's pixels. A seat's message arrives from outside the program,
+// same), `fast(v)` and `guard(v)` (1 held, 0 let go), `press(key)`, a key pressed, buffered as above; `target()`,
+// the next target; `look(dyaw, dpitch)` and `zoom(by)`, the wheel's pixels. A seat's message arrives from outside the program,
 // so each refuses arguments of the wrong kind and writes nothing.
 import type { Kind, Row, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
@@ -48,6 +68,9 @@ import { activityOf, drive, motionOf, press } from '#plugins/motion3d/motion3d.s
 import { clipOf, playKind, rigOf } from '#plugins/motion3d/motion3d.play.ts'
 import { nearest, relative } from '#plugins/kinematics3d/kinematics3d.sim.ts'
 import { graph } from '#plugins/nav3d/nav3d.sim.ts'
+import { fire } from '#plugins/volley3d/volley3d.sim.ts'
+import { strike } from '#plugins/hitscan3d/hitscan3d.sim.ts'
+import { abilityOf, blocked, commit, start as gas, step } from '../gas3d/gas3d.sim.ts'
 
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
@@ -116,6 +139,8 @@ function upperBusy(me: Row, w: W): boolean {
 // weapon; any other key is motion3d's. Whether it played.
 function act(me: Row, w: W, key: string, k: any): boolean {
   const d = me.data
+  const dealt = ability(me, w, key, k)
+  if (dealt !== undefined) return dealt
   const weapons: string[] = k.weapons
   const next = weapons[(weapons.indexOf(d.weapon) + 1) % weapons.length]
   if (key === 'draw') return press(me, w, `draw.${d.weapon}`, d.stick)
@@ -140,14 +165,111 @@ function stanceOf(me: Row, k: any): string | undefined {
   return Object.entries(k.aimOf as Record<string, string>).find(([, aim]) => aim === u)?.[0]
 }
 
+// The limbs a blow lands with: each hand's and foot's segment of the rig's measured `ends`.
+const LIMBS = ['handL', 'handR', 'footL', 'footR']
+// When a clip's blow lands, by the rig's `ends` and the clip's name: the time of the frame whose step its fastest
+// limb's far end moves furthest on, of all four limbs (Blows, the header).
+const blows = new WeakMap<object, Map<string, number>>()
+function blowAt(rig: any, body: string, clip: string): number {
+  let times = blows.get(rig)
+  if (!times) blows.set(rig, (times = new Map()))
+  const had = times.get(clip)
+  if (had !== undefined) return had
+  const e = rig.ends?.[body]?.[clip]
+  if (!e) throw new Error(`hero: the rig measures no ends of ${clip} for ${body}; bake it`)
+  let best = 0, at = 0
+  for (const limb of LIMBS) {
+    const f: number[][] = e[limb]
+    for (let i = 1; i < f.length; i++) {
+      const step = math.hypot(f[i][3] - f[i - 1][3], f[i][4] - f[i - 1][4], f[i][5] - f[i - 1][5])
+      if (step > best) { best = step; at = i / e.fps }
+    }
+  }
+  times.set(clip, at)
+  return at
+}
+
+// The living mob nearest the body within `far` metres and in front of it, or undefined.
+function nearestAhead(me: Row, w: W, far: number): Row | undefined {
+  const d = me.data
+  const ahead = [math.sin(d.yaw), math.cos(d.yaw)]
+  let near: Row | undefined, best = far
+  for (const z of w.all('mob')) {
+    if (z.data.dead) continue
+    const dx = z.data.pos[0] - d.pos[0], dz = z.data.pos[2] - d.pos[2]
+    const gap = math.hypot(dx, dz)
+    if (gap > best || dx * ahead[0] + dz * ahead[1] <= 0) continue
+    near = z
+    best = gap
+  }
+  return near
+}
+
+// The row's target while it is a living mob within `range` metres, or undefined.
+function targetOf(me: Row, w: W, range: number): Row | undefined {
+  const d = me.data
+  if (d.target === null) return undefined
+  const t = w.all('mob').find(z => z.id === d.target)
+  if (!t || t.data.dead) return undefined
+  return math.hypot(t.data.pos[0] - d.pos[0], t.data.pos[2] - d.pos[2]) <= range ? t : undefined
+}
+
+// The blow (Blows, the header): on the step a move of the `fight` activity carries its clip's playhead past the
+// moment its blow lands, the ability the body is `casting` is delivered.
+function blow(me: Row, w: W, k: any, was: { clip: unknown; t: number }) {
+  const d = me.data
+  if (d.activity !== 'fight' || d.state !== 'act' || typeof d.clip !== 'string') {
+    d.casting = null
+    return
+  }
+  if (d.casting === null) return
+  const peak = blowAt(rigOf(w, playKind(me)), playKind(me), clipOf(rigOf(w, playKind(me)), d.clip).source)
+  const from = was.clip === d.clip ? was.t : 0
+  if (!(from < peak && d.clipT >= peak)) return
+  const name: string = d.casting
+  d.casting = null
+  const ability = abilityOf(w, name)
+  const ahead = [math.sin(d.yaw), math.cos(d.yaw)]
+  const delivery = ability.delivery
+  if ('reach' in delivery) {
+    const near = nearestAhead(me, w, delivery.reach)
+    if (near) strike(w, near, { damage: 0, by: me.id, ability: name, part: null, point: [...near.data.pos], dir: [ahead[0], 0, ahead[1]], what: 'body' })
+    return
+  }
+  // A bolt flies from in front of the chest at the target's middle, or the nearest mob's in front.
+  const target = targetOf(me, w, delivery.range) ?? nearestAhead(me, w, delivery.range)
+  if (!target) return
+  const c = k.cast
+  const at = [d.pos[0] + ahead[0] * c.ahead, d.pos[1] + c.up, d.pos[2] + ahead[1] * c.ahead]
+  const to = [target.data.pos[0], target.data.pos[1] + c.aimUp, target.data.pos[2]]
+  fire(w, delivery.bolt, at, [to[0] - at[0], to[1] - at[1], to[2] - at[2]], { from: me.id, n: d.casts++, skip: [me.id], hurt: { damage: 0, by: me.id, ability: name } })
+}
+
+// A key that is the press of one of the definition's `abilities`: whether it was dealt with. One gas3d says may not
+// start is dropped; one that may is pressed to motion3d, and once its move plays, its cost and cooldown are paid
+// and it is the one the body is `casting`.
+function ability(me: Row, w: W, key: string, k: any): boolean | undefined {
+  const name = (k.abilities as string[]).find(a => abilityOf(w, a).press === key)
+  if (name === undefined) return undefined
+  if (blocked(w, me, name) !== undefined) return true
+  if (!press(me, w, key, me.data.stick)) return false
+  commit(w, me, name)
+  me.data.casting = name
+  return true
+}
+
 export const hero: Kind = {
   before(me, _dt, w) {
-    if (!me.data.stood) stood(me, w)
+    if (me.data.stood) return
+    stood(me, w)
+    const k = def(w, me.kind)
+    gas(w, me, k.attributes, k.effects)
   },
   tick(me, dt, w) {
     const d = me.data
     if (!d.stood) return
     const k = def(w, me.kind)
+    step(w, me, dt)
     view(me, dt, k)
     const [wx, wz] = relative(d.stick, d.look.yaw)
     // With an aim up the legs keep the way they face, and strafe, turned only as far as keeps the aim within the
@@ -165,7 +287,9 @@ export const hero: Kind = {
     // The guard held raises a block or an aim whenever one may come up, and let go lowers it.
     press(me, w, d.guard ? 'guard' : 'unguard', d.stick)
     buffered(me, w, dt, k)
+    const was = { clip: d.clip, t: d.clipT }
     drive(me, w, dt, d.stick)
+    blow(me, w, k, was)
   },
   acts: {
     stick(me, _w, _seat, x: unknown, y: unknown) {
@@ -184,6 +308,24 @@ export const hero: Kind = {
       const d = me.data
       if (typeof key !== 'string' || !d.stood) return
       d.queued = { key, age: 0 }
+    },
+    target(me, w) {
+      const d = me.data
+      if (!d.stood) return
+      const range = def(w, me.kind).target.range
+      // The living mobs within range, nearest first; the one after the target, or the nearest.
+      const near = w.all('mob')
+        .filter(z => !z.data.dead)
+        .map(z => ({ z, gap: math.hypot(z.data.pos[0] - d.pos[0], z.data.pos[2] - d.pos[2]) }))
+        .filter(o => o.gap <= range)
+        .sort((a, b) => a.gap - b.gap || a.z.id - b.z.id)
+        .map(o => o.z.id)
+      if (!near.length) {
+        d.target = null
+        return
+      }
+      const i = near.indexOf(d.target)
+      d.target = near[(i + 1) % near.length]
     },
     look(me, w, _seat, dyaw: unknown, dpitch: unknown) {
       if (!finite(dyaw, dpitch)) return

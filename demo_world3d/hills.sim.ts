@@ -5,7 +5,9 @@
 // cut into them, its ways painted the field's `street`. Every file of it is under `assets/hills/`, written by the
 // bake; its definitions are its own (`assets/hills/hills.json`), main's but for the player's, the visitors touring
 // the place's graph as they do in the village. The seat plays demo_motion3d's X Bot: the `player` rule here is hero's
-// (`plugins/hero/hero.sim.ts`), moved by kinematics3d and played and drawn by motion3d.
+// (`plugins/hero/hero.sim.ts`), moved by kinematics3d and played and drawn by motion3d. The place's mobs are its mmo3d
+// file's (`assets/hills/hills.mmo3d.json`), spawned by the `mmo3d` row (`plugins/mmo3d/mmo3d.sim.ts`) as `mob` rows
+// (`mob.sim.ts`): a zombie stands near the start as the hero's target.
 import type { Scene, Sim } from '#engine/engine.ts'
 import { scenemanager } from '#plugins/scenemanager/scenemanager.sim.ts'
 import { loader } from '#plugins/loader/loader.sim.ts'
@@ -17,8 +19,11 @@ import { start } from './start.sim.ts'
 import { world3d } from '#plugins/world3d/world3d.sim.ts'
 import { visitor } from './visitor.sim.ts'
 import { person } from './person.sim.ts'
+import { mob } from './mob.sim.ts'
+import { mmo3d } from './plugins/mmo3d/mmo3d.sim.ts'
+import { volley3d } from '#plugins/volley3d/volley3d.sim.ts'
 import file from './hills.scene.json' with { type: 'json' }
 
-export const sim: Sim = { scenemanager, loader, npc3d, skydome3d, particle3d, world3d, player, start, visitor, person }
+export const sim: Sim = { scenemanager, loader, npc3d, skydome3d, particle3d, volley3d, world3d, player, start, visitor, person, mmo3d, mob }
 
 export const scene = file as Scene

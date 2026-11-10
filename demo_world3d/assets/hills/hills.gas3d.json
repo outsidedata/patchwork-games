@@ -1,0 +1,21 @@
+{
+  "effects": {
+    "punch": { "duration": "instant", "modifiers": [{ "attribute": "health", "add": -1 }] },
+    "kick": { "duration": "instant", "modifiers": [{ "attribute": "health", "add": -2 }] },
+    "firebolt": { "duration": "instant", "modifiers": [{ "attribute": "health", "add": -1 }] },
+    "burning": { "duration": "timed", "for": 2, "every": 1, "modifiers": [{ "attribute": "health", "add": -0.5 }], "tags": ["burning"] },
+    "manaRegen": { "duration": "until", "every": 1, "modifiers": [{ "attribute": "mana", "add": 5 }] }
+  },
+  "abilities": {
+    "jab": { "press": "light", "delivery": { "reach": 1.5 }, "effects": ["punch"] },
+    "kick": { "press": "heavy", "cooldown": 1, "delivery": { "reach": 1.8 }, "effects": ["kick"] },
+    "firebolt": { "press": "skill", "cost": { "mana": 20 }, "cooldown": 1.5, "delivery": { "bolt": "firebolt", "range": 30 }, "effects": ["firebolt", "burning"] }
+  },
+  "cues": {
+    "burning": "handfire"
+  },
+  "cap": {
+    "health": "maxHealth",
+    "mana": "maxMana"
+  }
+}
