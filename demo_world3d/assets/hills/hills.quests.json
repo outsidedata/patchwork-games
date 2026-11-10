@@ -1,0 +1,17 @@
+{
+  "quests": {
+    "graves": {
+      "title": "Restless Graves",
+      "details": "The dead in the graves east of the village won't lie still. Put some of them down before they come for the houses.",
+      "objectives": "Put down 5 zombies in the graves east of the village.",
+      "starters": ["old_woman"],
+      "enders": ["old_woman"],
+      "prev": null,
+      "kills": [{ "kind": "zombie", "count": 5 }],
+      "items": [],
+      "gold": 15,
+      "rewards": [],
+      "endScript": { "world.graves.cleared": 1 }
+    }
+  }
+}

@@ -46,9 +46,15 @@
 // living mob in front, within the ability's `range`, `cast.aimUp` over its feet, its hurt naming the ability, so
 // the mob it meets is struck the same way. `casts` on the row counts the rounds it has fired, which names each.
 //
-// Targeting. `target` is the id of the mob the seat has picked, or null. The target key cycles it through the living
-// mobs within the definition's `target.range` metres, nearest first. A bolt flies at it while it lives and is within
-// the ability's range.
+// Targeting. What the hero can hit is what hitscan3d can hit (`world.hitscan3d.kinds`, a dead one off), but itself:
+// every mob, whatever its kind. `target` is the id of the one the seat has picked, or null. The target key cycles it
+// through those within the definition's `target.range` metres, nearest first. A bolt flies at it while it lives and
+// is within the ability's range.
+//
+// Being struck. Its `hit` act takes a hitscan3d `Struck` naming the ability that struck it (a mob's bite): gas3d puts
+// that ability's effects on it, and while it lives it plays motion3d's `hit`. The step its health reaches 0, by a
+// strike or an effect, it is `dead`: it plays motion3d's `die`, its keys and stick do nothing, and nothing targets
+// it. Only rules strike it; a seat's `hit` changes nothing.
 //
 // `before` stands it once on the ground at its slot's start: on the place whose data says `start` in the nav3d
 // graph the start's `graph` names (`player.sim.ts`'s `root`), else at the start's `pos`; facing the start's
@@ -57,7 +63,32 @@
 // kinematics3d's `want`, the way the stick points from the camera's yaw, as hard as it is pushed (the clip it
 // plays says how fast); and motion3d's `drive`, which moves and plays the body by it.
 //
-// The acts are the page's keys: `stick(x, y)` (y down, as a stick reads), `turn(x, y)` (the right stick, the
+// Talking is talk's (`plugins/talk/talk.sim.ts`), its row's `talking`. `talk()` starts talking to the nearest one
+// within the definition's `talk.reach` metres who has something to say, or ends the talk it is in; `choose(i)` picks
+// the choice `i` of what was said. The talk ends once it walks out of reach, or dies. Its quests are quests'
+// (`plugins/quests/quests.sim.ts`), stepped each step so each is done once its objectives are met.
+//
+// Trading. A talk that opens a service (talk's `vendor`, `trainer` and `enchanter` actions) leaves its row's
+// `serving`; while it is within reach of that speaker, `buy(i, count)` buys `count` of the vendor's i-th item,
+// `sell(id)` sells a carried instance that is neither equipped nor on the quick bar, and `buyBack(i)` buys the i-th
+// of its buyback back (`plugins/vendor`); `learn(recipe)` learns one of the trainer's recipes (`plugins/crafting`);
+// `enchant(enchant, id)` has the enchanter put an enchant on a carried instance (`plugins/enchanting`). `craft(recipe)`
+// makes a known recipe within reach of its focus, served by no one; `leave()` closes the service.
+//
+// Death. Dead, `release()` raises it at its slot's start, as World of Warcraft's spirit healer raises a player at
+// the graveyard: it is stood there again, and the definition's `release.effect`, a gas3d effect, put on it (its
+// health back to a share of its most).
+//
+// Carrying, after Lyra's inventory, equipment and quick bar (`plugins/inventory`, `plugins/equipment`,
+// `plugins/quickbar`): its row's `inventory`, `equipment` and `quickbar`, the quick bar as many slots
+// long as the `player` prefab gives. `slot(slot, id)` puts a carried instance in an empty slot of the bar and `unslot(slot)`
+// empties one; `hold(slot)` makes a slot the one in the hands, its item equipped (-1 holds nothing). What is worn,
+// not held, is equipped straight: `wear(id)` equips a carried instance with an `equippable` fragment that is neither
+// on the bar nor equipped, and `takeOff(id)` takes it off. `drop(id)` throws an instance away, taken off the bar and
+// unequipped first. Only rules add to its inventory. The abilities it has are its definition's `abilities` and those
+// its equipment's ability sets grant (gas3d's `granted`).
+//
+// The acts are the page's keys:`stick(x, y)` (y down, as a stick reads), `turn(x, y)` (the right stick, the
 // same), `fast(v)` and `guard(v)` (1 held, 0 let go), `press(key)`, a key pressed, buffered as above; `target()`,
 // the next target; `look(dyaw, dpitch)` and `zoom(by)`, the wheel's pixels. A seat's message arrives from outside the program,
 // so each refuses arguments of the wrong kind and writes nothing.
@@ -69,15 +100,31 @@ import { clipOf, playKind, rigOf } from '#plugins/motion3d/motion3d.play.ts'
 import { nearest, relative } from '#plugins/kinematics3d/kinematics3d.sim.ts'
 import { graph } from '#plugins/nav3d/nav3d.sim.ts'
 import { fire } from '#plugins/volley3d/volley3d.sim.ts'
-import { strike } from '#plugins/hitscan3d/hitscan3d.sim.ts'
-import { abilityOf, blocked, commit, start as gas, step } from '../gas3d/gas3d.sim.ts'
+import { hittable, strike, type Struck } from '#plugins/hitscan3d/hitscan3d.sim.ts'
+import { fragment, instanceOf, removeInstance, type Instance } from '../inventory/inventory.sim.ts'
+import { equip, equippedFrom, unequip } from '../equipment/equipment.sim.ts'
+import { addToSlot, removeFromSlot, setActive } from '../quickbar/quickbar.sim.ts'
+import { choose, end, serving, start, step as talking, type Serving } from '../talk/talk.sim.ts'
+import { buy, buyBack, sell } from '../vendor/vendor.sim.ts'
+import { craft, learn } from '../crafting/crafting.sim.ts'
+import { enchant } from '../enchanting/enchanting.sim.ts'
+import { step as quests } from '../quests/quests.sim.ts'
+import { abilityOf, apply, blowAt, granted, blocked, commit, receive, start as gas, step, value } from '../gas3d/gas3d.sim.ts'
 
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
 const finite = (...v: unknown[]) => v.every(x => typeof x === 'number' && Number.isFinite(x))
 const way = (v: unknown) => typeof v === 'number' && Math.abs(v) <= 1
 
-type Buffer = { hold: number; cancel: Record<string, Record<string, number>> }
+// The instance a seat named, when the row carries it.
+const carried = (me: Row, id: unknown): Instance | undefined => (Number.isInteger(id) ? instanceOf(me, id as number) : undefined)
+const isSlot = (me: Row, slot: unknown) => Number.isInteger(slot) && (slot as number) >= 0 && (slot as number) < me.data.quickbar.slots.length
+const onBar = (me: Row, id: number) => me.data.quickbar.slots.includes(id)
+// The speaker serving that service, while the hero lives and is within talk's reach of it.
+const served = (me: Row, w: W, what: Serving['what']): Row | undefined =>
+  me.data.dead ? undefined : serving(w, me, what, def(w, me.kind).talk.reach)
+
+type Buffer ={ hold: number; cancel: Record<string, Record<string, number>> }
 
 // The view turns while the right stick is held, whatever the body does.
 function view(me: Row, dt: number, k: any) {
@@ -165,37 +212,15 @@ function stanceOf(me: Row, k: any): string | undefined {
   return Object.entries(k.aimOf as Record<string, string>).find(([, aim]) => aim === u)?.[0]
 }
 
-// The limbs a blow lands with: each hand's and foot's segment of the rig's measured `ends`.
-const LIMBS = ['handL', 'handR', 'footL', 'footR']
-// When a clip's blow lands, by the rig's `ends` and the clip's name: the time of the frame whose step its fastest
-// limb's far end moves furthest on, of all four limbs (Blows, the header).
-const blows = new WeakMap<object, Map<string, number>>()
-function blowAt(rig: any, body: string, clip: string): number {
-  let times = blows.get(rig)
-  if (!times) blows.set(rig, (times = new Map()))
-  const had = times.get(clip)
-  if (had !== undefined) return had
-  const e = rig.ends?.[body]?.[clip]
-  if (!e) throw new Error(`hero: the rig measures no ends of ${clip} for ${body}; bake it`)
-  let best = 0, at = 0
-  for (const limb of LIMBS) {
-    const f: number[][] = e[limb]
-    for (let i = 1; i < f.length; i++) {
-      const step = math.hypot(f[i][3] - f[i - 1][3], f[i][4] - f[i - 1][4], f[i][5] - f[i - 1][5])
-      if (step > best) { best = step; at = i / e.fps }
-    }
-  }
-  times.set(clip, at)
-  return at
-}
+// Every body the hero can hit now: hitscan3d's (`world.hitscan3d.kinds`, the dead ones off), but itself.
+const targets = (me: Row, w: W): Row[] => hittable(w).filter(b => b.id !== me.id).map(b => w.get(b.id))
 
-// The living mob nearest the body within `far` metres and in front of it, or undefined.
+// The living body nearest the hero within `far` metres and in front of it, or undefined.
 function nearestAhead(me: Row, w: W, far: number): Row | undefined {
   const d = me.data
   const ahead = [math.sin(d.yaw), math.cos(d.yaw)]
   let near: Row | undefined, best = far
-  for (const z of w.all('mob')) {
-    if (z.data.dead) continue
+  for (const z of targets(me, w)) {
     const dx = z.data.pos[0] - d.pos[0], dz = z.data.pos[2] - d.pos[2]
     const gap = math.hypot(dx, dz)
     if (gap > best || dx * ahead[0] + dz * ahead[1] <= 0) continue
@@ -205,12 +230,12 @@ function nearestAhead(me: Row, w: W, far: number): Row | undefined {
   return near
 }
 
-// The row's target while it is a living mob within `range` metres, or undefined.
+// The row's target while it is a living body within `range` metres, or undefined.
 function targetOf(me: Row, w: W, range: number): Row | undefined {
   const d = me.data
   if (d.target === null) return undefined
-  const t = w.all('mob').find(z => z.id === d.target)
-  if (!t || t.data.dead) return undefined
+  const t = targets(me, w).find(z => z.id === d.target)
+  if (!t) return undefined
   return math.hypot(t.data.pos[0] - d.pos[0], t.data.pos[2] - d.pos[2]) <= range ? t : undefined
 }
 
@@ -245,11 +270,21 @@ function blow(me: Row, w: W, k: any, was: { clip: unknown; t: number }) {
   fire(w, delivery.bolt, at, [to[0] - at[0], to[1] - at[1], to[2] - at[2]], { from: me.id, n: d.casts++, skip: [me.id], hurt: { damage: 0, by: me.id, ability: name } })
 }
 
+// The step its health reaches 0, by a strike or an effect on it: `dead`, and its death played (motion3d's `die`).
+function dies(me: Row, w: W) {
+  const d = me.data
+  if (d.dead || value(w, me, 'health') > 0) return
+  d.dead = true
+  d.casting = null
+  d.queued = null
+  press(me, w, 'die', [0, 0])
+}
+
 // A key that is the press of one of the definition's `abilities`: whether it was dealt with. One gas3d says may not
 // start is dropped; one that may is pressed to motion3d, and once its move plays, its cost and cooldown are paid
 // and it is the one the body is `casting`.
 function ability(me: Row, w: W, key: string, k: any): boolean | undefined {
-  const name = (k.abilities as string[]).find(a => abilityOf(w, a).press === key)
+  const name = [...(k.abilities as string[]), ...granted(me)].find(a => abilityOf(w, a).press === key)
   if (name === undefined) return undefined
   if (blocked(w, me, name) !== undefined) return true
   if (!press(me, w, key, me.data.stick)) return false
@@ -271,6 +306,16 @@ export const hero: Kind = {
     const k = def(w, me.kind)
     step(w, me, dt)
     view(me, dt, k)
+    dies(me, w)
+    quests(w, me)
+    if (d.dead) end(me)
+    else talking(w, me, k.talk.reach)
+    // Dead, it plays out its death and is driven by nothing.
+    if (d.dead) {
+      d.want = [0, 0]
+      drive(me, w, dt, [0, 0])
+      return
+    }
     const [wx, wz] = relative(d.stick, d.look.yaw)
     // With an aim up the legs keep the way they face, and strafe, turned only as far as keeps the aim within the
     // rig's `aim.across` of them; with the guard held they face the look; else they turn the way they go.
@@ -309,13 +354,23 @@ export const hero: Kind = {
       if (typeof key !== 'string' || !d.stood) return
       d.queued = { key, age: 0 }
     },
+    // Struck (hitscan3d's `Struck`, naming the ability that struck it and the row it was by): the ability's effects
+    // put on it, and, while it lives, its `hit` played; at 0 health it dies. Only rules strike: a seat's message
+    // changes nothing.
+    hit(me, w, seat, struck: unknown) {
+      const d = me.data
+      const s = struck as Struck
+      if (seat >= 0 || d.dead || !d.gas || typeof s.ability !== 'string') return
+      receive(w, me, s.ability, s.by)
+      if (value(w, me, 'health') > 0) press(me, w, 'hit', d.stick)
+      else dies(me, w)
+    },
     target(me, w) {
       const d = me.data
       if (!d.stood) return
       const range = def(w, me.kind).target.range
       // The living mobs within range, nearest first; the one after the target, or the nearest.
-      const near = w.all('mob')
-        .filter(z => !z.data.dead)
+      const near = targets(me, w)
         .map(z => ({ z, gap: math.hypot(z.data.pos[0] - d.pos[0], z.data.pos[2] - d.pos[2]) }))
         .filter(o => o.gap <= range)
         .sort((a, b) => a.gap - b.gap || a.z.id - b.z.id)
@@ -326,6 +381,90 @@ export const hero: Kind = {
       }
       const i = near.indexOf(d.target)
       d.target = near[(i + 1) % near.length]
+    },
+    // Talking (Talking, the header).
+    talk(me, w) {
+      const d = me.data
+      if (!d.stood || d.dead) return
+      if (d.talking !== null) return end(me)
+      start(w, me, def(w, me.kind).talk.reach)
+    },
+    choose(me, w, _seat, i: unknown) {
+      if (!Number.isInteger(i) || me.data.talking === null) return
+      choose(w, me, i as number)
+    },
+    // Trading (Trading, the header): each with the speaker serving it that service.
+    buy(me, w, _seat, i: unknown, count: unknown) {
+      const v = served(me, w, 'vendor')
+      if (v && Number.isInteger(i) && Number.isInteger(count)) buy(w, me, v, i as number, count as number)
+    },
+    sell(me, w, _seat, id: unknown) {
+      const v = served(me, w, 'vendor')
+      const i = carried(me, id)
+      if (v && i && !equippedFrom(me, i.id) && !onBar(me, i.id)) sell(w, me, v, i.id)
+    },
+    buyBack(me, w, _seat, i: unknown) {
+      if (served(me, w, 'vendor') && Number.isInteger(i)) buyBack(me, i as number)
+    },
+    learn(me, w, _seat, recipe: unknown) {
+      const t = served(me, w, 'trainer')
+      if (t && typeof recipe === 'string') learn(w, me, t, recipe)
+    },
+    craft(me, w, _seat, recipe: unknown) {
+      if (typeof recipe === 'string' && !me.data.dead) craft(w, me, recipe)
+    },
+    enchant(me, w, _seat, name: unknown, id: unknown) {
+      const e = served(me, w, 'enchanter')
+      if (e && typeof name === 'string' && Number.isInteger(id)) enchant(w, me, e, name, id as number)
+    },
+    leave(me) {
+      me.data.serving = null
+    },
+    // Dead, it gets up again at its slot's start, as World of Warcraft's spirit healer raises a player at the
+    // graveyard (Death, the header).
+    release(me, w) {
+      const d = me.data
+      if (!d.dead) return
+      const k = def(w, me.kind)
+      d.dead = false
+      d.stood = false
+      d.target = null
+      d.talking = null
+      d.serving = null
+      apply(w, me, k.release.effect, me.id)
+    },
+    // What it carries (Carrying, the header). Each names an inventory instance by its id, or a quick bar slot.
+    wear(me, w, _seat, id: unknown) {
+      const i = carried(me, id)
+      if (!i || me.data.dead || equippedFrom(me, i.id) || onBar(me, i.id)) return
+      const e = fragment(w, i.definition, 'equippable')
+      if (e) equip(w, me, e.equipment, i.id)
+    },
+    takeOff(me, w, _seat, id: unknown) {
+      const i = carried(me, id)
+      if (!i || me.data.dead || onBar(me, i.id) || !equippedFrom(me, i.id)) return
+      unequip(w, me, i.id)
+    },
+    slot(me, w, _seat, slot: unknown, id: unknown) {
+      const i = carried(me, id)
+      if (!i || !isSlot(me, slot) || equippedFrom(me, i.id) || onBar(me, i.id)) return
+      addToSlot(w, me, slot as number, i.id)
+    },
+    unslot(me, w, _seat, slot: unknown) {
+      if (!isSlot(me, slot) || me.data.dead) return
+      removeFromSlot(w, me, slot as number)
+    },
+    hold(me, w, _seat, slot: unknown) {
+      if (me.data.dead || !(slot === -1 || isSlot(me, slot))) return
+      setActive(w, me, slot as number)
+    },
+    drop(me, w, _seat, id: unknown) {
+      const i = carried(me, id)
+      if (!i || me.data.dead) return
+      const at = me.data.quickbar.slots.indexOf(i.id)
+      if (at >= 0) removeFromSlot(w, me, at)
+      if (equippedFrom(me, i.id)) unequip(w, me, i.id)
+      removeInstance(me, i.id)
     },
     look(me, w, _seat, dyaw: unknown, dpitch: unknown) {
       if (!finite(dyaw, dpitch)) return

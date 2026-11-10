@@ -1,0 +1,10 @@
+{
+  "vendors": {
+    "smith": [
+      { "item": "ironBar", "max": 0, "restock": 0 },
+      { "item": "rustySword", "max": 2, "restock": 300 },
+      { "item": "leatherJerkin", "max": 1, "restock": 600 }
+    ]
+  },
+  "buyback": 12
+}

@@ -64,7 +64,7 @@
 //   zombie.glb, zombie_man.glb
 //                 the hills' mobs' bodies, the library's `characters/zombie` and `characters/zombie_man`, each with every
 //                 clip of `zombie.rig.json` (the Scary
-//                 Zombie pack's idle, walk, run and death, the Not So Scary pack's hit reaction) baked onto it by
+//                 Zombie pack's idle, walk, run, death and attack, the Not So Scary pack's hit reaction) baked onto it by
 //                 anim's export, its table written back into the rig
 // The rig's clips are read from ~/troupe-collection, its bodies from the paths its `bodies` give.
 import fs from 'node:fs'

@@ -48,6 +48,46 @@
           "url": "/games/demo_world3d/assets/hills/hills.gas3d.json",
           "preload": true
         },
+        "vendor": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/hills/hills.vendor.json",
+          "preload": true
+        },
+        "crafting": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/hills/hills.crafting.json",
+          "preload": true
+        },
+        "enchanting": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/hills/hills.enchanting.json",
+          "preload": true
+        },
+        "quests": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/hills/hills.quests.json",
+          "preload": true
+        },
+        "talk": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/hills/hills.talk.json",
+          "preload": true
+        },
+        "inventory": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/hills/hills.inventory.json",
+          "preload": true
+        },
+        "equipment": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/hills/hills.equipment.json",
+          "preload": true
+        },
+        "loot": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/hills/hills.loot.json",
+          "preload": true
+        },
         "mmo3d": {
           "type": "json",
           "url": "/games/demo_world3d/assets/hills/hills.mmo3d.json",
@@ -242,9 +282,88 @@
       "file": "gas3d",
       "cueUp": 1
     },
+    "inventory": {
+      "file": "inventory"
+    },
+    "talk": {
+      "file": "talk"
+    },
+    "ui": {
+      "panels": {
+        "world": { "anchor": "top-left", "at": [0, 0] },
+        "you": { "anchor": "top-left", "at": [20, 20], "size": [300, 86] },
+        "target": { "anchor": "top-left", "at": [340, 20], "size": [260, 90] },
+        "gold": { "anchor": "top-right", "at": [-20, 20], "size": [120, 32] },
+        "tracker": { "anchor": "top-right", "at": [-20, 64], "size": [280, 200] },
+        "loot": { "anchor": "bottom", "at": [0, -122], "size": [420, 30] },
+        "bars": { "anchor": "bottom", "at": [0, -20], "size": [460, 92] },
+        "talk": { "anchor": "bottom", "at": [0, -150], "size": [800, 200], "layer": 1 },
+        "bag": { "anchor": "center", "size": [700, 420], "modal": true, "key": "b", "group": "windows", "layer": 2 },
+        "character": { "anchor": "center", "size": [700, 400], "modal": true, "key": "c", "group": "windows", "layer": 2 },
+        "quests": { "anchor": "center", "size": [800, 420], "modal": true, "key": "l", "group": "windows", "layer": 2 },
+        "forge": { "anchor": "center", "size": [560, 360], "modal": true, "key": "g", "group": "windows", "layer": 2 },
+        "shop": { "anchor": "left", "at": [40, 0], "size": [800, 440], "modal": true, "layer": 3 },
+        "trainer": { "anchor": "center", "size": [480, 300], "modal": true, "layer": 3 },
+        "enchanter": { "anchor": "center", "size": [700, 380], "modal": true, "layer": 3 },
+        "death": { "anchor": "center", "size": [600, 300], "modal": true, "layer": 4, "backdrop": { "color": 2621440, "alpha": 0.55 } }
+      },
+      "keys": { "up": "ArrowUp", "down": "ArrowDown", "left": "ArrowLeft", "right": "ArrowRight", "press": ["Enter", " "], "back": "Escape" },
+      "styles": {
+        "name": { "fontFamily": "Georgia, serif", "fontSize": 18, "fontWeight": "bold", "fill": "#e9e4d6" },
+        "title": { "fontFamily": "Georgia, serif", "fontSize": 20, "fontWeight": "bold", "fill": "#f2c94c" },
+        "line": { "fontFamily": "Georgia, serif", "fontSize": 19, "fill": "#f3eee2", "lineHeight": 27 },
+        "heading": { "fontFamily": "system-ui, sans-serif", "fontSize": 13, "fontWeight": "bold", "fill": "#a39b88", "letterSpacing": 1 },
+        "body": { "fontFamily": "system-ui, sans-serif", "fontSize": 15, "fill": "#e9e4d6" },
+        "small": { "fontFamily": "system-ui, sans-serif", "fontSize": 13, "fill": "#c9c1ad" },
+        "tiny": { "fontFamily": "system-ui, sans-serif", "fontSize": 11, "fontWeight": "bold", "fill": "#e9e4d6", "align": "center", "wordWrap": true, "wordWrapWidth": 56 },
+        "key": { "fontFamily": "system-ui, sans-serif", "fontSize": 12, "fontWeight": "bold", "fill": "#f2c94c" },
+        "cost": { "fontFamily": "system-ui, sans-serif", "fontSize": 11, "fontWeight": "bold", "fill": "#8fb8ff" },
+        "cooldown": { "fontFamily": "system-ui, sans-serif", "fontSize": 22, "fontWeight": "bold", "fill": "#ffffff" },
+        "barnumber": { "fontFamily": "system-ui, sans-serif", "fontSize": 12, "fontWeight": "bold", "fill": "#ffffff", "stroke": { "color": "#000000", "width": 2, "join": "round" } },
+        "tag": { "fontFamily": "system-ui, sans-serif", "fontSize": 12, "fontWeight": "bold", "fill": "#ffc48a" },
+        "gold": { "fontFamily": "system-ui, sans-serif", "fontSize": 15, "fontWeight": "bold", "fill": "#f2d27a" },
+        "trackTitle": { "fontFamily": "Georgia, serif", "fontSize": 16, "fontWeight": "bold", "fill": "#f2c94c", "stroke": { "color": "#000000", "width": 3, "join": "round" } },
+        "loot": { "fontFamily": "system-ui, sans-serif", "fontSize": 15, "fontWeight": "bold", "fill": "#f2d27a", "stroke": { "color": "#000000", "width": 3, "join": "round" } },
+        "plate": { "fontFamily": "system-ui, sans-serif", "fontSize": 15, "fontWeight": "bold", "fill": "#f5efe0", "stroke": { "color": "#000000", "width": 3, "join": "round" } },
+        "plateTitle": { "fontFamily": "system-ui, sans-serif", "fontSize": 12, "fill": "#d8d1c0", "stroke": { "color": "#000000", "width": 3, "join": "round" } },
+        "mark": { "fontFamily": "Georgia, serif", "fontSize": 34, "fontWeight": "bold", "fill": "#f2c94c", "stroke": { "color": "#3a2a00", "width": 4, "join": "round" } },
+        "hurt": { "fontFamily": "Georgia, serif", "fontSize": 30, "fontWeight": "bold", "fill": "#fff3c4", "stroke": { "color": "#7a1b10", "width": 4, "join": "round" } },
+        "hurtSelf": { "fontFamily": "Georgia, serif", "fontSize": 26, "fontWeight": "bold", "fill": "#ff6b5b", "stroke": { "color": "#2a0000", "width": 4, "join": "round" } },
+        "heal": { "fontFamily": "Georgia, serif", "fontSize": 26, "fontWeight": "bold", "fill": "#9fe0a8", "stroke": { "color": "#0a2a10", "width": 4, "join": "round" } },
+        "death": { "fontFamily": "Georgia, serif", "fontSize": 64, "fontWeight": "bold", "fill": "#e0574b", "stroke": { "color": "#000000", "width": 4, "join": "round" } },
+        "button": { "size": [112, 30], "radius": 5, "fill": { "color": "#2a2620" }, "focus": { "color": "#4a3f28" }, "text": { "fontFamily": "system-ui, sans-serif", "fontSize": 14, "fontWeight": "bold", "fill": "#f3eee2" } },
+        "wide": { "size": [200, 40], "radius": 6, "fill": { "color": "#f2c94c" }, "focus": { "color": "#ffe08a" }, "text": { "fontFamily": "system-ui, sans-serif", "fontSize": 16, "fontWeight": "bold", "fill": "#1a1408" } },
+        "health": { "size": [272, 18], "edge": 1, "frame": { "color": "#000000" }, "track": { "color": "#2a1512" } },
+        "mana": { "size": [272, 14], "edge": 1, "frame": { "color": "#000000" }, "track": { "color": "#121a2a" } },
+        "targetHealth": { "size": [232, 14], "edge": 1, "frame": { "color": "#000000" }, "track": { "color": "#2a1512" } },
+        "plateHealth": { "size": [96, 8], "edge": 1, "frame": { "color": "#000000" }, "track": { "color": "#1b1512" } },
+        "progress": { "size": [220, 10], "edge": 1, "frame": { "color": "#000000" }, "track": { "color": "#1b1512" } }
+      }
+    },
+    "quests": {
+      "file": "quests"
+    },
+    "vendor": {
+      "file": "vendor"
+    },
+    "crafting": {
+      "file": "crafting"
+    },
+    "enchanting": {
+      "file": "enchanting"
+    },
+    "equipment": {
+      "file": "equipment"
+    },
+    "loot": {
+      "file": "loot"
+    },
     "hitscan3d": {
       "kinds": {
-        "mob": {
+        "zombie": {
+          "off": "dead"
+        },
+        "zombie_man": {
           "off": "dead"
         }
       },
@@ -601,6 +720,12 @@
         }
       },
       "mods": {
+        "height": "terrain3d",
+        "depth": "terrain3d",
+        "fixed": [
+          "shapes3d"
+        ],
+        "solids": "lod3d",
         "behaviors": "shapes3d"
       }
     },
@@ -670,7 +795,8 @@
         "activities": [
           "walk",
           "roll",
-          "fight"
+          "fight",
+          "hurt"
         ],
         "priority": 0,
         "data": {
@@ -761,7 +887,10 @@
       "rate": 30,
       "kinds": [
         "visitor",
-        "person"
+        "person",
+        "old_woman",
+        "smith",
+        "priest"
       ]
     },
     "npc3d": {
@@ -769,7 +898,8 @@
         "route": "nav3d",
         "behaviors": [
           "fortress",
-          "world3d"
+          "world3d",
+          "mmo3d"
         ]
       }
     },
@@ -778,7 +908,8 @@
         "fortress",
         "hero",
         "mmo3d",
-        "gas3d"
+        "gas3d",
+        "hud"
       ]
     },
     "skydome3d": {
@@ -839,6 +970,7 @@
     "player",
     "supershader3d",
     "terrain3d",
+    "ui",
     "shipped",
     "crowd3d",
     "anim",
@@ -936,6 +1068,14 @@
       "gas": null,
       "casting": null,
       "target": null,
+      "dead": false,
+      "factsdb": {},
+      "inventory": { "entries": [], "next": 1 },
+      "equipment": [],
+      "quickbar": { "slots": [null, null, null], "active": -1 },
+      "talking": null,
+      "serving": null,
+      "buyback": [],
       "look": {
         "yaw": 0,
         "pitch": 0.35,
@@ -944,40 +1084,120 @@
       "lift": 1.4
     },
     "mmo3d": {
-      "placed": false
+      "started": false,
+      "time": 0,
+      "present": {},
+      "packs": [],
+      "inside": {}
     },
-    "mob": {
-      "template": "",
-      "as": "",
-      "pos": [
-        0,
-        0,
-        0
-      ],
+    "factsdb": {
+      "factsdb": {}
+    },
+    "zombie": {
+      "pos": [0, 0, 0],
       "yaw": 0,
-      "vel": [
-        0,
-        0,
-        0
-      ],
+      "vel": [0, 0, 0],
       "grounded": false,
       "sliding": false,
       "speed": 0,
       "side": 0,
       "turned": 0,
-      "want": [
-        0,
-        0
-      ],
+      "want": [0, 0],
       "face": null,
       "jump": false,
       "limp": false,
+      "goal": null,
+      "stalled": 0,
+      "gap": null,
+      "rest": null,
+      "look": 0,
+      "gaze": null,
+      "seen": [],
+      "noticing": {},
+      "facts": [],
+      "doing": "",
+      "until": 0,
+      "wake": 0,
+      "arrived": false,
+      "told": null,
+      "route": null,
       "gas": null,
-      "dead": false
+      "dead": false,
+      "casting": null,
+      "blowClip": null,
+      "blowT": 0,
+      "struckBy": null
+    },
+    "zombie_man": {
+      "pos": [0, 0, 0],
+      "yaw": 0,
+      "vel": [0, 0, 0],
+      "grounded": false,
+      "sliding": false,
+      "speed": 0,
+      "side": 0,
+      "turned": 0,
+      "want": [0, 0],
+      "face": null,
+      "jump": false,
+      "limp": false,
+      "goal": null,
+      "stalled": 0,
+      "gap": null,
+      "rest": null,
+      "look": 0,
+      "gaze": null,
+      "seen": [],
+      "noticing": {},
+      "facts": [],
+      "doing": "",
+      "until": 0,
+      "wake": 0,
+      "arrived": false,
+      "told": null,
+      "route": null,
+      "gas": null,
+      "dead": false,
+      "casting": null,
+      "blowClip": null,
+      "blowT": 0,
+      "struckBy": null
     },
     "volley3d": {
       "next": 1,
       "live": []
+    },
+    "old_woman": {
+      "pos": [0, 0, 0],
+      "to": [0, 0, 0],
+      "yaw": 0,
+      "speed": 0,
+      "since": 0,
+      "body": "castle_woman",
+      "clip": "idle",
+      "holding": {}
+    },
+    "smith": {
+      "pos": [0, 0, 0],
+      "to": [0, 0, 0],
+      "yaw": 0,
+      "speed": 0,
+      "since": 0,
+      "body": "castle_walker",
+      "clip": "idle",
+      "holding": {},
+      "clock": 0,
+      "stock": {}
+    },
+    "priest": {
+      "pos": [0, 0, 0],
+      "to": [0, 0, 0],
+      "yaw": 0,
+      "speed": 0,
+      "since": 0,
+      "body": "castle_walker",
+      "clip": "idle",
+      "holding": {}
     },
     "visitor": {
       "pos": [
@@ -1080,6 +1300,9 @@
     },
     {
       "is": "mmo3d"
+    },
+    {
+      "is": "factsdb"
     },
     {
       "is": "visitor",

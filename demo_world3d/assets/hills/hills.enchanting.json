@@ -1,0 +1,14 @@
+{
+  "enchants": {
+    "blessedEdge": {
+      "name": "Blessed edge",
+      "class": "weapon",
+      "abilitySet": "blessedEdge",
+      "reagents": [{ "item": "graveRing", "count": 1 }],
+      "gold": 10
+    }
+  },
+  "enchanters": {
+    "priest": ["blessedEdge"]
+  }
+}

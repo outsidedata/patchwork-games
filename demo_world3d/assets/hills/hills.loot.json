@@ -1,0 +1,20 @@
+{
+  "loot": {
+    "graves": {
+      "gold": [1, 4],
+      "entries": [
+        { "item": "boneShard", "chance": 60, "group": 0, "min": 1, "max": 2 },
+        { "item": "rottenCloth", "chance": 30, "group": 0, "min": 1, "max": 1 },
+        { "item": "rustySword", "chance": 5, "group": 1, "min": 1, "max": 1 }
+      ]
+    },
+    "gravesMan": {
+      "gold": [3, 8],
+      "entries": [
+        { "item": "rottenCloth", "chance": 60, "group": 0, "min": 1, "max": 2 },
+        { "item": "graveRing", "chance": 20, "group": 1, "min": 1, "max": 1 },
+        { "item": "leatherJerkin", "chance": 10, "group": 1, "min": 1, "max": 1 }
+      ]
+    }
+  }
+}

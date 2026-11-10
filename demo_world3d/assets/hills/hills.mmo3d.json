@@ -1,22 +1,14 @@
 {
-  "templates": {
-    "zombie": {
-      "type": "mob",
-      "as": "zombie",
-      "attributes": { "health": 3, "maxHealth": 3 },
-      "hit": { "clip": "hit", "from": 0.33 },
-      "death": "death"
-    },
-    "zombie_man": {
-      "type": "mob",
-      "as": "zombie_man",
-      "attributes": { "health": 5, "maxHealth": 5 },
-      "hit": { "clip": "hit", "from": 0.33 },
-      "death": "death"
-    }
-  },
+  "landmarks": "village-terrain3d.art.crowd",
+  "facts": {},
   "placements": [
-    { "template": "zombie", "at": [100.79, 12, -75.28], "yaw": 0 },
-    { "template": "zombie_man", "at": [103.29, 12, -75.28], "yaw": 0 }
-  ]
+    { "kind": "old_woman", "at": [97.79, 11.042, -70.28], "yaw": 1.5708 },
+    { "kind": "smith", "at": "smithy/smithy_anvil" },
+    { "kind": "priest", "at": [73.44, 12.098, -75.81], "yaw": 4.7124 }
+  ],
+  "spawns": [
+    { "kind": "zombie", "at": [100.79, 12, -77.28], "count": 3, "spread": 4, "respawn": 30, "when": "!world.graves.cleared" },
+    { "kind": "zombie_man", "at": [103.29, 12, -77.28], "count": 2, "spread": 4, "respawn": 45, "when": "!world.graves.cleared" }
+  ],
+  "zones": []
 }

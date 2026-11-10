@@ -21,6 +21,7 @@
         --effect: #e3758a;
         --mob: #8cc46f;
         --place: #74b3e6;
+        --item: #c9a6f0;
         --tip: #0d1119;
         --tipline: #5d6b85;
       }
@@ -55,6 +56,7 @@
       .effect { color: var(--effect) }
       .mob { color: var(--mob) }
       .place { color: var(--place) }
+      .item { color: var(--item) }
       main { padding: 36px 48px 80px; max-width: 980px }
       main h1 { font: 700 44px/1.1 Alegreya, serif; margin: 0 0 6px }
       .kind { color: var(--dim); margin: 0 0 28px }
@@ -105,6 +107,9 @@
       import mmo from './assets/hills/hills.mmo3d.json'
       import defs from './assets/hills/hills.json'
       import volleys from './assets/hills/volleys.json'
+      import inventory from './assets/hills/hills.inventory.json'
+      import equipment from './assets/hills/hills.equipment.json'
+      import loot from './assets/hills/hills.loot.json'
 
       const hero = defs.player
       const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
@@ -134,10 +139,19 @@
         return `${what ? what[0].toUpperCase() + what.slice(1) : 'Changes nothing'} ${how}${tags}.`
       }
 
-      // Who has each ability: the hero, by its definition.
-      const usersOf = name => (hero.abilities.includes(name) ? ['the hero'] : [])
+      // The mob kinds: every kind the placements name, each with its definition.
+      const mobs = Object.fromEntries([...new Set([...mmo.placements, ...mmo.spawns].map(p => p.kind))].filter(kind => defs[kind]?.prey).map(kind => [kind, defs[kind]]))
+      // Where an `at` is: a landmark's name, or its coordinates.
+      const atSays = at => (typeof at === 'string' ? `the ${esc(words(at.split('/').pop()))} (${esc(at.split('/')[0])})` : at.map(num).join(', '))
+      const whenSays = c => (c ? ` while ${esc(c)} holds` : '')
+      // Who has each ability: the hero and the mobs, by their definitions.
+      const usersOf = name => [
+        ...(hero.abilities.includes(name) ? ['the hero'] : []),
+        ...Object.entries(mobs).filter(([, m]) => m.abilities.includes(name)).map(([kind]) => link('mob', kind)),
+      ]
       const abilitiesApplying = effect => Object.entries(gas.abilities).filter(([, a]) => a.effects.includes(effect)).map(([n]) => n)
-      const placementsOf = template => mmo.placements.filter(p => p.template === template)
+      const placementsOf = kind => mmo.placements.filter(p => p.kind === kind)
+      const packsOf = kind => mmo.spawns.filter(s => s.kind === kind)
 
       function abilityPage(name) {
         const a = gas.abilities[name]
@@ -186,24 +200,30 @@
       }
 
       function mobPage(name) {
-        const t = mmo.templates[name]
+        const t = mobs[name]
         const at = t.attributes
+        const hunt = t.behaviors.hunt
         const tip = `
           <div class="tip">
             <div class="name mob">${esc(title(name))}</div>
             <div class="row"><span>Health</span><span>${num(at.health)} / ${num(at.maxHealth ?? at.health)}</span></div>
-            <div class="note">Body: ${esc(words(t.as))}</div>
+            <div class="row"><span>Sees</span><span>${num(t.sight.range)} m</span></div>
+            <div class="say">${t.abilities.map(a => `Uses ${esc(title(a))}.`).join(' ')}</div>
           </div>`
-        const hits = Object.entries(gas.abilities).map(([n, a]) => {
+        const hits = hero.abilities.map(n => [n, gas.abilities[n]]).map(([n, a]) => {
           const dmg = a.effects.flatMap(e => (gas.effects[e].modifiers ?? []).filter(m => m.attribute === 'health' && m.add < 0).map(m => -m.add * (gas.effects[e].every ? gas.effects[e].for / gas.effects[e].every : 1))).reduce((s, v) => s + v, 0)
           return dmg > 0 ? `<tr><td>${link('ability', n)}</td><td>${num(dmg)}</td><td>${Math.ceil(at.health / dmg)}</td></tr>` : ''
         }).join('')
         const body = `
-          <p>A mob of ${num(at.health)} health. Struck, it plays its ${esc(words(t.hit.clip))} clip; at 0 health it plays ${esc(words(t.death))} and lies dead.</p>
+          <p>A mob of ${num(at.health)} health. It notices ${t.prey.map(words).join(' or ')} within ${num(t.sight.range)} m in front of it, walks to them while they are within ${num(hunt.range)} m, and in reach uses ${t.abilities.map(a => link('ability', a)).join(', ')}. Struck, it plays its ${esc(words(t.hit.clip))} clip; at 0 health it plays ${esc(words(t.behaviors[t.dies].clip))} and lies dead for ${secs(t.behaviors[t.dies].for)}.</p>
+          ${t.loot ? `<h3>What it drops</h3><p>${num(loot.loot[t.loot].gold[0])} to ${num(loot.loot[t.loot].gold[1])} gold, to whoever killed it, and:</p>${list(loot.loot[t.loot].entries.map(d => `${link('item', d.item)}: ${chanceSays(d)}`))}` : ''}
           <h3>How many hits it takes</h3>
           <table><tr><th>Ability</th><th>Health it takes</th><th>To kill</th></tr>${hits}</table>
           <h3>Where it stands</h3>
-          ${list(placementsOf(name).map(p => { const i = mmo.placements.indexOf(p); return `<a class="place" href="#place/${i}">Placement ${i + 1}</a> at ${p.at.map(num).join(', ')}` }))}`
+          ${list([
+            ...placementsOf(name).map(p => { const i = mmo.placements.indexOf(p); return `<a class="place" href="#place/${i}">Placement ${i + 1}</a> at ${atSays(p.at)}` }),
+            ...packsOf(name).map(s => { const i = mmo.spawns.indexOf(s); return `<a class="place" href="#pack/${i}">Pack ${i + 1}</a>: ${num(s.count)} within ${num(s.spread)} m of ${atSays(s.at)}` }),
+          ])}`
         return page(name, 'Mob', body, tip)
       }
 
@@ -211,8 +231,48 @@
         const p = mmo.placements[+i]
         if (!p) return missing('place', i)
         const body = `
-          <p>${link('mob', p.template)} stands at ${p.at.map(num).join(', ')}, facing ${num(p.yaw)} radians.</p>`
+          <p>${link('mob', p.kind)} stands at ${atSays(p.at)}${whenSays(p.when)}.</p>`
         return `<h1>Placement ${+i + 1}</h1><p class="kind">Placement</p><div class="entry"><div>${body}</div></div>`
+      }
+
+      function packPage(i) {
+        const s = mmo.spawns[+i]
+        if (!s) return missing('pack', i)
+        const back = s.respawn === undefined ? 'A mob of it killed does not come back.' : `A mob of it killed comes back ${secs(s.respawn)} later.`
+        const body = `
+          <p>${num(s.count)} ${link('mob', s.kind)} stand within ${num(s.spread)} m of ${atSays(s.at)}${whenSays(s.when)}. ${back}</p>`
+        return `<h1>Pack ${+i + 1}</h1><p class="kind">Pack</p><div class="entry"><div>${body}</div></div>`
+      }
+
+      // The loot tables an item drops from, and the mobs that roll each.
+      const items = inventory.items
+      const dropsOf = item => Object.entries(loot.loot).flatMap(([t, l]) => l.entries.filter(d => d.item === item).map(d => ({ table: t, ...d })))
+      const rollersOf = table => Object.entries(mobs).filter(([, m]) => m.loot === table).map(([k]) => k)
+      const chanceSays = d => `${num(d.chance)}%${d.group ? ` (at most one of group ${d.group})` : ''}${d.max > 1 ? `, ${num(d.min)} to ${num(d.max)}` : ''}`
+      // The effects equipping an item puts on: its equipment's ability sets' effects.
+      const equippedEffects = name => {
+        const e = items[name].fragments.equippable
+        return e ? equipment.equipment[e.equipment].abilitySets.flatMap(s => gas.abilitySets[s].effects ?? []) : []
+      }
+
+      function itemPage(name) {
+        const f = items[name].fragments
+        const grade = f.quality?.grade
+        const wears = equippedEffects(name)
+        const tip = `
+          <div class="tip">
+            <div class="name item">${esc(items[name].name)}</div>
+            <div class="row"><span>${grade ? esc(title(grade)) : ''}</span><span>${f.equippable ? 'Equippable' : 'Carried'}</span></div>
+            ${wears.length ? `<div class="say">Equipped: ${esc(wears.map(e => effectSays(gas.effects[e])).join(' '))}</div>` : ''}
+            ${f.price ? `<div class="note">Sells for ${num(f.price.sell)} gold</div>` : ''}
+          </div>`
+        const from = dropsOf(name).flatMap(d => rollersOf(d.table).map(k => `${link('mob', k)}: ${chanceSays(d)}`))
+        const body = `
+          <p>${f.equippable ? 'Equipped, worn or held on the quick bar.' : grade === 'grey' ? 'Junk, carried only to be sold.' : 'Carried.'}${f.price ? ` A trader pays ${num(f.price.sell)} gold for one.` : ''}</p>
+          ${wears.length ? `<h3>While equipped</h3>${list(wears.map(e => `${link('effect', e)}: ${esc(effectSays(gas.effects[e]))}`))}` : ''}
+          <h3>Dropped by</h3>
+          ${list(from)}`
+        return `<h1>${esc(items[name].name)}</h1><p class="kind">Item</p><div class="entry"><div>${body}</div>${tip}</div>`
       }
 
       function page(name, kind, body, tip) {
@@ -231,8 +291,10 @@
             <table>${rows('ability', Object.entries(gas.abilities), a => a.effects.map(e => effectSays(gas.effects[e])).join(' '))}</table>
             <h3>Effects</h3>
             <table>${rows('effect', Object.entries(gas.effects), effectSays)}</table>
+            <h3>Items</h3>
+            <table>${rows('item', Object.entries(items).filter(([n]) => n !== 'gold'), i => `${i.fragments.quality ? title(i.fragments.quality.grade) : ''}${i.fragments.equippable ? ', equippable' : ''}${i.fragments.price ? `, sells for ${num(i.fragments.price.sell)} gold` : ''}`)}</table>
             <h3>Mobs</h3>
-            <table>${rows('mob', Object.entries(mmo.templates), (t, n) => `${num(t.attributes.health)} health, placed ${placementsOf(n).length} ${placementsOf(n).length === 1 ? 'time' : 'times'}`)}</table>
+            <table>${rows('mob', Object.entries(mobs), (t, n) => `${num(t.attributes.health)} health, ${packsOf(n).reduce((s, p) => s + p.count, 0) + placementsOf(n).length} in the place`)}</table>
           </div>`
       }
 
@@ -241,16 +303,18 @@
         return `<h1><a href="#">Hills wiki</a></h1>
           ${group('Abilities', 'ability', Object.keys(gas.abilities))}
           ${group('Effects', 'effect', Object.keys(gas.effects))}
-          ${group('Mobs', 'mob', Object.keys(mmo.templates))}`
+          ${group('Mobs', 'mob', Object.keys(mobs))}
+          ${group('Items', 'item', Object.keys(items).filter(n => n !== 'gold'))}`
       }
 
       function show() {
         const at = decodeURIComponent(location.hash.slice(1))
         const [what, name] = at.split('/')
-        const pages = { ability: [gas.abilities, abilityPage], effect: [gas.effects, effectPage], mob: [mmo.templates, mobPage] }
+        const pages = { ability: [gas.abilities, abilityPage], effect: [gas.effects, effectPage], mob: [mobs, mobPage], item: [items, itemPage] }
         let html
         if (!at) html = home()
         else if (what === 'place') html = placePage(name)
+        else if (what === 'pack') html = packPage(name)
         else if (pages[what]) html = pages[what][0][name] ? pages[what][1](name) : missing(what, name)
         else html = missing('page', at)
         document.getElementById('main').innerHTML = html

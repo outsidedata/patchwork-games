@@ -48,7 +48,8 @@
       import { sim } from './demo_world3d.sim.ts'
       import { scene as main } from './main.sim.ts'
       import { visitor } from './visitor.sim.ts'
-      import { tags } from './plugins/gas3d/gas3d.sim.ts'
+      import { tags, value } from './plugins/gas3d/gas3d.sim.ts'
+      import { COMPLETE, INCOMPLETE, progress, questsOf, status } from './plugins/quests/quests.sim.ts'
       import file from './demo_world3d.scene.json'
       import town from './assets/smallville.town.nav.json'
       import bridge from './assets/bridge.nav.json'
@@ -484,8 +485,19 @@
           `${frames.length} fps  longest frame ${worst.toFixed(1)} ms  step ${truth.n}`,
           (l3 => l3 ? `lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} still tiles drawn this frame, ${l3.moving} moving tiles, ${l3.owed} faces owed` : '')(window.__client?.plugins.lights3d),
           p?.data.pos ? `you (${p.data.pos.map(v => v.toFixed(2)).join(', ')}) ${p.data.grounded ? 'on the ground' : 'in the air'}${p.data.motion ? `, ${p.data.activity}.${p.data.motion}` : ''}${p.data.target != null ? `, targeting ${p.data.target}` : ''}` : '',
-          // every body gas3d keeps: its attributes and its tags
-          ...room.rows.filter(r => r.data.gas).map(r => `${r.kind} ${r.id}${r.data.template ? ` ${r.data.template}` : ''}: ${Object.entries(r.data.gas.base).map(([a, v]) => `${a} ${(+v).toFixed(1)}`).join(', ')}${r.data.dead ? ', dead' : ''}${(t => t.length ? `; ${t.join(', ')}` : '')(tags(room, r))}`),
+          // every row's facts (factsdb's): the hero's and the place's
+          ...room.rows.filter(r => r.data.factsdb).map(r => `${r.kind} ${r.id} facts: ${Object.entries(r.data.factsdb).map(([n, v]) => `${n} ${v}`).join(', ') || 'none yet'}`),
+          // each player's quest log (quests'): every quest taken or done, and how far along each objective is
+          ...room.rows.filter(r => r.data.factsdb && r.kind === 'player').flatMap(r => Object.entries(questsOf(room)).filter(([id]) => [COMPLETE, INCOMPLETE].includes(status(r, id))).map(([id, q]) => `${r.kind} ${r.id} quest ${q.title}${status(r, id) === COMPLETE ? ' (done: hand it in)' : ''}: ${progress(room, r, id).map(p => `${p.what} ${p.has}/${p.count}`).join(', ')}`)),
+          // the service each player has open (talk's `serving`), with the vendor's stock and the buyback
+          ...room.rows.filter(r => r.data.serving).map(r => `${r.kind} ${r.id} is served: ${r.data.serving.what} by ${room.rows.find(x => x.id === r.data.serving.with)?.kind}${r.data.buyback.length ? `; buyback ${r.data.buyback.map((b, i) => `${i}) ${b.instance.definition} ×${b.count} for ${b.price}`).join(', ')}` : ''}`),
+          // what each player is told (talk's): the line said and the choices, each by its key
+          ...room.rows.filter(r => r.data.talking).map(r => `${r.kind} ${r.id} is told: "${r.data.talking.line}"${r.data.talking.choices.map((c, i) => `  ${i + 1}) ${c.say}`).join('')}`),
+          // what each player carries (inventory's), each instance by its id, what of it is equipped (equipment's) and
+          // its quick bar
+          ...room.rows.filter(r => r.data.inventory).map(r => `${r.kind} ${r.id} carries: ${r.data.inventory.entries.map(e => `#${e.instance.id} ${e.instance.definition} ×${e.count}${r.data.equipment.some(q => q.instance === e.instance.id) ? ' (equipped)' : ''}`).join(', ') || 'nothing'}; quick bar ${r.data.quickbar.slots.map((s, i) => `${i === r.data.quickbar.active ? '[' : ''}${s === null ? '-' : `#${s}`}${i === r.data.quickbar.active ? ']' : ''}`).join(' ')}`),
+          // every body gas3d keeps: its attributes, with the effects on it, and its tags
+          ...room.rows.filter(r => r.data.gas).map(r => `${r.kind} ${r.id}${r.data.template ? ` ${r.data.template}` : ''}: ${Object.keys(r.data.gas.base).map(a => `${a} ${value(room, r, a).toFixed(1)}`).join(', ')}${r.data.dead ? ', dead' : ''}${(t => t.length ? `; ${t.join(', ')}` : '')(tags(room, r))}`),
           ...visitors().map(v => `${v.id === picked.id ? '> ' : ''}visitor ${v.id} ${v.data.body}: ${v.data.speed > 0 ? `going to ${where(v)}, ${left(v)} places left` : `standing at ${where(v)}`} at y ${bodies.crowd3d.where(v, time())[1].toFixed(2)}, switched courses ${switches.get(v.id) ?? 0}`),
           ...errors,
         ].join('\n')

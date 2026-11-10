@@ -1,18 +1,32 @@
 {
   "effects": {
-    "punch": { "duration": "instant", "modifiers": [{ "attribute": "health", "add": -1 }] },
-    "kick": { "duration": "instant", "modifiers": [{ "attribute": "health", "add": -2 }] },
+    "punch": { "duration": "instant", "modifiers": [{ "attribute": "health", "add": -1, "plus": { "attribute": "power", "times": -1 } }] },
+    "kick": { "duration": "instant", "modifiers": [{ "attribute": "health", "add": -2, "plus": { "attribute": "power", "times": -1 } }] },
+    "risen": { "duration": "instant", "modifiers": [{ "attribute": "health", "add": 0, "plus": { "attribute": "maxHealth", "times": 0.5 } }] },
+    "mended": { "duration": "instant", "modifiers": [{ "attribute": "health", "add": 4 }] },
+    "rustySword": { "duration": "until", "modifiers": [{ "attribute": "power", "add": 1 }] },
+    "ironSword": { "duration": "until", "modifiers": [{ "attribute": "power", "add": 2 }] },
+    "blessedEdge": { "duration": "until", "modifiers": [{ "attribute": "power", "add": 1 }] },
+    "leatherJerkin": { "duration": "until", "modifiers": [{ "attribute": "maxHealth", "add": 2 }] },
     "firebolt": { "duration": "instant", "modifiers": [{ "attribute": "health", "add": -1 }] },
     "burning": { "duration": "timed", "for": 2, "every": 1, "modifiers": [{ "attribute": "health", "add": -0.5 }], "tags": ["burning"] },
+    "bite": { "duration": "instant", "modifiers": [{ "attribute": "health", "add": -1 }] },
     "manaRegen": { "duration": "until", "every": 1, "modifiers": [{ "attribute": "mana", "add": 5 }] }
   },
   "abilities": {
     "jab": { "press": "light", "delivery": { "reach": 1.5 }, "effects": ["punch"] },
     "kick": { "press": "heavy", "cooldown": 1, "delivery": { "reach": 1.8 }, "effects": ["kick"] },
+    "bite": { "clip": "attack", "cooldown": 2, "delivery": { "reach": 1.4 }, "effects": ["bite"] },
     "firebolt": { "press": "skill", "cost": { "mana": 20 }, "cooldown": 1.5, "delivery": { "bolt": "firebolt", "range": 30 }, "effects": ["firebolt", "burning"] }
   },
   "cues": {
     "burning": "handfire"
+  },
+  "abilitySets": {
+    "rustySword": { "effects": ["rustySword"] },
+    "ironSword": { "effects": ["ironSword"] },
+    "blessedEdge": { "effects": ["blessedEdge"] },
+    "leatherJerkin": { "effects": ["leatherJerkin"] }
   },
   "cap": {
     "health": "maxHealth",

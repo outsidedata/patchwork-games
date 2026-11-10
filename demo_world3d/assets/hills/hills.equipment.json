@@ -1,0 +1,7 @@
+{
+  "equipment": {
+    "rustySword": { "abilitySets": ["rustySword"] },
+    "ironSword": { "abilitySets": ["ironSword"] },
+    "leatherJerkin": { "abilitySets": ["leatherJerkin"] }
+  }
+}

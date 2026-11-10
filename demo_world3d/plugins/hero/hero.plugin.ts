@@ -13,6 +13,10 @@
 //   motions   each a motion's name to its keys, pressed as `press` with that name: motion3d plays it in the
 //             activity the body is in
 //   target    sent as `target`: the next mob targeted
+//   talk      sent as `talk`: talking to the nearest one with something to say, or the talk ended
+//   leave     sent as `leave`: the shop, trainer or enchanter open closed; `world.ui`'s `back`, which the ui
+//             leaves to the game on a screen the game puts up
+//   choose    a list of key lists, the i-th sent as `choose` with i: the i-th choice of what was said
 //   nearer, further   the camera in and out by `camera.step` of the wheel's pixels a press
 // The mouse dragged with `drag` held sends `look` with its pixels times `sens`, right turning the view right and
 // down tilting it down; the wheel sends `zoom` with the pixels it turned. chasecamera3d follows the row.
@@ -31,6 +35,9 @@ export function bind(row: Row, plugins: Plugins) {
   const button = (list: string[], input: Input) => { for (const key of list) press[key] = input }
   for (const [motion, list] of Object.entries(keys.motions as Record<string, string[]>)) button(list, ['press', motion])
   button(keys.target, ['target'])
+  button(keys.talk, ['talk'])
+  button(keys.leave, ['leave'])
+  ;(keys.choose as string[][]).forEach((list, i) => button(list, ['choose', i]))
   button(keys.nearer, ['zoom', -k.camera.step])
   button(keys.further, ['zoom', k.camera.step])
   // chasecamera3d looks along (sin yaw, cos yaw), so a larger yaw turns the view left: right on the mouse is less
