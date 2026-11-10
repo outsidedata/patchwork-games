@@ -12,14 +12,14 @@
 // (gas3d's `delivery.reach`), it stops, faces the row, and uses the first of its abilities gas3d says it may (no
 // cooldown on, enough of what it costs): the cost and cooldown paid, the ability's `clip` played, and the ability the
 // one it is `casting`. On the step that clip's blow lands (gas3d's `lands`, the frame its fastest hand or foot moves
-// furthest), the row it hunts, while it is still within that reach and in front of it, is struck with the ability
+// furthest, measured on its anim kind's `model`, as anim reads a body's ends), the row it hunts, while it is still within that reach and in front of it, is struck with the ability
 // (hitscan3d's `strike`, a `Struck` naming it). A cast whose clip no longer plays (a hit stopped it) is let go. With no
 // fact of its prey left, or no living row of it within `range`, the hunt is over. The row keeps `casting`, and the
 // clip and playhead it last read (`blowClip`, `blowT`), so a blow is landed once.
 import type { Row, W } from '#engine/engine.ts'
 import * as math from '#plugins/math/math.sim.ts'
 import { strike } from '#plugins/hitscan3d/hitscan3d.sim.ts'
-import { play, rigOf } from '#plugins/anim/anim.sim.ts'
+import { numbersOf, play, rigOf } from '#plugins/anim/anim.sim.ts'
 import { listOf, nearness, recall, toward, travel, type Behavior, type Body, type Settings } from '#plugins/npc3d/npc3d.sim.ts'
 import { abilityOf, blocked, commit, lands } from '../gas3d/gas3d.sim.ts'
 
@@ -70,7 +70,7 @@ const hunt: Behavior = {
     if (d.casting !== null) {
       const ability = abilityOf(w, d.casting)
       if (d.clip !== ability.clip || d.state !== 'act') d.casting = null
-      else if (lands(rigOf(w, me.kind), me.kind, ability.clip!, d.clipT, was)) {
+      else if (lands(rigOf(w, me.kind), numbersOf(w).kinds[me.kind].model, ability.clip!, d.clipT, was)) {
         const name: string = d.casting
         d.casting = null
         const ahead = [math.sin(d.yaw), math.cos(d.yaw)]

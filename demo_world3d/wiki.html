@@ -110,6 +110,7 @@
       import inventory from './assets/hills/hills.inventory.json'
       import equipment from './assets/hills/hills.equipment.json'
       import loot from './assets/hills/hills.loot.json'
+      import classes from './assets/hills/hills.classes.json'
 
       const hero = defs.player
       const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
@@ -146,7 +147,7 @@
       const whenSays = c => (c ? ` while ${esc(c)} holds` : '')
       // Who has each ability: the hero and the mobs, by their definitions.
       const usersOf = name => [
-        ...(hero.abilities.includes(name) ? ['the hero'] : []),
+        ...Object.values(classes.classes).filter(c => c.abilities.includes(name)).map(c => `the ${c.name.toLowerCase()}`),
         ...Object.entries(mobs).filter(([, m]) => m.abilities.includes(name)).map(([kind]) => link('mob', kind)),
       ]
       const abilitiesApplying = effect => Object.entries(gas.abilities).filter(([, a]) => a.effects.includes(effect)).map(([n]) => n)
@@ -157,16 +158,20 @@
         const a = gas.abilities[name]
         const d = a.delivery
         const bolt = d.bolt ? volleys.patterns[d.bolt] : undefined
-        const range = d.reach !== undefined ? `${num(d.reach)} m` : `${num(d.range)} m`
+        const range = d.self ? 'Self' : `${num(d.reach ?? d.range ?? d.radius)} m`
         const cost = Object.entries(a.cost ?? {}).map(([k, v]) => `${num(v)} ${words(k)}`).join(', ')
         const lands = d.reach !== undefined
           ? `It strikes the nearest living mob within ${num(d.reach)} m in front of the user, the moment the blow lands.`
-          : `The moment the cast is thrown it fires a bolt at the user's target, or the nearest living mob in front within ${num(d.range)} m. The bolt flies at ${num(bolt.speed)} m a second for up to ${secs(bolt.life)}, and hits anything within ${num(bolt.radius)} m of its line.`
+          : d.radius !== undefined
+            ? `The moment the blow lands it strikes every living mob within ${num(d.radius)} m of the user.`
+            : d.self
+              ? 'The moment the cast lands it is put on the user itself.'
+              : `The moment the cast is thrown it fires a bolt at the user's target, or the nearest living mob in front within ${num(d.range)} m. The bolt flies at ${num(bolt.speed)} m a second for up to ${secs(bolt.life)}, and hits anything within ${num(bolt.radius)} m of its line.`
         const tip = `
           <div class="tip">
             <div class="name ability">${esc(title(name))}</div>
             <div class="row"><span>${cost || 'No cost'}</span><span>${range} range</span></div>
-            <div class="row"><span>${d.bolt ? 'Thrown' : 'Melee'}</span><span>${a.cooldown ? `${secs(a.cooldown)} cooldown` : 'No cooldown'}</span></div>
+            <div class="row"><span>${d.bolt ? 'Thrown' : d.radius ? 'Around' : d.self ? 'On self' : 'Melee'}</span><span>${a.cooldown ? `${secs(a.cooldown)} cooldown` : 'No cooldown'}</span></div>
             <div class="say">${a.effects.map(e => effectSays(gas.effects[e])).join(' ')}</div>
             <div class="note">Key: ${esc(keyOf(a.press) || a.press)}</div>
           </div>`
@@ -195,7 +200,7 @@
           <h3>Changes</h3>
           ${list((e.modifiers ?? []).map(m => esc(modifierSays(m, e.every))))}
           <h3>Applied by</h3>
-          ${list([...users.map(a => link('ability', a)), ...(hero.effects.includes(name) ? ['the hero, always'] : [])])}`
+          ${list([...users.map(a => link('ability', a)), ...Object.values(classes.classes).filter(c => c.effects.includes(name)).map(c => `the ${c.name.toLowerCase()}, always`)])}`
         return page(name, 'Effect', body, tip)
       }
 
@@ -210,7 +215,7 @@
             <div class="row"><span>Sees</span><span>${num(t.sight.range)} m</span></div>
             <div class="say">${t.abilities.map(a => `Uses ${esc(title(a))}.`).join(' ')}</div>
           </div>`
-        const hits = hero.abilities.map(n => [n, gas.abilities[n]]).map(([n, a]) => {
+        const hits = [...new Set(Object.values(classes.classes).flatMap(c => c.abilities))].map(n => [n, gas.abilities[n]]).map(([n, a]) => {
           const dmg = a.effects.flatMap(e => (gas.effects[e].modifiers ?? []).filter(m => m.attribute === 'health' && m.add < 0).map(m => -m.add * (gas.effects[e].every ? gas.effects[e].for / gas.effects[e].every : 1))).reduce((s, v) => s + v, 0)
           return dmg > 0 ? `<tr><td>${link('ability', n)}</td><td>${num(dmg)}</td><td>${Math.ceil(at.health / dmg)}</td></tr>` : ''
         }).join('')

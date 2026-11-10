@@ -6,16 +6,18 @@
 //               (`plugins/factsdb`) on the first step.
 //   placements  `[{ kind, at, yaw?, when? }]`: one row of the kind, standing at `at` and facing `yaw` (radians; a
 //               landmark's own yaw when `at` names one and `yaw` is left out, else 0). With `when`, a factsdb
-//               condition (`holds`, read on the place's facts), the row stands only while it holds: it is spawned the
-//               step it comes to hold and ended the step it stops.
+//               condition (`holds`, read on the place's facts), the row is spawned only while it holds: each step it
+//               holds and the placement has no row standing, one is spawned. A row standing stays when it stops
+//               holding (a boss's body lies its time out after its death writes the fact that keeps it from rising).
 //   spawns      `[{ kind, at, count, spread, respawn?, when? }]`: a pack of `count` rows of the kind, each spawned at a
 //               point within `spread` metres of `at` across the ground (`at`'s own height; the body stands itself on
 //               the ground), facing a way of its own. A row of a pack that is gone is spawned again `respawn` seconds
 //               after it went, never without `respawn`. With `when`, nothing of the pack is spawned, first or again,
 //               while it does not hold; the rows standing stay.
-//   zones       `[{ name, at, radius, set }]`: a circle across the ground of `radius` metres round `at`. Each time a
-//               `player` row comes into it, each fact of `set` `{ <name>: number }` is written (factsdb's `write`: on
-//               that player's facts, or the place's for a name `world.` starts).
+//   zones       `[{ name, at, radius, set, when? }]`: a circle across the ground of `radius` metres round `at`. Each
+//               time a `player` row comes into it while its `when` holds (on the place's facts; always without one),
+//               each fact of `set` `{ <name>: number }` is written (factsdb's `write`: on that player's facts, or the
+//               place's for a name `world.` starts).
 // An `at` is [x, y, z] or a landmark's name. Every kind a placement or a spawn names is a kind of the game's own, its
 // rule a one-line file handing out one of this file's rules (`zombie.sim.ts`: `export const zombie = mob`), with its
 // own definition and its own prefab. The `mmo3d` row, one `actors` entry, does all of it, writing `pos` and `yaw` over
@@ -61,7 +63,7 @@ const TURN = 2 * Math.PI
 export type At = number[] | string
 export type Placement = { kind: string; at: At; yaw?: number; when?: string }
 export type Spawn = { kind: string; at: At; count: number; spread: number; respawn?: number; when?: string }
-export type Zone = { name: string; at: At; radius: number; set: Record<string, number> }
+export type Zone = { name: string; at: At; radius: number; set: Record<string, number>; when?: string }
 export type File = {
   landmarks: string
   facts: Record<string, number>
@@ -101,9 +103,6 @@ function place(me: Row, w: W) {
     if (ok && !up) {
       const l = where(w, p.at)
       present[i] = w.spawn(p.kind, { pos: l.at, yaw: p.yaw ?? l.yaw }).id
-    } else if (!ok && up) {
-      w.end(w.get(id))
-      delete present[i]
     }
   })
   me.data.present = present
@@ -139,7 +138,7 @@ function zones(me: Row, w: W) {
       const [x, , zz] = p.data.pos as number[]
       if (math.hypot(x - c[0], zz - c[2]) > z.radius) continue
       inside[z.name].push(p.id)
-      if (was.includes(p.id)) continue
+      if (was.includes(p.id) || !when(w, z.when)) continue
       for (const [name, value] of Object.entries(z.set)) write(w, p, name, value)
     }
   }

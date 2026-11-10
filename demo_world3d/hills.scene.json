@@ -33,6 +33,21 @@
           "url": "/games/demo_world3d/assets/xbot.glb",
           "preload": true
         },
+        "sword": {
+          "type": "model",
+          "url": "/games/demo_world3d/assets/sword.glb",
+          "preload": true
+        },
+        "wand": {
+          "type": "model",
+          "url": "/games/demo_world3d/assets/wand.glb",
+          "preload": true
+        },
+        "classes": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/hills/hills.classes.json",
+          "preload": true
+        },
         "xbot-motion3d": {
           "type": "json",
           "url": "/games/demo_world3d/assets/xbot.motion3d.json",
@@ -61,6 +76,11 @@
         "enchanting": {
           "type": "json",
           "url": "/games/demo_world3d/assets/hills/hills.enchanting.json",
+          "preload": true
+        },
+        "smartai": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/hills/hills.smartai.json",
           "preload": true
         },
         "quests": {
@@ -296,7 +316,8 @@
         "gold": { "anchor": "top-right", "at": [-20, 20], "size": [120, 32] },
         "tracker": { "anchor": "top-right", "at": [-20, 64], "size": [280, 200] },
         "loot": { "anchor": "bottom", "at": [0, -122], "size": [420, 30] },
-        "bars": { "anchor": "bottom", "at": [0, -20], "size": [460, 92] },
+        "boss": { "anchor": "top", "at": [0, 120], "size": [600, 56] },
+        "bars": { "anchor": "bottom", "at": [0, -20], "size": [540, 92] },
         "talk": { "anchor": "bottom", "at": [0, -150], "size": [800, 200], "layer": 1 },
         "bag": { "anchor": "center", "size": [700, 420], "modal": true, "key": "b", "group": "windows", "layer": 2 },
         "character": { "anchor": "center", "size": [700, 400], "modal": true, "key": "c", "group": "windows", "layer": 2 },
@@ -305,6 +326,7 @@
         "shop": { "anchor": "left", "at": [40, 0], "size": [800, 440], "modal": true, "layer": 3 },
         "trainer": { "anchor": "center", "size": [480, 300], "modal": true, "layer": 3 },
         "enchanter": { "anchor": "center", "size": [700, 380], "modal": true, "layer": 3 },
+        "classes": { "anchor": "center", "size": [760, 420], "modal": true, "layer": 5, "backdrop": { "color": 0, "alpha": 0.6 } },
         "death": { "anchor": "center", "size": [600, 300], "modal": true, "layer": 4, "backdrop": { "color": 2621440, "alpha": 0.55 } }
       },
       "keys": { "up": "ArrowUp", "down": "ArrowDown", "left": "ArrowLeft", "right": "ArrowRight", "press": ["Enter", " "], "back": "Escape" },
@@ -337,11 +359,19 @@
         "mana": { "size": [272, 14], "edge": 1, "frame": { "color": "#000000" }, "track": { "color": "#121a2a" } },
         "targetHealth": { "size": [232, 14], "edge": 1, "frame": { "color": "#000000" }, "track": { "color": "#2a1512" } },
         "plateHealth": { "size": [96, 8], "edge": 1, "frame": { "color": "#000000" }, "track": { "color": "#1b1512" } },
+        "say": { "fontFamily": "Georgia, serif", "fontSize": 18, "fontStyle": "italic", "fontWeight": "bold", "fill": "#ffd9a0", "stroke": { "color": "#000000", "width": 4, "join": "round" } },
+        "bossHealth": { "size": [560, 14], "edge": 1, "frame": { "color": "#000000" }, "track": { "color": "#2a1512" } },
         "progress": { "size": [220, 10], "edge": 1, "frame": { "color": "#000000" }, "track": { "color": "#1b1512" } }
       }
     },
     "quests": {
       "file": "quests"
+    },
+    "smartai": {
+      "file": "smartai"
+    },
+    "classes": {
+      "file": "classes"
     },
     "vendor": {
       "file": "vendor"
@@ -364,6 +394,9 @@
           "off": "dead"
         },
         "zombie_man": {
+          "off": "dead"
+        },
+        "barrow_king": {
           "off": "dead"
         }
       },
@@ -717,6 +750,23 @@
           "span": 0.3,
           "probe": 0.5,
           "seekSpeed": 3
+        },
+        "barrow_king": {
+          "radius": 0.4,
+          "height": 1.9,
+          "accel": 12,
+          "airAccel": 2,
+          "turnRate": 10,
+          "gravity": 20,
+          "jumpH": 1.1,
+          "step": 0.45,
+          "maxSlope": 0.9,
+          "slopeBand": 0.2,
+          "slide": 4,
+          "wade": 0.8,
+          "span": 0.3,
+          "probe": 0.5,
+          "seekSpeed": 3
         }
       },
       "mods": {
@@ -760,6 +810,18 @@
             "grounded": "grounded",
             "limp": "limp"
           }
+        },
+        "barrow_king": {
+          "rig": "zombieRig",
+          "model": "zombie_man",
+          "fade": 0.15,
+          "reads": {
+            "pos": "pos",
+            "yaw": "yaw",
+            "vel": "vel",
+            "grounded": "grounded",
+            "limp": "limp"
+          }
         }
       }
     },
@@ -779,7 +841,11 @@
             "vel": "vel",
             "grounded": "grounded",
             "limp": "limp"
-          }
+          },
+          "props": [
+            { "model": "sword", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
+            { "model": "wand", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] }
+          ]
         }
       },
       "anywhere": {
@@ -796,7 +862,9 @@
           "walk",
           "roll",
           "fight",
-          "hurt"
+          "hurt",
+          "swordshield",
+          "magic"
         ],
         "priority": 0,
         "data": {
@@ -1074,6 +1142,7 @@
       "equipment": [],
       "quickbar": { "slots": [null, null, null], "active": -1 },
       "talking": null,
+      "class": null,
       "serving": null,
       "buyback": [],
       "look": {
@@ -1162,6 +1231,43 @@
       "blowClip": null,
       "blowT": 0,
       "struckBy": null
+    },
+    "barrow_king": {
+      "pos": [0, 0, 0],
+      "yaw": 0,
+      "vel": [0, 0, 0],
+      "grounded": false,
+      "sliding": false,
+      "speed": 0,
+      "side": 0,
+      "turned": 0,
+      "want": [0, 0],
+      "face": null,
+      "jump": false,
+      "limp": false,
+      "goal": null,
+      "stalled": 0,
+      "gap": null,
+      "rest": null,
+      "look": 0,
+      "gaze": null,
+      "seen": [],
+      "noticing": {},
+      "facts": [],
+      "doing": "",
+      "until": 0,
+      "wake": 0,
+      "arrived": false,
+      "told": null,
+      "route": null,
+      "gas": null,
+      "dead": false,
+      "casting": null,
+      "blowClip": null,
+      "blowT": 0,
+      "struckBy": null,
+      "script": { "phase": 0, "time": 0, "fighting": false, "timers": {}, "done": [], "health": 100, "died": false },
+      "said": null
     },
     "volley3d": {
       "next": 1,

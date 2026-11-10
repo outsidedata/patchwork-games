@@ -24,7 +24,9 @@
 //                blocked    tags that stop it starting while any is on
 //                delivery   `{ reach }`, metres: the nearest body in front of the user within that reach, at the
 //                           clip's blow; `{ bolt, range }`: a volley3d round of the pattern `bolt` fired at the
-//                           user's target, or the nearest body in front within `range`, at the clip's blow
+//                           user's target, or the nearest body in front within `range`, at the clip's blow;
+//                           `{ radius }`, metres: every body within that many metres of the user, at the clip's
+//                           blow; `{ self: true }`: the user itself, at the clip's blow
 //                effects    the effects applied to what it lands on
 //   cues       `{ <tag>: <particle3d effect> }`, what a body looks like while it has a tag (the page half's)
 //   cap        `{ <attribute>: <attribute> }`: an attribute's base is kept between 0 and the one named here
@@ -43,6 +45,7 @@
 //                               `{ abilities, effects }`, the ids each was given.
 //   takeSet(w, row, handles)      what giving a set handed out taken back.
 //   granted(row)                the abilities ability sets have granted the row.
+//   dispel(w, row, tag)         every effect on the row that grants the tag taken off.
 // `value`, `tags` and `fileOf` read from the truth or from a page's rows alike.
 //   start(attributes, effects)  a body's first `gas`: the attributes' bases, the effects named on.
 //   value(row, attribute)       the attribute's value: its base, plus every add of the effects on it that modify
@@ -69,7 +72,7 @@ import * as math from '#plugins/math/math.sim.ts'
 
 export type Modifier = { attribute: string; add?: number; multiply?: number; plus?: { attribute: string; times: number } }
 export type Effect = { duration: 'instant' | 'timed' | 'until'; for?: number; every?: number; modifiers?: Modifier[]; tags?: string[] }
-export type Delivery = { reach: number } | { bolt: string; range: number }
+export type Delivery = { reach: number } | { bolt: string; range: number } | { radius: number } | { self: true }
 export type Ability = { press?: string; clip?: string; cost?: Record<string, number>; cooldown?: number; blocked?: string[]; delivery: Delivery; effects: string[] }
 export type AbilitySet = { abilities?: string[]; effects?: string[] }
 export type File = { effects: Record<string, Effect>; abilities: Record<string, Ability>; cues: Record<string, string>; cap: Record<string, string>; abilitySets: Record<string, AbilitySet> }
@@ -223,6 +226,12 @@ export function takeSet(w: W, row: Row, h: Handles) {
   g.granted = g.granted.filter(a => !h.abilities.includes(a.id))
   g.active = g.active.filter(a => !h.effects.includes(a.id))
   capped(w, row)
+}
+
+// Every effect on the row that grants the tag taken off (a ward spent).
+export function dispel(w: W, row: Row, tag: string) {
+  const g = gasOf(row)
+  g.active = g.active.filter(a => a.effect.startsWith('#') || !(effectOf(w, a.effect).tags ?? []).includes(tag))
 }
 
 export const granted = (row: Row): string[] => gasOf(row).granted.map(a => a.ability)

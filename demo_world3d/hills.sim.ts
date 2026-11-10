@@ -28,8 +28,9 @@ import { factsdb } from './plugins/factsdb/factsdb.sim.ts'
 import { old_woman } from './old_woman.sim.ts'
 import { smith } from './smith.sim.ts'
 import { priest } from './priest.sim.ts'
+import { barrow_king } from './barrow_king.sim.ts'
 import file from './hills.scene.json' with { type: 'json' }
 
-export const sim: Sim = { scenemanager, loader, npc3d, skydome3d, particle3d, volley3d, world3d, player, start, visitor, person, mmo3d, factsdb, zombie, zombie_man, old_woman, smith, priest }
+export const sim: Sim = { scenemanager, loader, npc3d, skydome3d, particle3d, volley3d, world3d, player, start, visitor, person, mmo3d, factsdb, zombie, zombie_man, old_woman, smith, priest, barrow_king }
 
 export const scene = file as Scene

@@ -30,18 +30,23 @@
 // draw key draws; else it is pressed to motion3d and `weapon` follows. Whichever weapon's stance is up is
 // `weapon`.
 //
+// Classes. Its row's `class` is null till the seat picks one (`pickClass(name)`, once, `plugins/classes`): till then it
+// has no `gas` and stands where it stood. Picking one starts its `gas` from the class's attributes and effects, gives
+// it the class's items (its weapon on the quick bar and held, its armour worn), makes its first stance its `weapon`
+// and presses the draw key, so it stands in that stance. The stances its draw key draws are its class's `weapons`.
+//
 // Abilities. What the body can do is gas3d's (`plugins/gas3d/gas3d.sim.ts`): its row's `gas` holds its attributes
-// and the effects on it, started on its first step from the definition's `attributes` with its `effects` on (its
-// mana regeneration), and stepped each step. The definition's `abilities` names the abilities of gas3d's file it
-// has, each played by its `press` key: a key pressed that is one of them starts it only when gas3d says it may (no
+// and the effects on it, and is stepped each step. Its class's `abilities`, and those its equipment grants, are the
+// abilities of gas3d's file it has, each played by its `press` key: a key pressed that is one of them starts it only when gas3d says it may (no
 // cooldown on, enough of what it costs), and once its move plays, its cost is paid, its cooldown put on, and it is
 // the one the row is `casting`; one gas3d refuses is dropped.
 //
-// Blows. A move of the X Bot's `fight` activity lands its blow on the step its clip's playhead passes the moment its
+// Blows. A move of the X Bot's `fight` activity, or of one of its class's stances, lands its blow on the step its clip's playhead passes the moment its
 // blow lands: the frame on which the fastest of its hands and feet moves furthest, read off the rig's measured
 // `ends` (the punch's fist, the kick's foot). Then the ability it is `casting` is delivered: by `reach`, the
 // nearest living mob within that many metres in front of the body is struck (hitscan3d's `strike`, its `hit` act,
-// `mob.sim.ts`, handed a `Struck` naming the ability); by `bolt`, a volley3d round of that pattern is fired from
+// `mob.sim.ts`, handed a `Struck` naming the ability); by `radius`, every living mob within that many metres is
+// struck the same way; by `self`, the ability's effects are put on the body itself; by `bolt`, a volley3d round of that pattern is fired from
 // `cast.ahead` metres in front of the body and `cast.up` over its feet, at the row's target, or else the nearest
 // living mob in front, within the ability's `range`, `cast.aimUp` over its feet, its hurt naming the ability, so
 // the mob it meets is struck the same way. `casts` on the row counts the rounds it has fired, which names each.
@@ -51,8 +56,10 @@
 // through those within the definition's `target.range` metres, nearest first. A bolt flies at it while it lives and
 // is within the ability's range.
 //
-// Being struck. Its `hit` act takes a hitscan3d `Struck` naming the ability that struck it (a mob's bite): gas3d puts
-// that ability's effects on it, and while it lives it plays motion3d's `hit`. The step its health reaches 0, by a
+// Being struck. Its `hit` act takes a hitscan3d `Struck` naming the ability that struck it (a mob's bite). While a
+// block plays (a motion whose name ends `block`) the blow does nothing; while it has the tag its definition's `ward`
+// names, the blow does nothing and every effect granting that tag is taken off. Else gas3d puts that ability's
+// effects on it, and while it lives it plays motion3d's `hit`. The step its health reaches 0, by a
 // strike or an effect, it is `dead`: it plays motion3d's `die`, its keys and stick do nothing, and nothing targets
 // it. Only rules strike it; a seat's `hit` changes nothing.
 //
@@ -109,7 +116,11 @@ import { buy, buyBack, sell } from '../vendor/vendor.sim.ts'
 import { craft, learn } from '../crafting/crafting.sim.ts'
 import { enchant } from '../enchanting/enchanting.sim.ts'
 import { step as quests } from '../quests/quests.sim.ts'
-import { abilityOf, apply, blowAt, granted, blocked, commit, receive, start as gas, step, value } from '../gas3d/gas3d.sim.ts'
+import { abilityOf, apply, blowAt, dispel, granted, blocked, commit, receive, step, tags, value } from '../gas3d/gas3d.sim.ts'
+import { classOf, classesOf, make } from '../classes/classes.sim.ts'
+
+// The stances its draw key draws: its class's.
+const weaponsOf = (me: Row, w: W): string[] => (me.data.class === null ? [] : classOf(w, me.data.class).weapons)
 
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
@@ -166,7 +177,7 @@ function buffered(me: Row, w: W, dt: number, k: any) {
   const until = lockedUntil(me, w, k.buffer, q.key)
   const share = until > 0 ? d.clipT / clipOf(rigOf(w, playKind(me)), d.clip).dur : 1
   if (share < until) return
-  if (act(me, w, q.key, k)) {
+  if (act(me, w, q.key)) {
     d.queued = null
     return
   }
@@ -184,11 +195,11 @@ function upperBusy(me: Row, w: W): boolean {
 
 // A key played: the draw key draws or puts away `weapon`; the switch key with nothing drawn picks the next
 // weapon; any other key is motion3d's. Whether it played.
-function act(me: Row, w: W, key: string, k: any): boolean {
+function act(me: Row, w: W, key: string): boolean {
   const d = me.data
-  const dealt = ability(me, w, key, k)
+  const dealt = ability(me, w, key)
   if (dealt !== undefined) return dealt
-  const weapons: string[] = k.weapons
+  const weapons = weaponsOf(me, w)
   const next = weapons[(weapons.indexOf(d.weapon) + 1) % weapons.length]
   if (key === 'draw') return press(me, w, `draw.${d.weapon}`, d.stick)
   if (key !== 'switch') return press(me, w, key, d.stick)
@@ -206,9 +217,9 @@ function act(me: Row, w: W, key: string, k: any): boolean {
 
 // The weapon whose stance is up, its own or its aim's: `weapons[i]` is aimed by `aims` where one names it
 // (`aimOf`); none while no stance is up.
-function stanceOf(me: Row, k: any): string | undefined {
+function stanceOf(me: Row, w: W, k: any): string | undefined {
   const u = me.data.upperMotion
-  if (k.weapons.includes(u)) return u
+  if (weaponsOf(me, w).includes(u)) return u
   return Object.entries(k.aimOf as Record<string, string>).find(([, aim]) => aim === u)?.[0]
 }
 
@@ -243,7 +254,7 @@ function targetOf(me: Row, w: W, range: number): Row | undefined {
 // moment its blow lands, the ability the body is `casting` is delivered.
 function blow(me: Row, w: W, k: any, was: { clip: unknown; t: number }) {
   const d = me.data
-  if (d.activity !== 'fight' || d.state !== 'act' || typeof d.clip !== 'string') {
+  if (!['fight', ...weaponsOf(me, w)].includes(d.activity) || d.state !== 'act' || typeof d.clip !== 'string') {
     d.casting = null
     return
   }
@@ -259,6 +270,17 @@ function blow(me: Row, w: W, k: any, was: { clip: unknown; t: number }) {
   if ('reach' in delivery) {
     const near = nearestAhead(me, w, delivery.reach)
     if (near) strike(w, near, { damage: 0, by: me.id, ability: name, part: null, point: [...near.data.pos], dir: [ahead[0], 0, ahead[1]], what: 'body' })
+    return
+  }
+  if ('self' in delivery) {
+    receive(w, me, name, me.id)
+    return
+  }
+  if ('radius' in delivery) {
+    for (const z of targets(me, w)) {
+      if (math.hypot(z.data.pos[0] - d.pos[0], z.data.pos[2] - d.pos[2]) > delivery.radius) continue
+      strike(w, z, { damage: 0, by: me.id, ability: name, part: null, point: [...z.data.pos], dir: [ahead[0], 0, ahead[1]], what: 'body' })
+    }
     return
   }
   // A bolt flies from in front of the chest at the target's middle, or the nearest mob's in front.
@@ -280,11 +302,11 @@ function dies(me: Row, w: W) {
   press(me, w, 'die', [0, 0])
 }
 
-// A key that is the press of one of the definition's `abilities`: whether it was dealt with. One gas3d says may not
-// start is dropped; one that may is pressed to motion3d, and once its move plays, its cost and cooldown are paid
-// and it is the one the body is `casting`.
-function ability(me: Row, w: W, key: string, k: any): boolean | undefined {
-  const name = [...(k.abilities as string[]), ...granted(me)].find(a => abilityOf(w, a).press === key)
+// A key that is the press of one of its class's abilities, or one its equipment grants: whether it was dealt with.
+// One gas3d says may not start is dropped; one that may is pressed to motion3d, and once its move plays, its cost and
+// cooldown are paid and it is the one the body is `casting`.
+function ability(me: Row, w: W, key: string): boolean | undefined {
+  const name = [...classOf(w, me.data.class).abilities, ...granted(me)].find(a => abilityOf(w, a).press === key)
   if (name === undefined) return undefined
   if (blocked(w, me, name) !== undefined) return true
   if (!press(me, w, key, me.data.stick)) return false
@@ -297,13 +319,17 @@ export const hero: Kind = {
   before(me, _dt, w) {
     if (me.data.stood) return
     stood(me, w)
-    const k = def(w, me.kind)
-    gas(w, me, k.attributes, k.effects)
   },
   tick(me, dt, w) {
     const d = me.data
     if (!d.stood) return
     const k = def(w, me.kind)
+    // No class picked yet: it stands where it is.
+    if (d.class === null) {
+      d.want = [0, 0]
+      drive(me, w, dt, [0, 0])
+      return
+    }
     step(w, me, dt)
     view(me, dt, k)
     dies(me, w)
@@ -323,7 +349,7 @@ export const hero: Kind = {
     if (!limits) throw new Error(`hero: the rig of ${playKind(me)} gives no aim limits`)
     const across = wrap(d.look.yaw - d.yaw)
     const aiming = Object.values(k.aimOf).includes(d.upperMotion)
-    d.weapon = stanceOf(me, k) ?? d.weapon
+    d.weapon = stanceOf(me, w, k) ?? d.weapon
     d.face = aiming ? (Math.abs(across) > limits.across ? wrap(d.look.yaw - Math.sign(across) * limits.across) : d.yaw) : d.guard ? d.look.yaw : null
     d.want = [wx, wz]
     // Aimed the way the camera looks: along its yaw, and down by its pitch within the rig's `aim.up` and `aim.down`.
@@ -361,6 +387,9 @@ export const hero: Kind = {
       const d = me.data
       const s = struck as Struck
       if (seat >= 0 || d.dead || !d.gas || typeof s.ability !== 'string') return
+      // A block up turns the blow aside, and a ward takes it and is spent.
+      if (typeof d.motion === 'string' && d.motion.endsWith('block')) return
+      if (tags(w, me).includes(def(w, me.kind).ward)) return dispel(w, me, def(w, me.kind).ward)
       receive(w, me, s.ability, s.by)
       if (value(w, me, 'health') > 0) press(me, w, 'hit', d.stick)
       else dies(me, w)
@@ -381,6 +410,13 @@ export const hero: Kind = {
       }
       const i = near.indexOf(d.target)
       d.target = near[(i + 1) % near.length]
+    },
+    // A class picked (Classes, the header): once, before anything else.
+    pickClass(me, w, _seat, name: unknown) {
+      const d = me.data
+      if (d.class !== null || typeof name !== 'string' || !(name in classesOf(w)) || !d.stood) return
+      make(w, me, name)
+      d.queued = { key: 'draw', age: 0 }
     },
     // Talking (Talking, the header).
     talk(me, w) {

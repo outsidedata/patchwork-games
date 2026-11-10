@@ -1,0 +1,22 @@
+{
+  "classes": {
+    "fighter": {
+      "name": "Fighter",
+      "about": "Sword and shield. Slashes in chains, blocks with the shield held up, charges in and rallies.",
+      "attributes": { "health": 22, "maxHealth": 22, "mana": 30, "maxMana": 30, "power": 3 },
+      "effects": ["manaRegen"],
+      "abilities": ["slash", "strike", "charge", "rally"],
+      "items": [{ "item": "rustySword", "count": 1 }, { "item": "leatherJerkin", "count": 1 }],
+      "weapons": ["swordshield"]
+    },
+    "wizard": {
+      "name": "Wizard",
+      "about": "Staff in hand. Throws arcane bolts and firebolts, rings itself in frost and wards off a blow.",
+      "attributes": { "health": 9, "maxHealth": 9, "mana": 80, "maxMana": 80, "power": 0 },
+      "effects": ["manaRegen"],
+      "abilities": ["arcaneBolt", "frostRing", "ward", "firebolt"],
+      "items": [{ "item": "apprenticeWand", "count": 1 }],
+      "weapons": ["magic"]
+    }
+  }
+}

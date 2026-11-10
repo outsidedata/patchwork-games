@@ -21,7 +21,7 @@
     "behaviors": {
       "idle": { "weight": 0.1, "clips": ["idle"], "for": [2, 4] },
       "hunt": { "at": "prey", "weight": 10, "range": 15, "near": 0.5, "speed": 1, "clip": "walk" },
-      "die": { "clip": "death", "for": 30 }
+      "die": { "clip": "death", "for": 30, "commit": true }
     }
   },
   "zombie_man": {
@@ -45,7 +45,33 @@
     "behaviors": {
       "idle": { "weight": 0.1, "clips": ["idle"], "for": [2, 4] },
       "hunt": { "at": "prey", "weight": 10, "range": 15, "near": 0.5, "speed": 1, "clip": "walk" },
-      "die": { "clip": "death", "for": 30 }
+      "die": { "clip": "death", "for": 30, "commit": true }
+    }
+  },
+  "barrow_king": {
+    "body": "walker",
+    "sight": { "eye": 1.8, "at": 1.4, "cone": 200, "range": 18, "kinds": ["player"] },
+    "look": { "rate": 3, "reach": 60 },
+    "notice": { "time": 0.3, "fall": 1 },
+    "memory": 10,
+    "think": 0.5,
+    "stay": 0.5,
+    "whim": 0.1,
+    "react": [0.1, 0.2],
+    "arrive": 1.2,
+    "stall": { "speed": 0.2, "time": 1 },
+    "dies": "die",
+    "prey": ["player"],
+    "attributes": { "health": 40, "maxHealth": 40 },
+    "abilities": ["kingBite"],
+    "loot": "barrow",
+    "script": "barrowKing",
+    "boss": true,
+    "hit": { "clip": "hit", "from": 0.33 },
+    "behaviors": {
+      "idle": { "weight": 0.1, "clips": ["idle"], "for": [2, 4] },
+      "hunt": { "at": "prey", "weight": 10, "range": 25, "near": 0.5, "speed": 1, "clip": "walk" },
+      "die": { "clip": "death", "for": 60, "commit": true }
     }
   },
   "player": {
@@ -56,13 +82,15 @@
       "stick": [["a", "ArrowLeft", "PadStickLeft"], ["d", "ArrowRight", "PadStickRight"], ["w", "ArrowUp", "PadStickUp"], ["s", "ArrowDown", "PadStickDown"]],
       "look": ["PadRightStickLeft", "PadRightStickRight", "PadRightStickUp", "PadRightStickDown"],
       "fast": ["Shift", "Pad7"],
-      "guard": [],
+      "guard": ["Control", "Pad9"],
       "motions": {
         "jump": [" ", "Pad0"],
         "use": ["e", "Pad2"],
         "light": ["j", "Mouse0", "Pad5"],
         "heavy": ["k", "Pad10"],
-        "skill": ["r", "Pad6"]
+        "skill": ["r", "Pad6"],
+        "special": ["q", "Pad1"],
+        "draw": ["x", "Pad11"]
       },
       "target": ["Tab", "Pad4"],
       "talk": ["f", "Pad3"],
@@ -72,10 +100,8 @@
       "further": ["Pad13"],
       "drag": "Mouse2"
     },
-    "attributes": { "health": 10, "maxHealth": 10, "mana": 60, "maxMana": 60, "power": 0 },
-    "effects": ["manaRegen"],
-    "abilities": ["jab", "kick", "firebolt"],
     "target": { "range": 30 },
+    "ward": "warded",
     "talk": { "reach": 3 },
     "release": { "effect": "risen" },
     "hud": {
@@ -91,27 +117,30 @@
       "grades": { "grey": "Grey", "common": "Common", "fine": "Fine", "rare": "Rare" },
       "classes": { "weapon": "Weapon", "chest": "Chest" },
       "attributes": { "health": "Health", "maxHealth": "Max health", "mana": "Mana", "maxMana": "Max mana", "power": "Power" },
-      "tags": { "burning": "Burning" },
-      "abilities": { "jab": "Jab", "kick": "Kick", "firebolt": "Firebolt" },
+      "tags": { "burning": "Burning", "chilled": "Chilled", "warded": "Warded", "rallied": "Rallied" },
+      "abilities": { "slash": "Slash", "strike": "Strike", "charge": "Charge", "rally": "Rally", "arcaneBolt": "Arcane bolt", "frostRing": "Frost ring", "ward": "Ward", "firebolt": "Firebolt" },
       "columns": ["Attribute", "Base", "Gear", "Total"],
       "plates": {
         "old_woman": { "name": "Old woman", "up": 2.0 },
         "smith": { "name": "Smith", "title": "<Blacksmith>", "up": 2.1 },
         "priest": { "name": "Priest", "title": "<Enchanter>", "up": 2.1 },
         "zombie": { "name": "Zombie", "up": 2.1 },
-        "zombie_man": { "name": "Zombie man", "up": 2.1 }
+        "zombie_man": { "name": "Zombie man", "up": 2.1 },
+        "barrow_king": { "name": "The Barrow King", "up": 2.3 }
       },
+      "sayUp": 26,
+      "boss": { "size": [600, 56], "name": [300, 6], "bar": [20, 34] },
       "plateBar": [48, -4],
       "markUp": 22,
       "float": { "up": 2.4, "life": 1.2, "rise": 40 },
-      "you": { "size": [300, 86], "title": "You", "name": [14, 8], "health": [14, 36], "healthN": [150, 44], "mana": [14, 62], "manaN": [150, 68] },
+      "you": { "size": [300, 86], "name": [14, 8], "health": [14, 36], "healthN": [150, 44], "mana": [14, 62], "manaN": [150, 68] },
       "target": { "size": [260, 90], "name": [14, 8], "healthN": [246, 12], "health": [14, 40], "tags": [14, 62], "tagStep": 110 },
       "gold": { "size": [120, 32], "n": [12, 6] },
       "tracker": { "step": 52, "line": 24 },
       "loot": { "life": 4, "at": [210, 4] },
       "bars": {
         "step": 80, "size": [72, 72], "name": [36, 48], "key": [5, 3], "cost": [52, 4],
-        "quick": [260, 8], "quickStep": 64, "quickSize": [56, 56]
+        "quick": [340, 8], "quickStep": 64, "quickSize": [56, 56]
       },
       "talk": {
         "size": [800, 200], "who": [24, 16], "leave": [776, 20], "line": [24, 52], "wrap": 752,
@@ -143,6 +172,7 @@
         "weapons": [340, 56], "weaponStep": 44, "weaponSize": [340, 38], "whereX": 200, "gap": 8, "lineStep": 26
       },
       "death": { "title": [300, 90], "button": [232, 200] },
+      "classes": { "title": [380, 6], "first": [30, 80], "step": 360, "size": [340, 330], "pad": 16, "about": 50, "stats": 200, "button": 270, "shown": ["health", "mana", "power"] },
       "words": {
         "of": "{n} / {most}", "tag": "{tag}", "tagLeft": "{tag} {left}s", "gold": "{n} gold", "handIn": "Done: hand it in",
         "objective": "{what} {has} / {count}", "join": ", ", "lootItem": "{name} ×{count}", "lootGold": "+{n} gold",
@@ -160,12 +190,11 @@
         "teaches": "{who} teaches", "known": "Known", "learn": "Learn",
         "enchantHeading": "Enchant", "fee": "Gold {n}", "onWhich": "On which {class}", "inYourHands": "in your hands", "worn": "worn", "inBag": "in your bag",
         "replaces": "This replaces its {name}.", "enchantFor": "Enchant · {n} gold",
-        "died": "You died", "release": "Get up at the village"
+        "died": "You died", "release": "Get up at the village", "pickClass": "Choose your class", "playAs": "Play as {name}"
       }
     },
     "ring": { "inner": 0.45, "outer": 0.6, "colour": "#ffd400" },
     "cast": { "ahead": 0.6, "up": 1.4, "aimUp": 1.2 },
-    "weapons": [],
     "aimOf": {},
     "buffer": {
       "hold": 0.4,

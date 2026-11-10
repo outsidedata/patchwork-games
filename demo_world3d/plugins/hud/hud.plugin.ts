@@ -3,7 +3,9 @@
 // (`possessed`) and the rows round it, on core's ui plugin (`plugins.ui`), every frame it wants a thing shown. It has
 // no numbers of its own: every place, size, colour and word is the `player` definition's `hud` entry, and the panels,
 // keys and text styles are `world.ui`'s. Its pieces, each on the panel of its name:
-//   you        the seat's health and mana, as bars with their numbers
+//   classes    a screen while its row has no `class`: each class of the classes file (`plugins/classes`), what it
+//              does and its stats, pressed to play as it (the hero's `pickClass`); nothing else is drawn till then
+//   you        its class's name, the seat's health and mana, as bars with their numbers
 //   target     the row the seat targets: its name, health, and each tag on it with the seconds it has left
 //   gold       the gold it carries
 //   tracker    each quest it has taken, with each objective's count, and "done" once it may be handed in
@@ -14,6 +16,8 @@
 //              mob's health bar once it is hurt or targeted, a "!" over one that has a quest for the seat and a "?"
 //              over one it may hand one in to; the target's ring is hero's. And each fall of a row's health, and each
 //              rise of the seat's own, as a number rising from it for `float.life` seconds.
+//   boss       the name and health of a boss (a definition saying `boss`) while its fight is on (smartai's
+//              `script.fighting`); and over any scripted row's head, on `world`, what it says (smartai's `said`)
 //   talk       what it is told and the choices, each pressed to choose it (talk's `talking`)
 //   bag        a menu the seat opens: every instance it carries, by quality, marked on the bar, worn or enchanted;
 //              the one selected's card, with what it does and what may be done with it
@@ -40,6 +44,7 @@ import { recipesOf, trainerOf } from '../crafting/crafting.sim.ts'
 import { enchanterOf, enchantsOf } from '../enchanting/enchanting.sim.ts'
 import { where } from '../mmo3d/mmo3d.sim.ts'
 import { fact } from '../factsdb/factsdb.sim.ts'
+import { classOf, classesOf } from '../classes/classes.sim.ts'
 
 type At = [number, number]
 type Floater = { id: number; at: number[]; text: string; style: string; born: number }
@@ -63,7 +68,7 @@ export function hud() {
     tick(plugins: Plugins) {
       const { ui, wire } = plugins
       const me = possessed(wire.rows)
-      if (!me || !me.data.gas || !me.data.inventory) return
+      if (!me || !me.data.inventory) return
       const P = ui.PIXI as typeof PIXI
       const h = def(wire, me.kind).hud
       const now = performance.now() / 1000
@@ -107,6 +112,23 @@ export function hud() {
         return g
       }
 
+      // No class yet: the screen to pick one, and nothing else.
+      if (me.data.class === null) {
+        const c = h.classes
+        text('classes', 'title', 'death', c.title, h.words.pickClass).anchor.set(0.5, 0)
+        Object.entries(classesOf(wire)).forEach(([id, k], i) => {
+          const x = c.first[0] + i * c.step
+          box('classes', `${id}.back`, [x, c.first[1]], c.size, { ...h.window, line: h.colours.edge })
+          text('classes', `${id}.name`, 'title', [x + c.pad, c.first[1] + c.pad], k.name)
+          const about = text('classes', `${id}.about`, 'body', [x + c.pad, c.first[1] + c.about], k.about)
+          about.style.wordWrap = true
+          about.style.wordWrapWidth = c.size[0] - 2 * c.pad
+          text('classes', `${id}.stats`, 'small', [x + c.pad, c.first[1] + c.stats], Object.entries(k.attributes).filter(([a]) => c.shown.includes(a)).map(([a, n]) => `${h.attributes[a]} ${n}`).join(h.words.join))
+          button('classes', `${id}.pick`, 'wide', fill(h.words.playAs, { name: k.name }), [x + c.pad, c.first[1] + c.button], () => send.pickClass(id))
+        })
+        return
+      }
+      if (!me.data.gas) return
       const gas = gasFile(wire)
       const items = (id: string) => definitionOf(wire, id)
       const quality = (id: string) => h.quality[fragment(wire, id, 'quality')?.grade ?? 'common']
@@ -129,7 +151,7 @@ export function hud() {
       const hp = value(wire, me, 'health'), hpMax = value(wire, me, 'maxHealth')
       const mp = value(wire, me, 'mana'), mpMax = value(wire, me, 'maxMana')
       box('you', 'back', [0, 0], h.you.size, h.panel)
-      text('you', 'name', 'name', h.you.name, h.you.title)
+      text('you', 'name', 'name', h.you.name, classOf(wire, me.data.class).name)
       bar('you', 'health', 'health', h.you.health, hp / hpMax, h.colours.health)
       text('you', 'healthN', 'barnumber', h.you.healthN, fill(h.words.of, { n: num(hp), most: num(hpMax) })).anchor.set(0.5)
       bar('you', 'mana', 'mana', h.you.mana, mp / mpMax, h.colours.mana)
@@ -173,7 +195,7 @@ export function hud() {
       if (loot && now - loot.born < h.loot.life) text('loot', 'line', 'loot', h.loot.at, loot.text).anchor.set(0.5, 0)
 
       // abilities and the quick bar
-      const abilities = [...(def(wire, me.kind).abilities as string[]), ...granted(me)]
+      const abilities = [...classOf(wire, me.data.class).abilities, ...granted(me)]
       const keyOf = (press: string) => (def(wire, me.kind).keys.motions[press] ?? []).find((k: string) => !k.startsWith('Pad') && !k.startsWith('Mouse'))?.toUpperCase() ?? ''
       abilities.forEach((name, i) => {
         const a = gas.abilities[name]
@@ -240,6 +262,24 @@ export function hud() {
           if (q.starters.includes(r.kind) && status(me!, id) === NONE && (q.prev === null || status(me!, q.prev) === REWARDED)) return h.words.questMark
         }
         return undefined
+      }
+
+      // what a scripted row says, over its head (smartai's `said`), and the bar of a boss in its fight
+      for (const r of wire.rows) {
+        if (!r.data.script) continue
+        if (r.data.said) {
+          const s = ui.show('world', `${r.id}.said`, () => new P.Text({ text: '', style: ui.style('say') }))
+          s.text = r.data.said.line
+          s.anchor.set(0.5, 1)
+          s.pivot.set(0, h.sayUp)
+          ui.pin(s, [r.data.pos[0], r.data.pos[1] + (h.plates[r.kind]?.up ?? 0), r.data.pos[2]])
+        }
+        if (def(wire, r.kind).boss && r.data.script.fighting && !r.data.dead) {
+          const b = h.boss
+          box('boss', 'back', [0, 0], b.size, { ...h.panel, line: h.colours.hostile })
+          text('boss', 'name', 'title', b.name, h.plates[r.kind]?.name ?? r.kind, h.colours.hostileName).anchor.set(0.5, 0)
+          bar('boss', 'bar', 'bossHealth', b.bar, value(wire, r, 'health') / value(wire, r, 'maxHealth'), h.colours.health)
+        }
       }
 
       // health falling and rising, as numbers
