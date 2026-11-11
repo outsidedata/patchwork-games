@@ -4,7 +4,7 @@
       "name": "Iron sword",
       "reagents": [{ "item": "ironBar", "count": 4 }, { "item": "rustySword", "count": 1 }],
       "creates": { "item": "ironSword", "count": 1 },
-      "focus": { "at": "village-terrain3d.smithy 1.smithy_anvil", "reach": 5.5 }
+      "focus": { "at": "smithy 1.smith 1", "reach": 5.5 }
     }
   },
   "trainers": {

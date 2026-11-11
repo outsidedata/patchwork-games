@@ -1,8 +1,9 @@
 // talk: demo_world3d's own plugin, what people say, after Valve's rule-based dialogue (Elan Ruskin, "AI-driven Dynamic
 // Dialog through Fuzzy Pattern Matching", GDC 2012, the response rules of Left 4 Dead 2) (core issue #67). This file
 // is its server half; it has no page half. Its file is a loader `json` entry the scene names in `world.talk.file`:
-//   rules  `[{ name, who, concept, criteria, say, remember, choices, actions }]`, Ruskin's rules:
+//   rules  `[{ name, who, record, concept, criteria, say, remember, choices, actions }]`, Ruskin's rules:
 //            who        the kind of the one speaking
+//            record     the speaker's record within that kind (its row's `record`, `plugins/mmo3d`)
 //            concept    what is being answered: `hello` when a player starts talking, else the concept of the
 //                       choice the player picked
 //            criteria   conditions every one of which must hold for the rule to match, each on the query:
@@ -23,7 +24,7 @@
 //                         recipes it teaches (`plugins/crafting`) or its enchants (`plugins/enchanting`) open to the
 //                         player: its row's `serving` `{ what, with }`, until it is closed or the player is out of
 //                         reach of the speaker
-// A query is a concept asked of one speaker. Of the rules of the speaker's kind and that concept whose criteria all
+// A query is a concept asked of one speaker. Of the rules of the speaker's kind and record and that concept whose criteria all
 // hold, the one with the most criteria answers, Ruskin's best match; of several with as many, one is picked with the
 // truth's die. No rule matching, the talk ends.
 //
@@ -51,6 +52,7 @@ export type Choice = { say: string; concept: string }
 export type Rule = {
   name: string
   who: string
+  record: string
   concept: string
   criteria: string[]
   say: string[]
@@ -79,8 +81,8 @@ function criterion(w: W, me: Row, c: string): boolean {
 }
 
 // Ruskin's best match: of the speaker's rules for the concept whose criteria all hold, the one with the most.
-function best(w: W, me: Row, who: string, concept: string): Rule | undefined {
-  const matched = rulesOf(w).filter(r => r.who === who && r.concept === concept && r.criteria.every(c => criterion(w, me, c)))
+function best(w: W, me: Row, speaker: Row, concept: string): Rule | undefined {
+  const matched = rulesOf(w).filter(r => r.who === speaker.kind && r.record === speaker.data.record && r.concept === concept && r.criteria.every(c => criterion(w, me, c)))
   if (!matched.length) return undefined
   const most = Math.max(...matched.map(r => r.criteria.length))
   const top = matched.filter(r => r.criteria.length === most)
@@ -98,7 +100,7 @@ const ACTIONS: Record<string, (w: W, me: Row, speaker: Row, n: any) => void> = {
 }
 
 function ask(w: W, me: Row, speaker: Row, concept: string) {
-  const r = best(w, me, speaker.kind, concept)
+  const r = best(w, me, speaker, concept)
   if (!r) {
     me.data.talking = null
     return
@@ -165,6 +167,6 @@ export function step(w: W, me: Row, reach: number) {
 
 export const talker: Kind = {
   tick(me, dt, w) {
-    if (listOf(w, me.kind).length) vendorStep(w, me, dt)
+    if (listOf(w, me).length) vendorStep(w, me, dt)
   },
 }

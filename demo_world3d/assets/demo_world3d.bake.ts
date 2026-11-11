@@ -92,9 +92,9 @@ const merge = path.join(root, '.claude', 'skills', 'using-mixamo-assets', 'scrip
 // its override strings, `{ "<key chain>": value }`, handed to its solver in its asks: each one either resolves on
 // what the solvers placed or is refused in the run, by its key chain.
 const PLACES: { pro?: string; stronghold?: string; folder: string; scene: string; field: string; at?: [number, number]; overrides?: string }[] = [
-  { pro: 'castle/smallville/smallville.town', folder: '', scene: 'main.scene.json', field: 'demo_world3d.field.json' },
-  { stronghold: 'winterfell/village', folder: 'village', scene: 'village.scene.json', field: 'village/village.field.json' },
-  { stronghold: 'winterfell/tavern', folder: 'tavern', scene: 'tavern.scene.json', field: 'tavern/tavern.field.json' },
+  // { pro: 'castle/smallville/smallville.town', folder: '', scene: 'main.scene.json', field: 'demo_world3d.field.json' },
+  // { stronghold: 'winterfell/village', folder: 'village', scene: 'village.scene.json', field: 'village/village.field.json' },
+  // { stronghold: 'winterfell/tavern', folder: 'tavern', scene: 'tavern.scene.json', field: 'tavern/tavern.field.json' },
   { stronghold: 'winterfell/village-terrain3d', folder: 'hills', scene: 'hills.scene.json', field: 'hills/hills.field.json', at: [0, 0], overrides: 'hills/hills.overrides.json' },
 ]
 // what pro-ng's build writes for a scene, each `<name><suffix>`

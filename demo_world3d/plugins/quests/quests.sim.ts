@@ -6,7 +6,8 @@
 //             title       the quest's name in the log (`LogTitle`)
 //             details     what the giver says it is (`QuestDescription`)
 //             objectives  what the log says to do (`LogDescription`)
-//             starters, enders  the kinds that give it and take it back (`creature_queststarter`,
+//             starters, enders  `[{ class, record }]`: who gives it and who takes it back, each a kind and a record
+//                         within it (a row's `record`, `plugins/mmo3d`) (`creature_queststarter`,
 //                         `creature_questender`)
 //             prev        a quest that must be rewarded before this one is given (`PrevQuestID`), or null
 //             kills       `[{ kind, count }]`: rows of the kind to kill once it is taken (`RequiredNpcOrGo`,
@@ -21,9 +22,9 @@
 // and not yet done (`QUEST_STATUS_INCOMPLETE`), 1 done and not yet turned in (`QUEST_STATUS_COMPLETE`), 6 turned in
 // (`QUEST_STATUS_REWARDED`). The kills of a taken quest are its facts `quest.<id>.kill.<kind>` (`mobcount`), counted
 // from when it is taken; what it carries is counted off the inventory as it stands.
-//   accept(w, me, speaker, id)   the quest taken from the speaker, when its kind starts it, the quest's status is 0 and
+//   accept(w, me, speaker, id)   the quest taken from the speaker, when it starts it, the quest's status is 0 and
 //                                its `prev` is turned in; whether it was.
-//   reward(w, me, speaker, id)   the quest turned in to the speaker, when its kind ends it and it is done: its items
+//   reward(w, me, speaker, id)   the quest turned in to the speaker, when it ends it and it is done: its items
 //                                taken, its gold and rewards given, its end script run, its status 6; whether it was.
 //   credit(w, me, kind)          a kill of the kind counted for every quest the player has taken (`KilledMonsterCredit`).
 //   step(w, me)                  once a step: each taken quest whose objectives are all met is done, and each done
@@ -37,12 +38,13 @@ import { add, fact, set, write } from '../factsdb/factsdb.sim.ts'
 import { addDefinition, consume, countOf } from '../inventory/inventory.sim.ts'
 
 export type Count = { count: number }
+export type Who = { class: string; record: string }
 export type Quest = {
   title: string
   details: string
   objectives: string
-  starters: string[]
-  enders: string[]
+  starters: Who[]
+  enders: Who[]
   prev: string | null
   kills: ({ kind: string } & Count)[]
   items: ({ item: string } & Count)[]
@@ -63,6 +65,9 @@ function questOf(from: W | Wire, id: string): Quest {
 
 export const status = (me: Row, id: string) => fact(me, `quest.${id}`)
 
+// Whether the row is one of them: of that class's kind, with that record.
+export const among = (who: Who[], row: Row) => who.some(x => x.class === row.kind && x.record === row.data.record)
+
 export function progress(from: W | Wire, me: Row, id: string): { what: string; has: number; count: number }[] {
   const q = questOf(from, id)
   return [
@@ -75,7 +80,7 @@ const met = (w: W, me: Row, id: string) => progress(w, me, id).every(p => p.has 
 
 export function accept(w: W, me: Row, speaker: Row, id: string): boolean {
   const q = questOf(w, id)
-  if (!q.starters.includes(speaker.kind) || status(me, id) !== NONE) return false
+  if (!among(q.starters, speaker) || status(me, id) !== NONE) return false
   if (q.prev !== null && status(me, q.prev) !== REWARDED) return false
   for (const k of q.kills) set(me, `quest.${id}.kill.${k.kind}`, 0)
   set(me, `quest.${id}`, INCOMPLETE)
@@ -84,7 +89,7 @@ export function accept(w: W, me: Row, speaker: Row, id: string): boolean {
 
 export function reward(w: W, me: Row, speaker: Row, id: string): boolean {
   const q = questOf(w, id)
-  if (!q.enders.includes(speaker.kind) || status(me, id) !== COMPLETE || !met(w, me, id)) return false
+  if (!among(q.enders, speaker) || status(me, id) !== COMPLETE || !met(w, me, id)) return false
   for (const i of q.items) consume(me, i.item, i.count)
   if (q.gold > 0) addDefinition(w, me, 'gold', q.gold)
   for (const r of q.rewards) addDefinition(w, me, r.item, r.count)

@@ -1,31 +1,31 @@
 // mmo3d: demo_world3d's own plugin, a place's population and the rules it plays by (core issue #67). This file is its
 // server half. The place's mmo3d file is a loader `json` entry the scene names in `world.mmo3d.file`:
-//   landmarks   the loader `json` entry of the place's crowd file, whose `landmarks` `{ <name>: { at, yaw } }` an `at`
-//               may name.
+//   landmarks   the loader `json` entry of the place's crowd file, what the place's solvers wrote out, whose
+//               `landmarks` `{ <name>: { at, yaw, class?, record? } }` an identity names: where each nav point
+//               stands, the way one there faces, and the class and the record the place's override strings gave it
+//               (`composing_a_world.md`).
 //   facts       `{ <name>: number }`: the place's facts as the place starts, written on the `factsdb` row
 //               (`plugins/factsdb`) on the first step.
-//   placements  `[{ kind, at, yaw?, when? }]`: one row of the kind, standing at `at` and facing `yaw` (radians; a
-//               landmark's own yaw when `at` names one and `yaw` is left out, else 0). With `when`, a factsdb
-//               condition (`holds`, read on the place's facts), the row is spawned only while it holds: each step it
-//               holds and the placement has no row standing, one is spawned. A row standing stays when it stops
-//               holding (a boss's body lies its time out after its death writes the fact that keeps it from rising).
-//   spawns      `[{ kind, at, count, spread, respawn?, when? }]`: a pack of `count` rows of the kind, each spawned at a
-//               point within `spread` metres of `at` across the ground (`at`'s own height; the body stands itself on
-//               the ground), facing a way of its own. A row of a pack that is gone is spawned again `respawn` seconds
-//               after it went, never without `respawn`. With `when`, nothing of the pack is spawned, first or again,
-//               while it does not hold; the rows standing stay.
+//   placements  `[{ at, respawn?, when? }]`: one person, by their identity (`at`). They are brought in as one row of
+//               their class's kind, standing at their landmark and facing its way, their row's `record` their record
+//               (null for a class with none). A person gone is brought in again `respawn` seconds after they went,
+//               never without `respawn`. With `when`, a factsdb condition (`holds`, read on the place's facts), they
+//               are brought in, first or again, only while it holds; a row standing stays when it stops holding (a
+//               boss's body lies its time out after its death writes the fact that keeps it from rising).
 //   zones       `[{ name, at, radius, set, when? }]`: a circle across the ground of `radius` metres round `at`. Each
 //               time a `player` row comes into it while its `when` holds (on the place's facts; always without one),
 //               each fact of `set` `{ <name>: number }` is written (factsdb's `write`: on that player's facts, or the
 //               place's for a name `world.` starts).
-// An `at` is [x, y, z] or a landmark's name. Every kind a placement or a spawn names is a kind of the game's own, its
-// rule a one-line file handing out one of this file's rules (`zombie.sim.ts`: `export const zombie = mob`), with its
-// own definition and its own prefab. The `mmo3d` row, one `actors` entry, does all of it, writing `pos` and `yaw` over
-// each kind's prefab. What it keeps from step to step is on its row:
+// An identity is a person's key chain as the place's override strings write it (`smithy 1.smith 1`); the crowd file
+// names their landmark by the same names (`smithy 1/smith 1`). An `at` is [x, y, z] or an identity. Every class is a kind of the game's own, its rule a
+// one-line file handing out one of this file's rules (`zombie.sim.ts`: `export const zombie = mob`), with its own
+// definition and its own prefab. The `mmo3d` row, one `actors` entry, does all of it, writing `pos`, `yaw` and
+// `record` over each kind's prefab. What it keeps from step to step is on its row:
 //   started     whether the starting facts are written;
 //   time        seconds since the place started;
 //   present     `{ <placement index>: row id }`, each placement's row while it stands;
-//   packs       one per spawn, `{ ids, due }`: the ids of its rows standing, and the times its rows gone are due back;
+//   due         `{ <placement index>: seconds }`, the time each person gone is due back, or null for one who is not
+//               brought in again; a person never yet brought in has none;
 //   inside      `{ <zone name>: player row ids }`, the players in each zone as the last step left them.
 //
 // `mob` is the rule of every kind that fights: npc3d's `npc` (`plugins/npc3d`), on the body its definition names,
@@ -58,73 +58,66 @@ import { roll } from '../loot/loot.sim.ts'
 import { addDefinition } from '../inventory/inventory.sim.ts'
 import { credit } from '../quests/quests.sim.ts'
 
-const TURN = 2 * Math.PI
-
 export type At = number[] | string
-export type Placement = { kind: string; at: At; yaw?: number; when?: string }
-export type Spawn = { kind: string; at: At; count: number; spread: number; respawn?: number; when?: string }
+export type Placement = { at: string; respawn?: number; when?: string }
 export type Zone = { name: string; at: At; radius: number; set: Record<string, number>; when?: string }
 export type File = {
   landmarks: string
   facts: Record<string, number>
   placements: Placement[]
-  spawns: Spawn[]
   zones: Zone[]
 }
-type Landmark = { at: number[]; yaw: number }
-type Pack = { ids: number[]; due: number[] }
+type Landmark = { at: number[]; yaw: number; class?: string; record?: string }
+export type Person = { kind: string; record: string | null; at: number[]; yaw: number }
 
 export const fileOf = (from: W | Wire): File => json(from, ('find' in from ? from.world : from.scene.world!).mmo3d.file)
 
-// The kinds the place's placements and spawns name.
-export const kindsOf = (w: W): string[] => {
-  const f = fileOf(w)
-  return [...new Set([...f.placements.map(p => p.kind), ...f.spawns.map(s => s.kind)])]
+// The landmark an identity names: the crowd file's, by the same names.
+function landmark(w: W | Wire, identity: string): Landmark {
+  const l = (json(w, fileOf(w).landmarks).landmarks as Record<string, Landmark>)[identity.split('.').join('/')]
+  if (!l) throw new Error(`mmo3d: ${identity} names nobody in ${fileOf(w).landmarks}`)
+  return l
 }
 
-// Where an `at` stands and the way it faces: [x, y, z] as it is, a landmark's name as the crowd file places it.
-export function where(w: W | Wire, at: At): Landmark {
+// Where an `at` stands and the way it faces: [x, y, z] as it is, an identity where its landmark is.
+export function where(w: W | Wire, at: At): { at: number[]; yaw: number } {
   if (typeof at !== 'string') return { at: [...at], yaw: 0 }
-  const l = (json(w, fileOf(w).landmarks).landmarks as Record<string, Landmark>)[at]
-  if (!l) throw new Error(`mmo3d: no landmark ${at} in ${fileOf(w).landmarks}`)
+  const l = landmark(w, at)
   return { at: [...l.at], yaw: l.yaw }
 }
+
+// The person of that identity, as the solver wrote them out: the kind their class is, their record, where they stand
+// and the way they face.
+export function person(w: W | Wire, identity: string): Person {
+  const l = landmark(w, identity)
+  if (l.class === undefined) throw new Error(`mmo3d: ${identity} has no class in ${fileOf(w).landmarks}`)
+  return { kind: l.class, record: l.record ?? null, at: [...l.at], yaw: l.yaw }
+}
+
+// The kinds the place's placements are brought in as.
+export const kindsOf = (w: W): string[] => [...new Set(fileOf(w).placements.map(p => person(w, p.at).kind))]
 
 const when = (w: W, c: string | undefined) => c === undefined || holds(w, world(w), c)
 const standing = (w: W, kind: string, id: number) => w.all(kind).some(r => r.id === id)
 
 function place(me: Row, w: W) {
+  const now = me.data.time as number
   const present: Record<string, number> = { ...me.data.present }
+  const due: Record<string, number | null> = { ...me.data.due }
   fileOf(w).placements.forEach((p, i) => {
-    const id = present[i]
-    const up = id !== undefined && standing(w, p.kind, id)
-    if (id !== undefined && !up) delete present[i]
-    const ok = when(w, p.when)
-    if (ok && !up) {
-      const l = where(w, p.at)
-      present[i] = w.spawn(p.kind, { pos: l.at, yaw: p.yaw ?? l.yaw }).id
+    const who = person(w, p.at)
+    if (present[i] !== undefined && !standing(w, who.kind, present[i])) {
+      delete present[i]
+      due[i] = p.respawn === undefined ? null : now + p.respawn
     }
+    if (present[i] !== undefined || !when(w, p.when)) return
+    const back = due[i]
+    if (back === null || (back !== undefined && back > now)) return
+    present[i] = w.spawn(who.kind, { pos: who.at, yaw: who.yaw, record: who.record }).id
+    delete due[i]
   })
   me.data.present = present
-}
-
-function spawn(me: Row, w: W) {
-  const now = me.data.time as number
-  me.data.packs = fileOf(w).spawns.map((s, i) => {
-    const was: Pack = me.data.packs[i] ?? { ids: [], due: Array.from({ length: s.count }, () => now) }
-    const ids = was.ids.filter(id => standing(w, s.kind, id))
-    const gone = was.ids.length - ids.length
-    const due = s.respawn === undefined ? was.due : [...was.due, ...Array.from({ length: gone }, () => now + s.respawn!)]
-    if (!when(w, s.when)) return { ids, due }
-    const c = where(w, s.at).at
-    for (const _ of due.filter(t => t <= now)) {
-      const r = s.spread * math.pow(w.die(), 0.5)
-      const a = TURN * w.die()
-      const pos = [c[0] + r * math.cos(a), c[1], c[2] + r * math.sin(a)]
-      ids.push(w.spawn(s.kind, { pos, yaw: TURN * w.die() }).id)
-    }
-    return { ids, due: due.filter(t => t > now) }
-  })
+  me.data.due = due
 }
 
 function zones(me: Row, w: W) {
@@ -154,7 +147,6 @@ export const mmo3d: Kind = {
     me.data.time += dt
     zones(me, w)
     place(me, w)
-    spawn(me, w)
   },
 }
 

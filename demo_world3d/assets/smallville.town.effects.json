@@ -1,5 +1,138 @@
 {
  "effects": {
+  "torch_bracket/flame": [
+   {
+    "n": [
+     8,
+     10
+    ],
+    "every": 0.02,
+    "life": [
+     0.3,
+     0.5
+    ],
+    "size": [
+     0.02,
+     0.036
+    ],
+    "grow": -1.2,
+    "spread": 0.2,
+    "speed": [
+     0.25,
+     0.45
+    ],
+    "g": -0.6,
+    "jitter": [
+     0.04,
+     0.05,
+     0.04
+    ],
+    "tint": 16772300,
+    "tint1": 14694400,
+    "a0": 0.7,
+    "a1": 0,
+    "add": true,
+    "gain": 1.9,
+    "spin": 2
+   }
+  ],
+  "torch_bracket/sparks": [
+   {
+    "every": 0.25,
+    "life": [
+     0.5,
+     1.0
+    ],
+    "size": [
+     0.004,
+     0.007
+    ],
+    "spread": 0.5,
+    "speed": [
+     0.6,
+     1.2
+    ],
+    "g": 0.6,
+    "drag": 0.4,
+    "jitter": [
+     0.02,
+     0,
+     0.02
+    ],
+    "tint": 16773280,
+    "tint1": 16742400,
+    "a0": 1,
+    "a1": 0,
+    "add": true,
+    "gain": 2
+   }
+  ],
+  "torch_bracket/smoke": [
+   {
+    "every": 0.06,
+    "life": [
+     1.2,
+     2.0
+    ],
+    "size": [
+     0.025,
+     0.04
+    ],
+    "grow": 2.5,
+    "spread": 0.2,
+    "speed": [
+     0.35,
+     0.5
+    ],
+    "g": -0.1,
+    "drag": 0.4,
+    "jitter": [
+     0.015,
+     0,
+     0.015
+    ],
+    "tint": 4210752,
+    "tint1": 7368816,
+    "a0": 0.12,
+    "a1": 0,
+    "spin": 0.6
+   }
+  ],
+  "torch_bracket/glow": [
+   {
+    "lamp": {
+     "at": [
+      0,
+      0.1,
+      0
+     ],
+     "tint": 16754752,
+     "intensity": 2.5,
+     "distance": 7,
+     "decay": 2,
+     "flicker": 0.35
+    }
+   }
+  ],
+  "torch_bracket/fire": [
+   {
+    "effect": "torch_bracket/glow"
+   },
+   {
+    "effect": "torch_bracket/flame"
+   },
+   {
+    "effect": "torch_bracket/sparks"
+   },
+   {
+    "effect": "torch_bracket/smoke",
+    "at": [
+     0,
+     0.15,
+     0
+    ]
+   }
+  ],
   "chimney/core": [
    {
     "n": [
@@ -164,6 +297,225 @@
     "effect": "chimney/gust"
    }
   ],
+  "candlestick/flame": [
+   {
+    "n": [
+     3,
+     4
+    ],
+    "every": 0.015,
+    "life": [
+     0.1,
+     0.18
+    ],
+    "size": [
+     0.004,
+     0.007
+    ],
+    "grow": -0.7,
+    "spread": 0.05,
+    "speed": [
+     0.06,
+     0.11
+    ],
+    "g": -0.2,
+    "jitter": [
+     0.0008,
+     0,
+     0.0008
+    ],
+    "tint": 16772300,
+    "tint1": 16742944,
+    "a0": 0.7,
+    "a1": 0,
+    "add": true,
+    "gain": 1.6,
+    "spin": 2
+   }
+  ],
+  "candlestick/glow": [
+   {
+    "lamp": {
+     "at": [
+      0,
+      0.02,
+      0
+     ],
+     "tint": 16758864,
+     "intensity": 0.3,
+     "distance": 2.5,
+     "decay": 2,
+     "flicker": 0.15
+    }
+   }
+  ],
+  "candlestick/fire": [
+   {
+    "effect": "candlestick/glow"
+   },
+   {
+    "effect": "candlestick/flame"
+   }
+  ],
+  "chandelier/flame": [
+   {
+    "n": [
+     3,
+     4
+    ],
+    "every": 0.015,
+    "life": [
+     0.11,
+     0.2
+    ],
+    "size": [
+     0.005,
+     0.009
+    ],
+    "grow": -0.7,
+    "spread": 0.05,
+    "speed": [
+     0.06,
+     0.11
+    ],
+    "g": -0.2,
+    "jitter": [
+     0.001,
+     0,
+     0.001
+    ],
+    "tint": 16772300,
+    "tint1": 16742944,
+    "a0": 0.7,
+    "a1": 0,
+    "add": true,
+    "gain": 1.6,
+    "spin": 2
+   }
+  ],
+  "chandelier/glow": [
+   {
+    "lamp": {
+     "tint": 16758864,
+     "intensity": 1.25,
+     "distance": 6,
+     "decay": 2,
+     "flicker": 0.12
+    }
+   }
+  ],
+  "sconce/flame": [
+   {
+    "n": [
+     3,
+     4
+    ],
+    "every": 0.015,
+    "life": [
+     0.11,
+     0.2
+    ],
+    "size": [
+     0.005,
+     0.008
+    ],
+    "grow": -0.7,
+    "spread": 0.05,
+    "speed": [
+     0.06,
+     0.11
+    ],
+    "g": -0.2,
+    "jitter": [
+     0.001,
+     0,
+     0.001
+    ],
+    "tint": 16772300,
+    "tint1": 16742944,
+    "a0": 0.7,
+    "a1": 0,
+    "add": true,
+    "gain": 1.6,
+    "spin": 2
+   }
+  ],
+  "sconce/glow": [
+   {
+    "lamp": {
+     "at": [
+      0,
+      0.02,
+      0
+     ],
+     "tint": 16758864,
+     "intensity": 0.35,
+     "distance": 3,
+     "decay": 2,
+     "flicker": 0.15
+    }
+   }
+  ],
+  "sconce/fire": [
+   {
+    "effect": "sconce/glow"
+   },
+   {
+    "effect": "sconce/flame"
+   }
+  ],
+  "candlestand/flame": [
+   {
+    "n": [
+     3,
+     4
+    ],
+    "every": 0.015,
+    "life": [
+     0.12,
+     0.22
+    ],
+    "size": [
+     0.006,
+     0.01
+    ],
+    "grow": -0.7,
+    "spread": 0.05,
+    "speed": [
+     0.07,
+     0.12
+    ],
+    "g": -0.2,
+    "jitter": [
+     0.0012,
+     0,
+     0.0012
+    ],
+    "tint": 16772300,
+    "tint1": 16742944,
+    "a0": 0.7,
+    "a1": 0,
+    "add": true,
+    "gain": 1.6,
+    "spin": 2
+   }
+  ],
+  "candlestand/glow": [
+   {
+    "lamp": {
+     "at": [
+      0,
+      0.03,
+      0
+     ],
+     "tint": 16758864,
+     "intensity": 0.6,
+     "distance": 4,
+     "decay": 2,
+     "flicker": 0.15
+    }
+   }
+  ],
   "cauldron/steam": [
    {
     "n": [
@@ -226,6 +578,301 @@
     "a1": 0,
     "fade": 0.1,
     "spin": 3
+   }
+  ],
+  "rushlight/flame": [
+   {
+    "n": [
+     3,
+     4
+    ],
+    "every": 0.015,
+    "life": [
+     0.12,
+     0.22
+    ],
+    "size": [
+     0.005,
+     0.009
+    ],
+    "grow": -0.7,
+    "spread": 0.08,
+    "speed": [
+     0.06,
+     0.12
+    ],
+    "g": -0.2,
+    "jitter": [
+     0.0015,
+     0,
+     0.0015
+    ],
+    "tint": 16772300,
+    "tint1": 16742944,
+    "a0": 0.7,
+    "a1": 0,
+    "add": true,
+    "gain": 1.5,
+    "spin": 2
+   }
+  ],
+  "rushlight/smoke": [
+   {
+    "every": 0.08,
+    "life": [
+     0.8,
+     1.4
+    ],
+    "size": [
+     0.006,
+     0.01
+    ],
+    "grow": 2.5,
+    "spread": 0.12,
+    "speed": [
+     0.12,
+     0.2
+    ],
+    "g": -0.05,
+    "drag": 0.3,
+    "jitter": [
+     0.001,
+     0,
+     0.001
+    ],
+    "tint": 4210752,
+    "tint1": 7368816,
+    "a0": 0.12,
+    "a1": 0,
+    "spin": 0.6
+   }
+  ],
+  "rushlight/glow": [
+   {
+    "lamp": {
+     "at": [
+      0,
+      0.02,
+      0
+     ],
+     "tint": 16756832,
+     "intensity": 0.25,
+     "distance": 2.5,
+     "decay": 2,
+     "flicker": 0.25
+    }
+   }
+  ],
+  "rushlight/fire": [
+   {
+    "effect": "rushlight/glow"
+   },
+   {
+    "effect": "rushlight/flame"
+   },
+   {
+    "effect": "rushlight/smoke",
+    "at": [
+     0,
+     0.04,
+     0
+    ]
+   }
+  ],
+  "candle/flame": [
+   {
+    "n": [
+     3,
+     4
+    ],
+    "every": 0.015,
+    "life": [
+     0.1,
+     0.18
+    ],
+    "size": [
+     0.004,
+     0.007
+    ],
+    "grow": -0.7,
+    "spread": 0.05,
+    "speed": [
+     0.06,
+     0.11
+    ],
+    "g": -0.2,
+    "jitter": [
+     0.0008,
+     0,
+     0.0008
+    ],
+    "tint": 16772300,
+    "tint1": 16742944,
+    "a0": 0.7,
+    "a1": 0,
+    "add": true,
+    "gain": 1.6,
+    "spin": 2
+   }
+  ],
+  "candle/glow": [
+   {
+    "lamp": {
+     "at": [
+      0,
+      0.02,
+      0
+     ],
+     "tint": 16758864,
+     "intensity": 0.3,
+     "distance": 2.5,
+     "decay": 2,
+     "flicker": 0.15
+    }
+   }
+  ],
+  "candle/fire": [
+   {
+    "effect": "candle/glow"
+   },
+   {
+    "effect": "candle/flame"
+   }
+  ],
+  "brazier/flame": [
+   {
+    "n": [
+     4,
+     6
+    ],
+    "every": 0.03,
+    "life": [
+     0.25,
+     0.5
+    ],
+    "size": [
+     0.04,
+     0.075
+    ],
+    "grow": -1.4,
+    "spread": 0.3,
+    "speed": [
+     0.25,
+     0.5
+    ],
+    "g": -0.6,
+    "jitter": [
+     0.05,
+     0.01,
+     0.05
+    ],
+    "tint": 16762928,
+    "tint1": 14694400,
+    "a0": 0.7,
+    "a1": 0,
+    "add": true,
+    "gain": 1.4
+   }
+  ],
+  "brazier/sparks": [
+   {
+    "every": 0.12,
+    "life": [
+     0.6,
+     1.2
+    ],
+    "size": [
+     0.006,
+     0.01
+    ],
+    "spread": 0.5,
+    "speed": [
+     0.8,
+     1.6
+    ],
+    "g": 0.6,
+    "drag": 0.4,
+    "jitter": [
+     0.1,
+     0,
+     0.1
+    ],
+    "tint": 16773280,
+    "tint1": 16742400,
+    "a0": 1,
+    "a1": 0,
+    "add": true,
+    "gain": 2
+   }
+  ],
+  "brazier/smoke": [
+   {
+    "n": [
+     2,
+     3
+    ],
+    "every": 0.08,
+    "life": [
+     2.0,
+     3.2
+    ],
+    "size": [
+     0.05,
+     0.08
+    ],
+    "grow": 2.5,
+    "spread": 0.3,
+    "speed": [
+     0.4,
+     0.7
+    ],
+    "g": -0.15,
+    "drag": 0.4,
+    "jitter": [
+     0.08,
+     0,
+     0.08
+    ],
+    "tint": 5263440,
+    "tint1": 8421504,
+    "a0": 0.12,
+    "a1": 0,
+    "spin": 0.6
+   }
+  ],
+  "brazier/glow": [
+   {
+    "lamp": {
+     "at": [
+      0,
+      0.3,
+      0
+     ],
+     "tint": 16742954,
+     "intensity": 3,
+     "distance": 8,
+     "decay": 2,
+     "flicker": 0.3
+    }
+   }
+  ],
+  "brazier/fire": [
+   {
+    "effect": "brazier/glow"
+   },
+   {
+    "effect": "brazier/flame"
+   },
+   {
+    "effect": "brazier/sparks"
+   },
+   {
+    "effect": "brazier/smoke",
+    "at": [
+     0,
+     0.4,
+     0
+    ]
    }
   ],
   "forge/flame": [
@@ -359,6 +1006,118 @@
  },
  "spawns": [
   {
+   "thing": "north west tower/tower torch",
+   "effect": "torch_bracket/fire",
+   "at": [
+    -17.9779,
+    3.0493,
+    -11.8137
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "north east tower/tower torch",
+   "effect": "torch_bracket/fire",
+   "at": [
+    16.8137,
+    3.0493,
+    -12.9779
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "south west tower/tower torch",
+   "effect": "torch_bracket/fire",
+   "at": [
+    -16.8137,
+    3.0493,
+    12.9779
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "south east tower/tower torch",
+   "effect": "torch_bracket/fire",
+   "at": [
+    17.9779,
+    3.0493,
+    11.8137
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "gate/gate torch west",
+   "effect": "torch_bracket/fire",
+   "at": [
+    -1.9,
+    3.1993,
+    19.2938
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "gate/gate torch east",
+   "effect": "torch_bracket/fire",
+   "at": [
+    1.9,
+    3.1993,
+    19.2938
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/hall torch west",
+   "effect": "torch_bracket/fire",
+   "at": [
+    -0.812,
+    2.5609,
+    -0.7062
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/hall torch east",
+   "effect": "torch_bracket/fire",
+   "at": [
+    0.812,
+    2.5609,
+    -0.7062
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
    "thing": "keep/hall/hall chimney",
    "effect": "chimney/puff",
    "at": [
@@ -379,6 +1138,356 @@
     0.6926,
     12.8,
     -11.4
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/high table candlestick west",
+   "effect": "candlestick/fire",
+   "at": [
+    4.6,
+    1.565,
+    -5.1
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/high table candlestick east",
+   "effect": "candlestick/fire",
+   "at": [
+    4.6,
+    1.565,
+    -6.3
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/hall chandelier",
+   "effect": "chandelier/flame",
+   "at": [
+    -1.4162,
+    3.308,
+    -6.522
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/hall chandelier",
+   "effect": "chandelier/flame",
+   "at": [
+    -1.722,
+    3.308,
+    -6.2162
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/hall chandelier",
+   "effect": "chandelier/flame",
+   "at": [
+    -1.722,
+    3.308,
+    -5.7838
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/hall chandelier",
+   "effect": "chandelier/flame",
+   "at": [
+    -1.4162,
+    3.308,
+    -5.478
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/hall chandelier",
+   "effect": "chandelier/flame",
+   "at": [
+    -0.9838,
+    3.308,
+    -5.478
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/hall chandelier",
+   "effect": "chandelier/flame",
+   "at": [
+    -0.678,
+    3.308,
+    -5.7838
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/hall chandelier",
+   "effect": "chandelier/flame",
+   "at": [
+    -0.678,
+    3.308,
+    -6.2162
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/hall chandelier",
+   "effect": "chandelier/flame",
+   "at": [
+    -0.9838,
+    3.308,
+    -6.522
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/hall chandelier",
+   "effect": "chandelier/glow",
+   "at": [
+    -1.2,
+    3.308,
+    -6.0
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/dais chandelier",
+   "effect": "chandelier/flame",
+   "at": [
+    1.7925,
+    3.508,
+    -6.3594
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/dais chandelier",
+   "effect": "chandelier/flame",
+   "at": [
+    1.585,
+    3.508,
+    -6.0
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/dais chandelier",
+   "effect": "chandelier/flame",
+   "at": [
+    1.7925,
+    3.508,
+    -5.6406
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/dais chandelier",
+   "effect": "chandelier/flame",
+   "at": [
+    2.2075,
+    3.508,
+    -5.6406
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/dais chandelier",
+   "effect": "chandelier/flame",
+   "at": [
+    2.415,
+    3.508,
+    -6.0
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/dais chandelier",
+   "effect": "chandelier/flame",
+   "at": [
+    2.2075,
+    3.508,
+    -6.3594
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/dais chandelier",
+   "effect": "chandelier/glow",
+   "at": [
+    2.0,
+    3.508,
+    -6.0
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/hall sconce west",
+   "effect": "sconce/fire",
+   "at": [
+    -1.4,
+    2.0006,
+    -2.45
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/hall/hall sconce east",
+   "effect": "sconce/fire",
+   "at": [
+    1.4,
+    2.0006,
+    -2.45
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/solar/solar candlestand",
+   "effect": "candlestand/flame",
+   "at": [
+    2.6,
+    7.291,
+    -6.6
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/solar/solar candlestand",
+   "effect": "candlestand/flame",
+   "at": [
+    2.4,
+    7.231,
+    -6.6
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/solar/solar candlestand",
+   "effect": "candlestand/flame",
+   "at": [
+    2.8,
+    7.231,
+    -6.6
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "keep/solar/solar candlestand",
+   "effect": "candlestand/glow",
+   "at": [
+    2.6,
+    7.291,
+    -6.6
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "passage/passage sconce",
+   "effect": "sconce/fire",
+   "at": [
+    -8.5,
+    2.0006,
+    -3.65
    ],
    "dir": [
     0.0,
@@ -471,6 +1580,272 @@
    ]
   },
   {
+   "thing": "kitchen/kitchen rushlight",
+   "effect": "rushlight/fire",
+   "at": [
+    -16.7008,
+    1.2671,
+    -0.8
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "chapel/chapel candlestand north",
+   "effect": "candlestand/flame",
+   "at": [
+    16.0,
+    1.811,
+    1.0
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "chapel/chapel candlestand north",
+   "effect": "candlestand/flame",
+   "at": [
+    16.0,
+    1.751,
+    1.2
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "chapel/chapel candlestand north",
+   "effect": "candlestand/flame",
+   "at": [
+    16.0,
+    1.751,
+    0.8
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "chapel/chapel candlestand north",
+   "effect": "candlestand/glow",
+   "at": [
+    16.0,
+    1.811,
+    1.0
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "chapel/chapel candlestand south",
+   "effect": "candlestand/flame",
+   "at": [
+    16.0,
+    1.811,
+    4.0
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "chapel/chapel candlestand south",
+   "effect": "candlestand/flame",
+   "at": [
+    16.0,
+    1.751,
+    4.2
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "chapel/chapel candlestand south",
+   "effect": "candlestand/flame",
+   "at": [
+    16.0,
+    1.751,
+    3.8
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "chapel/chapel candlestand south",
+   "effect": "candlestand/glow",
+   "at": [
+    16.0,
+    1.811,
+    4.0
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "chapel/chapel sconce north",
+   "effect": "sconce/fire",
+   "at": [
+    13.6,
+    2.1006,
+    0.65
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "chapel/chapel sconce south",
+   "effect": "sconce/fire",
+   "at": [
+    13.6,
+    2.1006,
+    4.35
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "chapel/chapel candle",
+   "effect": "candle/fire",
+   "at": [
+    10.0,
+    0.382,
+    4.1
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "armoury/armoury brazier",
+   "effect": "brazier/fire",
+   "at": [
+    11.3,
+    0.89,
+    10.0
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "armoury/armoury brazier",
+   "effect": "brazier/flame",
+   "at": [
+    11.4185,
+    0.8735,
+    9.9353
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "armoury/armoury brazier",
+   "effect": "brazier/flame",
+   "at": [
+    11.1847,
+    0.8735,
+    9.9298
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "armoury/armoury brazier",
+   "effect": "brazier/flame",
+   "at": [
+    11.2968,
+    0.8735,
+    10.135
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "lodging/sconce by the tapestry",
+   "effect": "sconce/fire",
+   "at": [
+    10.4,
+    1.8006,
+    -9.45
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "lodging/candlestand",
+   "effect": "candlestand/flame",
+   "at": [
+    15.75,
+    1.661,
+    -7.7
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "lodging/candlestand",
+   "effect": "candlestand/glow",
+   "at": [
+    15.75,
+    1.661,
+    -7.7
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
    "thing": "bailey/forge",
    "effect": "forge/fire",
    "at": [
@@ -527,6 +1902,62 @@
    ]
   },
   {
+   "thing": "tavern/tavern candle",
+   "effect": "candle/fire",
+   "at": [
+    -9.8,
+    1.0036,
+    27.25
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "tavern/loft rushlight",
+   "effect": "rushlight/fire",
+   "at": [
+    -11.2008,
+    3.8471,
+    25.6
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "workshop/workshop candle",
+   "effect": "candle/fire",
+   "at": [
+    14.1,
+    1.0441,
+    40.35
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "workshop/workshop rushlight",
+   "effect": "rushlight/fire",
+   "at": [
+    12.9992,
+    1.2671,
+    37.2
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
    "thing": "catalogue/iron cauldron",
    "effect": "cauldron/bubbles",
    "at": [
@@ -547,6 +1978,104 @@
     30.0,
     0.3816,
     13.0
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "catalogue/plaster candle small",
+   "effect": "candle/fire",
+   "at": [
+    30.0,
+    0.1247,
+    1.0
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "catalogue/plaster candle middle",
+   "effect": "candle/fire",
+   "at": [
+    30.0,
+    0.2236,
+    0.75
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "catalogue/plaster candle large",
+   "effect": "candle/fire",
+   "at": [
+    30.0,
+    0.362,
+    0.45
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "catalogue/slate brazier",
+   "effect": "brazier/fire",
+   "at": [
+    30.0,
+    0.87,
+    -7.0
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "catalogue/slate brazier",
+   "effect": "brazier/flame",
+   "at": [
+    29.9353,
+    0.8535,
+    -7.1185
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "catalogue/slate brazier",
+   "effect": "brazier/flame",
+   "at": [
+    29.9298,
+    0.8535,
+    -6.8847
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "catalogue/slate brazier",
+   "effect": "brazier/flame",
+   "at": [
+    30.135,
+    0.8535,
+    -6.9968
    ],
    "dir": [
     0.0,

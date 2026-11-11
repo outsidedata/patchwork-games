@@ -7,9 +7,10 @@
 //   enchants    `{ <id>: { name, class, abilitySet, reagents, gold } }`: the item class it goes on (an `equippable`
 //               fragment's `class`, `plugins/inventory`), the gas3d ability set it grants while the item is equipped
 //               (`plugins/gas3d`'s `abilitySets`), `reagents` `[{ item, count }]`, and the gold the enchanter asks
-//   enchanters  `{ <kind>: [<enchant id>] }`: what a kind enchants with
+//   enchanters  `{ <kind>: { <record>: [<enchant id>] } }`: what an enchanter of that kind with that record (its row's
+//               `record`, `plugins/mmo3d`) enchants with
 // The enchant is on the item instance (inventory's `enchant`), so it goes where the item goes.
-//   enchant(w, me, enchanter, id, instance)   the enchant put on the carried instance, when the enchanter's kind
+//   enchant(w, me, enchanter, id, instance)   the enchant put on the carried instance, when the enchanter
 //                                             has it, the item is of its class, and the player carries its reagents
 //                                             and gold: they are used up, and the item, if equipped, is equipped
 //                                             again with it (`plugins/equipment`); whether it was.
@@ -20,17 +21,17 @@ import { consume, countOf, enchantInstance, fragment, instanceOf } from '../inve
 import { equip, equippedFrom, unequip } from '../equipment/equipment.sim.ts'
 
 export type Enchantment = { name: string; class: string; abilitySet: string; reagents: { item: string; count: number }[]; gold: number }
-type File = { enchants: Record<string, Enchantment>; enchanters: Record<string, string[]> }
+type File = { enchants: Record<string, Enchantment>; enchanters: Record<string, Record<string, string[]>> }
 
 const fileOf = (from: W | Wire): File => json(from, ('find' in from ? from.world : from.scene.world!).enchanting.file)
 
 export const enchantsOf = (from: W | Wire) => fileOf(from).enchants
-export const enchanterOf = (w: W | Wire, kind: string) => fileOf(w).enchanters[kind] ?? []
+export const enchanterOf = (w: W | Wire, enchanter: Row) => fileOf(w).enchanters[enchanter.kind]?.[enchanter.data.record] ?? []
 
 export function enchant(w: W, me: Row, enchanter: Row, id: string, instance: number): boolean {
   const e = enchantsOf(w)[id]
   const i = instanceOf(me, instance)
-  if (!e || !i || !enchanterOf(w, enchanter.kind).includes(id)) return false
+  if (!e || !i || !enchanterOf(w, enchanter).includes(id)) return false
   if (fragment(w, i.definition, 'equippable')?.class !== e.class) return false
   if (!e.reagents.every(g => countOf(me, g.item) >= g.count) || countOf(me, 'gold') < e.gold) return false
   for (const g of e.reagents) consume(me, g.item, g.count)

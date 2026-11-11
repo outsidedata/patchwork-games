@@ -1,7 +1,8 @@
 // vendor: demo_world3d's own plugin, buying and selling, after World of Warcraft's vendors as the TrinityCore server
 // keeps them (`npc_vendor`, an item's `BuyPrice` and `SellPrice`, and the buyback slots) (core issue #67). This file
 // is its server half; it has no page half. Its file is a loader `json` entry the scene names in `world.vendor.file`:
-//   vendors   `{ <kind>: [{ item, max, restock }] }`: what a kind sells, in order (`npc_vendor`): an inventory item
+//   vendors   `{ <kind>: { <record>: [{ item, max, restock }] } }`: what a vendor of that kind with that record (its
+//             row's `record`, `plugins/mmo3d`) sells, in order (`npc_vendor`): an inventory item
 //             (`plugins/inventory`), `max` the most it has at once (0: never runs out, `maxcount`), and `restock` the
 //             seconds after it first sells one that it has `max` again (`incrtime`)
 //   buyback   how many of what a player sold are kept to buy back, newest first (`BUYBACK_SLOT_COUNT`, 12)
@@ -25,23 +26,24 @@ import { addDefinition, consume, countOf, entryOf, fragment, removeInstance, typ
 export type Sold = { item: string; max: number; restock: number }
 export type Stock = Record<string, { left: number; since: number }>
 export type Back = { instance: Instance; count: number; price: number }
-type File = { vendors: Record<string, Sold[]>; buyback: number }
+type File = { vendors: Record<string, Record<string, Sold[]>>; buyback: number }
 
 const fileOf = (from: W | Wire): File => json(from, ('find' in from ? from.world : from.scene.world!).vendor.file)
 
-export const listOf = (w: W | Wire, kind: string): Sold[] => fileOf(w).vendors[kind] ?? []
+// What that row sells: its kind's list for its record; nothing for a row that is no vendor.
+export const listOf = (w: W | Wire, vendor: Row): Sold[] => fileOf(w).vendors[vendor.kind]?.[vendor.data.record] ?? []
 
 const priceOf = (w: W | Wire, item: string): { buy: number; sell: number } | undefined => fragment(w, item, 'price')
 
 export function stockOf(w: W | Wire, vendor: Row, item: string): number {
-  const s = listOf(w, vendor.kind).find(x => x.item === item)
+  const s = listOf(w, vendor).find(x => x.item === item)
   if (!s) return 0
   if (s.max === 0) return Infinity
   return (vendor.data.stock as Stock)[item]?.left ?? s.max
 }
 
 export function buy(w: W, me: Row, vendor: Row, i: number, count: number): boolean {
-  const s = listOf(w, vendor.kind)[i]
+  const s = listOf(w, vendor)[i]
   const p = s && priceOf(w, s.item)
   if (!s || !p || count < 1 || stockOf(w, vendor, s.item) < count) return false
   if (!consume(me, 'gold', p.buy * count)) return false
@@ -76,7 +78,7 @@ export function buyBack(me: Row, i: number): boolean {
 export function step(w: W, vendor: Row, dt: number) {
   vendor.data.clock += dt
   const stock = vendor.data.stock as Stock
-  const sold = listOf(w, vendor.kind)
+  const sold = listOf(w, vendor)
   let changed = false
   const next: Stock = {}
   for (const [item, s] of Object.entries(stock)) {

@@ -38,7 +38,7 @@ import { possessed } from '#plugins/player/player.plugin.ts'
 import { def, json } from '#plugins/loader/loader.sim.ts'
 import { fileOf as gasFile, granted, value } from '../gas3d/gas3d.sim.ts'
 import { definitionOf, fragment, type Entry } from '../inventory/inventory.sim.ts'
-import { COMPLETE, INCOMPLETE, NONE, REWARDED, progress, questsOf, status } from '../quests/quests.sim.ts'
+import { COMPLETE, INCOMPLETE, NONE, REWARDED, among, progress, questsOf, status } from '../quests/quests.sim.ts'
 import { listOf, stockOf, type Back } from '../vendor/vendor.sim.ts'
 import { recipesOf, trainerOf } from '../crafting/crafting.sim.ts'
 import { enchanterOf, enchantsOf } from '../enchanting/enchanting.sim.ts'
@@ -258,8 +258,8 @@ export function hud() {
       }
       function markOf(r: Row): string | undefined {
         for (const [id, q] of Object.entries(questsOf(wire))) {
-          if (q.enders.includes(r.kind) && status(me!, id) === COMPLETE) return h.words.handInMark
-          if (q.starters.includes(r.kind) && status(me!, id) === NONE && (q.prev === null || status(me!, q.prev) === REWARDED)) return h.words.questMark
+          if (among(q.enders, r) && status(me!, id) === COMPLETE) return h.words.handInMark
+          if (among(q.starters, r) && status(me!, id) === NONE && (q.prev === null || status(me!, q.prev) === REWARDED)) return h.words.questMark
         }
         return undefined
       }
@@ -427,7 +427,7 @@ export function hud() {
           text('quests', 'q.rewardH', 'heading', q.reward, h.words.rewardHeading)
           const rewards = [...(t.gold ? [fill(h.words.lootGold, { n: t.gold })] : []), ...t.rewards.map(r => fill(h.words.lootItem, { name: items(r.item).name, count: r.count }))]
           text('quests', 'q.reward', 'gold', [q.reward[0], q.reward[1] + q.lineStep], rewards.join(h.words.join))
-          if (status(me, quest) === COMPLETE) text('quests', 'q.handIn', 'small', [q.reward[0], q.reward[1] + 2 * q.lineStep], fill(h.words.handInTo, { who: t.enders.map(k => h.plates[k]?.name ?? k).join(h.words.join) }))
+          if (status(me, quest) === COMPLETE) text('quests', 'q.handIn', 'small', [q.reward[0], q.reward[1] + 2 * q.lineStep], fill(h.words.handInTo, { who: t.enders.map(e => h.plates[e.class]?.name ?? e.class).join(h.words.join) }))
         }
       }
 
@@ -461,7 +461,7 @@ export function hud() {
           const s = h.shop
           frame('shop', s.size, who, fill(h.words.gold, { n: goldOf }))
           text('shop', 'saleH', 'heading', s.sale, h.words.forSale)
-          listOf(wire, server.kind).forEach((sold, i) => {
+          listOf(wire, server).forEach((sold, i) => {
             const y = s.sale[1] + s.firstRow + i * s.rowStep
             const left = stockOf(wire, server, sold.item)
             const price = fragment(wire, sold.item, 'price')
@@ -492,7 +492,7 @@ export function hud() {
         if (serving.what === 'trainer') {
           const t = h.trainer
           frame('trainer', t.size, fill(h.words.teaches, { who }), fill(h.words.gold, { n: goldOf }))
-          trainerOf(wire, server.kind).forEach((o, i) => {
+          trainerOf(wire, server).forEach((o, i) => {
             const y = t.first[1] + i * t.step
             const r = recipesOf(wire)[o.recipe]
             box('trainer', `${o.recipe}.back`, [t.first[0], y], t.rowSize, h.slot)
@@ -508,7 +508,7 @@ export function hud() {
         if (serving.what === 'enchanter') {
           const n = h.enchanter
           frame('enchanter', n.size, who, fill(h.words.gold, { n: goldOf }))
-          const offered = enchanterOf(wire, server.kind)
+          const offered = enchanterOf(wire, server)
           text('enchanter', 'enchantH', 'heading', n.enchants, h.words.enchantHeading)
           offered.forEach((id, i) => {
             const e = enchantsOf(wire)[id]

@@ -1,5 +1,5 @@
 // mmo3d's mod for hitscan3d (`world.hitscan3d.mods.bodies: 'mmo3d'`, with `mmo3d` in `world.shipped.plugins`): every
-// row of each kind the place's placements and spawns name (`mmo3d.sim.ts`'s `kindsOf`) that hitscan3d lists in
+// row of each kind the place's placements are brought in as (`mmo3d.sim.ts`'s `kindsOf`) that hitscan3d lists in
 // `world.hitscan3d.kinds` as a body a shot or a round meets, one
 // upright cylinder at its feet of its walker kind's `radius` and `height` (`world.walker.kinds`), its part `body`.
 // hitscan3d hits only those of the kinds `world.hitscan3d.kinds` lists, and none whose `off` field is set.

@@ -3,7 +3,7 @@
 // joined, and the seat driven by messages as a page's keys drive it, the bot reading what it sees off the hills' rows:
 //   1. it picks the class;
 //   2. it walks to the old woman, asks about the graves and takes "Restless Graves";
-//   3. it fights the graves' packs, each mob its target, until the quest is done, it carries a grave ring, and it has
+//   3. it fights the graves' dead, each mob its target, until the quest is done, it carries a grave ring, and it has
 //      the gold the rest of the slice costs;
 //   4. it hands the quest in;
 //   5. at the smith it sells its grey junk, buys the iron bars (and a rusty sword, when it has none) the iron sword
@@ -41,9 +41,10 @@ const COMPLETE = 1, INCOMPLETE = 3, REWARDED = 6
 
 type Entry = { instance: { id: number; definition: string; enchant: { name: string } | null }; count: number }
 
-// Where a placement or an `at` of the place file stands: [x, y, z] as it is, a landmark by the crowd file.
+// Where a placement or an `at` of the place file stands: [x, y, z] as it is, an identity where the crowd file has its
+// landmark, by the same names.
 const landmarks = crowd.landmarks as Record<string, { at: number[] }>
-const at = (a: number[] | string) => (typeof a === 'string' ? landmarks[a].at : a)
+const at = (a: number[] | string) => (typeof a === 'string' ? landmarks[a.split('.').join('/')].at : a)
 
 async function play(name: keyof typeof classesFile.classes) {
   const top = { ...file, prefabs: { ...file.prefabs, scenemanager: { ...file.prefabs.scenemanager, entry: 'hills' } } }
@@ -152,7 +153,7 @@ async function play(name: keyof typeof classesFile.classes) {
       const time = room.rows.find(r => r.kind === 'npc3d')!.data.time
       const foes = room.rows.filter(r => kinds.includes(r.kind)).map(r => `${r.kind} ${r.id} ${r.data.dead ? 'dead' : 'alive'} ${r.data.gas?.base.health} ${gap(r.data.pos[0], r.data.pos[2]).toFixed(1)}m ${r.data.doing} until ${r.data.until} at ${time}`)
       const mm = room.rows.find(r => r.kind === 'mmo3d')!.data
-      throw new Error(`${what}: not done after ${most} s, ${where()}; kills ${JSON.stringify(d.factsdb)}; gold ${count('gold')}, rings ${count('graveRing')}, needed ${needed()}; ${d.activity}.${d.motion} upper ${d.upperMotion} weapon ${d.weapon} casting ${d.casting}; foes ${foes.join('; ')}; mmo3d time ${mm.time} packs ${JSON.stringify(mm.packs)}`)
+      throw new Error(`${what}: not done after ${most} s, ${where()}; kills ${JSON.stringify(d.factsdb)}; gold ${count('gold')}, rings ${count('graveRing')}, needed ${needed()}; ${d.activity}.${d.motion} upper ${d.upperMotion} weapon ${d.weapon} casting ${d.casting}; foes ${foes.join('; ')}; mmo3d time ${mm.time} due ${JSON.stringify(mm.due)}`)
     }
   }
 
@@ -199,15 +200,17 @@ async function play(name: keyof typeof classesFile.classes) {
   const recipe = craftingFile.recipes.ironSword
   const price = (item: string) => (inventoryFile.items as Record<string, any>)[item].fragments.price
   const enchant = enchantingFile.enchants.blessedEdge
-  const learn = craftingFile.trainers.smith.find(t => t.recipe === 'ironSword')!.cost
+  const learn = craftingFile.trainers.smith.hills.find(t => t.recipe === 'ironSword')!.cost
   const needed = () => {
     const bars = Math.max(0, recipe.reagents.find(g => g.item === 'ironBar')!.count - count('ironBar'))
     const sword = count('rustySword') > 0 ? 0 : price('rustySword').buy
     return learn + bars * price('ironBar').buy + sword + enchant.gold
   }
-  const graves = place.spawns.map(s => s.kind)
+  const dead = place.placements.filter(p => p.at.startsWith('graveyard 1.'))
+  const graves = [...new Set(dead.map(p => p.kind))]
   const quest = questsFile.quests.graves
-  walk('to the graves', place.spawns[0].at[0], place.spawns[0].at[2], 6)
+  const grave = at(dead[0].at)
+  walk('to the graves', grave[0], grave[2], 6)
   fight('clearing the graves', graves, () => fact('quest.graves') === COMPLETE && count('graveRing') >= 1 && count('gold') >= needed(), 1800)
   expect(fact(`quest.graves.kill.${quest.kills[0].kind}`)).toBeGreaterThanOrEqual(quest.kills[0].count)
 
@@ -224,7 +227,7 @@ async function play(name: keyof typeof classesFile.classes) {
     send('sell', e.instance.id)
     step()
   }
-  const sold = vendorFile.vendors.smith
+  const sold = vendorFile.vendors.smith.hills
   const bars = recipe.reagents.find(g => g.item === 'ironBar')!.count - count('ironBar')
   if (bars > 0) send('buy', sold.findIndex(s => s.item === 'ironBar'), bars)
   step()
@@ -266,7 +269,8 @@ async function play(name: keyof typeof classesFile.classes) {
 
   // 7. the Barrow King woken and killed
   const zone = place.zones.find(z => z.name === 'barrow')!
-  near('into the barrow', zone.at[0] as number, zone.at[2] as number, zone.radius * 0.5)
+  const barrow = at(zone.at)
+  near('into the barrow', barrow[0], barrow[2], zone.radius * 0.5)
   for (let i = 0; i < SECOND && !room.rows.some(r => r.kind === 'barrow_king'); i++) step()
   expect(room.rows.some(r => r.kind === 'barrow_king')).toBe(true)
   fight('the Barrow King', ['barrow_king', 'zombie'], () => (facts()['killed.barrow_king'] ?? 0) >= 1, 600)

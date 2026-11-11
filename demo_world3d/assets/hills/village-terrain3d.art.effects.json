@@ -295,12 +295,12 @@
  },
  "spawns": [
   {
-   "thing": "smithy/chimney",
+   "thing": "smithy 1/chimney",
    "effect": "chimney/puff",
    "at": [
-    69.0144,
-    20.68,
-    -112.5571
+    133.53,
+    21.38,
+    -58.505
    ],
    "dir": [
     0.0,
@@ -309,12 +309,12 @@
    ]
   },
   {
-   "thing": "smithy/chimney",
+   "thing": "smithy 1/chimney",
    "effect": "chimney/puff",
    "at": [
-    69.241,
-    20.68,
-    -113.0582
+    133.53,
+    21.38,
+    -57.955
    ],
    "dir": [
     0.0,
@@ -323,12 +323,12 @@
    ]
   },
   {
-   "thing": "smithy/forge",
+   "thing": "smithy 1/forge",
    "effect": "forge/fire",
    "at": [
-    70.8554,
-    12.21,
-    -112.2039
+    131.707,
+    12.91,
+    -58.068
    ],
    "dir": [
     0.0,
@@ -337,12 +337,12 @@
    ]
   },
   {
-   "thing": "smithy/forge",
+   "thing": "smithy 1/forge",
    "effect": "forge/smoke",
    "at": [
-    70.6185,
-    15.43,
-    -112.311
+    131.967,
+    16.13,
+    -58.068
    ],
    "dir": [
     0.0,
@@ -351,12 +351,12 @@
    ]
   },
   {
-   "thing": "bakehouse/chimney",
+   "thing": "bakehouse 1/chimney",
    "effect": "chimney/puff",
    "at": [
-    87.4404,
-    20.39,
-    -50.5114
+    101.195,
+    22.01,
+    -58.79
    ],
    "dir": [
     0.0,
@@ -365,26 +365,12 @@
    ]
   },
   {
-   "thing": "bakehouse/chimney",
+   "thing": "bakehouse 1/chimney",
    "effect": "chimney/puff",
    "at": [
-    87.1274,
-    20.39,
-    -50.6679
-   ],
-   "dir": [
-    0.0,
-    1.0,
-    -0.0
-   ]
-  },
-  {
-   "thing": "house 1/chimney",
-   "effect": "chimney/puff",
-   "at": [
-    129.1569,
-    21.83,
-    -48.4991
+    101.545,
+    22.01,
+    -58.79
    ],
    "dir": [
     0.0,
@@ -396,9 +382,23 @@
    "thing": "house 1/chimney",
    "effect": "chimney/puff",
    "at": [
-    129.4536,
-    21.83,
-    -48.7674
+    153.4898,
+    21.46,
+    -54.6658
+   ],
+   "dir": [
+    0.0,
+    1.0,
+    -0.0
+   ]
+  },
+  {
+   "thing": "house 1/chimney",
+   "effect": "chimney/puff",
+   "at": [
+    153.4809,
+    21.46,
+    -55.0657
    ],
    "dir": [
     0.0,
@@ -410,9 +410,9 @@
    "thing": "longhouse 1/chimney",
    "effect": "chimney/puff",
    "at": [
-    128.5301,
-    22.6,
-    -26.6151
+    118.4589,
+    17.64,
+    -77.3901
    ],
    "dir": [
     0.0,
@@ -424,9 +424,9 @@
    "thing": "longhouse 1/chimney",
    "effect": "chimney/puff",
    "at": [
-    128.5563,
-    22.6,
-    -26.216
+    118.4644,
+    17.64,
+    -76.9901
    ],
    "dir": [
     0.0,
@@ -438,9 +438,9 @@
    "thing": "hallhouse 1/chimney",
    "effect": "chimney/puff",
    "at": [
-    175.1976,
-    19.88,
-    -72.1927
+    103.0994,
+    19.17,
+    -83.2689
    ],
    "dir": [
     0.0,
@@ -452,9 +452,9 @@
    "thing": "hallhouse 1/chimney",
    "effect": "chimney/puff",
    "at": [
-    175.1582,
-    19.88,
-    -72.5908
+    102.6998,
+    19.17,
+    -83.2874
    ],
    "dir": [
     0.0,
@@ -466,9 +466,9 @@
    "thing": "lofthouse 1/chimney",
    "effect": "chimney/puff",
    "at": [
-    176.0954,
-    20.66,
-    -86.7415
+    156.8331,
+    19.94,
+    -77.1821
    ],
    "dir": [
     0.0,
@@ -480,9 +480,9 @@
    "thing": "lofthouse 1/chimney",
    "effect": "chimney/puff",
    "at": [
-    176.4932,
-    20.66,
-    -86.7831
+    156.8306,
+    19.94,
+    -77.5821
    ],
    "dir": [
     0.0,
@@ -494,9 +494,9 @@
    "thing": "house 2/chimney",
    "effect": "chimney/puff",
    "at": [
-    108.9283,
-    21.92,
-    -42.3252
+    129.6923,
+    18.28,
+    -96.3525
    ],
    "dir": [
     0.0,
@@ -508,9 +508,9 @@
    "thing": "house 2/chimney",
    "effect": "chimney/puff",
    "at": [
-    109.1922,
-    21.92,
-    -42.6258
+    129.7167,
+    18.28,
+    -95.9532
    ],
    "dir": [
     0.0,
@@ -522,9 +522,9 @@
    "thing": "longhouse 2/chimney",
    "effect": "chimney/puff",
    "at": [
-    82.4245,
-    25.7,
-    -18.4293
+    102.1517,
+    17.84,
+    -108.3521
    ],
    "dir": [
     0.0,
@@ -536,9 +536,9 @@
    "thing": "longhouse 2/chimney",
    "effect": "chimney/puff",
    "at": [
-    82.463,
-    25.7,
-    -18.0312
+    101.7528,
+    17.84,
+    -108.3225
    ],
    "dir": [
     0.0,
@@ -550,9 +550,9 @@
    "thing": "hallhouse 2/chimney",
    "effect": "chimney/puff",
    "at": [
-    141.1207,
-    19.64,
-    -52.7749
+    34.1179,
+    30.81,
+    -39.1354
    ],
    "dir": [
     0.0,
@@ -564,9 +564,9 @@
    "thing": "hallhouse 2/chimney",
    "effect": "chimney/puff",
    "at": [
-    141.1173,
-    19.64,
-    -52.3749
+    33.7181,
+    30.81,
+    -39.1492
    ],
    "dir": [
     0.0,
@@ -578,9 +578,9 @@
    "thing": "lofthouse 2/chimney",
    "effect": "chimney/puff",
    "at": [
-    176.3687,
-    23.13,
-    -114.7787
+    160.5952,
+    20.99,
+    -96.5914
    ],
    "dir": [
     0.0,
@@ -592,9 +592,9 @@
    "thing": "lofthouse 2/chimney",
    "effect": "chimney/puff",
    "at": [
-    175.9701,
-    23.13,
-    -114.8126
+    160.571,
+    20.99,
+    -96.9907
    ],
    "dir": [
     0.0,
@@ -606,9 +606,9 @@
    "thing": "house 3/chimney",
    "effect": "chimney/puff",
    "at": [
-    63.2394,
-    27.08,
-    -21.199
+    169.8171,
+    21.85,
+    -53.9314
    ],
    "dir": [
     0.0,
@@ -620,9 +620,9 @@
    "thing": "house 3/chimney",
    "effect": "chimney/puff",
    "at": [
-    63.1108,
-    27.08,
-    -20.8203
+    169.8496,
+    21.85,
+    -54.3301
    ],
    "dir": [
     0.0,
@@ -634,9 +634,9 @@
    "thing": "house 4/chimney",
    "effect": "chimney/puff",
    "at": [
-    23.4059,
-    32.55,
-    -81.542
+    121.2037,
+    17.86,
+    -117.3919
    ],
    "dir": [
     0.0,
@@ -648,9 +648,9 @@
    "thing": "house 4/chimney",
    "effect": "chimney/puff",
    "at": [
-    23.2162,
-    32.55,
-    -81.1899
+    120.805,
+    17.86,
+    -117.3596
    ],
    "dir": [
     0.0,
@@ -662,9 +662,9 @@
    "thing": "house 5/chimney",
    "effect": "chimney/puff",
    "at": [
-    161.8808,
-    22.88,
-    -26.3847
+    55.1734,
+    27.58,
+    -29.2202
    ],
    "dir": [
     0.0,
@@ -676,9 +676,9 @@
    "thing": "house 5/chimney",
    "effect": "chimney/puff",
    "at": [
-    161.9124,
-    22.88,
-    -26.7834
+    55.318,
+    27.58,
+    -28.8473
    ],
    "dir": [
     0.0,
@@ -690,9 +690,9 @@
    "thing": "house 6/chimney",
    "effect": "chimney/puff",
    "at": [
-    165.036,
-    19.27,
-    -53.0123
+    173.0469,
+    21.42,
+    -35.8315
    ],
    "dir": [
     0.0,
@@ -704,9 +704,9 @@
    "thing": "house 6/chimney",
    "effect": "chimney/puff",
    "at": [
-    165.022,
-    19.27,
-    -52.6126
+    173.0317,
+    21.42,
+    -35.4317
    ],
    "dir": [
     0.0,
