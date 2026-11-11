@@ -75,6 +75,7 @@ import type { Looks, Tools } from '#scripts/bake.ts'
 import { packLooks } from '#scripts/pack-looks.ts'
 import { PARTS } from '#plugins/world3d/world3d.sim.ts'
 import player from './player.rig.json' with { type: 'json' }
+import { create_overrides } from '../plugins/mmo3d/create_overrides.ts'
 
 const here = import.meta.dirname
 const root = path.join(here, '..', '..', '..')
@@ -101,6 +102,7 @@ const PLACES: { pro?: string; stronghold?: string; folder: string; scene: string
 const MADE = ['.glb', '.looks.json', '.clips.json', '.shapes3d.json', '.nav.json', '.terrain3d_layers.json', '.hollows.json', '.effects.json', '.crowd.json']
 
 export default async ({ blender, scratch, library }: Tools) => {
+  fs.writeFileSync(path.join(here, 'hills/hills.overrides.json'), JSON.stringify(create_overrides(JSON.parse(fs.readFileSync(path.join(here, 'hills/hills.mmo3d.json'), 'utf8'))), null, 2) + '\n')
   // each place made into every file a game boots from by the library's pro-ng (`pro-ng/build.mjs`), on core's Blender
   const { build } = await import(pathToFileURL(path.join(library, 'pro-ng', 'build.mjs')).href)
   for (const place of PLACES) {

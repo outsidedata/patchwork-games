@@ -59,7 +59,7 @@ import { addDefinition } from '../inventory/inventory.sim.ts'
 import { credit } from '../quests/quests.sim.ts'
 
 export type At = number[] | string
-export type Placement = { at: string; respawn?: number; when?: string }
+export type Placement = { kind: string; record?: string; at: string; respawn?: number; when?: string }
 export type Zone = { name: string; at: At; radius: number; set: Record<string, number>; when?: string }
 export type File = {
   landmarks: string
