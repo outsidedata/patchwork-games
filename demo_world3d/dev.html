@@ -14,19 +14,19 @@
     <div id="readout"></div>
     <script type="module">
       // The testbed: index.html, the manager truth and main in this tab (or the scene `?scene=` names:
-      // `?scene=bridge`, `?scene=village`, `?scene=hills`), one seat on it over a loopback, stepped on the page's clock. The truths are kept
+      // `?scene=bridge`, `?scene=village`, `?scene=tavern`), one seat on it over a loopback, stepped on the page's clock. The truths are kept
       // on `window.__scenes`, the page on `window.__page` and the scene's client (its plugins) on
       // `window.__client`. The panel turns nav3d's drawing of the scene's graph on and off (`graphs`,
       // `?graphs=1` on at first), and puts the seat's body on any place of the graph, standing on
       // whatever is there (`go to`). Its `carry` folder sets the hand and the offset of what the
       // body carries, and its `stick` folder the hand, offset and turn of the stick it holds. Its `sky` folder sets skydome3d's clock on the truth's row and
       // its look and shadow on the page's world, copies them as JSON and resets them to the file. Its `lights` folder,
-      // in main, keeps the first `?torches=n` torches and `?people=n` visitors (1 of each at first),
-      // lights3d's fog only with `?fog=1`, sets the shadow atlases' `?atlas=` and `?tile=`, takes the
-      // torch's shadow off with `?torchshadow=0` and lights3d out with `?lights3d=0`, and sets the torch
-      // lamp, the carried light, the exposure, the fog and the castle's flat material live (Lights,
+      // in main, keeps the first `?people=n` visitors (1 at first),
+      // lights3d's fog only with `?fog=1`, sets the shadow atlases' `?atlas=` and `?tile=`, takes
+      // lights3d out with `?lights3d=0`, and sets the
+      // carried light, the exposure, the fog and the castle's flat material live (Lights,
       // below). The readout shows lights3d's lights, shadows, tiles, the still and moving tiles drawn this
-      // frame and the still ones owed, every body gas3d keeps (its attributes and tags, in the hills), and shows the frames drawn in
+      // frame and the still ones owed, and shows the frames drawn in
       // the last second and the longest of them, the step, where the seat's body stands and what it
       // stands on, each visitor's place it is going to and how many places of its route it has still to
       // get to, or the place it stands at, with the height its feet stand at now and how many times it has
@@ -48,25 +48,18 @@
       import { sim } from './demo_world3d.sim.ts'
       import { scene as main } from './main.sim.ts'
       import { visitor } from './visitor.sim.ts'
-      import { tags, value } from './plugins/gas3d/gas3d.sim.ts'
-      import { COMPLETE, INCOMPLETE, progress, questsOf, status } from './plugins/quests/quests.sim.ts'
       import file from './demo_world3d.scene.json'
       import town from './assets/smallville.town.nav.json'
       import bridge from './assets/bridge.nav.json'
       import village from './assets/village/village.art.nav.json'
       import tavern from './assets/tavern/tavern.art.nav.json'
-      import hills from './assets/hills/village-terrain3d.art.nav.json'
 
       file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
 
-      // The town's lights, cut down before the boot so each can be put back one at a time: `?torches=n`
-      // keeps the first n of main's torch actors (1 when left out, the gate's; `all` every one), and
-      // `?fog=1` keeps lights3d's fog, which is off when left out. Both reload the page.
+      // The town cut down before the boot: `?fog=1` keeps lights3d's fog, which is off when left out. It
+      // reloads the page.
       const query = new URLSearchParams(location.search)
       const reload = (key, value) => { query.set(key, value); location.search = query.toString() }
-      const torches = main.actors.filter(a => a.is === 'torch')
-      const kept = query.get('torches') === 'all' ? torches.length : Number(query.get('torches') ?? 1)
-      main.actors = main.actors.filter(a => a.is !== 'torch' || torches.indexOf(a) < kept)
       // `?people=n` keeps the first n of main's visitors (1 when left out; `all` every one)
       const people = main.actors.filter(a => a.is === 'visitor')
       const met = query.get('people') === 'all' ? people.length : Number(query.get('people') ?? 1)
@@ -77,9 +70,7 @@
       if (query.get('tile')) shadows.tile = Number(query.get('tile'))
       const fogged = query.get('fog') === '1'
       if (!fogged) delete main.world.lights3d.fog
-      // `?torchshadow=0` turns the torch lamp's shadow off as the folder is built; `?lights3d=0` takes
-      // lights3d out of main, so the torches are not lit and the carried light is three's own again
-      const torchShadow = query.get('torchshadow') !== '0'
+      // `?lights3d=0` takes lights3d out of main, so the carried light is three's own again
       if (query.get('lights3d') === '0') {
         main.plugins = main.plugins.filter(p => p !== 'lights3d')
         delete main.world.lights3d
@@ -129,7 +120,7 @@
       window.__page = page
       const room = window.__scenes.get(file.prefabs.scenemanager.entry)
       // the scene's graph, the one its page draws
-      const graph = { main: town, bridge, village, tavern, hills }[file.prefabs.scenemanager.entry]
+      const graph = { main: town, bridge, village, tavern }[file.prefabs.scenemanager.entry]
       const tagsOf = p => p.data?.nav3d?.tags ?? []
       const places = [...new Set(graph.places.flatMap(tagsOf))].sort()
       const me = () => room.rows.find(r => r.kind === 'player')
@@ -367,35 +358,22 @@
         } }, 'copy').name('copy stick JSON')
       }
 
-      // The lights, each switched on and off by itself. `torches` and `fog` reload the page (above). The
-      // torch's lamp is the walltorch effect's lamp layer, the one object every torch's light reads each
-      // frame on this page's copy of the effects file, so its numbers and its shadow show at once; the
-      // carried light is the player's `carry.light`, off by its strength put to 0 and back; the exposure
-      // is the renderer's. The fog's numbers are `world.lights3d.fog` on the page's copy of the scene,
-      // read by the fog every frame. `copy` puts the lamp and the fog on the clipboard under the files
-      // they go in. Built for each new client of main once its effects file has landed.
+      // The lights, each switched on and off by itself. `fog` reloads the page (above). The carried
+      // light is the player's `carry.light`, off by its strength put to 0 and back; the exposure is the
+      // renderer's. The fog's numbers are `world.lights3d.fog` on the page's copy of the scene, read by
+      // the fog every frame. `copy` puts the fog on the clipboard under the file it goes in. Built for
+      // each new client of main.
       const lamps = { client: null, folder: null }
       const lights = () => {
         const client = window.__client
         if (!client || lamps.client === client || client.plugins.wire.scene.world.lights3d === undefined) return
-        const effects = client.plugins.loader.get('effects')
-        const lamp = effects?.effects.walltorch?.find(l => 'lamp' in l)?.lamp
-        if (!lamp) return
         lamps.client = client
         lamps.folder?.destroy()
-        if (!torchShadow) lamp.shadow = false
         const f = (lamps.folder = gui.addFolder('lights'))
-        f.add({ torches: kept }, 'torches', 0, torches.length, 1).name(`torches (of ${torches.length}, reloads)`).onFinishChange(n => reload('torches', n))
         f.add({ people: met }, 'people', 0, people.length, 1).name(`people (of ${people.length}, reloads)`).onFinishChange(n => reload('people', n))
         f.add({ atlas: shadows.atlas }, 'atlas', [512, 1024, 2048, 4096]).name('shadow atlas (texels a side, reloads)').onChange(n => reload('atlas', n))
         f.add({ tile: shadows.tile }, 'tile', [64, 128, 256, 512]).name('shadow tile (texels a side, reloads)').onChange(n => reload('tile', n))
         f.add({ fog: fogged }, 'fog').name('fog (reloads)').onChange(on => reload('fog', on ? '1' : '0'))
-        const tf = f.addFolder('torch lamp')
-        tf.add(lamp, 'intensity', 0, 60, 0.1).name('intensity (candela)')
-        tf.add(lamp, 'distance', 0, 40, 0.1).name('distance (m, 0 none)')
-        tf.add(lamp, 'decay', 0, 4, 0.05)
-        tf.add(lamp, 'flicker', 0, 1, 0.01)
-        tf.add(lamp, 'shadow').name('shadow')
         const carried = defs.player.carry.light
         const on = { carry: carried.intensity > 0, strength: carried.intensity || 6 }
         f.add(on, 'carry').name('carried light').onChange(v => {
@@ -450,10 +428,7 @@
           }
         }
         f.add({ copy: () => {
-          const out = JSON.stringify({
-            'games/demo_world3d/assets/effects.json': { effects: { walltorch: [{ lamp }] } },
-            ...(fog ? { 'games/demo_world3d/main.scene.json': { world: { lights3d: { fog } } } } : {}),
-          }, null, 2)
+          const out = JSON.stringify(fog ? { 'games/demo_world3d/main.scene.json': { world: { lights3d: { fog } } } } : {}, null, 2)
           console.log(out)
           navigator.clipboard?.writeText(out)
         } }, 'copy').name('copy lights JSON')
@@ -484,20 +459,7 @@
         readout.textContent = [
           `${frames.length} fps  longest frame ${worst.toFixed(1)} ms  step ${truth.n}`,
           (l3 => l3 ? `lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} still tiles drawn this frame, ${l3.moving} moving tiles, ${l3.owed} faces owed` : '')(window.__client?.plugins.lights3d),
-          p?.data.pos ? `you (${p.data.pos.map(v => v.toFixed(2)).join(', ')}) ${p.data.grounded ? 'on the ground' : 'in the air'}${p.data.motion ? `, ${p.data.activity}.${p.data.motion}` : ''}${p.data.target != null ? `, targeting ${p.data.target}` : ''}` : '',
-          // every row's facts (factsdb's): the hero's and the place's
-          ...room.rows.filter(r => r.data.factsdb).map(r => `${r.kind} ${r.id} facts: ${Object.entries(r.data.factsdb).map(([n, v]) => `${n} ${v}`).join(', ') || 'none yet'}`),
-          // each player's quest log (quests'): every quest taken or done, and how far along each objective is
-          ...room.rows.filter(r => r.data.factsdb && r.kind === 'player').flatMap(r => Object.entries(questsOf(room)).filter(([id]) => [COMPLETE, INCOMPLETE].includes(status(r, id))).map(([id, q]) => `${r.kind} ${r.id} quest ${q.title}${status(r, id) === COMPLETE ? ' (done: hand it in)' : ''}: ${progress(room, r, id).map(p => `${p.what} ${p.has}/${p.count}`).join(', ')}`)),
-          // the service each player has open (talk's `serving`), with the vendor's stock and the buyback
-          ...room.rows.filter(r => r.data.serving).map(r => `${r.kind} ${r.id} is served: ${r.data.serving.what} by ${room.rows.find(x => x.id === r.data.serving.with)?.kind}${r.data.buyback.length ? `; buyback ${r.data.buyback.map((b, i) => `${i}) ${b.instance.definition} ×${b.count} for ${b.price}`).join(', ')}` : ''}`),
-          // what each player is told (talk's): the line said and the choices, each by its key
-          ...room.rows.filter(r => r.data.talking).map(r => `${r.kind} ${r.id} is told: "${r.data.talking.line}"${r.data.talking.choices.map((c, i) => `  ${i + 1}) ${c.say}`).join('')}`),
-          // what each player carries (inventory's), each instance by its id, what of it is equipped (equipment's) and
-          // its quick bar
-          ...room.rows.filter(r => r.data.inventory).map(r => `${r.kind} ${r.id} carries: ${r.data.inventory.entries.map(e => `#${e.instance.id} ${e.instance.definition} ×${e.count}${r.data.equipment.some(q => q.instance === e.instance.id) ? ' (equipped)' : ''}`).join(', ') || 'nothing'}; quick bar ${r.data.quickbar.slots.map((s, i) => `${i === r.data.quickbar.active ? '[' : ''}${s === null ? '-' : `#${s}`}${i === r.data.quickbar.active ? ']' : ''}`).join(' ')}`),
-          // every body gas3d keeps: its attributes, with the effects on it, and its tags
-          ...room.rows.filter(r => r.data.gas).map(r => `${r.kind} ${r.id}${r.data.template ? ` ${r.data.template}` : ''}: ${Object.keys(r.data.gas.base).map(a => `${a} ${value(room, r, a).toFixed(1)}`).join(', ')}${r.data.dead ? ', dead' : ''}${(t => t.length ? `; ${t.join(', ')}` : '')(tags(room, r))}`),
+          p?.data.pos ? `you (${p.data.pos.map(v => v.toFixed(2)).join(', ')}) ${p.data.grounded ? 'on the ground' : 'in the air'}` : '',
           ...visitors().map(v => `${v.id === picked.id ? '> ' : ''}visitor ${v.id} ${v.data.body}: ${v.data.speed > 0 ? `going to ${where(v)}, ${left(v)} places left` : `standing at ${where(v)}`} at y ${bodies.crowd3d.where(v, time())[1].toFixed(2)}, switched courses ${switches.get(v.id) ?? 0}`),
           ...errors,
         ].join('\n')

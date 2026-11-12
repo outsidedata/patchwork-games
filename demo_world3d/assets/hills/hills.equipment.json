@@ -1,9 +1,0 @@
-{
-  "equipment": {
-    "rustySword": { "abilitySets": ["rustySword"] },
-    "ironSword": { "abilitySets": ["ironSword"] },
-    "barrowBlade": { "abilitySets": ["barrowBlade"] },
-    "apprenticeWand": { "abilitySets": ["apprenticeWand"] },
-    "leatherJerkin": { "abilitySets": ["leatherJerkin"] }
-  }
-}

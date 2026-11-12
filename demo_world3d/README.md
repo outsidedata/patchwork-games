@@ -16,7 +16,7 @@ The town is world3d's (`plugins/world3d`): the scene names its place, `world.wor
 world3d reads the files pro-ng's build writes for it and nothing else of it: it draws the town's geometry and plays
 its moving things' clips, and hands what a body walks on to shapes3d, its ways to nav3d, its looks and course table to
 supershader3d, and its hollows, a box round each building standing at elevation 0, to lod3d, which draws no grass,
-trees or stones in them. The game adds its player, its visitors and its torches.
+trees or stones in them. The game adds its player and its visitors.
 
 ## Playing
 
@@ -35,12 +35,10 @@ the stone stairs to the walls) and onto every roof that is stood on.
 
 `dev.html` is the testbed: `?graphs=1` draws the town's graph, the panel puts you on any of its places, and the readout
 shows where you stand and where each visitor is going, and lights3d's lights and the still and moving shadow tiles it
-drew this frame. Its `lights` folder starts main cut down, to be built back a piece at a time: one torch (`?torches=n`,
-`all` every one), one visitor (`?people=n`, `all`), no fog (`?fog=1` keeps it); `?atlas=` and `?tile=` set the shadow
-atlases' size, `?torchshadow=0` takes the torch's shadow off and `?lights3d=0` takes lights3d out. Live, it sets the
-torch lamp's intensity, reach, decay, flicker and shadow, the carried light on and off, the exposure, the fog's
-numbers, and the castle drawn in one flat grey material in place of its relief looks; "copy lights JSON" copies the
-lamp and the fog for the files.
+drew this frame. Its `lights` folder starts main cut down, to be built back a piece at a time: one visitor
+(`?people=n`, `all` every one), no fog (`?fog=1` keeps it); `?atlas=` and `?tile=` set the shadow atlases' size and
+`?lights3d=0` takes lights3d out. Live, it sets the carried light on and off, the exposure, the fog's numbers, and the
+castle drawn in one flat grey material in place of its relief looks; "copy lights JSON" copies the fog for the files.
 
 `dev.html?scene=village` is the village: stronghold's village solver run once, compiled into the library's pro-ng
 scene `pro-ng/scenes/village/village.art.json` and its metadata, and baked the way the town is, its files in
@@ -83,10 +81,7 @@ walks its curve, as crowd3d walks a spline a straight piece at a time.
   light that casts shadows (lights3d's where the scene lists it, three's own where it does not), both moved onto the hand each frame by your look (`player.client.ts`) as your definition's
   `carry` says; the stick casts no shadow (`propsCast`).
 - **The sky** (main): skydome3d, its clock held at the hour the scene's prefab gives, no weather.
-- **The town's lights** (main, `torch.sim.ts`, `torch.client.ts`): twenty wall torches, at the gate, along the lane,
-  round the square and up on the towers, each a `torch` actor whose look plays particle3d's `walltorch` effect
-  (`assets/effects.json`): a flickering, shadowed lamp and the `handfire` flames. lights3d lights them, the light you
-  carry and the fog (`world.lights3d`). Every shadow of what never moves (the town) is drawn once into lights3d's
+- **The town's lights** (main): lights3d lights the light you carry and the fog (`world.lights3d`). Every shadow of what never moves (the town) is drawn once into lights3d's
   still atlas; what anim and crowd3d move, your body and the visitors, is drawn each frame into its moving atlas. The
   light you carry moves with you, so its shadow of the town stays as it was first drawn.
 - **The ways** (`assets/smallville.town.nav.json`, which world3d hands nav3d as the graph `place`): nav3d's graph, made of shapes3d's shapes, written by pro-ng's
@@ -100,7 +95,7 @@ walks its curve, as crowd3d walks a spline a straight piece at a time.
   it has, then rolls any other place of the graph, walks there along nav3d's route at a steady walk, each leg at the graph's heights so it climbs every stair,
   and stands a while. crowd3d draws every one of them, in the town and on the bridge, as the one Mixamo body,
   castle_woman. They walk through each other, and through you.
-- **The place's people** (`person.sim.ts`): in the village, the tavern and on hills, the people the place's stronghold
+- **The place's people** (`person.sim.ts`): in the village and the tavern, the people the place's stronghold
   solvers placed, spawned by world3d from the place's crowd file (the library's `stronghold/NAV.md`): the tavern's
   drinkers and barmaid, the smithy's smith, the village's old women, one of them limping. Each is an npc3d NPC on
   crowd3d's body, on world3d's `loiter` (parked at a landmark, a loiter verb of its activities) and `transfer` (on to

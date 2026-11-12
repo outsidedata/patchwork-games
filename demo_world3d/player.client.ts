@@ -1,5 +1,4 @@
-// One seat's `player` row (`player.sim.ts`; in the hills, hero's X Bot, `plugins/hero/hero.sim.ts`, drawn by
-// motion3d and its keys bound by hero's `bind`, the rest of this file passed over). anim draws the body, every seat's. For the
+// One seat's `player` row (`player.sim.ts`). anim draws the body, every seat's. For the
 // seat's own row, the one that is `mine`, its keys and mouse, and the camera, which chasecamera3d holds on
 // the row. Every key is the player's definition's `keys`, each naming the act of its name: the stick
 // (left, right, forward and back), `slow` held and `jump`. The mouse dragged with `drag` held sends `look`
@@ -28,7 +27,6 @@ import type { Plugins } from '#engine/browser.ts'
 import type { Binds, Input } from '#plugins/player/player.plugin.ts'
 import type { Effect } from '#plugins/particle3d/particle3d.plugin.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
-import { bind as hero } from './plugins/hero/hero.plugin.ts'
 
 let ours = false
 // what each row carries, by its id: its effect, and its light on the render3d scene it was put on
@@ -52,8 +50,6 @@ export function setup(row: Row, plugins: Plugins) {
   stop(row.id)
   ours = row.data.mine === true
   if (!ours) return
-  // the hills' X Bot hero: its keys are hero's (`plugins/hero/hero.plugin.ts`)
-  if (plugins.motion3d) return hero(row, plugins)
   const k = def(plugins.wire, row.kind)
   // chasecamera3d looks along (sin yaw, cos yaw), so a larger yaw turns the view left: right on the
   // mouse is less yaw. A larger pitch lifts the camera over the row and looks down.
@@ -74,8 +70,6 @@ const drop = (plugins: Plugins) => {
 }
 
 export function tick(row: Row, plugins: Plugins) {
-  // the hills' X Bot hero carries no prop and no fire
-  if (plugins.motion3d) return
   // whether the props anim hangs on the body cast shadows: every mesh of each, every frame, since anim
   // makes a prop again, casting, when its numbers change
   const cast: boolean = def(plugins.wire, row.kind).propsCast

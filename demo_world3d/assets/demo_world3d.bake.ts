@@ -58,14 +58,6 @@
 //                 (`plugins/anim/anim.export.py`). crowd3d plays idle, walk and run; anim plays by the table
 //                 the export measures on castle_walker, the rig's first body, written back into the rig in
 //                 the rig's own layout (`.claude/skills/using-mixamo-assets/scripts/merge-table.mjs`).
-//   xbot.glb, xbot.rig.baked.json, xbot.motion3d.baked.json
-//                 the hills' hero, as demo_motion3d bakes it: Mixamo's X Bot with every clip of `xbot.rig.json`,
-//                 the rig's measures, and each clip's offsets from `xbot.motion3d.json` (`motion3d.offsets.ts`)
-//   zombie.glb, zombie_man.glb
-//                 the hills' mobs' bodies, the library's `characters/zombie` and `characters/zombie_man`, each with every
-//                 clip of `zombie.rig.json` (the Scary
-//                 Zombie pack's idle, walk, run, death and attack, the Not So Scary pack's hit reaction) baked onto it by
-//                 anim's export, its table written back into the rig
 // The rig's clips are read from ~/troupe-collection, its bodies from the paths its `bodies` give.
 import fs from 'node:fs'
 import path from 'node:path'
@@ -75,7 +67,6 @@ import type { Looks, Tools } from '#scripts/bake.ts'
 import { packLooks } from '#scripts/pack-looks.ts'
 import { PARTS } from '#plugins/world3d/world3d.sim.ts'
 import player from './player.rig.json' with { type: 'json' }
-import { create_overrides } from '../plugins/mmo3d/create_overrides.ts'
 
 const here = import.meta.dirname
 const root = path.join(here, '..', '..', '..')
@@ -96,13 +87,11 @@ const PLACES: { pro?: string; stronghold?: string; folder: string; scene: string
   // { pro: 'castle/smallville/smallville.town', folder: '', scene: 'main.scene.json', field: 'demo_world3d.field.json' },
   // { stronghold: 'winterfell/village', folder: 'village', scene: 'village.scene.json', field: 'village/village.field.json' },
   // { stronghold: 'winterfell/tavern', folder: 'tavern', scene: 'tavern.scene.json', field: 'tavern/tavern.field.json' },
-  { stronghold: 'winterfell/village-terrain3d', folder: 'hills', scene: 'hills.scene.json', field: 'hills/hills.field.json', at: [0, 0], overrides: 'hills/hills.overrides.json' },
 ]
 // what pro-ng's build writes for a scene, each `<name><suffix>`
 const MADE = ['.glb', '.looks.json', '.clips.json', '.shapes3d.json', '.nav.json', '.terrain3d_layers.json', '.hollows.json', '.effects.json', '.crowd.json']
 
 export default async ({ blender, scratch, library }: Tools) => {
-  fs.writeFileSync(path.join(here, 'hills/hills.overrides.json'), JSON.stringify(create_overrides(JSON.parse(fs.readFileSync(path.join(here, 'hills/hills.mmo3d.json'), 'utf8'))), null, 2) + '\n')
   // each place made into every file a game boots from by the library's pro-ng (`pro-ng/build.mjs`), on core's Blender
   const { build } = await import(pathToFileURL(path.join(library, 'pro-ng', 'build.mjs')).href)
   for (const place of PLACES) {
@@ -195,28 +184,4 @@ export default async ({ blender, scratch, library }: Tools) => {
   for (const body of Object.keys(player.bodies)) console.log('wrote', path.relative(root, path.join(here, `${body}.glb`)))
   execFileSync(process.execPath, [merge, file, table, file], { stdio: 'inherit' })
   console.log('wrote', path.relative(root, file), 'its table')
-
-  // the hills' hero, copied from demo_motion3d's bake: Mixamo's X Bot with every clip of `xbot.rig.json` baked onto
-  // it, the rig's measures, and each clip's offsets from `xbot.motion3d.json`
-  const xrig = path.join(here, 'xbot.rig.json'), xtable = scratch('xbot.table.json'), xglb = path.join(here, 'xbot.glb')
-  await blender(['--factory-startup', '--python-exit-code', '1', '--python', exporter, '--', xrig, xtable, `xbot=${xglb}`])
-  console.log('wrote', path.relative(root, xglb))
-  const xmerged = scratch('xbot.merged.json')
-  execFileSync(process.execPath, [merge, xrig, xtable, xmerged], { stdio: 'inherit' })
-  const { table: measured, ends, grips, touches } = JSON.parse(fs.readFileSync(xmerged, 'utf8'))
-  const xbaked = path.join(here, 'xbot.rig.baked.json')
-  fs.writeFileSync(xbaked, JSON.stringify({ table: measured, ends, grips, touches }) + '\n')
-  console.log('wrote', path.relative(root, xbaked))
-  execFileSync(process.execPath, ['--experimental-strip-types', path.join(root, 'plugins', 'motion3d', 'motion3d.offsets.ts'), xrig, path.join(here, 'xbot.motion3d.json')], { stdio: 'inherit' })
-
-  // the hills' mobs: the library's `characters/zombie/zombie.fbx` and `characters/zombie_man/zombie_man.fbx` with every
-  // clip of `zombie.rig.json` baked onto each by anim's export, and the table, measured on the first, written back into
-  // the rig
-  const zrig = path.join(here, 'zombie.rig.json'), ztable = scratch('zombie.table.json'), zglb = path.join(here, 'zombie.glb')
-  const zmglb = path.join(here, 'zombie_man.glb')
-  await blender(['--factory-startup', '--python-exit-code', '1', '--python', exporter, '--', zrig, ztable, `zombie=${zglb}`, `zombie_man=${zmglb}`])
-  console.log('wrote', path.relative(root, zglb))
-  console.log('wrote', path.relative(root, zmglb))
-  execFileSync(process.execPath, [merge, zrig, ztable, zrig], { stdio: 'inherit' })
-  console.log('wrote', path.relative(root, zrig), 'its table')
 }
