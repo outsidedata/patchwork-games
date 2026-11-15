@@ -12,7 +12,7 @@
       { "n": [8, 10], "life": [0.35, 0.55], "size": [0, 0], "speed": [5, 8], "drag": 3, "carry": "plasma-arc" },
       { "n": [24, 32], "life": [0.6, 1.2], "shape": "glow", "size": [0.4, 0.8], "grow": 0.3, "speed": [3, 6], "drag": 3, "swirl": -2, "tint": 9093375, "tint1": 3346943, "gain": 3, "a1": 0, "add": true },
       { "n": [40, 60], "after": 0.1, "life": [1.5, 2.6], "shape": "spark", "size": [0.04, 0.08], "speed": [1, 4], "drag": 1.2, "g": -0.4, "swirl": 1, "tint": 13697023, "tint1": 5592575, "gain": 4, "a1": 0, "fade": 0.6, "add": true },
-      { "n": [10, 14], "after": 0.06, "life": [1.6, 2.4], "shape": "puff2", "size": [0.7, 1.1], "grow": 2.6, "speed": [1, 2.5], "drag": 2, "g": -0.5, "tint": 3812472, "tint1": 1712425, "a0": 0.5, "a1": 0, "spin": 0.6 }
+      { "n": [10, 14], "after": 0.06, "life": [1.6, 2.4], "sheet": "smoke", "clip": "billow", "start": [0, 0.2], "blend": true, "channels": { "value": [0.55, 0.45, 0, 0], "alpha": [0, 0, 0, 1], "hot": [0, 0, 0, 0] }, "erode": [[0, 0], [0.5, 0.15], [1, 0.75]], "size": [0.7, 1.1], "grow": 2.6, "speed": [1, 2.5], "drag": 2, "g": -0.5, "tint": 3812472, "tint1": 1712425, "a0": 0.5, "a1": 0, "spin": 0.6 }
     ],
     "plasma-arc": [
       { "n": [1, 1], "every": 0.05, "life": [0.03, 0.06], "shape": "bolt", "beam": true, "size": [0.15, 0.3], "tint": 13959167, "gain": 3, "a1": 0.3, "add": true },

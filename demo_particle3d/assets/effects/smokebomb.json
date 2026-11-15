@@ -6,7 +6,7 @@
         "n": [2, 3],
         "every": 0.03,
         "life": [1.5, 2.5],
-        "shape": "puff",
+        "sheet": "smoke", "clip": "billow", "start": [0, 0.2], "blend": true, "channels": { "value": [0.55, 0.45, 0, 0], "alpha": [0, 0, 0, 1], "hot": [0, 0, 0, 0] }, "erode": [[0, 0], [0.5, 0.15], [1, 0.75]],
         "size": [0.3, 0.5],
         "grow": 5,
         "speed": [0.3, 0.8],
@@ -86,7 +86,7 @@
       {
         "n": [16, 22],
         "life": [0.45, 0.85],
-        "shape": "puff",
+        "sheet": "fireball", "clip": "bloom", "blend": true, "channels": { "value": [1, 0, 0, 0], "alpha": [1, 0, 0, 0], "hot": [0.6, 0, 0, 0] },
         "size": [0.9, 1.5],
         "grow": 2.6,
         "speed": [2, 5.5],
@@ -104,7 +104,7 @@
         "n": [12, 16],
         "after": 0.08,
         "life": [1.2, 1.9],
-        "shape": "puff2",
+        "sheet": "smoke", "clip": "billow", "start": [0, 0.2], "blend": true, "channels": { "value": [0.55, 0.45, 0, 0], "alpha": [0, 0, 0, 1], "hot": [0, 0, 0, 0] }, "erode": [[0, 0], [0.5, 0.15], [1, 0.75]],
         "size": [1, 1.6],
         "grow": 2.8,
         "speed": [1.5, 4],
@@ -190,7 +190,7 @@
         "n": [30, 40],
         "after": 0.25,
         "life": [4, 6.5],
-        "shape": "puff2",
+        "sheet": "smoke", "clip": "billow", "start": [0, 0.2], "blend": true, "channels": { "value": [0.55, 0.45, 0, 0], "alpha": [0, 0, 0, 1], "hot": [0, 0, 0, 0] }, "erode": [[0, 0], [0.5, 0.15], [1, 0.75]],
         "size": [1.2, 2.1],
         "grow": 2.6,
         "speed": [0.5, 2],
@@ -209,7 +209,7 @@
         "n": [26, 34],
         "after": 0.04,
         "life": [2, 3.5],
-        "shape": "puff",
+        "sheet": "smoke", "clip": "billow", "start": [0, 0.2], "blend": true, "channels": { "value": [0.55, 0.45, 0, 0], "alpha": [0, 0, 0, 1], "hot": [0, 0, 0, 0] }, "erode": [[0, 0], [0.5, 0.15], [1, 0.75]],
         "size": [0.8, 1.3],
         "grow": 3.2,
         "speed": [5, 9],
@@ -244,12 +244,12 @@
       }
     ],
     "flamingdebris": [
-      { "n": [1, 2], "every": 0.015, "life": [0.25, 0.45], "shape": "puff", "size": [0.3, 0.45], "grow": 0.4, "speed": [0, 0.3], "tint": 16761952, "tint1": 16723968, "gain": 3.5, "a1": 0, "spin": 2, "add": true },
-      { "n": [1, 1], "every": 0.025, "life": [1.2, 2], "shape": "puff", "size": [0.25, 0.35], "grow": 5, "speed": [0, 0.3], "g": -0.6, "drag": 1, "tint": 6972512, "tint1": 3355443, "a0": 0.6, "a1": 0, "spin": 1 },
+      { "n": [1, 2], "every": 0.015, "life": [0.25, 0.45], "sheet": "fireball", "clip": "bloom", "blend": true, "channels": { "value": [1, 0, 0, 0], "alpha": [1, 0, 0, 0], "hot": [0.6, 0, 0, 0] }, "size": [0.3, 0.45], "grow": 0.4, "speed": [0, 0.3], "tint": 16761952, "tint1": 16723968, "gain": 3.5, "a1": 0, "spin": 2, "add": true },
+      { "n": [1, 1], "every": 0.025, "life": [1.2, 2], "sheet": "smoke", "clip": "billow", "start": [0, 0.2], "blend": true, "channels": { "value": [0.55, 0.45, 0, 0], "alpha": [0, 0, 0, 1], "hot": [0, 0, 0, 0] }, "erode": [[0, 0], [0.5, 0.15], [1, 0.75]], "size": [0.25, 0.35], "grow": 5, "speed": [0, 0.3], "g": -0.6, "drag": 1, "tint": 6972512, "tint1": 3355443, "a0": 0.6, "a1": 0, "spin": 1 },
       { "n": [1, 1], "every": 0.08, "life": [0.3, 0.6], "shape": "streak", "stretch": true, "size": [0.15, 0.25], "speed": [1, 3], "g": 9.8, "bounce": 0.4, "tint": 16769162, "tint1": 16729088, "gain": 5, "a1": 0, "add": true }
     ],
     "chunktrail": [
-      { "n": [1, 2], "every": 0.02, "life": [0.8, 1.4], "shape": "puff", "size": [0.25, 0.4], "grow": 4, "speed": [0, 0.3], "g": -0.5, "drag": 1, "tint": 10066329, "tint1": 4473924, "a0": 0.7, "a1": 0, "spin": 1 },
+      { "n": [1, 2], "every": 0.02, "life": [0.8, 1.4], "sheet": "smoke", "clip": "billow", "start": [0, 0.2], "blend": true, "channels": { "value": [0.55, 0.45, 0, 0], "alpha": [0, 0, 0, 1], "hot": [0, 0, 0, 0] }, "erode": [[0, 0], [0.5, 0.15], [1, 0.75]], "size": [0.25, 0.4], "grow": 4, "speed": [0, 0.3], "g": -0.5, "drag": 1, "tint": 10066329, "tint1": 4473924, "a0": 0.7, "a1": 0, "spin": 1 },
       { "n": [1, 1], "every": 0.04, "life": [0.2, 0.4], "shape": "streak", "stretch": true, "size": [0.2, 0.3], "speed": [0.5, 1.5], "g": 6, "tint": 16764006, "tint1": 16729088, "gain": 4, "a1": 0, "add": true }
     ]
   }

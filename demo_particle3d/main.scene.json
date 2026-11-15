@@ -9,7 +9,21 @@
         "effects": { "type": "json", "url": "/games/demo_particle3d/assets/effects.json", "preload": true },
         "checker": { "type": "texture", "url": "/games/demo_particle3d/assets/checker-1024.webp", "preload": true, "wrap": "repeat", "anisotropy": 8 },
         "xbot-rig": { "type": "json", "url": "/games/demo_particle3d/assets/xbot.rig.json", "preload": true },
-        "xbot": { "type": "model", "url": "/games/demo_particle3d/assets/xbot.glb", "preload": true }
+        "xbot": { "type": "model", "url": "/games/demo_particle3d/assets/xbot.glb", "preload": true },
+        "smoke": { "type": "sheet", "url": "/games/demo_particle3d/assets/effects/smoke/smoke.json", "preload": true },
+        "embers": { "type": "sheet", "url": "/games/demo_particle3d/assets/effects/embers/embers.json", "preload": true },
+        "tongues": { "type": "sheet", "url": "/games/demo_particle3d/assets/effects/campfire/tongues.json", "preload": true },
+        "coals": { "type": "sheet", "url": "/games/demo_particle3d/assets/effects/campfire/coals.json", "preload": true },
+        "flame": { "type": "sheet", "url": "/games/demo_particle3d/assets/effects/flame/flame.json", "preload": true },
+        "column": { "type": "sheet", "url": "/games/demo_particle3d/assets/effects/column/column.json", "preload": true },
+        "fireball": { "type": "sheet", "url": "/games/demo_particle3d/assets/effects/fireball/fireball.json", "preload": true },
+        "shockwave": { "type": "sheet", "url": "/games/demo_particle3d/assets/effects/shockwave/shockwave.json", "preload": true },
+        "swirl": { "type": "sheet", "url": "/games/demo_particle3d/assets/effects/swirl/swirl.json", "preload": true },
+        "steam": { "type": "sheet", "url": "/games/demo_particle3d/assets/effects/steam/steam.json", "preload": true },
+        "dust": { "type": "sheet", "url": "/games/demo_particle3d/assets/effects/dust/dust.json", "preload": true },
+        "splash": { "type": "sheet", "url": "/games/demo_particle3d/assets/effects/splash/splash.json", "preload": true },
+        "bolt": { "type": "sheet", "url": "/games/demo_particle3d/assets/effects/bolt/bolt.json", "preload": true },
+        "arc": { "type": "sheet", "url": "/games/demo_particle3d/assets/effects/arc/arc.json", "preload": true }
       }
     },
     "shapes3d": {
@@ -111,6 +125,19 @@
     { "is": "pad", "pos": [-3, 0, -6], "plays": "smoke" },
     { "is": "pad", "pos": [3, 0, -3], "plays": "flares" },
     { "is": "pad", "pos": [0, 0, -3], "plays": "portal" },
-    { "is": "pad", "pos": [-3, 0, -3], "plays": "firework" }
+    { "is": "pad", "pos": [-3, 0, -3], "plays": "firework" },
+    { "is": "pad", "pos": [6, 0, -15], "plays": "bolt" },
+    { "is": "pad", "pos": [3, 0, -15], "plays": "arc" },
+    { "is": "pad", "pos": [0, 0, -15], "plays": "fireball" },
+    { "is": "pad", "pos": [-3, 0, -15], "plays": "shockwave" },
+    { "is": "pad", "pos": [-6, 0, -15], "plays": "dust" },
+    { "is": "pad", "pos": [6, 0, -12], "plays": "campfire" },
+    { "is": "pad", "pos": [6, 0, -9], "plays": "flame" },
+    { "is": "pad", "pos": [6, 0, -6], "plays": "embers" },
+    { "is": "pad", "pos": [6, 0, -3], "plays": "column" },
+    { "is": "pad", "pos": [-6, 0, -12], "plays": "billow" },
+    { "is": "pad", "pos": [-6, 0, -9], "plays": "steam" },
+    { "is": "pad", "pos": [-6, 0, -6], "plays": "swirl" },
+    { "is": "pad", "pos": [-6, 0, -3], "plays": "splash" }
   ]
 }

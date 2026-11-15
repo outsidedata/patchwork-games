@@ -7,8 +7,12 @@
 //                        `xbot.rig.json` baked onto it by anim's export (`plugins/anim/anim.export.py`),
 //                        which packs it with gltfpack; the rig's measured `table` and `ends` are then
 //                        written back into `xbot.rig.json` by the mixamo skill's `merge-table.mjs`
-// The effects are data files written by hand (`effects.json`, and the files under `effects/` it lists),
-// drawn with particle3d's own shapes, so nothing is baked for them.
+//   effects/<name>/      each flipbook effect's sheets: `flipbooks` renders every flipbook its
+//                        `<name>Config.json` lists, from the node tree the entry writes out, into the
+//                        pictures (`.png`) and sheets (`.json`) beside it (`tools/workshop/flipbooks.py`
+//                        says what an entry holds), in Blender, reading nothing from the library
+// The other effects are data files written by hand (`effects.json`, and the files under `effects/` it
+// lists), drawn with particle3d's own shapes, so nothing is baked for them.
 import { execFile } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -17,6 +21,9 @@ import type { Tools } from '#scripts/bake.ts'
 
 const here = import.meta.dirname
 const root = path.join(here, '..', '..', '..')
+
+// The flipbook effects, each `effects/<name>/<name>Config.json`.
+const FLIPBOOKS = ['smoke', 'embers', 'campfire', 'flame', 'column', 'fireball', 'shockwave', 'swirl', 'steam', 'dust', 'splash', 'bolt', 'arc']
 
 const SIZE = 1024
 const CHECKER = { squares: 2, light: 0xd8, dark: 0x9c, rim: 0x80, line: 3 }
@@ -60,7 +67,10 @@ function png(size: number, grey: (x: number, y: number) => number): Buffer {
   ])
 }
 
-export default async ({ blender, webp, scratch }: Tools) => {
+export default async ({ blender, webp, flipbooks, scratch }: Tools) => {
+  // the flipbooks
+  for (const name of FLIPBOOKS) console.log(await flipbooks(path.join(here, 'effects', name, `${name}Config.json`)))
+
   // the checkerboard
   const cell = SIZE / CHECKER.squares
   const raw = scratch('checker.png')

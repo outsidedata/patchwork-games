@@ -27,9 +27,22 @@
       "plasma": { "effect": "plasma", "lift": [0, 1.2, 0], "again": 3 },
       "explosion": { "effect": "explosion", "lift": [0, 1.2, 0], "again": 4 },
       "portal": { "effect": "portal2", "lift": [0, 1.4, 0], "stream": true },
-      "mushroom": { "effect": "mushroom", "lift": [0, 1.2, 0], "again": 7 },
-      "implosion": { "effect": "implosion", "lift": [0, 1.2, 0], "again": 4 },
-      "firework": { "effect": "firework", "lift": [0, 1.2, 0], "again": 3 }
+      "mushroom": { "effect": "mushroom", "lift": [0, 0, 0], "again": 7 },
+      "implosion": { "effect": "implosion", "lift": [0, 2.6, 0], "again": 3.5 },
+      "firework": { "effect": "firework", "lift": [0, 1.2, 0], "again": 3 },
+      "campfire": { "effect": "campfire", "stream": true },
+      "flame": { "effect": "flame", "stream": true },
+      "embers": { "effect": "embers", "stream": true },
+      "column": { "effect": "column", "stream": true },
+      "billow": { "effect": "billow", "stream": true },
+      "steam": { "effect": "steam", "stream": true },
+      "swirl": { "effect": "swirl", "stream": true },
+      "splash": { "effect": "splash", "again": 3 },
+      "bolt": { "effect": "bolt", "lift": [0, 4.5, 0], "to": [0, 0, 0], "again": 2 },
+      "arc": { "effect": "crackle", "lift": [-1, 1, 0], "to": [1, 1, 0], "stream": true },
+      "fireball": { "effect": "fireball", "again": 4 },
+      "shockwave": { "effect": "shockwave", "again": 3 },
+      "dust": { "effect": "dust", "again": 3 }
     }
   }
 }

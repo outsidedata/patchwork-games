@@ -10,7 +10,8 @@
 // `leave` metres past the square's edge, so a body on the edge does not step on and off every step. The
 // tiles of the grid lie further apart than `leave`, so a body stands on one at most. What it plays is its
 // entry of `plays`: `effect`, the effect of the scene's effects file; `lift`, [x, y, z] metres off the
-// scene's `stage` it is thrown from, the stage itself when left out; and one of:
+// scene's `stage` it is thrown from, the stage itself when left out; `to`, [x, y, z] metres off the
+// stage where a beam of it ends (particle3d's `to`), left out for an effect with no beam; and one of:
 //   stream   the effect runs while a body stands on the pad: it is emitted the step one steps on, and
 //            each step after its `life` is kept `hold` seconds past its age, so it stops `hold` seconds
 //            after the body steps off and every page sees it through.
@@ -23,7 +24,7 @@ import type { Kind, Row, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import { emit, entry } from '#plugins/particle3d/particle3d.sim.ts'
 
-type Play = { effect: string; lift?: number[]; stream?: boolean; again?: number }
+type Play = { effect: string; lift?: number[]; to?: number[]; stream?: boolean; again?: number }
 
 // Whether a `player` row's feet are within `r` metres of the pad's middle along x and along z.
 const within = (me: Row, w: W, r: number) =>
@@ -35,7 +36,8 @@ function play(me: Row, w: W, it: Play, life: number) {
   const stage = w.find('stage').data.pos
   const at = [0, 1, 2].map(i => stage[i] + lift[i])
   me.data.t = 0
-  return emit(w, it.effect, at, { life, dir: [0, 1, 0], floor: 0 })
+  const to = it.to?.map((v, i) => stage[i] + v)
+  return emit(w, it.effect, at, { life, dir: [0, 1, 0], to, floor: 0 })
 }
 
 export const pad: Kind = {
