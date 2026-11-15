@@ -1,6 +1,7 @@
-// demo_particle3d: the manager booted as its page boots it and main loaded; a seat joins, walks its X Bot
-// from its start onto a pad that plays a stream, the pad's effect is on particle3d's ledger at the pad
-// while the body stands there, and it stops once the body walks off.
+// demo_particle3d: the manager booted as its page boots it and main loaded; a seat joins and its X Bot
+// lands on the tile under its start, which lights and throws its effect at the stage at once. It walks
+// onto a tile that plays a stream, the effect is on particle3d's ledger at the stage while the body
+// stands there, and it stops once the body walks off.
 import { expect, test } from 'vitest'
 import { boot, type Row, type Scene } from '#engine/engine.ts'
 import { connection, load, manager, type Down } from '#addons/scenemanager/scenemanager.addon.ts'
@@ -9,18 +10,36 @@ import file from './demo_particle3d.scene.json' with { type: 'json' }
 import defs from './assets/demo_particle3d.json' with { type: 'json' }
 
 const DT = file.prefabs.engine.dt
+const plays = defs.pad.plays as Record<string, { effect: string; lift?: number[]; stream?: boolean }>
 
-test('a seat walks onto a stream pad, its effect plays there, and stops when the seat walks off', async () => {
+async function joined() {
   const truth = boot(file as Scene, sim)
   const room = (await load(truth, import.meta.url)).get('main')!
   const heard: Down[] = []
   const seat = connection(manager(truth), d => heard.push(d))
   truth.step(DT)
   const body = () => room.rows.find(r => r.kind === 'player')!.data
-  const plays = defs.pad.plays as Record<string, { effect: string; stream?: boolean }>
-  const pad = room.rows.find(r => r.kind === 'pad' && plays[r.data.plays].stream)! as Row
+  const pads = room.rows.filter(r => r.kind === 'pad') as Row[]
+  const stage = room.rows.find(r => r.kind === 'stage')!.data.pos as number[]
   const ledger = () => room.rows.find(r => r.kind === 'particle3d')!.data.live as { id: number; effect: string; at: number[]; age: number; life: number }[]
+  // Where a pad's entry is thrown from: the stage, its `lift` over it.
+  const thrown = (pad: Row) => stage.map((v, i) => v + (plays[pad.data.plays].lift ?? [0, 0, 0])[i])
+  return { truth, room, heard, seat, body, pads, ledger, thrown }
+}
 
+test('the seat lands on a tile that lights and throws its effect at the stage', async () => {
+  const { truth, body, pads, ledger, thrown } = await joined()
+  truth.step(DT)
+  const under = pads.find(p => p.data.on)!
+  expect(Math.abs(under.data.pos[0] - body().pos[0])).toBeLessThanOrEqual(defs.pad.size / 2)
+  expect(Math.abs(under.data.pos[2] - body().pos[2])).toBeLessThanOrEqual(defs.pad.size / 2)
+  const playing = ledger().find(e => e.effect === plays[under.data.plays].effect)!
+  expect(playing.at).toEqual(thrown(under))
+})
+
+test('a seat walks onto a stream tile, its effect plays at the stage, and stops when the seat walks off', async () => {
+  const { truth, heard, seat, body, pads, ledger, thrown } = await joined()
+  const pad = pads.find(r => plays[r.data.plays].stream)!
   const last = heard[heard.length - 1]
   const me = last.packet.rows.find(r => r.kind === 'player')!
   let seq = 0
@@ -38,7 +57,7 @@ test('a seat walks onto a stream pad, its effect plays there, and stops when the
   send('stick', [0, 0])
   for (let i = 0; i < 60; i++) truth.step(DT)
   const playing = ledger().find(e => e.effect === plays[pad.data.plays].effect)!
-  expect(playing.at).toEqual(pad.data.pos)
+  expect(playing.at).toEqual(thrown(pad))
   expect(playing.life).toBeGreaterThan(playing.age)
 
   toward(pad.data.pos[0], pad.data.pos[2] - 5)

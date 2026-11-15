@@ -13,23 +13,23 @@
     "camera": { "minPitch": -0.5, "maxPitch": 1.4, "minDist": 2, "maxDist": 40, "zoom": 0.0015, "turn": 2.6, "tilt": 1.6, "step": 120 }
   },
   "pad": {
-    "radius": 1.3,
-    "leave": 1.6,
+    "size": 2,
+    "leave": 0.15,
     "hold": 0.4,
-    "disc": { "segments": 64, "lift": 0.012, "rim": 0.14, "roughness": 0.6, "glow": { "off": [0.05, 0.12], "on": [0.25, 0.45] } },
+    "tile": { "lift": 0.012, "roughness": 0.7, "colour": "#336699", "opacity": 0.5, "lit": "#e4e8ee", "glow": { "off": 0, "on": 0.3 } },
     "plays": {
-      "torch": { "effect": "torch", "colour": "#ff9a3c", "stream": true },
-      "sparks": { "effect": "sparks", "colour": "#ffd27a", "stream": true },
-      "smoke": { "effect": "smoke", "colour": "#a6adb6", "stream": true },
-      "flares": { "effect": "flares", "colour": "#ff6fd0", "lift": [0, 1.2, 0], "again": 5 },
-      "blast": { "effect": "blast", "colour": "#ff5a2a", "lift": [0, 1.2, 0], "again": 4 },
-      "grenade": { "effect": "grenade", "colour": "#8fbf4a", "lift": [0, 1.2, 0], "again": 3 },
-      "plasma": { "effect": "plasma", "colour": "#4ab8ff", "lift": [0, 1.2, 0], "again": 3 },
-      "explosion": { "effect": "explosion", "colour": "#e8483a", "lift": [0, 1.2, 0], "again": 4 },
-      "portal": { "effect": "portal2", "colour": "#7a5cff", "lift": [0, 1.4, 0], "stream": true },
-      "mushroom": { "effect": "mushroom", "colour": "#ffb347", "lift": [0, 1.2, 0], "again": 7 },
-      "implosion": { "effect": "implosion", "colour": "#b47aff", "lift": [0, 1.2, 0], "again": 4 },
-      "firework": { "effect": "firework", "colour": "#ff4a8f", "lift": [0, 1.2, 0], "again": 3 }
+      "torch": { "effect": "torch", "stream": true },
+      "sparks": { "effect": "sparks", "stream": true },
+      "smoke": { "effect": "smoke", "stream": true },
+      "flares": { "effect": "flares", "lift": [0, 1.2, 0], "again": 5 },
+      "blast": { "effect": "blast", "lift": [0, 1.2, 0], "again": 4 },
+      "grenade": { "effect": "grenade", "lift": [0, 1.2, 0], "again": 3 },
+      "plasma": { "effect": "plasma", "lift": [0, 1.2, 0], "again": 3 },
+      "explosion": { "effect": "explosion", "lift": [0, 1.2, 0], "again": 4 },
+      "portal": { "effect": "portal2", "lift": [0, 1.4, 0], "stream": true },
+      "mushroom": { "effect": "mushroom", "lift": [0, 1.2, 0], "again": 7 },
+      "implosion": { "effect": "implosion", "lift": [0, 1.2, 0], "again": 4 },
+      "firework": { "effect": "firework", "lift": [0, 1.2, 0], "again": 3 }
     }
   }
 }

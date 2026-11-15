@@ -80,12 +80,13 @@
       "jump": false,
       "stick": [0, 0],
       "turning": [0, 0],
-      "look": { "yaw": 0, "pitch": 0.45, "dist": 10 },
+      "look": { "yaw": 0, "pitch": 0.15, "dist": 5 },
       "lift": 1.4,
       "rig": "stand"
     },
     "floor": { "pos": [0, 0, 0], "yaw": 0 },
     "wall": { "pos": [0, 0, 0], "yaw": 0 },
+    "stage": { "pos": [0, 0, 0] },
     "pad": { "pos": [0, 0, 0], "plays": "", "on": false, "t": 0, "fx": 0 }
   },
   "actors": [
@@ -98,17 +99,18 @@
     { "is": "wall", "pos": [24.2, 0, 0], "yaw": 1.5707963267948966 },
     { "is": "wall", "pos": [-24.2, 0, 0], "yaw": 1.5707963267948966 },
     { "is": "start", "slot": 0, "pos": [0, -12], "yaw": 0 },
-    { "is": "pad", "pos": [15, 0, -4], "plays": "torch" },
-    { "is": "pad", "pos": [5, 0, -4], "plays": "sparks" },
-    { "is": "pad", "pos": [-5, 0, -4], "plays": "smoke" },
-    { "is": "pad", "pos": [-15, 0, -4], "plays": "flares" },
-    { "is": "pad", "pos": [15, 0, 6], "plays": "blast" },
-    { "is": "pad", "pos": [5, 0, 6], "plays": "grenade" },
-    { "is": "pad", "pos": [-5, 0, 6], "plays": "plasma" },
-    { "is": "pad", "pos": [-15, 0, 6], "plays": "explosion" },
-    { "is": "pad", "pos": [15, 0, 16], "plays": "portal" },
-    { "is": "pad", "pos": [5, 0, 16], "plays": "mushroom" },
-    { "is": "pad", "pos": [-5, 0, 16], "plays": "implosion" },
-    { "is": "pad", "pos": [-15, 0, 16], "plays": "firework" }
+    { "is": "stage", "pos": [0, 0, 0] },
+    { "is": "pad", "pos": [3, 0, -12], "plays": "explosion" },
+    { "is": "pad", "pos": [0, 0, -12], "plays": "blast" },
+    { "is": "pad", "pos": [-3, 0, -12], "plays": "grenade" },
+    { "is": "pad", "pos": [3, 0, -9], "plays": "plasma" },
+    { "is": "pad", "pos": [0, 0, -9], "plays": "implosion" },
+    { "is": "pad", "pos": [-3, 0, -9], "plays": "mushroom" },
+    { "is": "pad", "pos": [3, 0, -6], "plays": "torch" },
+    { "is": "pad", "pos": [0, 0, -6], "plays": "sparks" },
+    { "is": "pad", "pos": [-3, 0, -6], "plays": "smoke" },
+    { "is": "pad", "pos": [3, 0, -3], "plays": "flares" },
+    { "is": "pad", "pos": [0, 0, -3], "plays": "portal" },
+    { "is": "pad", "pos": [-3, 0, -3], "plays": "firework" }
   ]
 }

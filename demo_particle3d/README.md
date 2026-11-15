@@ -1,11 +1,22 @@
 # demo_particle3d
 
-The demo of the `particle3d` plugin. You run an X Bot round a room with a checkerboard floor, and
-each pad on the floor plays one of particle3d's effects while you stand on it, glowing brighter while
-you're on it. A stream runs for as long as you stand there and stops when you step off; a burst goes
-off as you step on, and again every few seconds while you stay.
+The demo of the `particle3d` plugin. You run an X Bot round a room with a checkerboard floor, across a
+grid of see-through blue tiles, each two squares of the checkerboard a side. Each tile lights up while you stand on it and plays one of particle3d's effects,
+and every effect plays at the same point just past the grid, the scene's `stage`, whichever tile sets
+it off. A stream runs for as long as you stand there and stops when you step off; a burst goes off as
+you step on, and again every few seconds while you stay. You start on the blast's tile, so the blast
+goes off as you land.
 
-| pad | effect | file | plays |
+Looking from the start towards the stage, the grid is, back row first:
+
+| | left | middle | right |
+|---|---|---|---|
+| back | explosion | blast (the start) | grenade |
+| | plasma | implosion | mushroom |
+| | torch | sparks | smoke |
+| front | flares | portal | firework |
+
+| tile | effect | file | plays |
 |---|---|---|---|
 | torch | `torch` | `effects.json` | stream |
 | sparks | `sparks` | `effects.json` | stream, its sparks bouncing off the floor |
@@ -20,15 +31,17 @@ off as you step on, and again every few seconds while you stay.
 | implosion | `implosion` | `effects/implosion.json` | burst every 4 s |
 | firework | `firework` | `effects/firework.json` | burst every 3 s |
 
-The pads are `pad` actors in `main.scene.json`, each naming the entry of the pad's definition
-(`assets/demo_particle3d.json`, `pad.plays`) that it plays: the effect, its colour, how far over the
-pad it is thrown from, and whether it is a stream or a burst thrown again every so many seconds.
+The tiles are `pad` actors in `main.scene.json`, each naming the entry of the pad's definition
+(`assets/demo_particle3d.json`, `pad.plays`) that it plays: the effect, how far over the stage it is
+thrown from, and whether it is a stream or a burst thrown again every so many seconds. The stage is
+the scene's one `stage` actor. The tiles' size, their colour, how far the floor shows through
+them and the colour they light up in are the definition's `size` and `tile`.
 
 The effects are in `assets/effects.json`, which holds the torch, the sparks, the smoke and the flares
 and lists the files under `assets/effects/` for the rest. Every one is drawn with particle3d's own
 shapes. Rocks and chunks are instances3d's meshes, and particles bounce off the floor and the walls,
 which are shapes3d's boxes. The effects under `assets/effects/` were made in the particle workshop (`yarn workshop particles demo_particle3d`), which throws an effect from 1.2 m
-over its floor, so each of their pads throws from 1.2 m over the pad (its entry's `lift`); any of
+over its floor, so each of their tiles throws from 1.2 m over the stage (its entry's `lift`); any of
 them can be tuned there and saved back.
 
 ## Controls

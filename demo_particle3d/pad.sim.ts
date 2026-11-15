@@ -1,35 +1,39 @@
-// A pad on the floor of the room, which plays one of particle3d's effects while a seat's body stands on
-// it. Its row: `pos` [x, y, z], the middle of the pad on the floor; `plays`, the name of the entry of
-// its definition's `plays` it plays; `on`, whether a body stands on it; `t`, the seconds since it last
-// threw its effect; and `fx`, the id of the ledger entry of the stream it holds on, 0 when it holds none.
-// Every number is the pad's definition in `assets/demo_particle3d.json`.
+// A square tile on the floor of the room, one of the grid of them, which plays one of particle3d's
+// effects while a seat's body stands on it. Its row: `pos` [x, y, z], the middle of the tile on the
+// floor; `plays`, the name of the entry of its definition's `plays` it plays; `on`, whether a body
+// stands on it; `t`, the seconds since it last threw its effect; and `fx`, the id of the ledger entry of
+// the stream it holds on, 0 when it holds none. Every number is the pad's definition in
+// `assets/demo_particle3d.json`.
 //
-// Each step it looks for a `player` row standing on it: one whose feet are within `radius` metres of the
-// pad's middle across the floor steps onto it, and one standing on it steps off once it is further than
-// `leave`, so a body on the edge does not step on and off every step. What it plays is its entry of
-// `plays`: `effect`, the effect of the scene's effects file; `lift`, [x, y, z] metres off the pad's
-// middle it is thrown from, the middle itself when left out; and one of:
+// Each step it looks for a `player` row standing on it: one whose feet are within the tile's square,
+// `size` metres a side, steps onto it, and one standing on it steps off once its feet are further than
+// `leave` metres past the square's edge, so a body on the edge does not step on and off every step. The
+// tiles of the grid lie further apart than `leave`, so a body stands on one at most. What it plays is its
+// entry of `plays`: `effect`, the effect of the scene's effects file; `lift`, [x, y, z] metres off the
+// scene's `stage` it is thrown from, the stage itself when left out; and one of:
 //   stream   the effect runs while a body stands on the pad: it is emitted the step one steps on, and
 //            each step after its `life` is kept `hold` seconds past its age, so it stops `hold` seconds
 //            after the body steps off and every page sees it through.
 //   again    the effect is one burst, thrown the step a body steps on, and again every `again` seconds
 //            while it stands there.
-// Every effect is thrown with the floor, y 0, as the height its particles come to rest at.
+// Every pad throws from the one `stage`, so every effect plays at the same point of the room whichever
+// tile of the grid sets it off. Every effect is thrown with the floor, y 0, as the height its particles
+// come to rest at.
 import type { Kind, Row, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import { emit, entry } from '#plugins/particle3d/particle3d.sim.ts'
-import * as math from '#plugins/math/math.sim.ts'
 
-type Play = { effect: string; colour: string; lift?: number[]; stream?: boolean; again?: number }
+type Play = { effect: string; lift?: number[]; stream?: boolean; again?: number }
 
-// Whether a `player` row's feet are within `r` metres of the pad's middle across the floor.
+// Whether a `player` row's feet are within `r` metres of the pad's middle along x and along z.
 const within = (me: Row, w: W, r: number) =>
-  w.all('player').some(p => math.hypot(p.data.pos[0] - me.data.pos[0], p.data.pos[2] - me.data.pos[2]) <= r)
+  w.all('player').some(p => Math.max(Math.abs(p.data.pos[0] - me.data.pos[0]), Math.abs(p.data.pos[2] - me.data.pos[2])) <= r)
 
-// The effect of the pad's entry thrown from its point.
+// The effect of the pad's entry thrown from the stage.
 function play(me: Row, w: W, it: Play, life: number) {
   const lift = it.lift ?? [0, 0, 0]
-  const at = [0, 1, 2].map(i => me.data.pos[i] + lift[i])
+  const stage = w.find('stage').data.pos
+  const at = [0, 1, 2].map(i => stage[i] + lift[i])
   me.data.t = 0
   return emit(w, it.effect, at, { life, dir: [0, 1, 0], floor: 0 })
 }
@@ -40,7 +44,7 @@ export const pad: Kind = {
     const k = def(w, me.kind)
     const it = k.plays[d.plays] as Play
     const was = d.on
-    d.on = within(me, w, was ? k.leave : k.radius)
+    d.on = within(me, w, k.size / 2 + (was ? k.leave : 0))
     d.t += dt
     if (it.stream) {
       const held = d.fx ? entry(w, d.fx) : undefined
