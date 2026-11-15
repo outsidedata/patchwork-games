@@ -18,16 +18,16 @@
       // are kept on `window.__scenes` and the page on `window.__page` for the profilers
       // (benchmarking-a-game). The frame rate is three's stats panel, the stats plugin, at the top left.
       //
-      // The keys are the game's own (`player.client.ts`), and none of them takes the pointer, so the
-      // panel is clicked freely: W and S fly forward and back, A and D turn, Q and E tilt up and down,
-      // Space climbs, C sinks, Shift boosts, the right mouse button dragged looks, the wheel, turned
-      // anywhere but over the panel, paces, and 1 to 8 fire the effects.
+      // The keys are the game's own (`player.client.ts`), shown along the bottom of the screen, and none
+      // of them takes the pointer, so the panel is clicked freely: W A S D run, Space jumps, the right
+      // mouse button dragged looks, and the wheel, turned anywhere but over the panel, zooms. Running
+      // onto a pad plays its effect.
       //
       // The panel tweaks a copy of the scene's `world.particle3d`, laid into the truth's world and the
       // page's a quarter second after the last change, so the server's ledger and the page read the
       // same `hold`; a change to a number the plugin reads only on its first frame (FIRST) closes the
-      // page's plugin so the next frame builds it again. The effects file's `cap`, `alphaTest` and `ppm`
-      // are written into the page's own decoded copy of the file, which particle3d reads every frame.
+      // page's plugin so the next frame builds it again. The effects file's `cap` and `alphaTest` are
+      // written into the page's own decoded copy of the file, which particle3d reads every frame.
       // Nothing is written to disk: `copy world.particle3d JSON` and `copy effects file numbers JSON`
       // copy the panel's numbers, for the scene file and the top of the effects file, and `reset to the
       // file` puts the files' back.
@@ -115,7 +115,7 @@
       // copy of them, written
       // into the page's decoded copy of the file a quarter second after the last change.
       const fileEffects = await prepared(main.world, own.effects)
-      const fileTop = { cap: fileEffects.cap, alphaTest: fileEffects.alphaTest ?? 0, ppm: fileEffects.ppm }
+      const fileTop = { cap: fileEffects.cap, alphaTest: fileEffects.alphaTest ?? 0 }
       const top = clone(fileTop)
       let topTimer
       const applyTop = () => {
@@ -130,7 +130,6 @@
       pf.add(own, 'hold', 0, 2, 0.01).name('hold s').onChange(apply)
       pf.add(top, 'cap', 100, 20000, 100).name('cap particles').onChange(applyTop)
       pf.add(top, 'alphaTest', 0, 1, 0.01).name('alphaTest').onChange(applyTop)
-      pf.add(top, 'ppm', 8, 256, 1).name('ppm px/m').onChange(applyTop)
 
       gui.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify(own, null, 2)) }, 'copy').name('copy world.particle3d JSON')
       gui.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify(top, null, 2)) }, 'copy').name('copy effects file numbers JSON')

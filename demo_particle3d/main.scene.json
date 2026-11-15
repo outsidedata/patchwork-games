@@ -1,17 +1,47 @@
 {
   "world": {
     "defs": "demo_particle3d",
+    "seed": 7,
+    "player": { "deadzone": 0.2, "resolution": 32 },
     "loader": {
       "assets": {
         "demo_particle3d": { "type": "json", "url": "/games/demo_particle3d/assets/demo_particle3d.json", "preload": true },
         "effects": { "type": "json", "url": "/games/demo_particle3d/assets/effects.json", "preload": true },
-        "particles": { "type": "sheet", "url": "/games/demo_particle3d/assets/particles/particles.json", "preload": true }
+        "checker": { "type": "texture", "url": "/games/demo_particle3d/assets/checker-1024.webp", "preload": true, "wrap": "repeat", "anisotropy": 8 },
+        "xbot-rig": { "type": "json", "url": "/games/demo_particle3d/assets/xbot.rig.json", "preload": true },
+        "xbot": { "type": "model", "url": "/games/demo_particle3d/assets/xbot.glb", "preload": true }
       }
     },
-    "particle3d": { "effects": "effects", "hold": 0.25 },
+    "shapes3d": {
+      "kinds": {
+        "floor": { "shape": { "box": { "size": [48.8, 0.1, 48.8] } }, "look": { "colour": "#ffffff", "roughness": 0.85, "map": "checker", "scale": 2 } },
+        "wall": { "shape": { "box": { "size": [48.8, 1.2, 0.4] } }, "look": { "colour": "#c9ced6", "roughness": 0.9 } }
+      }
+    },
+    "solids": { "mods": { "models": "shapes3d" } },
+    "walker": {
+      "kinds": {
+        "xbot": {
+          "radius": 0.3, "height": 1.8, "accel": 12, "airAccel": 2, "turnRate": 12, "gravity": 20, "jumpH": 1.1,
+          "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5, "seekSpeed": 1.7
+        }
+      },
+      "mods": { "behaviors": "shapes3d" }
+    },
+    "anim": {
+      "still": 0.05, "shift": 0.75, "leap": 0.5, "landFall": 7.5, "moves": 0.05, "turns": 30,
+      "kinds": {
+        "xbot": {
+          "rig": "xbot-rig", "model": "xbot", "fade": 0.2, "falls": [{ "above": 4.3, "role": "fall" }],
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
+        }
+      }
+    },
+    "particle3d": { "effects": "effects", "hold": 0.25, "mods": { "behaviors": ["instances3d"], "solids": ["shapes3d"] } },
+    "instances3d": {},
     "lights3d": { "grid": [16, 9], "slices": 24, "shadows": { "atlas": 4096, "tile": 256, "bias": 0.05, "normalBias": 0.06, "budget": 24 } }
   },
-  "plugins": ["loader", "scenemanager", "player", "particle3d", "render3d", "lights3d", "chasecamera3d", "stats"],
+  "plugins": ["loader", "scenemanager", "player", "anim", "solids", "particle3d", "instances3d", "environment3d", "render3d", "lights3d", "chasecamera3d", "stats"],
   "seats": 1,
   "prefabs": {
     "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
@@ -19,54 +49,66 @@
     "loader": {},
     "particle3d": { "next": 1, "live": [] },
     "render3d": {
-      "camera": { "fov": 60, "near": 0.1, "far": 600, "at": [0, 8, -40], "look": [0, 2, 0] },
+      "camera": { "fov": 55, "near": 0.1, "far": 400, "at": [0, 6, -24], "look": [0, 1, -12] },
       "pixelRatio": 1,
       "tone": "neutral",
       "exposure": 1,
       "shadows": "soft",
-      "background": "#2b3448",
-      "ao": { "on": false, "radius": 0.8, "thickness": 0.3, "falloff": 1, "scale": 1.5, "intensity": 0.8, "samples": 16 },
-      "bloom": { "strength": 0.6, "radius": 0.5, "threshold": 1.2 }
+      "background": "#3a4250",
+      "ao": { "on": false, "radius": 0.6, "thickness": 0.5, "falloff": 1, "scale": 1, "intensity": 1, "samples": 16 },
+      "bloom": { "strength": 0.6, "radius": 0.4, "threshold": 1 }
     },
-    "start": { "slot": 0, "pos": [0, 0, 0], "yaw": 0, "pitch": 0 },
+    "environment3d": {
+      "sun": { "color": "#ffe6c8", "power": 1.8, "at": [-30, 50, -40], "shadow": { "map": 4096, "half": 24, "near": 1, "far": 200, "distance": 100, "bias": -0.0002, "normalBias": 0.02 } },
+      "sky": { "color": "#9fb2d6", "ground": "#4a4038", "power": 1 }
+    },
+    "start": { "slot": 0, "pos": [0, 0], "yaw": 0 },
     "player": {
       "seat": 0,
       "stood": false,
+      "as": "xbot",
       "pos": [0, 0, 0],
-      "look": { "yaw": 0, "pitch": 0.25, "dist": 9 },
-      "lift": 2.2,
+      "yaw": 0,
+      "vel": [0, 0, 0],
+      "grounded": false,
+      "sliding": false,
+      "speed": 0,
+      "side": 0,
+      "turned": 0,
+      "want": [0, 0],
+      "face": null,
+      "jump": false,
       "stick": [0, 0],
-      "tilt": 0,
-      "up": false,
-      "down": false,
-      "fast": false,
-      "pace": 1,
-      "aim": [0, 0, 0],
-      "kept": []
+      "turning": [0, 0],
+      "look": { "yaw": 0, "pitch": 0.45, "dist": 10 },
+      "lift": 1.4,
+      "rig": "stand"
     },
-    "comet": { "centre": [0, 0, 0], "t": 0, "pos": [0, 0, 0] },
-    "ground": {},
-    "sky": {},
-    "block": { "pos": [0, 0, 0], "size": [1, 1, 1] }
+    "floor": { "pos": [0, 0, 0], "yaw": 0 },
+    "wall": { "pos": [0, 0, 0], "yaw": 0 },
+    "pad": { "pos": [0, 0, 0], "plays": "", "on": false, "t": 0, "fx": 0 }
   },
   "actors": [
     { "is": "scenemanager" },
     { "is": "loader" },
     { "is": "particle3d" },
-    { "is": "ground" },
-    { "is": "sky" },
-    { "is": "start", "slot": 0, "pos": [0, 4, -34], "yaw": 0, "pitch": 0.22 },
-    { "is": "block", "pos": [-9, 0, 4], "size": [2, 7, 2] },
-    { "is": "block", "pos": [9, 0, 4], "size": [2, 7, 2] },
-    { "is": "block", "pos": [-9, 0, 20], "size": [2, 7, 2] },
-    { "is": "block", "pos": [9, 0, 20], "size": [2, 7, 2] },
-    { "is": "block", "pos": [0, 0, 30], "size": [24, 4, 1.5] },
-    { "is": "block", "pos": [-20, 0, 12], "size": [1.5, 2.5, 14] },
-    { "is": "block", "pos": [20, 0, 12], "size": [1.5, 2.5, 14] },
-    { "is": "block", "pos": [-3, 0, 12], "size": [3, 1.2, 3] },
-    { "is": "block", "pos": [4, 0, 15], "size": [2, 0.8, 2] },
-    { "is": "block", "pos": [-28, 0, -6], "size": [5, 9, 5] },
-    { "is": "block", "pos": [30, 0, 0], "size": [6, 12, 6] },
-    { "is": "block", "pos": [0, 0, 52], "size": [10, 16, 6] }
+    { "is": "floor", "pos": [0, -0.1, 0] },
+    { "is": "wall", "pos": [0, 0, 24.2] },
+    { "is": "wall", "pos": [0, 0, -24.2] },
+    { "is": "wall", "pos": [24.2, 0, 0], "yaw": 1.5707963267948966 },
+    { "is": "wall", "pos": [-24.2, 0, 0], "yaw": 1.5707963267948966 },
+    { "is": "start", "slot": 0, "pos": [0, -12], "yaw": 0 },
+    { "is": "pad", "pos": [15, 0, -4], "plays": "torch" },
+    { "is": "pad", "pos": [5, 0, -4], "plays": "sparks" },
+    { "is": "pad", "pos": [-5, 0, -4], "plays": "smoke" },
+    { "is": "pad", "pos": [-15, 0, -4], "plays": "flares" },
+    { "is": "pad", "pos": [15, 0, 6], "plays": "blast" },
+    { "is": "pad", "pos": [5, 0, 6], "plays": "grenade" },
+    { "is": "pad", "pos": [-5, 0, 6], "plays": "plasma" },
+    { "is": "pad", "pos": [-15, 0, 6], "plays": "explosion" },
+    { "is": "pad", "pos": [15, 0, 16], "plays": "portal" },
+    { "is": "pad", "pos": [5, 0, 16], "plays": "mushroom" },
+    { "is": "pad", "pos": [-5, 0, 16], "plays": "implosion" },
+    { "is": "pad", "pos": [-15, 0, 16], "plays": "firework" }
   ]
 }
