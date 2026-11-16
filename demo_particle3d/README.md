@@ -57,7 +57,7 @@ them and the colour they light up in are the definition's `size` and `tile`.
 The effects are in `assets/effects.json`, which holds the torch, the sparks, the smoke and the flares
 and lists the files under `assets/effects/` for the rest. The hand-written ones draw their smoke and
 dust from the `smoke` flipbook and their fire from the `fireball` flipbook (The flipbooks, below), and
-their flashes, glows, rings, sparks, streaks and bolts with particle3d's own shapes. Rocks and chunks are instances3d's meshes, and particles bounce off the floor
+their flashes, glows, rings, sparks and bolts with particle3d's own shapes. Rocks and chunks are instances3d's meshes, and particles bounce off the floor
 and the walls, which are shapes3d's boxes. The effects in the files directly under `assets/effects/`
 were made in the particle workshop (`yarn workshop particles demo_particle3d`), which throws an effect
 from 1.2 m over its floor, so each of their tiles throws from 1.2 m over the stage (its entry's
