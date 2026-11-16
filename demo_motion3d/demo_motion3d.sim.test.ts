@@ -10,9 +10,11 @@ import { connection, load, manager, type Down } from '#addons/scenemanager/scene
 import { possessed } from '#addons/player/player.addon.ts'
 import * as THREE from 'three'
 import { motion3d } from '#plugins/motion3d/motion3d.plugin.ts'
-import { posed } from '#plugins/motion3d/motion3d.play.ts'
+import { posed, secondsIn } from '#plugins/motion3d/motion3d.play.ts'
 import { carrying, reachesOf, type File } from '#plugins/motion3d/motion3d.sim.ts'
 import { sim } from './demo_motion3d.sim.ts'
+import { blowAt } from './dummy.sim.ts'
+import { def } from '#plugins/loader/loader.sim.ts'
 import file from './demo_motion3d.scene.json' with { type: 'json' }
 import main from './main.scene.json' with { type: 'json' }
 import motions from './assets/xbot.motion3d.json' with { type: 'json' }
@@ -214,6 +216,299 @@ test('the use key plays each zone\'s own clip in it, holding the body still, and
   }
 })
 
+test('a light pressed three times during the first swing plays the whole chain, each swing starting as the one before strikes', async () => {
+  const { truth, room, send, me, until } = await joined()
+  until(() => me().data.clip === clipsOf('walk', 'stand')[0], 30)
+  send('press', 'light')
+  truth.step(DT)
+  expect(me().data.motion).toBe('light1')
+  // Two more within the first tenth of a second, held in the buffer in turn.
+  send('press', 'light')
+  truth.step(DT)
+  send('press', 'light')
+  truth.step(DT)
+  expect(me().data.queued.map((q: { key: string }) => q.key)).toEqual(['light', 'light'])
+  const chain: { motion: string; from: string; at: number }[] = []
+  let was = { motion: me().data.motion as string, clip: me().data.clip as string, t: me().data.clipT as number }
+  for (let i = 0; i < 60 * 8 && chain.length < 2; i++) {
+    truth.step(DT)
+    const d = me().data
+    if (d.motion !== was.motion) chain.push({ motion: d.motion, from: was.clip, at: was.t })
+    was = { motion: d.motion, clip: d.clip, t: d.clipT }
+  }
+  expect(chain.map(c => c.motion)).toEqual(['light2', 'light3'])
+  // Each played at the swing before's strike: on the step after the first whose playhead reached it.
+  for (const c of chain) {
+    const strike = secondsIn(reader(room), me(), c.from, 'strike', 'strike')
+    expect(c.at, `${c.motion} from ${c.from}`).toBeGreaterThanOrEqual(strike - 1e-9)
+    expect(c.at - DT * 1.01, `${c.motion} from ${c.from}`).toBeLessThan(strike)
+  }
+  expect(me().data.queued).toEqual([])
+})
+
+test('three lights pressed one after another as each swing plays chain all three, each from the one before\'s strike', async () => {
+  const { truth, room, send, me, until } = await joined()
+  until(() => me().data.clip === clipsOf('walk', 'stand')[0], 30)
+  const order: string[] = []
+  send('press', 'light')
+  for (let i = 0; i < 60 * 12 && order.length < 3; i++) {
+    truth.step(DT)
+    const d = me().data
+    if (order[order.length - 1] !== d.motion && /^light\d$/.test(d.motion)) {
+      order.push(d.motion)
+      // The next pressed at once, held in the buffer until this one strikes.
+      send('press', 'light')
+    }
+  }
+  expect(order).toEqual(['light1', 'light2', 'light3'])
+  // The fourth has nothing to chain into: held while the third plays, dropped once it may play and nothing
+  // does, its hold run out.
+  truth.step(DT)
+  expect(me().data.queued).toEqual([{ key: 'light', age: 0 }])
+  until(() => me().data.queued.length === 0, 60 * 6)
+  expect(me().data.motion).toBe('light3')
+  void room
+})
+
+// Draws the axe: the switch key with nothing drawn picks each next weapon until it is the axe, then the
+// draw key, and steps until its stance is up.
+function drawAxe({ truth, send, me, until }: Awaited<ReturnType<typeof joined>>) {
+  until(() => me().data.clip === clipsOf('walk', 'stand')[0], 30)
+  for (let i = 0; i < 9 && me().data.weapon !== 'axe'; i++) {
+    expect(me().data.upperMotion).toBe(null)
+    send('press', 'switch')
+    truth.step(DT)
+  }
+  expect(me().data.upperMotion).toBe(null)
+  send('press', 'draw')
+  until(() => me().data.upperMotion === 'axe', 60 * 4)
+  until(() => me().data.motion === 'axestand', 60)
+}
+
+// Jumps from standing, the key held for `held` seconds, and steps until it stands again: where it left
+// the ground, its highest, and where it came down, each [x, y, z], and the playhead the feet left on.
+function jumped(j: Awaited<ReturnType<typeof joined>>, held: number) {
+  const { truth, send, me, until } = j
+  const ground = me().data.pos[1]
+  send('jumping', 1)
+  send('press', 'jump')
+  let off: number[] | undefined, top = -Infinity, down: number[] | undefined, offAt = 0, steps = 0
+  for (let i = 0; i < 60 * 6 && !down; i++) {
+    if (steps * DT >= held) send('jumping', 0)
+    const was = me().data.grounded
+    const t = me().data.clipT
+    truth.step(DT)
+    steps++
+    const d = me().data
+    if (!off && was !== false && d.grounded === false) { off = [...d.pos]; offAt = t }
+    if (off) top = Math.max(top, d.pos[1] - ground)
+    if (off && d.grounded !== false) down = [...d.pos]
+  }
+  expect(off && down).toBeTruthy()
+  until(() => me().data.speed < 0.05 && me().data.grounded !== false, 60 * 4)
+  return { off: off!, top, down: down!, offAt }
+}
+
+test('a jump leaves the ground on its clip\'s takeoff, the clip played so it lands as the body does', async () => {
+  const j = await joined()
+  const { truth, room, send, me } = j
+  drawAxe(j)
+  send('jumping', 1)
+  send('press', 'jump')
+  truth.step(DT)
+  expect(me().data.motion).toBe('axejump')
+  const clip = me().data.clip
+  const takeoff = secondsIn(reader(room), me(), clip, 'takeoff', 'takeoff')
+  const landing = secondsIn(reader(room), me(), clip, 'landing', 'landing')
+  expect(takeoff).toBeGreaterThan(0.3)
+  // On the ground, held there, until the clip's feet leave it.
+  let leftAt = -1, landedAt = -1
+  for (let i = 0; i < 60 * 4 && landedAt < 0; i++) {
+    const t = me().data.clipT
+    const up = me().data.grounded === false
+    truth.step(DT)
+    const d = me().data
+    if (leftAt < 0 && !up && d.grounded === false) leftAt = t
+    if (leftAt < 0) expect(d.clip).toBe(clip)
+    if (leftAt >= 0 && d.grounded !== false) landedAt = d.clip === clip ? d.clipT : Infinity
+  }
+  // Left on the step whose playhead reached the takeoff (`leftAt` is where that step began).
+  expect(leftAt).toBeLessThan(takeoff)
+  expect(leftAt + 1.01 * DT).toBeGreaterThanOrEqual(takeoff)
+  // Came down as the clip came to its landing: within two steps of it.
+  expect(Math.abs(landedAt - landing)).toBeLessThan(3 * DT)
+})
+
+test('a jump held longer goes higher; a running jump goes further than a standing one', async () => {
+  const j = await joined()
+  const short = jumped(j, 0.05)
+  const long = jumped(j, 2)
+  expect(long.top).toBeGreaterThan(short.top * 1.5)
+  // kinematics3d's jumpH: held all the way, the body rises as high as it, short of it by the step.
+  expect(long.top).toBeGreaterThan(1.85)
+  expect(long.top).toBeLessThanOrEqual(2)
+  const standing = Math.hypot(long.down[0] - long.off[0], long.down[2] - long.off[2])
+  // Running, then jumping with the key held as long.
+  j.send('fast', 1)
+  j.send('stick', 0, -1)
+  for (let i = 0; i < 60; i++) j.truth.step(DT)
+  const run = jumped(j, 2)
+  j.send('stick', 0, 0)
+  j.send('fast', 0)
+  const running = Math.hypot(run.down[0] - run.off[0], run.down[2] - run.off[2])
+  expect(running).toBeGreaterThan(standing + 2)
+})
+
+test('a hit while running flinches the upper body over the run, the legs running on; a hard turn leans the body into it', async () => {
+  const { truth, send, me, until } = await joined()
+  send('fast', 1)
+  send('stick', 0, -1)
+  until(() => me().data.motion === 'run' && me().data.speed > 3, 60 * 3)
+  expect(Math.abs(me().data.lean)).toBeLessThan(0.01)
+  send('press', 'hit')
+  truth.step(DT)
+  expect(me().data.adds.map((l: { name: string }) => l.name)).toEqual(['hurt.flinch'])
+  expect(me().data.adds[0]).toMatchObject({ clip: 'uahit', bone: 'Spine', most: 0.8 })
+  until(() => {
+    expect(me().data.motion).toBe('run')
+    return me().data.adds.length === 0
+  }, 60 * 3)
+  // Turning hard to the left as it runs: leaning into the turn, no further than the kind's most.
+  let most = 0
+  for (let i = 0; i < 40; i++) {
+    send('look', 0.05, 0)
+    truth.step(DT)
+    most = Math.max(most, me().data.lean)
+  }
+  expect(most).toBeGreaterThan(0.05)
+  expect(most).toBeLessThanOrEqual(0.25)
+  send('stick', 0, 0)
+  send('fast', 0)
+})
+
+// Stands the body `far` metres from the dummy, at the bearing `around` from it, turned `off` radians away
+// from facing it, and still.
+function standBy(j: Awaited<ReturnType<typeof joined>>, far: number, around: number, off: number) {
+  const { truth, me, row, until } = j
+  const at = row('dummy').data.pos
+  const d = me().data
+  expect(Array.isArray(d.along) && d.along.length === 3).toBe(true)
+  d.pos = [at[0] + far * Math.sin(around), at[1], at[2] + far * Math.cos(around)]
+  // Its place on the triangles it stands on is where it stands.
+  d.along = [...d.pos]
+  d.yaw = around + Math.PI + off
+  d.facing = d.yaw
+  d.look = { ...d.look, yaw: d.yaw }
+  d.vel = [0, 0, 0]
+  truth.step(DT)
+  until(() => me().data.motion === 'stand' && me().data.speed === 0, 60)
+}
+
+test('a light attack started a metre and a half from the dummy, from any side and turned away from it, lands its blow on the dummy', async () => {
+  const j = await joined()
+  const { truth, room, send, me, row } = j
+  const dummy = () => row('dummy')
+  for (const around of [0, Math.PI / 2, Math.PI, -2.3]) {
+    standBy(j, 1.5, around, 0.7)
+    expect(me().data.target).toEqual(dummy().data.pos)
+    const hits = dummy().data.hits
+    send('press', 'light')
+    let landed: number[] | undefined
+    for (let i = 0; i < 60 * 3 && dummy().data.hits === hits; i++) {
+      truth.step(DT)
+      if (me().data.windows.includes('blow')) landed = blowAt(reader(room), me())
+    }
+    expect(dummy().data.hits, `from ${around}`).toBe(hits + 1)
+    // The blow, as the body is drawn, within the dummy's reach of its middle.
+    const at = dummy().data.pos
+    expect(Math.hypot(landed![0] - at[0], landed![2] - at[2]), `from ${around}`).toBeLessThanOrEqual(0.7)
+    // Queued as the blow lands, played by its next step.
+    truth.step(DT)
+    expect(dummy().data.motion).toBe('hit')
+    for (let i = 0; i < 60 * 3; i++) truth.step(DT)
+  }
+  // Out of `lock`, nothing to bend onto: the jab lands on the air.
+  standBy(j, 5, 0, 0)
+  expect(me().data.target).toBe(null)
+  const hits = dummy().data.hits
+  send('press', 'light')
+  for (let i = 0; i < 60 * 2; i++) truth.step(DT)
+  expect(dummy().data.hits).toBe(hits)
+  // And from a metre and a half, turned away, with no target to bend onto (the player's `lock` 0 for
+  // the while): the same jab misses, so the bend is what lands it.
+  const k = def(reader(room), 'player')
+  const lock = k.lock
+  k.lock = 0
+  try {
+    standBy(j, 1.5, 0, 0.7)
+    expect(me().data.target).toBe(null)
+    send('press', 'light')
+    for (let i = 0; i < 60 * 2; i++) truth.step(DT)
+    expect(dummy().data.hits).toBe(hits)
+  } finally {
+    k.lock = lock
+  }
+})
+
+// Stands the body at (x, z) facing +z, still.
+function standAt(j: Awaited<ReturnType<typeof joined>>, x: number, z: number) {
+  const { truth, me, until } = j
+  const d = me().data
+  d.pos = [x, 0, z]
+  d.along = [...d.pos]
+  d.yaw = 0
+  d.facing = 0
+  d.look = { ...d.look, yaw: 0 }
+  d.vel = [0, 0, 0]
+  truth.step(DT)
+  until(() => me().data.motion === 'stand' && me().data.speed === 0, 60)
+}
+
+test('run at a plain waist-high box with no station placed, the body vaults it; at a head-high one, it climbs onto it', async () => {
+  const j = await joined()
+  const { truth, send, me, row, kinds } = j
+  // The waist-high box: run at it from six metres, the stick held forward.
+  const vault = row('vaultbox')
+  standAt(j, vault.data.pos[0], vault.data.pos[2] - 6)
+  send('fast', 1)
+  send('stick', 0, -1)
+  const seen = new Set<string>()
+  for (let i = 0; i < 60 * 6 && !(seen.has('vaultover') && me().data.activity === 'walk'); i++) {
+    truth.step(DT)
+    seen.add(me().data.activity)
+  }
+  expect([...seen]).toContain('vaultover')
+  expect(me().data.activity).toBe('walk')
+  // Over it: beyond its far side, on the ground.
+  const far = vault.data.pos[2] + kinds.vaultbox.shape.box.size[2] / 2
+  expect(me().data.pos[2]).toBeGreaterThan(far)
+  expect(me().data.pos[1]).toBeLessThan(0.05)
+  send('stick', 0, 0)
+  send('fast', 0)
+
+  // The head-high box: run into it, the stick held forward: it jumps up, hangs and climbs onto its top.
+  const climb = row('climbbox')
+  standAt(j, climb.data.pos[0], climb.data.pos[2] - 4)
+  send('fast', 1)
+  send('stick', 0, -1)
+  const motions: string[] = []
+  for (let i = 0; i < 60 * 10 && !(motions.includes('climbup.over') && me().data.activity === 'walk'); i++) {
+    truth.step(DT)
+    const m = `${me().data.activity}.${me().data.motion}`
+    if (motions[motions.length - 1] !== m) motions.push(m)
+  }
+  expect(motions).toContain('climbup.up')
+  expect(motions).toContain('climbup.over')
+  send('stick', 0, 0)
+  send('fast', 0)
+  for (let i = 0; i < 30; i++) truth.step(DT)
+  // On its top.
+  const top = kinds.climbbox.shape.box.size[1]
+  expect(me().data.pos[1]).toBeCloseTo(top, 1)
+  const near = climb.data.pos[2] - kinds.climbbox.shape.box.size[2] / 2
+  expect(me().data.pos[2]).toBeGreaterThan(near)
+})
+
 test('standing at rest, the idle plays on at its own rate', async () => {
   const { truth, me } = await joined()
   for (let i = 0; i < 10; i++) truth.step(DT)
@@ -235,7 +530,8 @@ async function hung() {
   const lip = kinds.ledgezone.points.Lip.line
   const lipZ = zone.data.pos[2] + lip.from[2], lipY = zone.data.pos[1] + lip.from[1]
   walkTo(zone.data.pos[0], zone.data.pos[2], 0.3)
-  expect(me().data.offered).toEqual(['ledge'])
+  // The wall's side offers mantling onto it as well, to a body run into it.
+  expect(me().data.offered).toContain('ledge')
   send('press', 'use')
   truth.step(DT)
   expect(me().data.activity).toBe('ledge')

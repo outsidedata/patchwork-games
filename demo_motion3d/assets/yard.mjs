@@ -69,7 +69,7 @@ const sceneFile = path.join(here, '..', 'main.scene.json')
 const scene = JSON.parse(readFileSync(sceneFile, 'utf8'))
 // The kinds of the scene written by hand, which this leaves as they are; every other shapes3d kind is
 // this file's, written anew.
-const BY_HAND = ['partyzone', 'sadzone', 'wall', 'ledgezone', 'chair', 'chairback', 'chairzone']
+const BY_HAND = ['partyzone', 'sadzone', 'wall', 'ledgezone', 'chair', 'chairback', 'chairzone', 'vaultbox', 'climbbox']
 // A one-shot carries travel ending further than `moves` metres from its start, and keeps its turn turning
 // `turns` degrees or further (the X Bot's motion3d file).
 const { moves: MOVES, turns: TURNS } = JSON.parse(readFileSync(path.join(here, 'xbot.motion3d.json'), 'utf8'))
