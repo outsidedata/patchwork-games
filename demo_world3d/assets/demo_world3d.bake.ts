@@ -21,12 +21,14 @@
 //   smallville.town.effects.json
 //                 the particle3d effects that burn in the town, `{ spawns: [{ effect, at, dir }] }`, which world3d
 //                 emits; `effects.json` lists the file, so particle3d holds its effects
-//   smallville.town.looks.json, looks/<file>.webp
+//   smallville.town.looks.json, looks/<file>.webp, looks/smallville.town.pictures.ktx2
 //                 the town's one shader, supershader3d's file, and the pictures it reads, which pack.mjs writes
 //                 beside the glb (`pro-ng/look_bake.mjs`) from the library's looks and `pro-ng/materials.json`: every
 //                 material the town draws, its settings then moved out of uniforms into supershader3d's settings
-//                 table by core's `packLooks` (`scripts/pack-looks.ts`). Each picture is listed in main's catalogue (`main.scene.json`) by its
-//                 name, the entries of an earlier bake's pictures taken out first.
+//                 table by core's `packLooks` (`scripts/pack-looks.ts`), and its pictures made one KTX2 array, its
+//                 `stack`, by core's bake's `stack`. The stack alone is listed in main's catalogue (`main.scene.json`),
+//                 as `smallville.town_pictures`, the entries of an earlier bake's pictures and stack taken out first;
+//                 supershader3d binds it and never asks for the pictures one by one.
 //   smallville.town.shapes3d.json
 //                 what a walker stands on and bumps into, shapes3d's shapes file, which procedural.py writes beside the
 //                 glb (`pro-ng/shapes.py`): `kinds`, every kind's shape, and `shapes`, each one's `kind`, `pos` and `yaw`
@@ -101,7 +103,7 @@ if (chosen && !baked.length) throw new Error(`demo_world3d's bake: no place is b
 // what pro-ng's build writes for a scene, each `<name><suffix>`
 const MADE = ['.glb', '.looks.json', '.clips.json', '.shapes3d.json', '.nav.json', '.terrain3d_layers.json', '.hollows.json', '.effects.json', '.crowd.json']
 
-export default async ({ blender, scratch, library }: Tools) => {
+export default async ({ blender, scratch, library, stack }: Tools) => {
   // each place made into every file a game boots from by the library's pro-ng (`pro-ng/build.mjs`), on core's Blender
   const { build } = await import(pathToFileURL(path.join(library, 'pro-ng', 'build.mjs')).href)
   for (const place of baked) {
@@ -165,6 +167,10 @@ export default async ({ blender, scratch, library }: Tools) => {
       fs.copyFileSync(path.join(out, 'looks', p.file), path.join(into, 'looks', p.file))
       console.log('wrote', path.relative(root, path.join(into, 'looks', p.file)))
     }
+    // the looks' pictures as one GPU-compressed KTX2 array beside them, the looks file written again with its `stack`
+    const stacked: Looks = await stack(looks, path.join(into, 'looks'), looksFile)
+    fs.writeFileSync(looksFile, JSON.stringify(stacked, null, 1) + '\n')
+    if (stacked.stack) console.log('wrote', path.relative(root, path.join(into, 'looks', stacked.stack.file)))
     // the place world3d's: its name, and each part of it an entry named as world3d reads it, standing where the entry of
     // its file stood in the catalogue, or after the rest
     const folder = `/games/demo_world3d/assets/${place.folder ? `${place.folder}/` : ''}`
@@ -183,15 +189,14 @@ export default async ({ blender, scratch, library }: Tools) => {
     }
     for (const part of Object.values(parts)) catalogued[part.name] ??= part.entry
     scene.world.loader.assets = catalogued
-    // each picture in the scene's catalogue by its name, a colour picture in sRGB and every other linear
+    // the pictures' stack in the scene's catalogue, the one entry supershader3d binds, in place of every earlier bake's
+    // pictures and stack
     const url = `${folder}looks/`
     const assets: Record<string, { url: string }> = scene.world.loader.assets
     for (const [asset, a] of Object.entries(assets)) if (a.url.startsWith(url)) delete assets[asset]
-    for (const p of looks.pictures) {
-      assets[p.asset] = { type: 'texture', url: `${url}${p.file}`, ...(p.colour ? {} : { space: 'linear' }), wrap: 'repeat', preload: true } as any
-    }
+    if (stacked.stack) assets[stacked.stack.asset] = { type: 'texture', url: `${url}${stacked.stack.file}`, preload: true } as any
     fs.writeFileSync(sceneFile, JSON.stringify(scene, null, 2) + '\n')
-    console.log('wrote', path.relative(root, sceneFile), `world3d's place ${name}, its catalogue's ${PARTS.length} parts and ${looks.pictures.length} pictures`)
+    console.log('wrote', path.relative(root, sceneFile), `world3d's place ${name}, its catalogue's ${PARTS.length} parts and its pictures' stack`)
     // the place's flatten laid into its field, its one painted layer
     const fieldFile = path.join(here, place.field)
     const field = JSON.parse(fs.readFileSync(fieldFile, 'utf8'))

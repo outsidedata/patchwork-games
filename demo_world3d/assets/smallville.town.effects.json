@@ -1,6 +1,6 @@
 {
  "effects": {
-  "torch_bracket/flame": [
+  "fantasy/medieval/village/torch_bracket/flame": [
    {
     "n": [
      8,
@@ -36,7 +36,7 @@
     "spin": 2
    }
   ],
-  "torch_bracket/sparks": [
+  "fantasy/medieval/village/torch_bracket/sparks": [
    {
     "every": 0.25,
     "life": [
@@ -67,7 +67,7 @@
     "gain": 2
    }
   ],
-  "torch_bracket/smoke": [
+  "fantasy/medieval/village/torch_bracket/smoke": [
    {
     "every": 0.06,
     "life": [
@@ -98,7 +98,7 @@
     "spin": 0.6
    }
   ],
-  "torch_bracket/glow": [
+  "fantasy/medieval/village/torch_bracket/glow": [
    {
     "lamp": {
      "at": [
@@ -114,18 +114,18 @@
     }
    }
   ],
-  "torch_bracket/fire": [
+  "fantasy/medieval/village/torch_bracket/fire": [
    {
-    "effect": "torch_bracket/glow"
+    "effect": "fantasy/medieval/village/torch_bracket/glow"
    },
    {
-    "effect": "torch_bracket/flame"
+    "effect": "fantasy/medieval/village/torch_bracket/flame"
    },
    {
-    "effect": "torch_bracket/sparks"
+    "effect": "fantasy/medieval/village/torch_bracket/sparks"
    },
    {
-    "effect": "torch_bracket/smoke",
+    "effect": "fantasy/medieval/village/torch_bracket/smoke",
     "at": [
      0,
      0.15,
@@ -133,7 +133,7 @@
     ]
    }
   ],
-  "chimney/core": [
+  "fantasy/medieval/village/chimney/core": [
    {
     "n": [
      2,
@@ -167,7 +167,7 @@
     "spin": 1.2
    }
   ],
-  "chimney/column": [
+  "fantasy/medieval/village/chimney/column": [
    {
     "n": [
      3,
@@ -207,7 +207,7 @@
     "spin": 0.5
    }
   ],
-  "chimney/haze": [
+  "fantasy/medieval/village/chimney/haze": [
    {
     "every": 0.1,
     "life": [
@@ -243,7 +243,7 @@
     "spin": 0.3
    }
   ],
-  "chimney/gust": [
+  "fantasy/medieval/village/chimney/gust": [
    {
     "n": [
      3,
@@ -283,21 +283,21 @@
     "spin": 0.8
    }
   ],
-  "chimney/puff": [
+  "fantasy/medieval/village/chimney/puff": [
    {
-    "effect": "chimney/core"
+    "effect": "fantasy/medieval/village/chimney/core"
    },
    {
-    "effect": "chimney/column"
+    "effect": "fantasy/medieval/village/chimney/column"
    },
    {
-    "effect": "chimney/haze"
+    "effect": "fantasy/medieval/village/chimney/haze"
    },
    {
-    "effect": "chimney/gust"
+    "effect": "fantasy/medieval/village/chimney/gust"
    }
   ],
-  "candlestick/flame": [
+  "fantasy/medieval/village/candlestick/flame": [
    {
     "n": [
      3,
@@ -333,7 +333,7 @@
     "spin": 2
    }
   ],
-  "candlestick/glow": [
+  "fantasy/medieval/village/candlestick/glow": [
    {
     "lamp": {
      "at": [
@@ -349,15 +349,15 @@
     }
    }
   ],
-  "candlestick/fire": [
+  "fantasy/medieval/village/candlestick/fire": [
    {
-    "effect": "candlestick/glow"
+    "effect": "fantasy/medieval/village/candlestick/glow"
    },
    {
-    "effect": "candlestick/flame"
+    "effect": "fantasy/medieval/village/candlestick/flame"
    }
   ],
-  "chandelier/flame": [
+  "fantasy/medieval/village/chandelier/flame": [
    {
     "n": [
      3,
@@ -393,7 +393,7 @@
     "spin": 2
    }
   ],
-  "chandelier/glow": [
+  "fantasy/medieval/village/chandelier/glow": [
    {
     "lamp": {
      "tint": 16758864,
@@ -404,7 +404,7 @@
     }
    }
   ],
-  "sconce/flame": [
+  "fantasy/medieval/village/sconce/flame": [
    {
     "n": [
      3,
@@ -440,7 +440,7 @@
     "spin": 2
    }
   ],
-  "sconce/glow": [
+  "fantasy/medieval/village/sconce/glow": [
    {
     "lamp": {
      "at": [
@@ -456,15 +456,15 @@
     }
    }
   ],
-  "sconce/fire": [
+  "fantasy/medieval/village/sconce/fire": [
    {
-    "effect": "sconce/glow"
+    "effect": "fantasy/medieval/village/sconce/glow"
    },
    {
-    "effect": "sconce/flame"
+    "effect": "fantasy/medieval/village/sconce/flame"
    }
   ],
-  "candlestand/flame": [
+  "fantasy/medieval/village/candlestand/flame": [
    {
     "n": [
      3,
@@ -500,7 +500,7 @@
     "spin": 2
    }
   ],
-  "candlestand/glow": [
+  "fantasy/medieval/village/candlestand/glow": [
    {
     "lamp": {
      "at": [
@@ -516,7 +516,7 @@
     }
    }
   ],
-  "cauldron/steam": [
+  "fantasy/medieval/village/cauldron/steam": [
    {
     "n": [
      2,
@@ -551,7 +551,7 @@
     "spin": 0.9
    }
   ],
-  "cauldron/bubbles": [
+  "fantasy/medieval/village/cauldron/bubbles": [
    {
     "every": 0.07,
     "life": [
@@ -580,7 +580,7 @@
     "spin": 3
    }
   ],
-  "rushlight/flame": [
+  "fantasy/medieval/village/rushlight/flame": [
    {
     "n": [
      3,
@@ -616,7 +616,7 @@
     "spin": 2
    }
   ],
-  "rushlight/smoke": [
+  "fantasy/medieval/village/rushlight/smoke": [
    {
     "every": 0.08,
     "life": [
@@ -647,7 +647,7 @@
     "spin": 0.6
    }
   ],
-  "rushlight/glow": [
+  "fantasy/medieval/village/rushlight/glow": [
    {
     "lamp": {
      "at": [
@@ -663,15 +663,15 @@
     }
    }
   ],
-  "rushlight/fire": [
+  "fantasy/medieval/village/rushlight/fire": [
    {
-    "effect": "rushlight/glow"
+    "effect": "fantasy/medieval/village/rushlight/glow"
    },
    {
-    "effect": "rushlight/flame"
+    "effect": "fantasy/medieval/village/rushlight/flame"
    },
    {
-    "effect": "rushlight/smoke",
+    "effect": "fantasy/medieval/village/rushlight/smoke",
     "at": [
      0,
      0.04,
@@ -679,7 +679,7 @@
     ]
    }
   ],
-  "candle/flame": [
+  "fantasy/medieval/village/candle/flame": [
    {
     "n": [
      3,
@@ -715,7 +715,7 @@
     "spin": 2
    }
   ],
-  "candle/glow": [
+  "fantasy/medieval/village/candle/glow": [
    {
     "lamp": {
      "at": [
@@ -731,15 +731,15 @@
     }
    }
   ],
-  "candle/fire": [
+  "fantasy/medieval/village/candle/fire": [
    {
-    "effect": "candle/glow"
+    "effect": "fantasy/medieval/village/candle/glow"
    },
    {
-    "effect": "candle/flame"
+    "effect": "fantasy/medieval/village/candle/flame"
    }
   ],
-  "brazier/flame": [
+  "fantasy/medieval/village/brazier/flame": [
    {
     "n": [
      4,
@@ -774,7 +774,7 @@
     "gain": 1.4
    }
   ],
-  "brazier/sparks": [
+  "fantasy/medieval/village/brazier/sparks": [
    {
     "every": 0.12,
     "life": [
@@ -805,7 +805,7 @@
     "gain": 2
    }
   ],
-  "brazier/smoke": [
+  "fantasy/medieval/village/brazier/smoke": [
    {
     "n": [
      2,
@@ -840,7 +840,7 @@
     "spin": 0.6
    }
   ],
-  "brazier/glow": [
+  "fantasy/medieval/village/brazier/glow": [
    {
     "lamp": {
      "at": [
@@ -856,18 +856,18 @@
     }
    }
   ],
-  "brazier/fire": [
+  "fantasy/medieval/village/brazier/fire": [
    {
-    "effect": "brazier/glow"
+    "effect": "fantasy/medieval/village/brazier/glow"
    },
    {
-    "effect": "brazier/flame"
+    "effect": "fantasy/medieval/village/brazier/flame"
    },
    {
-    "effect": "brazier/sparks"
+    "effect": "fantasy/medieval/village/brazier/sparks"
    },
    {
-    "effect": "brazier/smoke",
+    "effect": "fantasy/medieval/village/brazier/smoke",
     "at": [
      0,
      0.4,
@@ -875,7 +875,7 @@
     ]
    }
   ],
-  "forge/flame": [
+  "fantasy/medieval/village/forge/flame": [
    {
     "n": [
      4,
@@ -910,7 +910,7 @@
     "gain": 1.4
    }
   ],
-  "forge/sparks": [
+  "fantasy/medieval/village/forge/sparks": [
    {
     "every": 0.12,
     "life": [
@@ -941,7 +941,7 @@
     "gain": 2
    }
   ],
-  "forge/glow": [
+  "fantasy/medieval/village/forge/glow": [
    {
     "lamp": {
      "at": [
@@ -957,18 +957,18 @@
     }
    }
   ],
-  "forge/fire": [
+  "fantasy/medieval/village/forge/fire": [
    {
-    "effect": "forge/glow"
+    "effect": "fantasy/medieval/village/forge/glow"
    },
    {
-    "effect": "forge/flame"
+    "effect": "fantasy/medieval/village/forge/flame"
    },
    {
-    "effect": "forge/sparks"
+    "effect": "fantasy/medieval/village/forge/sparks"
    }
   ],
-  "forge/smoke": [
+  "fantasy/medieval/village/forge/smoke": [
    {
     "n": [
      1,
@@ -1007,7 +1007,7 @@
  "spawns": [
   {
    "thing": "north west tower/tower torch",
-   "effect": "torch_bracket/fire",
+   "effect": "fantasy/medieval/village/torch_bracket/fire",
    "at": [
     -17.9779,
     3.0493,
@@ -1021,7 +1021,7 @@
   },
   {
    "thing": "north east tower/tower torch",
-   "effect": "torch_bracket/fire",
+   "effect": "fantasy/medieval/village/torch_bracket/fire",
    "at": [
     16.8137,
     3.0493,
@@ -1035,7 +1035,7 @@
   },
   {
    "thing": "south west tower/tower torch",
-   "effect": "torch_bracket/fire",
+   "effect": "fantasy/medieval/village/torch_bracket/fire",
    "at": [
     -16.8137,
     3.0493,
@@ -1049,7 +1049,7 @@
   },
   {
    "thing": "south east tower/tower torch",
-   "effect": "torch_bracket/fire",
+   "effect": "fantasy/medieval/village/torch_bracket/fire",
    "at": [
     17.9779,
     3.0493,
@@ -1063,7 +1063,7 @@
   },
   {
    "thing": "gate/gate torch west",
-   "effect": "torch_bracket/fire",
+   "effect": "fantasy/medieval/village/torch_bracket/fire",
    "at": [
     -1.9,
     3.1993,
@@ -1077,7 +1077,7 @@
   },
   {
    "thing": "gate/gate torch east",
-   "effect": "torch_bracket/fire",
+   "effect": "fantasy/medieval/village/torch_bracket/fire",
    "at": [
     1.9,
     3.1993,
@@ -1091,7 +1091,7 @@
   },
   {
    "thing": "keep/hall/hall torch west",
-   "effect": "torch_bracket/fire",
+   "effect": "fantasy/medieval/village/torch_bracket/fire",
    "at": [
     -0.812,
     2.5609,
@@ -1105,7 +1105,7 @@
   },
   {
    "thing": "keep/hall/hall torch east",
-   "effect": "torch_bracket/fire",
+   "effect": "fantasy/medieval/village/torch_bracket/fire",
    "at": [
     0.812,
     2.5609,
@@ -1119,7 +1119,7 @@
   },
   {
    "thing": "keep/hall/hall chimney",
-   "effect": "chimney/puff",
+   "effect": "fantasy/medieval/village/chimney/puff",
    "at": [
     0.1426,
     12.8,
@@ -1133,7 +1133,7 @@
   },
   {
    "thing": "keep/hall/hall chimney",
-   "effect": "chimney/puff",
+   "effect": "fantasy/medieval/village/chimney/puff",
    "at": [
     0.6926,
     12.8,
@@ -1147,7 +1147,7 @@
   },
   {
    "thing": "keep/hall/high table candlestick west",
-   "effect": "candlestick/fire",
+   "effect": "fantasy/medieval/village/candlestick/fire",
    "at": [
     4.6,
     1.565,
@@ -1161,7 +1161,7 @@
   },
   {
    "thing": "keep/hall/high table candlestick east",
-   "effect": "candlestick/fire",
+   "effect": "fantasy/medieval/village/candlestick/fire",
    "at": [
     4.6,
     1.565,
@@ -1175,7 +1175,7 @@
   },
   {
    "thing": "keep/hall/hall chandelier",
-   "effect": "chandelier/flame",
+   "effect": "fantasy/medieval/village/chandelier/flame",
    "at": [
     -1.4162,
     3.308,
@@ -1189,7 +1189,7 @@
   },
   {
    "thing": "keep/hall/hall chandelier",
-   "effect": "chandelier/flame",
+   "effect": "fantasy/medieval/village/chandelier/flame",
    "at": [
     -1.722,
     3.308,
@@ -1203,7 +1203,7 @@
   },
   {
    "thing": "keep/hall/hall chandelier",
-   "effect": "chandelier/flame",
+   "effect": "fantasy/medieval/village/chandelier/flame",
    "at": [
     -1.722,
     3.308,
@@ -1217,7 +1217,7 @@
   },
   {
    "thing": "keep/hall/hall chandelier",
-   "effect": "chandelier/flame",
+   "effect": "fantasy/medieval/village/chandelier/flame",
    "at": [
     -1.4162,
     3.308,
@@ -1231,7 +1231,7 @@
   },
   {
    "thing": "keep/hall/hall chandelier",
-   "effect": "chandelier/flame",
+   "effect": "fantasy/medieval/village/chandelier/flame",
    "at": [
     -0.9838,
     3.308,
@@ -1245,7 +1245,7 @@
   },
   {
    "thing": "keep/hall/hall chandelier",
-   "effect": "chandelier/flame",
+   "effect": "fantasy/medieval/village/chandelier/flame",
    "at": [
     -0.678,
     3.308,
@@ -1259,7 +1259,7 @@
   },
   {
    "thing": "keep/hall/hall chandelier",
-   "effect": "chandelier/flame",
+   "effect": "fantasy/medieval/village/chandelier/flame",
    "at": [
     -0.678,
     3.308,
@@ -1273,7 +1273,7 @@
   },
   {
    "thing": "keep/hall/hall chandelier",
-   "effect": "chandelier/flame",
+   "effect": "fantasy/medieval/village/chandelier/flame",
    "at": [
     -0.9838,
     3.308,
@@ -1287,7 +1287,7 @@
   },
   {
    "thing": "keep/hall/hall chandelier",
-   "effect": "chandelier/glow",
+   "effect": "fantasy/medieval/village/chandelier/glow",
    "at": [
     -1.2,
     3.308,
@@ -1301,7 +1301,7 @@
   },
   {
    "thing": "keep/hall/dais chandelier",
-   "effect": "chandelier/flame",
+   "effect": "fantasy/medieval/village/chandelier/flame",
    "at": [
     1.7925,
     3.508,
@@ -1315,7 +1315,7 @@
   },
   {
    "thing": "keep/hall/dais chandelier",
-   "effect": "chandelier/flame",
+   "effect": "fantasy/medieval/village/chandelier/flame",
    "at": [
     1.585,
     3.508,
@@ -1329,7 +1329,7 @@
   },
   {
    "thing": "keep/hall/dais chandelier",
-   "effect": "chandelier/flame",
+   "effect": "fantasy/medieval/village/chandelier/flame",
    "at": [
     1.7925,
     3.508,
@@ -1343,7 +1343,7 @@
   },
   {
    "thing": "keep/hall/dais chandelier",
-   "effect": "chandelier/flame",
+   "effect": "fantasy/medieval/village/chandelier/flame",
    "at": [
     2.2075,
     3.508,
@@ -1357,7 +1357,7 @@
   },
   {
    "thing": "keep/hall/dais chandelier",
-   "effect": "chandelier/flame",
+   "effect": "fantasy/medieval/village/chandelier/flame",
    "at": [
     2.415,
     3.508,
@@ -1371,7 +1371,7 @@
   },
   {
    "thing": "keep/hall/dais chandelier",
-   "effect": "chandelier/flame",
+   "effect": "fantasy/medieval/village/chandelier/flame",
    "at": [
     2.2075,
     3.508,
@@ -1385,7 +1385,7 @@
   },
   {
    "thing": "keep/hall/dais chandelier",
-   "effect": "chandelier/glow",
+   "effect": "fantasy/medieval/village/chandelier/glow",
    "at": [
     2.0,
     3.508,
@@ -1399,7 +1399,7 @@
   },
   {
    "thing": "keep/hall/hall sconce west",
-   "effect": "sconce/fire",
+   "effect": "fantasy/medieval/village/sconce/fire",
    "at": [
     -1.4,
     2.0006,
@@ -1413,7 +1413,7 @@
   },
   {
    "thing": "keep/hall/hall sconce east",
-   "effect": "sconce/fire",
+   "effect": "fantasy/medieval/village/sconce/fire",
    "at": [
     1.4,
     2.0006,
@@ -1427,7 +1427,7 @@
   },
   {
    "thing": "keep/solar/solar candlestand",
-   "effect": "candlestand/flame",
+   "effect": "fantasy/medieval/village/candlestand/flame",
    "at": [
     2.6,
     7.291,
@@ -1441,7 +1441,7 @@
   },
   {
    "thing": "keep/solar/solar candlestand",
-   "effect": "candlestand/flame",
+   "effect": "fantasy/medieval/village/candlestand/flame",
    "at": [
     2.4,
     7.231,
@@ -1455,7 +1455,7 @@
   },
   {
    "thing": "keep/solar/solar candlestand",
-   "effect": "candlestand/flame",
+   "effect": "fantasy/medieval/village/candlestand/flame",
    "at": [
     2.8,
     7.231,
@@ -1469,7 +1469,7 @@
   },
   {
    "thing": "keep/solar/solar candlestand",
-   "effect": "candlestand/glow",
+   "effect": "fantasy/medieval/village/candlestand/glow",
    "at": [
     2.6,
     7.291,
@@ -1483,7 +1483,7 @@
   },
   {
    "thing": "passage/passage sconce",
-   "effect": "sconce/fire",
+   "effect": "fantasy/medieval/village/sconce/fire",
    "at": [
     -8.5,
     2.0006,
@@ -1497,7 +1497,7 @@
   },
   {
    "thing": "kitchen/kitchen chimney",
-   "effect": "chimney/puff",
+   "effect": "fantasy/medieval/village/chimney/puff",
    "at": [
     -15.675,
     7.8,
@@ -1511,7 +1511,7 @@
   },
   {
    "thing": "kitchen/kitchen chimney",
-   "effect": "chimney/puff",
+   "effect": "fantasy/medieval/village/chimney/puff",
    "at": [
     -15.125,
     7.8,
@@ -1525,7 +1525,7 @@
   },
   {
    "thing": "kitchen/kitchen cauldron hung",
-   "effect": "cauldron/bubbles",
+   "effect": "fantasy/medieval/village/cauldron/bubbles",
    "at": [
     -15.47,
     0.5536,
@@ -1539,7 +1539,7 @@
   },
   {
    "thing": "kitchen/kitchen cauldron hung",
-   "effect": "cauldron/steam",
+   "effect": "fantasy/medieval/village/cauldron/steam",
    "at": [
     -15.47,
     0.5536,
@@ -1553,7 +1553,7 @@
   },
   {
    "thing": "kitchen/kitchen cauldron",
-   "effect": "cauldron/bubbles",
+   "effect": "fantasy/medieval/village/cauldron/bubbles",
    "at": [
     -16.6,
     0.4016,
@@ -1567,7 +1567,7 @@
   },
   {
    "thing": "kitchen/kitchen cauldron",
-   "effect": "cauldron/steam",
+   "effect": "fantasy/medieval/village/cauldron/steam",
    "at": [
     -16.6,
     0.4016,
@@ -1581,7 +1581,7 @@
   },
   {
    "thing": "kitchen/kitchen rushlight",
-   "effect": "rushlight/fire",
+   "effect": "fantasy/medieval/village/rushlight/fire",
    "at": [
     -16.7008,
     1.2671,
@@ -1595,7 +1595,7 @@
   },
   {
    "thing": "chapel/chapel candlestand north",
-   "effect": "candlestand/flame",
+   "effect": "fantasy/medieval/village/candlestand/flame",
    "at": [
     16.0,
     1.811,
@@ -1609,7 +1609,7 @@
   },
   {
    "thing": "chapel/chapel candlestand north",
-   "effect": "candlestand/flame",
+   "effect": "fantasy/medieval/village/candlestand/flame",
    "at": [
     16.0,
     1.751,
@@ -1623,7 +1623,7 @@
   },
   {
    "thing": "chapel/chapel candlestand north",
-   "effect": "candlestand/flame",
+   "effect": "fantasy/medieval/village/candlestand/flame",
    "at": [
     16.0,
     1.751,
@@ -1637,7 +1637,7 @@
   },
   {
    "thing": "chapel/chapel candlestand north",
-   "effect": "candlestand/glow",
+   "effect": "fantasy/medieval/village/candlestand/glow",
    "at": [
     16.0,
     1.811,
@@ -1651,7 +1651,7 @@
   },
   {
    "thing": "chapel/chapel candlestand south",
-   "effect": "candlestand/flame",
+   "effect": "fantasy/medieval/village/candlestand/flame",
    "at": [
     16.0,
     1.811,
@@ -1665,7 +1665,7 @@
   },
   {
    "thing": "chapel/chapel candlestand south",
-   "effect": "candlestand/flame",
+   "effect": "fantasy/medieval/village/candlestand/flame",
    "at": [
     16.0,
     1.751,
@@ -1679,7 +1679,7 @@
   },
   {
    "thing": "chapel/chapel candlestand south",
-   "effect": "candlestand/flame",
+   "effect": "fantasy/medieval/village/candlestand/flame",
    "at": [
     16.0,
     1.751,
@@ -1693,7 +1693,7 @@
   },
   {
    "thing": "chapel/chapel candlestand south",
-   "effect": "candlestand/glow",
+   "effect": "fantasy/medieval/village/candlestand/glow",
    "at": [
     16.0,
     1.811,
@@ -1707,7 +1707,7 @@
   },
   {
    "thing": "chapel/chapel sconce north",
-   "effect": "sconce/fire",
+   "effect": "fantasy/medieval/village/sconce/fire",
    "at": [
     13.6,
     2.1006,
@@ -1721,7 +1721,7 @@
   },
   {
    "thing": "chapel/chapel sconce south",
-   "effect": "sconce/fire",
+   "effect": "fantasy/medieval/village/sconce/fire",
    "at": [
     13.6,
     2.1006,
@@ -1735,7 +1735,7 @@
   },
   {
    "thing": "chapel/chapel candle",
-   "effect": "candle/fire",
+   "effect": "fantasy/medieval/village/candle/fire",
    "at": [
     10.0,
     0.382,
@@ -1749,7 +1749,7 @@
   },
   {
    "thing": "armoury/armoury brazier",
-   "effect": "brazier/fire",
+   "effect": "fantasy/medieval/village/brazier/fire",
    "at": [
     11.3,
     0.89,
@@ -1763,7 +1763,7 @@
   },
   {
    "thing": "armoury/armoury brazier",
-   "effect": "brazier/flame",
+   "effect": "fantasy/medieval/village/brazier/flame",
    "at": [
     11.4185,
     0.8735,
@@ -1777,7 +1777,7 @@
   },
   {
    "thing": "armoury/armoury brazier",
-   "effect": "brazier/flame",
+   "effect": "fantasy/medieval/village/brazier/flame",
    "at": [
     11.1847,
     0.8735,
@@ -1791,7 +1791,7 @@
   },
   {
    "thing": "armoury/armoury brazier",
-   "effect": "brazier/flame",
+   "effect": "fantasy/medieval/village/brazier/flame",
    "at": [
     11.2968,
     0.8735,
@@ -1805,7 +1805,7 @@
   },
   {
    "thing": "lodging/sconce by the tapestry",
-   "effect": "sconce/fire",
+   "effect": "fantasy/medieval/village/sconce/fire",
    "at": [
     10.4,
     1.8006,
@@ -1819,7 +1819,7 @@
   },
   {
    "thing": "lodging/candlestand",
-   "effect": "candlestand/flame",
+   "effect": "fantasy/medieval/village/candlestand/flame",
    "at": [
     15.75,
     1.661,
@@ -1833,7 +1833,7 @@
   },
   {
    "thing": "lodging/candlestand",
-   "effect": "candlestand/glow",
+   "effect": "fantasy/medieval/village/candlestand/glow",
    "at": [
     15.75,
     1.661,
@@ -1847,7 +1847,7 @@
   },
   {
    "thing": "bailey/forge",
-   "effect": "forge/fire",
+   "effect": "fantasy/medieval/village/forge/fire",
    "at": [
     6.55,
     0.78,
@@ -1861,7 +1861,7 @@
   },
   {
    "thing": "bailey/forge",
-   "effect": "forge/smoke",
+   "effect": "fantasy/medieval/village/forge/smoke",
    "at": [
     6.81,
     3.6,
@@ -1875,7 +1875,7 @@
   },
   {
    "thing": "tavern/tavern chimney",
-   "effect": "chimney/puff",
+   "effect": "fantasy/medieval/village/chimney/puff",
    "at": [
     -10.725,
     8.8,
@@ -1889,7 +1889,7 @@
   },
   {
    "thing": "tavern/tavern chimney",
-   "effect": "chimney/puff",
+   "effect": "fantasy/medieval/village/chimney/puff",
    "at": [
     -11.275,
     8.8,
@@ -1903,7 +1903,7 @@
   },
   {
    "thing": "tavern/tavern candle",
-   "effect": "candle/fire",
+   "effect": "fantasy/medieval/village/candle/fire",
    "at": [
     -9.8,
     1.0036,
@@ -1917,7 +1917,7 @@
   },
   {
    "thing": "tavern/loft rushlight",
-   "effect": "rushlight/fire",
+   "effect": "fantasy/medieval/village/rushlight/fire",
    "at": [
     -11.2008,
     3.8471,
@@ -1931,7 +1931,7 @@
   },
   {
    "thing": "workshop/workshop candle",
-   "effect": "candle/fire",
+   "effect": "fantasy/medieval/village/candle/fire",
    "at": [
     14.1,
     1.0441,
@@ -1945,7 +1945,7 @@
   },
   {
    "thing": "workshop/workshop rushlight",
-   "effect": "rushlight/fire",
+   "effect": "fantasy/medieval/village/rushlight/fire",
    "at": [
     12.9992,
     1.2671,
@@ -1959,7 +1959,7 @@
   },
   {
    "thing": "catalogue/iron cauldron",
-   "effect": "cauldron/bubbles",
+   "effect": "fantasy/medieval/village/cauldron/bubbles",
    "at": [
     30.0,
     0.3816,
@@ -1973,7 +1973,7 @@
   },
   {
    "thing": "catalogue/iron cauldron",
-   "effect": "cauldron/steam",
+   "effect": "fantasy/medieval/village/cauldron/steam",
    "at": [
     30.0,
     0.3816,
@@ -1987,7 +1987,7 @@
   },
   {
    "thing": "catalogue/plaster candle small",
-   "effect": "candle/fire",
+   "effect": "fantasy/medieval/village/candle/fire",
    "at": [
     30.0,
     0.1247,
@@ -2001,7 +2001,7 @@
   },
   {
    "thing": "catalogue/plaster candle middle",
-   "effect": "candle/fire",
+   "effect": "fantasy/medieval/village/candle/fire",
    "at": [
     30.0,
     0.2236,
@@ -2015,7 +2015,7 @@
   },
   {
    "thing": "catalogue/plaster candle large",
-   "effect": "candle/fire",
+   "effect": "fantasy/medieval/village/candle/fire",
    "at": [
     30.0,
     0.362,
@@ -2029,7 +2029,7 @@
   },
   {
    "thing": "catalogue/slate brazier",
-   "effect": "brazier/fire",
+   "effect": "fantasy/medieval/village/brazier/fire",
    "at": [
     30.0,
     0.87,
@@ -2043,7 +2043,7 @@
   },
   {
    "thing": "catalogue/slate brazier",
-   "effect": "brazier/flame",
+   "effect": "fantasy/medieval/village/brazier/flame",
    "at": [
     29.9353,
     0.8535,
@@ -2057,7 +2057,7 @@
   },
   {
    "thing": "catalogue/slate brazier",
-   "effect": "brazier/flame",
+   "effect": "fantasy/medieval/village/brazier/flame",
    "at": [
     29.9298,
     0.8535,
@@ -2071,7 +2071,7 @@
   },
   {
    "thing": "catalogue/slate brazier",
-   "effect": "brazier/flame",
+   "effect": "fantasy/medieval/village/brazier/flame",
    "at": [
     30.135,
     0.8535,

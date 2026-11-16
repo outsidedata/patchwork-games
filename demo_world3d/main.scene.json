@@ -107,64 +107,9 @@
           "url": "/games/demo_world3d/assets/smallville.town.crowd.json",
           "preload": true
         },
-        "Rock013_4K_Color": {
+        "smallville.town_pictures": {
           "type": "texture",
-          "url": "/games/demo_world3d/assets/looks/Rock013_4K_Color.webp",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Rock013_4K_Displacement": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/looks/Rock013_4K_Displacement.webp",
-          "space": "linear",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Rock013_4K_NormalGL": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/looks/Rock013_4K_NormalGL.webp",
-          "space": "linear",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Concrete034_4K_Color": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/looks/Concrete034_4K_Color.webp",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Concrete034_4K_Displacement": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/looks/Concrete034_4K_Displacement.webp",
-          "space": "linear",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Wood036_4K_Color": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/looks/Wood036_4K_Color.webp",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Wood036_4K_Displacement": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/looks/Wood036_4K_Displacement.webp",
-          "space": "linear",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Wood036_4K_NormalGL": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/looks/Wood036_4K_NormalGL.webp",
-          "space": "linear",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Wood036_4K_Roughness": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/looks/Wood036_4K_Roughness.webp",
-          "space": "linear",
-          "wrap": "repeat",
+          "url": "/games/demo_world3d/assets/looks/smallville.town.pictures.ktx2",
           "preload": true
         }
       }

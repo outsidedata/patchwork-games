@@ -60,7 +60,8 @@ comes out marked `world3d_playerStart`.
   building one solid, with its roofs' coverings, its timber and its kit, drawn as one geometry by supershader3d, the
   scene's one shader, in at most three draw calls (solid, relief, see-through). Every material is the library's
   (`pro-ng/materials.json`, its look in `pro-ng/material/looks/`), composed into `assets/smallville.town.looks.json`
-  with its pictures in `assets/looks/`. Each vertex carries its material's number and what its look reads, and the
+  with its pictures in `assets/looks/`, drawn from one GPU-compressed KTX2 array of them,
+  `assets/looks/smallville.town.pictures.ktx2`. Each vertex carries its material's number and what its look reads, and the
   glb's extras say how its attributes make the shader's inputs, so the game names no material: a material or a look
   changed in the library shows in the game once it is baked again. world3d hands supershader3d the looks file and the
   wall looks the buildings' course table.
@@ -109,7 +110,8 @@ comes out marked `world3d_playerStart`.
 `yarn bake demo_world3d` (`assets/demo_world3d.bake.ts`) has the library's pro-ng make the town in one build
 (`pro-ng/build.mjs`: it fetches the texture sets, cuts the town in Blender, packs the glb with its shader and pictures,
 and writes its ways), copies what it wrote in, writes `main.scene.json`'s `world.world3d.place` and an entry of its
-catalogue for each of world3d's parts (`smallville.town.glb`, `smallville.town.looks`, …) and each picture, does the
+catalogue for each of world3d's parts (`smallville.town.glb`, `smallville.town.looks`, …) and one for its pictures'
+KTX2 stack (core's bake's `stack`, `smallville.town_pictures`) in place of the pictures one by one, does the
 same for the village in `village.scene.json`, bakes the two
 bodies, castle_walker (you) and castle_woman (every visitor), with every clip of your rig (`assets/player.rig.json`),
 writing the table anim plays by back into the rig. The bodies come from the paths the rig's `bodies` give, the clips
