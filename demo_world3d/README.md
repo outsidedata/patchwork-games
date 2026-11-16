@@ -54,13 +54,6 @@ nav graph, as the solver output names it, the placed thing and then its place (t
 the house's `house/patio`). The bake hands it to the place's build as an override, and you start on the place that
 comes out marked `world3d_playerStart`.
 
-`dev.html?scene=bridge` is the bridge: a field, a bridge 3 m up across it on two piers, a ramp down from each end, and
-a road under it. Its people walk over the bridge, under it on the ground and up and down its ramps, along a graph
-written by hand (`assets/bridge.nav.json`), each way one straight line of shapes3d's: up a ramp, across the deck, along
-the road. It shows npc3d's people on routes that climb, with people at two heights at one place on the ground. Beside
-the bridge a man goes up and down a spiral, three turns rising 3 m, a way of the graph that is a shapes3d spline: he
-walks its curve, as crowd3d walks a spline a straight piece at a time.
-
 ## How it is made
 
 - **The town drawn** (world3d): `assets/smallville.town.glb` as pro-ng's `procedural.py` cuts it, every
@@ -102,7 +95,7 @@ walks its curve, as crowd3d walks a spline a straight piece at a time.
 - **The people** (`visitor.sim.ts`): 30 npc3d NPCs on its crowd3d body, not walkers. Each goes on the fortress plugin's
   `tour` (`plugins/fortress/fortress.npc3d.ts`): each starts on one of the graph's places, the 30 spread evenly over every place
   it has, then rolls any other place of the graph, walks there along nav3d's route at a steady walk, each leg at the graph's heights so it climbs every stair,
-  and stands a while. crowd3d draws every one of them, in the town and on the bridge, as the one Mixamo body,
+  and stands a while. crowd3d draws every one of them, in the town, as the one Mixamo body,
   castle_woman. They walk through each other, and through you.
 - **The place's people** (`person.sim.ts`): in the village and the tavern, the people the place's stronghold
   solvers placed, spawned by world3d from the place's crowd file (the library's `stronghold/NAV.md`): the tavern's
@@ -133,7 +126,7 @@ every override or ask the solvers refused, `[{ path, reason }]`, `path` the solv
 ## Tests
 
 `yarn vitest run games/demo_world3d/demo_world3d.sim.test.ts`: you start on the town's start place and stand on it; a visitor walks the town to one of its places and stops on it at its height, its course written once
-a leg; and on the bridge, visitors walk over the bridge at its height, under it on the ground, and up its ramps.
+a leg; and in the tavern, each person loiters on a clip of a loiter verb of its landmark.
 
 How world3d draws a place, plays its clips and hands its files on is proven by world3d's own tests
 (`plugins/world3d/*.test.ts`).

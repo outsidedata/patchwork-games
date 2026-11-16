@@ -1,8 +1,8 @@
 // One of the town's people: an NPC of npc3d (`plugins/npc3d`) on its `crowd3d` body, drawn by crowd3d as
 // a person of its `body`, going about the town on the fortress plugin's `tour` behaviour
 // (`plugins/fortress/fortress.npc3d.ts`): from place to place of the graph along nav3d's routes. Like every
-// crowd3d person, it walks through every other body. Its numbers are its definition (`assets/demo_world3d.json`,
-// `assets/bridge.json`): npc3d's, and its `tour`'s settings.
+// crowd3d person, it walks through every other body. Its numbers are its definition (`assets/demo_world3d.json`):
+// npc3d's, and its `tour`'s settings.
 // Its own field, beside npc3d's and crowd3d's:
 //   home   the tag of the place its actor stands it at; '' to stand it on one of the tour's places spread evenly
 //          among the people of its kind: the k-th of n on the place k·m/n of the tour's m places, in order.

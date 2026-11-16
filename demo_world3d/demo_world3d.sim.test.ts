@@ -1,7 +1,6 @@
 // demo_world3d: the manager booted as its page boots it and main loaded, on pro-ng's town as
 // `yarn bake demo_world3d` wrote it, which world3d hands shapes3d and nav3d. A seat joins on the town's start place and
-// stands on it; and the visitors go about the town until one reaches a place along nav3d's route. On bridge, the visitors
-// walk over the bridge at its height, under it on the ground, and up and down its ramps. In the tavern, its
+// stands on it; and the visitors go about the town until one reaches a place along nav3d's route. In the tavern, its
 // people loiter on the verbs of its crowd file.
 import { expect, test } from 'vitest'
 import { boot, type Row, type Scene, type W } from '#engine/engine.ts'
@@ -91,25 +90,4 @@ test('in the tavern, each person loiters on a clip of a loiter verb of its landm
       expect(p.data.at === 'tavern_bar' ? BAR : SEATED).toContain(p.data.clip)
     }
   }
-})
-
-test('on bridge, visitors walk over the bridge at its height, under it on the ground, and up its ramps', async () => {
-  const { truth, room } = await main('bridge')
-  const visitors = room.rows.filter(r => r.kind === 'visitor') as Row[]
-  const time = () => room.rows.find(r => r.kind === 'npc3d')!.data.time
-  // the deck's top is 3 m up, from x −8 to 8, 2.5 m across z; the ramps run from it to the ground at x ±16
-  let over = false, under = false, ramp = false
-  for (let i = 0; i < 120 / DT && !(over && under && ramp); i++) {
-    truth.step(DT)
-    for (const v of visitors) {
-      if (v.data.speed === 0) continue
-      const [x, y, z] = bodies.crowd3d.where(v, time())
-      const deck = Math.abs(x) < 8 && Math.abs(z) < 1.25
-      if (deck && Math.abs(y - 3) < 1e-6) over = true
-      if (deck && Math.abs(y) < 1e-6) under = true
-      // on a ramp, its feet at the ramp's height there: 0 at its foot, 3 at its top
-      if (Math.abs(x) > 9 && Math.abs(x) < 15 && Math.abs(z) < 1.25 && Math.abs(y - (16 - Math.abs(x)) * 0.375) < 1e-6) ramp = true
-    }
-  }
-  expect({ over, under, ramp }).toEqual({ over: true, under: true, ramp: true })
 })
