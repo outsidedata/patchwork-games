@@ -1,0 +1,66 @@
+{
+  "program": {
+    "world": 4096,
+    "hscale": 1,
+    "sea": 0.5,
+    "flood": false,
+    "out": "ground",
+    "nodes": [
+      {
+        "id": "ground",
+        "op": "const",
+        "value": 0
+      }
+    ]
+  },
+  "analysis": {
+    "slopeStep": 0.5,
+    "curveStep": 2,
+    "positionRadius": 10,
+    "occlusionRadius": 20,
+    "occlusionSteps": 6,
+    "cliffProbe": 4,
+    "cliffSlope": 0.6,
+    "cliffDrop": 4,
+    "flatAngle": 0.03,
+    "records": 50000
+  },
+  "ground": {
+    "roughness": 0.95,
+    "layers": [
+      {
+        "name": "grass",
+        "map": "grass",
+        "normal": "grassNormal",
+        "scale": 4
+      }
+    ]
+  },
+  "surfaces": {},
+  "layers": [
+    {
+      "at": [
+        18.952,
+        -20.007
+      ],
+      "size": 32,
+      "px": 32,
+      "strokes": [
+        {
+          "verb": "flatten",
+          "radius": 14.894,
+          "hardness": 1,
+          "strength": 0,
+          "level": 0,
+          "surface": "",
+          "path": [
+            [
+              18.952,
+              -20.007
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

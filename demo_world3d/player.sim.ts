@@ -11,8 +11,10 @@
 //   stick   [x, z], the keys' way, right and forward.
 //   slow    whether the walk key is held.
 //   stood   whether `before` has stood it on its start.
-// `before` stands it once on its slot's `start`: on the place whose data says `start` in the nav3d graph
-// the start's `graph` names (`root`), else at the start's `pos`; facing its `yaw`, and the camera behind it. Each step it walks the definition's `run` metres a second (`walk` while `slow`) the way the
+// `before` stands it once: in a scene that gives `world.world3d.playerStart`, on world3d's `playerStart`, the place
+// of the nav graph the bake marked `world3d_playerStart`; else on its slot's `start`, on the place whose data says
+// `start` in the nav3d graph the start's `graph` names (`root`), else at the start's `pos`. It faces the start's
+// `yaw`, and the camera is behind it. Each step it walks the definition's `run` metres a second (`walk` while `slow`) the way the
 // stick points from the camera's yaw, jumps on the jump key, and is animated.
 //
 // The acts are the page's keys: `stick(x, y)` (y down, as a stick reads), `look(dyaw, dpitch)` within
@@ -27,6 +29,7 @@ import { solids as trees } from '#plugins/lod3d/lod3d.walker.ts'
 import { numbers, relative, walk } from '#plugins/walker/walker.sim.ts'
 import { animate } from '#plugins/anim/anim.sim.ts'
 import { graph } from '#plugins/nav3d/nav3d.sim.ts'
+import { playerStart } from '#plugins/world3d/world3d.sim.ts'
 
 const wrap = (a: number) => math.atan2(math.sin(a), math.cos(a))
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
@@ -46,7 +49,8 @@ export const player: Kind = {
     const d = me.data
     if (d.stood) return
     const start = w.find('start', s => s.data.slot === d.seat).data
-    d.pos = start.graph ? [...root(w, start.graph).point.at] : [...start.pos]
+    // a scene naming world3d's player start stands it on world3d's `playerStart`
+    d.pos = w.world.world3d?.playerStart !== undefined ? playerStart(w).at : start.graph ? [...root(w, start.graph).point.at] : [...start.pos]
     d.yaw = start.yaw
     d.look = { ...d.look, yaw: start.yaw }
     d.stood = true

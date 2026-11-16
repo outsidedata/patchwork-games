@@ -45,6 +45,15 @@ scene `pro-ng/scenes/village/village.art.json` and its metadata, and baked the w
 `assets/village/`. It is main with the village in place of the town, world3d's place `village.art`: the same kinds and
 definitions, the player on the start place its metadata marks, the visitors on its graph.
 
+`dev.html?scene=tavern` is the tavern, `dev.html?scene=spire` the spire (stronghold's `winterfell/spire`) and
+`dev.html?scene=house` the house (stronghold's `colonial/yard`): each a place stronghold's solvers build, baked into
+`assets/<scene>/` and drawn by world3d the way the village is, with the place's people.
+
+Where you start in a stronghold place is the scene's `world.world3d.playerStart`: the name of a place of the place's
+nav graph, as the solver output names it, the placed thing and then its place (the spire's `drum 1/outside the door`,
+the house's `house/patio`). The bake hands it to the place's build as an override, and you start on the place that
+comes out marked `world3d_playerStart`.
+
 `dev.html?scene=bridge` is the bridge: a field, a bridge 3 m up across it on two piers, a ramp down from each end, and
 a road under it. Its people walk over the bridge, under it on the ground and up and down its ramps, along a graph
 written by hand (`assets/bridge.nav.json`), each way one straight line of shapes3d's: up a ramp, across the deck, along
@@ -113,6 +122,13 @@ bodies, castle_walker (you) and castle_woman (every visitor), with every clip of
 writing the table anim plays by back into the rig. The bodies come from the paths the rig's `bodies` give, the clips
 from `~/troupe-collection`. The particle sheet (`assets/particles/`) and the torch stick (`assets/torch.glb`) are
 demo_particle3d's and demo_motion3d's, copied. Change the town, a material or a look in the library and bake again.
+
+The village, tavern, spire and house are stronghold places: the bake runs stronghold's `build.mjs` on each, with its
+overrides, plus `<playerStart with dots for slashes>.world3d_playerStart` set to true when the scene gives
+`world.world3d.playerStart`, and copies its files into `assets/<scene>/`, with `<place>.refusals.json` beside them:
+every override or ask the solvers refused, `[{ path, reason }]`, `path` the solvers' names from the top one down.
+
+`yarn bake demo_world3d <scene>` (`spire`, `house`, …) bakes that one scene's place and nothing else, no bodies.
 
 ## Tests
 

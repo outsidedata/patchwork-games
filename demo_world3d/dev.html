@@ -14,7 +14,7 @@
     <div id="readout"></div>
     <script type="module">
       // The testbed: index.html, the manager truth and main in this tab (or the scene `?scene=` names:
-      // `?scene=bridge`, `?scene=village`, `?scene=tavern`), one seat on it over a loopback, stepped on the page's clock. The truths are kept
+      // `?scene=bridge`, `?scene=village`, `?scene=tavern`, `?scene=spire`, `?scene=house`), one seat on it over a loopback, stepped on the page's clock. The truths are kept
       // on `window.__scenes`, the page on `window.__page` and the scene's client (its plugins) on
       // `window.__client`. The panel turns nav3d's drawing of the scene's graph on and off (`graphs`,
       // `?graphs=1` on at first), and puts the seat's body on any place of the graph, standing on
@@ -53,6 +53,8 @@
       import bridge from './assets/bridge.nav.json'
       import village from './assets/village/village.art.nav.json'
       import tavern from './assets/tavern/tavern.art.nav.json'
+      import spire from './assets/spire/spire.art.nav.json'
+      import house from './assets/house/yard.art.nav.json'
 
       file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
 
@@ -120,7 +122,7 @@
       window.__page = page
       const room = window.__scenes.get(file.prefabs.scenemanager.entry)
       // the scene's graph, the one its page draws
-      const graph = { main: town, bridge, village, tavern }[file.prefabs.scenemanager.entry]
+      const graph = { main: town, bridge, village, tavern, spire, house }[file.prefabs.scenemanager.entry]
       const tagsOf = p => p.data?.nav3d?.tags ?? []
       const places = [...new Set(graph.places.flatMap(tagsOf))].sort()
       const me = () => room.rows.find(r => r.kind === 'player')

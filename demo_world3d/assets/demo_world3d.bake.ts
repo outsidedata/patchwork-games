@@ -42,6 +42,9 @@
 //                 terrain3d's painted layer that flattens the ground under the whole town to 0, one flatten stroke,
 //                 which procedural.py writes beside the glb; for a place laid on the land (`at`, below), what its
 //                 solver cut into the land instead: its streets benched, its pads flattened, its ways painted
+//   <place>.refusals.json
+//                 a stronghold place's refusals, `[{ path, reason }]`: everything its run refused, each with the path
+//                 of names from the top solver down to the one that said it (stronghold's build.mjs)
 //   smallville.town.hollows.json
 //                 the boxes lod3d draws no grass, trees or stones in: one round each building standing at elevation 0,
 //                 which procedural.py writes beside the glb, handed to lod3d by world3d (`world3d.lod3d.ts`)
@@ -83,35 +86,53 @@ const merge = path.join(root, '.claude', 'skills', 'using-mixamo-assets', 'scrip
 // painted layer in place of one flatten under the whole place. A stronghold place's `overrides` (under this folder) is
 // its override strings, `{ "<key chain>": value }`, handed to its solver in its asks: each one either resolves on
 // what the solvers placed or is refused in the run, by its key chain.
+// `yarn bake demo_world3d <scene>` bakes that scene's place alone (`main`, `village`, `tavern`, `spire`, `house`: its scene
+// file's name), and not the bodies; `yarn bake demo_world3d` bakes every place and the bodies.
 const PLACES: { pro?: string; stronghold?: string; folder: string; scene: string; field: string; at?: [number, number]; overrides?: string }[] = [
-  // { pro: 'castle/smallville/smallville.town', folder: '', scene: 'main.scene.json', field: 'demo_world3d.field.json' },
-  // { stronghold: 'winterfell/village', folder: 'village', scene: 'village.scene.json', field: 'village/village.field.json' },
-  // { stronghold: 'winterfell/tavern', folder: 'tavern', scene: 'tavern.scene.json', field: 'tavern/tavern.field.json' },
+  { pro: 'castle/smallville/smallville.town', folder: '', scene: 'main.scene.json', field: 'demo_world3d.field.json' },
+  { stronghold: 'winterfell/village', folder: 'village', scene: 'village.scene.json', field: 'village/village.field.json' },
+  { stronghold: 'winterfell/tavern', folder: 'tavern', scene: 'tavern.scene.json', field: 'tavern/tavern.field.json' },
+  { stronghold: 'winterfell/spire', folder: 'spire', scene: 'spire.scene.json', field: 'spire/spire.field.json' },
+  { stronghold: 'colonial/yard', folder: 'house', scene: 'house.scene.json', field: 'house/house.field.json' },
 ]
+const chosen = process.argv[3]
+const baked = chosen ? PLACES.filter(place => place.scene === `${chosen}.scene.json`) : PLACES
+if (chosen && !baked.length) throw new Error(`demo_world3d's bake: no place is baked for the scene ${chosen}; the scenes with places are ${PLACES.map(place => place.scene.replace('.scene.json', '')).join(', ')}`)
 // what pro-ng's build writes for a scene, each `<name><suffix>`
 const MADE = ['.glb', '.looks.json', '.clips.json', '.shapes3d.json', '.nav.json', '.terrain3d_layers.json', '.hollows.json', '.effects.json', '.crowd.json']
 
 export default async ({ blender, scratch, library }: Tools) => {
   // each place made into every file a game boots from by the library's pro-ng (`pro-ng/build.mjs`), on core's Blender
   const { build } = await import(pathToFileURL(path.join(library, 'pro-ng', 'build.mjs')).href)
-  for (const place of PLACES) {
+  for (const place of baked) {
     // a stronghold run's scene is named after its solver's last word, `<word>.art`
     const name = place.pro ? path.basename(place.pro) : `${path.basename(place.stronghold!)}.art`
     const out = scratch(name)
     if (place.pro) await build(place.pro, out, blender)
-    else if (place.at) {
-      // the land the solver is laid on: the field with no layers, every one of them the place's own from a bake before
-      const land = scratch(`${name}.land.json`)
-      fs.writeFileSync(land, JSON.stringify({ ...JSON.parse(fs.readFileSync(path.join(here, place.field), 'utf8')), layers: [] }))
-      const asks = scratch(`${name}.asks.json`)
+    else {
+      // the solver's override strings: the place's own file's, and the scene's player start, world3d's
+      // `world.world3d.playerStart` (a nav place's whole name, `drum 1/outside the door`), as the override marking that
+      // place `world3d_playerStart` (`drum 1.outside the door.world3d_playerStart`)
       const overrides = place.overrides ? JSON.parse(fs.readFileSync(path.join(here, place.overrides), 'utf8')) : {}
-      fs.writeFileSync(asks, JSON.stringify({ ground: { field: land, at: place.at }, overrides }))
-      execFileSync(process.execPath, [path.join(library, 'stronghold', 'build.mjs'), place.stronghold!, out, '--config', asks], { stdio: 'inherit', env: { ...process.env, PATCHWORK_CORE: root } })
+      const playerStart: string | undefined = JSON.parse(fs.readFileSync(path.join(here, '..', place.scene), 'utf8')).world.world3d?.playerStart
+      if (playerStart !== undefined) overrides[`${playerStart.split('/').join('.')}.world3d_playerStart`] = true
+      const asks = scratch(`${name}.asks.json`)
+      if (place.at) {
+        // the land the solver is laid on: the field with no layers, every one of them the place's own from a bake before
+        const land = scratch(`${name}.land.json`)
+        fs.writeFileSync(land, JSON.stringify({ ...JSON.parse(fs.readFileSync(path.join(here, place.field), 'utf8')), layers: [] }))
+        fs.writeFileSync(asks, JSON.stringify({ ground: { field: land, at: place.at }, overrides }))
+        execFileSync(process.execPath, [path.join(library, 'stronghold', 'build.mjs'), place.stronghold!, out, '--config', asks], { stdio: 'inherit', env: { ...process.env, PATCHWORK_CORE: root } })
+      }
+      else {
+        fs.writeFileSync(asks, JSON.stringify({ overrides }))
+        execFileSync(process.execPath, [path.join(library, 'stronghold', 'build.mjs'), place.stronghold!, out, '--config', asks], { stdio: 'inherit' })
+      }
     }
-    else execFileSync(process.execPath, [path.join(library, 'stronghold', 'build.mjs'), place.stronghold!, out], { stdio: 'inherit' })
     const into = path.join(here, place.folder)
     fs.mkdirSync(into, { recursive: true })
-    for (const suffix of MADE) {
+    // a stronghold run also writes its refusals, every one of the run with the path to the solver that said it
+    for (const suffix of place.stronghold ? [...MADE, '.refusals.json'] : MADE) {
       fs.copyFileSync(path.join(out, name + suffix), path.join(into, name + suffix))
       console.log('wrote', path.relative(root, path.join(into, name + suffix)))
     }
@@ -178,6 +199,7 @@ export default async ({ blender, scratch, library }: Tools) => {
     fs.writeFileSync(fieldFile, JSON.stringify(field, null, 2) + '\n')
     console.log('wrote', path.relative(root, fieldFile), 'its layers')
   }
+  if (chosen) return
   const file = path.join(here, 'player.rig.json'), table = scratch('player.table.json')
   const bodies = Object.keys(player.bodies).map(body => `${body}=${path.join(here, `${body}.glb`)}`)
   await blender(['--factory-startup', '--python-exit-code', '1', '--python', exporter, '--', file, table, ...bodies])

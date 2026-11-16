@@ -30,5 +30,11 @@
 !/demo_terrain3d/
 !/demo_trees/
 !/demo_walker/
+# demo_world3d's stronghold places are baked again by `yarn bake demo_world3d <scene>`; only their fields are kept
+/demo_world3d/assets/village/*
+/demo_world3d/assets/tavern/*
+/demo_world3d/assets/spire/*
+/demo_world3d/assets/house/*
+!/demo_world3d/assets/*/*.field.json
 __pycache__/
 .DS_Store
