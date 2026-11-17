@@ -11,6 +11,8 @@ Station 5 is the horse ridden: the `rider` kind is the horse's definition with a
 X Bot, hung `on` the horse's `body:spine 2` with `along`, `offset` and `turn`. The horse's solver
 stands its bones first, then the X Bot is hung on that bone and seated by a cues driver on the
 horse's own senses (`stride`, `speed`, `clock`), so it rides each stride the way the head and tail do.
+`rider.cues.mjs` writes the `rider` definition, its seat and every bone's cues; tune the pose there
+and run `node games/demo_puppet3d/rider.cues.mjs`.
 
 `pose.html` (`?kind=<kind>`, `rider` by default) poses a kind's hung layouts with puppet3d's own
 `played`, `hung` and `skinned` on the world layout's rest skeleton: drag and wheel to orbit, side,
