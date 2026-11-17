@@ -1,0 +1,32 @@
+{
+  "player": {
+    "stations": 5,
+    "puppets": 2,
+    "view": { "yaw": 1.25, "pitch": 0.12, "orbit": 1.6 }
+  },
+  "horse": {
+    "puppets": ["four", "upright"],
+    "speeds": { "four": [0, 1.5, 3.4, 6, 12], "upright": [0, 0.7, 1.1, 1.5, 1.9] },
+    "show": { "radius": 14.4, "accel": 4, "dist": 7.35, "lift": 0.93 }
+  },
+  "tiger": {
+    "puppets": ["four", "upright"],
+    "speeds": { "four": [0, 1.1, 2.6, 5, 12], "upright": [0, 0.6, 0.9, 1.2, 1.5] },
+    "show": { "radius": 14.4, "accel": 4, "dist": 6, "lift": 0.7 }
+  },
+  "lion": {
+    "puppets": ["four", "upright"],
+    "speeds": { "four": [0, 1.1, 2.6, 5, 12], "upright": [0, 0.6, 0.9, 1.2, 1.5] },
+    "show": { "radius": 14.4, "accel": 4, "dist": 6, "lift": 0.7 }
+  },
+  "cheetah": {
+    "puppets": ["four", "upright"],
+    "speeds": { "four": [0, 1.1, 2.6, 5, 12], "upright": [0, 0.6, 0.9, 1.2, 1.5] },
+    "show": { "radius": 14.4, "accel": 4, "dist": 6, "lift": 0.7 }
+  },
+  "xbot": {
+    "puppets": ["cued", "cued"],
+    "speeds": { "cued": [0, 1.2, 1.669, 2.1, 2.5] },
+    "show": { "radius": 14.4, "accel": 4, "dist": 4.5, "lift": 1 }
+  }
+}

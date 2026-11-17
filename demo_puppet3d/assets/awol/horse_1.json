@@ -1,0 +1,1668 @@
+{
+  "skeleton": "horse_1Skeleton",
+  "skin": "horse_1Skin",
+  "puppets": {
+    "four": {
+      "solve": {
+        "quadruped": {
+          "centre": 0.63684,
+          "span": 0.9996,
+          "ends": {
+            "hind": {
+              "y": 1.09016,
+              "home": 0.1143,
+              "top": 0.13684,
+              "foot": 0.1812,
+              "hoof": 0.01491,
+              "leg": {
+                "bones": [
+                  0.3645,
+                  0.30101,
+                  0.36042,
+                  0.10836
+                ],
+                "bend": 1,
+                "straight": 0.999,
+                "cannon": {
+                  "follow": 0.5,
+                  "rest": -0.12279,
+                  "flex": 0.95
+                },
+                "pastern": {
+                  "rest": 0.37892,
+                  "sink": 0.3,
+                  "flex": 0.7
+                },
+                "out": [
+                  0,
+                  0.01955,
+                  -0.03082,
+                  -0.03261,
+                  0
+                ]
+              }
+            },
+            "fore": {
+              "y": 1.01503,
+              "home": 1.15939,
+              "top": 0.20056,
+              "foot": 0.14405,
+              "hoof": 0.00555,
+              "leg": {
+                "bones": [
+                  0.35952,
+                  0.27029,
+                  0.2875,
+                  0.13458
+                ],
+                "bend": -1,
+                "straight": 0.99995,
+                "cannon": {
+                  "follow": 1,
+                  "rest": -0.11165,
+                  "flex": 1.25
+                },
+                "pastern": {
+                  "rest": 0.53667,
+                  "sink": 0.3,
+                  "flex": 0.8
+                },
+                "out": [
+                  0,
+                  -0.02446,
+                  -0.05016,
+                  -0.03096,
+                  0
+                ]
+              }
+            }
+          },
+          "legs": [
+            {
+              "end": "hind",
+              "side": 1,
+              "bones": [
+                "left hip",
+                "left stifle",
+                "left hock",
+                "left hind paw"
+              ]
+            },
+            {
+              "end": "fore",
+              "side": 1,
+              "bones": [
+                "left shoulder",
+                "left elbow",
+                "left wrist",
+                "left front paw"
+              ]
+            },
+            {
+              "end": "hind",
+              "side": -1,
+              "bones": [
+                "right hip",
+                "right stifle",
+                "right hock",
+                "right hind paw"
+              ]
+            },
+            {
+              "end": "fore",
+              "side": -1,
+              "bones": [
+                "right shoulder",
+                "right elbow",
+                "right wrist",
+                "right front paw"
+              ]
+            }
+          ],
+          "gait": {
+            "paces": [
+              {
+                "name": "walk",
+                "speed": 1.5,
+                "cycle": 1,
+                "air": 0.38,
+                "fall": [
+                  0,
+                  0.25,
+                  0.5,
+                  0.75
+                ],
+                "lift": 0.09,
+                "crouch": 0.12089
+              },
+              {
+                "name": "trot",
+                "speed": 3.4,
+                "cycle": 0.66,
+                "air": 0.58,
+                "fall": [
+                  0,
+                  0.5,
+                  0.5,
+                  1
+                ],
+                "lift": 0.16,
+                "crouch": 0.13111
+              },
+              {
+                "name": "canter",
+                "speed": 6,
+                "cycle": 0.52,
+                "air": 0.68,
+                "fall": [
+                  0,
+                  0.3,
+                  0.3,
+                  0.55
+                ],
+                "lift": 0.2,
+                "crouch": 0.19727
+              },
+              {
+                "name": "gallop",
+                "speed": 12,
+                "cycle": 0.4,
+                "air": 0.8,
+                "fall": [
+                  0,
+                  0.4,
+                  0.1,
+                  0.5
+                ],
+                "lift": 0.22,
+                "crouch": 0.16782
+              }
+            ],
+            "reach": 0.6,
+            "lead": 0.34,
+            "still": 0.05,
+            "settle": 0.1,
+            "fold": 0.2
+          },
+          "spring": {
+            "gravity": 8,
+            "k": 30,
+            "c": 6,
+            "cap": 10,
+            "taut": 0.97312,
+            "give": 0.333
+          },
+          "ride": 0.5,
+          "back": {
+            "arch": 0.07,
+            "shorten": 0.05,
+            "span": 0.9,
+            "ease": 0.05
+          },
+          "spine": {
+            "points": [
+              [
+                0.08494,
+                0.07093
+              ],
+              [
+                0.23622,
+                0.07927
+              ],
+              [
+                0.36388,
+                0.05487
+              ],
+              [
+                0.5197,
+                0.03475
+              ],
+              [
+                0.69593,
+                0.02977
+              ],
+              [
+                0.85163,
+                0.06431
+              ],
+              [
+                1.05597,
+                0.17451
+              ]
+            ],
+            "bones": [
+              [
+                "pelvis",
+                0,
+                1
+              ],
+              [
+                "spine 1",
+                0,
+                1
+              ],
+              [
+                "spine 2",
+                1,
+                2
+              ],
+              [
+                "spine 3",
+                2,
+                3
+              ],
+              [
+                "spine 4",
+                3,
+                4
+              ],
+              [
+                "spine 5",
+                4,
+                5
+              ],
+              [
+                "chest",
+                5,
+                6
+              ]
+            ]
+          }
+        }
+      },
+      "cues": {
+        "neck": {
+          "bend": [
+            {
+              "by": "stride",
+              "swing": 0.04,
+              "period": 0.5
+            },
+            {
+              "by": "speed",
+              "keys": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  1.5,
+                  -0.05
+                ],
+                [
+                  12,
+                  -0.2
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "head": {
+          "bend": [
+            {
+              "by": "stride",
+              "swing": 0.03,
+              "period": 0.5,
+              "phase": 0.25
+            },
+            {
+              "by": "speed",
+              "keys": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  12,
+                  0.1
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "jaw": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "left ear": {
+          "bend": [
+            {
+              "by": "speed",
+              "keys": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  12,
+                  -0.3
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "swing": 0.08,
+              "period": 3.7
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "right ear": {
+          "bend": [
+            {
+              "by": "speed",
+              "keys": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  12,
+                  -0.3
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "swing": 0.08,
+              "period": 4.3,
+              "phase": 0.3
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "tail 1": {
+          "bend": [
+            {
+              "by": "speed",
+              "keys": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  12,
+                  -0.35
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "stride",
+              "swing": 0.06,
+              "period": 1
+            },
+            {
+              "by": "clock",
+              "swing": 0.05,
+              "period": 4
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "tail 2": {
+          "bend": [
+            {
+              "by": "speed",
+              "keys": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  12,
+                  -0.1
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "stride",
+              "swing": 0.05,
+              "period": 1,
+              "phase": 0.08
+            },
+            {
+              "by": "clock",
+              "swing": 0.05,
+              "period": 4,
+              "phase": 0.08
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "tail 3": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "stride",
+              "swing": 0.05,
+              "period": 1,
+              "phase": 0.16
+            },
+            {
+              "by": "clock",
+              "swing": 0.05,
+              "period": 4,
+              "phase": 0.16
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "tail 4": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "stride",
+              "swing": 0.05,
+              "period": 1,
+              "phase": 0.24
+            },
+            {
+              "by": "clock",
+              "swing": 0.05,
+              "period": 4,
+              "phase": 0.24
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "tail 5": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "stride",
+              "swing": 0.05,
+              "period": 1,
+              "phase": 0.32
+            },
+            {
+              "by": "clock",
+              "swing": 0.05,
+              "period": 4,
+              "phase": 0.32
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "tail 6": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "stride",
+              "swing": 0.05,
+              "period": 1,
+              "phase": 0.4
+            },
+            {
+              "by": "clock",
+              "swing": 0.05,
+              "period": 4,
+              "phase": 0.4
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "tail 7": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "stride",
+              "swing": 0.05,
+              "period": 1,
+              "phase": 0.48
+            },
+            {
+              "by": "clock",
+              "swing": 0.05,
+              "period": 4,
+              "phase": 0.48
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "upright": {
+      "solve": {
+        "upright": {
+          "centre": 0,
+          "hip": 1.03,
+          "rear": 1.15,
+          "lean": 0.08,
+          "home": 0.04,
+          "top": 0.13684,
+          "foot": 0.15,
+          "hoof": 0.01491,
+          "sway": 0.04,
+          "leg": {
+            "bones": [
+              0.3645,
+              0.30101,
+              0.36042,
+              0.10836
+            ],
+            "bend": 1,
+            "straight": 0.999,
+            "cannon": {
+              "follow": 0.5,
+              "rest": -0.12279,
+              "flex": 0.95
+            },
+            "pastern": {
+              "rest": 0.37892,
+              "sink": 0.3,
+              "flex": 0.7
+            },
+            "out": [
+              0,
+              0.01955,
+              -0.03082,
+              -0.03261,
+              0
+            ]
+          },
+          "legs": [
+            {
+              "side": 1,
+              "bones": [
+                "left hip",
+                "left stifle",
+                "left hock",
+                "left hind paw"
+              ]
+            },
+            {
+              "side": -1,
+              "bones": [
+                "right hip",
+                "right stifle",
+                "right hock",
+                "right hind paw"
+              ]
+            }
+          ],
+          "gait": {
+            "paces": [
+              {
+                "name": "walk",
+                "speed": 0.7,
+                "cycle": 1.1,
+                "air": 0.4,
+                "fall": [
+                  0,
+                  0.5
+                ],
+                "lift": 0.12,
+                "crouch": 0.05
+              },
+              {
+                "name": "jog",
+                "speed": 1.4,
+                "cycle": 0.8,
+                "air": 0.5,
+                "fall": [
+                  0,
+                  0.5
+                ],
+                "lift": 0.16,
+                "crouch": 0.07
+              },
+              {
+                "name": "run",
+                "speed": 2.2,
+                "cycle": 0.6,
+                "air": 0.58,
+                "fall": [
+                  0,
+                  0.5
+                ],
+                "lift": 0.2,
+                "crouch": 0.09
+              }
+            ],
+            "reach": 0.4,
+            "lead": 0.3,
+            "still": 0.05,
+            "settle": 0.08,
+            "fold": 0.15
+          },
+          "spring": {
+            "gravity": 8,
+            "k": 30,
+            "c": 6,
+            "cap": 10,
+            "taut": 0.97312,
+            "give": 0.333
+          },
+          "ride": 0.3,
+          "spine": {
+            "points": [
+              [
+                0.08494,
+                0.07093
+              ],
+              [
+                0.23622,
+                0.07927
+              ],
+              [
+                0.36388,
+                0.05487
+              ],
+              [
+                0.5197,
+                0.03475
+              ],
+              [
+                0.69593,
+                0.02977
+              ],
+              [
+                0.85163,
+                0.06431
+              ],
+              [
+                1.05597,
+                0.17451
+              ]
+            ],
+            "bones": [
+              [
+                "pelvis",
+                0,
+                1
+              ],
+              [
+                "spine 1",
+                0,
+                1
+              ],
+              [
+                "spine 2",
+                1,
+                2
+              ],
+              [
+                "spine 3",
+                2,
+                3
+              ],
+              [
+                "spine 4",
+                3,
+                4
+              ],
+              [
+                "spine 5",
+                4,
+                5
+              ],
+              [
+                "chest",
+                5,
+                6
+              ]
+            ]
+          }
+        }
+      },
+      "cues": {
+        "left shoulder": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0.6
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "left elbow": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  -1.4
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "left wrist": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  1
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "left front paw": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "right shoulder": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0.6
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "right elbow": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  -1.4
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "right wrist": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  1
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "right front paw": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "neck": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "tail 1": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0.6
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "head": {
+          "bend": [
+            {
+              "by": "stride",
+              "swing": 0.03,
+              "period": 0.5,
+              "phase": 0.25
+            },
+            {
+              "by": "speed",
+              "keys": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  12,
+                  0.1
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "jaw": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "left ear": {
+          "bend": [
+            {
+              "by": "speed",
+              "keys": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  12,
+                  -0.3
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "swing": 0.08,
+              "period": 3.7
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "right ear": {
+          "bend": [
+            {
+              "by": "speed",
+              "keys": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  12,
+                  -0.3
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "clock",
+              "swing": 0.08,
+              "period": 4.3,
+              "phase": 0.3
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "tail 2": {
+          "bend": [
+            {
+              "by": "speed",
+              "keys": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  12,
+                  -0.1
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "stride",
+              "swing": 0.05,
+              "period": 1,
+              "phase": 0.08
+            },
+            {
+              "by": "clock",
+              "swing": 0.05,
+              "period": 4,
+              "phase": 0.08
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "tail 3": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "stride",
+              "swing": 0.05,
+              "period": 1,
+              "phase": 0.16
+            },
+            {
+              "by": "clock",
+              "swing": 0.05,
+              "period": 4,
+              "phase": 0.16
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "tail 4": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "stride",
+              "swing": 0.05,
+              "period": 1,
+              "phase": 0.24
+            },
+            {
+              "by": "clock",
+              "swing": 0.05,
+              "period": 4,
+              "phase": 0.24
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "tail 5": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "stride",
+              "swing": 0.05,
+              "period": 1,
+              "phase": 0.32
+            },
+            {
+              "by": "clock",
+              "swing": 0.05,
+              "period": 4,
+              "phase": 0.32
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "tail 6": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "stride",
+              "swing": 0.05,
+              "period": 1,
+              "phase": 0.4
+            },
+            {
+              "by": "clock",
+              "swing": 0.05,
+              "period": 4,
+              "phase": 0.4
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        },
+        "tail 7": {
+          "bend": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "swing": [
+            {
+              "by": "stride",
+              "swing": 0.05,
+              "period": 1,
+              "phase": 0.48
+            },
+            {
+              "by": "clock",
+              "swing": 0.05,
+              "period": 4,
+              "phase": 0.48
+            }
+          ],
+          "twist": [
+            {
+              "by": "clock",
+              "keys": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

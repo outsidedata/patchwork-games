@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demo_puppet3d dev</title>
+    <style>
+      body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      canvas { grid-area: 1 / 1 }
+      .lil-gui.root { max-height: 100vh; overflow-y: auto }
+      #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px; pointer-events: none }
+    </style>
+  </head>
+  <body>
+    <div id="readout"></div>
+    <script type="module">
+      // The testbed: index.html, the manager truth and the scene it enters, in this tab, one seat on it
+      // over a loopback, stepped on the page's clock. The truths are kept on `window.__scenes` and the page
+      // on `window.__page`. The readout shows the step, the animal at the station the camera is on, the
+      // puppet it is posed as and its speed, and the last five errors the page threw or wrote.
+      // The keys are the seat's (1 to 5 the pace, t the next puppet, [ and ] the station, q and e the
+      // camera). The panel writes the same onto the keeper's row: the pace, the puppet, the station; and
+      // the clock, slowed or held and stepped (the backquote holds it, n steps it once).
+      import { boot } from '#engine/engine.ts'
+      import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
+      import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import { possessed } from '#plugins/player/player.plugin.ts'
+      import GUI from 'lil-gui'
+      import { sim } from './demo_puppet3d.sim.ts'
+      import file from './demo_puppet3d.scene.json'
+
+      const errors = []
+      const caught = e => {
+        errors.push(String(e?.message ?? e))
+        if (errors.length > 5) errors.shift()
+      }
+      addEventListener('error', e => caught(e.error ?? e.message))
+      addEventListener('unhandledrejection', e => caught(e.reason))
+      const written = console.error.bind(console)
+      console.error = (...a) => { caught(a.map(x => x?.message ?? x).join(' ')); written(...a) }
+
+      const dt = file.prefabs.engine.dt
+      const truth = boot(file, sim)
+      window.__scenes = await load(truth, import.meta.url)
+      const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+        for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
+          if (!surface) continue
+          const canvas = document.createElement('canvas')
+          canvas.width = scene.prefabs.engine.width
+          canvas.height = scene.prefabs.engine.height
+          document.body.appendChild(canvas)
+          surface.mount(canvas)
+        }
+        me.plugins.stats?.mount(document.body)
+      })
+      window.__page = page
+      const readout = document.getElementById('readout')
+
+      const gui = new GUI({ title: 'demo_puppet3d dev' })
+      for (const type of ['keydown', 'keyup', 'click', 'mousedown', 'contextmenu', 'wheel'])
+        gui.domElement.addEventListener(type, e => e.stopPropagation())
+      gui.domElement.addEventListener('pointerup', () => requestAnimationFrame(() => {
+        const at = document.activeElement
+        if (gui.domElement.contains(at) && at.tagName !== 'SELECT' && !(at.tagName === 'INPUT' && (at.type === 'text' || at.type === 'number'))) at.blur()
+      }))
+
+      const room = () => window.__scenes.get(file.prefabs.scenemanager.entry)
+      const keeper = () => room()?.rows.find(r => r.kind === 'player')
+      const set = (field, v) => { const k = keeper(); if (k) k.data[field] = v }
+      window.__keeper = set
+
+      const pace = gui.addFolder('pace')
+      ;[0, 1, 2, 3, 4].forEach(i => pace.add({ go: () => set('gait', i) }, 'go').name(`gait ${i} (${i + 1})`))
+      const puppet = gui.addFolder('puppet (t)')
+      ;['four', 'upright'].forEach((name, i) => puppet.add({ go: () => set('puppet', i) }, 'go').name(name))
+      const station = gui.addFolder('station ([ ])')
+      ;['horse', 'tiger', 'xbot'].forEach((name, i) => station.add({ go: () => set('station', i) }, 'go').name(name))
+
+      const clock = { speed: 1, paused: false }
+      window.__step = (n = 1) => { clock.paused = true; for (let i = 0; i < n; i++) truth.step(dt) }
+      const time = gui.addFolder('clock')
+      time.add(clock, 'speed', 0.05, 1, 0.01).name('speed (× real time)')
+      time.add(clock, 'paused').name('held (`)').listen()
+      time.add({ step: () => window.__step(1) }, 'step').name('one step (n)')
+      addEventListener('keydown', e => {
+        if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return
+        if (e.key === '`') clock.paused = !clock.paused
+        else if (e.key === 'n') window.__step(1)
+      })
+
+      let last = performance.now(), owed = 0
+      const loop = async now => {
+        owed = clock.paused ? 0 : owed + Math.min((now - last) / 1000, 0.25) * clock.speed
+        last = now
+        try {
+          page.input()
+          while (owed >= dt) { truth.step(dt); owed -= dt }
+          await page.frame(clock.paused ? 1 : owed / dt)
+        } catch (e) { caught(e) }
+        const mine = page.client && possessed(page.client.plugins.wire.rows)
+        const at = mine && page.client.plugins.wire.rows.find(r => r.data.at === mine.data.station)
+        readout.textContent = [`${file.prefabs.scenemanager.entry}  step ${truth.n}${at ? `  station ${mine.data.station}: ${at.kind} as ${at.data.puppet} at ${at.data.speed.toFixed(2)} m/s` : ''}`, ...errors].join('\n')
+        requestAnimationFrame(loop)
+      }
+      requestAnimationFrame(loop)
+    </script>
+  </body>
+</html>

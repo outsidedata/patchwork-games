@@ -1,0 +1,47 @@
+{
+  "program": {
+    "world": 2000,
+    "hscale": 26,
+    "sea": 0.5,
+    "flood": false,
+    "out": "land",
+    "nodes": [
+      { "id": "roll", "op": "noise", "kind": "simplex", "freq": 6, "seed": 11 },
+      { "id": "swell", "op": "noise", "kind": "simplex", "freq": 21, "seed": 5 },
+      { "id": "ripple", "op": "scale", "input": "swell", "by": 0.14 },
+      { "id": "land", "op": "combine", "a": "roll", "b": "ripple", "mode": "add" }
+    ]
+  },
+  "analysis": {
+    "slopeStep": 1,
+    "curveStep": 3,
+    "positionRadius": 12,
+    "occlusionRadius": 20,
+    "occlusionSteps": 5,
+    "cliffProbe": 6,
+    "cliffSlope": 0.5,
+    "cliffDrop": 3,
+    "flatAngle": 0.03,
+    "records": 50000
+  },
+  "ground": {
+    "compose": "stack",
+    "heightBlend": { "amount": 2, "depth": 0.1 },
+    "far": { "amount": 0.7, "scale": 7.3 },
+    "roughness": 0.9,
+    "layers": [
+      {
+        "name": "grass",
+        "map": "grass",
+        "normal": "grassNormal",
+        "scale": 30,
+        "warp": [
+          { "freq": 0.005, "amp": 30, "stretch": [1, 1, 1], "rotate": 0 },
+          { "freq": 0.035, "amp": 3, "stretch": [1, 1, 1], "rotate": 0.7 }
+        ]
+      }
+    ]
+  },
+  "surfaces": {},
+  "layers": []
+}
