@@ -104,7 +104,19 @@ async function joined() {
     }
     expect(done()).toBe(true)
   }
-  return { truth, room, send, me, until, kinds, row, walkTo, route, pointOf, middle, steady }
+  // Presses use and steps once. A move it starts that gives a warp (motion3d's Warp) begins where the
+  // body stood and facing as it faced: the step moves it no more than a walking step and turns it less
+  // than two degrees, wherever it stood off its point.
+  const pressUse = () => {
+    const was = { pos: [...me().data.pos], yaw: me().data.yaw, motion: `${me().data.activity}.${me().data.motion}` }
+    send('press', 'use')
+    truth.step(DT)
+    const d = me().data
+    if (`${d.activity}.${d.motion}` === was.motion || !MOTION.activities[d.activity]?.motions[d.motion]?.warp) return
+    expect(far(d.pos, was.pos)).toBeLessThan(0.15)
+    expect(Math.abs(Math.atan2(Math.sin(d.yaw - was.yaw), Math.cos(d.yaw - was.yaw)))).toBeLessThan(2 * (Math.PI / 180))
+  }
+  return { truth, room, send, me, until, kinds, row, walkTo, route, pointOf, middle, steady, pressUse }
 }
 
 // Where a bone of the body stands in the world as the page draws it this step: motion3d's pose of the row's
@@ -185,10 +197,9 @@ function landsOnFloor({ truth, room, me }: { truth: Truth; room: Truth; me: () =
 const STEP = 0.06
 
 test('the use key plays each zone\'s own clip in it, holding the body still, and outside them steps back', async () => {
-  const { truth, send, me, until, kinds, row, walkTo } = await joined()
+  const { truth, send, me, until, kinds, row, walkTo, pressUse } = await joined()
   const idle = me().data.clip
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.activity).toBe('roll')
   expect(me().data).toMatchObject({ motion: 'backstep', clip: clipsOf('roll', 'backstep')[0] })
   until(() => me().data.clip === idle, 60 * 3)
@@ -197,8 +208,7 @@ test('the use key plays each zone\'s own clip in it, holding the body still, and
     walkTo(zone.data.pos[0], zone.data.pos[2], kinds[zone.kind].shape.box.size[0] / 4)
     const [word] = kinds[zone.kind].activities
     expect(me().data.offered).toEqual([word])
-    send('press', 'use')
-    truth.step(DT)
+    pressUse()
     expect(me().data.activity).toBe(word)
     expect(me().data.clip).toBe(clipsOf(word, 'use')[0])
     // Eased onto the floor where it stood over the fade, then held there, placed by the clip's offsets.
@@ -493,8 +503,16 @@ test('run at a plain waist-high box with no station placed, the body vaults it; 
   send('stick', 0, -1)
   const motions: string[] = []
   for (let i = 0; i < 60 * 10 && !(motions.includes('climbup.over') && me().data.activity === 'walk'); i++) {
+    const was = { pos: [...me().data.pos], yaw: me().data.yaw }
     truth.step(DT)
     const m = `${me().data.activity}.${me().data.motion}`
+    // The jump up is warped onto the lip: the step it begins on moves the body no more than a run's step
+    // and turns it less than two degrees.
+    if (m === 'climbup.up' && !motions.includes(m)) {
+      const [x, y, z] = me().data.pos
+      expect(Math.hypot(x - was.pos[0], y - was.pos[1], z - was.pos[2])).toBeLessThan(0.15)
+      expect(Math.abs(me().data.yaw - was.yaw)).toBeLessThan(2 * (Math.PI / 180))
+    }
     if (motions[motions.length - 1] !== m) motions.push(m)
   }
   expect(motions).toContain('climbup.up')
@@ -507,6 +525,71 @@ test('run at a plain waist-high box with no station placed, the body vaults it; 
   expect(me().data.pos[1]).toBeCloseTo(top, 1)
   const near = climb.data.pos[2] - kinds.climbbox.shape.box.size[2] / 2
   expect(me().data.pos[2]).toBeGreaterThan(near)
+})
+
+// Runs at the waist-high box on `slant` radians from square, six metres short of it and off to the side
+// so the way it runs meets the box's near side at its middle, until it has vaulted and walks again:
+// where it stood the step before the vault began, where its line met the near side, and each step of
+// the vault (its clip's playhead, its place and its facing).
+async function vaultRun(slant: number) {
+  const j = await joined()
+  const { truth, room, send, me, row, kinds } = j
+  const box = row('vaultbox')
+  const near = box.data.pos[2] - kinds.vaultbox.shape.box.size[2] / 2
+  standAt(j, box.data.pos[0] - (near - (box.data.pos[2] - 6)) * Math.tan(slant), box.data.pos[2] - 6)
+  send('look', slant, 0)
+  send('fast', 1)
+  send('stick', 0, -1)
+  const plant = secondsIn(reader(room), me(), 'vaultone', 'warp', 'plant')
+  let was = { pos: [...me().data.pos], yaw: me().data.yaw }
+  let before: { pos: number[]; yaw: number } | null = null
+  const steps: { t: number; pos: number[]; yaw: number }[] = []
+  for (let i = 0; i < 60 * 6 && !(steps.length && me().data.activity === 'walk'); i++) {
+    truth.step(DT)
+    const d = me().data
+    if (d.activity === 'vaultover') {
+      before ??= was
+      steps.push({ t: d.clipT, pos: [...d.pos], yaw: d.yaw })
+    }
+    was = { pos: [...d.pos], yaw: d.yaw }
+  }
+  expect(before).not.toBe(null)
+  const meets = before!.pos[0] + (near - before!.pos[2]) * Math.tan(before!.yaw)
+  const beyond = box.data.pos[2] + kinds.vaultbox.shape.box.size[2] / 2
+  return { before: before!, meets, plant, steps, end: me().data, beyond }
+}
+
+test('run at the waist-high box on a slant, the vault is warped: it begins where the body runs, with no jump or snap, bends onto its point and is the square vault from the hand plant on', async () => {
+  const slant = 25 * (Math.PI / 180)
+  const square = await vaultRun(0)
+  const slanted = await vaultRun(slant)
+  const first = slanted.steps[0]
+  // The step it begins on carries it on as a run's step would, facing the way it ran: no jump, no turn.
+  expect(Math.hypot(first.pos[0] - slanted.before.pos[0], first.pos[2] - slanted.before.pos[2])).toBeLessThan(0.15)
+  expect(Math.abs(first.yaw - slanted.before.yaw)).toBeLessThan(2 * (Math.PI / 180))
+  expect(first.yaw).toBeCloseTo(slant, 1)
+  // Each step against the square vault at the same playhead: the bend the warp lays on.
+  const at = (t: number) => square.steps.find(s => Math.abs(s.t - t) < 1e-6)!
+  let bent = slant
+  for (const s of slanted.steps) {
+    const q = at(s.t)
+    const turn = s.yaw - q.yaw
+    if (s.t < slanted.plant) {
+      // Before the plant it turns from its slant to square, never back, a little each step.
+      expect(turn).toBeLessThanOrEqual(bent + 1e-9)
+      expect(bent - turn).toBeLessThan(2 * (Math.PI / 180))
+      bent = turn
+    } else {
+      // From the plant on it is the square vault, moved along the box to where its line met it.
+      expect(Math.abs(turn)).toBeLessThan(1e-6)
+      expect(s.pos[0] - q.pos[0]).toBeCloseTo(slanted.meets - square.meets, 3)
+      expect(s.pos[2]).toBeCloseTo(q.pos[2], 3)
+    }
+  }
+  // And over it, on the ground beyond.
+  expect(slanted.end.activity).toBe('walk')
+  expect(slanted.end.pos[2]).toBeGreaterThan(slanted.beyond)
+  expect(slanted.end.pos[1]).toBeLessThan(0.05)
 })
 
 test('standing at rest, the idle plays on at its own rate', async () => {
@@ -525,15 +608,14 @@ const HANDS = ['LeftHand', 'RightHand']
 // hang and onto the lip.
 async function hung() {
   const j = await joined()
-  const { truth, send, me, until, kinds, row, walkTo, middle, steady } = j
+  const { truth, send, me, until, kinds, row, walkTo, middle, steady, pressUse } = j
   const zone = row('ledgezone'), wall = row('wall')
   const lip = kinds.ledgezone.points.Lip.line
   const lipZ = zone.data.pos[2] + lip.from[2], lipY = zone.data.pos[1] + lip.from[1]
   walkTo(zone.data.pos[0], zone.data.pos[2], 0.3)
   // The wall's side offers mantling onto it as well, to a body run into it.
   expect(me().data.offered).toContain('ledge')
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.activity).toBe('ledge')
   expect(me().data.clip).toBe(clipsOf('ledge', 'use')[0])
   until(() => me().data.motion === 'hang', 60 * 3)
@@ -565,7 +647,7 @@ async function hung() {
 }
 
 test('under the wall it hangs from the lip, shimmies along it until the hands would leave it, and climbs up onto the top', async () => {
-  const { truth, room, send, me, until, kinds, zone, wall, lip, lipY, lipZ, steady } = await hung()
+  const { truth, room, send, me, until, kinds, zone, wall, lip, lipY, lipZ, steady, pressUse } = await hung()
   // The stick right: along the lip to the body's right, −x, the hands steady into the shimmy, until it
   // stops short of the lip's end. The hands take turns gripping the lip: each is bent onto it while it
   // grips, and the other is let go to reach along.
@@ -600,8 +682,7 @@ test('under the wall it hangs from the lip, shimmies along it until the hands wo
   // Forward and use: up onto the wall's top, its hips going steadily from the climb onto its feet there,
   // and walking.
   send('stick', 0, -1)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe(clipsOf('ledge', 'climb')[0])
   send('stick', 0, 0)
   until(() => me().data.activity === 'walk', 60 * 3)
@@ -615,10 +696,9 @@ test('under the wall it hangs from the lip, shimmies along it until the hands wo
 })
 
 test('hanging, back and use drops it to the ground, its feet landing on the floor, walking', async () => {
-  const { truth, room, send, me, until, steady } = await hung()
+  const { truth, room, send, me, until, steady, pressUse } = await hung()
   send('stick', 0, 1)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe(clipsOf('ledge', 'drop')[0])
   steady(HANDS, () => me().data.eased === null, 30)
   send('stick', 0, 0)
@@ -627,13 +707,12 @@ test('hanging, back and use drops it to the ground, its feet landing on the floo
 })
 
 test('in front of the chair it sits down, its hips on the seat, and stands up again', async () => {
-  const { truth, room, send, me, until, kinds, row, walkTo, steady } = await joined()
+  const { truth, room, send, me, until, kinds, row, walkTo, steady, pressUse } = await joined()
   const zone = row('chairzone')
   const seat = kinds.chairzone.points.Seat.point.at
   walkTo(zone.data.pos[0], zone.data.pos[2] - 0.3, 0.3)
   expect(me().data.offered).toEqual(['chair'])
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.activity).toBe('chair')
   expect(me().data.clip).toBe(clipsOf('chair', 'use')[0])
   until(() => me().data.motion === 'seated', 60 * 4)
@@ -644,8 +723,7 @@ test('in front of the chair it sits down, its hips on the seat, and stands up ag
   expect(hips[1]).toBeCloseTo(zone.data.pos[1] + seat[1], 3)
   expect(hips[2]).toBeCloseTo(zone.data.pos[2] + seat[2], 3)
 
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe(clipsOf('chair', 'stand')[0])
   until(() => me().data.activity === 'walk', 60 * 4)
   const at = [...me().data.pos]
@@ -678,13 +756,12 @@ test('standing still in the cold room plays its idle, walking in it walks as any
 // Up into a hang from a bar or a ceiling, along it to its end, and down again.
 async function freehang(kind: string, point: string, across: (p: Point) => number[]) {
   const j = await joined()
-  const { truth, send, me, until, row, route, steady, middle, pointOf } = j
+  const { truth, send, me, until, row, route, steady, middle, pointOf, pressUse } = j
   const zone = row(kind).data.pos
   const lane = zone[0] < 0 ? -LANE : LANE
   const front = zone[2] < 30 ? ROW1 : ROW3
   route([[lane, front], [zone[0], front], [zone[0], zone[2]]], 0.3)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe('freejump')
   until(() => me().data.motion === 'hang', 60 * 3)
   steady(HANDS, () => me().data.eased === null, 30)
@@ -704,8 +781,7 @@ async function freehang(kind: string, point: string, across: (p: Point) => numbe
   until(() => me().data.motion === 'hang', 60 * 20)
   for (const b of HANDS) expect(boneAt(j.room, me(), b)[0]).toBeLessThanOrEqual(hi + 0.05)
   send('stick', 0, 0)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe('freedrop')
   landsOnFloor(j, 60 * 3)
   until(() => me().data.grounded && Math.abs(me().data.pos[1]) < 1e-6, 60 * 2)
@@ -720,11 +796,10 @@ test('under the ceiling it jumps up and hangs from it, its wrists on it, moves a
 })
 
 test('at the rope it takes hold, climbs while the stick is forward and holds on while not, up to the top, and lets go', async () => {
-  const { truth, send, me, until, row, route, middle, pointOf } = await joined()
+  const { truth, send, me, until, row, route, middle, pointOf, pressUse } = await joined()
   const zone = row('ropezone').data.pos
   route([[LANE, ROW1], [zone[0], ROW1], [zone[0], zone[2]]], 0.3)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.activity).toBe('rope')
   const rope = pointOf('ropezone', 'Rope')
   // Held still with the stick let go.
@@ -747,11 +822,10 @@ test('at the rope it takes hold, climbs while the stick is forward and holds on 
 })
 
 test('at the rope swing it swings from the beam onto the platform and stands there', async () => {
-  const { truth, send, me, until, row, route, kinds } = await joined()
+  const { truth, send, me, until, row, route, kinds, pressUse } = await joined()
   const zone = row('swingzone').data.pos
   route([[LANE, ROW1 - 2], [zone[0], ROW1 - 2], [zone[0], zone[2]]], 0.3)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe('ropeswing')
   until(() => me().data.activity === 'walk' && me().data.eased === null, 60 * 4)
   for (let i = 0; i < 30; i++) truth.step(DT)
@@ -760,11 +834,10 @@ test('at the rope swing it swings from the beam onto the platform and stands the
 })
 
 test('at the climbing wall it takes hold, climbs up while the stick is forward to the top, down while it is back, and lets go', async () => {
-  const { truth, send, me, until, row, route, pointOf } = await joined()
+  const { truth, send, me, until, row, route, pointOf, pressUse } = await joined()
   const zone = row('climbzone').data.pos
   route([[LANE, ROW1], [zone[0], ROW1], [zone[0], zone[2]]], 0.3)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.activity).toBe('climb')
   const face = pointOf('climbzone', 'Face')
   const low = me().data.pos[1]
@@ -787,11 +860,10 @@ test('at the climbing wall it takes hold, climbs up while the stick is forward t
 })
 
 test('at the wall leaning back it climbs at its clip\'s own rate, the stick forward, up along the slab', async () => {
-  const { truth, send, me, until, row, route } = await joined()
+  const { truth, send, me, until, row, route, pressUse } = await joined()
   const zone = row('tiltzone').data.pos
   route([[LANE, ROW3 - 2], [zone[0], ROW3 - 2], [zone[0], zone[2]]], 0.3)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.activity).toBe('climb')
   send('stick', 0, -1)
   for (let i = 0; i < 60; i++) truth.step(DT)
@@ -807,11 +879,10 @@ test('at the wall leaning back it climbs at its clip\'s own rate, the stick forw
 // A one-shot from a point of the station's space: played from the point, then walking on its feet.
 async function oneShot(kind: string, clip: string, lane: number, front: number) {
   const j = await joined()
-  const { truth, send, me, until, row, route } = j
+  const { truth, send, me, until, row, route, pressUse } = j
   const zone = row(kind).data.pos
   route([[lane, front], [zone[0], front], [zone[0], zone[2]]], 0.3)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe(clip)
   until(() => me().data.activity === 'walk', 60 * 4)
   until(() => me().data.eased === null && me().data.grounded, 60 * 4)
@@ -819,11 +890,10 @@ async function oneShot(kind: string, clip: string, lane: number, front: number) 
 }
 
 test('at the run wall it runs along the wall, comes down onto the ground, and walks on there further along it', async () => {
-  const { truth, send, me, until, row, route } = await joined()
+  const { truth, send, me, until, row, route, pressUse } = await joined()
   const zone = row('runzone').data.pos
   route([[-LANE, ROW2], [zone[0], ROW2], [zone[0], zone[2]]], 0.3)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe('wallside')
   // The run ends in the air off the wall, and falls to the ground.
   until(() => me().data.activity === 'walk', 60 * 3)
@@ -839,23 +909,23 @@ test('at the run wall it runs along the wall, comes down onto the ground, and wa
 })
 
 test('on the block\'s top at its front it teeters with its ankles at the edge, and steps down off it, its feet landing on the floor', async () => {
-  const { truth, room, send, me, until, row, route, middle, pointOf } = await joined()
+  const { truth, room, send, me, until, row, route, middle, pointOf, pressUse } = await joined()
   const zone = row('edgezone').data.pos
   const step = row('edgestep').data.pos
   // Round to the step behind the block, up it onto the top, and along it to its front.
   route([[LANE, ROW2], [LANE, step[2] + 1], [zone[0], step[2] + 1], [zone[0], step[2] - 0.5], [zone[0], zone[2]]], 0.3)
   expect(me().data.offered).toEqual(['edge'])
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe('teeter')
-  until(() => me().data.eased === null, 30)
-  // The ankles at the edge, within the centimetre the clip's own sway moves them as it teeters.
+  // Settled once the fade and the warp onto the edge are both over.
+  until(() => me().data.eased === null && me().data.warp === null, 60)
+  // The ankles at the edge, within the two centimetres the clip's own sway moves them as it teeters
+  // (1.4 cm low as the warp lets go, 0.5 s in; 0.1 to 2.0 cm over its first second and a half).
   const edge = pointOf('edgezone', 'Edge')
   const ankles = middle(['LeftFoot', 'RightFoot'])
-  expect(Math.abs(ankles[1] - edge.from![1])).toBeLessThan(0.01)
-  expect(Math.abs(ankles[2] - edge.from![2])).toBeLessThan(0.01)
-  send('press', 'use')
-  truth.step(DT)
+  expect(Math.abs(ankles[1] - edge.from![1])).toBeLessThan(0.02)
+  expect(Math.abs(ankles[2] - edge.from![2])).toBeLessThan(0.02)
+  pressUse()
   expect(me().data.clip).toBe('jumpdown')
   landsOnFloor({ truth, room, me }, 60 * 5)
   until(() => me().data.eased === null, 60)
@@ -864,11 +934,10 @@ test('on the block\'s top at its front it teeters with its ankles at the edge, a
 })
 
 test('at the stairs\' foot it climbs them to the landing, falls into the pool, floats, swims to the far wall and climbs out onto it', async () => {
-  const { truth, send, me, until, row, route, kinds, pointOf, middle } = await joined()
+  const { truth, send, me, until, row, route, kinds, pointOf, middle, pressUse } = await joined()
   const stairs = row('stairzone').data.pos
   route([[LANE, ROW1 + 3], [LANE, ROW2 - 1], [stairs[0], ROW2 - 1], [stairs[0], stairs[2]]], 0.3)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe('stairsup')
   send('stick', 0, -1)
   const landing = kinds.stairlanding.shape.box.size[1]
@@ -880,8 +949,7 @@ test('at the stairs\' foot it climbs them to the landing, falls into the pool, f
   route([[pool[0], pool[2]]], 0.3)
   expect(me().data.pos[1]).toBeCloseTo(landing, 3)
   expect(me().data.offered).toEqual(['pool'])
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe('poolin')
   until(() => me().data.motion === 'float', 60 * 4)
   until(() => me().data.eased === null, 30)
@@ -893,8 +961,7 @@ test('at the stairs\' foot it climbs them to the landing, falls into the pool, f
   until(() => me().data.motion === 'swim', 10)
   until(() => me().data.motion === 'float', 60 * 12)
   send('stick', 0, 0)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe('bracedclimb')
   until(() => me().data.activity === 'walk' && me().data.eased === null, 60 * 4)
   for (let i = 0; i < 20; i++) truth.step(DT)
@@ -903,13 +970,13 @@ test('at the stairs\' foot it climbs them to the landing, falls into the pool, f
 })
 
 test('by the desk it sits at it typing, its hips on the seat, and stands up where it sat', async () => {
-  const { truth, send, me, until, row, route, middle, pointOf } = await joined()
+  const { truth, send, me, until, row, route, middle, pointOf, pressUse } = await joined()
   const zone = row('deskzone').data.pos
   route([[LANE, ROW2], [zone[0], ROW2], [zone[0], zone[2]]], 0.3)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe('typing')
-  until(() => me().data.eased === null, 30)
+  // Settled once the fade and the warp onto the seat are both over.
+  until(() => me().data.eased === null && me().data.warp === null, 60)
   const seat = pointOf('deskzone', 'Seat').at!
   const hips = middle(['Hips'])
   for (let i = 0; i < 3; i++) expect(hips[i]).toBeCloseTo(seat[i], 2)
@@ -922,12 +989,11 @@ test('by the desk it sits at it typing, its hips on the seat, and stands up wher
 })
 
 test('at the bed\'s foot it lies down on it, its hips where it lies, and gets up where it lies', async () => {
-  const { truth, send, me, until, row, route, middle, pointOf } = await joined()
+  const { truth, send, me, until, row, route, middle, pointOf, pressUse } = await joined()
   // Round the bed to its foot.
   const zone = row('bedzone').data.pos
   route([[-LANE, ROW3], [-LANE, zone[2] + 1], [zone[0], zone[2] + 1], [zone[0], zone[2]]], 0.3)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe('liedown')
   until(() => me().data.motion === 'lie', 60 * 7)
   until(() => me().data.eased === null, 30)
@@ -943,7 +1009,7 @@ test('at the bed\'s foot it lies down on it, its hips where it lies, and gets up
 })
 
 test('at the car\'s door it gets in, its hips on the seat; drives it, held on the seat; honks; and gets out', async () => {
-  const { truth, send, me, until, row, route, middle, room } = await joined()
+  const { truth, send, me, until, row, route, middle, room, pressUse } = await joined()
   const car = row('car')
   const zone = row('carzone')
   const seatOf = () => {
@@ -952,8 +1018,7 @@ test('at the car\'s door it gets in, its hips on the seat; drives it, held on th
     return [z.pos[0] + p[0] * c + p[2] * s, z.pos[1] + p[1], z.pos[2] - p[0] * s + p[2] * c]
   }
   route([[LANE, ROW3], [zone.data.pos[0], zone.data.pos[2]]], 0.3)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe('carin')
   until(() => me().data.motion === 'pilot', 60 * 7)
   until(() => me().data.eased === null, 30)
@@ -996,8 +1061,7 @@ test('at the car\'s door it gets in, its hips on the seat; drives it, held on th
     return me().data.upper === null && me().data.was === null
   }, 60 * 4)
   expect(me().data.upperMotion).toBe(null)
-  send('press', 'use')
-  truth.step(DT)
+  pressUse()
   expect(me().data.clip).toBe('carout')
   until(() => me().data.activity === 'walk' && me().data.eased === null, 60 * 7)
   until(() => me().data.grounded && Math.abs(me().data.pos[1]) < 1e-6, 60 * 2)

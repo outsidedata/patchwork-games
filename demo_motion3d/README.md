@@ -72,7 +72,11 @@ panel tunes motion3d's settings and whose readout shows what the body is doing. 
   reads off the row's `windows`, taking the hit where the striking limb is drawn within its reach.
 - `vaultover` and `climbup` are offered by the sides of the yard's solid boxes (their `solid` entries,
   motion3d's Solids), a run into one at the right height playing them; the lip, the vault point and
-  the face stand off the side as the yard's stations measured them. The props are boxes and cylinders, `assets/props.mjs`. The yard's `guard` and
+  the face stand off the side as the yard's stations measured them.
+- Every motion that takes E from moving about onto a station gives a `warp` (motion3d's Warp): it
+  begins where E stands and facing as E faces, and is bent onto its point by its `until`, with no
+  snap. The vaults bend until the hand plants, the jumps up and the walk-ins until their takeoff, the
+  chair, the rope swing and the run wall until the seconds their plants give, the loops half a second. The props are boxes and cylinders, `assets/props.mjs`. The yard's `guard` and
   `near` states (`plugins/yard/yard.kinematics3d.ts`) are the guard key held and a station in reach,
   so E rolls only away from one.
 - What the X Bot can do is its motion3d file, `assets/xbot.motion3d.json`: every activity, its motions,
@@ -128,4 +132,6 @@ into the car, drives it, honks and gets out; chains three lights pressed during 
 from the one before's strike; jumps the axe's jump off the ground on its takeoff and lands as its clip
 does; jumps higher held than tapped, and further running; lands a light attack on the dummy from two
 metres off on every side, and misses with nothing to bend onto; flinches over a run and leans into a
-turn; and vaults the plain low box and climbs onto the plain head-high one.
+turn; vaults the plain low box and climbs onto the plain head-high one; and, run at the low box on a
+slant, begins the vault on its own line with no jump or snap and is the square vault from the hand
+plant on; and at every station begins its move with no jump or snap.
