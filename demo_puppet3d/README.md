@@ -5,6 +5,17 @@ AWOL animals and a Mixamo body posed by puppet3d.
 Keys: 1 to 5 pace, `w` `s` pace up and down, `t` upright or on four legs, `j` leap, `[` `]` station,
 `q` `e` camera.
 
+## The rider
+
+Station 5 is the horse ridden: the `rider` kind is the horse's definition with a second layout, the
+X Bot, hung `on` the horse's `body:spine 2` with `along`, `offset` and `turn`. The horse's solver
+stands its bones first, then the X Bot is hung on that bone and seated by a cues driver on the
+horse's own senses (`stride`, `speed`, `clock`), so it rides each stride the way the head and tail do.
+
+`pose.html` (`?kind=<kind>`, `rider` by default) poses a kind's hung layouts with puppet3d's own
+`played`, `hung` and `skinned` on the world layout's rest skeleton: drag and wheel to orbit, side,
+front, back and top views, a slider for each sense, and `R` to read the definition again.
+
 ## An animal's files
 
 Each animal is three files in `assets/awol/`:

@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demo_puppet3d pose</title>
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #20242c; font: 12px ui-monospace, monospace; color: #dde }
+      #panel { position: fixed; top: 8px; left: 8px; display: flex; flex-direction: column; gap: 4px; background: #0008; padding: 8px; border-radius: 6px }
+      #panel label { display: grid; grid-template-columns: 70px 160px 40px; align-items: center; gap: 6px }
+      #panel button { font: inherit; margin-right: 4px }
+      #readout { position: fixed; bottom: 8px; left: 8px; background: #0008; padding: 4px 8px }
+    </style>
+  </head>
+  <body>
+    <div id="panel"></div>
+    <div id="readout"></div>
+    <script type="module" src="./pose.ts"></script>
+  </body>
+</html>

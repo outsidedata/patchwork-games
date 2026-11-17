@@ -25,7 +25,7 @@
     },
     "shipped": { "plugins": ["paddock"] },
     "puppet3d": {
-      "kinds": ["horse", "tiger", "xbot", "lion", "cheetah"],
+      "kinds": ["horse", "tiger", "xbot", "lion", "cheetah", "rider"],
       "mods": { "land": "terrain3d", "behaviors": ["puppet3d", "paddock"] }
     },
     "terrain3d": {
@@ -77,7 +77,8 @@
     "xbot": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "stride": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
     "tiger": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
     "lion": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
-    "cheetah": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } }
+    "cheetah": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
+    "rider": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } }
   },
   "actors": [
     { "is": "scenemanager" },
@@ -87,6 +88,7 @@
     { "is": "tiger", "at": 1, "pos": [40, 0, 0] },
     { "is": "xbot", "at": 2, "pos": [-40, 0, 0] },
     { "is": "lion", "at": 3, "pos": [80, 0, 0] },
-    { "is": "cheetah", "at": 4, "pos": [-80, 0, 0] }
+    { "is": "cheetah", "at": 4, "pos": [-80, 0, 0] },
+    { "is": "rider", "at": 5, "pos": [120, 0, 0] }
   ]
 }
