@@ -592,7 +592,7 @@ test('run at the waist-high box on a slant, the vault is warped: it begins where
   expect(slanted.end.pos[1]).toBeLessThan(0.05)
 })
 
-test('strafing with the guard up, the stick swept from forward to left mixes the forward walk into the left strafe: half each at 45°, in step by the left foot, the body\'s clip handed over with no restart or fade, the feet never jumping', async () => {
+test('strafing with the guard up, the stick swept from forward to left mixes the forward walk into the left strafe: half each at 45°, in step by the left foot, the body\'s clip handed over with no restart or fade and going round as often, the body as fast at 45° as straight on', async () => {
   const j = await joined()
   const { truth, room, send, me, until } = j
   send('guard', 1)
@@ -601,67 +601,168 @@ test('strafing with the guard up, the stick swept from forward to left mixes the
   const from = me().data.from
   const m = MOTION.activities.walk.motions.guardwalk
   const [ahead, left] = m.clips
-  // The left foot's place in the body's frame, as the page draws it.
-  const foot = (bone: string) => new THREE.Vector3().setFromMatrixPosition(posed(reader(room), me()).get(bone)!)
+  const table = (measured as any).table
+  // How fast a clip carries the body, m/s, and how often the body's clip goes round, laps a second.
+  const speedOf = (clip: string) => Math.hypot(table[clip].forward, table[clip].left) / table[clip].dur
+  const often = (d: any) => (d.rate * ((written as any).clips[d.clip]?.rate ?? 1)) / table[d.clip].dur
   // How far through its lap from its left foot coming down a clip is at t.
   const through = (clip: string, t: number) => {
-    const dur = (measured as any).table[clip].dur
-    const s = (t - downOf(reader(room), me(), clip)) / dur
+    const s = (t - downOf(reader(room), me(), clip)) / table[clip].dur
     return s - Math.floor(s)
   }
-  // The most a foot moves in one step as the stick is held, over two laps: the clips' own swing.
-  const held = (x: number, y: number) => {
-    send('stick', x, y)
-    let w0 = { L: foot('LeftFoot'), R: foot('RightFoot') }, top = 0
-    for (let i = 0; i < 120; i++) {
-      truth.step(DT)
-      const now = { L: foot('LeftFoot'), R: foot('RightFoot') }
-      top = Math.max(top, now.L.distanceTo(w0.L), now.R.distanceTo(w0.R))
-      w0 = now
-    }
-    return top
-  }
-  const swingAhead = held(0, -1)
-  let was = { L: foot('LeftFoot'), R: foot('RightFoot') }
-  let most = 0
-  let handed = false
+  until(() => Math.abs(me().data.speed - speedOf(ahead)) < 0.01, 60 * 2)
+  let handed = 0
   let half: { clip: string; mix: { clip: string; w: number }[] } | null = null
   const steps = 90
   for (let i = 1; i <= steps; i++) {
     // The stick turned from straight ahead to straight left, a step at a time.
     const a = (i / steps) * (Math.PI / 2)
     send('stick', -Math.sin(a), -Math.cos(a))
-    const before = me().data.clip
+    const before = { clip: me().data.clip, often: often(me().data) }
     truth.step(DT)
     const d = me().data
     expect(d.motion).toBe('guardwalk')
     // No restart and no fade: the clip it plays never fades in afresh.
     expect(d.blend).toBe(1)
     expect(d.from).toBe(from)
-    if (d.clip !== before) handed = true
+    // Handed over, the body's clip goes round as often as the one before it did.
+    if (d.clip !== before.clip) {
+      handed++
+      expect(Math.abs(often(d) - before.often) / before.often).toBeLessThan(0.05)
+    }
     // In step: every clip mixed with the body's clip as far through its lap from its left foot coming down.
     for (const x of d.mix) {
       const gap = Math.abs(through(x.clip, x.t) - through(d.clip, d.clipT))
       expect(Math.min(gap, 1 - gap)).toBeLessThan(1e-6)
     }
     if (i === steps / 2) half = { clip: d.clip, mix: d.mix.map((x: { clip: string; w: number }) => ({ clip: x.clip, w: x.w })) }
-    const now = { L: foot('LeftFoot'), R: foot('RightFoot') }
-    most = Math.max(most, now.L.distanceTo(was.L), now.R.distanceTo(was.R))
-    was = now
   }
-  // At 45° it is drawn half the forward walk and half the left strafe.
+  // At 45° it is drawn half the forward walk and half the left strafe, and nothing of the run.
   expect(half).not.toBe(null)
   const shares = new Map([[half!.clip, 1 - half!.mix.reduce((s, x) => s + x.w, 0)], ...half!.mix.map(x => [x.clip, x.w] as [string, number])])
   expect([...shares.keys()].sort()).toEqual([ahead, left].sort())
   expect(shares.get(ahead)).toBeCloseTo(0.5, 1)
   expect(shares.get(left)).toBeCloseTo(0.5, 1)
-  // The body's clip was handed from the forward walk to the left strafe on the way, and ends there.
-  expect(handed).toBe(true)
+  // The body's clip was handed from the forward walk to the left strafe once on the way, and ends there.
+  expect(handed).toBe(1)
   expect(me().data.clip).toBe(left)
-  // The drawn feet never jump: through the sweep no foot moves further in a step than it swings in the
-  // forward walk or the left strafe played alone.
-  const swingLeft = held(-1, 0)
-  expect(most).toBeLessThanOrEqual(Math.max(swingAhead, swingLeft) + 1e-3)
+  // Held at 45°, the body goes as fast as half of each clip's speed, as fast as either: a blend space's
+  // speed, not the shorter way their two laps make laid together.
+  send('stick', -Math.SQRT1_2, -Math.SQRT1_2)
+  for (let i = 0; i < 90; i++) truth.step(DT)
+  expect(me().data.speed).toBeCloseTo((speedOf(ahead) + speedOf(left)) / 2, 1)
+})
+
+test('walking, the run key held mixes the walk into the run as the body speeds up: in step, with no restart or fade, the run\'s share easing toward where the speed stands, the clip handed over going round as often, all run at full speed', async () => {
+  const j = await joined()
+  const { truth, room, send, me, until } = j
+  // How fast a clip carries the body, m/s: its lap over its length.
+  const speedOf = (clip: string) => {
+    const t = (measured as any).table[clip]
+    return Math.hypot(t.forward, t.left) / t.dur
+  }
+  const [walk, run] = [MOTION.activities.walk.motions.walk.clips[0], MOTION.activities.walk.motions.run.clips[0]]
+  const slow = speedOf(walk), quick = speedOf(run)
+  const fade = main.world.motion3d.kinds.xbot.fade
+  // How often the body's clip goes round, laps a second: the row's rate on the clip's own, over its length.
+  const often = (d: any) => (d.rate * ((written as any).clips[d.clip]?.rate ?? 1)) / (measured as any).table[d.clip].dur
+  // How far through its lap from its left foot coming down a clip is at t.
+  const through = (clip: string, t: number) => {
+    const s = (t - downOf(reader(room), me(), clip)) / (measured as any).table[clip].dur
+    return s - Math.floor(s)
+  }
+  send('stick', 0, -1)
+  send('fast', 0)
+  until(() => me().data.motion === 'walk' && Math.abs(me().data.speed - slow) < 0.01, 60 * 3)
+  const from = me().data.from
+  // The run key held: the run comes in as the body speeds up.
+  send('fast', 1)
+  const seen: number[] = []
+  let handed = 0
+  for (let i = 0; i < 60 * 3 && !(me().data.clip === run && (seen[seen.length - 1] ?? 0) > 0.99); i++) {
+    const before = { clip: me().data.clip, often: often(me().data) }
+    truth.step(DT)
+    const d = me().data
+    // One gait carried on into the other: never restarted, never faded.
+    expect(d.blend).toBe(1)
+    expect(d.from).toBe(from)
+    // In step: the clip mixed with the body's as far through its lap from its left foot coming down.
+    for (const x of d.mix) {
+      const gap = Math.abs(through(x.clip, x.t) - through(d.clip, d.clipT))
+      expect(Math.min(gap, 1 - gap)).toBeLessThan(1e-6)
+    }
+    // The run's share heads for where the speed stands between the walk's and the run's, by no more than
+    // a step over the kind's fade, and never back.
+    const share = d.clip === run ? 1 - d.mix.reduce((s: number, x: { w: number }) => s + x.w, 0) : d.mix.find((x: { clip: string }) => x.clip === run)?.w ?? 0
+    const last = seen.length ? seen[seen.length - 1] : 0
+    expect(share - last).toBeLessThanOrEqual(DT / fade + 1e-9)
+    expect(share).toBeGreaterThanOrEqual(last - 1e-9)
+    seen.push(share)
+    // Handed from the walk to the run, the body's clip goes round as often as it went: within the change
+    // a step of speeding up makes either side of it.
+    if (d.clip !== before.clip) {
+      handed++
+      expect(Math.abs(often(d) - before.often) / before.often).toBeLessThan(0.05)
+    }
+  }
+  expect(me().data.motion).toBe('run')
+  expect(handed).toBe(1)
+  // It eased in from nothing, through the middle of the two, on its way to all run at full speed.
+  expect(seen[0]).toBeLessThanOrEqual(DT / fade + 1e-9)
+  expect(seen.some(s => s > 0.3 && s < 0.7)).toBe(true)
+  expect(me().data.clip).toBe(run)
+  expect(me().data.speed).toBeGreaterThan(slow + 0.95 * (quick - slow))
+})
+
+test('strafing at 45° with the guard up, the run key held mixes by the way and by the speed at once: the walk\'s and the run\'s forward and left clips together, in step, with no fade, half forward and half left all through', async () => {
+  const j = await joined()
+  const { truth, room, send, me, until } = j
+  const through = (clip: string, t: number) => {
+    const s = (t - downOf(reader(room), me(), clip)) / (measured as any).table[clip].dur
+    return s - Math.floor(s)
+  }
+  const walkSet = MOTION.activities.walk.motions.guardwalk.clips, runSet = MOTION.activities.walk.motions.guardrun.clips
+  send('guard', 1)
+  send('stick', -Math.SQRT1_2, -Math.SQRT1_2)
+  until(() => me().data.motion === 'guardwalk' && me().data.blend >= 1 && me().data.gaitW === 0, 60 * 2)
+  const from = me().data.from
+  send('fast', 1)
+  let four = false
+  for (let i = 0; i < 60; i++) {
+    truth.step(DT)
+    const d = me().data
+    expect(d.blend).toBe(1)
+    expect(d.from).toBe(from)
+    const shares = new Map<string, number>([[d.clip, 1 - d.mix.reduce((s: number, x: { w: number }) => s + x.w, 0)], ...d.mix.map((x: { clip: string; w: number }) => [x.clip, x.w] as [string, number])])
+    for (const x of d.mix) {
+      const gap = Math.abs(through(x.clip, x.t) - through(d.clip, d.clipT))
+      expect(Math.min(gap, 1 - gap)).toBeLessThan(1e-6)
+    }
+    // Only the forward and left clips of each set: half forward and half left, the speed between them.
+    const ahead = (shares.get(walkSet[0]) ?? 0) + (shares.get(runSet[0]) ?? 0)
+    const left = (shares.get(walkSet[1]) ?? 0) + (shares.get(runSet[1]) ?? 0)
+    expect(ahead + left).toBeCloseTo(1, 9)
+    expect(ahead).toBeCloseTo(0.5, 1)
+    if ([walkSet[0], walkSet[1], runSet[0], runSet[1]].every(c => (shares.get(c) ?? 0) > 0.05)) four = true
+  }
+  // On the way, all four drawn at once.
+  expect(four).toBe(true)
+  expect(me().data.motion).toBe('guardrun')
+})
+
+test('every walk and run that mixes by speed names a gait of its own activity, a loop on the ground, that names it back', () => {
+  for (const [word, a] of Object.entries(MOTION.activities)) {
+    for (const [name, m] of Object.entries(a.motions)) {
+      if (!m.gait) continue
+      const g = a.motions[m.gait]
+      expect(g, `${word}.${name}`).toBeDefined()
+      expect(g.gait, `${word}.${name}`).toBe(name)
+      expect([m.target, g.target], `${word}.${name}`).toEqual(['triangles', 'triangles'])
+      for (const clip of [...m.clips, ...g.clips]) expect((measured as any).touches.xbot[clip]?.loop ?? ((written as any).clips[clip]?.loop), `${word}.${name} ${clip}`).not.toBe(false)
+    }
+  }
+  const pairs = Object.values(MOTION.activities).flatMap(a => Object.values(a.motions).filter(m => m.gait))
+  expect(pairs.length).toBe(40)
 })
 
 test('every motion that mixes its clips mixes loops on the ground that each go somewhere, each with its left foot coming down inside its lap', async () => {

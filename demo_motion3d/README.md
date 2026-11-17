@@ -81,6 +81,8 @@ panel tunes motion3d's settings and whose readout shows what the body is doing. 
 - Every guard walk, guard run, strafe and aim gives `mix: "way"` (motion3d's Mixes): its clips are
   drawn together by the way E is walked, kept in step by the left foot coming down (the file's
   `down`, 0.02 m), so turning while strafing blends from one direction into the next.
+- Every walk and its run name each other as their `gait` (motion3d's Gaits): the run key held, E
+  speeds up through a mix of the two, the run coming in as the speed rises, with no restart.
 - The yard's `guard` and
   `near` states (`plugins/yard/yard.kinematics3d.ts`) are the guard key held and a station in reach,
   so E rolls only away from one.
@@ -140,4 +142,5 @@ metres off on every side, and misses with nothing to bend onto; flinches over a 
 turn; vaults the plain low box and climbs onto the plain head-high one; and, run at the low box on a
 slant, begins the vault on its own line with no jump or snap and is the square vault from the hand
 plant on; at every station begins its move with no jump or snap; and, strafing with the stick swept
-from forward to left, blends from the forward walk into the left strafe in step with no restart.
+from forward to left, blends from the forward walk into the left strafe in step with no restart; and,
+walking with the run key held, speeds up through a mix of the walk and the run in step with no restart.

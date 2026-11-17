@@ -80,10 +80,10 @@
    "motions": {
     "fall": { "target": "triangles", "clips": ["fall"], "when": ["falling", "!armed"] },
     "stand": { "target": "triangles", "clips": ["idle"], "when": ["ground", "!pushed", "!guard", "!armed"] },
-    "walk": { "target": "triangles", "clips": ["walk"], "when": ["ground", "pushed", "!fast", "!guard", "!armed"] },
-    "run": { "target": "triangles", "clips": ["run"], "when": ["ground", "pushed", "fast", "!guard", "!armed"] },
-    "guardwalk": { "target": "triangles", "clips": ["walk", "uawalkleft", "uawalkright", "uawalkback"], "when": ["ground", "pushed", "guard", "!fast", "!armed"], "mix": "way" },
-    "guardrun": { "target": "triangles", "clips": ["run", "uarunleft", "uarunright", "uarunback"], "when": ["ground", "pushed", "guard", "fast", "!armed"], "mix": "way" },
+    "walk": { "target": "triangles", "clips": ["walk"], "when": ["ground", "pushed", "!fast", "!guard", "!armed"], "gait": "run" },
+    "run": { "target": "triangles", "clips": ["run"], "when": ["ground", "pushed", "fast", "!guard", "!armed"], "gait": "walk" },
+    "guardwalk": { "target": "triangles", "clips": ["walk", "uawalkleft", "uawalkright", "uawalkback"], "when": ["ground", "pushed", "guard", "!fast", "!armed"], "mix": "way", "gait": "guardrun" },
+    "guardrun": { "target": "triangles", "clips": ["run", "uarunleft", "uarunright", "uarunback"], "when": ["ground", "pushed", "guard", "fast", "!armed"], "mix": "way", "gait": "guardwalk" },
     "block": { "target": "triangles", "clips": ["uaguard"], "when": ["ground", "!pushed", "guard", "!armed"] },
     "jump": { "target": "triangles", "behavior": "jump", "clips": ["jump"], "press": "jump", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"], "then": "fall" }
    }
@@ -156,11 +156,11 @@
     "greatswordgetup": { "target": "triangles", "clips": ["uagetup"], "from": ["greatsworddeath"] },
     "greatswordjump": { "target": "triangles", "behavior": "jump", "clips": ["gsjump"], "press": "jump", "from": ["greatswordstand", "greatswordwalk", "greatswordrun", "greatswordguardwalk", "greatswordguardrun", "greatswordblock"], "then": "greatswordfall" },
     "greatswordfall": { "target": "triangles", "clips": ["fall"], "when": ["falling"], "from": ["greatsword"] },
-    "greatswordguardrun": { "target": "triangles", "clips": ["gsrun", "gsrunleft", "gsrunright", "gsrunback"], "from": ["greatsword"], "when": ["ground", "pushed", "guard", "fast"], "mix": "way" },
-    "greatswordguardwalk": { "target": "triangles", "clips": ["gswalk", "gswalkleft", "gswalkright", "gswalkback"], "from": ["greatsword"], "when": ["ground", "pushed", "guard"], "mix": "way" },
+    "greatswordguardrun": { "target": "triangles", "clips": ["gsrun", "gsrunleft", "gsrunright", "gsrunback"], "from": ["greatsword"], "when": ["ground", "pushed", "guard", "fast"], "mix": "way", "gait": "greatswordguardwalk" },
+    "greatswordguardwalk": { "target": "triangles", "clips": ["gswalk", "gswalkleft", "gswalkright", "gswalkback"], "from": ["greatsword"], "when": ["ground", "pushed", "guard"], "mix": "way", "gait": "greatswordguardrun" },
     "greatswordblock": { "target": "triangles", "clips": ["gsblock"], "from": ["greatsword"], "when": ["ground", "!pushed", "guard"] },
-    "greatswordrun": { "target": "triangles", "clips": ["gsrun"], "from": ["greatsword"], "when": ["ground", "pushed", "fast"] },
-    "greatswordwalk": { "target": "triangles", "clips": ["gswalk"], "from": ["greatsword"], "when": ["ground", "pushed"] },
+    "greatswordrun": { "target": "triangles", "clips": ["gsrun"], "from": ["greatsword"], "when": ["ground", "pushed", "fast"], "gait": "greatswordwalk" },
+    "greatswordwalk": { "target": "triangles", "clips": ["gswalk"], "from": ["greatsword"], "when": ["ground", "pushed"], "gait": "greatswordrun" },
     "greatswordstand": { "target": "triangles", "clips": ["gsidle"], "from": ["greatsword"], "when": ["ground", "!pushed"] }
    }
   },
@@ -193,11 +193,11 @@
     "swordshieldgetup": { "target": "triangles", "clips": ["uagetup"], "from": ["swordshielddeath"] },
     "swordshieldjump": { "target": "triangles", "behavior": "jump", "clips": ["ssjump"], "press": "jump", "from": ["swordshieldstand", "swordshieldwalk", "swordshieldrun", "swordshieldguardwalk", "swordshieldguardrun", "swordshieldblock"], "then": "swordshieldfall" },
     "swordshieldfall": { "target": "triangles", "clips": ["fall"], "when": ["falling"], "from": ["swordshield"] },
-    "swordshieldguardrun": { "target": "triangles", "clips": ["ssrun", "ssrunleft", "ssrunright", "ssrunback"], "from": ["swordshield"], "when": ["ground", "pushed", "guard", "fast"], "mix": "way" },
-    "swordshieldguardwalk": { "target": "triangles", "clips": ["sswalk", "sswalkleft", "sswalkright", "sswalkback"], "from": ["swordshield"], "when": ["ground", "pushed", "guard"], "mix": "way" },
+    "swordshieldguardrun": { "target": "triangles", "clips": ["ssrun", "ssrunleft", "ssrunright", "ssrunback"], "from": ["swordshield"], "when": ["ground", "pushed", "guard", "fast"], "mix": "way", "gait": "swordshieldguardwalk" },
+    "swordshieldguardwalk": { "target": "triangles", "clips": ["sswalk", "sswalkleft", "sswalkright", "sswalkback"], "from": ["swordshield"], "when": ["ground", "pushed", "guard"], "mix": "way", "gait": "swordshieldguardrun" },
     "swordshieldblock": { "target": "triangles", "clips": ["ssblock"], "from": ["swordshield"], "when": ["ground", "!pushed", "guard"] },
-    "swordshieldrun": { "target": "triangles", "clips": ["ssrun"], "from": ["swordshield"], "when": ["ground", "pushed", "fast"] },
-    "swordshieldwalk": { "target": "triangles", "clips": ["sswalk"], "from": ["swordshield"], "when": ["ground", "pushed"] },
+    "swordshieldrun": { "target": "triangles", "clips": ["ssrun"], "from": ["swordshield"], "when": ["ground", "pushed", "fast"], "gait": "swordshieldwalk" },
+    "swordshieldwalk": { "target": "triangles", "clips": ["sswalk"], "from": ["swordshield"], "when": ["ground", "pushed"], "gait": "swordshieldrun" },
     "swordshieldstand": { "target": "triangles", "clips": ["ssidle"], "from": ["swordshield"], "when": ["ground", "!pushed"] }
    }
   },
@@ -230,11 +230,11 @@
     "swordgetup": { "target": "triangles", "clips": ["uagetup"], "from": ["sworddeath"] },
     "swordjump": { "target": "triangles", "behavior": "jump", "clips": ["ssjump"], "press": "jump", "from": ["swordstand", "swordwalk", "swordrun", "swordguardwalk", "swordguardrun", "swordblock"], "then": "swordfall" },
     "swordfall": { "target": "triangles", "clips": ["fall"], "when": ["falling"], "from": ["sword"] },
-    "swordguardrun": { "target": "triangles", "clips": ["osrun", "ssrunleft", "ssrunright", "ssrunback"], "from": ["sword"], "when": ["ground", "pushed", "guard", "fast"], "mix": "way" },
-    "swordguardwalk": { "target": "triangles", "clips": ["sswalk", "sswalkleft", "sswalkright", "sswalkback"], "from": ["sword"], "when": ["ground", "pushed", "guard"], "mix": "way" },
+    "swordguardrun": { "target": "triangles", "clips": ["osrun", "ssrunleft", "ssrunright", "ssrunback"], "from": ["sword"], "when": ["ground", "pushed", "guard", "fast"], "mix": "way", "gait": "swordguardwalk" },
+    "swordguardwalk": { "target": "triangles", "clips": ["sswalk", "sswalkleft", "sswalkright", "sswalkback"], "from": ["sword"], "when": ["ground", "pushed", "guard"], "mix": "way", "gait": "swordguardrun" },
     "swordblock": { "target": "triangles", "clips": ["ssblock"], "from": ["sword"], "when": ["ground", "!pushed", "guard"] },
-    "swordrun": { "target": "triangles", "clips": ["osrun"], "from": ["sword"], "when": ["ground", "pushed", "fast"] },
-    "swordwalk": { "target": "triangles", "clips": ["sswalk"], "from": ["sword"], "when": ["ground", "pushed"] },
+    "swordrun": { "target": "triangles", "clips": ["osrun"], "from": ["sword"], "when": ["ground", "pushed", "fast"], "gait": "swordwalk" },
+    "swordwalk": { "target": "triangles", "clips": ["sswalk"], "from": ["sword"], "when": ["ground", "pushed"], "gait": "swordrun" },
     "swordstand": { "target": "triangles", "clips": ["ssidle"], "from": ["sword"], "when": ["ground", "!pushed"] }
    }
   },
@@ -265,11 +265,11 @@
     "axegetup": { "target": "triangles", "clips": ["uagetupfront"], "from": ["axedeath"] },
     "axejump": { "target": "triangles", "behavior": "jump", "clips": ["axjump"], "press": "jump", "from": ["axestand", "axewalk", "axerun", "axeguardwalk", "axeguardrun", "axeblock"], "then": "axefall" },
     "axefall": { "target": "triangles", "clips": ["fall"], "when": ["falling"], "from": ["axe"] },
-    "axeguardrun": { "target": "triangles", "clips": ["axrun", "axwalkleft", "axwalkright", "axrunback"], "from": ["axe"], "when": ["ground", "pushed", "guard", "fast"], "mix": "way" },
-    "axeguardwalk": { "target": "triangles", "clips": ["axwalk", "axwalkleft", "axwalkright", "axwalkback"], "from": ["axe"], "when": ["ground", "pushed", "guard"], "mix": "way" },
+    "axeguardrun": { "target": "triangles", "clips": ["axrun", "axwalkleft", "axwalkright", "axrunback"], "from": ["axe"], "when": ["ground", "pushed", "guard", "fast"], "mix": "way", "gait": "axeguardwalk" },
+    "axeguardwalk": { "target": "triangles", "clips": ["axwalk", "axwalkleft", "axwalkright", "axwalkback"], "from": ["axe"], "when": ["ground", "pushed", "guard"], "mix": "way", "gait": "axeguardrun" },
     "axeblock": { "target": "triangles", "clips": ["axblock"], "from": ["axe"], "when": ["ground", "!pushed", "guard"] },
-    "axerun": { "target": "triangles", "clips": ["axrun"], "from": ["axe"], "when": ["ground", "pushed", "fast"] },
-    "axewalk": { "target": "triangles", "clips": ["axwalk"], "from": ["axe"], "when": ["ground", "pushed"] },
+    "axerun": { "target": "triangles", "clips": ["axrun"], "from": ["axe"], "when": ["ground", "pushed", "fast"], "gait": "axewalk" },
+    "axewalk": { "target": "triangles", "clips": ["axwalk"], "from": ["axe"], "when": ["ground", "pushed"], "gait": "axerun" },
     "axestand": { "target": "triangles", "clips": ["axidle"], "from": ["axe"], "when": ["ground", "!pushed"] }
    }
   },
@@ -297,11 +297,11 @@
     "riflejump": { "target": "triangles", "behavior": "jump", "clips": ["rfjump"], "press": "jump", "from": ["riflestand", "riflewalk", "riflerun"], "then": "riflefall" },
     "riflefall": { "target": "triangles", "clips": ["rffall"], "when": ["falling"], "from": ["rifle", "aim"] },
     "rifleland": { "target": "triangles", "clips": ["rfland"], "when": ["ground"], "from": ["riflefall"] },
-    "strafefast": { "target": "triangles", "clips": ["riflerun", "riflerunleft", "riflerunright", "riflerunback", "riflerunforwardleft", "riflerunforwardright", "riflerunbackleft", "riflerunbackright"], "from": ["aim"], "when": ["ground", "pushed", "fast"], "mix": "way" },
-    "strafe": { "target": "triangles", "clips": ["riflewalk", "riflewalkleft", "riflewalkright", "riflewalkback", "riflewalkforwardleft", "riflewalkforwardright", "riflewalkbackleft", "riflewalkbackright"], "from": ["aim"], "when": ["ground", "pushed"], "mix": "way" },
+    "strafefast": { "target": "triangles", "clips": ["riflerun", "riflerunleft", "riflerunright", "riflerunback", "riflerunforwardleft", "riflerunforwardright", "riflerunbackleft", "riflerunbackright"], "from": ["aim"], "when": ["ground", "pushed", "fast"], "mix": "way", "gait": "strafe" },
+    "strafe": { "target": "triangles", "clips": ["riflewalk", "riflewalkleft", "riflewalkright", "riflewalkback", "riflewalkforwardleft", "riflewalkforwardright", "riflewalkbackleft", "riflewalkbackright"], "from": ["aim"], "when": ["ground", "pushed"], "mix": "way", "gait": "strafefast" },
     "strafestand": { "target": "triangles", "clips": ["rifleidle"], "from": ["aim"], "when": ["ground", "!pushed"] },
-    "riflerun": { "target": "triangles", "clips": ["rfsprint"], "from": ["rifle"], "when": ["ground", "pushed", "fast"] },
-    "riflewalk": { "target": "triangles", "clips": ["riflewalk"], "from": ["rifle"], "when": ["ground", "pushed"] },
+    "riflerun": { "target": "triangles", "clips": ["rfsprint"], "from": ["rifle"], "when": ["ground", "pushed", "fast"], "gait": "riflewalk" },
+    "riflewalk": { "target": "triangles", "clips": ["riflewalk"], "from": ["rifle"], "when": ["ground", "pushed"], "gait": "riflerun" },
     "riflestand": { "target": "triangles", "clips": ["rfidle"], "from": ["rifle"], "when": ["ground", "!pushed"] }
    }
   },
@@ -329,12 +329,12 @@
     "pistolgetup": { "target": "triangles", "clips": ["uagetup"], "from": ["pistoldeath"] },
     "pistoljump": { "target": "triangles", "behavior": "jump", "clips": ["ptjump"], "press": "jump", "from": ["pistolstand", "pistolwalk", "pistolrun", "pistolkneeling"], "then": "pistolfall" },
     "pistolfall": { "target": "triangles", "clips": ["fall"], "when": ["falling"], "from": ["pistol", "pistolaim"] },
-    "pistolaimfast": { "target": "triangles", "clips": ["ptrun", "ptstrafeleft", "ptstraferight", "ptrunback"], "from": ["pistolaim"], "when": ["ground", "pushed", "fast"], "mix": "way" },
-    "pistolaimwalk": { "target": "triangles", "clips": ["ptwalk", "ptstrafeleft", "ptstraferight", "ptwalkback"], "from": ["pistolaim"], "when": ["ground", "pushed"], "mix": "way" },
+    "pistolaimfast": { "target": "triangles", "clips": ["ptrun", "ptstrafeleft", "ptstraferight", "ptrunback"], "from": ["pistolaim"], "when": ["ground", "pushed", "fast"], "mix": "way", "gait": "pistolaimwalk" },
+    "pistolaimwalk": { "target": "triangles", "clips": ["ptwalk", "ptstrafeleft", "ptstraferight", "ptwalkback"], "from": ["pistolaim"], "when": ["ground", "pushed"], "mix": "way", "gait": "pistolaimfast" },
     "pistolaimstand": { "target": "triangles", "clips": ["ptidle"], "from": ["pistolaim"], "when": ["ground", "!pushed"] },
     "pistolkneeling": { "target": "triangles", "clips": ["ptkneeling"], "from": ["pistolkneel", "pistolkneeling"], "when": ["ground", "!pushed"] },
-    "pistolrun": { "target": "triangles", "clips": ["ptrun"], "from": ["pistol"], "when": ["ground", "pushed", "fast"] },
-    "pistolwalk": { "target": "triangles", "clips": ["ptwalk"], "from": ["pistol"], "when": ["ground", "pushed"] },
+    "pistolrun": { "target": "triangles", "clips": ["ptrun"], "from": ["pistol"], "when": ["ground", "pushed", "fast"], "gait": "pistolwalk" },
+    "pistolwalk": { "target": "triangles", "clips": ["ptwalk"], "from": ["pistol"], "when": ["ground", "pushed"], "gait": "pistolrun" },
     "pistolstand": { "target": "triangles", "clips": ["ptidle"], "from": ["pistol"], "when": ["ground", "!pushed"] }
    }
   },
@@ -363,11 +363,11 @@
     "bowjump": { "target": "triangles", "behavior": "jump", "clips": ["jump"], "press": "jump", "from": ["bowstand", "bowwalk", "bowrun"], "then": "bowfall" },
     "bowfall": { "target": "triangles", "clips": ["bwfall"], "when": ["falling"], "from": ["bow", "bowaim"] },
     "bowland": { "target": "triangles", "clips": ["bwland"], "when": ["ground"], "from": ["bowfall"] },
-    "bowaimfast": { "target": "triangles", "clips": ["bwaimwalk", "bwaimwalkleft", "bwaimwalkright", "bwaimwalkback"], "from": ["bowaim"], "when": ["ground", "pushed", "fast"], "mix": "way" },
-    "bowaimwalk": { "target": "triangles", "clips": ["bwaimwalk", "bwaimwalkleft", "bwaimwalkright", "bwaimwalkback"], "from": ["bowaim"], "when": ["ground", "pushed"], "mix": "way" },
+    "bowaimfast": { "target": "triangles", "clips": ["bwaimwalk", "bwaimwalkleft", "bwaimwalkright", "bwaimwalkback"], "from": ["bowaim"], "when": ["ground", "pushed", "fast"], "mix": "way", "gait": "bowaimwalk" },
+    "bowaimwalk": { "target": "triangles", "clips": ["bwaimwalk", "bwaimwalkleft", "bwaimwalkright", "bwaimwalkback"], "from": ["bowaim"], "when": ["ground", "pushed"], "mix": "way", "gait": "bowaimfast" },
     "bowaimstand": { "target": "triangles", "clips": ["bwidle"], "from": ["bowaim"], "when": ["ground", "!pushed"] },
-    "bowrun": { "target": "triangles", "clips": ["bwrun"], "from": ["bow"], "when": ["ground", "pushed", "fast"] },
-    "bowwalk": { "target": "triangles", "clips": ["bwwalk"], "from": ["bow"], "when": ["ground", "pushed"] },
+    "bowrun": { "target": "triangles", "clips": ["bwrun"], "from": ["bow"], "when": ["ground", "pushed", "fast"], "gait": "bowwalk" },
+    "bowwalk": { "target": "triangles", "clips": ["bwwalk"], "from": ["bow"], "when": ["ground", "pushed"], "gait": "bowrun" },
     "bowstand": { "target": "triangles", "clips": ["bwidle"], "from": ["bow"], "when": ["ground", "!pushed"] }
    }
   },
@@ -397,10 +397,10 @@
     "torchgetup": { "target": "triangles", "clips": ["uagetup"], "from": ["torchdeath"] },
     "torchjump": { "target": "triangles", "behavior": "jump", "clips": ["tcjump"], "press": "jump", "from": ["torchstand", "torchwalk", "torchrun", "torchguardwalk", "torchguardrun"], "then": "torchfall" },
     "torchfall": { "target": "triangles", "clips": ["fall"], "when": ["falling"], "from": ["torch"] },
-    "torchguardrun": { "target": "triangles", "clips": ["tcrun", "tcrunleft", "tcrunright", "tcrunback"], "from": ["torch"], "when": ["ground", "pushed", "guard", "fast"], "mix": "way" },
-    "torchguardwalk": { "target": "triangles", "clips": ["tcwalk", "tcwalkleft", "tcwalkright", "tcwalkback"], "from": ["torch"], "when": ["ground", "pushed", "guard"], "mix": "way" },
-    "torchrun": { "target": "triangles", "clips": ["tcrun"], "from": ["torch"], "when": ["ground", "pushed", "fast"] },
-    "torchwalk": { "target": "triangles", "clips": ["tcwalk"], "from": ["torch"], "when": ["ground", "pushed"] },
+    "torchguardrun": { "target": "triangles", "clips": ["tcrun", "tcrunleft", "tcrunright", "tcrunback"], "from": ["torch"], "when": ["ground", "pushed", "guard", "fast"], "mix": "way", "gait": "torchguardwalk" },
+    "torchguardwalk": { "target": "triangles", "clips": ["tcwalk", "tcwalkleft", "tcwalkright", "tcwalkback"], "from": ["torch"], "when": ["ground", "pushed", "guard"], "mix": "way", "gait": "torchguardrun" },
+    "torchrun": { "target": "triangles", "clips": ["tcrun"], "from": ["torch"], "when": ["ground", "pushed", "fast"], "gait": "torchwalk" },
+    "torchwalk": { "target": "triangles", "clips": ["tcwalk"], "from": ["torch"], "when": ["ground", "pushed"], "gait": "torchrun" },
     "torchstand": { "target": "triangles", "clips": ["tcidle"], "from": ["torch"], "when": ["ground", "!pushed"] }
    }
   },
@@ -434,11 +434,11 @@
     "magicjump": { "target": "triangles", "behavior": "jump", "clips": ["mgjump"], "press": "jump", "from": ["magicstand", "magicwalk", "magicrun", "magicguardwalk", "magicguardrun", "magicblock"], "then": "magicfall" },
     "magicfall": { "target": "triangles", "clips": ["fall"], "when": ["falling"], "from": ["magic"] },
     "magicland": { "target": "triangles", "clips": ["mgland"], "when": ["ground"], "from": ["magicfall"] },
-    "magicguardrun": { "target": "triangles", "clips": ["mgrun", "mgrunleft", "mgrunright", "mgrunback"], "from": ["magic"], "when": ["ground", "pushed", "guard", "fast"], "mix": "way" },
-    "magicguardwalk": { "target": "triangles", "clips": ["mgwalk", "mgwalkleft", "mgwalkright", "mgwalkback"], "from": ["magic"], "when": ["ground", "pushed", "guard"], "mix": "way" },
+    "magicguardrun": { "target": "triangles", "clips": ["mgrun", "mgrunleft", "mgrunright", "mgrunback"], "from": ["magic"], "when": ["ground", "pushed", "guard", "fast"], "mix": "way", "gait": "magicguardwalk" },
+    "magicguardwalk": { "target": "triangles", "clips": ["mgwalk", "mgwalkleft", "mgwalkright", "mgwalkback"], "from": ["magic"], "when": ["ground", "pushed", "guard"], "mix": "way", "gait": "magicguardrun" },
     "magicblock": { "target": "triangles", "clips": ["mgblock"], "from": ["magic"], "when": ["ground", "!pushed", "guard"] },
-    "magicrun": { "target": "triangles", "clips": ["mgrun"], "from": ["magic"], "when": ["ground", "pushed", "fast"] },
-    "magicwalk": { "target": "triangles", "clips": ["mgwalk"], "from": ["magic"], "when": ["ground", "pushed"] },
+    "magicrun": { "target": "triangles", "clips": ["mgrun"], "from": ["magic"], "when": ["ground", "pushed", "fast"], "gait": "magicwalk" },
+    "magicwalk": { "target": "triangles", "clips": ["mgwalk"], "from": ["magic"], "when": ["ground", "pushed"], "gait": "magicrun" },
     "magicstand": { "target": "triangles", "clips": ["mgidle"], "from": ["magic"], "when": ["ground", "!pushed"] }
    }
   },
