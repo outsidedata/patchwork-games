@@ -79,45 +79,50 @@
    "normal": [0, 1, 0],
    "motions": {
     "fall": { "target": "triangles", "clips": ["fall"], "when": ["falling", "!armed"] },
+    "turnwalk": { "target": "triangles", "clips": ["walkturn"], "when": ["ground", "pushed", "reversed", "!fast", "!guard", "!armed"], "from": ["walk", "start"], "then": "walk" },
+    "turnrun": { "target": "triangles", "clips": ["runturn"], "when": ["ground", "pushed", "reversed", "fast", "!guard", "!armed"], "from": ["run"], "then": "run" },
+    "start": { "target": "triangles", "clips": ["walkstart"], "when": ["ground", "pushed", "!fast", "!guard", "!armed"], "from": ["stand"], "then": "walk", "steer": true, "end": "landing", "yields": true },
+    "stopwalk": { "target": "triangles", "clips": ["walkstop"], "when": ["ground", "!pushed", "!guard", "!armed"], "from": ["walk", "start"], "then": "stand", "begin": 1.3, "yields": true },
+    "stoprun": { "target": "triangles", "clips": ["runstop"], "when": ["ground", "!pushed", "!guard", "!armed"], "from": ["run"], "then": "stand", "yields": true },
     "stand": { "target": "triangles", "clips": ["idle"], "when": ["ground", "!pushed", "!guard", "!armed"] },
-    "walk": { "target": "triangles", "clips": ["walk"], "when": ["ground", "pushed", "!fast", "!guard", "!armed"], "gait": "run" },
-    "run": { "target": "triangles", "clips": ["run"], "when": ["ground", "pushed", "fast", "!guard", "!armed"], "gait": "walk" },
+    "walk": { "target": "triangles", "clips": ["walk"], "when": ["ground", "pushed", "!reversed", "!fast", "!guard", "!armed"], "gait": "run" },
+    "run": { "target": "triangles", "clips": ["run"], "when": ["ground", "pushed", "!reversed", "fast", "!guard", "!armed"], "gait": "walk" },
     "guardwalk": { "target": "triangles", "clips": ["walk", "uawalkleft", "uawalkright", "uawalkback"], "when": ["ground", "pushed", "guard", "!fast", "!armed"], "mix": "way", "gait": "guardrun" },
     "guardrun": { "target": "triangles", "clips": ["run", "uarunleft", "uarunright", "uarunback"], "when": ["ground", "pushed", "guard", "fast", "!armed"], "mix": "way", "gait": "guardwalk" },
     "block": { "target": "triangles", "clips": ["uaguard"], "when": ["ground", "!pushed", "guard", "!armed"] },
-    "jump": { "target": "triangles", "behavior": "jump", "clips": ["jump"], "press": "jump", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"], "then": "fall" }
+    "jump": { "target": "triangles", "behavior": "jump", "clips": ["jump"], "press": "jump", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "then": "fall" }
    }
   },
   "roll": {
    "normal": [0, 1, 0],
    "motions": {
-    "dive": { "target": "triangles", "clips": ["uadive"], "press": "use", "when": ["ground", "!near", "fast", "pushed"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"] },
-    "dodge": { "target": "triangles", "clips": ["uastepback", "uastepforward", "uastepleft", "uastepright"], "press": "use", "when": ["ground", "!near", "guard"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"] },
-    "roll": { "target": "triangles", "clips": ["uaroll"], "press": "use", "when": ["ground", "!near", "pushed"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"] },
-    "backstep": { "target": "triangles", "clips": ["uastepback"], "press": "use", "when": ["ground", "!near"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"] }
+    "dive": { "target": "triangles", "clips": ["uadive"], "press": "use", "when": ["ground", "!near", "fast", "pushed"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"] },
+    "dodge": { "target": "triangles", "clips": ["uastepback", "uastepforward", "uastepleft", "uastepright"], "press": "use", "when": ["ground", "!near", "guard"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"] },
+    "roll": { "target": "triangles", "clips": ["uaroll"], "press": "use", "when": ["ground", "!near", "pushed"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"] },
+    "backstep": { "target": "triangles", "clips": ["uastepback"], "press": "use", "when": ["ground", "!near"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"] }
    }
   },
   "fight": {
    "normal": [0, 1, 0],
    "motions": {
-    "light1": { "target": "triangles", "clips": ["uajab"], "press": "light", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"], "warp": { "until": "strike", "reach": 1.5, "turn": 60, "accel": 60 } },
+    "light1": { "target": "triangles", "clips": ["uajab"], "press": "light", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "warp": { "until": "strike", "reach": 1.5, "turn": 60, "accel": 60 } },
     "light2": { "target": "triangles", "clips": ["uacross"], "press": "light", "when": ["ground"], "from": ["light1"], "warp": { "until": "strike", "reach": 1.5, "turn": 60, "accel": 60 } },
     "light3": { "target": "triangles", "clips": ["uahook"], "press": "light", "when": ["ground"], "from": ["light2"], "warp": { "until": "strike", "reach": 1.5, "turn": 60, "accel": 60 } },
     "finisher": { "target": "triangles", "clips": ["uauppercut"], "press": "heavy", "when": ["ground"], "from": ["light1", "light2", "light3"], "warp": { "until": "strike", "reach": 1.5, "turn": 60, "accel": 60 } },
     "finisher2": { "target": "triangles", "clips": ["uahurricane"], "press": "heavy", "when": ["ground"], "from": ["finisher"], "warp": { "until": "strike", "reach": 1.5, "turn": 60, "accel": 60 } },
-    "heavy": { "target": "triangles", "clips": ["uakick"], "press": "heavy", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"], "warp": { "until": "strike", "reach": 1.5, "turn": 60, "accel": 60 } },
-    "runspecial": { "target": "triangles", "clips": ["uaflykick"], "press": "special", "when": ["ground", "pushed"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"], "warp": { "until": "strike", "reach": 1.5, "turn": 60, "accel": 60 } },
-    "special": { "target": "triangles", "clips": ["uammakick"], "press": "special", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"], "warp": { "until": "strike", "reach": 1.5, "turn": 60, "accel": 60 } },
-    "skill": { "target": "triangles", "clips": ["uafireball"], "press": "skill", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"] },
-    "taunt": { "target": "triangles", "clips": ["uataunt"], "press": "taunt", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"] }
+    "heavy": { "target": "triangles", "clips": ["uakick"], "press": "heavy", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "warp": { "until": "strike", "reach": 1.5, "turn": 60, "accel": 60 } },
+    "runspecial": { "target": "triangles", "clips": ["uaflykick"], "press": "special", "when": ["ground", "pushed"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "warp": { "until": "strike", "reach": 1.5, "turn": 60, "accel": 60 } },
+    "special": { "target": "triangles", "clips": ["uammakick"], "press": "special", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "warp": { "until": "strike", "reach": 1.5, "turn": 60, "accel": 60 } },
+    "skill": { "target": "triangles", "clips": ["uafireball"], "press": "skill", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"] },
+    "taunt": { "target": "triangles", "clips": ["uataunt"], "press": "taunt", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"] }
    }
   },
   "hurt": {
    "normal": [0, 1, 0],
    "motions": {
     "flinch": { "clips": ["uahit"], "over": "Spine", "add": true, "weight": 0.8, "press": "hit", "when": ["ground", "pushed"] },
-    "hit": { "target": "triangles", "clips": ["uahit"], "press": "hit", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "dive", "dodge", "roll", "backstep", "light1", "light2", "light3", "finisher", "finisher2", "heavy", "runspecial", "special", "skill", "taunt"] },
-    "death": { "target": "triangles", "clips": ["uadeath"], "press": "die", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "dive", "dodge", "roll", "backstep", "light1", "light2", "light3", "finisher", "finisher2", "heavy", "runspecial", "special", "skill", "taunt"], "then": "getup" },
+    "hit": { "target": "triangles", "clips": ["uahit"], "press": "hit", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "dive", "dodge", "roll", "backstep", "light1", "light2", "light3", "finisher", "finisher2", "heavy", "runspecial", "special", "skill", "taunt", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"] },
+    "death": { "target": "triangles", "clips": ["uadeath"], "press": "die", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "dive", "dodge", "roll", "backstep", "light1", "light2", "light3", "finisher", "finisher2", "heavy", "runspecial", "special", "skill", "taunt", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "then": "getup" },
     "getup": { "target": "triangles", "clips": ["uagetup"], "from": ["death"] }
    }
   },
@@ -130,7 +135,7 @@
   "greatsword": {
    "normal": [0, 1, 0],
    "motions": {
-    "drawgreatsword": { "clips": ["gsdraw"], "over": "Spine", "press": "draw.greatsword", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"], "then": "greatsword", "carry": "greatsword" },
+    "drawgreatsword": { "clips": ["gsdraw"], "over": "Spine", "press": "draw.greatsword", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "then": "greatsword", "carry": "greatsword" },
     "holstergreatsword": { "clips": ["gssheath"], "over": "Spine", "press": "draw.greatsword", "from": ["greatsword"], "carry": "greatsword" },
     "switchgreatsword": { "clips": ["gssheath"], "over": "Spine", "press": "switch", "from": ["greatsword"], "then": "swordshield.drawswordshield", "carry": "greatsword" },
     "greatsword": { "clips": [], "over": "Spine", "from": ["greatsword"], "carry": "greatsword" },
@@ -167,7 +172,7 @@
   "swordshield": {
    "normal": [0, 1, 0],
    "motions": {
-    "drawswordshield": { "clips": ["ssdraw"], "over": "Spine", "press": "draw.swordshield", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"], "then": "swordshield", "carry": "swordshield" },
+    "drawswordshield": { "clips": ["ssdraw"], "over": "Spine", "press": "draw.swordshield", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "then": "swordshield", "carry": "swordshield" },
     "holsterswordshield": { "clips": ["sssheath"], "over": "Spine", "press": "draw.swordshield", "from": ["swordshield"], "carry": "swordshield" },
     "switchswordshield": { "clips": ["sssheath"], "over": "Spine", "press": "switch", "from": ["swordshield"], "then": "sword.drawsword", "carry": "swordshield" },
     "swordshield": { "clips": [], "over": "Spine", "from": ["swordshield"], "carry": "swordshield" },
@@ -204,7 +209,7 @@
   "sword": {
    "normal": [0, 1, 0],
    "motions": {
-    "drawsword": { "clips": ["osdraw"], "over": "Spine", "press": "draw.sword", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"], "then": "sword", "carry": "sword" },
+    "drawsword": { "clips": ["osdraw"], "over": "Spine", "press": "draw.sword", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "then": "sword", "carry": "sword" },
     "holstersword": { "clips": ["ossheath"], "over": "Spine", "press": "draw.sword", "from": ["sword"], "carry": "sword" },
     "switchsword": { "clips": ["ossheath"], "over": "Spine", "press": "switch", "from": ["sword"], "then": "axe.drawaxe", "carry": "sword" },
     "sword": { "clips": [], "over": "Spine", "from": ["sword"], "carry": "sword" },
@@ -241,7 +246,7 @@
   "axe": {
    "normal": [0, 1, 0],
    "motions": {
-    "drawaxe": { "clips": ["axdraw"], "over": "Spine", "press": "draw.axe", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"], "then": "axe", "carry": "axe" },
+    "drawaxe": { "clips": ["axdraw"], "over": "Spine", "press": "draw.axe", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "then": "axe", "carry": "axe" },
     "holsteraxe": { "clips": ["axsheath"], "over": "Spine", "press": "draw.axe", "from": ["axe"], "carry": "axe" },
     "switchaxe": { "clips": ["axsheath"], "over": "Spine", "press": "switch", "from": ["axe"], "then": "rifle.drawrifle", "carry": "axe" },
     "axe": { "clips": [], "over": "Spine", "from": ["axe"], "carry": "axe" },
@@ -276,7 +281,7 @@
   "rifle": {
    "normal": [0, 1, 0],
    "motions": {
-    "drawrifle": { "clips": ["rifleout"], "over": "Spine", "press": "draw.rifle", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"], "then": "rifle", "carry": "rifle" },
+    "drawrifle": { "clips": ["rifleout"], "over": "Spine", "press": "draw.rifle", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "then": "rifle", "carry": "rifle" },
     "holsterrifle": { "clips": ["rifleaway"], "over": "Spine", "press": "draw.rifle", "from": ["rifle", "aim"], "carry": "rifle" },
     "switchrifle": { "clips": ["rifleaway"], "over": "Spine", "press": "switch", "from": ["rifle", "aim"], "then": "pistol.drawpistol", "carry": "rifle" },
     "aim": { "clips": ["rifleidle"], "over": "Spine", "press": "guard", "from": ["rifle"], "carry": "rifle" },
@@ -308,7 +313,7 @@
   "pistol": {
    "normal": [0, 1, 0],
    "motions": {
-    "drawpistol": { "clips": ["ptdraw"], "over": "Spine", "press": "draw.pistol", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"], "then": "pistol", "carry": "pistol" },
+    "drawpistol": { "clips": ["ptdraw"], "over": "Spine", "press": "draw.pistol", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "then": "pistol", "carry": "pistol" },
     "holsterpistol": { "clips": ["ptholster"], "over": "Spine", "press": "draw.pistol", "from": ["pistol", "pistolaim"], "carry": "pistol" },
     "switchpistol": { "clips": ["ptholster"], "over": "Spine", "press": "switch", "from": ["pistol", "pistolaim"], "then": "bow.drawbow", "carry": "pistol" },
     "pistolaim": { "clips": ["ptaim"], "over": "Spine", "press": "guard", "from": ["pistol"], "carry": "pistol" },
@@ -341,7 +346,7 @@
   "bow": {
    "normal": [0, 1, 0],
    "motions": {
-    "drawbow": { "clips": ["bwdraw"], "over": "Spine", "press": "draw.bow", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"], "then": "bow", "carry": "bow" },
+    "drawbow": { "clips": ["bwdraw"], "over": "Spine", "press": "draw.bow", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "then": "bow", "carry": "bow" },
     "holsterbow": { "clips": ["bwsheath"], "over": "Spine", "press": "draw.bow", "from": ["bow", "bowaim"], "carry": "bow" },
     "switchbow": { "clips": ["bwsheath"], "over": "Spine", "press": "switch", "from": ["bow", "bowaim"], "then": "torch.drawtorch", "carry": "bow" },
     "bowaim": { "clips": ["bwaim"], "over": "Spine", "press": "guard", "from": ["bow"], "carry": "bow" },
@@ -374,7 +379,7 @@
   "torch": {
    "normal": [0, 1, 0],
    "motions": {
-    "drawtorch": { "clips": ["tcdraw"], "over": "Spine", "press": "draw.torch", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"], "then": "torch", "carry": "torch" },
+    "drawtorch": { "clips": ["tcdraw"], "over": "Spine", "press": "draw.torch", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "then": "torch", "carry": "torch" },
     "holstertorch": { "clips": [], "over": "Spine", "press": "draw.torch", "from": ["torch"] },
     "switchtorch": { "clips": ["mgdraw"], "over": "Spine", "press": "switch", "from": ["torch"], "then": "magic.magic", "carry": "magic" },
     "torch": { "clips": [], "over": "Spine", "from": ["torch"], "carry": "torch" },
@@ -407,7 +412,7 @@
   "magic": {
    "normal": [0, 1, 0],
    "motions": {
-    "drawmagic": { "clips": ["mgdraw"], "over": "Spine", "press": "draw.magic", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block"], "then": "magic", "carry": "magic" },
+    "drawmagic": { "clips": ["mgdraw"], "over": "Spine", "press": "draw.magic", "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "then": "magic", "carry": "magic" },
     "holstermagic": { "clips": [], "over": "Spine", "press": "draw.magic", "from": ["magic"] },
     "switchmagic": { "clips": ["gsdraw"], "over": "Spine", "press": "switch", "from": ["magic"], "then": "greatsword.greatsword", "carry": "greatsword" },
     "magic": { "clips": [], "over": "Spine", "from": ["magic"], "carry": "magic" },

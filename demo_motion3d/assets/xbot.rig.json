@@ -24,6 +24,21 @@
    "gear": 0,
    "stance": "stand"
   },
+  "walkstart": {
+   "file": "packs/mixamo-motions/Start Walking (2).fbx"
+  },
+  "walkstop": {
+   "file": "packs/mixamo-motions/Stop Walking.fbx"
+  },
+  "runstop": {
+   "file": "packs/mixamo-motions/Run To Stop.fbx"
+  },
+  "walkturn": {
+   "file": "packs/mixamo-motions/Walking Turn 180.fbx"
+  },
+  "runturn": {
+   "file": "packs/mixamo-motions/Running Turn 180.fbx"
+  },
   "jump": {
    "file": "packs/mixamo-motions/Jumping Up (2).fbx"
   },

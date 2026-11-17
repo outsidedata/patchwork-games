@@ -401,6 +401,9 @@ test('a hit while running flinches the upper body over the run, the legs running
 function standBy(j: Awaited<ReturnType<typeof joined>>, far: number, around: number, off: number) {
   const { truth, me, row, until } = j
   const at = row('dummy').data.pos
+  // A body that was moving plays its stop out first, which carries it on: stood still, its fade into
+  // standing over (`eased`, which would ease it back to where it stood), before it is moved.
+  until(() => me().data.motion === 'stand' && me().data.speed === 0 && me().data.eased === null, 60 * 3)
   const d = me().data
   expect(Array.isArray(d.along) && d.along.length === 3).toBe(true)
   d.pos = [at[0] + far * Math.sin(around), at[1], at[2] + far * Math.cos(around)]
@@ -463,6 +466,9 @@ test('a light attack started a metre and a half from the dummy, from any side an
 // Stands the body at (x, z) facing +z, still.
 function standAt(j: Awaited<ReturnType<typeof joined>>, x: number, z: number) {
   const { truth, me, until } = j
+  // A body that was moving plays its stop out first, which carries it on: stood still, its fade into
+  // standing over (`eased`, which would ease it back to where it stood), before it is moved.
+  until(() => me().data.motion === 'stand' && me().data.speed === 0 && me().data.eased === null, 60 * 3)
   const d = me().data
   d.pos = [x, 0, z]
   d.along = [...d.pos]
@@ -748,6 +754,130 @@ test('strafing at 45° with the guard up, the run key held mixes by the way and 
   // On the way, all four drawn at once.
   expect(four).toBe(true)
   expect(me().data.motion).toBe('guardrun')
+})
+
+// The angle between two facings, radians, 0 to π.
+const apart = (a: number, b: number) => Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)))
+
+test('standing, the stick pushed to the side plays the start, which turns toward the stick as it goes with no snap and goes on into the walk', async () => {
+  const j = await joined()
+  const { truth, send, me, until } = j
+  until(() => me().data.motion === 'stand' && me().data.speed === 0, 60 * 2)
+  const yaw0 = me().data.yaw
+  // The stick pushed to the right of the way the body faces, 90° off.
+  send('stick', 1, 0)
+  truth.step(DT)
+  expect(me().data.motion).toBe('start')
+  expect(me().data.clip).toBe(MOTION.activities.walk.motions.start.clips[0])
+  // It turns a little each step, never snapping, toward the stick's way.
+  const aim = me().data.want ? Math.atan2(me().data.want[0], me().data.want[1]) : yaw0
+  let was = me().data.yaw, most = 0, last = yaw0
+  until(() => {
+    const y = me().data.yaw
+    most = Math.max(most, apart(y, was))
+    was = y
+    if (me().data.motion === 'start') last = y
+    return me().data.motion === 'walk'
+  }, 60 * 3)
+  expect(most).toBeLessThan(0.25)
+  // By the start's last step it has turned most of the way toward the stick itself, before the walk
+  // takes over.
+  expect(apart(last, aim)).toBeLessThan(apart(yaw0, aim) / 4)
+})
+
+test('the start hands over to the walk at its clip\'s landing, its second foot down; let go during it, the stop gives way to; pushed during a stop, the walk', async () => {
+  const j = await joined()
+  const { truth, room, send, me, until } = j
+  until(() => me().data.motion === 'stand' && me().data.speed === 0, 60 * 2)
+  const clip = MOTION.activities.walk.motions.start.clips[0]
+  const landing = secondsIn(reader(room), me(), clip, 'end', 'landing')
+  send('stick', 0, -1)
+  truth.step(DT)
+  expect(me().data.motion).toBe('start')
+  let at = 0
+  until(() => {
+    if (me().data.motion === 'start') at = me().data.clipT
+    return me().data.motion === 'walk'
+  }, 60 * 3)
+  // Handed over the step its playhead passed its landing, not at the clip's end.
+  expect(at).toBeLessThan(landing)
+  expect(at).toBeGreaterThan(landing - 2 * DT)
+  expect(landing).toBeLessThan((measured as any).table[clip].dur)
+  // Let go during a start: the walk's stop takes over at once, begun where its motion says.
+  const k = await joined()
+  k.until(() => k.me().data.motion === 'stand' && k.me().data.speed === 0, 60 * 2)
+  k.send('stick', 0, -1)
+  for (let i = 0; i < 20; i++) k.truth.step(DT)
+  expect(k.me().data.motion).toBe('start')
+  k.send('stick', 0, 0)
+  k.truth.step(DT)
+  expect(k.me().data.motion).toBe('stopwalk')
+  expect(k.me().data.clipT).toBeGreaterThanOrEqual(MOTION.activities.walk.motions.stopwalk.begin as number)
+  // Pushed again during the stop: the walk takes over at once.
+  for (let i = 0; i < 10; i++) k.truth.step(DT)
+  expect(k.me().data.motion).toBe('stopwalk')
+  k.send('stick', 0, -1)
+  k.truth.step(DT)
+  expect(k.me().data.motion).toBe('walk')
+})
+
+test('walking, the stick let go plays the walk\'s stop, which carries the body on to rest, and it stands; running, the run\'s stop', async () => {
+  for (const [fast, stop] of [[0, 'stopwalk'], [1, 'stoprun']] as const) {
+    const j = await joined()
+    const { truth, send, me, until } = j
+    send('fast', fast)
+    send('stick', 0, -1)
+    until(() => me().data.motion === (fast ? 'run' : 'walk') && me().data.speed > 1, 60 * 4)
+    const at = [...me().data.pos]
+    send('stick', 0, 0)
+    truth.step(DT)
+    expect(me().data.motion).toBe(stop)
+    expect(me().data.clip).toBe(MOTION.activities.walk.motions[stop].clips[0])
+    until(() => me().data.motion === 'stand', 60 * 4)
+    // Carried on past where the stick was let go, and come to rest.
+    expect(Math.hypot(me().data.pos[0] - at[0], me().data.pos[2] - at[2])).toBeGreaterThan(0.3)
+    until(() => me().data.speed < 0.05, 60)
+  }
+})
+
+test('walking or running, the stick flicked back plays the walk\'s or the run\'s 180, turned by its clip alone from where the body faced, and goes on back the way it came', async () => {
+  for (const [fast, gait, pivot, speed] of [[0, 'walk', 'turnwalk', 1], [1, 'run', 'turnrun', 3]] as const) {
+    const j = await joined()
+    const { truth, send, me, until } = j
+    send('fast', fast)
+    send('stick', 0, -1)
+    until(() => me().data.motion === gait && me().data.speed > speed, 60 * 4)
+    const yaw0 = me().data.yaw
+    // Flicked back: the want the other way.
+    send('stick', 0, 1)
+    until(() => me().data.motion === pivot, 30)
+    const clip = MOTION.activities.walk.motions[pivot].clips[0]
+    expect(me().data.clip).toBe(clip)
+    // The clip's own turn `t` seconds in, radians, off its measured travel rows [t, fwd, left, yaw°], the
+    // yaw unwrapped where it crosses ±180°.
+    const rows = ((measured as any).table[clip].travel as number[][]).map(r => [...r])
+    for (let i = 1; i < rows.length; i++) rows[i][3] = rows[i - 1][3] + (((rows[i][3] - rows[i - 1][3] + 540) % 360) - 180)
+    const turnAt = (t: number) => {
+      const i = Math.max(1, rows.findIndex(r => r[0] >= t))
+      const [a, b] = [rows[i - 1], rows[Math.min(i, rows.length - 1)]]
+      const s = b[0] > a[0] ? Math.min(1, Math.max(0, (t - a[0]) / (b[0] - a[0]))) : 0
+      return ((a[3] + (b[3] - a[3]) * s) * Math.PI) / 180
+    }
+    // Begun from where the body faced as the stick was flicked, not from where the step it was flicked on
+    // had turned it toward the stick.
+    expect(apart(me().data.yaw - turnAt(me().data.clipT), yaw0)).toBeLessThan((0.5 * Math.PI) / 180)
+    // All through it, turned from there by as much as its clip has turned and no more: the clip alone
+    // turns it.
+    let off = 0
+    until(() => {
+      const d = me().data
+      if (d.motion === pivot) off = Math.max(off, apart(d.yaw, yaw0 + turnAt(d.clipT)))
+      return d.motion === gait
+    }, 60 * 3)
+    expect(off, pivot).toBeLessThan((0.5 * Math.PI) / 180)
+    // Facing back the way it came, half way round.
+    expect(apart(me().data.yaw, yaw0)).toBeGreaterThan(Math.PI - (0.5 * Math.PI) / 180)
+  }
 })
 
 test('every walk and run that mixes by speed names a gait of its own activity, a loop on the ground, that names it back', () => {

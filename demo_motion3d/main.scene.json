@@ -51,6 +51,16 @@
           "points": { "Seat": { "point": { "at": [0, 0.61, 1], "turn": [180, 0, 0] } } },
           "activities": ["chair"]
         },
+        "padramp": { "shape": { "plane": { "size": [2, 2.838], "tilt": 0.4 } }, "look": { "colour": "#c07850", "roughness": 0.8, "thick": 0.1 } },
+        "padblock": { "shape": { "box": { "size": [2, 1.2, 10] } }, "look": { "colour": "#c07850", "roughness": 0.8 } },
+        "pad": {
+          "shape": { "box": { "size": [2, 0.04, 2.5] } },
+          "look": { "colour": "#40e070", "roughness": 0.8 },
+          "activities": ["jumppad"],
+          "data": { "motion3d": { "autoChange": true } }
+        },
+        "lift": { "shape": { "hyperplane": { "size": [3, 3] } }, "look": { "colour": "#e07850", "roughness": 0.7, "thick": 0.2 } },
+        "liftblock": { "shape": { "box": { "size": [3, 2.5, 3] } }, "look": { "colour": "#d0b070", "roughness": 0.8 } },
         "coldroom": {
           "shape": { "box": { "size": [5, 0.04, 5] } },
           "look": { "colour": "#a8d0f0", "roughness": 0.8 },
@@ -173,12 +183,7 @@
         "crawlcubemat": { "shape": { "box": { "size": [5, 0.02, 5] } }, "look": { "colour": "#d8c08a", "roughness": 0.8 } },
         "crawlcube": { "shape": { "box": { "size": [5, 3, 5] } }, "activities": ["crawl"], "data": { "motion3d": { "autoChange": true } } },
         "cavemat": { "shape": { "box": { "size": [6, 0.02, 6] } }, "look": { "colour": "#4a4552", "roughness": 0.8 } },
-        "cave": { "shape": { "box": { "size": [6, 3, 6] } }, "activities": ["light_torch"], "data": { "motion3d": { "autoChange": true } } },
-        "padramp": { "shape": { "plane": { "size": [2, 2.838], "tilt": 0.4 } }, "look": { "colour": "#c07850", "roughness": 0.8, "thick": 0.1 } },
-        "padblock": { "shape": { "box": { "size": [2, 1.2, 10] } }, "look": { "colour": "#c07850", "roughness": 0.8 } },
-        "pad": { "shape": { "box": { "size": [2, 0.04, 2.5] } }, "look": { "colour": "#40e070", "roughness": 0.8 }, "activities": ["jumppad"], "data": { "motion3d": { "autoChange": true } } },
-        "lift": { "shape": { "hyperplane": { "size": [3, 3] } }, "look": { "colour": "#e07850", "roughness": 0.7, "thick": 0.2 } },
-        "liftblock": { "shape": { "box": { "size": [3, 2.5, 3] } }, "look": { "colour": "#d0b070", "roughness": 0.8 } }
+        "cave": { "shape": { "box": { "size": [6, 3, 6] } }, "activities": ["light_torch"], "data": { "motion3d": { "autoChange": true } } }
       },
       "mods": { "height": "terrain3d" }
     },
@@ -223,12 +228,17 @@
       "kinds": {
         "xbot": {
           "triangles": { "radius": 0.3, "height": 1.8, "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5 },
-          "move": { "accel": 12, "turnRate": 12, "still": 0.05 },
+          "move": { "accel": 12, "turnRate": 12, "still": 0.05, "reverse": 135 },
           "fall": { "gravity": 20, "airAccel": 2 },
           "jump": { "jumpH": 2, "jumpVelocityBoostMagnitude": 2, "cut": 0.4 }
         }
       },
-      "mods": { "behaviors": ["shapes3d", "terrain3d", "motion3d", "jumppad"], "solids": ["shapes3d"], "footprints": ["shapes3d"], "states": ["motion3d", "yard"] }
+      "mods": {
+        "behaviors": ["shapes3d", "terrain3d", "motion3d", "jumppad"],
+        "solids": ["shapes3d"],
+        "footprints": ["shapes3d"],
+        "states": ["motion3d", "yard"]
+      }
     }
   },
   "plugins": ["loader", "scenemanager", "player", "terrain3d", "solids", "shipped", "motion3d", "environment3d", "render3d", "chasecamera3d", "stats"],
@@ -283,6 +293,12 @@
     "chair": { "pos": [0, 0, 0], "yaw": 0 },
     "chairback": { "pos": [0, 0, 0], "yaw": 0 },
     "chairzone": { "pos": [0, 0, 0], "yaw": 0 },
+    "padramp": { "pos": [0, 0, 0], "yaw": 0 },
+    "padblock": { "pos": [0, 0, 0], "yaw": 0 },
+    "pad": { "pos": [0, 0, 0], "yaw": 0, "velocity": [0, 0, 0] },
+    "jumppad": { "made": false },
+    "lift": { "pos": [0, 0, 0], "rot": [0, 0, 0, 1], "was": null, "low": 0, "high": 0, "going": 1, "held": 0 },
+    "liftblock": { "pos": [0, 0, 0], "yaw": 0 },
     "coldroom": { "pos": [0, 0, 0], "yaw": 0 },
     "barpost": { "pos": [0, 0, 0], "yaw": 0 },
     "bar": { "pos": [0, 0, 0], "yaw": 0 },
@@ -349,13 +365,7 @@
     "crawlcubemat": { "pos": [0, 0, 0], "yaw": 0 },
     "crawlcube": { "pos": [0, 0, 0], "yaw": 0 },
     "cavemat": { "pos": [0, 0, 0], "yaw": 0 },
-    "cave": { "pos": [0, 0, 0], "yaw": 0 },
-    "padramp": { "pos": [0, 0, 0], "yaw": 0 },
-    "padblock": { "pos": [0, 0, 0], "yaw": 0 },
-    "pad": { "pos": [0, 0, 0], "yaw": 0, "velocity": [0, 0, 0] },
-    "jumppad": { "made": false },
-    "lift": { "pos": [0, 0, 0], "rot": [0, 0, 0, 1], "was": null, "low": 0, "high": 0, "going": 1, "held": 0 },
-    "liftblock": { "pos": [0, 0, 0], "yaw": 0 }
+    "cave": { "pos": [0, 0, 0], "yaw": 0 }
   },
   "actors": [
     { "is": "scenemanager" },
@@ -371,6 +381,11 @@
     { "is": "chair", "pos": [6, 0, 10] },
     { "is": "chairback", "pos": [6, 0, 10.306] },
     { "is": "chairzone", "pos": [6, 0, 9] },
+    { "is": "padramp", "pos": [0, 0.6, 78.581] },
+    { "is": "padblock", "pos": [0, 0, 85] },
+    { "is": "jumppad" },
+    { "is": "liftblock", "pos": [14, 0, 82.5] },
+    { "is": "lift", "pos": [14, 0, 79.5], "low": 0, "high": 2.5 },
     { "is": "coldroom", "pos": [-14, -0.02, 18] },
     { "is": "barpost", "pos": [-9.05, 0, 18] },
     { "is": "barpost", "pos": [-4.95, 0, 18] },
@@ -437,11 +452,6 @@
     { "is": "crawlcubemat", "pos": [0, 0, 66] },
     { "is": "crawlcube", "pos": [0, -0.02, 66] },
     { "is": "cavemat", "pos": [14, 0, 66] },
-    { "is": "cave", "pos": [14, -0.02, 66] },
-    { "is": "padramp", "pos": [0, 0.6, 78.581] },
-    { "is": "padblock", "pos": [0, 0, 85] },
-    { "is": "jumppad" },
-    { "is": "liftblock", "pos": [14, 0, 82.5] },
-    { "is": "lift", "pos": [14, 0, 79.5], "low": 0, "high": 2.5 }
+    { "is": "cave", "pos": [14, -0.02, 66] }
   ]
 }

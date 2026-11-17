@@ -83,6 +83,10 @@ panel tunes motion3d's settings and whose readout shows what the body is doing. 
   `down`, 0.02 m), so turning while strafing blends from one direction into the next.
 - Every walk and its run name each other as their `gait` (motion3d's Gaits): the run key held, E
   speeds up through a mix of the two, the run coming in as the speed rises, with no restart.
+- The walk activity starts, stops and turns round: pushed from standing E plays `start` (`Start
+  Walking (2)`), steering toward the stick, into the walk at its second foot down; let go, `stopwalk`
+  or `stoprun`; walked back further than the kind's `move.reverse` (135°), `turnwalk` or `turnrun`. A
+  start or a stop gives way at once to the stick pushed or let go again (`yields`).
 - The yard's `guard` and
   `near` states (`plugins/yard/yard.kinematics3d.ts`) are the guard key held and a station in reach,
   so E rolls only away from one.
@@ -143,4 +147,5 @@ turn; vaults the plain low box and climbs onto the plain head-high one; and, run
 slant, begins the vault on its own line with no jump or snap and is the square vault from the hand
 plant on; at every station begins its move with no jump or snap; and, strafing with the stick swept
 from forward to left, blends from the forward walk into the left strafe in step with no restart; and,
-walking with the run key held, speeds up through a mix of the walk and the run in step with no restart.
+walking with the run key held, speeds up through a mix of the walk and the run in step with no restart;
+starts toward the stick from standing, stops when let go, and turns round on a 180 when walked back.
