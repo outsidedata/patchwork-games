@@ -10,7 +10,7 @@ import { connection, load, manager, type Down } from '#addons/scenemanager/scene
 import { possessed } from '#addons/player/player.addon.ts'
 import * as THREE from 'three'
 import { motion3d } from '#plugins/motion3d/motion3d.plugin.ts'
-import { posed, secondsIn } from '#plugins/motion3d/motion3d.play.ts'
+import { downOf, posed, secondsIn } from '#plugins/motion3d/motion3d.play.ts'
 import { carrying, reachesOf, type File } from '#plugins/motion3d/motion3d.sim.ts'
 import { sim } from './demo_motion3d.sim.ts'
 import { blowAt } from './dummy.sim.ts'
@@ -590,6 +590,99 @@ test('run at the waist-high box on a slant, the vault is warped: it begins where
   expect(slanted.end.activity).toBe('walk')
   expect(slanted.end.pos[2]).toBeGreaterThan(slanted.beyond)
   expect(slanted.end.pos[1]).toBeLessThan(0.05)
+})
+
+test('strafing with the guard up, the stick swept from forward to left mixes the forward walk into the left strafe: half each at 45°, in step by the left foot, the body\'s clip handed over with no restart or fade, the feet never jumping', async () => {
+  const j = await joined()
+  const { truth, room, send, me, until } = j
+  send('guard', 1)
+  send('stick', 0, -1)
+  until(() => me().data.motion === 'guardwalk' && me().data.blend >= 1, 60)
+  const from = me().data.from
+  const m = MOTION.activities.walk.motions.guardwalk
+  const [ahead, left] = m.clips
+  // The left foot's place in the body's frame, as the page draws it.
+  const foot = (bone: string) => new THREE.Vector3().setFromMatrixPosition(posed(reader(room), me()).get(bone)!)
+  // How far through its lap from its left foot coming down a clip is at t.
+  const through = (clip: string, t: number) => {
+    const dur = (measured as any).table[clip].dur
+    const s = (t - downOf(reader(room), me(), clip)) / dur
+    return s - Math.floor(s)
+  }
+  // The most a foot moves in one step as the stick is held, over two laps: the clips' own swing.
+  const held = (x: number, y: number) => {
+    send('stick', x, y)
+    let w0 = { L: foot('LeftFoot'), R: foot('RightFoot') }, top = 0
+    for (let i = 0; i < 120; i++) {
+      truth.step(DT)
+      const now = { L: foot('LeftFoot'), R: foot('RightFoot') }
+      top = Math.max(top, now.L.distanceTo(w0.L), now.R.distanceTo(w0.R))
+      w0 = now
+    }
+    return top
+  }
+  const swingAhead = held(0, -1)
+  let was = { L: foot('LeftFoot'), R: foot('RightFoot') }
+  let most = 0
+  let handed = false
+  let half: { clip: string; mix: { clip: string; w: number }[] } | null = null
+  const steps = 90
+  for (let i = 1; i <= steps; i++) {
+    // The stick turned from straight ahead to straight left, a step at a time.
+    const a = (i / steps) * (Math.PI / 2)
+    send('stick', -Math.sin(a), -Math.cos(a))
+    const before = me().data.clip
+    truth.step(DT)
+    const d = me().data
+    expect(d.motion).toBe('guardwalk')
+    // No restart and no fade: the clip it plays never fades in afresh.
+    expect(d.blend).toBe(1)
+    expect(d.from).toBe(from)
+    if (d.clip !== before) handed = true
+    // In step: every clip mixed with the body's clip as far through its lap from its left foot coming down.
+    for (const x of d.mix) {
+      const gap = Math.abs(through(x.clip, x.t) - through(d.clip, d.clipT))
+      expect(Math.min(gap, 1 - gap)).toBeLessThan(1e-6)
+    }
+    if (i === steps / 2) half = { clip: d.clip, mix: d.mix.map((x: { clip: string; w: number }) => ({ clip: x.clip, w: x.w })) }
+    const now = { L: foot('LeftFoot'), R: foot('RightFoot') }
+    most = Math.max(most, now.L.distanceTo(was.L), now.R.distanceTo(was.R))
+    was = now
+  }
+  // At 45° it is drawn half the forward walk and half the left strafe.
+  expect(half).not.toBe(null)
+  const shares = new Map([[half!.clip, 1 - half!.mix.reduce((s, x) => s + x.w, 0)], ...half!.mix.map(x => [x.clip, x.w] as [string, number])])
+  expect([...shares.keys()].sort()).toEqual([ahead, left].sort())
+  expect(shares.get(ahead)).toBeCloseTo(0.5, 1)
+  expect(shares.get(left)).toBeCloseTo(0.5, 1)
+  // The body's clip was handed from the forward walk to the left strafe on the way, and ends there.
+  expect(handed).toBe(true)
+  expect(me().data.clip).toBe(left)
+  // The drawn feet never jump: through the sweep no foot moves further in a step than it swings in the
+  // forward walk or the left strafe played alone.
+  const swingLeft = held(-1, 0)
+  expect(most).toBeLessThanOrEqual(Math.max(swingAhead, swingLeft) + 1e-3)
+})
+
+test('every motion that mixes its clips mixes loops on the ground that each go somewhere, each with its left foot coming down inside its lap', async () => {
+  const { room, me } = await joined()
+  const mixing = Object.entries(MOTION.activities).flatMap(([word, a]) => Object.entries(a.motions).filter(([, m]) => m.mix).map(([name, m]) => ({ name: `${word}.${name}`, m })))
+  expect(mixing.length).toBe(20)
+  const table = (measured as any).table
+  for (const { name, m } of mixing) {
+    expect(m.mix, name).toBe('way')
+    expect(m.target, name).toBe('triangles')
+    for (const clip of m.clips) {
+      const entry = (written as any).clips[clip]
+      const source = typeof entry === 'object' && entry.mirror ? entry.mirror : clip
+      const row = table[source]
+      expect(row, `${name} ${clip}`).toBeDefined()
+      expect(Math.hypot(row.forward, row.left), `${name} ${clip} goes somewhere`).toBeGreaterThan(0.5)
+      const down = downOf(reader(room), me(), clip)
+      expect(down, `${name} ${clip}`).toBeGreaterThanOrEqual(0)
+      expect(down, `${name} ${clip}`).toBeLessThan(row.dur)
+    }
+  }
 })
 
 test('standing at rest, the idle plays on at its own rate', async () => {
