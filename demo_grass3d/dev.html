@@ -1,0 +1,205 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demo_grass3d dev</title>
+    <style>
+      body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      canvas { grid-area: 1 / 1 }
+      .lil-gui.root { max-height: 100vh; overflow-y: auto }
+      #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 12px monospace; background: #0008; padding: 4px 6px; pointer-events: none }
+    </style>
+  </head>
+  <body>
+    <div id="readout"></div>
+    <script type="module">
+      // The demo: index.html with three's lil-gui at the top right and a readout at the bottom left.
+      //
+      // The grass folder sets every number and colour of this page's own copy of `world.grass3d`'s grass,
+      // and the wind folder its gusts, bend and trampling; each change hands grass3d a new object, which
+      // makes the grass again. The weather folder fades the weather3d row to any weather of the weathers
+      // file and sets the wind's way, on the truth in this tab, as its `weather` act does; the clock sets
+      // the sky's hour. Nothing is written to disk and the truth keeps the file's: `copy JSON` copies
+      // `world.grass3d` as the panel has it, for `main.scene.json`.
+      //
+      // The view folder holds render3d's camera at a place of its own instead of behind the car: `drive`
+      // gives it back, `feet`, `meadow`, `hill`, `wind` and `track` look at the grass from a metre, from
+      // standing height across the field, from over a hill to the horizon, low into the wind toward the
+      // sun, and down at the tracks the car left. `?view=<name>` starts in one.
+      //
+      // The readout: frames a second over the last second, the blocks of ground grass3d holds of its
+      // window, its chunks drawn and casting, and the car's speed.
+      //
+      // The truths this tab holds are on `window.__scenes` and the page on `window.__page`, and
+      // `window.__view(name)` sets a view, for the benchmarking skill's profilers and for screenshots.
+      import { boot } from '#engine/engine.ts'
+      import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
+      import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import GUI from 'lil-gui'
+      import { sim } from './demo_grass3d.sim.ts'
+      import { scene as main } from './main.sim.ts'
+      import file from './demo_grass3d.scene.json'
+      const params = new URLSearchParams(location.search)
+
+      // `?grass=0`: this page's copy of main.scene.json without grass3d, before the boot reads it: out of
+      // `plugins`, its `world` entry, and terrain3d's `ready` mods. The same scene to measure it against.
+      if (params.get('grass') === '0') {
+        main.plugins = main.plugins.filter(p => p !== 'grass3d')
+        delete main.world.grass3d
+        main.world.terrain3d.mods.ready = main.world.terrain3d.mods.ready.filter(p => p !== 'grass3d')
+      }
+
+      const dt = file.prefabs.engine.dt
+      const truth = boot(file, sim)
+      window.__scenes = await load(truth, import.meta.url)
+      let client
+      const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+        client = me
+        for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
+          if (!surface) continue
+          const canvas = document.createElement('canvas')
+          canvas.width = scene.prefabs.engine.width
+          canvas.height = scene.prefabs.engine.height
+          document.body.appendChild(canvas)
+          surface.mount(canvas)
+        }
+      })
+      window.__page = page
+
+      // The views: where the camera stands and what it looks at, in metres; `drive` is the car's own camera.
+      const VIEWS = {
+        drive: null,
+        feet: { at: [3, 1.1, -6], look: [3.5, 0.4, -2] },
+        meadow: { at: [-20, 1.7, -30], look: [10, 0.8, 20] },
+        hill: { at: [0, 14, -40], look: [0, 0, 80] },
+        wind: { at: [8, 0.8, 6], look: [30, 3, 40] },
+        track: { at: [0, 6, -6], look: [0, 0, 4] },
+      }
+      const OWNER = 'dev.html view'
+      let held = params.get('view') ?? 'drive'
+      // The view's height over the land, which the camera stands on from frame to frame.
+      const place = () => {
+        const r3 = client?.plugins.render3d, ground = client?.plugins.terrain3d?.ground
+        if (!r3?.camera || !ground) return
+        const v = VIEWS[held]
+        if (!v) { r3.release(OWNER); return }
+        r3.claim(OWNER)
+        const up = (p) => [p[0], p[1] + ground.height(p[0], p[2]), p[2]]
+        const at = up(v.at), look = up(v.look)
+        r3.camera.position.set(...at)
+        r3.camera.lookAt(...look)
+      }
+      window.__view = name => { held = name; place() }
+
+      const gui = new GUI({ title: 'demo_grass3d' })
+      for (const type of ['keydown', 'keyup']) gui.domElement.addEventListener(type, e => e.stopPropagation())
+      gui.add({ get view() { return held }, set view(v) { held = v } }, 'view', Object.keys(VIEWS)).listen()
+
+      const GRASS = {
+        density: [10, 800, 1], full: [1, 30, 0.5], reach: [10, 300, 1], fade: [0, 100, 1], tile: [0.5, 8, 0.25],
+        widen: [0, 1.5, 0.01], widest: [1, 16, 0.1], lean: [0, 0.85, 0.01], chunks: [1, 8, 1],
+        vary: [0, 1, 0.01], translucency: [0, 3, 0.01], roughness: [0, 1, 0.01], ao: [0, 1, 0.01], shadow: [0, 60, 1],
+      }
+      const sliders = (folder, o, ranges, then) => {
+        for (const [key, [lo, hi, step]] of Object.entries(ranges)) folder.add(o, key, lo, hi, step).onChange(then)
+      }
+
+      let shown = null
+      function panel(me) {
+        const world = me.plugins.wire.scene.world
+        // The panel waits for the weathers file, whose names its weather list offers.
+        const table = world.weather3d && me.plugins.loader.get(world.weather3d.weathers)
+        if (!world.grass3d || (world.weather3d && !table)) return
+        const folder = gui.addFolder('main')
+        shown = { me, folder }
+        const copy = structuredClone(world.grass3d)
+        const set = () => { world.grass3d = structuredClone(copy) }
+        for (const [name, g] of Object.entries(copy.grasses)) {
+          const gf = folder.addFolder(`grass ${name}`)
+          sliders(gf, g, GRASS, set)
+          gf.add(g.height, 0, 0.05, 2, 0.01).name('height').onChange(set)
+          gf.add(g.height, 1, 0, 2, 0.01).name('height spread').onChange(set)
+          gf.add(g.width, 0, 0.005, 0.3, 0.001).name('width').onChange(set)
+          gf.add(g.width, 1, 0, 2, 0.01).name('width spread').onChange(set)
+          gf.addColor(g.colours, 'root').onChange(set)
+          gf.addColor(g.colours, 'tip').onChange(set)
+          gf.addColor(g.colours, 'dry').onChange(set)
+          gf.add(g.dry, 'amount', 0, 1, 0.01).name('dry amount').onChange(set)
+          gf.add(g.dry, 'scale', 1, 80, 0.5).name('dry scale').onChange(set)
+        }
+        const wf = folder.addFolder('wind and trampling')
+        sliders(wf, copy.gust, { scale: [1, 80, 0.5], strength: [0, 1, 0.01], flutter: [0, 0.5, 0.005], rate: [0, 12, 0.05] }, set)
+        wf.add(copy, 'bend', 0, 0.85, 0.005).onChange(set)
+        wf.add(copy.trample, 'recover', 0.5, 120, 0.5).name('trample recover').onChange(set)
+        wf.add(copy.trample, 'reach', 0, 2, 0.01).name('trample reach').onChange(set)
+
+        const scenes = window.__scenes
+        const rowOf = kind => scenes.get('main')?.rows.find(r => r.kind === kind)
+        if (rowOf('weather3d')) {
+          const xf = folder.addFolder('weather')
+          const wx = () => rowOf('weather3d').data
+          const pick = { weather: wx().to, fade: 5 }
+          const fade = () => { const d = wx(); d.from = { ...d.mix }; d.to = pick.weather; d.blend = 0; d.fade = pick.fade }
+          xf.add(pick, 'weather', Object.keys(table)).onChange(fade)
+          xf.add(pick, 'fade', 0, 120, 1).name('fade seconds')
+          xf.add({ get way() { return wx().windDeg }, set way(v) { wx().windDeg = v } }, 'way', 0, 360, 1).name('wind toward °').listen()
+          const day = world.skydome3d.day
+          const sky = () => rowOf('skydome3d').data
+          xf.add({ get hour() { return (sky().t / day) * 24 }, set hour(h) { sky().t = (h / 24) * day } }, 'hour', 0, 24, 0.01).name('hour of the day').listen()
+          xf.add({ get rate() { return sky().rate }, set rate(v) { sky().rate = v } }, 'rate', 0, 200, 0.5).name('clock rate').listen()
+        }
+        folder.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify(copy, null, 2)) }, 'copy').name('copy JSON')
+      }
+      const follow = () => {
+        if (!client || client === shown?.me) return
+        shown?.folder.destroy()
+        shown = null
+        panel(client)
+      }
+
+      const readout = document.getElementById('readout')
+      let frames = 0, since = performance.now(), fps = 0
+      const read = () => {
+        frames++
+        const now = performance.now()
+        if (now - since >= 1000) { fps = (frames * 1000) / (now - since); frames = 0; since = now }
+        const g = client?.plugins.grass3d
+        const car = window.__scenes.get('main')?.rows.find(r => r.kind === 'car')
+        const speed = car ? Math.hypot(car.data.vel[0], car.data.vel[2]) * 3.6 : 0
+        let grass = 'no grass'
+        if (g) {
+          const b = g.blocks()
+          const chunks = g.chunks().flatMap(x => x.levels.flatMap(l => l.chunks))
+          grass = `blocks ${b.held}/${b.of}   chunks ${chunks.filter(c => c.visible).length} drawn, ${chunks.filter(c => c.visible && c.castShadow).length} casting`
+        }
+        readout.textContent = `${fps.toFixed(0)} fps   ${grass}   car ${speed.toFixed(0)} km/h`
+      }
+
+      // An error stops the loop and is written over the readout, whole, and kept on `window.__error`.
+      const fail = e => {
+        window.__error = String(e?.stack ?? e)
+        readout.style.whiteSpace = 'pre-wrap'
+        readout.style.color = '#ff8a80'
+        readout.textContent = window.__error
+      }
+      addEventListener('error', e => fail(e.error ?? e.message))
+      addEventListener('unhandledrejection', e => fail(e.reason))
+
+      let last = performance.now(), owed = 0
+      const loop = async now => {
+        try {
+          owed += Math.min((now - last) / 1000, 0.25)
+          last = now
+          page.input()
+          while (owed >= dt) { truth.step(dt); owed -= dt }
+          place()
+          await page.frame(owed / dt)
+          follow()
+          read()
+        } catch (e) { fail(e); return }
+        requestAnimationFrame(loop)
+      }
+      requestAnimationFrame(loop)
+    </script>
+  </body>
+</html>

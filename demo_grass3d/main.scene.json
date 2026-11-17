@@ -1,0 +1,958 @@
+{
+  "world": {
+    "predict": {
+      "epsilon": 0.000001,
+      "cutoff": 60,
+      "halflife": 100,
+      "snap": 5,
+      "below": 0.0001
+    },
+    "defs": "demo_grass3d",
+    "player": {
+      "actions": {
+        "pedal": {
+          "label": "Throttle and brake",
+          "keys": [
+            [
+              "ArrowDown",
+              "s",
+              "Pad6"
+            ],
+            [
+              "ArrowUp",
+              "w",
+              "Pad7"
+            ]
+          ]
+        },
+        "steer": {
+          "label": "Steer",
+          "keys": [
+            [
+              "ArrowRight",
+              "d",
+              "Pad15",
+              "PadStickRight"
+            ],
+            [
+              "ArrowLeft",
+              "a",
+              "Pad14",
+              "PadStickLeft"
+            ]
+          ]
+        },
+        "brake": {
+          "label": "Brake",
+          "keys": [
+            " ",
+            "Pad0"
+          ]
+        }
+      },
+      "deadzone": 0.15,
+      "resolution": 64
+    },
+    "loader": {
+      "assets": {
+        "demo_grass3d": {
+          "type": "json",
+          "url": "/games/demo_grass3d/assets/demo_grass3d.json",
+          "preload": true
+        },
+        "meadow": {
+          "type": "json",
+          "url": "/games/demo_grass3d/assets/meadow.json",
+          "preload": true
+        },
+        "weathers": {
+          "type": "json",
+          "url": "/games/demo_grass3d/assets/weathers.json",
+          "preload": true
+        },
+        "grass-color": {
+          "type": "texture",
+          "url": "/games/demo_grass3d/assets/ground/grass-color-1024.webp",
+          "wrap": "repeat",
+          "anisotropy": 8
+        },
+        "grass-normal": {
+          "type": "texture",
+          "url": "/games/demo_grass3d/assets/ground/grass-normal-1024.webp",
+          "space": "linear",
+          "wrap": "repeat",
+          "anisotropy": 8
+        },
+        "gravel-color": {
+          "type": "texture",
+          "url": "/games/demo_grass3d/assets/ground/gravel-color-1024.webp",
+          "wrap": "repeat",
+          "anisotropy": 8
+        },
+        "gravel-normal": {
+          "type": "texture",
+          "url": "/games/demo_grass3d/assets/ground/gravel-normal-1024.webp",
+          "space": "linear",
+          "wrap": "repeat",
+          "anisotropy": 8
+        },
+        "rock-color": {
+          "type": "texture",
+          "url": "/games/demo_grass3d/assets/ground/rock-color-1024.webp",
+          "wrap": "repeat",
+          "anisotropy": 8
+        },
+        "rock-normal": {
+          "type": "texture",
+          "url": "/games/demo_grass3d/assets/ground/rock-normal-1024.webp",
+          "space": "linear",
+          "wrap": "repeat",
+          "anisotropy": 8
+        }
+      }
+    },
+    "terrain3d": {
+      "field": "meadow",
+      "rings": [
+        {
+          "reach": 64,
+          "seg": 256
+        },
+        {
+          "reach": 320,
+          "seg": 128
+        },
+        {
+          "reach": 2000,
+          "seg": 100
+        }
+      ],
+      "shadowReach": 64,
+      "budget": 8,
+      "seabed": false,
+      "preload": true,
+      "mods": {
+        "ready": [
+          "grass3d"
+        ]
+      }
+    },
+    "skydome3d": {
+      "day": 1200,
+      "look": {
+        "dayZenith": "#2a63b8",
+        "nightZenith": "#03050e",
+        "dayHorizon": "#e6d6bd",
+        "nightHorizon": "#0d0e1a",
+        "setZenith": "#47386b",
+        "setHorizon": "#fa7a38",
+        "sunHigh": "#fff4dc",
+        "sunLow": "#ff6b29",
+        "moon": "#8cadff",
+        "ground": "#2a1e12",
+        "exposure": 1.05,
+        "nightOpen": 0.35,
+        "sunIntensity": 2.6,
+        "moonIntensity": 0.35,
+        "hemiDay": 0.6,
+        "hemiNight": 0.12,
+        "stars": 1,
+        "haze": 0.0005,
+        "mist": 0.01,
+        "starSize": 0.15,
+        "twinkle": 0.4,
+        "twinkles": 900,
+        "twinkleSpread": 5,
+        "sunShrink": [
+          0.05,
+          0.4
+        ],
+        "sunEdge": 0.85,
+        "moonEdge": 0.9,
+        "moonSize": 0.0045,
+        "radius": 8000,
+        "overcast": 0.2,
+        "envSun": 0.02,
+        "envMix": 0.05,
+        "envIntensity": 0.25
+      },
+      "shadow": {
+        "map": 2048,
+        "half": 45,
+        "near": 1,
+        "far": 1600,
+        "bias": -0.00002,
+        "normalBias": 0.04
+      },
+      "mods": {
+        "weather": "weather3d"
+      }
+    },
+    "weather3d": {
+      "weathers": "weathers",
+      "soak": 6,
+      "dry": 45,
+      "lay": 55,
+      "melt": 90,
+      "gusts": [
+        3,
+        7,
+        11
+      ],
+      "bolt": {
+        "lasts": [
+          0.12,
+          0.4
+        ],
+        "out": [
+          300,
+          2500
+        ]
+      },
+      "look": {
+        "snowScale": 0.05,
+        "snowSharp": 0.42,
+        "flash": 0.8
+      },
+      "precip": {
+        "rain": 40000,
+        "snow": 60000,
+        "dust": 2600,
+        "splashes": 280,
+        "range": 26,
+        "edge": 3,
+        "near": 1.5,
+        "rainFall": 16,
+        "rainLen": 0.24,
+        "rainWidth": 0.012,
+        "rainOpacity": 0.24,
+        "snowFall": 1.1,
+        "snowSize": 0.03,
+        "snowOpacity": 0.9,
+        "snowSway": [
+          0.25,
+          1.3,
+          0.5
+        ],
+        "dustFall": 0.1,
+        "dustSize": 0.02,
+        "dustOpacity": 0.22,
+        "dustColour": "#c9a571",
+        "dustSway": [
+          0.6,
+          0.4,
+          0.6
+        ],
+        "swayPeriod": 60,
+        "splashSize": 0.12,
+        "splashLife": 0.35,
+        "splashOpacity": 0.32,
+        "splashRing": 0.25,
+        "lift": 0.02,
+        "keyShare": 0.3
+      },
+      "mods": {
+        "sky": "skydome3d",
+        "land": "terrain3d"
+      }
+    },
+    "clouds3d": {
+      "look": {
+        "cloudScale": 0.004,
+        "cloudSharp": 0.42,
+        "cloudDrift": 0.01,
+        "cloudShadow": 0.55,
+        "godrays": 1,
+        "cloudLit": 0.35,
+        "cloudShade": 0.55,
+        "lining": 0.8,
+        "cirrusAlpha": 0.5
+      },
+      "mods": {
+        "weather": "weather3d"
+      }
+    },
+    "box3d": {
+      "gravity": [
+        0,
+        -9.8,
+        0
+      ],
+      "subStepCount": 4,
+      "enableSleep": true,
+      "enableContinuous": true,
+      "enableWarmStarting": false,
+      "static": [],
+      "kinds": {},
+      "chunk": {
+        "count": 65,
+        "cell": 0.5
+      },
+      "mods": {
+        "kinds": [
+          "box3dvehicle"
+        ],
+        "ground": "terrain3d"
+      }
+    },
+    "box3dvehicle": {
+      "chassis": "car",
+      "wheel": "wheel",
+      "joint": "axle",
+      "vehicles": {
+        "hatch": {
+          "body": {
+            "length": 3.6,
+            "width": 1.3,
+            "height": 0.7,
+            "mass": 600,
+            "center": [
+              0.1,
+              -0.1,
+              0
+            ],
+            "friction": 0.9,
+            "cabin": {
+              "at": -0.35,
+              "length": 1.7,
+              "width": 1.2,
+              "top": 1.3,
+              "topWidth": 1.1,
+              "height": 0.55
+            }
+          },
+          "bodies": {
+            "enableContactRecycling": false
+          },
+          "axles": [
+            {
+              "at": 1.25,
+              "track": 1.7,
+              "mount": 0.2,
+              "wheel": {
+                "radius": 0.42,
+                "width": 0.32,
+                "mass": 20,
+                "friction": 0.9,
+                "rollingResistance": 0
+              },
+              "spring": {
+                "stiffness": 16000,
+                "length": 0.55,
+                "travel": 0.3,
+                "sag": 0.1
+              },
+              "damper": {
+                "bump": 800,
+                "rebound": 2200
+              },
+              "bumpStop": {
+                "length": 0.06,
+                "stiffness": 30000
+              },
+              "antiRoll": 8000,
+              "driven": true,
+              "steered": true
+            },
+            {
+              "at": -1.25,
+              "track": 1.7,
+              "mount": 0.2,
+              "wheel": {
+                "radius": 0.42,
+                "width": 0.32,
+                "mass": 20,
+                "friction": 0.9,
+                "rollingResistance": 0
+              },
+              "spring": {
+                "stiffness": 15000,
+                "length": 0.55,
+                "travel": 0.3,
+                "sag": 0.1
+              },
+              "damper": {
+                "bump": 800,
+                "rebound": 2200
+              },
+              "bumpStop": {
+                "length": 0.06,
+                "stiffness": 30000
+              },
+              "antiRoll": 5000,
+              "driven": true,
+              "steered": false
+            }
+          ],
+          "engine": {
+            "curve": [
+              [
+                800,
+                70
+              ],
+              [
+                2000,
+                95
+              ],
+              [
+                3500,
+                115
+              ],
+              [
+                4500,
+                110
+              ],
+              [
+                5800,
+                92
+              ],
+              [
+                6500,
+                78
+              ]
+            ],
+            "idle": 850,
+            "launch": 2200,
+            "redline": 6500,
+            "revRate": 9000,
+            "friction": [
+              8,
+              3
+            ],
+            "gears": [
+              3.6,
+              2.65,
+              2.05,
+              1.7,
+              1.45
+            ],
+            "reverse": 3.4,
+            "final": 5.2,
+            "efficiency": 0.88,
+            "brakeTorque": 600,
+            "automatic": {
+              "up": [
+                2500,
+                6000
+              ],
+              "down": [
+                1300,
+                3500
+              ]
+            }
+          },
+          "steering": {
+            "angle": 0.5,
+            "hertz": 5,
+            "dampingRatio": 1,
+            "maxTorque": 10000
+          },
+          "pedal": {
+            "stop": 0.5
+          },
+          "look": {
+            "lock": 2,
+            "paint": {
+              "body": 4161488,
+              "cabin": 15905331,
+              "trim": 1842204,
+              "glass": 10471126,
+              "light": 16774338,
+              "tail": 13707807,
+              "tyre": 1710618,
+              "rim": 2829099,
+              "spring": 14826539,
+              "damper": 12105912,
+              "arm": 2763306,
+              "chrome": 14211804,
+              "seat": 8017462,
+              "amber": 16751135,
+              "hook": 12592669
+            },
+            "finish": {
+              "body": {
+                "roughness": 0.38,
+                "metalness": 0.15,
+                "clearcoat": 1,
+                "clearcoatRoughness": 0.06
+              },
+              "cabin": {
+                "roughness": 0.38,
+                "metalness": 0.15,
+                "clearcoat": 1,
+                "clearcoatRoughness": 0.06
+              },
+              "trim": {
+                "roughness": 0.8,
+                "metalness": 0
+              },
+              "glass": {
+                "roughness": 0.02,
+                "metalness": 0,
+                "opacity": 0.22
+              },
+              "light": {
+                "roughness": 0.05,
+                "metalness": 0,
+                "opacity": 0.75
+              },
+              "tail": {
+                "roughness": 0.1,
+                "metalness": 0,
+                "opacity": 0.9
+              },
+              "amber": {
+                "roughness": 0.1,
+                "metalness": 0,
+                "opacity": 0.9
+              },
+              "chrome": {
+                "roughness": 0.1,
+                "metalness": 1
+              },
+              "seat": {
+                "roughness": 0.55,
+                "metalness": 0,
+                "sheen": 0.5,
+                "sheenRoughness": 0.45
+              },
+              "hook": {
+                "roughness": 0.35,
+                "metalness": 0.1,
+                "clearcoat": 0.8,
+                "clearcoatRoughness": 0.1
+              },
+              "tyre": {
+                "roughness": 0.92,
+                "metalness": 0
+              },
+              "rim": {
+                "roughness": 0.35,
+                "metalness": 0.5,
+                "clearcoat": 0.4,
+                "clearcoatRoughness": 0.2
+              },
+              "spring": {
+                "roughness": 0.4,
+                "metalness": 0.7
+              },
+              "damper": {
+                "roughness": 0.3,
+                "metalness": 0.9
+              },
+              "arm": {
+                "roughness": 0.5,
+                "metalness": 0.6
+              }
+            },
+            "segments": 32,
+            "spokes": 5,
+            "rim": 0.55,
+            "coils": 7,
+            "coilRadius": 0.07,
+            "wire": 0.014,
+            "arm": 0.035,
+            "tread": {
+              "blocks": 22,
+              "depth": 0.032,
+              "angle": 0.4
+            },
+            "bumpers": {
+              "depth": 0.15,
+              "height": 0.2,
+              "overhang": 0.3,
+              "round": 0.03,
+              "bolts": 4,
+              "hooks": 0.45
+            },
+            "grille": {
+              "slots": 7,
+              "width": 0.6,
+              "height": 0.3,
+              "depth": 0.06,
+              "paint": "body"
+            },
+            "spare": {
+              "lift": 0.1
+            },
+            "open": {
+              "windshield": {
+                "height": 0.5,
+                "lean": 0.35,
+                "frame": 0.05,
+                "wiper": 0.3
+              },
+              "cage": {
+                "height": 0.6,
+                "tube": 0.035,
+                "bend": 0.12,
+                "pad": 0.05
+              },
+              "wall": 0.06,
+              "floor": 0.08,
+              "corner": 0.14,
+              "door": {
+                "from": -1,
+                "to": 0.4,
+                "drop": 0.26,
+                "ease": 0.18
+              },
+              "rib": {
+                "at": -0.1,
+                "depth": 0.012,
+                "height": 0.04
+              },
+              "seat": {
+                "width": 0.45,
+                "depth": 0.45,
+                "base": 0.14,
+                "back": 0.5,
+                "round": 0.04,
+                "tilt": 0.18,
+                "head": 0.16
+              },
+              "bench": true,
+              "steer": 0.17,
+              "dash": {
+                "depth": 0.12,
+                "height": 0.2
+              },
+              "tunnel": {
+                "width": 0.26,
+                "height": 0.1
+              },
+              "stick": 0.28,
+              "hood": {
+                "drop": 0.04,
+                "round": 0.035,
+                "dome": {
+                  "inset": 0.14,
+                  "height": 0.02
+                }
+              },
+              "rocker": {
+                "height": 0.1,
+                "depth": 0.05
+              },
+              "mirror": {
+                "size": 0.12,
+                "arm": 0.1
+              }
+            },
+            "fenders": {
+              "gap": 0.04,
+              "thickness": 0.025,
+              "flare": 0.01,
+              "round": 0.01,
+              "ease": 0.15,
+              "square": 2.4
+            }
+          }
+        }
+      },
+      "mods": {
+        "gravity": "box3d",
+        "grip": "terrain3d",
+        "drag": "terrain3d"
+      }
+    },
+    "grass3d": {
+      "mods": {
+        "land": "terrain3d",
+        "wind": "weather3d",
+        "hollows": [
+          "box3dvehicle"
+        ]
+      },
+      "budget": 3,
+      "hollows": 16,
+      "pushes": 0,
+      "wind": {
+        "toward": 210,
+        "speed": 2.5
+      },
+      "gust": {
+        "scale": 14,
+        "strength": 0.7,
+        "flutter": 0.05,
+        "rate": 2.4
+      },
+      "bend": 0.07,
+      "trample": {
+        "recover": 25,
+        "reach": 0.35
+      },
+      "grasses": {
+        "meadow": {
+          "rules": [
+            {
+              "q": "layer:rock",
+              "lo": 0.5,
+              "hi": 0.15
+            },
+            {
+              "q": "slope",
+              "lo": 0.45,
+              "hi": 0.3
+            }
+          ],
+          "density": 260,
+          "full": 6,
+          "reach": 110,
+          "fade": 25,
+          "tile": 3,
+          "height": [
+            0.42,
+            0.7
+          ],
+          "width": [
+            0.045,
+            0.5
+          ],
+          "widen": 0.5,
+          "widest": 6,
+          "lean": 0.25,
+          "segments": [
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "chunks": 4,
+          "colours": {
+            "root": "#1d3010",
+            "tip": "#8fae4c",
+            "dry": "#b9a462"
+          },
+          "dry": {
+            "amount": 0.45,
+            "scale": 11
+          },
+          "vary": 0.18,
+          "translucency": 0.55,
+          "roughness": 0.7,
+          "ao": 0.55,
+          "shadow": 14
+        }
+      }
+    },
+    "seed": 1
+  },
+  "plugins": [
+    "loader",
+    "scenemanager",
+    "player",
+    "terrain3d",
+    "skydome3d",
+    "weather3d",
+    "clouds3d",
+    "box3d",
+    "box3dvehicle",
+    "grass3d",
+    "render3d",
+    "stats"
+  ],
+  "seats": 1,
+  "prefabs": {
+    "engine": {
+      "dt": 0.016666666666666666,
+      "width": 1280,
+      "height": 720
+    },
+    "scenemanager": {
+      "out": {}
+    },
+    "loader": {},
+    "skydome3d": {
+      "t": 600,
+      "rate": 1,
+      "doy": 172,
+      "lat": 30,
+      "phase": 0.72
+    },
+    "weather3d": {
+      "to": "clear",
+      "from": {
+        "cloud": 0,
+        "cirrus": 0.1,
+        "base": 1400,
+        "top": 2000,
+        "dense": 1,
+        "rain": 0,
+        "snow": 0,
+        "fog": 0,
+        "haze": 1.15,
+        "wind": 2.5,
+        "gust": 0.15,
+        "thunder": 0,
+        "dust": 0.05
+      },
+      "mix": {
+        "cloud": 0,
+        "cirrus": 0.1,
+        "base": 1400,
+        "top": 2000,
+        "dense": 1,
+        "rain": 0,
+        "snow": 0,
+        "fog": 0,
+        "haze": 1.15,
+        "wind": 2.5,
+        "gust": 0.15,
+        "thunder": 0,
+        "dust": 0.05
+      },
+      "blend": 1,
+      "fade": 20,
+      "wet": 0,
+      "pack": 0,
+      "windDeg": 210,
+      "flash": 0,
+      "strike": [
+        0,
+        0
+      ],
+      "drift": [
+        0,
+        0
+      ]
+    },
+    "render3d": {
+      "camera": {
+        "at": [
+          0,
+          4,
+          -8
+        ],
+        "look": [
+          0,
+          1,
+          0
+        ],
+        "fov": 60,
+        "near": 0.1,
+        "far": 9000
+      },
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "pixelRatio": 2
+    },
+    "box3d": {},
+    "box3dvehicle": {
+      "throttle": 0,
+      "brake": 0,
+      "steer": 0,
+      "gear": 1,
+      "rpm": 0,
+      "torque": 0
+    },
+    "car": {
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "rot": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "vel": [
+        0,
+        0,
+        0
+      ],
+      "spin": [
+        0,
+        0,
+        0
+      ],
+      "awake": true
+    },
+    "wheel": {
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "rot": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "vel": [
+        0,
+        0,
+        0
+      ],
+      "spin": [
+        0,
+        0,
+        0
+      ],
+      "awake": true
+    },
+    "axle": {},
+    "ground": {
+      "around": 1
+    },
+    "player": {
+      "seat": 0,
+      "held": null,
+      "controls": {
+        "pedal": 0,
+        "steer": 0,
+        "brake": 0
+      }
+    },
+    "start": {
+      "slot": 0,
+      "spot": ""
+    },
+    "spot": {
+      "name": "",
+      "vehicle": "",
+      "x": 0,
+      "z": 0,
+      "yaw": 0,
+      "made": 0
+    }
+  },
+  "actors": [
+    {
+      "is": "scenemanager"
+    },
+    {
+      "is": "loader"
+    },
+    {
+      "is": "skydome3d"
+    },
+    {
+      "is": "weather3d"
+    },
+    {
+      "is": "box3d"
+    },
+    {
+      "is": "ground"
+    },
+    {
+      "is": "spot",
+      "name": "hatch",
+      "vehicle": "hatch",
+      "x": 0,
+      "z": 0,
+      "yaw": 0
+    },
+    {
+      "is": "start",
+      "slot": 0,
+      "spot": "hatch"
+    }
+  ]
+}

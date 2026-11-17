@@ -1,0 +1,8 @@
+{
+  "car": {
+    "spawnLift": 0.13
+  },
+  "player": {
+    "camera": { "back": 7, "high": 2.6, "aim": 1.1, "followHz": 4, "riseHz": 1.5, "turnHz": 1 }
+  }
+}
