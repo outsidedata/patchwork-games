@@ -198,6 +198,7 @@
           "model": "xbot",
           "glb": "xbot-glb",
           "fade": 0.2,
+          "blend": "inertial",
           "lean": { "most": 0.25, "ease": 0.12 },
           "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
           "props": [

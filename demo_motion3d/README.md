@@ -87,6 +87,9 @@ panel tunes motion3d's settings and whose readout shows what the body is doing. 
   Walking (2)`), steering toward the stick, into the walk at its second foot down; let go, `stopwalk`
   or `stoprun`; walked back further than the kind's `move.reverse` (135°), `turnwalk` or `turnrun`. A
   start or a stop gives way at once to the stick pushed or let go again (`yields`).
+- The X Bot's kind inertializes (`blend: "inertial"`, motion3d's Inertialization): each change of clip
+  draws the new clip whole and decays the pose E left in onto it, so a change cut short goes on from
+  the pose drawn.
 - The yard's `guard` and
   `near` states (`plugins/yard/yard.kinematics3d.ts`) are the guard key held and a station in reach,
   so E rolls only away from one.

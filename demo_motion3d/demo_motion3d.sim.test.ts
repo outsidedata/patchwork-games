@@ -495,6 +495,8 @@ test('run at a plain waist-high box with no station placed, the body vaults it; 
   }
   expect([...seen]).toContain('vaultover')
   expect(me().data.activity).toBe('walk')
+  // Come down from where its feet were as the vault let it go, the change of clip faded through.
+  j.until(() => me().data.grounded && me().data.inert.length === 0 && me().data.eased === null, 60)
   // Over it: beyond its far side, on the ground.
   const far = vault.data.pos[2] + kinds.vaultbox.shape.box.size[2] / 2
   expect(me().data.pos[2]).toBeGreaterThan(far)
@@ -562,6 +564,8 @@ async function vaultRun(slant: number) {
   expect(before).not.toBe(null)
   const meets = before!.pos[0] + (near - before!.pos[2]) * Math.tan(before!.yaw)
   const beyond = box.data.pos[2] + kinds.vaultbox.shape.box.size[2] / 2
+  // Come down from where its feet were as the vault let it go, the change of clip faded through.
+  j.until(() => me().data.grounded && me().data.inert.length === 0 && me().data.eased === null, 60)
   return { before: before!, meets, plant, steps, end: me().data, beyond }
 }
 
@@ -878,6 +882,47 @@ test('walking or running, the stick flicked back plays the walk\'s or the run\'s
     // Facing back the way it came, half way round.
     expect(apart(me().data.yaw, yaw0)).toBeGreaterThan(Math.PI - (0.5 * Math.PI) / 180)
   }
+})
+
+test('inertialized, a change of clip cut short by another goes on from the pose drawn: walking let go into the stop and pushed again half way through its fade, the body does not pop back as a crossfade pops it', async () => {
+  // The most any of the hips and the feet jumps, drawn in the body's own frame, from the step the stop is
+  // cut short on through the steps after it: each step's move against the one before.
+  const jolt = async (blend: 'inertial' | 'cross') => {
+    const j = await joined()
+    const { truth, room, send, me, until } = j
+    room.world.motion3d.kinds.xbot.blend = blend
+    send('stick', 0, -1)
+    until(() => me().data.motion === 'walk' && me().data.inert.length === 0 && me().data.blend >= 1, 60 * 4)
+    for (let i = 0; i < 30; i++) truth.step(DT)
+    const bones = ['Hips', 'LeftFoot', 'RightFoot']
+    // In the body's own frame, as `posed` draws it: the pose alone, not the body's travel.
+    const at = () => bones.map(b => new THREE.Vector3().setFromMatrixPosition(posed(reader(room), me()).get(b)!).toArray())
+    // Let go: the stop, its fade run half way.
+    send('stick', 0, 0)
+    truth.step(DT)
+    expect(me().data.motion).toBe('stopwalk')
+    for (let i = 0; i < 5; i++) truth.step(DT)
+    let a = at()
+    truth.step(DT)
+    let b = at()
+    // Pushed again: the stop gives way to the walk before its fade is through.
+    send('stick', 0, -1)
+    let most = 0
+    for (let i = 0; i < 4; i++) {
+      truth.step(DT)
+      if (i === 0) expect(me().data.motion).toBe('walk')
+      const c = at()
+      most = Math.max(most, ...bones.map((_, n) => Math.hypot(...[0, 1, 2].map(k => (c[n][k] - b[n][k]) - (b[n][k] - a[n][k])))))
+      a = b
+      b = c
+    }
+    return most
+  }
+  const inertial = await jolt('inertial')
+  const cross = await jolt('cross')
+  // Measured: 2.8 cm inertialized against 13.4 cm crossfaded, which drops the stop half faded in and
+  // pops back to the walk it froze.
+  expect(inertial).toBeLessThan(cross / 3)
 })
 
 test('every walk and run that mixes by speed names a gait of its own activity, a loop on the ground, that names it back', () => {
@@ -1209,7 +1254,8 @@ async function oneShot(kind: string, clip: string, lane: number, front: number) 
   pressUse()
   expect(me().data.clip).toBe(clip)
   until(() => me().data.activity === 'walk', 60 * 4)
-  until(() => me().data.eased === null && me().data.grounded, 60 * 4)
+  // Settled: on the ground, the change of clip faded through (crossfaded or inertialized).
+  until(() => me().data.eased === null && me().data.inert.length === 0 && me().data.grounded, 60 * 4)
   return j
 }
 
@@ -1221,7 +1267,8 @@ test('at the run wall it runs along the wall, comes down onto the ground, and wa
   expect(me().data.clip).toBe('wallside')
   // The run ends in the air off the wall, and falls to the ground.
   until(() => me().data.activity === 'walk', 60 * 3)
-  until(() => me().data.grounded && me().data.eased === null, 60)
+  // Settled: on the ground, the change of clip faded through (crossfaded or inertialized).
+  until(() => me().data.grounded && me().data.eased === null && me().data.inert.length === 0, 60)
   // Walking again with its feet on the ground.
   for (let i = 0; i < 30; i++) {
     expect(me().data.pos[1]).toBeLessThan(0.03)
