@@ -20,7 +20,7 @@
 //   leg      a leg: `bones`, `bend`, `out`, `straight`, `cannon`, `pastern`, as the
 //            pureQuadrupedDriver's; `legs` each `{ side, bones }`, in the order of `fall`, `bones` the
 //            four bones from the leg's top to its foot.
-//   gait     `paces`, `reach`, `lead`, `still`, `settle`, `fold`, as the pureQuadrupedDriver's.
+//   gait     `paces`, `reach`, `lead`, `still`, `settle`, `fold`, `hurry`, as the pureQuadrupedDriver's.
 //   spring   `gravity`, `k`, `c`, `cap`, `taut`, `give`; `ride` the hips ride the land this far each way.
 //   spine    `{ points, bones }`: the back's points from the rump to the breast, each [u, y] as the body
 //            stands level, reared up about the hip joint; `bones` each `[name, from, to]`.
@@ -34,7 +34,7 @@ type Upright = {
   centre: number; hip: number; rear: number; lean: number
   home: number; top: number; foot: number; hoof: number; sway: number
   leg: Leg; legs: { side: number; bones: string[] }[]
-  gait: { paces: Stride[]; reach: number; lead: number; still: number; settle: number; fold: number }
+  gait: { paces: Stride[]; reach: number; lead: number; still: number; settle: number; fold: number; hurry: number }
   spring: { gravity: number; k: number; c: number; cap: number; taut: number; give: number }
   ride: number
   spine: { points: V2[]; bones: [string, number, number][] }
@@ -43,7 +43,7 @@ type Upright = {
 type Trunk = { world(q: V3): V3; local(q: V3): V3; at(u: number, y: number): V2; across: V3; shift: number }
 type Standing = {
   at: Ridden; spin: number; cycle: number; waiting: boolean; stride: Stride
-  planted: V3[]; up: boolean[]; from: V3[]; feet: V3[]; arcs: number[]; loads: number[]
+  planted: V3[]; up: boolean[]; from: V3[]; feet: V3[]; arcs: number[]; loads: number[]; far: number[]
   y: number; v: number; trunk: Trunk; legs: { pts: V3[]; over: number }[]
 }
 
@@ -62,7 +62,7 @@ function pace(paces: Stride[], v: number): Stride {
       const t = (v - a.speed) / (b.speed - a.speed)
       return {
         name: t < 0.5 ? a.name : b.name, speed: v, cycle: lerp(a.cycle, b.cycle, t), air: lerp(a.air, b.air, t),
-        fall: a.fall.map((n, j) => lerp(n, b.fall[j], t)), lift: lerp(a.lift, b.lift, t), crouch: lerp(a.crouch, b.crouch, t),
+        fall: a.fall.map((n, j) => frac(n + (b.fall[j] - n - Math.round(b.fall[j] - n)) * t)), lift: lerp(a.lift, b.lift, t), crouch: lerp(a.crouch, b.crouch, t),
       }
     }
   }
@@ -188,11 +188,30 @@ function stride(U: Upright, g: Standing, at: Ridden, dt: number, land: Height) {
     lift(j)
     g.waiting = false
   }
+  // How fast the stride goes round, as the pureQuadrupedDriver's: its pace's, or as much faster as
+  // brings round the turn of each foot standing by the time the body has left it as far behind as a
+  // steady stride leaves a foot, to `hurry` times its pace's. `far` is that distance for each foot, at
+  // the fastest the body has gone since the foot was put down, so a body slowing down hurries no foot;
+  // a turn less than a step late is not hurried.
+  const furthest = v * standing - Math.min(G.reach, v * standing * G.lead)
+  for (const j of legs) g.far[j] = Math.max(g.far[j], furthest)
+  const rate = () => {
+    if (v <= G.still) return 1 / p.cycle
+    let most = 1 / p.cycle
+    for (const j of legs) {
+      if (g.up[j]) continue
+      const [x, z] = home(U, j, px, pz, at.yaw), behind = -((g.planted[j][0] - x) * vx + (g.planted[j][2] - z) * vz) / v
+      const left = (g.far[j] - behind) / v, turn = 1 - round(j)
+      if (turn * p.cycle - left <= dt) continue
+      most = left > 0 ? Math.max(most, turn / left) : Infinity
+    }
+    return Math.min(most, G.hurry / p.cycle)
+  }
   if (!g.waiting) {
-    g.cycle = frac(g.cycle + dt / p.cycle)
+    g.cycle = frac(g.cycle + dt * rate())
     for (const j of legs) {
       const now = round(j)
-      if (g.up[j] && (now >= p.air || before[j] - now > 0.5)) { g.planted[j] = target(j, 1); g.up[j] = false }
+      if (g.up[j] && (now >= p.air || before[j] - now > 0.5)) { g.planted[j] = target(j, 1); g.up[j] = false; g.far[j] = furthest }
     }
     const going = restless()
     for (const j of legs) if (!g.up[j] && going && before[j] - round(j) > 0.5) lift(j)
@@ -223,7 +242,7 @@ function make(U: Upright, at: Ridden, land: Height): Standing {
   const copy = () => planted.map(q => [...q] as V3)
   const g: Standing = {
     at: { pos: [...at.pos], yaw: at.yaw, vel: [0, 0, 0] }, spin: 0, cycle: 0, waiting: true, stride: pace(U.gait.paces, 0),
-    planted, up: planted.map(() => false), from: copy(), feet: copy(), arcs: planted.map(() => 0), loads: planted.map(() => 0.5),
+    planted, up: planted.map(() => false), from: copy(), feet: copy(), arcs: planted.map(() => 0), loads: planted.map(() => 0.5), far: planted.map(() => 0),
     y: 0, v: 0, trunk: undefined as unknown as Trunk, legs: [],
   }
   settle(U, g, land)

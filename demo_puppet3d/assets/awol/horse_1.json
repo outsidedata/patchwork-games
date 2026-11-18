@@ -135,7 +135,8 @@
       "lead": 0.34,
       "still": 0.05,
       "settle": 0.1,
-      "fold": 0.2
+      "fold": 0.2,
+      "hurry": 2
     },
     "spring": {
       "gravity": 8,
@@ -283,7 +284,8 @@
       "lead": 0.3,
       "still": 0.05,
       "settle": 0.08,
-      "fold": 0.15
+      "fold": 0.15,
+      "hurry": 2
     },
     "spring": {
       "gravity": 8,
