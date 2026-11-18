@@ -1,0 +1,287 @@
+{
+  "fabrics": {
+    "flag": {
+      "plane": {
+        "size": [
+          2.4,
+          1.6
+        ]
+      },
+      "paint": {
+        "colour": "#c8312b",
+        "roughness": 0.85
+      },
+      "points": [
+        37,
+        25
+      ],
+      "weight": 0.15,
+      "stretch": 1,
+      "shear": 0.6,
+      "bend": 0.1,
+      "drag": 0.3,
+      "catch": 0.6,
+      "friction": 0.3,
+      "thick": 0.02,
+      "pins": [
+        {
+          "on": "pos",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            24
+          ],
+          "at": [
+            0.06,
+            5.9,
+            0
+          ],
+          "turn": [
+            90,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "cloth": {
+      "plane": {
+        "size": [
+          2.6,
+          2
+        ]
+      },
+      "paint": {
+        "colour": "#e8e2d0",
+        "roughness": 0.9
+      },
+      "points": [
+        53,
+        41
+      ],
+      "weight": 0.25,
+      "stretch": 1,
+      "shear": 0.5,
+      "bend": 0.05,
+      "drag": 0.6,
+      "catch": 0.2,
+      "friction": 0.6,
+      "thick": 0.02
+    },
+    "sheet": {
+      "plane": {
+        "size": [
+          2.4,
+          2.4
+        ]
+      },
+      "paint": {
+        "colour": "#3d8f6a",
+        "roughness": 0.9
+      },
+      "points": [
+        49,
+        49
+      ],
+      "weight": 0.25,
+      "stretch": 1,
+      "shear": 0.5,
+      "bend": 0.05,
+      "drag": 0.6,
+      "catch": 0.2,
+      "friction": 0.6,
+      "thick": 0.02
+    },
+    "cape": {
+      "plane": {
+        "size": [
+          0.8,
+          1.2
+        ]
+      },
+      "paint": {
+        "colour": "#5a2a82",
+        "roughness": 0.8
+      },
+      "points": [
+        17,
+        25
+      ],
+      "weight": 0.3,
+      "stretch": 1,
+      "shear": 0.5,
+      "bend": 0.1,
+      "drag": 1,
+      "catch": 0.3,
+      "friction": 0.2,
+      "thick": 0.035,
+      "pins": [
+        {
+          "on": "Neck",
+          "from": [
+            5,
+            0
+          ],
+          "to": [
+            11,
+            0
+          ],
+          "at": [
+            -0.15,
+            0.02,
+            -0.11
+          ],
+          "turn": [
+            90,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "ribbon": {
+      "plane": {
+        "size": [
+          0.08,
+          3
+        ]
+      },
+      "paint": {
+        "colour": "#f2c230",
+        "roughness": 0.6
+      },
+      "points": [
+        3,
+        61
+      ],
+      "weight": 0.08,
+      "stretch": 1,
+      "shear": 0.5,
+      "bend": 0.02,
+      "drag": 1.5,
+      "catch": 0.4,
+      "friction": 0.2,
+      "thick": 0.01,
+      "pins": [
+        {
+          "on": "tip",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            2,
+            0
+          ],
+          "at": [
+            -0.04,
+            0,
+            0
+          ],
+          "turn": [
+            90,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "colours": {
+      "plane": {
+        "size": [
+          1.2,
+          0.8
+        ]
+      },
+      "paint": {
+        "colour": "#2b62c8",
+        "roughness": 0.85
+      },
+      "points": [
+        25,
+        17
+      ],
+      "weight": 0.15,
+      "stretch": 1,
+      "shear": 0.6,
+      "bend": 0.1,
+      "drag": 0.3,
+      "catch": 0.6,
+      "friction": 0.3,
+      "thick": 0.015,
+      "pins": [
+        {
+          "on": "tip",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            16
+          ],
+          "at": [
+            0.02,
+            0,
+            0
+          ],
+          "turn": [
+            90,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "banner": {
+      "plane": {
+        "size": [
+          7,
+          1.4
+        ]
+      },
+      "paint": {
+        "colour": "#f4f1e6",
+        "roughness": 0.9
+      },
+      "points": [
+        71,
+        15
+      ],
+      "weight": 0.15,
+      "stretch": 1,
+      "shear": 0.6,
+      "bend": 0.1,
+      "drag": 0.2,
+      "catch": 0.5,
+      "friction": 0.3,
+      "thick": 0.02,
+      "pins": [
+        {
+          "on": "tail",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            14
+          ],
+          "at": [
+            0,
+            0.95,
+            -2.6
+          ],
+          "turn": [
+            90,
+            0,
+            -90
+          ]
+        }
+      ]
+    }
+  }
+}

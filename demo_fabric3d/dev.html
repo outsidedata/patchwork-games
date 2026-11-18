@@ -1,0 +1,183 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demo_fabric3d dev</title>
+    <style>
+      body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      canvas { grid-area: 1 / 1 }
+      .lil-gui.root { max-height: 100vh; overflow-y: auto }
+      #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px; pointer-events: none }
+    </style>
+  </head>
+  <body>
+    <div id="readout"></div>
+    <script type="module">
+      // The testbed: index.html, the manager truth and the scenes its row names all in this tab, one
+      // seat on them over a loopback, stepped on the page's clock. The truths are kept on
+      // `window.__scenes` and the page on `window.__page` for the profilers (benchmarking-a-game). The
+      // frame rate is the stats plugin's panel at the top left. The readout shows the scene, the step,
+      // each fabric in the scene, and the last five errors the page threw or wrote.
+      //
+      // The address:
+      //   ?scene=<scene>          enters that scene
+      //   ?cam=x,y,z,tx,ty,tz     takes the camera: stands it at x, y, z looking at tx, ty, tz
+      //   ?hold=<n>               pauses the truth once it has taken n steps, so a picture shows that step
+      //
+      // The panel: the clock (paused, one step, speed); `world.fabric3d`'s wind, turbulence, gravity,
+      // substep and passes, written into the page's own world, which is the only one fabric3d reads; and
+      // every fabric of the fabrics file, written into the page's loader's copy, which the fabrics in the
+      // scene read each frame. `copy changed values` puts what was moved on the clipboard under the file
+      // each number is kept in.
+      import { boot } from '#engine/engine.ts'
+      import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
+      import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import GUI from 'lil-gui'
+      import { sim } from './demo_fabric3d.sim.ts'
+      import file from './demo_fabric3d.scene.json'
+
+      // Every error the page throws or writes, the last five, shown under the readout.
+      const errors = []
+      const caught = e => {
+        errors.push(String(e?.message ?? e))
+        if (errors.length > 5) errors.shift()
+      }
+      addEventListener('error', e => caught(e.error ?? e.message))
+      addEventListener('unhandledrejection', e => caught(e.reason))
+      const written = console.error.bind(console)
+      console.error = (...a) => { caught(a.map(x => x?.message ?? x).join(' ')); written(...a) }
+
+      const query = new URLSearchParams(location.search)
+      const wanted = query.get('scene') ?? file.prefabs.scenemanager.entry
+      if (!(wanted in file.prefabs.scenemanager.scenes)) throw new Error(`demo_fabric3d has no scene ${wanted}: ${Object.keys(file.prefabs.scenemanager.scenes).join(', ')}`)
+      file.prefabs.scenemanager.entry = wanted
+      const cam = query.get('cam')?.split(',').map(Number)
+      const hold = query.has('hold') ? Number(query.get('hold')) : undefined
+
+      const dt = file.prefabs.engine.dt
+      const truth = boot(file, sim)
+      window.__scenes = await load(truth, import.meta.url)
+      const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+        for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
+          if (!surface) continue
+          const canvas = document.createElement('canvas')
+          canvas.width = scene.prefabs.engine.width
+          canvas.height = scene.prefabs.engine.height
+          document.body.appendChild(canvas)
+          surface.mount(canvas)
+        }
+        me.plugins.stats?.mount(document.body)
+      })
+      window.__page = page
+      const readout = document.getElementById('readout')
+
+      // The panel. A press on it stops at it, a release never does, and after a click the focus goes
+      // back to the page unless it went into a number to type or a list to pick from.
+      const gui = new GUI({ title: 'demo_fabric3d dev' })
+      for (const type of ['keydown', 'keyup', 'click', 'mousedown', 'contextmenu', 'wheel'])
+        gui.domElement.addEventListener(type, e => e.stopPropagation())
+      gui.domElement.addEventListener('pointerup', () => requestAnimationFrame(() => {
+        const at = document.activeElement
+        if (gui.domElement.contains(at) && at.tagName !== 'SELECT' && !(at.tagName === 'INPUT' && (at.type === 'text' || at.type === 'number'))) at.blur()
+      }))
+      addEventListener('change', e => { if (gui.domElement.contains(e.target)) e.target.blur() })
+
+      // The scene, chosen from the manager's table, the page loaded again on it.
+      const chosen = { scene: wanted }
+      const reload = (key, value) => { const url = new URL(location.href); url.searchParams.set(key, value); location.href = url.href }
+      gui.add(chosen, 'scene', Object.keys(file.prefabs.scenemanager.scenes)).onChange(s => reload('scene', s))
+
+      // The clock: paused, stepped one step at a time, or slowed.
+      const clock = { speed: 1, paused: false }
+      window.__step = (n = 1) => { clock.paused = true; for (let i = 0; i < n; i++) truth.step(dt) }
+      const time = gui.addFolder('clock')
+      time.add(clock, 'paused').listen()
+      time.add({ step: () => window.__step(1) }, 'step').name('one step')
+      time.add(clock, 'speed', 0.02, 1, 0.01).name('speed (× real time)')
+
+      // The fabric3d numbers and the fabrics file, built once the page's client holds them, and again
+      // for each new client. Each folder is kept with the file its numbers go in, for the copy.
+      const homes = []
+      let built, folders = []
+      const build = client => {
+        const own = client.plugins.wire.scene.world?.fabric3d
+        const fabrics = own && client.plugins.loader.get(own.fabrics)
+        if (!own || !fabrics) return false
+        for (const f of folders) f.destroy()
+        folders = []
+        homes.length = 0
+        const scene = `games/demo_fabric3d/${chosen.scene}.scene.json`
+        homes.push([own, scene, ['world', 'fabric3d']], [fabrics, 'games/demo_fabric3d/assets/fabrics.json', []])
+        const air = gui.addFolder('world.fabric3d')
+        folders.push(air)
+        own.wind ??= [0, 0, 0]
+        own.turbulence ??= { size: 1, strength: 0 }
+        ;['x', 'y', 'z'].forEach((axis, i) => air.add(own.wind, i, -20, 20, 0.1).name(`wind ${axis} (m/s)`))
+        air.add(own.turbulence, 'size', 0.2, 10, 0.1).name('turbulence size (m)')
+        air.add(own.turbulence, 'strength', 0, 2, 0.01).name('turbulence strength')
+        air.add(own.gravity, 1, -20, 0, 0.01).name('gravity y (m/s²)')
+        air.add(own, 'substep', 0.001, 0.02, 0.0001).name('substep (s)')
+        air.add(own, 'passes', 1, 24, 1)
+        for (const [name, f] of Object.entries(fabrics.fabrics)) {
+          const folder = gui.addFolder(`fabric ${name}`)
+          folders.push(folder)
+          folder.add(f, 'weight', 0.02, 2, 0.01).name('weight (kg/m²)')
+          for (const k of ['stretch', 'shear', 'bend', 'friction']) folder.add(f, k, 0, 1, 0.01)
+          folder.add(f, 'drag', 0, 5, 0.01).name('drag (1/s)')
+          folder.add(f, 'catch', 0, 5, 0.01).name('catch (N/m² per m/s)')
+          folder.add(f, 'thick', 0, 0.2, 0.001).name('thick (m)')
+          folder.close()
+        }
+        return true
+      }
+      const pathTo = (root, target) => { const seen = new Set(); const walk = (o, keys) => { if (o === target) return keys; if (!o || typeof o !== 'object' || seen.has(o)) return undefined; seen.add(o); for (const k of Object.keys(o)) { const f = walk(o[k], [...keys, k]); if (f) return f } }; return walk(root, []) }
+      const where = c => {
+        for (const [root, path, base] of homes) {
+          const keys = pathTo(root, c.object)
+          if (keys) return Array.isArray(c.object) ? [path, [...base, ...keys], [...c.object]] : [path, [...base, ...keys, c.property], c.getValue()]
+        }
+        return ['this page only', [c._name], c.getValue()]
+      }
+      const touched = new Set()
+      gui.onChange(e => { if (typeof e.value !== 'function') touched.add(e.controller) })
+      gui.add({ copy: () => {
+        const out = {}
+        for (const c of touched) { const [path, keys, value] = where(c); let at = (out[path] ??= {}); for (const k of keys.slice(0, -1)) at = (at[k] ??= {}); at[keys.at(-1)] = value }
+        navigator.clipboard.writeText(JSON.stringify(out, null, 2))
+      } }, 'copy').name('copy changed values')
+
+      const OWNER = 'demo_fabric3d dev'
+      let last = performance.now(), owed = 0
+      const loop = async now => {
+        if (hold !== undefined && truth.n >= hold) clock.paused = true
+        owed = clock.paused ? 0 : owed + Math.min((now - last) / 1000, 0.25) * clock.speed
+        last = now
+        // A frame that throws is shown, and the next frame goes on.
+        try {
+          page.input()
+          while (owed >= dt && !(hold !== undefined && truth.n >= hold)) { truth.step(dt); owed -= dt }
+          const client = page.client
+          if (client && client !== built && build(client)) built = client
+          const r3 = client?.plugins.render3d
+          // the address's camera takes the camera from whoever holds it, the chase camera
+          if (cam && r3?.camera && r3.claimed() !== undefined && r3.claimed() !== OWNER) r3.release(r3.claimed())
+          if (cam && r3?.camera && r3.claim(OWNER)) {
+            r3.camera.position.set(cam[0], cam[1], cam[2])
+            r3.camera.up.set(0, 1, 0)
+            r3.camera.lookAt(cam[3], cam[4], cam[5])
+          }
+          // Paused, the page draws the newest step where it stands, not between it and the one before.
+          await page.frame(clock.paused ? 1 : owed / dt)
+        } catch (e) { caught(e) }
+        const fabrics = page.client?.plugins.fabric3d?.fabrics ?? []
+        readout.textContent = [
+          `${chosen.scene}  step ${truth.n}${clock.paused ? '  paused' : ''}`,
+          ...fabrics.map(f => `${f.fabric} ${f.columns}×${f.rows}${f.of ? ` on ${f.of} ${f.thing}` : ''}`),
+          ...errors,
+        ].join('\n')
+        requestAnimationFrame(loop)
+      }
+      requestAnimationFrame(loop)
+    </script>
+  </body>
+</html>
