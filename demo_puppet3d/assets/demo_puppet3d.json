@@ -1,10 +1,23 @@
 {
   "player": {
-    "stations": 6,
+    "stations": 7,
     "view": {
       "yaw": 1.25,
       "pitch": 0.12,
       "orbit": 1.6
+    },
+    "pilots": [
+      "horse",
+      "tiger",
+      "xbot",
+      "lion",
+      "cheetah",
+      "rider",
+      "hawk"
+    ],
+    "chase": {
+      "yaw": 0,
+      "pitch": 0.28
     }
   },
   "horse": {
@@ -106,7 +119,8 @@
       "radius": 14.4,
       "accel": 4,
       "dist": 7.35,
-      "lift": 0.93
+      "lift": 0.93,
+      "turn": 1.4
     }
   },
   "tiger": {
@@ -208,7 +222,8 @@
       "radius": 14.4,
       "accel": 4,
       "dist": 6,
-      "lift": 0.7
+      "lift": 0.7,
+      "turn": 1.4
     }
   },
   "lion": {
@@ -327,7 +342,8 @@
       "radius": 14.4,
       "accel": 4,
       "dist": 6,
-      "lift": 0.7
+      "lift": 0.7,
+      "turn": 1.4
     }
   },
   "cheetah": {
@@ -433,7 +449,8 @@
       "radius": 14.4,
       "accel": 4,
       "dist": 6,
-      "lift": 0.7
+      "lift": 0.7,
+      "turn": 1.4
     }
   },
   "xbot": {
@@ -532,7 +549,8 @@
       "radius": 14.4,
       "accel": 4,
       "dist": 4.5,
-      "lift": 1
+      "lift": 1,
+      "turn": 1.4
     }
   },
   "rider": {
@@ -668,7 +686,158 @@
       "radius": 14.4,
       "accel": 4,
       "dist": 7.35,
-      "lift": 0.93
+      "lift": 0.93,
+      "turn": 1.4
+    }
+  },
+  "hawk": {
+    "senses": {
+      "clock": "clock",
+      "speed": "velocity",
+      "bank": "aloftBank",
+      "climb": "aloftClimb"
+    },
+    "speeds": [
+      0,
+      7,
+      10,
+      14
+    ],
+    "flight": {
+      "height": 9,
+      "full": 7,
+      "climb": 3.5,
+      "floor": 1.5,
+      "ceiling": 80
+    },
+    "layouts": {
+      "body": {
+        "layout": "proNgBird",
+        "on": "world",
+        "skeleton": "hawkSkeleton",
+        "skin": "hawkSkin",
+        "drivers": [
+          {
+            "name": "perch",
+            "cues": "hawk_perch",
+            "weight": [
+              {
+                "by": "clock",
+                "keys": [
+                  [
+                    0,
+                    1
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "name": "fly",
+            "cues": "hawk_fly",
+            "weight": [
+              {
+                "by": "speed",
+                "keys": [
+                  [
+                    0.3,
+                    0
+                  ],
+                  [
+                    3,
+                    1
+                  ]
+                ]
+              }
+            ],
+            "solver": "aloft",
+            "gait": "hawkSheet"
+          },
+          {
+            "name": "soar",
+            "cues": "hawk_soar",
+            "weight": [
+              {
+                "by": "speed",
+                "keys": [
+                  [
+                    11,
+                    0
+                  ],
+                  [
+                    13.5,
+                    1
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "name": "feathers",
+            "cues": "hawk_feathers",
+            "weight": [
+              {
+                "by": "clock",
+                "keys": [
+                  [
+                    0,
+                    1
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "name": "beat",
+            "cues": "hawk_beat",
+            "weight": [
+              {
+                "by": "speed",
+                "keys": [
+                  [
+                    0.3,
+                    0
+                  ],
+                  [
+                    3,
+                    1
+                  ],
+                  [
+                    11,
+                    1
+                  ],
+                  [
+                    13.5,
+                    0
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "name": "look",
+            "cues": "hawk_look",
+            "weight": [
+              {
+                "by": "clock",
+                "keys": [
+                  [
+                    0,
+                    1
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "show": {
+      "radius": 30,
+      "accel": 4,
+      "turn": 1.1,
+      "dist": 2.4,
+      "lift": 0.3
     }
   },
   "meadow": {

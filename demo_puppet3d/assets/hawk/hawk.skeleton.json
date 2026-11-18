@@ -1,0 +1,1336 @@
+{
+ "entry": "hawkSkeleton",
+ "layout": "proNgBird",
+ "bones": [
+  {
+   "name": "kit bones",
+   "parent": null,
+   "head": [
+    0,
+    0,
+    0
+   ],
+   "tail": [
+    0,
+    0.05,
+    0
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/body body",
+   "parent": "kit bones",
+   "head": [
+    0,
+    0.232197,
+    0
+   ],
+   "tail": [
+    0,
+    0.282197,
+    0
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/body tail",
+   "parent": "red-tailed hawk/body body",
+   "head": [
+    0,
+    0.148152,
+    0.058849
+   ],
+   "tail": [
+    0,
+    0.127673,
+    0.073188
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/body rectrices.first",
+   "parent": "red-tailed hawk/body tail",
+   "head": [
+    -0.010395,
+    0.14019,
+    0.064424
+   ],
+   "tail": [
+    -0.028656,
+    0.126204,
+    0.074218
+   ],
+   "across": [
+    0,
+    0.573576,
+    0.819152
+   ]
+  },
+  {
+   "name": "red-tailed hawk/body rectrices.last",
+   "parent": "red-tailed hawk/body tail",
+   "head": [
+    0.010395,
+    0.14019,
+    0.064424
+   ],
+   "tail": [
+    0.028656,
+    0.126204,
+    0.074218
+   ],
+   "across": [
+    0,
+    0.573576,
+    0.819152
+   ]
+  },
+  {
+   "name": "red-tailed hawk/body head",
+   "parent": "red-tailed hawk/body body",
+   "head": [
+    0,
+    0.370472,
+    -0.057657
+   ],
+   "tail": [
+    0,
+    0.420472,
+    -0.057657
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk head mount",
+   "parent": "red-tailed hawk/body head",
+   "head": [
+    0,
+    0.370472,
+    -0.057657
+   ],
+   "tail": [
+    0,
+    0.420472,
+    -0.057657
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/head base",
+   "parent": "red-tailed hawk head mount",
+   "head": [
+    0,
+    0.370472,
+    -0.057657
+   ],
+   "tail": [
+    0,
+    0.420472,
+    -0.057657
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/head neck.0",
+   "parent": "red-tailed hawk/head base",
+   "head": [
+    0,
+    0.383126,
+    -0.05374
+   ],
+   "tail": [
+    0,
+    0.407641,
+    -0.048837
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/head neck.1",
+   "parent": "red-tailed hawk/head neck.0",
+   "head": [
+    0,
+    0.395177,
+    -0.05133
+   ],
+   "tail": [
+    0,
+    0.395177,
+    -0.02633
+   ],
+   "across": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/head neck.2",
+   "parent": "red-tailed hawk/head neck.1",
+   "head": [
+    0,
+    0.407228,
+    -0.050125
+   ],
+   "tail": [
+    0,
+    0.432228,
+    -0.050125
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/head neck.3",
+   "parent": "red-tailed hawk/head neck.2",
+   "head": [
+    0,
+    0.416869,
+    -0.050125
+   ],
+   "tail": [
+    0,
+    0.416869,
+    -0.075125
+   ],
+   "across": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/head head",
+   "parent": "red-tailed hawk/head neck.3",
+   "head": [
+    0,
+    0.42651,
+    -0.05133
+   ],
+   "tail": [
+    0,
+    0.421449,
+    -0.110622
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/head beak mount",
+   "parent": "red-tailed hawk/head head",
+   "head": [
+    0,
+    0.421449,
+    -0.110622
+   ],
+   "tail": [
+    0,
+    0.471449,
+    -0.110622
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/body shoulder.L",
+   "parent": "red-tailed hawk/body body",
+   "head": [
+    0.046872,
+    0.291521,
+    -0.000008
+   ],
+   "tail": [
+    0.046872,
+    0.341521,
+    -0.000008
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk left wing mount",
+   "parent": "red-tailed hawk/body shoulder.L",
+   "head": [
+    0.046872,
+    0.291521,
+    -0.000008
+   ],
+   "tail": [
+    0.046872,
+    0.341521,
+    -0.000008
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left wing shoulder",
+   "parent": "red-tailed hawk left wing mount",
+   "head": [
+    0.046872,
+    0.291521,
+    -0.000008
+   ],
+   "tail": [
+    0.222872,
+    0.291521,
+    -0.000008
+   ],
+   "across": [
+    0,
+    0,
+    -1
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left wing elbow",
+   "parent": "red-tailed hawk/left wing shoulder",
+   "head": [
+    0.222872,
+    0.291521,
+    0.043992
+   ],
+   "tail": [
+    0.431872,
+    0.291521,
+    -0.000008
+   ],
+   "across": [
+    0,
+    -1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left wing wrist",
+   "parent": "red-tailed hawk/left wing elbow",
+   "head": [
+    0.431872,
+    0.291521,
+    -0.000008
+   ],
+   "tail": [
+    0.448045,
+    0.291521,
+    0.019056
+   ],
+   "across": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left wing primaries.first",
+   "parent": "red-tailed hawk/left wing wrist",
+   "head": [
+    0.440122,
+    0.28831,
+    0.009717
+   ],
+   "tail": [
+    0.456295,
+    0.28831,
+    0.028781
+   ],
+   "across": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left wing primaries.last",
+   "parent": "red-tailed hawk/left wing wrist",
+   "head": [
+    0.588622,
+    0.290667,
+    0.012881
+   ],
+   "tail": [
+    0.745372,
+    0.290667,
+    0.02577
+   ],
+   "across": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left wing alula",
+   "parent": "red-tailed hawk/left wing wrist",
+   "head": [
+    0.448372,
+    0.305618,
+    -0.021284
+   ],
+   "tail": [
+    0.464872,
+    0.305618,
+    -0.04256
+   ],
+   "across": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left wing secondaries",
+   "parent": "red-tailed hawk/left wing elbow",
+   "head": [
+    0.301178,
+    0.288373,
+    0.034526
+   ],
+   "tail": [
+    0.379484,
+    0.288373,
+    0.02506
+   ],
+   "across": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/body shoulder.R",
+   "parent": "red-tailed hawk/body body",
+   "head": [
+    -0.046872,
+    0.291521,
+    -0.000008
+   ],
+   "tail": [
+    -0.046872,
+    0.341521,
+    -0.000008
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk right wing mount",
+   "parent": "red-tailed hawk/body shoulder.R",
+   "head": [
+    -0.046872,
+    0.291521,
+    -0.000008
+   ],
+   "tail": [
+    -0.046872,
+    0.341521,
+    -0.000008
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right wing shoulder",
+   "parent": "red-tailed hawk right wing mount",
+   "head": [
+    -0.046872,
+    0.291521,
+    -0.000008
+   ],
+   "tail": [
+    -0.222872,
+    0.291521,
+    -0.000008
+   ],
+   "across": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right wing elbow",
+   "parent": "red-tailed hawk/right wing shoulder",
+   "head": [
+    -0.222872,
+    0.291521,
+    0.043992
+   ],
+   "tail": [
+    -0.431872,
+    0.291521,
+    -0.000008
+   ],
+   "across": [
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right wing wrist",
+   "parent": "red-tailed hawk/right wing elbow",
+   "head": [
+    -0.431872,
+    0.291521,
+    -0.000008
+   ],
+   "tail": [
+    -0.448045,
+    0.291521,
+    0.019056
+   ],
+   "across": [
+    0,
+    -1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right wing primaries.first",
+   "parent": "red-tailed hawk/right wing wrist",
+   "head": [
+    -0.440122,
+    0.28831,
+    0.009717
+   ],
+   "tail": [
+    -0.456295,
+    0.28831,
+    0.028781
+   ],
+   "across": [
+    0,
+    -1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right wing primaries.last",
+   "parent": "red-tailed hawk/right wing wrist",
+   "head": [
+    -0.588622,
+    0.290667,
+    0.012881
+   ],
+   "tail": [
+    -0.745372,
+    0.290667,
+    0.02577
+   ],
+   "across": [
+    0,
+    -1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right wing alula",
+   "parent": "red-tailed hawk/right wing wrist",
+   "head": [
+    -0.448372,
+    0.305618,
+    -0.021284
+   ],
+   "tail": [
+    -0.464872,
+    0.305618,
+    -0.04256
+   ],
+   "across": [
+    0,
+    -1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right wing secondaries",
+   "parent": "red-tailed hawk/right wing elbow",
+   "head": [
+    -0.301178,
+    0.288373,
+    0.034526
+   ],
+   "tail": [
+    -0.379484,
+    0.288373,
+    0.02506
+   ],
+   "across": [
+    0,
+    -1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/body hip.L",
+   "parent": "red-tailed hawk/body body",
+   "head": [
+    0.031752,
+    0.224637,
+    0
+   ],
+   "tail": [
+    0.031752,
+    0.198177,
+    -0.02268
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/body drum.L",
+   "parent": "red-tailed hawk/body hip.L",
+   "head": [
+    0.027972,
+    0.198177,
+    -0.02268
+   ],
+   "tail": [
+    0.027972,
+    0.09,
+    0.011338
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/body heel.L",
+   "parent": "red-tailed hawk/body drum.L",
+   "head": [
+    0.027972,
+    0.09,
+    0.011338
+   ],
+   "tail": [
+    0.027972,
+    0.14,
+    0.011338
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk left foot mount",
+   "parent": "red-tailed hawk/body heel.L",
+   "head": [
+    0.027972,
+    0,
+    0.002338
+   ],
+   "tail": [
+    0.027972,
+    0.05,
+    0.002338
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left foot shank",
+   "parent": "red-tailed hawk left foot mount",
+   "head": [
+    0.027972,
+    0.09,
+    0.011338
+   ],
+   "tail": [
+    0.027972,
+    0.14,
+    0.011338
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left foot hind.0",
+   "parent": "red-tailed hawk/left foot shank",
+   "head": [
+    0.027972,
+    0.00918,
+    0.002338
+   ],
+   "tail": [
+    0.027972,
+    0.007412,
+    0.027275
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left foot hind.1",
+   "parent": "red-tailed hawk/left foot hind.0",
+   "head": [
+    0.027972,
+    0.007569,
+    0.025063
+   ],
+   "tail": [
+    0.027972,
+    0.005801,
+    0.05
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left foot inner.0",
+   "parent": "red-tailed hawk/left foot shank",
+   "head": [
+    0.027972,
+    0.00918,
+    0.002338
+   ],
+   "tail": [
+    0.015498,
+    0.00757,
+    -0.019268
+   ],
+   "across": [
+    -0.866025,
+    0,
+    0.5
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left foot inner.1",
+   "parent": "red-tailed hawk/left foot inner.0",
+   "head": [
+    0.01886,
+    0.008004,
+    -0.013445
+   ],
+   "tail": [
+    0.006383,
+    0.006496,
+    -0.035056
+   ],
+   "across": [
+    -0.866025,
+    0,
+    0.5
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left foot inner.2",
+   "parent": "red-tailed hawk/left foot inner.1",
+   "head": [
+    0.01166,
+    0.007134,
+    -0.025916
+   ],
+   "tail": [
+    -0.000817,
+    0.005626,
+    -0.047527
+   ],
+   "across": [
+    -0.866025,
+    0,
+    0.5
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left foot middle.0",
+   "parent": "red-tailed hawk/left foot shank",
+   "head": [
+    0.027972,
+    0.00918,
+    0.002338
+   ],
+   "tail": [
+    0.027972,
+    0.007833,
+    -0.022626
+   ],
+   "across": [
+    -1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left foot middle.1",
+   "parent": "red-tailed hawk/left foot middle.0",
+   "head": [
+    0.027972,
+    0.008221,
+    -0.015437
+   ],
+   "tail": [
+    0.027972,
+    0.007054,
+    -0.04041
+   ],
+   "across": [
+    -1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left foot middle.2",
+   "parent": "red-tailed hawk/left foot middle.1",
+   "head": [
+    0.027972,
+    0.007569,
+    -0.029387
+   ],
+   "tail": [
+    0.027972,
+    0.006402,
+    -0.05436
+   ],
+   "across": [
+    -1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left foot middle.3",
+   "parent": "red-tailed hawk/left foot middle.2",
+   "head": [
+    0.027972,
+    0.006917,
+    -0.043337
+   ],
+   "tail": [
+    0.027972,
+    0.00575,
+    -0.06831
+   ],
+   "across": [
+    -1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left foot outer.0",
+   "parent": "red-tailed hawk/left foot shank",
+   "head": [
+    0.027972,
+    0.00918,
+    0.002338
+   ],
+   "tail": [
+    0.040446,
+    0.007569,
+    -0.019268
+   ],
+   "across": [
+    -0.866025,
+    0,
+    -0.5
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left foot outer.1",
+   "parent": "red-tailed hawk/left foot outer.0",
+   "head": [
+    0.034384,
+    0.008352,
+    -0.008769
+   ],
+   "tail": [
+    0.046863,
+    0.006904,
+    -0.030383
+   ],
+   "across": [
+    -0.866025,
+    0,
+    -0.5
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left foot outer.2",
+   "parent": "red-tailed hawk/left foot outer.1",
+   "head": [
+    0.038884,
+    0.00783,
+    -0.016563
+   ],
+   "tail": [
+    0.051363,
+    0.006382,
+    -0.038177
+   ],
+   "across": [
+    -0.866025,
+    0,
+    -0.5
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left foot outer.3",
+   "parent": "red-tailed hawk/left foot outer.2",
+   "head": [
+    0.043384,
+    0.007308,
+    -0.024357
+   ],
+   "tail": [
+    0.055863,
+    0.00586,
+    -0.045971
+   ],
+   "across": [
+    -0.866025,
+    0,
+    -0.5
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left foot outer.4",
+   "parent": "red-tailed hawk/left foot outer.3",
+   "head": [
+    0.047884,
+    0.006786,
+    -0.032151
+   ],
+   "tail": [
+    0.060363,
+    0.005338,
+    -0.053765
+   ],
+   "across": [
+    -0.866025,
+    0,
+    -0.5
+   ]
+  },
+  {
+   "name": "red-tailed hawk/body hip.R",
+   "parent": "red-tailed hawk/body body",
+   "head": [
+    -0.031752,
+    0.224637,
+    0
+   ],
+   "tail": [
+    -0.031752,
+    0.198177,
+    -0.02268
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/body drum.R",
+   "parent": "red-tailed hawk/body hip.R",
+   "head": [
+    -0.027972,
+    0.198177,
+    -0.02268
+   ],
+   "tail": [
+    -0.027972,
+    0.09,
+    0.011338
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/body heel.R",
+   "parent": "red-tailed hawk/body drum.R",
+   "head": [
+    -0.027972,
+    0.09,
+    0.011338
+   ],
+   "tail": [
+    -0.027972,
+    0.14,
+    0.011338
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk right foot mount",
+   "parent": "red-tailed hawk/body heel.R",
+   "head": [
+    -0.027972,
+    0,
+    0.002338
+   ],
+   "tail": [
+    -0.027972,
+    0.05,
+    0.002338
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right foot shank",
+   "parent": "red-tailed hawk right foot mount",
+   "head": [
+    -0.027972,
+    0.09,
+    0.011338
+   ],
+   "tail": [
+    -0.027972,
+    0.14,
+    0.011338
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right foot hind.0",
+   "parent": "red-tailed hawk/right foot shank",
+   "head": [
+    -0.027972,
+    0.00918,
+    0.002338
+   ],
+   "tail": [
+    -0.027972,
+    0.007412,
+    0.027275
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right foot hind.1",
+   "parent": "red-tailed hawk/right foot hind.0",
+   "head": [
+    -0.027972,
+    0.007569,
+    0.025063
+   ],
+   "tail": [
+    -0.027972,
+    0.005801,
+    0.05
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right foot inner.0",
+   "parent": "red-tailed hawk/right foot shank",
+   "head": [
+    -0.027972,
+    0.00918,
+    0.002338
+   ],
+   "tail": [
+    -0.015498,
+    0.00757,
+    -0.019268
+   ],
+   "across": [
+    -0.866025,
+    0,
+    -0.5
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right foot inner.1",
+   "parent": "red-tailed hawk/right foot inner.0",
+   "head": [
+    -0.01886,
+    0.008004,
+    -0.013445
+   ],
+   "tail": [
+    -0.006383,
+    0.006496,
+    -0.035056
+   ],
+   "across": [
+    -0.866025,
+    0,
+    -0.5
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right foot inner.2",
+   "parent": "red-tailed hawk/right foot inner.1",
+   "head": [
+    -0.01166,
+    0.007134,
+    -0.025916
+   ],
+   "tail": [
+    0.000817,
+    0.005626,
+    -0.047527
+   ],
+   "across": [
+    -0.866025,
+    0,
+    -0.5
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right foot middle.0",
+   "parent": "red-tailed hawk/right foot shank",
+   "head": [
+    -0.027972,
+    0.00918,
+    0.002338
+   ],
+   "tail": [
+    -0.027972,
+    0.007833,
+    -0.022626
+   ],
+   "across": [
+    -1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right foot middle.1",
+   "parent": "red-tailed hawk/right foot middle.0",
+   "head": [
+    -0.027972,
+    0.008221,
+    -0.015437
+   ],
+   "tail": [
+    -0.027972,
+    0.007054,
+    -0.04041
+   ],
+   "across": [
+    -1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right foot middle.2",
+   "parent": "red-tailed hawk/right foot middle.1",
+   "head": [
+    -0.027972,
+    0.007569,
+    -0.029387
+   ],
+   "tail": [
+    -0.027972,
+    0.006402,
+    -0.05436
+   ],
+   "across": [
+    -1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right foot middle.3",
+   "parent": "red-tailed hawk/right foot middle.2",
+   "head": [
+    -0.027972,
+    0.006917,
+    -0.043337
+   ],
+   "tail": [
+    -0.027972,
+    0.00575,
+    -0.06831
+   ],
+   "across": [
+    -1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right foot outer.0",
+   "parent": "red-tailed hawk/right foot shank",
+   "head": [
+    -0.027972,
+    0.00918,
+    0.002338
+   ],
+   "tail": [
+    -0.040446,
+    0.007569,
+    -0.019268
+   ],
+   "across": [
+    -0.866025,
+    0,
+    0.5
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right foot outer.1",
+   "parent": "red-tailed hawk/right foot outer.0",
+   "head": [
+    -0.034384,
+    0.008352,
+    -0.008769
+   ],
+   "tail": [
+    -0.046863,
+    0.006904,
+    -0.030383
+   ],
+   "across": [
+    -0.866025,
+    0,
+    0.5
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right foot outer.2",
+   "parent": "red-tailed hawk/right foot outer.1",
+   "head": [
+    -0.038884,
+    0.00783,
+    -0.016563
+   ],
+   "tail": [
+    -0.051363,
+    0.006382,
+    -0.038177
+   ],
+   "across": [
+    -0.866025,
+    0,
+    0.5
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right foot outer.3",
+   "parent": "red-tailed hawk/right foot outer.2",
+   "head": [
+    -0.043384,
+    0.007308,
+    -0.024357
+   ],
+   "tail": [
+    -0.055863,
+    0.00586,
+    -0.045971
+   ],
+   "across": [
+    -0.866025,
+    0,
+    0.5
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right foot outer.4",
+   "parent": "red-tailed hawk/right foot outer.3",
+   "head": [
+    -0.047884,
+    0.006786,
+    -0.032151
+   ],
+   "tail": [
+    -0.060363,
+    0.005338,
+    -0.053765
+   ],
+   "across": [
+    -0.866025,
+    0,
+    0.5
+   ]
+  }
+ ]
+}

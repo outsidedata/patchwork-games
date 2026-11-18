@@ -7,5 +7,8 @@
     "tiger_1": { "kind": "tiger", "walk": 1.6, "stride": "stride", "settle": 3, "idle": 10 },
     "male_lion_1": { "kind": "lion", "walk": 1.6, "stride": "stride", "settle": 3, "idle": 10 },
     "cheetah_1": { "kind": "cheetah", "walk": 1.6, "stride": "stride", "settle": 3, "idle": 10 }
+  },
+  "birds": {
+    "hawk": { "scene": "animals/red_tailed_hawk", "layout": "proNgBird", "skeleton": "hawkSkeleton" }
   }
 }

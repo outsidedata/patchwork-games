@@ -3,6 +3,7 @@
     "defs": "demo_puppet3d",
     "loader": {
       "assets": {
+        "hairs": { "type": "json", "url": "/games/demo_puppet3d/assets/hairs/paddock.hairs.json", "preload": true },
         "demo_puppet3d": { "type": "json", "url": "/games/demo_puppet3d/assets/demo_puppet3d.json", "preload": true },
         "horse_1": { "type": "json", "url": "/games/demo_puppet3d/assets/awol/horse_1.json", "preload": true },
         "horse_1Skeleton": { "type": "json", "url": "/games/demo_puppet3d/assets/awol/horse_1.skeleton.json", "preload": true },
@@ -36,16 +37,30 @@
         "graze": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/graze.cues.json", "preload": true },
         "nod": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/nod.cues.json", "preload": true },
         "wave": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/wave.cues.json", "preload": true },
+        "hawkSkeleton": { "type": "json", "url": "/games/demo_puppet3d/assets/hawk/hawk.skeleton.json", "preload": true },
+        "hawkSheet": { "type": "json", "url": "/games/demo_puppet3d/assets/hawk/hawk.json", "preload": true },
+        "hawkSkin": { "type": "model", "url": "/games/demo_puppet3d/assets/hawk/hawk.glb" },
+        "hawkLooks": { "type": "json", "url": "/games/demo_puppet3d/assets/hawk/hawk.looks.json", "preload": true },
+        "red_tailed_hawk": { "type": "texture", "url": "/games/demo_puppet3d/assets/hawk/looks/red_tailed_hawk.webp", "wrap": "repeat", "preload": true },
+        "red_tailed_hawk_normal": { "type": "texture", "url": "/games/demo_puppet3d/assets/hawk/looks/red_tailed_hawk_normal.webp", "space": "linear", "wrap": "repeat", "preload": true },
+        "hawk_perch": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.perch.cues.json", "preload": true },
+        "hawk_fly": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.fly.cues.json", "preload": true },
+        "hawk_soar": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.soar.cues.json", "preload": true },
+        "hawk_feathers": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.feathers.cues.json", "preload": true },
+        "hawk_beat": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.beat.cues.json", "preload": true },
+        "hawk_look": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.look.cues.json", "preload": true },
         "hills": { "type": "json", "url": "/games/demo_puppet3d/assets/hills.json", "preload": true },
         "grass": { "type": "texture", "url": "/games/demo_puppet3d/assets/ground/grass-color-1024.webp", "wrap": "repeat" },
         "grassNormal": { "type": "texture", "url": "/games/demo_puppet3d/assets/ground/grass-normal-1024.webp", "space": "linear", "wrap": "repeat" }
       }
     },
-    "shipped": { "plugins": ["paddock"] },
+    "shipped": { "plugins": ["paddock", "aviary"] },
+    "supershader3d": { "looks": "hawkLooks" },
     "puppet3d": {
-      "kinds": ["horse", "tiger", "xbot", "lion", "cheetah", "rider"],
-      "mods": { "land": "terrain3d", "behaviors": ["puppet3d", "paddock"] }
+      "kinds": ["horse", "tiger", "xbot", "lion", "cheetah", "rider", "hawk"],
+      "mods": { "land": "terrain3d", "behaviors": ["puppet3d", "paddock", "aviary"] }
     },
+    "hair3d": { "hairs": "hairs", "mods": { "skins": ["puppet3d"], "behaviors": ["render3d"] } },
     "terrain3d": {
       "field": "hills",
       "rings": [
@@ -77,7 +92,7 @@
       "mods": { "land": "terrain3d" }
     }
   },
-  "plugins": ["loader", "scenemanager", "player", "terrain3d", "skydome3d", "puppet3d", "shipped", "render3d", "chasecamera3d", "stats"],
+  "plugins": ["loader", "scenemanager", "player", "supershader3d", "terrain3d", "skydome3d", "puppet3d", "shipped", "hair3d", "render3d", "chasecamera3d", "stats"],
   "seats": 1,
   "prefabs": {
     "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
@@ -90,13 +105,14 @@
       "exposure": 1,
       "shadows": "soft"
     },
-    "player": { "seat": 0, "station": 0, "gait": 1, "orbit": 0, "swing": 0, "aloft": false, "leaps": 0, "leapHeight": 0.6, "upright": 0 },
-    "horse": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
-    "xbot": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "stride": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
-    "tiger": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
-    "lion": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
-    "cheetah": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
-    "rider": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } }
+    "player": { "seat": 0, "station": 0, "gait": 1, "orbit": 0, "swing": 0, "aloft": false, "leaps": 0, "leapHeight": 0.6, "upright": 0, "held": null },
+    "horse": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "steer": 0, "piloted": false, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
+    "xbot": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "steer": 0, "piloted": false, "stride": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
+    "tiger": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "steer": 0, "piloted": false, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
+    "lion": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "steer": 0, "piloted": false, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
+    "cheetah": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "steer": 0, "piloted": false, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
+    "rider": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "steer": 0, "piloted": false, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
+    "hawk": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "alt": 0, "steer": 0, "climb": 0, "piloted": false, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } }
   },
   "actors": [
     { "is": "scenemanager" },
@@ -107,6 +123,7 @@
     { "is": "xbot", "at": 2, "pos": [-40, 0, 0] },
     { "is": "lion", "at": 3, "pos": [80, 0, 0] },
     { "is": "cheetah", "at": 4, "pos": [-80, 0, 0] },
-    { "is": "rider", "at": 5, "pos": [120, 0, 0] }
+    { "is": "rider", "at": 5, "pos": [120, 0, 0] },
+    { "is": "hawk", "at": 6, "pos": [-120, 0, 0] }
   ]
 }

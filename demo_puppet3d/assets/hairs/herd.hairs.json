@@ -1,0 +1,123 @@
+{
+  "wind": { "toward": 210, "speed": 2 },
+  "gust": { "scale": 4, "strength": 0.7, "rate": 1.4 },
+  "kinds": {
+    "horse": {
+      "hairs": ["horseMane", "horseTail"],
+      "solids": [
+        { "bone": "neck", "at": [0, 0.17, 0], "radius": 0.15 },
+        { "bone": "chest", "at": [0, 0.1, 0], "radius": 0.24 },
+        { "bone": "pelvis", "at": [0, -0.05, -0.1], "radius": 0.24 }
+      ]
+    },
+    "lion": {
+      "hairs": ["lionMane"],
+      "solids": [{ "bone": "neck", "at": [0, 0.14, 0], "radius": 0.14 }, { "bone": "chest", "at": [0, 0.12, 0], "radius": 0.2 }]
+    }
+  },
+  "hairs": {
+    "horseMane": {
+      "on": {
+        "meshes": "horse_1",
+        "bones": ["neck", "head"],
+        "weight": 0.5,
+        "cuts": [],
+        "planes": [
+          { "normal": [1, 0, 0], "offset": -0.045 },
+          { "normal": [-1, 0, 0], "offset": -0.045 },
+          { "normal": [0, 0, -1], "offset": -1.5 }
+        ],
+        "faces": [{ "toward": [0, 1, 0], "within": 55 }]
+      },
+      "density": 30000,
+      "strands": 14,
+      "length": [0.3, 0.4],
+      "width": [0.004, 0.5],
+      "taper": 0.3,
+      "thin": 0.0012,
+      "links": 5,
+      "segments": 8,
+      "comb": [1.6, -0.6, -0.2],
+      "stiffness": [10, 0.3],
+      "gravity": 9.8,
+      "damping": 2.5,
+      "drag": 1.5,
+      "clump": { "radius": 0.012, "tight": 0.5 },
+      "curl": { "radius": 0.002, "turns": 1 },
+      "ragged": 0.3,
+      "colours": { "root": "#120c08", "tip": "#3a2a1c" },
+      "vary": 0.25,
+      "ao": 0.4,
+      "roughness": 0.5,
+      "shine": { "strength": 0.12, "power": 50 },
+      "translucency": 0.2,
+      "shadow": true
+    },
+    "horseTail": {
+      "on": {
+        "meshes": "horse_1",
+        "bones": ["tail_5", "tail_6", "tail_7"],
+        "weight": 0.5,
+        "cuts": [],
+        "planes": [],
+        "faces": []
+      },
+      "density": 9000,
+      "strands": 16,
+      "length": [0.6, 0.3],
+      "width": [0.004, 0.5],
+      "taper": 0.3,
+      "thin": 0.0012,
+      "links": 8,
+      "segments": 12,
+      "comb": [0, -3, -0.6],
+      "stiffness": [4, 0.1],
+      "gravity": 9.8,
+      "damping": 2,
+      "drag": 1.2,
+      "clump": { "radius": 0.015, "tight": 0.4 },
+      "curl": { "radius": 0.003, "turns": 1.5 },
+      "ragged": 0.3,
+      "colours": { "root": "#120c08", "tip": "#3a2a1c" },
+      "vary": 0.25,
+      "ao": 0.4,
+      "roughness": 0.5,
+      "shine": { "strength": 0.12, "power": 50 },
+      "translucency": 0.2,
+      "shadow": true
+    },
+    "lionMane": {
+      "on": {
+        "meshes": "male_lion_1",
+        "bones": ["neck", "head", "chest"],
+        "weight": 0.6,
+        "cuts": [],
+        "planes": [{ "normal": [0, 0, -1], "offset": -1.24 }, { "normal": [0, 0, 1], "offset": 0.72 }],
+        "faces": []
+      },
+      "density": 7000,
+      "strands": 16,
+      "length": [0.24, 0.5],
+      "width": [0.005, 0.5],
+      "taper": 0.3,
+      "thin": 0.0012,
+      "links": 4,
+      "segments": 7,
+      "comb": [0, -0.5, -1.1],
+      "stiffness": [22, 2.5],
+      "gravity": 9.8,
+      "damping": 3,
+      "drag": 1.5,
+      "clump": { "radius": 0.022, "tight": 0.55 },
+      "curl": { "radius": 0.004, "turns": 1 },
+      "ragged": 0.35,
+      "colours": { "root": "#2e1a0c", "tip": "#b98a45" },
+      "vary": 0.3,
+      "ao": 0.5,
+      "roughness": 0.65,
+      "shine": { "strength": 0.1, "power": 40 },
+      "translucency": 0.3,
+      "shadow": true
+    }
+  }
+}

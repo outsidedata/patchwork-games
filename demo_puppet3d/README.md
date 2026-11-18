@@ -1,9 +1,10 @@
 # demo_puppet3d
 
-AWOL animals and a Mixamo body posed by puppet3d.
+AWOL animals, a Mixamo body and a pro-ng hawk posed by puppet3d.
 
 Keys: 1 to 5 pace, `w` `s` pace up and down, `t` upright or on four legs, `j` leap, `[` `]` station,
-`q` `e` camera.
+`q` `e` camera, `p` take the controls of the hawk at its station or give them back. Flying it: `a` `d`
+turn, `w` climb, `s` dive (or the arrows), 1 to 5 its speed, 1 landing it.
 
 ## The rider
 
@@ -18,6 +19,30 @@ and run `node games/demo_puppet3d/rider.cues.mjs`.
 `played`, `hung` and `skinned` on the world layout's rest skeleton: drag and wheel to orbit, side,
 front, back and top views, a slider for each sense, and `R` to read the definition again.
 
+## The hawk
+
+Station 6 is the red-tailed hawk, a bird of the library's pro-ng kit (`pro-ng/scenes/animals/red_tailed_hawk.json`),
+posed by cues alone, no solver. Pace 1 perches it on the ground with its wings folded; 2 and 3 fly it,
+beating its wings; 4 and 5 soar it. Its long feathers hang on art bones of their own (each wing's
+`primaries.first`, `primaries.last`, `secondaries` and `alula`, the tail's `rectrices.first` and
+`rectrices.last`), which sheets of their own turn, so the feathers ruffle and the tail fans whatever the
+wing does.
+
+- The bake's `birds` (`assets/demo_puppet3d.bake.json`) builds it with the library's `pro-ng/build.mjs`
+  and writes `assets/hawk/`: its glb, its looks file and their pictures for supershader3d, and its rest
+  skeleton for puppet3d.
+- `hawk.cues.mjs` writes the `hawk` definition and its six cue sheets (`assets/cues/hawk.*.cues.json`);
+  tune the poses there and run `node games/demo_puppet3d/hawk.cues.mjs`.
+- `plugins/aviary/aviary.plugin.ts` dresses its skin in supershader3d's materials before puppet3d builds
+  its body, so it is drawn in its own looks.
+- paddock's `flier` takes it round its circle, on the ground at a stand and in the air as it gathers
+  speed. With `p` the seat's `keeper` takes hold of it (core's `take`) and it is flown by the keys, the
+  camera behind it; `p` again lets go, and its circle goes on from where it is.
+- `plugins/aviary/aviary.puppet3d.ts` delivers puppet3d the `aloft` solver, the driver of its flying
+  sheet: it stands no bone, and gives off how far the bird leans into its turn and how steeply it climbs,
+  read off the row's own motion, which the sheet's cues roll and tip the body by. Its numbers are
+  `assets/hawk/hawk.json`.
+
 ## Sheets from the library
 
 Over its walk, each animal plays cue sheets from the library's `cues/`, each naming only its own bones:
@@ -25,6 +50,18 @@ the horse wags its tail and flicks its ears, the tiger looks round and wags, the
 every ten seconds, the cheetah grazes when it stands and flicks its ears. The X Bot nods, and waves when
 it stands. `yarn bake demo_puppet3d` (`assets/demo_puppet3d.bake.ts`) copies the sheets into
 `assets/cues/`; the walk and upright cues each animal's solvers play are its own sheets there too.
+
+## Manes and tails
+
+The horse's mane and tail and the lion's mane are hair3d's, grown on their bodies from the hairs file
+`assets/hairs/paddock.hairs.json`, which `main.scene.json` names (`world.hair3d.hairs`, with
+`mods: { skins: ['puppet3d'], behaviors: ['render3d'] }`): the horse's mane on the top of its neck
+between two planes either side of its middle, its tail on the last three tail bones, the lion's mane all
+round its neck, the back of its head and the front of its chest. Each hangs, swings as the animal walks
+and blows in the wind. The herd's horses and lions wear the same hairs from a file of their own,
+`assets/hairs/herd.hairs.json` (`mods: { skins: ['crowd3d'], behaviors: ['crowd3d'] }`), every horse in
+one draw; three takes the spaces out of a glb's bone names, so the tail's bones are `tail_5` there and
+`tail 5` here.
 
 ## The herd
 

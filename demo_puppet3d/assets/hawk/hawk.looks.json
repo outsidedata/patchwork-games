@@ -1,0 +1,1024 @@
+{
+ "about": "the shader of red_tailed_hawk.looks.json, put together from its materials' looks by the library's pro-ng/material/compose.js",
+ "picture": 1024,
+ "materials": [
+  {
+   "name": "plumage_red_tailed_hawk",
+   "look": "plumage",
+   "call": "solid",
+   "colour": [
+    0.06847816984440017,
+    0.0295568344378088,
+    0.014443843596092545
+   ]
+  },
+  {
+   "name": "feather_sea_eagle",
+   "look": "feather",
+   "call": "solid",
+   "colour": [
+    0.042311410620809675,
+    0.02315336617811041,
+    0.012983032342173012
+   ]
+  },
+  {
+   "name": "beak_hawk",
+   "look": "beak",
+   "call": "solid",
+   "colour": [
+    0.0295568344378088,
+    0.03433980680868217,
+    0.04518620438567554
+   ]
+  },
+  {
+   "name": "beak_cere_hawk",
+   "look": "beak",
+   "call": "solid",
+   "colour": [
+    0.8069522576692516,
+    0.4793201831008268,
+    0.021219010376003555
+   ]
+  },
+  {
+   "name": "eye_hawk_brown",
+   "look": "bird_eye",
+   "call": "solid",
+   "colour": [
+    0.10224173308810132,
+    0.03433980680868217,
+    0.006995410187265387
+   ]
+  },
+  {
+   "name": "bird_skin",
+   "look": "beak",
+   "call": "solid",
+   "colour": [
+    0.39157247774972326,
+    0.31398871337571754,
+    0.2788942634768104
+   ]
+  },
+  {
+   "name": "leg_yellow",
+   "look": "bird_leg",
+   "call": "solid",
+   "colour": [
+    0.7454042095403874,
+    0.43415363617474895,
+    0.0295568344378088
+   ]
+  },
+  {
+   "name": "claw_black",
+   "look": "beak",
+   "call": "solid",
+   "colour": [
+    0.006995410187265387,
+    0.006995410187265387,
+    0.006995410187265387
+   ]
+  }
+ ],
+ "vertexPars": "uniform highp sampler2D lookSettings;\n\nattribute float lookId;\nattribute vec3 lookInfo;\nattribute vec3 s0;\nattribute vec3 s1;\nattribute vec4 s2;\nattribute vec2 s3;\nflat varying float vLookId;\nvarying vec3 vLookInfo;\nvarying vec2 vLookUv;\nvarying vec3 vLookWorld;\nvarying vec3 vLookWN;\nvarying vec3 vS0;\nvarying vec3 vS1;\nvarying vec4 vS2;\nvarying vec2 vS3;\n",
+ "vertexMain": "\nvLookId = lookId;\nvLookInfo = lookInfo;\nvLookUv = uv;\nvLookWorld = (modelMatrix * vec4(position, 1.0)).xyz;\nvLookWN = normalize(mat3(modelMatrix) * normal);\nvS0 = s0;\nvS1 = s1;\nvS2 = s2;\nvS3 = s3;\n",
+ "calls": {
+  "solid": {
+   "ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "fragmentPars": "uniform highp sampler2D lookSettings;\n\nflat varying float vLookId;\nvarying vec3 vLookInfo;\nvarying vec2 vLookUv;\nvarying vec3 vLookWorld;\nvarying vec3 vLookWN;\nvarying vec3 vS0;\nvarying vec3 vS1;\nvarying vec4 vS2;\nvarying vec2 vS3;\n#define s0 vS0\n#define s1 vS1\n#define s2 vS2\n#define s3 vS3\nuniform float lookView;\nuniform float lookDebug;\n// the looks' clock: seconds, one for every look of the scene, set each frame by the page (install.js's `time`) or the\n// game (core's supershader3d). It grows without end, and a hash of a large number is no longer random, so a look never\n// feeds it to its noise as it is: it takes it through kcycle or kloop, whose numbers stay inside one period.\nuniform float lookTime;\n// the uv's change across the pixel, worked out once where every pixel of the quad runs it, so a picture read inside a\n// look's branch still knows its sharpness\nvec2 lookGx, lookGy;\n// the slot s3's change across the pixel, worked out beside them, for a picture laid by a place the geometry gives in s3\nvec2 lookS3x, lookS3y;\n\nfloat kh(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }\nfloat kh1(float x) { return fract(sin(x * 91.7) * 43758.5453); }\nfloat kn(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  vec2 u = f * f * (3.0 - 2.0 * f);\n  return mix(mix(kh(i), kh(i + vec2(1, 0)), u.x), mix(kh(i + vec2(0, 1)), kh(i + vec2(1, 1)), u.x), u.y);\n}\nfloat kfbm(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 5; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s / 0.97;\n}\nfloat kfbm4(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 4; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s;\n}\n// a feature f metres across fades to its mean where it is finer than a pixel\nfloat kfade(float f) { vec2 fw = abs(lookGx) + abs(lookGy); return clamp(1.5 - (fw.x + fw.y) / f, 0.0, 1.0); }\n// cells of jittered seeds: the distance to the nearest, its number (0 to 1), and how far the second is past it\nfloat kvor(vec2 p, out float id, out float edge) {\n  vec2 i = floor(p), f = fract(p);\n  float d1 = 8.0, d2 = 8.0;\n  vec2 best = vec2(0.0);\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 c = i + o;\n    vec2 r = o + vec2(kh(c), kh(c + 7.3)) - f;\n    float d = dot(r, r);\n    if (d < d1) { d2 = d1; d1 = d; best = c; } else if (d < d2) { d2 = d; }\n  }\n  id = kh(best + 3.7);\n  edge = sqrt(d2) - sqrt(d1);\n  return sqrt(d1);\n}\n// a dimple field: the distance to the nearest of jittered cells' seeds\nfloat kcell(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  float d = 8.0;\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 r = o + vec2(kh(i + o), kh(i + o + 7.3)) - f;\n    d = min(d, dot(r, r));\n  }\n  return sqrt(d);\n}\n// courses: the row along v, the piece in it along u (each row offset), where in the piece (0 to 1 each way)\nvec4 kcourse(vec2 uv, float row, float wide, float jitter, float seed, out vec2 id) {\n  float r = floor(uv.y / row);\n  float shift = kh1(r + seed) * wide;\n  float w = wide * (1.0 - jitter * 0.5 + jitter * kh(vec2(r, floor((uv.x + shift) / wide) + seed)));\n  float x = (uv.x + shift) / w;\n  id = vec2(r, floor(x));\n  return vec4(fract(x), fract(uv.y / row), r, w);\n}\n// marble's veins: thin lines wandering through a warped field, the main ones and finer ones across them\nfloat kveins(vec2 p, float seed) {\n  float w = kfbm(p * 1.3 + seed) * 4.0;\n  float a = pow(1.0 - abs(sin((p.x * 1.6 + p.y * 0.6 + w) * 3.14159)), 22.0);\n  float b = pow(1.0 - abs(sin((p.y * 2.7 - p.x * 1.1 + kfbm(p * 2.6 + seed + 7.0) * 3.0) * 3.14159)), 50.0);\n  return clamp(a + 0.6 * b, 0.0, 1.0);\n}\n// wood's grain along u: its rings' lines (late wood 1, early 0) wandering across v, and its fibres\nfloat kring(vec2 uv, float seed, float rings) {\n  float w = kfbm(vec2(uv.x * 0.35, uv.y * 2.0) + seed) * 1.6;\n  return smoothstep(0.5, 0.95, fract(uv.y * rings + w + uv.x * 0.04));\n}\nfloat kfibre(vec2 uv, float seed) { return kn(vec2(uv.x * 3.0, uv.y * 420.0) + seed) * kfade(0.003); }\n// how strongly a cloth's weave shows: a plain weave of threads t metres across, over and under\nfloat kweave(vec2 uv, float t) {\n  vec2 q = uv / t;\n  float warp = sin(q.x * 3.14159), weft = sin(q.y * 3.14159);\n  float over = step(0.0, warp * weft);\n  return mix(0.5, mix(0.8, 1.08, over) * (0.85 + 0.15 * abs(over > 0.5 ? weft : warp)), kfade(t * 2.0));\n}\n// a cycle of `period` seconds: how far through it the clock is, 0 to 1, for a look that pulses or goes round (anything\n// of 6.28318 times it, a sin or a turn, comes back to where it began with no seam)\nfloat kcycle(float period) { return fract(lookTime / period); }\n// a drift that never repeats, for a look that flows, boils or creeps: two phases of one cycle of `period` seconds, half\n// a cycle apart, each 0 to 1 (x and y), and the share of the first (z). A look moves its pattern on by each phase, reads\n// it at both and mixes them by z; each phase jumps back to 0 only where its share is 0, so the drift shows no seam\nvec3 kloop(float period) { float a = fract(lookTime / period); return vec3(a, fract(a + 0.5), 1.0 - abs(2.0 * a - 1.0)); }\n// value noise in three numbers whose third repeats every `n` cells (a whole number): a pattern that churns in place,\n// for what boils, breathes or glows and fades, never sliding as a drift does. Given p.z = kcycle(period) * n it changes\n// n cells' worth over the period and comes back to where it began at its end with no seam, so nothing is mixed and\n// nothing shows twice\nfloat kh3(vec3 c) { return fract(sin(dot(c, vec3(127.1, 311.7, 74.7))) * 43758.5453123); }\nfloat kn3(vec3 p, float n) {\n  vec3 i = floor(p), f = fract(p);\n  vec3 u = f * f * (3.0 - 2.0 * f);\n  float z0 = mod(i.z, n), z1 = mod(i.z + 1.0, n);\n  float a0 = mix(mix(kh3(vec3(i.xy, z0)), kh3(vec3(i.xy + vec2(1, 0), z0)), u.x),\n                 mix(kh3(vec3(i.xy + vec2(0, 1), z0)), kh3(vec3(i.xy + vec2(1, 1), z0)), u.x), u.y);\n  float a1 = mix(mix(kh3(vec3(i.xy, z1)), kh3(vec3(i.xy + vec2(1, 0), z1)), u.x),\n                 mix(kh3(vec3(i.xy + vec2(0, 1), z1)), kh3(vec3(i.xy + vec2(1, 1), z1)), u.x), u.y);\n  return mix(a0, a1, u.z);\n}\n// four sizes of it, each finer one churning twice as fast and still repeating on the same cycle\nfloat kfbm3(vec3 p, float n) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 4; i++) { s += a * kn3(p, n); p = vec3(p.xy * 2.03 + 17.1, p.z * 2.0); n *= 2.0; a *= 0.5; }\n  return s / 0.9375;\n}\n// the normal bent by a height field, as three's bump map bends it (perturbNormalArb)\nvec3 kitBump(vec3 pos, vec3 n, float h, float faceDirection) {\n  vec3 sx = dFdx(pos), sy = dFdy(pos);\n  vec3 r1 = cross(sy, n), r2 = cross(n, sx);\n  float det = dot(sx, r1) * faceDirection;\n  vec2 dh = vec2(dFdx(h), dFdy(h));\n  vec3 grad = sign(det) * (dh.x * r1 + dh.y * r2);\n  return normalize(abs(det) * n - grad);\n}\n// a normal in the surface's own ways (u, v, out) turned into the view's, the ways found from the uv's change across\n// the pixel, as three's normal map without tangents finds them (getTangentFrame)\nvec3 lookPerturb(vec3 n, vec3 nts, float faceDirection) {\n  vec3 q0 = dFdx(-vViewPosition), q1 = dFdy(-vViewPosition);\n  vec3 q1perp = cross(q1, n), q0perp = cross(n, q0);\n  vec3 T = q1perp * lookGx.x + q0perp * lookGy.x;\n  vec3 B = q1perp * lookGx.y + q0perp * lookGy.y;\n  float det = max(dot(T, T), dot(B, B));\n  float scale = det == 0.0 ? 0.0 : faceDirection * inversesqrt(det);\n  return normalize(T * (nts.x * scale) + B * (nts.y * scale) + n * nts.z);\n}\n\nstruct Look {\n  vec3 colour; float rough; float metal; float height; vec3 nts; vec3 normal; bool ownNormal;\n  float ao; float aoDirect; float alpha; vec3 glow;\n  float clearcoat; float clearcoatRough; vec3 sheen; float sheenRough; float iridescence; float iridIor; float iridThick;\n  float transmission; float thickness; vec3 attColour; float attDist; float ior; float dispersion;\n};\nLook lookStart() {\n  Look k;\n  k.colour = vec3(0.5); k.rough = 0.8; k.metal = 0.0; k.height = 0.0; k.nts = vec3(0.0, 0.0, 1.0);\n  k.normal = vec3(0.0, 0.0, 1.0); k.ownNormal = false; k.ao = 1.0; k.aoDirect = 0.0; k.alpha = 1.0; k.glow = vec3(0.0);\n  k.clearcoat = 0.0; k.clearcoatRough = 0.1; k.sheen = vec3(0.0); k.sheenRough = 0.5;\n  k.iridescence = 0.0; k.iridIor = 1.3; k.iridThick = 400.0;\n  k.transmission = 0.0; k.thickness = 0.0; k.attColour = vec3(1.0); k.attDist = 1e9; k.ior = 1.5; k.dispersion = 0.0;\n  return k;\n}\n\n\nuniform highp sampler2DArray lookPictures;\nuniform float lookMeans[2];\nvec3 lookSrgb(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }\nvec4 picData(int t, vec2 uv, float scale) { return textureGrad(lookPictures, vec3(uv, float(t)), lookGx * scale, lookGy * scale); }\nvec3 picColour(int t, vec2 uv, float scale) { return lookSrgb(picData(t, uv, scale).rgb); }\nvec4 picDataLod(int t, vec2 uv, float lod) { return textureLod(lookPictures, vec3(uv, float(t)), lod); }\nvec3 picColourLod(int t, vec2 uv, float lod) { return lookSrgb(picDataLod(t, uv, lod).rgb); }\nfloat picMean(int t) { return lookMeans[t]; }\n// a picture laid once over a piece by the place its geometry gives in s3 (0 to 1 each way): `at` is that place\nvec4 picDataS3(int t, vec2 at) { return textureGrad(lookPictures, vec3(at, float(t)), lookS3x, lookS3y); }\n\nvec3 p_plUpper;\nvec3 p_plUnder;\nvec3 p_plNeck;\nvec3 p_plHead;\nvec3 p_plMark;\nvec3 p_plEdge;\nvec3 p_plSpotColour;\nfloat p_plLap;\nfloat p_plPoint;\nfloat p_plVary;\nfloat p_plMottle;\nfloat p_plMottleScale;\nfloat p_plFluff;\nfloat p_plBarbs;\nfloat p_plFringe;\nfloat p_plFringeUp;\nfloat p_plFringeUnder;\nfloat p_plStreakWidth;\nfloat p_plStreakUp;\nfloat p_plStreakUnder;\nfloat p_plBars;\nfloat p_plBarUp;\nfloat p_plBarUnder;\nfloat p_plSpot;\nfloat p_plSpotOn;\nfloat p_plShade;\nfloat p_plLift;\nfloat p_plRough;\nvec3 p_plSheen;\nfloat p_plIrid;\nfloat p_plIridNeck;\nfloat p_plIridThick;\nfloat p_plIridIor;\nfloat p_plBarbLean;\nfloat p_plShadeFall;\nfloat p_plShaftWidth;\nfloat p_plFluffGloss;\nfloat p_plFluffEdge;\nfloat p_plFluffRough;\nvec3 p_fwTint;\nfloat p_fwCut;\nfloat p_fwRough;\nfloat p_fwRelief;\nvec3 p_fwSheen;\nvec3 p_bkBase;\nvec3 p_bkBody;\nvec3 p_bkTip;\nfloat p_bkBaseTo;\nfloat p_bkTipFrom;\nfloat p_bkTipTo;\nfloat p_bkLines;\nfloat p_bkLineScale;\nfloat p_bkRidge;\nfloat p_bkPits;\nfloat p_bkScales;\nfloat p_bkScaleSize;\nfloat p_bkScaleRelief;\nvec3 p_bkCrack;\nfloat p_bkMottle;\nfloat p_bkRough;\nfloat p_bkCoat;\nvec3 p_eyPupil;\nvec3 p_eyIrisIn;\nvec3 p_eyIrisOut;\nvec3 p_eyRim;\nvec3 p_eyRing;\nfloat p_eyPupilSize;\nfloat p_eyRimFrom;\nfloat p_eyFlecks;\nfloat p_eyFibres;\nfloat p_eyFibreRelief;\nfloat p_eyPupilSink;\nfloat p_eyBulge;\nfloat p_eyLid;\nfloat p_eyLidWide;\nfloat p_eyScales;\nfloat p_eyScaleRelief;\nvec3 p_eyCrack;\nfloat p_eyRingRough;\nvec3 p_lgSkin;\nvec3 p_lgPlate;\nvec3 p_lgPad;\nvec3 p_lgCrack;\nfloat p_lgPlateWide;\nfloat p_lgScale;\nfloat p_lgPadScale;\nfloat p_lgRelief;\nfloat p_lgPlateRelief;\nfloat p_lgMottle;\nfloat p_lgRough;\nfloat p_lgCoat;\nint t_fwHawkWing;\nint t_fwHawkNormal;\n\n\n\nfloat plStagger(float q) { return mod(q, 2.0) * 0.5 + (kh1(q * 5.13) - 0.5) * 0.25; }\n// the feather of row q at column c: its place across (f, 0 to 1), its number, and where its tip edge lies (rows)\nfloat plTip(float q, float c, float fluff, out float f, out float id) {\n  float cc = c + plStagger(q);\n  f = fract(cc);\n  id = floor(cc) + q * 311.0;\n  float x = 2.0 * f - 1.0;\n  float edge = mix(sqrt(max(1.0 - x * x, 0.0)), 1.0 - abs(x), p_plPoint);\n  edge += fluff * (kn(vec2(f * 14.0, id * 1.7)) - 0.5) * p_plFluffEdge;\n  return q + 1.0 + p_plLap * clamp(edge, 0.0, 1.0);\n}\n\n\n\n\n\nvoid look_0(inout Look k) {\n  p_plUpper = texelFetch(lookSettings, ivec2(0, 0), 0).rgb;\n  p_plUnder = texelFetch(lookSettings, ivec2(1, 0), 0).rgb;\n  p_plNeck = texelFetch(lookSettings, ivec2(2, 0), 0).rgb;\n  p_plHead = texelFetch(lookSettings, ivec2(3, 0), 0).rgb;\n  p_plMark = texelFetch(lookSettings, ivec2(4, 0), 0).rgb;\n  p_plEdge = texelFetch(lookSettings, ivec2(5, 0), 0).rgb;\n  p_plSpotColour = texelFetch(lookSettings, ivec2(6, 0), 0).rgb;\n  p_plLap = texelFetch(lookSettings, ivec2(7, 0), 0).r;\n  p_plPoint = texelFetch(lookSettings, ivec2(8, 0), 0).r;\n  p_plVary = texelFetch(lookSettings, ivec2(9, 0), 0).r;\n  p_plMottle = texelFetch(lookSettings, ivec2(10, 0), 0).r;\n  p_plMottleScale = texelFetch(lookSettings, ivec2(11, 0), 0).r;\n  p_plFluff = texelFetch(lookSettings, ivec2(12, 0), 0).r;\n  p_plBarbs = texelFetch(lookSettings, ivec2(13, 0), 0).r;\n  p_plFringe = texelFetch(lookSettings, ivec2(14, 0), 0).r;\n  p_plFringeUp = texelFetch(lookSettings, ivec2(15, 0), 0).r;\n  p_plFringeUnder = texelFetch(lookSettings, ivec2(16, 0), 0).r;\n  p_plStreakWidth = texelFetch(lookSettings, ivec2(17, 0), 0).r;\n  p_plStreakUp = texelFetch(lookSettings, ivec2(18, 0), 0).r;\n  p_plStreakUnder = texelFetch(lookSettings, ivec2(19, 0), 0).r;\n  p_plBars = texelFetch(lookSettings, ivec2(20, 0), 0).r;\n  p_plBarUp = texelFetch(lookSettings, ivec2(21, 0), 0).r;\n  p_plBarUnder = texelFetch(lookSettings, ivec2(22, 0), 0).r;\n  p_plSpot = texelFetch(lookSettings, ivec2(23, 0), 0).r;\n  p_plSpotOn = texelFetch(lookSettings, ivec2(24, 0), 0).r;\n  p_plShade = texelFetch(lookSettings, ivec2(25, 0), 0).r;\n  p_plLift = texelFetch(lookSettings, ivec2(26, 0), 0).r;\n  p_plRough = texelFetch(lookSettings, ivec2(27, 0), 0).r;\n  p_plSheen = texelFetch(lookSettings, ivec2(28, 0), 0).rgb;\n  p_plIrid = texelFetch(lookSettings, ivec2(29, 0), 0).r;\n  p_plIridNeck = texelFetch(lookSettings, ivec2(30, 0), 0).r;\n  p_plIridThick = texelFetch(lookSettings, ivec2(31, 0), 0).r;\n  p_plIridIor = texelFetch(lookSettings, ivec2(32, 0), 0).r;\n  p_plBarbLean = texelFetch(lookSettings, ivec2(33, 0), 0).r;\n  p_plShadeFall = texelFetch(lookSettings, ivec2(34, 0), 0).r;\n  p_plShaftWidth = texelFetch(lookSettings, ivec2(35, 0), 0).r;\n  p_plFluffGloss = texelFetch(lookSettings, ivec2(36, 0), 0).r;\n  p_plFluffEdge = texelFetch(lookSettings, ivec2(37, 0), 0).r;\n  p_plFluffRough = texelFetch(lookSettings, ivec2(38, 0), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float L = max(s2.y, 0.002);\n    float fluff = clamp(s2.x * p_plFluff, 0.0, 1.0);\n    float under = s1.x, neck = s1.y, head = s1.z;\n    float r = floor(s3.x);\n    // the feather on the head side (row r - 1) lies over this row where its tip reaches; else it is row r's own\n    float fA, idA, fB, idB, fC, idC;\n    float tipA = plTip(r - 1.0, s3.y, fluff, fA, idA);\n    float tipB = plTip(r, s3.y, fluff, fB, idB);\n    float tipC = plTip(r - 2.0, s3.y, fluff, fC, idC);\n    bool onA = s3.x < tipA;\n    float q = onA ? r - 1.0 : r;\n    float f = onA ? fA : fB;\n    float id = onA ? idA : idB;\n    float tip = onA ? tipA : tipB;\n    float prevEdge = onA ? tipC : tipA;\n    float tipDist = tip - s3.x;\n    float past = s3.x - prevEdge;\n    float s = clamp(past / max(tip - prevEdge, 0.05), 0.0, 1.0);\n    float feather = kfade(L * 1.5);\n    // the feather's own colour: the zone it is in, then its own shade\n    vec3 c = mix(p_plUpper, p_plUnder, under);\n    c = mix(c, p_plNeck, neck);\n    c = mix(c, p_plHead, head);\n    c *= 1.0 + (kh1(id * 0.731 + seed) - 0.5) * p_plVary * feather;\n    c *= 1.0 + (kfbm4(uv * p_plMottleScale + seed) - 0.5) * p_plMottle * 1.6;\n    // barbs leaning out from the shaft toward the tip\n    float barb = kn(vec2(((s3.x - q) - abs(f - 0.5) * p_plBarbLean) * p_plBarbs, id * 3.1)) * kfade(L * 4.0 / p_plBarbs);\n    float shaft = smoothstep(p_plShaftWidth, 0.0, abs(f - 0.5)) * smoothstep(0.0, 0.3, tipDist) * kfade(L * 0.06);\n    // marks, each on the back and underneath by its own amount\n    float streak = smoothstep(p_plStreakWidth, p_plStreakWidth * 0.4, abs(f - 0.5)) * smoothstep(0.0, 0.15, tipDist);\n    streak *= mix(p_plStreakUp, p_plStreakUnder, under) * kfade(L * p_plStreakWidth);\n    float band = fract(tipDist * p_plBars);\n    float bar = smoothstep(0.25, 0.35, band) * smoothstep(0.75, 0.65, band) * step(p_plFringe * 0.5, tipDist);\n    bar *= mix(p_plBarUp, p_plBarUnder, under) * kfade(L * 2.5 / p_plBars);\n    float fringe = smoothstep(p_plFringe, p_plFringe * 0.45, tipDist) * mix(p_plFringeUp, p_plFringeUnder, under);\n    fringe *= kfade(L * p_plFringe);\n    float spotD = length(vec2((tipDist - p_plSpot * 1.3) / p_plSpot, (f - 0.5) / (p_plSpot * 1.2)));\n    float spot = smoothstep(1.0, 0.7, spotD) * p_plSpotOn * kfade(L * p_plSpot);\n    c = mix(c, p_plMark, max(streak, bar) * feather);\n    c = mix(c, p_plEdge, fringe * feather);\n    c = mix(c, p_plSpotColour, spot * feather);\n    c *= 0.9 + 0.2 * (barb - 0.5);\n    c *= 1.0 - 0.15 * shaft;\n    // the shadow on this feather just past the tip of the one over it\n    float shade = 1.0 - p_plShade * exp(-past * p_plShadeFall) * feather;\n    k.colour = c * shade;\n    k.ao = mix(1.0, 0.6 + 0.4 * s, feather);\n    k.rough = mix(p_plRough, 1.0, fluff * p_plFluffRough);\n    k.metal = 0.0;\n    // each feather rises from the tip over it to its own tip edge, where it steps down onto the next\n    k.height = L * (p_plLift * smoothstep(0.0, 1.0, s) * feather + 0.02 * barb);\n    k.sheen = p_plSheen * (1.0 + fluff);\n    k.sheenRough = 0.5;\n    float irid = clamp(mix(p_plIrid, max(p_plIrid, p_plIridNeck), max(neck, head * 0.5)), 0.0, 1.0);\n    k.iridescence = irid * (1.0 - fluff * p_plFluffGloss);\n    k.iridIor = p_plIridIor;\n    k.iridThick = p_plIridThick;\n    if (lookView > 0.5 && lookView < 1.5) k.colour = vec3(fract(id * 0.37), fract(id * 0.61), fract(id * 0.83));\n\n}\n\nvoid look_1(inout Look k) {\n  p_fwTint = texelFetch(lookSettings, ivec2(0, 1), 0).rgb;\n  p_fwCut = texelFetch(lookSettings, ivec2(1, 1), 0).r;\n  p_fwRough = texelFetch(lookSettings, ivec2(2, 1), 0).r;\n  p_fwRelief = texelFetch(lookSettings, ivec2(3, 1), 0).r;\n  p_fwSheen = texelFetch(lookSettings, ivec2(4, 1), 0).rgb;\n  t_fwHawkWing = 0;\n  t_fwHawkNormal = 1;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    vec4 fwD = picDataS3(t_fwHawkWing, s3);\n    // the picture's colour is stored times its alpha (pictures.mjs): divided out, then made linear\n    vec3 fwC = clamp(fwD.rgb / max(fwD.a, 0.02), 0.0, 1.0);\n    fwC = mix(fwC / 12.92, pow((fwC + 0.055) / 1.055, vec3(2.4)), step(0.04045, fwC));\n    k.colour = fwC * p_fwTint;\n    k.alpha = fwD.a >= p_fwCut ? 1.0 : 0.0;\n    // the normal map laid on the card as the colour is: its ways across and up the picture found from s3's change\n    // across the pixel, as three's normal map finds a surface's ways from its uv\n    vec3 fwM = picDataS3(t_fwHawkNormal, s3).xyz * 2.0 - 1.0;\n    vec3 fwG = normalize(vNormal) * (gl_FrontFacing ? 1.0 : -1.0);\n    vec3 fwQ0 = dFdx(-vViewPosition), fwQ1 = dFdy(-vViewPosition);\n    vec2 fwSx = dFdx(s3), fwSy = dFdy(s3);\n    vec3 fwP1 = cross(fwQ1, fwG), fwP0 = cross(fwG, fwQ0);\n    vec3 fwT = fwP1 * fwSx.x + fwP0 * fwSy.x;\n    vec3 fwB = -(fwP1 * fwSx.y + fwP0 * fwSy.y);\n    float fwDet = max(dot(fwT, fwT), dot(fwB, fwB));\n    float fwScale = fwDet == 0.0 ? 0.0 : (gl_FrontFacing ? 1.0 : -1.0) * inversesqrt(fwDet);\n    k.normal = normalize(fwT * (fwM.x * p_fwRelief * fwScale) + fwB * (fwM.y * p_fwRelief * fwScale) + fwG * fwM.z);\n    k.ownNormal = true;\n    k.rough = p_fwRough;\n    k.metal = 0.0;\n    k.sheen = p_fwSheen;\n    k.sheenRough = 0.5;\n\n}\n\nvoid look_2(inout Look k) {\n  p_bkBase = texelFetch(lookSettings, ivec2(0, 2), 0).rgb;\n  p_bkBody = texelFetch(lookSettings, ivec2(1, 2), 0).rgb;\n  p_bkTip = texelFetch(lookSettings, ivec2(2, 2), 0).rgb;\n  p_bkBaseTo = texelFetch(lookSettings, ivec2(3, 2), 0).r;\n  p_bkTipFrom = texelFetch(lookSettings, ivec2(4, 2), 0).r;\n  p_bkTipTo = texelFetch(lookSettings, ivec2(5, 2), 0).r;\n  p_bkLines = texelFetch(lookSettings, ivec2(6, 2), 0).r;\n  p_bkLineScale = texelFetch(lookSettings, ivec2(7, 2), 0).r;\n  p_bkRidge = texelFetch(lookSettings, ivec2(8, 2), 0).r;\n  p_bkPits = texelFetch(lookSettings, ivec2(9, 2), 0).r;\n  p_bkScales = texelFetch(lookSettings, ivec2(10, 2), 0).r;\n  p_bkScaleSize = texelFetch(lookSettings, ivec2(11, 2), 0).r;\n  p_bkScaleRelief = texelFetch(lookSettings, ivec2(12, 2), 0).r;\n  p_bkCrack = texelFetch(lookSettings, ivec2(13, 2), 0).rgb;\n  p_bkMottle = texelFetch(lookSettings, ivec2(14, 2), 0).r;\n  p_bkRough = texelFetch(lookSettings, ivec2(15, 2), 0).r;\n  p_bkCoat = texelFetch(lookSettings, ivec2(16, 2), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float t = clamp(s3.x, 0.0, 1.0);\n    vec3 c = mix(p_bkBase, p_bkBody, smoothstep(p_bkBaseTo * 0.6, p_bkBaseTo, t));\n    c = mix(c, p_bkTip, smoothstep(p_bkTipFrom, max(p_bkTipTo, p_bkTipFrom + 0.001), t));\n    // growth ridges along the beak, and pits between them\n    float ridge = kn(vec2(uv.x * 8.0, uv.y * p_bkLineScale) + seed) * kfade(2.0 / p_bkLineScale);\n    float pit = smoothstep(0.72, 0.9, kn(uv * p_bkLineScale * 1.7 + seed * 2.3)) * kfade(1.5 / p_bkLineScale);\n    float mottle = kfbm4(uv * 60.0 + seed);\n    c *= 1.0 + (ridge - 0.5) * p_bkLines;\n    c *= 1.0 - 0.3 * pit * p_bkPits;\n    c *= 1.0 + (mottle - 0.5) * p_bkMottle;\n    // skin: small rounded scales, the cracks between them dark\n    float cell, edge;\n    kvor(uv / p_bkScaleSize + seed * 5.1, cell, edge);\n    float fade = kfade(p_bkScaleSize);\n    float bump = smoothstep(0.0, 0.3, edge) * fade;\n    vec3 skinTone = mix(p_bkCrack, vec3(0.9 + 0.2 * cell), mix(1.0, bump, fade));\n    c *= mix(vec3(1.0), skinTone, p_bkScales);\n    k.colour = c;\n    k.rough = mix(p_bkRough, min(1.0, p_bkRough + 0.25), p_bkScales * (1.0 - bump));\n    k.metal = 0.0;\n    k.height = (1.0 - p_bkScales) * (p_bkRidge * (ridge - 0.5) * 2.0 - 0.5 * p_bkRidge * pit * p_bkPits)\n             + p_bkScales * p_bkScaleRelief * bump;\n    k.ao = 1.0 - 0.3 * p_bkScales * (1.0 - bump) * fade;\n    k.clearcoat = p_bkCoat * (1.0 - 0.7 * p_bkScales);\n    k.clearcoatRough = 0.25;\n\n}\n\nvoid look_3(inout Look k) {\n  p_bkBase = texelFetch(lookSettings, ivec2(0, 3), 0).rgb;\n  p_bkBody = texelFetch(lookSettings, ivec2(1, 3), 0).rgb;\n  p_bkTip = texelFetch(lookSettings, ivec2(2, 3), 0).rgb;\n  p_bkBaseTo = texelFetch(lookSettings, ivec2(3, 3), 0).r;\n  p_bkTipFrom = texelFetch(lookSettings, ivec2(4, 3), 0).r;\n  p_bkTipTo = texelFetch(lookSettings, ivec2(5, 3), 0).r;\n  p_bkLines = texelFetch(lookSettings, ivec2(6, 3), 0).r;\n  p_bkLineScale = texelFetch(lookSettings, ivec2(7, 3), 0).r;\n  p_bkRidge = texelFetch(lookSettings, ivec2(8, 3), 0).r;\n  p_bkPits = texelFetch(lookSettings, ivec2(9, 3), 0).r;\n  p_bkScales = texelFetch(lookSettings, ivec2(10, 3), 0).r;\n  p_bkScaleSize = texelFetch(lookSettings, ivec2(11, 3), 0).r;\n  p_bkScaleRelief = texelFetch(lookSettings, ivec2(12, 3), 0).r;\n  p_bkCrack = texelFetch(lookSettings, ivec2(13, 3), 0).rgb;\n  p_bkMottle = texelFetch(lookSettings, ivec2(14, 3), 0).r;\n  p_bkRough = texelFetch(lookSettings, ivec2(15, 3), 0).r;\n  p_bkCoat = texelFetch(lookSettings, ivec2(16, 3), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float t = clamp(s3.x, 0.0, 1.0);\n    vec3 c = mix(p_bkBase, p_bkBody, smoothstep(p_bkBaseTo * 0.6, p_bkBaseTo, t));\n    c = mix(c, p_bkTip, smoothstep(p_bkTipFrom, max(p_bkTipTo, p_bkTipFrom + 0.001), t));\n    // growth ridges along the beak, and pits between them\n    float ridge = kn(vec2(uv.x * 8.0, uv.y * p_bkLineScale) + seed) * kfade(2.0 / p_bkLineScale);\n    float pit = smoothstep(0.72, 0.9, kn(uv * p_bkLineScale * 1.7 + seed * 2.3)) * kfade(1.5 / p_bkLineScale);\n    float mottle = kfbm4(uv * 60.0 + seed);\n    c *= 1.0 + (ridge - 0.5) * p_bkLines;\n    c *= 1.0 - 0.3 * pit * p_bkPits;\n    c *= 1.0 + (mottle - 0.5) * p_bkMottle;\n    // skin: small rounded scales, the cracks between them dark\n    float cell, edge;\n    kvor(uv / p_bkScaleSize + seed * 5.1, cell, edge);\n    float fade = kfade(p_bkScaleSize);\n    float bump = smoothstep(0.0, 0.3, edge) * fade;\n    vec3 skinTone = mix(p_bkCrack, vec3(0.9 + 0.2 * cell), mix(1.0, bump, fade));\n    c *= mix(vec3(1.0), skinTone, p_bkScales);\n    k.colour = c;\n    k.rough = mix(p_bkRough, min(1.0, p_bkRough + 0.25), p_bkScales * (1.0 - bump));\n    k.metal = 0.0;\n    k.height = (1.0 - p_bkScales) * (p_bkRidge * (ridge - 0.5) * 2.0 - 0.5 * p_bkRidge * pit * p_bkPits)\n             + p_bkScales * p_bkScaleRelief * bump;\n    k.ao = 1.0 - 0.3 * p_bkScales * (1.0 - bump) * fade;\n    k.clearcoat = p_bkCoat * (1.0 - 0.7 * p_bkScales);\n    k.clearcoatRough = 0.25;\n\n}\n\nvoid look_4(inout Look k) {\n  p_eyPupil = texelFetch(lookSettings, ivec2(0, 4), 0).rgb;\n  p_eyIrisIn = texelFetch(lookSettings, ivec2(1, 4), 0).rgb;\n  p_eyIrisOut = texelFetch(lookSettings, ivec2(2, 4), 0).rgb;\n  p_eyRim = texelFetch(lookSettings, ivec2(3, 4), 0).rgb;\n  p_eyRing = texelFetch(lookSettings, ivec2(4, 4), 0).rgb;\n  p_eyPupilSize = texelFetch(lookSettings, ivec2(5, 4), 0).r;\n  p_eyRimFrom = texelFetch(lookSettings, ivec2(6, 4), 0).r;\n  p_eyFlecks = texelFetch(lookSettings, ivec2(7, 4), 0).r;\n  p_eyFibres = texelFetch(lookSettings, ivec2(8, 4), 0).r;\n  p_eyFibreRelief = texelFetch(lookSettings, ivec2(9, 4), 0).r;\n  p_eyPupilSink = texelFetch(lookSettings, ivec2(10, 4), 0).r;\n  p_eyBulge = texelFetch(lookSettings, ivec2(11, 4), 0).r;\n  p_eyLid = texelFetch(lookSettings, ivec2(12, 4), 0).r;\n  p_eyLidWide = texelFetch(lookSettings, ivec2(13, 4), 0).r;\n  p_eyScales = texelFetch(lookSettings, ivec2(14, 4), 0).r;\n  p_eyScaleRelief = texelFetch(lookSettings, ivec2(15, 4), 0).r;\n  p_eyCrack = texelFetch(lookSettings, ivec2(16, 4), 0).rgb;\n  p_eyRingRough = texelFetch(lookSettings, ivec2(17, 4), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float R = max(s2.x, 1e-5);\n    float r = length(s3);\n    float a = atan(s3.y, s3.x);\n    float soft = 0.025;\n    float eye = 1.0 - smoothstep(1.0 - soft, 1.0 + soft, r);\n    // the iris: its colour, flecks and fibres running out from the pupil\n    float fleck = kn(vec2(a * 14.0, r * 24.0) + seed) * kfade(R * 0.05);\n    float fibre = kn(vec2(a * p_eyFibres / 6.2832, r * 3.0) + seed * 1.7) * kfade(R * 6.2832 / p_eyFibres);\n    vec3 iris = mix(p_eyIrisIn, p_eyIrisOut, smoothstep(p_eyPupilSize, p_eyRimFrom, r));\n    iris *= 1.0 + (fleck - 0.5) * p_eyFlecks + (fibre - 0.5) * 0.25;\n    float inIris = smoothstep(p_eyPupilSize - soft, p_eyPupilSize + soft, r);\n    vec3 c = mix(p_eyPupil, iris, inIris);\n    c = mix(c, p_eyRim, smoothstep(p_eyRimFrom, 1.0, r));\n    // the ring: rounded scales of skin, darker in the cracks between them\n    float cell, edge;\n    float d = kvor(s3 * p_eyScales + seed * 3.1, cell, edge);\n    float scaleFade = kfade(R / p_eyScales);\n    float bump = smoothstep(0.0, 0.35, edge) * scaleFade;\n    vec3 ring = p_eyRing * (0.85 + 0.3 * cell);\n    ring = mix(ring * p_eyCrack, ring, mix(1.0, bump, scaleFade));\n    // the lids: a soft fold standing proud just outside the eye's edge, creased where it tucks under\n    float lid = smoothstep(1.0, 1.0 + 0.4 * p_eyLidWide, r) * (1.0 - smoothstep(1.0 + 0.4 * p_eyLidWide, 1.0 + p_eyLidWide, r));\n    float crease = 1.0 - smoothstep(1.0, 1.0 + 0.25 * p_eyLidWide, r);\n    ring *= 1.0 - 0.45 * crease;\n    k.colour = mix(ring, c, eye);\n    k.rough = mix(p_eyRingRough, 0.25, eye);\n    k.metal = 0.0;\n    float dome = p_eyBulge * sqrt(max(0.0, 1.0 - r * r));\n    float iris3 = inIris * (fibre - 0.5) * p_eyFibreRelief - (1.0 - inIris) * p_eyPupilSink;\n    float skin3 = p_eyLid * lid + p_eyScaleRelief * bump * (1.0 - lid);\n    k.height = R * mix(skin3, dome + iris3, eye);\n    k.ao = mix(1.0 - 0.5 * crease * (1.0 - eye), 1.0, eye);\n    k.clearcoat = eye;\n    k.clearcoatRough = 0.02;\n\n}\n\nvoid look_5(inout Look k) {\n  p_bkBase = texelFetch(lookSettings, ivec2(0, 5), 0).rgb;\n  p_bkBody = texelFetch(lookSettings, ivec2(1, 5), 0).rgb;\n  p_bkTip = texelFetch(lookSettings, ivec2(2, 5), 0).rgb;\n  p_bkBaseTo = texelFetch(lookSettings, ivec2(3, 5), 0).r;\n  p_bkTipFrom = texelFetch(lookSettings, ivec2(4, 5), 0).r;\n  p_bkTipTo = texelFetch(lookSettings, ivec2(5, 5), 0).r;\n  p_bkLines = texelFetch(lookSettings, ivec2(6, 5), 0).r;\n  p_bkLineScale = texelFetch(lookSettings, ivec2(7, 5), 0).r;\n  p_bkRidge = texelFetch(lookSettings, ivec2(8, 5), 0).r;\n  p_bkPits = texelFetch(lookSettings, ivec2(9, 5), 0).r;\n  p_bkScales = texelFetch(lookSettings, ivec2(10, 5), 0).r;\n  p_bkScaleSize = texelFetch(lookSettings, ivec2(11, 5), 0).r;\n  p_bkScaleRelief = texelFetch(lookSettings, ivec2(12, 5), 0).r;\n  p_bkCrack = texelFetch(lookSettings, ivec2(13, 5), 0).rgb;\n  p_bkMottle = texelFetch(lookSettings, ivec2(14, 5), 0).r;\n  p_bkRough = texelFetch(lookSettings, ivec2(15, 5), 0).r;\n  p_bkCoat = texelFetch(lookSettings, ivec2(16, 5), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float t = clamp(s3.x, 0.0, 1.0);\n    vec3 c = mix(p_bkBase, p_bkBody, smoothstep(p_bkBaseTo * 0.6, p_bkBaseTo, t));\n    c = mix(c, p_bkTip, smoothstep(p_bkTipFrom, max(p_bkTipTo, p_bkTipFrom + 0.001), t));\n    // growth ridges along the beak, and pits between them\n    float ridge = kn(vec2(uv.x * 8.0, uv.y * p_bkLineScale) + seed) * kfade(2.0 / p_bkLineScale);\n    float pit = smoothstep(0.72, 0.9, kn(uv * p_bkLineScale * 1.7 + seed * 2.3)) * kfade(1.5 / p_bkLineScale);\n    float mottle = kfbm4(uv * 60.0 + seed);\n    c *= 1.0 + (ridge - 0.5) * p_bkLines;\n    c *= 1.0 - 0.3 * pit * p_bkPits;\n    c *= 1.0 + (mottle - 0.5) * p_bkMottle;\n    // skin: small rounded scales, the cracks between them dark\n    float cell, edge;\n    kvor(uv / p_bkScaleSize + seed * 5.1, cell, edge);\n    float fade = kfade(p_bkScaleSize);\n    float bump = smoothstep(0.0, 0.3, edge) * fade;\n    vec3 skinTone = mix(p_bkCrack, vec3(0.9 + 0.2 * cell), mix(1.0, bump, fade));\n    c *= mix(vec3(1.0), skinTone, p_bkScales);\n    k.colour = c;\n    k.rough = mix(p_bkRough, min(1.0, p_bkRough + 0.25), p_bkScales * (1.0 - bump));\n    k.metal = 0.0;\n    k.height = (1.0 - p_bkScales) * (p_bkRidge * (ridge - 0.5) * 2.0 - 0.5 * p_bkRidge * pit * p_bkPits)\n             + p_bkScales * p_bkScaleRelief * bump;\n    k.ao = 1.0 - 0.3 * p_bkScales * (1.0 - bump) * fade;\n    k.clearcoat = p_bkCoat * (1.0 - 0.7 * p_bkScales);\n    k.clearcoatRough = 0.25;\n\n}\n\nvoid look_6(inout Look k) {\n  p_lgSkin = texelFetch(lookSettings, ivec2(0, 6), 0).rgb;\n  p_lgPlate = texelFetch(lookSettings, ivec2(1, 6), 0).rgb;\n  p_lgPad = texelFetch(lookSettings, ivec2(2, 6), 0).rgb;\n  p_lgCrack = texelFetch(lookSettings, ivec2(3, 6), 0).rgb;\n  p_lgPlateWide = texelFetch(lookSettings, ivec2(4, 6), 0).r;\n  p_lgScale = texelFetch(lookSettings, ivec2(5, 6), 0).r;\n  p_lgPadScale = texelFetch(lookSettings, ivec2(6, 6), 0).r;\n  p_lgRelief = texelFetch(lookSettings, ivec2(7, 6), 0).r;\n  p_lgPlateRelief = texelFetch(lookSettings, ivec2(8, 6), 0).r;\n  p_lgMottle = texelFetch(lookSettings, ivec2(9, 6), 0).r;\n  p_lgRough = texelFetch(lookSettings, ivec2(10, 6), 0).r;\n  p_lgCoat = texelFetch(lookSettings, ivec2(11, 6), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float along = s3.x, round_ = s3.y, girth = max(s2.y, 1e-4), plateLen = max(s2.x, 1e-4);\n    float across = round_ * girth;\n    float topness = abs(round_);\n    // the plates: on the top band, each row plateLen long, its lower edge lapping the next\n    float band = 1.0 - smoothstep(p_lgPlateWide * 0.5 - 0.04, p_lgPlateWide * 0.5 + 0.02, topness);\n    float row = along / plateLen;\n    float f = fract(row);\n    float plateFade = kfade(plateLen * 0.5);\n    float seam = (1.0 - smoothstep(0.0, 0.12, f)) * plateFade;\n    float dome = sin(3.14159 * f) * (1.0 - smoothstep(0.25, 0.5, abs(across) / max(girth * p_lgPlateWide, 1e-5)));\n    float plateTone = kh1(floor(row) * 3.7 + seed);\n    // the small scales round the sides and back, or the pads underneath\n    float isPad = s2.z * smoothstep(0.3, 0.38, topness);\n    float size = girth * mix(p_lgScale, p_lgPadScale, isPad);\n    float cell, edge;\n    kvor(vec2(along, across) / size + seed * 4.3, cell, edge);\n    float scaleFade = kfade(size);\n    float bump = smoothstep(0.0, 0.35, edge) * scaleFade;\n    vec3 skin = mix(p_lgSkin, p_lgPad, isPad) * (0.9 + 0.2 * cell);\n    skin = mix(skin * p_lgCrack, skin, mix(1.0, bump, scaleFade));\n    vec3 plate = p_lgPlate * (0.88 + 0.24 * plateTone);\n    plate = mix(plate, plate * p_lgCrack, seam);\n    vec3 c = mix(skin, plate, band);\n    c *= 1.0 + (kfbm4(vec2(along, across) * 40.0 + seed) - 0.5) * p_lgMottle;\n    k.colour = c;\n    k.rough = mix(p_lgRough, p_lgRough - 0.15, band);\n    k.metal = 0.0;\n    float scales = girth * p_lgRelief * mix(1.0, 2.0, isPad) * bump;\n    float plates = girth * p_lgPlateRelief * (f * plateFade + 0.5 * dome);\n    k.height = mix(scales, plates, band);\n    k.ao = 1.0 - 0.35 * mix((1.0 - bump) * scaleFade, seam, band);\n    k.clearcoat = p_lgCoat;\n    k.clearcoatRough = 0.3;\n\n}\n\nvoid look_7(inout Look k) {\n  p_bkBase = texelFetch(lookSettings, ivec2(0, 7), 0).rgb;\n  p_bkBody = texelFetch(lookSettings, ivec2(1, 7), 0).rgb;\n  p_bkTip = texelFetch(lookSettings, ivec2(2, 7), 0).rgb;\n  p_bkBaseTo = texelFetch(lookSettings, ivec2(3, 7), 0).r;\n  p_bkTipFrom = texelFetch(lookSettings, ivec2(4, 7), 0).r;\n  p_bkTipTo = texelFetch(lookSettings, ivec2(5, 7), 0).r;\n  p_bkLines = texelFetch(lookSettings, ivec2(6, 7), 0).r;\n  p_bkLineScale = texelFetch(lookSettings, ivec2(7, 7), 0).r;\n  p_bkRidge = texelFetch(lookSettings, ivec2(8, 7), 0).r;\n  p_bkPits = texelFetch(lookSettings, ivec2(9, 7), 0).r;\n  p_bkScales = texelFetch(lookSettings, ivec2(10, 7), 0).r;\n  p_bkScaleSize = texelFetch(lookSettings, ivec2(11, 7), 0).r;\n  p_bkScaleRelief = texelFetch(lookSettings, ivec2(12, 7), 0).r;\n  p_bkCrack = texelFetch(lookSettings, ivec2(13, 7), 0).rgb;\n  p_bkMottle = texelFetch(lookSettings, ivec2(14, 7), 0).r;\n  p_bkRough = texelFetch(lookSettings, ivec2(15, 7), 0).r;\n  p_bkCoat = texelFetch(lookSettings, ivec2(16, 7), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float t = clamp(s3.x, 0.0, 1.0);\n    vec3 c = mix(p_bkBase, p_bkBody, smoothstep(p_bkBaseTo * 0.6, p_bkBaseTo, t));\n    c = mix(c, p_bkTip, smoothstep(p_bkTipFrom, max(p_bkTipTo, p_bkTipFrom + 0.001), t));\n    // growth ridges along the beak, and pits between them\n    float ridge = kn(vec2(uv.x * 8.0, uv.y * p_bkLineScale) + seed) * kfade(2.0 / p_bkLineScale);\n    float pit = smoothstep(0.72, 0.9, kn(uv * p_bkLineScale * 1.7 + seed * 2.3)) * kfade(1.5 / p_bkLineScale);\n    float mottle = kfbm4(uv * 60.0 + seed);\n    c *= 1.0 + (ridge - 0.5) * p_bkLines;\n    c *= 1.0 - 0.3 * pit * p_bkPits;\n    c *= 1.0 + (mottle - 0.5) * p_bkMottle;\n    // skin: small rounded scales, the cracks between them dark\n    float cell, edge;\n    kvor(uv / p_bkScaleSize + seed * 5.1, cell, edge);\n    float fade = kfade(p_bkScaleSize);\n    float bump = smoothstep(0.0, 0.3, edge) * fade;\n    vec3 skinTone = mix(p_bkCrack, vec3(0.9 + 0.2 * cell), mix(1.0, bump, fade));\n    c *= mix(vec3(1.0), skinTone, p_bkScales);\n    k.colour = c;\n    k.rough = mix(p_bkRough, min(1.0, p_bkRough + 0.25), p_bkScales * (1.0 - bump));\n    k.metal = 0.0;\n    k.height = (1.0 - p_bkScales) * (p_bkRidge * (ridge - 0.5) * 2.0 - 0.5 * p_bkRidge * pit * p_bkPits)\n             + p_bkScales * p_bkScaleRelief * bump;\n    k.ao = 1.0 - 0.3 * p_bkScales * (1.0 - bump) * fade;\n    k.clearcoat = p_bkCoat * (1.0 - 0.7 * p_bkScales);\n    k.clearcoatRough = 0.25;\n\n}\n\n\n\n\n\n\n\n\n\nLook lookRun(int id) {\n  Look k = lookStart();\n  switch (id) {\n    case 0: look_0(k); break;\n    case 1: look_1(k); break;\n    case 2: look_2(k); break;\n    case 3: look_3(k); break;\n    case 4: look_4(k); break;\n    case 5: look_5(k); break;\n    case 6: look_6(k); break;\n    case 7: look_7(k); break;\n  }\n  if (lookDebug > 0.5) {\n    switch (id) {\n      case 0: k.colour = vec3(0.06847816984440017, 0.0295568344378088, 0.014443843596092545); break;\n      case 1: k.colour = vec3(0.042311410620809675, 0.02315336617811041, 0.012983032342173012); break;\n      case 2: k.colour = vec3(0.0295568344378088, 0.03433980680868217, 0.04518620438567554); break;\n      case 3: k.colour = vec3(0.8069522576692516, 0.4793201831008268, 0.021219010376003555); break;\n      case 4: k.colour = vec3(0.10224173308810132, 0.03433980680868217, 0.006995410187265387); break;\n      case 5: k.colour = vec3(0.39157247774972326, 0.31398871337571754, 0.2788942634768104); break;\n      case 6: k.colour = vec3(0.7454042095403874, 0.43415363617474895, 0.0295568344378088); break;\n      case 7: k.colour = vec3(0.006995410187265387, 0.006995410187265387, 0.006995410187265387); break;\n    }\n  }\n  return k;\n}\nfloat lookShadow(int id, vec3 Lview) {\n  \n  return 1.0;\n}\n",
+   "features": {
+    "clearcoat": true,
+    "sheen": true,
+    "iridescence": true,
+    "dispersion": false,
+    "transmission": false
+   }
+  },
+  "relief": null,
+  "seeThrough": null,
+  "all": {
+   "ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "fragmentPars": "uniform highp sampler2D lookSettings;\n\nflat varying float vLookId;\nvarying vec3 vLookInfo;\nvarying vec2 vLookUv;\nvarying vec3 vLookWorld;\nvarying vec3 vLookWN;\nvarying vec3 vS0;\nvarying vec3 vS1;\nvarying vec4 vS2;\nvarying vec2 vS3;\n#define s0 vS0\n#define s1 vS1\n#define s2 vS2\n#define s3 vS3\nuniform float lookView;\nuniform float lookDebug;\n// the looks' clock: seconds, one for every look of the scene, set each frame by the page (install.js's `time`) or the\n// game (core's supershader3d). It grows without end, and a hash of a large number is no longer random, so a look never\n// feeds it to its noise as it is: it takes it through kcycle or kloop, whose numbers stay inside one period.\nuniform float lookTime;\n// the uv's change across the pixel, worked out once where every pixel of the quad runs it, so a picture read inside a\n// look's branch still knows its sharpness\nvec2 lookGx, lookGy;\n// the slot s3's change across the pixel, worked out beside them, for a picture laid by a place the geometry gives in s3\nvec2 lookS3x, lookS3y;\n\nfloat kh(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }\nfloat kh1(float x) { return fract(sin(x * 91.7) * 43758.5453); }\nfloat kn(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  vec2 u = f * f * (3.0 - 2.0 * f);\n  return mix(mix(kh(i), kh(i + vec2(1, 0)), u.x), mix(kh(i + vec2(0, 1)), kh(i + vec2(1, 1)), u.x), u.y);\n}\nfloat kfbm(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 5; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s / 0.97;\n}\nfloat kfbm4(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 4; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s;\n}\n// a feature f metres across fades to its mean where it is finer than a pixel\nfloat kfade(float f) { vec2 fw = abs(lookGx) + abs(lookGy); return clamp(1.5 - (fw.x + fw.y) / f, 0.0, 1.0); }\n// cells of jittered seeds: the distance to the nearest, its number (0 to 1), and how far the second is past it\nfloat kvor(vec2 p, out float id, out float edge) {\n  vec2 i = floor(p), f = fract(p);\n  float d1 = 8.0, d2 = 8.0;\n  vec2 best = vec2(0.0);\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 c = i + o;\n    vec2 r = o + vec2(kh(c), kh(c + 7.3)) - f;\n    float d = dot(r, r);\n    if (d < d1) { d2 = d1; d1 = d; best = c; } else if (d < d2) { d2 = d; }\n  }\n  id = kh(best + 3.7);\n  edge = sqrt(d2) - sqrt(d1);\n  return sqrt(d1);\n}\n// a dimple field: the distance to the nearest of jittered cells' seeds\nfloat kcell(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  float d = 8.0;\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 r = o + vec2(kh(i + o), kh(i + o + 7.3)) - f;\n    d = min(d, dot(r, r));\n  }\n  return sqrt(d);\n}\n// courses: the row along v, the piece in it along u (each row offset), where in the piece (0 to 1 each way)\nvec4 kcourse(vec2 uv, float row, float wide, float jitter, float seed, out vec2 id) {\n  float r = floor(uv.y / row);\n  float shift = kh1(r + seed) * wide;\n  float w = wide * (1.0 - jitter * 0.5 + jitter * kh(vec2(r, floor((uv.x + shift) / wide) + seed)));\n  float x = (uv.x + shift) / w;\n  id = vec2(r, floor(x));\n  return vec4(fract(x), fract(uv.y / row), r, w);\n}\n// marble's veins: thin lines wandering through a warped field, the main ones and finer ones across them\nfloat kveins(vec2 p, float seed) {\n  float w = kfbm(p * 1.3 + seed) * 4.0;\n  float a = pow(1.0 - abs(sin((p.x * 1.6 + p.y * 0.6 + w) * 3.14159)), 22.0);\n  float b = pow(1.0 - abs(sin((p.y * 2.7 - p.x * 1.1 + kfbm(p * 2.6 + seed + 7.0) * 3.0) * 3.14159)), 50.0);\n  return clamp(a + 0.6 * b, 0.0, 1.0);\n}\n// wood's grain along u: its rings' lines (late wood 1, early 0) wandering across v, and its fibres\nfloat kring(vec2 uv, float seed, float rings) {\n  float w = kfbm(vec2(uv.x * 0.35, uv.y * 2.0) + seed) * 1.6;\n  return smoothstep(0.5, 0.95, fract(uv.y * rings + w + uv.x * 0.04));\n}\nfloat kfibre(vec2 uv, float seed) { return kn(vec2(uv.x * 3.0, uv.y * 420.0) + seed) * kfade(0.003); }\n// how strongly a cloth's weave shows: a plain weave of threads t metres across, over and under\nfloat kweave(vec2 uv, float t) {\n  vec2 q = uv / t;\n  float warp = sin(q.x * 3.14159), weft = sin(q.y * 3.14159);\n  float over = step(0.0, warp * weft);\n  return mix(0.5, mix(0.8, 1.08, over) * (0.85 + 0.15 * abs(over > 0.5 ? weft : warp)), kfade(t * 2.0));\n}\n// a cycle of `period` seconds: how far through it the clock is, 0 to 1, for a look that pulses or goes round (anything\n// of 6.28318 times it, a sin or a turn, comes back to where it began with no seam)\nfloat kcycle(float period) { return fract(lookTime / period); }\n// a drift that never repeats, for a look that flows, boils or creeps: two phases of one cycle of `period` seconds, half\n// a cycle apart, each 0 to 1 (x and y), and the share of the first (z). A look moves its pattern on by each phase, reads\n// it at both and mixes them by z; each phase jumps back to 0 only where its share is 0, so the drift shows no seam\nvec3 kloop(float period) { float a = fract(lookTime / period); return vec3(a, fract(a + 0.5), 1.0 - abs(2.0 * a - 1.0)); }\n// value noise in three numbers whose third repeats every `n` cells (a whole number): a pattern that churns in place,\n// for what boils, breathes or glows and fades, never sliding as a drift does. Given p.z = kcycle(period) * n it changes\n// n cells' worth over the period and comes back to where it began at its end with no seam, so nothing is mixed and\n// nothing shows twice\nfloat kh3(vec3 c) { return fract(sin(dot(c, vec3(127.1, 311.7, 74.7))) * 43758.5453123); }\nfloat kn3(vec3 p, float n) {\n  vec3 i = floor(p), f = fract(p);\n  vec3 u = f * f * (3.0 - 2.0 * f);\n  float z0 = mod(i.z, n), z1 = mod(i.z + 1.0, n);\n  float a0 = mix(mix(kh3(vec3(i.xy, z0)), kh3(vec3(i.xy + vec2(1, 0), z0)), u.x),\n                 mix(kh3(vec3(i.xy + vec2(0, 1), z0)), kh3(vec3(i.xy + vec2(1, 1), z0)), u.x), u.y);\n  float a1 = mix(mix(kh3(vec3(i.xy, z1)), kh3(vec3(i.xy + vec2(1, 0), z1)), u.x),\n                 mix(kh3(vec3(i.xy + vec2(0, 1), z1)), kh3(vec3(i.xy + vec2(1, 1), z1)), u.x), u.y);\n  return mix(a0, a1, u.z);\n}\n// four sizes of it, each finer one churning twice as fast and still repeating on the same cycle\nfloat kfbm3(vec3 p, float n) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 4; i++) { s += a * kn3(p, n); p = vec3(p.xy * 2.03 + 17.1, p.z * 2.0); n *= 2.0; a *= 0.5; }\n  return s / 0.9375;\n}\n// the normal bent by a height field, as three's bump map bends it (perturbNormalArb)\nvec3 kitBump(vec3 pos, vec3 n, float h, float faceDirection) {\n  vec3 sx = dFdx(pos), sy = dFdy(pos);\n  vec3 r1 = cross(sy, n), r2 = cross(n, sx);\n  float det = dot(sx, r1) * faceDirection;\n  vec2 dh = vec2(dFdx(h), dFdy(h));\n  vec3 grad = sign(det) * (dh.x * r1 + dh.y * r2);\n  return normalize(abs(det) * n - grad);\n}\n// a normal in the surface's own ways (u, v, out) turned into the view's, the ways found from the uv's change across\n// the pixel, as three's normal map without tangents finds them (getTangentFrame)\nvec3 lookPerturb(vec3 n, vec3 nts, float faceDirection) {\n  vec3 q0 = dFdx(-vViewPosition), q1 = dFdy(-vViewPosition);\n  vec3 q1perp = cross(q1, n), q0perp = cross(n, q0);\n  vec3 T = q1perp * lookGx.x + q0perp * lookGy.x;\n  vec3 B = q1perp * lookGx.y + q0perp * lookGy.y;\n  float det = max(dot(T, T), dot(B, B));\n  float scale = det == 0.0 ? 0.0 : faceDirection * inversesqrt(det);\n  return normalize(T * (nts.x * scale) + B * (nts.y * scale) + n * nts.z);\n}\n\nstruct Look {\n  vec3 colour; float rough; float metal; float height; vec3 nts; vec3 normal; bool ownNormal;\n  float ao; float aoDirect; float alpha; vec3 glow;\n  float clearcoat; float clearcoatRough; vec3 sheen; float sheenRough; float iridescence; float iridIor; float iridThick;\n  float transmission; float thickness; vec3 attColour; float attDist; float ior; float dispersion;\n};\nLook lookStart() {\n  Look k;\n  k.colour = vec3(0.5); k.rough = 0.8; k.metal = 0.0; k.height = 0.0; k.nts = vec3(0.0, 0.0, 1.0);\n  k.normal = vec3(0.0, 0.0, 1.0); k.ownNormal = false; k.ao = 1.0; k.aoDirect = 0.0; k.alpha = 1.0; k.glow = vec3(0.0);\n  k.clearcoat = 0.0; k.clearcoatRough = 0.1; k.sheen = vec3(0.0); k.sheenRough = 0.5;\n  k.iridescence = 0.0; k.iridIor = 1.3; k.iridThick = 400.0;\n  k.transmission = 0.0; k.thickness = 0.0; k.attColour = vec3(1.0); k.attDist = 1e9; k.ior = 1.5; k.dispersion = 0.0;\n  return k;\n}\n\n\nuniform highp sampler2DArray lookPictures;\nuniform float lookMeans[2];\nvec3 lookSrgb(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }\nvec4 picData(int t, vec2 uv, float scale) { return textureGrad(lookPictures, vec3(uv, float(t)), lookGx * scale, lookGy * scale); }\nvec3 picColour(int t, vec2 uv, float scale) { return lookSrgb(picData(t, uv, scale).rgb); }\nvec4 picDataLod(int t, vec2 uv, float lod) { return textureLod(lookPictures, vec3(uv, float(t)), lod); }\nvec3 picColourLod(int t, vec2 uv, float lod) { return lookSrgb(picDataLod(t, uv, lod).rgb); }\nfloat picMean(int t) { return lookMeans[t]; }\n// a picture laid once over a piece by the place its geometry gives in s3 (0 to 1 each way): `at` is that place\nvec4 picDataS3(int t, vec2 at) { return textureGrad(lookPictures, vec3(at, float(t)), lookS3x, lookS3y); }\n\nvec3 p_plUpper;\nvec3 p_plUnder;\nvec3 p_plNeck;\nvec3 p_plHead;\nvec3 p_plMark;\nvec3 p_plEdge;\nvec3 p_plSpotColour;\nfloat p_plLap;\nfloat p_plPoint;\nfloat p_plVary;\nfloat p_plMottle;\nfloat p_plMottleScale;\nfloat p_plFluff;\nfloat p_plBarbs;\nfloat p_plFringe;\nfloat p_plFringeUp;\nfloat p_plFringeUnder;\nfloat p_plStreakWidth;\nfloat p_plStreakUp;\nfloat p_plStreakUnder;\nfloat p_plBars;\nfloat p_plBarUp;\nfloat p_plBarUnder;\nfloat p_plSpot;\nfloat p_plSpotOn;\nfloat p_plShade;\nfloat p_plLift;\nfloat p_plRough;\nvec3 p_plSheen;\nfloat p_plIrid;\nfloat p_plIridNeck;\nfloat p_plIridThick;\nfloat p_plIridIor;\nfloat p_plBarbLean;\nfloat p_plShadeFall;\nfloat p_plShaftWidth;\nfloat p_plFluffGloss;\nfloat p_plFluffEdge;\nfloat p_plFluffRough;\nvec3 p_fwTint;\nfloat p_fwCut;\nfloat p_fwRough;\nfloat p_fwRelief;\nvec3 p_fwSheen;\nvec3 p_bkBase;\nvec3 p_bkBody;\nvec3 p_bkTip;\nfloat p_bkBaseTo;\nfloat p_bkTipFrom;\nfloat p_bkTipTo;\nfloat p_bkLines;\nfloat p_bkLineScale;\nfloat p_bkRidge;\nfloat p_bkPits;\nfloat p_bkScales;\nfloat p_bkScaleSize;\nfloat p_bkScaleRelief;\nvec3 p_bkCrack;\nfloat p_bkMottle;\nfloat p_bkRough;\nfloat p_bkCoat;\nvec3 p_eyPupil;\nvec3 p_eyIrisIn;\nvec3 p_eyIrisOut;\nvec3 p_eyRim;\nvec3 p_eyRing;\nfloat p_eyPupilSize;\nfloat p_eyRimFrom;\nfloat p_eyFlecks;\nfloat p_eyFibres;\nfloat p_eyFibreRelief;\nfloat p_eyPupilSink;\nfloat p_eyBulge;\nfloat p_eyLid;\nfloat p_eyLidWide;\nfloat p_eyScales;\nfloat p_eyScaleRelief;\nvec3 p_eyCrack;\nfloat p_eyRingRough;\nvec3 p_lgSkin;\nvec3 p_lgPlate;\nvec3 p_lgPad;\nvec3 p_lgCrack;\nfloat p_lgPlateWide;\nfloat p_lgScale;\nfloat p_lgPadScale;\nfloat p_lgRelief;\nfloat p_lgPlateRelief;\nfloat p_lgMottle;\nfloat p_lgRough;\nfloat p_lgCoat;\nint t_fwHawkWing;\nint t_fwHawkNormal;\n\n\n\nfloat plStagger(float q) { return mod(q, 2.0) * 0.5 + (kh1(q * 5.13) - 0.5) * 0.25; }\n// the feather of row q at column c: its place across (f, 0 to 1), its number, and where its tip edge lies (rows)\nfloat plTip(float q, float c, float fluff, out float f, out float id) {\n  float cc = c + plStagger(q);\n  f = fract(cc);\n  id = floor(cc) + q * 311.0;\n  float x = 2.0 * f - 1.0;\n  float edge = mix(sqrt(max(1.0 - x * x, 0.0)), 1.0 - abs(x), p_plPoint);\n  edge += fluff * (kn(vec2(f * 14.0, id * 1.7)) - 0.5) * p_plFluffEdge;\n  return q + 1.0 + p_plLap * clamp(edge, 0.0, 1.0);\n}\n\n\n\n\n\nvoid look_0(inout Look k) {\n  p_plUpper = texelFetch(lookSettings, ivec2(0, 0), 0).rgb;\n  p_plUnder = texelFetch(lookSettings, ivec2(1, 0), 0).rgb;\n  p_plNeck = texelFetch(lookSettings, ivec2(2, 0), 0).rgb;\n  p_plHead = texelFetch(lookSettings, ivec2(3, 0), 0).rgb;\n  p_plMark = texelFetch(lookSettings, ivec2(4, 0), 0).rgb;\n  p_plEdge = texelFetch(lookSettings, ivec2(5, 0), 0).rgb;\n  p_plSpotColour = texelFetch(lookSettings, ivec2(6, 0), 0).rgb;\n  p_plLap = texelFetch(lookSettings, ivec2(7, 0), 0).r;\n  p_plPoint = texelFetch(lookSettings, ivec2(8, 0), 0).r;\n  p_plVary = texelFetch(lookSettings, ivec2(9, 0), 0).r;\n  p_plMottle = texelFetch(lookSettings, ivec2(10, 0), 0).r;\n  p_plMottleScale = texelFetch(lookSettings, ivec2(11, 0), 0).r;\n  p_plFluff = texelFetch(lookSettings, ivec2(12, 0), 0).r;\n  p_plBarbs = texelFetch(lookSettings, ivec2(13, 0), 0).r;\n  p_plFringe = texelFetch(lookSettings, ivec2(14, 0), 0).r;\n  p_plFringeUp = texelFetch(lookSettings, ivec2(15, 0), 0).r;\n  p_plFringeUnder = texelFetch(lookSettings, ivec2(16, 0), 0).r;\n  p_plStreakWidth = texelFetch(lookSettings, ivec2(17, 0), 0).r;\n  p_plStreakUp = texelFetch(lookSettings, ivec2(18, 0), 0).r;\n  p_plStreakUnder = texelFetch(lookSettings, ivec2(19, 0), 0).r;\n  p_plBars = texelFetch(lookSettings, ivec2(20, 0), 0).r;\n  p_plBarUp = texelFetch(lookSettings, ivec2(21, 0), 0).r;\n  p_plBarUnder = texelFetch(lookSettings, ivec2(22, 0), 0).r;\n  p_plSpot = texelFetch(lookSettings, ivec2(23, 0), 0).r;\n  p_plSpotOn = texelFetch(lookSettings, ivec2(24, 0), 0).r;\n  p_plShade = texelFetch(lookSettings, ivec2(25, 0), 0).r;\n  p_plLift = texelFetch(lookSettings, ivec2(26, 0), 0).r;\n  p_plRough = texelFetch(lookSettings, ivec2(27, 0), 0).r;\n  p_plSheen = texelFetch(lookSettings, ivec2(28, 0), 0).rgb;\n  p_plIrid = texelFetch(lookSettings, ivec2(29, 0), 0).r;\n  p_plIridNeck = texelFetch(lookSettings, ivec2(30, 0), 0).r;\n  p_plIridThick = texelFetch(lookSettings, ivec2(31, 0), 0).r;\n  p_plIridIor = texelFetch(lookSettings, ivec2(32, 0), 0).r;\n  p_plBarbLean = texelFetch(lookSettings, ivec2(33, 0), 0).r;\n  p_plShadeFall = texelFetch(lookSettings, ivec2(34, 0), 0).r;\n  p_plShaftWidth = texelFetch(lookSettings, ivec2(35, 0), 0).r;\n  p_plFluffGloss = texelFetch(lookSettings, ivec2(36, 0), 0).r;\n  p_plFluffEdge = texelFetch(lookSettings, ivec2(37, 0), 0).r;\n  p_plFluffRough = texelFetch(lookSettings, ivec2(38, 0), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float L = max(s2.y, 0.002);\n    float fluff = clamp(s2.x * p_plFluff, 0.0, 1.0);\n    float under = s1.x, neck = s1.y, head = s1.z;\n    float r = floor(s3.x);\n    // the feather on the head side (row r - 1) lies over this row where its tip reaches; else it is row r's own\n    float fA, idA, fB, idB, fC, idC;\n    float tipA = plTip(r - 1.0, s3.y, fluff, fA, idA);\n    float tipB = plTip(r, s3.y, fluff, fB, idB);\n    float tipC = plTip(r - 2.0, s3.y, fluff, fC, idC);\n    bool onA = s3.x < tipA;\n    float q = onA ? r - 1.0 : r;\n    float f = onA ? fA : fB;\n    float id = onA ? idA : idB;\n    float tip = onA ? tipA : tipB;\n    float prevEdge = onA ? tipC : tipA;\n    float tipDist = tip - s3.x;\n    float past = s3.x - prevEdge;\n    float s = clamp(past / max(tip - prevEdge, 0.05), 0.0, 1.0);\n    float feather = kfade(L * 1.5);\n    // the feather's own colour: the zone it is in, then its own shade\n    vec3 c = mix(p_plUpper, p_plUnder, under);\n    c = mix(c, p_plNeck, neck);\n    c = mix(c, p_plHead, head);\n    c *= 1.0 + (kh1(id * 0.731 + seed) - 0.5) * p_plVary * feather;\n    c *= 1.0 + (kfbm4(uv * p_plMottleScale + seed) - 0.5) * p_plMottle * 1.6;\n    // barbs leaning out from the shaft toward the tip\n    float barb = kn(vec2(((s3.x - q) - abs(f - 0.5) * p_plBarbLean) * p_plBarbs, id * 3.1)) * kfade(L * 4.0 / p_plBarbs);\n    float shaft = smoothstep(p_plShaftWidth, 0.0, abs(f - 0.5)) * smoothstep(0.0, 0.3, tipDist) * kfade(L * 0.06);\n    // marks, each on the back and underneath by its own amount\n    float streak = smoothstep(p_plStreakWidth, p_plStreakWidth * 0.4, abs(f - 0.5)) * smoothstep(0.0, 0.15, tipDist);\n    streak *= mix(p_plStreakUp, p_plStreakUnder, under) * kfade(L * p_plStreakWidth);\n    float band = fract(tipDist * p_plBars);\n    float bar = smoothstep(0.25, 0.35, band) * smoothstep(0.75, 0.65, band) * step(p_plFringe * 0.5, tipDist);\n    bar *= mix(p_plBarUp, p_plBarUnder, under) * kfade(L * 2.5 / p_plBars);\n    float fringe = smoothstep(p_plFringe, p_plFringe * 0.45, tipDist) * mix(p_plFringeUp, p_plFringeUnder, under);\n    fringe *= kfade(L * p_plFringe);\n    float spotD = length(vec2((tipDist - p_plSpot * 1.3) / p_plSpot, (f - 0.5) / (p_plSpot * 1.2)));\n    float spot = smoothstep(1.0, 0.7, spotD) * p_plSpotOn * kfade(L * p_plSpot);\n    c = mix(c, p_plMark, max(streak, bar) * feather);\n    c = mix(c, p_plEdge, fringe * feather);\n    c = mix(c, p_plSpotColour, spot * feather);\n    c *= 0.9 + 0.2 * (barb - 0.5);\n    c *= 1.0 - 0.15 * shaft;\n    // the shadow on this feather just past the tip of the one over it\n    float shade = 1.0 - p_plShade * exp(-past * p_plShadeFall) * feather;\n    k.colour = c * shade;\n    k.ao = mix(1.0, 0.6 + 0.4 * s, feather);\n    k.rough = mix(p_plRough, 1.0, fluff * p_plFluffRough);\n    k.metal = 0.0;\n    // each feather rises from the tip over it to its own tip edge, where it steps down onto the next\n    k.height = L * (p_plLift * smoothstep(0.0, 1.0, s) * feather + 0.02 * barb);\n    k.sheen = p_plSheen * (1.0 + fluff);\n    k.sheenRough = 0.5;\n    float irid = clamp(mix(p_plIrid, max(p_plIrid, p_plIridNeck), max(neck, head * 0.5)), 0.0, 1.0);\n    k.iridescence = irid * (1.0 - fluff * p_plFluffGloss);\n    k.iridIor = p_plIridIor;\n    k.iridThick = p_plIridThick;\n    if (lookView > 0.5 && lookView < 1.5) k.colour = vec3(fract(id * 0.37), fract(id * 0.61), fract(id * 0.83));\n\n}\n\nvoid look_1(inout Look k) {\n  p_fwTint = texelFetch(lookSettings, ivec2(0, 1), 0).rgb;\n  p_fwCut = texelFetch(lookSettings, ivec2(1, 1), 0).r;\n  p_fwRough = texelFetch(lookSettings, ivec2(2, 1), 0).r;\n  p_fwRelief = texelFetch(lookSettings, ivec2(3, 1), 0).r;\n  p_fwSheen = texelFetch(lookSettings, ivec2(4, 1), 0).rgb;\n  t_fwHawkWing = 0;\n  t_fwHawkNormal = 1;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    vec4 fwD = picDataS3(t_fwHawkWing, s3);\n    // the picture's colour is stored times its alpha (pictures.mjs): divided out, then made linear\n    vec3 fwC = clamp(fwD.rgb / max(fwD.a, 0.02), 0.0, 1.0);\n    fwC = mix(fwC / 12.92, pow((fwC + 0.055) / 1.055, vec3(2.4)), step(0.04045, fwC));\n    k.colour = fwC * p_fwTint;\n    k.alpha = fwD.a >= p_fwCut ? 1.0 : 0.0;\n    // the normal map laid on the card as the colour is: its ways across and up the picture found from s3's change\n    // across the pixel, as three's normal map finds a surface's ways from its uv\n    vec3 fwM = picDataS3(t_fwHawkNormal, s3).xyz * 2.0 - 1.0;\n    vec3 fwG = normalize(vNormal) * (gl_FrontFacing ? 1.0 : -1.0);\n    vec3 fwQ0 = dFdx(-vViewPosition), fwQ1 = dFdy(-vViewPosition);\n    vec2 fwSx = dFdx(s3), fwSy = dFdy(s3);\n    vec3 fwP1 = cross(fwQ1, fwG), fwP0 = cross(fwG, fwQ0);\n    vec3 fwT = fwP1 * fwSx.x + fwP0 * fwSy.x;\n    vec3 fwB = -(fwP1 * fwSx.y + fwP0 * fwSy.y);\n    float fwDet = max(dot(fwT, fwT), dot(fwB, fwB));\n    float fwScale = fwDet == 0.0 ? 0.0 : (gl_FrontFacing ? 1.0 : -1.0) * inversesqrt(fwDet);\n    k.normal = normalize(fwT * (fwM.x * p_fwRelief * fwScale) + fwB * (fwM.y * p_fwRelief * fwScale) + fwG * fwM.z);\n    k.ownNormal = true;\n    k.rough = p_fwRough;\n    k.metal = 0.0;\n    k.sheen = p_fwSheen;\n    k.sheenRough = 0.5;\n\n}\n\nvoid look_2(inout Look k) {\n  p_bkBase = texelFetch(lookSettings, ivec2(0, 2), 0).rgb;\n  p_bkBody = texelFetch(lookSettings, ivec2(1, 2), 0).rgb;\n  p_bkTip = texelFetch(lookSettings, ivec2(2, 2), 0).rgb;\n  p_bkBaseTo = texelFetch(lookSettings, ivec2(3, 2), 0).r;\n  p_bkTipFrom = texelFetch(lookSettings, ivec2(4, 2), 0).r;\n  p_bkTipTo = texelFetch(lookSettings, ivec2(5, 2), 0).r;\n  p_bkLines = texelFetch(lookSettings, ivec2(6, 2), 0).r;\n  p_bkLineScale = texelFetch(lookSettings, ivec2(7, 2), 0).r;\n  p_bkRidge = texelFetch(lookSettings, ivec2(8, 2), 0).r;\n  p_bkPits = texelFetch(lookSettings, ivec2(9, 2), 0).r;\n  p_bkScales = texelFetch(lookSettings, ivec2(10, 2), 0).r;\n  p_bkScaleSize = texelFetch(lookSettings, ivec2(11, 2), 0).r;\n  p_bkScaleRelief = texelFetch(lookSettings, ivec2(12, 2), 0).r;\n  p_bkCrack = texelFetch(lookSettings, ivec2(13, 2), 0).rgb;\n  p_bkMottle = texelFetch(lookSettings, ivec2(14, 2), 0).r;\n  p_bkRough = texelFetch(lookSettings, ivec2(15, 2), 0).r;\n  p_bkCoat = texelFetch(lookSettings, ivec2(16, 2), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float t = clamp(s3.x, 0.0, 1.0);\n    vec3 c = mix(p_bkBase, p_bkBody, smoothstep(p_bkBaseTo * 0.6, p_bkBaseTo, t));\n    c = mix(c, p_bkTip, smoothstep(p_bkTipFrom, max(p_bkTipTo, p_bkTipFrom + 0.001), t));\n    // growth ridges along the beak, and pits between them\n    float ridge = kn(vec2(uv.x * 8.0, uv.y * p_bkLineScale) + seed) * kfade(2.0 / p_bkLineScale);\n    float pit = smoothstep(0.72, 0.9, kn(uv * p_bkLineScale * 1.7 + seed * 2.3)) * kfade(1.5 / p_bkLineScale);\n    float mottle = kfbm4(uv * 60.0 + seed);\n    c *= 1.0 + (ridge - 0.5) * p_bkLines;\n    c *= 1.0 - 0.3 * pit * p_bkPits;\n    c *= 1.0 + (mottle - 0.5) * p_bkMottle;\n    // skin: small rounded scales, the cracks between them dark\n    float cell, edge;\n    kvor(uv / p_bkScaleSize + seed * 5.1, cell, edge);\n    float fade = kfade(p_bkScaleSize);\n    float bump = smoothstep(0.0, 0.3, edge) * fade;\n    vec3 skinTone = mix(p_bkCrack, vec3(0.9 + 0.2 * cell), mix(1.0, bump, fade));\n    c *= mix(vec3(1.0), skinTone, p_bkScales);\n    k.colour = c;\n    k.rough = mix(p_bkRough, min(1.0, p_bkRough + 0.25), p_bkScales * (1.0 - bump));\n    k.metal = 0.0;\n    k.height = (1.0 - p_bkScales) * (p_bkRidge * (ridge - 0.5) * 2.0 - 0.5 * p_bkRidge * pit * p_bkPits)\n             + p_bkScales * p_bkScaleRelief * bump;\n    k.ao = 1.0 - 0.3 * p_bkScales * (1.0 - bump) * fade;\n    k.clearcoat = p_bkCoat * (1.0 - 0.7 * p_bkScales);\n    k.clearcoatRough = 0.25;\n\n}\n\nvoid look_3(inout Look k) {\n  p_bkBase = texelFetch(lookSettings, ivec2(0, 3), 0).rgb;\n  p_bkBody = texelFetch(lookSettings, ivec2(1, 3), 0).rgb;\n  p_bkTip = texelFetch(lookSettings, ivec2(2, 3), 0).rgb;\n  p_bkBaseTo = texelFetch(lookSettings, ivec2(3, 3), 0).r;\n  p_bkTipFrom = texelFetch(lookSettings, ivec2(4, 3), 0).r;\n  p_bkTipTo = texelFetch(lookSettings, ivec2(5, 3), 0).r;\n  p_bkLines = texelFetch(lookSettings, ivec2(6, 3), 0).r;\n  p_bkLineScale = texelFetch(lookSettings, ivec2(7, 3), 0).r;\n  p_bkRidge = texelFetch(lookSettings, ivec2(8, 3), 0).r;\n  p_bkPits = texelFetch(lookSettings, ivec2(9, 3), 0).r;\n  p_bkScales = texelFetch(lookSettings, ivec2(10, 3), 0).r;\n  p_bkScaleSize = texelFetch(lookSettings, ivec2(11, 3), 0).r;\n  p_bkScaleRelief = texelFetch(lookSettings, ivec2(12, 3), 0).r;\n  p_bkCrack = texelFetch(lookSettings, ivec2(13, 3), 0).rgb;\n  p_bkMottle = texelFetch(lookSettings, ivec2(14, 3), 0).r;\n  p_bkRough = texelFetch(lookSettings, ivec2(15, 3), 0).r;\n  p_bkCoat = texelFetch(lookSettings, ivec2(16, 3), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float t = clamp(s3.x, 0.0, 1.0);\n    vec3 c = mix(p_bkBase, p_bkBody, smoothstep(p_bkBaseTo * 0.6, p_bkBaseTo, t));\n    c = mix(c, p_bkTip, smoothstep(p_bkTipFrom, max(p_bkTipTo, p_bkTipFrom + 0.001), t));\n    // growth ridges along the beak, and pits between them\n    float ridge = kn(vec2(uv.x * 8.0, uv.y * p_bkLineScale) + seed) * kfade(2.0 / p_bkLineScale);\n    float pit = smoothstep(0.72, 0.9, kn(uv * p_bkLineScale * 1.7 + seed * 2.3)) * kfade(1.5 / p_bkLineScale);\n    float mottle = kfbm4(uv * 60.0 + seed);\n    c *= 1.0 + (ridge - 0.5) * p_bkLines;\n    c *= 1.0 - 0.3 * pit * p_bkPits;\n    c *= 1.0 + (mottle - 0.5) * p_bkMottle;\n    // skin: small rounded scales, the cracks between them dark\n    float cell, edge;\n    kvor(uv / p_bkScaleSize + seed * 5.1, cell, edge);\n    float fade = kfade(p_bkScaleSize);\n    float bump = smoothstep(0.0, 0.3, edge) * fade;\n    vec3 skinTone = mix(p_bkCrack, vec3(0.9 + 0.2 * cell), mix(1.0, bump, fade));\n    c *= mix(vec3(1.0), skinTone, p_bkScales);\n    k.colour = c;\n    k.rough = mix(p_bkRough, min(1.0, p_bkRough + 0.25), p_bkScales * (1.0 - bump));\n    k.metal = 0.0;\n    k.height = (1.0 - p_bkScales) * (p_bkRidge * (ridge - 0.5) * 2.0 - 0.5 * p_bkRidge * pit * p_bkPits)\n             + p_bkScales * p_bkScaleRelief * bump;\n    k.ao = 1.0 - 0.3 * p_bkScales * (1.0 - bump) * fade;\n    k.clearcoat = p_bkCoat * (1.0 - 0.7 * p_bkScales);\n    k.clearcoatRough = 0.25;\n\n}\n\nvoid look_4(inout Look k) {\n  p_eyPupil = texelFetch(lookSettings, ivec2(0, 4), 0).rgb;\n  p_eyIrisIn = texelFetch(lookSettings, ivec2(1, 4), 0).rgb;\n  p_eyIrisOut = texelFetch(lookSettings, ivec2(2, 4), 0).rgb;\n  p_eyRim = texelFetch(lookSettings, ivec2(3, 4), 0).rgb;\n  p_eyRing = texelFetch(lookSettings, ivec2(4, 4), 0).rgb;\n  p_eyPupilSize = texelFetch(lookSettings, ivec2(5, 4), 0).r;\n  p_eyRimFrom = texelFetch(lookSettings, ivec2(6, 4), 0).r;\n  p_eyFlecks = texelFetch(lookSettings, ivec2(7, 4), 0).r;\n  p_eyFibres = texelFetch(lookSettings, ivec2(8, 4), 0).r;\n  p_eyFibreRelief = texelFetch(lookSettings, ivec2(9, 4), 0).r;\n  p_eyPupilSink = texelFetch(lookSettings, ivec2(10, 4), 0).r;\n  p_eyBulge = texelFetch(lookSettings, ivec2(11, 4), 0).r;\n  p_eyLid = texelFetch(lookSettings, ivec2(12, 4), 0).r;\n  p_eyLidWide = texelFetch(lookSettings, ivec2(13, 4), 0).r;\n  p_eyScales = texelFetch(lookSettings, ivec2(14, 4), 0).r;\n  p_eyScaleRelief = texelFetch(lookSettings, ivec2(15, 4), 0).r;\n  p_eyCrack = texelFetch(lookSettings, ivec2(16, 4), 0).rgb;\n  p_eyRingRough = texelFetch(lookSettings, ivec2(17, 4), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float R = max(s2.x, 1e-5);\n    float r = length(s3);\n    float a = atan(s3.y, s3.x);\n    float soft = 0.025;\n    float eye = 1.0 - smoothstep(1.0 - soft, 1.0 + soft, r);\n    // the iris: its colour, flecks and fibres running out from the pupil\n    float fleck = kn(vec2(a * 14.0, r * 24.0) + seed) * kfade(R * 0.05);\n    float fibre = kn(vec2(a * p_eyFibres / 6.2832, r * 3.0) + seed * 1.7) * kfade(R * 6.2832 / p_eyFibres);\n    vec3 iris = mix(p_eyIrisIn, p_eyIrisOut, smoothstep(p_eyPupilSize, p_eyRimFrom, r));\n    iris *= 1.0 + (fleck - 0.5) * p_eyFlecks + (fibre - 0.5) * 0.25;\n    float inIris = smoothstep(p_eyPupilSize - soft, p_eyPupilSize + soft, r);\n    vec3 c = mix(p_eyPupil, iris, inIris);\n    c = mix(c, p_eyRim, smoothstep(p_eyRimFrom, 1.0, r));\n    // the ring: rounded scales of skin, darker in the cracks between them\n    float cell, edge;\n    float d = kvor(s3 * p_eyScales + seed * 3.1, cell, edge);\n    float scaleFade = kfade(R / p_eyScales);\n    float bump = smoothstep(0.0, 0.35, edge) * scaleFade;\n    vec3 ring = p_eyRing * (0.85 + 0.3 * cell);\n    ring = mix(ring * p_eyCrack, ring, mix(1.0, bump, scaleFade));\n    // the lids: a soft fold standing proud just outside the eye's edge, creased where it tucks under\n    float lid = smoothstep(1.0, 1.0 + 0.4 * p_eyLidWide, r) * (1.0 - smoothstep(1.0 + 0.4 * p_eyLidWide, 1.0 + p_eyLidWide, r));\n    float crease = 1.0 - smoothstep(1.0, 1.0 + 0.25 * p_eyLidWide, r);\n    ring *= 1.0 - 0.45 * crease;\n    k.colour = mix(ring, c, eye);\n    k.rough = mix(p_eyRingRough, 0.25, eye);\n    k.metal = 0.0;\n    float dome = p_eyBulge * sqrt(max(0.0, 1.0 - r * r));\n    float iris3 = inIris * (fibre - 0.5) * p_eyFibreRelief - (1.0 - inIris) * p_eyPupilSink;\n    float skin3 = p_eyLid * lid + p_eyScaleRelief * bump * (1.0 - lid);\n    k.height = R * mix(skin3, dome + iris3, eye);\n    k.ao = mix(1.0 - 0.5 * crease * (1.0 - eye), 1.0, eye);\n    k.clearcoat = eye;\n    k.clearcoatRough = 0.02;\n\n}\n\nvoid look_5(inout Look k) {\n  p_bkBase = texelFetch(lookSettings, ivec2(0, 5), 0).rgb;\n  p_bkBody = texelFetch(lookSettings, ivec2(1, 5), 0).rgb;\n  p_bkTip = texelFetch(lookSettings, ivec2(2, 5), 0).rgb;\n  p_bkBaseTo = texelFetch(lookSettings, ivec2(3, 5), 0).r;\n  p_bkTipFrom = texelFetch(lookSettings, ivec2(4, 5), 0).r;\n  p_bkTipTo = texelFetch(lookSettings, ivec2(5, 5), 0).r;\n  p_bkLines = texelFetch(lookSettings, ivec2(6, 5), 0).r;\n  p_bkLineScale = texelFetch(lookSettings, ivec2(7, 5), 0).r;\n  p_bkRidge = texelFetch(lookSettings, ivec2(8, 5), 0).r;\n  p_bkPits = texelFetch(lookSettings, ivec2(9, 5), 0).r;\n  p_bkScales = texelFetch(lookSettings, ivec2(10, 5), 0).r;\n  p_bkScaleSize = texelFetch(lookSettings, ivec2(11, 5), 0).r;\n  p_bkScaleRelief = texelFetch(lookSettings, ivec2(12, 5), 0).r;\n  p_bkCrack = texelFetch(lookSettings, ivec2(13, 5), 0).rgb;\n  p_bkMottle = texelFetch(lookSettings, ivec2(14, 5), 0).r;\n  p_bkRough = texelFetch(lookSettings, ivec2(15, 5), 0).r;\n  p_bkCoat = texelFetch(lookSettings, ivec2(16, 5), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float t = clamp(s3.x, 0.0, 1.0);\n    vec3 c = mix(p_bkBase, p_bkBody, smoothstep(p_bkBaseTo * 0.6, p_bkBaseTo, t));\n    c = mix(c, p_bkTip, smoothstep(p_bkTipFrom, max(p_bkTipTo, p_bkTipFrom + 0.001), t));\n    // growth ridges along the beak, and pits between them\n    float ridge = kn(vec2(uv.x * 8.0, uv.y * p_bkLineScale) + seed) * kfade(2.0 / p_bkLineScale);\n    float pit = smoothstep(0.72, 0.9, kn(uv * p_bkLineScale * 1.7 + seed * 2.3)) * kfade(1.5 / p_bkLineScale);\n    float mottle = kfbm4(uv * 60.0 + seed);\n    c *= 1.0 + (ridge - 0.5) * p_bkLines;\n    c *= 1.0 - 0.3 * pit * p_bkPits;\n    c *= 1.0 + (mottle - 0.5) * p_bkMottle;\n    // skin: small rounded scales, the cracks between them dark\n    float cell, edge;\n    kvor(uv / p_bkScaleSize + seed * 5.1, cell, edge);\n    float fade = kfade(p_bkScaleSize);\n    float bump = smoothstep(0.0, 0.3, edge) * fade;\n    vec3 skinTone = mix(p_bkCrack, vec3(0.9 + 0.2 * cell), mix(1.0, bump, fade));\n    c *= mix(vec3(1.0), skinTone, p_bkScales);\n    k.colour = c;\n    k.rough = mix(p_bkRough, min(1.0, p_bkRough + 0.25), p_bkScales * (1.0 - bump));\n    k.metal = 0.0;\n    k.height = (1.0 - p_bkScales) * (p_bkRidge * (ridge - 0.5) * 2.0 - 0.5 * p_bkRidge * pit * p_bkPits)\n             + p_bkScales * p_bkScaleRelief * bump;\n    k.ao = 1.0 - 0.3 * p_bkScales * (1.0 - bump) * fade;\n    k.clearcoat = p_bkCoat * (1.0 - 0.7 * p_bkScales);\n    k.clearcoatRough = 0.25;\n\n}\n\nvoid look_6(inout Look k) {\n  p_lgSkin = texelFetch(lookSettings, ivec2(0, 6), 0).rgb;\n  p_lgPlate = texelFetch(lookSettings, ivec2(1, 6), 0).rgb;\n  p_lgPad = texelFetch(lookSettings, ivec2(2, 6), 0).rgb;\n  p_lgCrack = texelFetch(lookSettings, ivec2(3, 6), 0).rgb;\n  p_lgPlateWide = texelFetch(lookSettings, ivec2(4, 6), 0).r;\n  p_lgScale = texelFetch(lookSettings, ivec2(5, 6), 0).r;\n  p_lgPadScale = texelFetch(lookSettings, ivec2(6, 6), 0).r;\n  p_lgRelief = texelFetch(lookSettings, ivec2(7, 6), 0).r;\n  p_lgPlateRelief = texelFetch(lookSettings, ivec2(8, 6), 0).r;\n  p_lgMottle = texelFetch(lookSettings, ivec2(9, 6), 0).r;\n  p_lgRough = texelFetch(lookSettings, ivec2(10, 6), 0).r;\n  p_lgCoat = texelFetch(lookSettings, ivec2(11, 6), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float along = s3.x, round_ = s3.y, girth = max(s2.y, 1e-4), plateLen = max(s2.x, 1e-4);\n    float across = round_ * girth;\n    float topness = abs(round_);\n    // the plates: on the top band, each row plateLen long, its lower edge lapping the next\n    float band = 1.0 - smoothstep(p_lgPlateWide * 0.5 - 0.04, p_lgPlateWide * 0.5 + 0.02, topness);\n    float row = along / plateLen;\n    float f = fract(row);\n    float plateFade = kfade(plateLen * 0.5);\n    float seam = (1.0 - smoothstep(0.0, 0.12, f)) * plateFade;\n    float dome = sin(3.14159 * f) * (1.0 - smoothstep(0.25, 0.5, abs(across) / max(girth * p_lgPlateWide, 1e-5)));\n    float plateTone = kh1(floor(row) * 3.7 + seed);\n    // the small scales round the sides and back, or the pads underneath\n    float isPad = s2.z * smoothstep(0.3, 0.38, topness);\n    float size = girth * mix(p_lgScale, p_lgPadScale, isPad);\n    float cell, edge;\n    kvor(vec2(along, across) / size + seed * 4.3, cell, edge);\n    float scaleFade = kfade(size);\n    float bump = smoothstep(0.0, 0.35, edge) * scaleFade;\n    vec3 skin = mix(p_lgSkin, p_lgPad, isPad) * (0.9 + 0.2 * cell);\n    skin = mix(skin * p_lgCrack, skin, mix(1.0, bump, scaleFade));\n    vec3 plate = p_lgPlate * (0.88 + 0.24 * plateTone);\n    plate = mix(plate, plate * p_lgCrack, seam);\n    vec3 c = mix(skin, plate, band);\n    c *= 1.0 + (kfbm4(vec2(along, across) * 40.0 + seed) - 0.5) * p_lgMottle;\n    k.colour = c;\n    k.rough = mix(p_lgRough, p_lgRough - 0.15, band);\n    k.metal = 0.0;\n    float scales = girth * p_lgRelief * mix(1.0, 2.0, isPad) * bump;\n    float plates = girth * p_lgPlateRelief * (f * plateFade + 0.5 * dome);\n    k.height = mix(scales, plates, band);\n    k.ao = 1.0 - 0.35 * mix((1.0 - bump) * scaleFade, seam, band);\n    k.clearcoat = p_lgCoat;\n    k.clearcoatRough = 0.3;\n\n}\n\nvoid look_7(inout Look k) {\n  p_bkBase = texelFetch(lookSettings, ivec2(0, 7), 0).rgb;\n  p_bkBody = texelFetch(lookSettings, ivec2(1, 7), 0).rgb;\n  p_bkTip = texelFetch(lookSettings, ivec2(2, 7), 0).rgb;\n  p_bkBaseTo = texelFetch(lookSettings, ivec2(3, 7), 0).r;\n  p_bkTipFrom = texelFetch(lookSettings, ivec2(4, 7), 0).r;\n  p_bkTipTo = texelFetch(lookSettings, ivec2(5, 7), 0).r;\n  p_bkLines = texelFetch(lookSettings, ivec2(6, 7), 0).r;\n  p_bkLineScale = texelFetch(lookSettings, ivec2(7, 7), 0).r;\n  p_bkRidge = texelFetch(lookSettings, ivec2(8, 7), 0).r;\n  p_bkPits = texelFetch(lookSettings, ivec2(9, 7), 0).r;\n  p_bkScales = texelFetch(lookSettings, ivec2(10, 7), 0).r;\n  p_bkScaleSize = texelFetch(lookSettings, ivec2(11, 7), 0).r;\n  p_bkScaleRelief = texelFetch(lookSettings, ivec2(12, 7), 0).r;\n  p_bkCrack = texelFetch(lookSettings, ivec2(13, 7), 0).rgb;\n  p_bkMottle = texelFetch(lookSettings, ivec2(14, 7), 0).r;\n  p_bkRough = texelFetch(lookSettings, ivec2(15, 7), 0).r;\n  p_bkCoat = texelFetch(lookSettings, ivec2(16, 7), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    float t = clamp(s3.x, 0.0, 1.0);\n    vec3 c = mix(p_bkBase, p_bkBody, smoothstep(p_bkBaseTo * 0.6, p_bkBaseTo, t));\n    c = mix(c, p_bkTip, smoothstep(p_bkTipFrom, max(p_bkTipTo, p_bkTipFrom + 0.001), t));\n    // growth ridges along the beak, and pits between them\n    float ridge = kn(vec2(uv.x * 8.0, uv.y * p_bkLineScale) + seed) * kfade(2.0 / p_bkLineScale);\n    float pit = smoothstep(0.72, 0.9, kn(uv * p_bkLineScale * 1.7 + seed * 2.3)) * kfade(1.5 / p_bkLineScale);\n    float mottle = kfbm4(uv * 60.0 + seed);\n    c *= 1.0 + (ridge - 0.5) * p_bkLines;\n    c *= 1.0 - 0.3 * pit * p_bkPits;\n    c *= 1.0 + (mottle - 0.5) * p_bkMottle;\n    // skin: small rounded scales, the cracks between them dark\n    float cell, edge;\n    kvor(uv / p_bkScaleSize + seed * 5.1, cell, edge);\n    float fade = kfade(p_bkScaleSize);\n    float bump = smoothstep(0.0, 0.3, edge) * fade;\n    vec3 skinTone = mix(p_bkCrack, vec3(0.9 + 0.2 * cell), mix(1.0, bump, fade));\n    c *= mix(vec3(1.0), skinTone, p_bkScales);\n    k.colour = c;\n    k.rough = mix(p_bkRough, min(1.0, p_bkRough + 0.25), p_bkScales * (1.0 - bump));\n    k.metal = 0.0;\n    k.height = (1.0 - p_bkScales) * (p_bkRidge * (ridge - 0.5) * 2.0 - 0.5 * p_bkRidge * pit * p_bkPits)\n             + p_bkScales * p_bkScaleRelief * bump;\n    k.ao = 1.0 - 0.3 * p_bkScales * (1.0 - bump) * fade;\n    k.clearcoat = p_bkCoat * (1.0 - 0.7 * p_bkScales);\n    k.clearcoatRough = 0.25;\n\n}\n\n\n\n\n\n\n\n\n\nLook lookRun(int id) {\n  Look k = lookStart();\n  switch (id) {\n    case 0: look_0(k); break;\n    case 1: look_1(k); break;\n    case 2: look_2(k); break;\n    case 3: look_3(k); break;\n    case 4: look_4(k); break;\n    case 5: look_5(k); break;\n    case 6: look_6(k); break;\n    case 7: look_7(k); break;\n  }\n  if (lookDebug > 0.5) {\n    switch (id) {\n      case 0: k.colour = vec3(0.06847816984440017, 0.0295568344378088, 0.014443843596092545); break;\n      case 1: k.colour = vec3(0.042311410620809675, 0.02315336617811041, 0.012983032342173012); break;\n      case 2: k.colour = vec3(0.0295568344378088, 0.03433980680868217, 0.04518620438567554); break;\n      case 3: k.colour = vec3(0.8069522576692516, 0.4793201831008268, 0.021219010376003555); break;\n      case 4: k.colour = vec3(0.10224173308810132, 0.03433980680868217, 0.006995410187265387); break;\n      case 5: k.colour = vec3(0.39157247774972326, 0.31398871337571754, 0.2788942634768104); break;\n      case 6: k.colour = vec3(0.7454042095403874, 0.43415363617474895, 0.0295568344378088); break;\n      case 7: k.colour = vec3(0.006995410187265387, 0.006995410187265387, 0.006995410187265387); break;\n    }\n  }\n  return k;\n}\nfloat lookShadow(int id, vec3 Lview) {\n  \n  return 1.0;\n}\n",
+   "features": {
+    "clearcoat": true,
+    "sheen": true,
+    "iridescence": true,
+    "dispersion": false,
+    "transmission": false
+   }
+  }
+ },
+ "needs": [],
+ "pictures": [
+  {
+   "asset": "red_tailed_hawk",
+   "file": "red_tailed_hawk.webp",
+   "set": "feather-atlas",
+   "source": "red_tailed_hawk.webp",
+   "colour": true
+  },
+  {
+   "asset": "red_tailed_hawk_normal",
+   "file": "red_tailed_hawk_normal.webp",
+   "set": "feather-atlas",
+   "source": "red_tailed_hawk_normal.webp",
+   "colour": false
+  }
+ ],
+ "settings": {
+  "width": 39,
+  "materials": [
+   [
+    {
+     "name": "plUpper",
+     "type": "vec3",
+     "value": [
+      0.08,
+      0.05,
+      0.035
+     ]
+    },
+    {
+     "name": "plUnder",
+     "type": "vec3",
+     "value": [
+      0.62,
+      0.5,
+      0.36
+     ]
+    },
+    {
+     "name": "plNeck",
+     "type": "vec3",
+     "value": [
+      0.26,
+      0.14,
+      0.075
+     ]
+    },
+    {
+     "name": "plHead",
+     "type": "vec3",
+     "value": [
+      0.11,
+      0.07,
+      0.05
+     ]
+    },
+    {
+     "name": "plMark",
+     "type": "vec3",
+     "value": [
+      0.06,
+      0.035,
+      0.022
+     ]
+    },
+    {
+     "name": "plEdge",
+     "type": "vec3",
+     "value": [
+      0.32,
+      0.22,
+      0.13
+     ]
+    },
+    {
+     "name": "plSpotColour",
+     "type": "vec3",
+     "value": [
+      0.5,
+      0.45,
+      0.35
+     ]
+    },
+    {
+     "name": "plLap",
+     "type": "float",
+     "value": 0.55
+    },
+    {
+     "name": "plPoint",
+     "type": "float",
+     "value": 0.35
+    },
+    {
+     "name": "plVary",
+     "type": "float",
+     "value": 0.4
+    },
+    {
+     "name": "plMottle",
+     "type": "float",
+     "value": 0.3
+    },
+    {
+     "name": "plMottleScale",
+     "type": "float",
+     "value": 7
+    },
+    {
+     "name": "plFluff",
+     "type": "float",
+     "value": 0.5
+    },
+    {
+     "name": "plBarbs",
+     "type": "float",
+     "value": 22
+    },
+    {
+     "name": "plFringe",
+     "type": "float",
+     "value": 0.12
+    },
+    {
+     "name": "plFringeUp",
+     "type": "float",
+     "value": 0.55
+    },
+    {
+     "name": "plFringeUnder",
+     "type": "float",
+     "value": 0.1
+    },
+    {
+     "name": "plStreakWidth",
+     "type": "float",
+     "value": 0.1
+    },
+    {
+     "name": "plStreakUp",
+     "type": "float",
+     "value": 0.3
+    },
+    {
+     "name": "plStreakUnder",
+     "type": "float",
+     "value": 0.45
+    },
+    {
+     "name": "plBars",
+     "type": "float",
+     "value": 3
+    },
+    {
+     "name": "plBarUp",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "plBarUnder",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "plSpot",
+     "type": "float",
+     "value": 0.15
+    },
+    {
+     "name": "plSpotOn",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "plShade",
+     "type": "float",
+     "value": 0.55
+    },
+    {
+     "name": "plLift",
+     "type": "float",
+     "value": 0.12
+    },
+    {
+     "name": "plRough",
+     "type": "float",
+     "value": 0.74
+    },
+    {
+     "name": "plSheen",
+     "type": "vec3",
+     "value": [
+      0.05,
+      0.035,
+      0.025
+     ]
+    },
+    {
+     "name": "plIrid",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "plIridNeck",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "plIridThick",
+     "type": "float",
+     "value": 420
+    },
+    {
+     "name": "plIridIor",
+     "type": "float",
+     "value": 1.35
+    },
+    {
+     "name": "plBarbLean",
+     "type": "float",
+     "value": 0.9
+    },
+    {
+     "name": "plShadeFall",
+     "type": "float",
+     "value": 7
+    },
+    {
+     "name": "plShaftWidth",
+     "type": "float",
+     "value": 0.035
+    },
+    {
+     "name": "plFluffGloss",
+     "type": "float",
+     "value": 0.7
+    },
+    {
+     "name": "plFluffEdge",
+     "type": "float",
+     "value": 0.7
+    },
+    {
+     "name": "plFluffRough",
+     "type": "float",
+     "value": 0.6
+    }
+   ],
+   [
+    {
+     "name": "fwTint",
+     "type": "vec3",
+     "value": [
+      0.75,
+      0.62,
+      0.5
+     ]
+    },
+    {
+     "name": "fwCut",
+     "type": "float",
+     "value": 0.1
+    },
+    {
+     "name": "fwRough",
+     "type": "float",
+     "value": 0.6
+    },
+    {
+     "name": "fwRelief",
+     "type": "float",
+     "value": 1
+    },
+    {
+     "name": "fwSheen",
+     "type": "vec3",
+     "value": [
+      0.05,
+      0.04,
+      0.03
+     ]
+    }
+   ],
+   [
+    {
+     "name": "bkBase",
+     "type": "vec3",
+     "value": [
+      0.75,
+      0.52,
+      0.05
+     ]
+    },
+    {
+     "name": "bkBody",
+     "type": "vec3",
+     "value": [
+      0.12,
+      0.13,
+      0.16
+     ]
+    },
+    {
+     "name": "bkTip",
+     "type": "vec3",
+     "value": [
+      0.012,
+      0.012,
+      0.014
+     ]
+    },
+    {
+     "name": "bkBaseTo",
+     "type": "float",
+     "value": 0.22
+    },
+    {
+     "name": "bkTipFrom",
+     "type": "float",
+     "value": 0.55
+    },
+    {
+     "name": "bkTipTo",
+     "type": "float",
+     "value": 0.8
+    },
+    {
+     "name": "bkLines",
+     "type": "float",
+     "value": 0.3
+    },
+    {
+     "name": "bkLineScale",
+     "type": "float",
+     "value": 900
+    },
+    {
+     "name": "bkRidge",
+     "type": "float",
+     "value": 0.0002
+    },
+    {
+     "name": "bkPits",
+     "type": "float",
+     "value": 0.3
+    },
+    {
+     "name": "bkScales",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "bkScaleSize",
+     "type": "float",
+     "value": 0.0015
+    },
+    {
+     "name": "bkScaleRelief",
+     "type": "float",
+     "value": 0.00025
+    },
+    {
+     "name": "bkCrack",
+     "type": "vec3",
+     "value": [
+      0.4,
+      0.35,
+      0.3
+     ]
+    },
+    {
+     "name": "bkMottle",
+     "type": "float",
+     "value": 0.15
+    },
+    {
+     "name": "bkRough",
+     "type": "float",
+     "value": 0.3
+    },
+    {
+     "name": "bkCoat",
+     "type": "float",
+     "value": 0.5
+    }
+   ],
+   [
+    {
+     "name": "bkBase",
+     "type": "vec3",
+     "value": [
+      0.78,
+      0.55,
+      0.05
+     ]
+    },
+    {
+     "name": "bkBody",
+     "type": "vec3",
+     "value": [
+      0.75,
+      0.52,
+      0.05
+     ]
+    },
+    {
+     "name": "bkTip",
+     "type": "vec3",
+     "value": [
+      0.7,
+      0.48,
+      0.05
+     ]
+    },
+    {
+     "name": "bkBaseTo",
+     "type": "float",
+     "value": 0.1
+    },
+    {
+     "name": "bkTipFrom",
+     "type": "float",
+     "value": 0.9
+    },
+    {
+     "name": "bkTipTo",
+     "type": "float",
+     "value": 1
+    },
+    {
+     "name": "bkLines",
+     "type": "float",
+     "value": 0.05
+    },
+    {
+     "name": "bkLineScale",
+     "type": "float",
+     "value": 900
+    },
+    {
+     "name": "bkRidge",
+     "type": "float",
+     "value": 0.0002
+    },
+    {
+     "name": "bkPits",
+     "type": "float",
+     "value": 0.3
+    },
+    {
+     "name": "bkScales",
+     "type": "float",
+     "value": 0.6
+    },
+    {
+     "name": "bkScaleSize",
+     "type": "float",
+     "value": 0.0003
+    },
+    {
+     "name": "bkScaleRelief",
+     "type": "float",
+     "value": 0.00003
+    },
+    {
+     "name": "bkCrack",
+     "type": "vec3",
+     "value": [
+      0.7,
+      0.62,
+      0.5
+     ]
+    },
+    {
+     "name": "bkMottle",
+     "type": "float",
+     "value": 0.25
+    },
+    {
+     "name": "bkRough",
+     "type": "float",
+     "value": 0.6
+    },
+    {
+     "name": "bkCoat",
+     "type": "float",
+     "value": 0.1
+    }
+   ],
+   [
+    {
+     "name": "eyPupil",
+     "type": "vec3",
+     "value": [
+      0.004,
+      0.004,
+      0.005
+     ]
+    },
+    {
+     "name": "eyIrisIn",
+     "type": "vec3",
+     "value": [
+      0.34,
+      0.16,
+      0.05
+     ]
+    },
+    {
+     "name": "eyIrisOut",
+     "type": "vec3",
+     "value": [
+      0.2,
+      0.09,
+      0.03
+     ]
+    },
+    {
+     "name": "eyRim",
+     "type": "vec3",
+     "value": [
+      0.02,
+      0.014,
+      0.01
+     ]
+    },
+    {
+     "name": "eyRing",
+     "type": "vec3",
+     "value": [
+      0.3,
+      0.3,
+      0.27
+     ]
+    },
+    {
+     "name": "eyPupilSize",
+     "type": "float",
+     "value": 0.42
+    },
+    {
+     "name": "eyRimFrom",
+     "type": "float",
+     "value": 0.88
+    },
+    {
+     "name": "eyFlecks",
+     "type": "float",
+     "value": 0.3
+    },
+    {
+     "name": "eyFibres",
+     "type": "float",
+     "value": 60
+    },
+    {
+     "name": "eyFibreRelief",
+     "type": "float",
+     "value": 0.015
+    },
+    {
+     "name": "eyPupilSink",
+     "type": "float",
+     "value": 0.03
+    },
+    {
+     "name": "eyBulge",
+     "type": "float",
+     "value": 0.35
+    },
+    {
+     "name": "eyLid",
+     "type": "float",
+     "value": 0.12
+    },
+    {
+     "name": "eyLidWide",
+     "type": "float",
+     "value": 0.12
+    },
+    {
+     "name": "eyScales",
+     "type": "float",
+     "value": 9
+    },
+    {
+     "name": "eyScaleRelief",
+     "type": "float",
+     "value": 0.035
+    },
+    {
+     "name": "eyCrack",
+     "type": "vec3",
+     "value": [
+      0.35,
+      0.3,
+      0.25
+     ]
+    },
+    {
+     "name": "eyRingRough",
+     "type": "float",
+     "value": 0.65
+    }
+   ],
+   [
+    {
+     "name": "bkBase",
+     "type": "vec3",
+     "value": [
+      0.4,
+      0.34,
+      0.31
+     ]
+    },
+    {
+     "name": "bkBody",
+     "type": "vec3",
+     "value": [
+      0.4,
+      0.34,
+      0.31
+     ]
+    },
+    {
+     "name": "bkTip",
+     "type": "vec3",
+     "value": [
+      0.4,
+      0.34,
+      0.31
+     ]
+    },
+    {
+     "name": "bkBaseTo",
+     "type": "float",
+     "value": 0.1
+    },
+    {
+     "name": "bkTipFrom",
+     "type": "float",
+     "value": 0.9
+    },
+    {
+     "name": "bkTipTo",
+     "type": "float",
+     "value": 1
+    },
+    {
+     "name": "bkLines",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "bkLineScale",
+     "type": "float",
+     "value": 900
+    },
+    {
+     "name": "bkRidge",
+     "type": "float",
+     "value": 0.0002
+    },
+    {
+     "name": "bkPits",
+     "type": "float",
+     "value": 0.3
+    },
+    {
+     "name": "bkScales",
+     "type": "float",
+     "value": 1
+    },
+    {
+     "name": "bkScaleSize",
+     "type": "float",
+     "value": 0.0012
+    },
+    {
+     "name": "bkScaleRelief",
+     "type": "float",
+     "value": 0.00012
+    },
+    {
+     "name": "bkCrack",
+     "type": "vec3",
+     "value": [
+      0.4,
+      0.35,
+      0.3
+     ]
+    },
+    {
+     "name": "bkMottle",
+     "type": "float",
+     "value": 0.3
+    },
+    {
+     "name": "bkRough",
+     "type": "float",
+     "value": 0.7
+    },
+    {
+     "name": "bkCoat",
+     "type": "float",
+     "value": 0.05
+    }
+   ],
+   [
+    {
+     "name": "lgSkin",
+     "type": "vec3",
+     "value": [
+      0.7,
+      0.5,
+      0.06
+     ]
+    },
+    {
+     "name": "lgPlate",
+     "type": "vec3",
+     "value": [
+      0.78,
+      0.56,
+      0.07
+     ]
+    },
+    {
+     "name": "lgPad",
+     "type": "vec3",
+     "value": [
+      0.62,
+      0.45,
+      0.08
+     ]
+    },
+    {
+     "name": "lgCrack",
+     "type": "vec3",
+     "value": [
+      0.55,
+      0.45,
+      0.3
+     ]
+    },
+    {
+     "name": "lgPlateWide",
+     "type": "float",
+     "value": 0.2
+    },
+    {
+     "name": "lgScale",
+     "type": "float",
+     "value": 0.07
+    },
+    {
+     "name": "lgPadScale",
+     "type": "float",
+     "value": 0.14
+    },
+    {
+     "name": "lgRelief",
+     "type": "float",
+     "value": 0.012
+    },
+    {
+     "name": "lgPlateRelief",
+     "type": "float",
+     "value": 0.02
+    },
+    {
+     "name": "lgMottle",
+     "type": "float",
+     "value": 0.2
+    },
+    {
+     "name": "lgRough",
+     "type": "float",
+     "value": 0.55
+    },
+    {
+     "name": "lgCoat",
+     "type": "float",
+     "value": 0.15
+    }
+   ],
+   [
+    {
+     "name": "bkBase",
+     "type": "vec3",
+     "value": [
+      0.03,
+      0.028,
+      0.026
+     ]
+    },
+    {
+     "name": "bkBody",
+     "type": "vec3",
+     "value": [
+      0.02,
+      0.019,
+      0.018
+     ]
+    },
+    {
+     "name": "bkTip",
+     "type": "vec3",
+     "value": [
+      0.012,
+      0.012,
+      0.012
+     ]
+    },
+    {
+     "name": "bkBaseTo",
+     "type": "float",
+     "value": 0.15
+    },
+    {
+     "name": "bkTipFrom",
+     "type": "float",
+     "value": 0.6
+    },
+    {
+     "name": "bkTipTo",
+     "type": "float",
+     "value": 1
+    },
+    {
+     "name": "bkLines",
+     "type": "float",
+     "value": 0.3
+    },
+    {
+     "name": "bkLineScale",
+     "type": "float",
+     "value": 900
+    },
+    {
+     "name": "bkRidge",
+     "type": "float",
+     "value": 0.0002
+    },
+    {
+     "name": "bkPits",
+     "type": "float",
+     "value": 0.3
+    },
+    {
+     "name": "bkScales",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "bkScaleSize",
+     "type": "float",
+     "value": 0.0015
+    },
+    {
+     "name": "bkScaleRelief",
+     "type": "float",
+     "value": 0.00025
+    },
+    {
+     "name": "bkCrack",
+     "type": "vec3",
+     "value": [
+      0.4,
+      0.35,
+      0.3
+     ]
+    },
+    {
+     "name": "bkMottle",
+     "type": "float",
+     "value": 0.15
+    },
+    {
+     "name": "bkRough",
+     "type": "float",
+     "value": 0.3
+    },
+    {
+     "name": "bkCoat",
+     "type": "float",
+     "value": 0.5
+    }
+   ]
+  ]
+ }
+}

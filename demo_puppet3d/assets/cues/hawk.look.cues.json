@@ -1,0 +1,72 @@
+{
+  "red-tailed hawk/head neck.1": {
+    "bend": [
+      {
+        "by": "clock",
+        "swing": -0.38397,
+        "period": 7.3,
+        "phase": 0
+      },
+      {
+        "by": "clock",
+        "swing": -0.13963,
+        "period": 2.1,
+        "phase": 0.3
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/head neck.3": {
+    "bend": [
+      {
+        "by": "clock",
+        "swing": -0.27925,
+        "period": 5.9,
+        "phase": 0.2
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  }
+}

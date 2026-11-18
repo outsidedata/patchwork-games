@@ -1,0 +1,422 @@
+{
+  "red-tailed hawk/left wing primaries.first": {
+    "bend": [
+      {
+        "by": "clock",
+        "swing": -0.05236,
+        "period": 2.3,
+        "phase": 0.1
+      },
+      {
+        "by": "clock",
+        "swing": -0.10472,
+        "period": 0.46,
+        "phase": 0.4
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/right wing primaries.first": {
+    "bend": [
+      {
+        "by": "clock",
+        "swing": -0.05236,
+        "period": 2.3,
+        "phase": -0.1
+      },
+      {
+        "by": "clock",
+        "swing": -0.10472,
+        "period": 0.46,
+        "phase": 0.4
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/left wing primaries.last": {
+    "bend": [
+      {
+        "by": "clock",
+        "swing": -0.06981,
+        "period": 2.9,
+        "phase": 0.15
+      },
+      {
+        "by": "speed",
+        "keys": [
+          [
+            0,
+            0
+          ],
+          [
+            8,
+            0.13963
+          ]
+        ]
+      },
+      {
+        "by": "clock",
+        "swing": -0.15708,
+        "period": 0.46,
+        "phase": 0.45
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/right wing primaries.last": {
+    "bend": [
+      {
+        "by": "clock",
+        "swing": -0.06981,
+        "period": 2.9,
+        "phase": -0.15
+      },
+      {
+        "by": "speed",
+        "keys": [
+          [
+            0,
+            0
+          ],
+          [
+            8,
+            0.13963
+          ]
+        ]
+      },
+      {
+        "by": "clock",
+        "swing": -0.15708,
+        "period": 0.46,
+        "phase": 0.45
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/left wing secondaries": {
+    "bend": [
+      {
+        "by": "clock",
+        "swing": -0.05236,
+        "period": 3.4,
+        "phase": 0.2
+      },
+      {
+        "by": "clock",
+        "swing": -0.08727,
+        "period": 0.46,
+        "phase": 0.35
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/right wing secondaries": {
+    "bend": [
+      {
+        "by": "clock",
+        "swing": -0.05236,
+        "period": 3.4,
+        "phase": -0.2
+      },
+      {
+        "by": "clock",
+        "swing": -0.08727,
+        "period": 0.46,
+        "phase": 0.35
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/left wing alula": {
+    "bend": [
+      {
+        "by": "clock",
+        "swing": -0.12217,
+        "period": 1.7,
+        "phase": 0.25
+      },
+      {
+        "by": "clock",
+        "swing": -0.08727,
+        "period": 0.46,
+        "phase": 0.5
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/right wing alula": {
+    "bend": [
+      {
+        "by": "clock",
+        "swing": -0.12217,
+        "period": 1.7,
+        "phase": -0.25
+      },
+      {
+        "by": "clock",
+        "swing": -0.08727,
+        "period": 0.46,
+        "phase": 0.5
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/body rectrices.first": {
+    "bend": [
+      {
+        "by": "clock",
+        "swing": -0.06981,
+        "period": 3.1,
+        "phase": 0
+      },
+      {
+        "by": "speed",
+        "keys": [
+          [
+            0,
+            0
+          ],
+          [
+            8,
+            0.24435
+          ]
+        ]
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/body rectrices.last": {
+    "bend": [
+      {
+        "by": "clock",
+        "swing": -0.06981,
+        "period": 3.1,
+        "phase": 0
+      },
+      {
+        "by": "speed",
+        "keys": [
+          [
+            0,
+            0
+          ],
+          [
+            8,
+            -0.24435
+          ]
+        ]
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  }
+}

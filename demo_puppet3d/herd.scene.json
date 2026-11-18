@@ -3,6 +3,7 @@
     "defs": "demo_puppet3d",
     "loader": {
       "assets": {
+        "hairs": { "type": "json", "url": "/games/demo_puppet3d/assets/hairs/herd.hairs.json", "preload": true },
         "demo_puppet3d": { "type": "json", "url": "/games/demo_puppet3d/assets/demo_puppet3d.json", "preload": true },
         "horse_1Clips": { "type": "model", "url": "/games/demo_puppet3d/assets/awol/horse_1.clips.glb", "preload": true },
         "tiger_1Clips": { "type": "model", "url": "/games/demo_puppet3d/assets/awol/tiger_1.clips.glb", "preload": true },
@@ -22,9 +23,10 @@
       "kinds": ["beast"],
       "poolSize": 64,
       "fade": 0.3
-    }
+    },
+    "hair3d": { "hairs": "hairs", "mods": { "skins": ["crowd3d"], "behaviors": ["crowd3d"] } }
   },
-  "plugins": ["loader", "scenemanager", "crowd3d", "environment3d", "render3d", "stats"],
+  "plugins": ["loader", "scenemanager", "crowd3d", "hair3d", "environment3d", "render3d", "stats"],
   "seats": 1,
   "prefabs": {
     "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },

@@ -55,7 +55,6 @@ rider.layouts.rider = {
   drivers: [{ name: 'seat', weight: [{ by: 'clock', keys: [[0, 1]] }], cues: 'rider_rider_seat' }],
 }
 defs.rider = rider
-defs.player.stations = 6
 writeFileSync(new URL('./assets/cues/rider.rider.seat.cues.json', import.meta.url), JSON.stringify(cues, null, 2) + '\n')
 writeFileSync(file, JSON.stringify(defs, null, 2) + '\n')
 console.log('rider written,', Object.keys(cues).length, 'bones cued')

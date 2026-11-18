@@ -1,0 +1,9 @@
+{
+  "aloft": {
+    "gravity": 9.81,
+    "most": 1,
+    "steep": 0.6,
+    "slow": 4,
+    "ease": 0.35
+  }
+}

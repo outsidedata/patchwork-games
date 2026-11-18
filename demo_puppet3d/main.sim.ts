@@ -6,7 +6,13 @@
 // round by paddock's `pacer`, posed by cues alone, a walk and an idle written from clips by
 // `plugins/puppet3d/puppet3d.cues.py`, weighed by its speed; and at station 5 the horse ridden, one
 // body of two layouts: the horse, and the X Bot hung on its back (`body:spine 4`), seated by cues on
-// the horse's own senses, so it rides each stride the horse's solver stands. Each animal and the X Bot
+// the horse's own senses, so it rides each stride the horse's solver stands; and at station 6 the
+// red-tailed hawk, a pro-ng bird (`assets/hawk/`), going round by paddock's `flier`, on the ground at a
+// stand and in the air as it gathers speed, posed by cues alone (`hawk.cues.mjs` writes them): perched,
+// beating its wings, soaring, its long feathers on art bones of their own ruffling whatever the wing does,
+// and drawn in its own looks through supershader3d, which the game's `aviary` plugin dresses its skin in
+// (`plugins/aviary/aviary.plugin.ts`); the keeper can take its controls and fly it (`pilot`), banking
+// and tipping by what aviary's `aloft` solver reads of its flight. Each animal and the X Bot
 // play cue sheets of the library's over that (`assets/cues/`), each naming only its own bones: a tail's
 // wag, ears, a look round, a roar, grazing, a nod, a wave. Every number that never changes is its
 // definition in `assets/demo_puppet3d.json`, which the scene's `world.defs` names, and its sheet.
@@ -14,9 +20,9 @@ import type { Scene, Sim } from '#engine/engine.ts'
 import { scenemanager } from '#plugins/scenemanager/scenemanager.sim.ts'
 import { loader } from '#plugins/loader/loader.sim.ts'
 import { skydome3d } from '#plugins/skydome3d/skydome3d.sim.ts'
-import { keeper, pacer, strider } from './plugins/paddock/paddock.sim.ts'
+import { flier, keeper, pacer, strider } from './plugins/paddock/paddock.sim.ts'
 import file from './main.scene.json' with { type: 'json' }
 
-export const sim: Sim = { scenemanager, loader, skydome3d, player: keeper, horse: strider, tiger: strider, xbot: pacer, lion: strider, cheetah: strider, rider: strider }
+export const sim: Sim = { scenemanager, loader, skydome3d, player: keeper, horse: strider, tiger: strider, xbot: pacer, lion: strider, cheetah: strider, rider: strider, hawk: flier }
 
 export const scene = file as Scene
