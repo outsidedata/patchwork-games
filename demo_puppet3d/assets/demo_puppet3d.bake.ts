@@ -1,10 +1,13 @@
-// demo_puppet3d's bake, `yarn bake demo_puppet3d` (core's `scripts/bake.ts`):
-//   cues     each cue sheet of `SHEETS`, copied from the library's `cues/` into `cues/` beside this file,
-//            where the scenes' catalogues read it (`<sheet>.cues.json`, the entry `<sheet>`);
-//   wings    the pegasus's wings, built by `wings/wings.py` in Blender, packed by gltfpack into
-//            `wings/wings.glb`, with their rest skeleton `wings/wings.skeleton.json`;
-//   clips    each animal of `CLIPS`, posed by puppet3d's own code from its definition in main's scene and
-//            written with a `walk` and an `idle` into `awol/<animal>.clips.glb` by
+// demo_puppet3d's bake, `yarn bake demo_puppet3d` (core's `scripts/bake.ts`). Every number and name it
+// uses is `demo_puppet3d.bake.json`'s, beside this file:
+//   cues     each cue sheet of its `sheets`, copied from the library's `cues/` into `cues/` beside this
+//            file, where the scenes' catalogues read it (`<sheet>.cues.json`, the entry `<sheet>`);
+//   wings    the pegasus's wings, built in Blender by `wings/wings.py` from `wings/wings.json`, packed by
+//            gltfpack into `wings/wings.glb`, with their rest skeleton `wings/wings.skeleton.json`;
+//   clips    each animal of its `clips`, `{ kind, walk, stride, settle, idle }`: its kind in main's scene,
+//            posed by puppet3d's own code from its definition and written with a `walk` (at `walk` metres a
+//            second, a stride being `stride` coming round, after `settle` seconds) and an `idle` (`idle`
+//            seconds), at `rate` frames a second, into `awol/<animal>.clips.glb` by
 //            `plugins/puppet3d/puppet3d.clips.ts`, for the herd scene's crowd3d to bake and play.
 import fs from 'node:fs'
 import path from 'node:path'
@@ -14,33 +17,25 @@ import type { Tools } from '#scripts/bake.ts'
 const here = import.meta.dirname
 const root = path.join(here, '..', '..', '..')
 
-// The library's sheets the game plays.
-const SHEETS = ['wag', 'ears', 'look', 'roar', 'graze', 'nod', 'wave', 'flap']
-// Each animal's clips: its kind in main's scene, its walk's speed in metres a second, the sense whose
-// coming round is a stride, the seconds it walks before its stride is taken, and its idle's seconds.
-const CLIPS: Record<string, { kind: string; walk: number; stride: string; settle: number; idle: number }> = {
-  horse_1: { kind: 'horse', walk: 1.6, stride: 'stride', settle: 3, idle: 10 },
-  tiger_1: { kind: 'tiger', walk: 1.4, stride: 'stride', settle: 3, idle: 10 },
-  male_lion_1: { kind: 'lion', walk: 1.4, stride: 'stride', settle: 3, idle: 10 },
-  cheetah_1: { kind: 'cheetah', walk: 1.6, stride: 'stride', settle: 3, idle: 10 },
-}
-const RATE = 30
+type Bake = { sheets: string[]; rate: number; clips: Record<string, { kind: string; walk: number; stride: string; settle: number; idle: number }> }
 
 export default async ({ blender, pack, scratch, library }: Tools) => {
+  const bake = JSON.parse(fs.readFileSync(path.join(here, 'demo_puppet3d.bake.json'), 'utf8')) as Bake
+
   fs.mkdirSync(path.join(here, 'cues'), { recursive: true })
-  for (const s of SHEETS) {
+  for (const s of bake.sheets) {
     fs.copyFileSync(path.join(library, 'cues', `${s}.cues.json`), path.join(here, 'cues', `${s}.cues.json`))
     console.log('wrote', path.relative(root, path.join(here, 'cues', `${s}.cues.json`)))
   }
 
   const raw = scratch('wings.glb')
-  await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(here, 'wings', 'wings.py'), '--', raw, path.join(here, 'wings', 'wings.skeleton.json')])
+  await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(here, 'wings', 'wings.py'), '--', path.join(here, 'wings', 'wings.json'), raw, path.join(here, 'wings', 'wings.skeleton.json')])
   await pack(raw, path.join(here, 'wings', 'wings.glb'))
   console.log('wrote', path.relative(root, path.join(here, 'wings', 'wings.glb')))
 
-  for (const [animal, c] of Object.entries(CLIPS)) {
+  for (const [animal, c] of Object.entries(bake.clips)) {
     const out = path.join(here, 'awol', `${animal}.clips.glb`)
     execFileSync('node', ['--experimental-strip-types', path.join(root, 'plugins', 'puppet3d', 'puppet3d.clips.ts'), path.join(here, '..', 'main.scene.json'), c.kind, out,
-      `rate=${RATE}`, `walk=${c.walk},${c.stride},${c.settle}`, `idle=${c.idle}`], { stdio: 'inherit' })
+      `rate=${bake.rate}`, `walk=${c.walk},${c.stride},${c.settle}`, `idle=${c.idle}`], { stdio: 'inherit' })
   }
 }
