@@ -15,12 +15,12 @@
     <script type="module">
       // The demo: index.html with three's lil-gui at the top right and a readout at the bottom left.
       //
-      // The grass folder sets every number and colour of this page's own copy of `world.grass3d`'s grass,
-      // and the wind folder its gusts, bend and trampling; each change hands grass3d a new object, which
-      // makes the grass again. The weather folder fades the weather3d row to any weather of the weathers
+      // The grass folder sets every number and colour of this page's own copy of the grasses file
+      // (`world.grass3d.grasses`), and the wind folder its gusts, bend and trampling; grass3d reads the
+      // file every frame, and a change makes the grass again. The weather folder fades the weather3d row to any weather of the weathers
       // file and sets the wind's way, on the truth in this tab, as its `weather` act does; the clock sets
       // the sky's hour. Nothing is written to disk and the truth keeps the file's: `copy JSON` copies
-      // `world.grass3d` as the panel has it, for `main.scene.json`.
+      // the grasses file as the panel has it, for `assets/grasses.json`.
       //
       // The view folder holds render3d's camera at a place of its own instead of behind the car: `drive`
       // gives it back, `feet`, `meadow`, `hill`, `wind` and `track` look at the grass from a metre, from
@@ -109,11 +109,12 @@
         const world = me.plugins.wire.scene.world
         // The panel waits for the weathers file, whose names its weather list offers.
         const table = world.weather3d && me.plugins.loader.get(world.weather3d.weathers)
-        if (!world.grass3d || (world.weather3d && !table)) return
+        // And for the grasses file, this page's own copy of which the panel changes in place.
+        const copy = world.grass3d && me.plugins.loader.get(world.grass3d.grasses)
+        if (!copy || (world.weather3d && !table)) return
         const folder = gui.addFolder('main')
         shown = { me, folder }
-        const copy = structuredClone(world.grass3d)
-        const set = () => { world.grass3d = structuredClone(copy) }
+        const set = () => {}
         for (const [name, g] of Object.entries(copy.grasses)) {
           const gf = folder.addFolder(`grass ${name}`)
           sliders(gf, g, GRASS, set)

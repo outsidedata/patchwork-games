@@ -2,7 +2,7 @@
 // grass3d's grass. The land is terrain3d's field `assets/meadow.json` (written by `assets/meadow.mjs`):
 // rolling hills, flattened round the start, of the cc0 Grass004 ground, rock on the steep slopes, and a
 // gravel track painted round the start, whose cover is 0, so no grass grows on it. The grass is grass3d's
-// (`world.grass3d`): it stands on the land, off the rock and the track, bends in weather3d's wind and
+// (its grasses file, `assets/grasses.json`, which `world.grass3d.grasses` names): it stands on the land, off the rock and the track, bends in weather3d's wind and
 // gusts, and bends away from the car and lies down in its tracks. The sky is skydome3d's, the weather
 // weather3d's (its weathers `assets/weathers.json`), the clouds clouds3d's.
 //
