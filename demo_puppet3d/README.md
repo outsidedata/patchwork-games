@@ -18,6 +18,28 @@ and run `node games/demo_puppet3d/rider.cues.mjs`.
 `played`, `hung` and `skinned` on the world layout's rest skeleton: drag and wheel to orbit, side,
 front, back and top views, a slider for each sense, and `R` to read the definition again.
 
+## Sheets from the library
+
+Over its walk, each animal plays cue sheets from the library's `cues/`, each naming only its own bones:
+the horse wags its tail and flicks its ears, the tiger looks round and wags, the lion wags and roars
+every ten seconds, the cheetah grazes when it stands and flicks its ears. The X Bot nods, and waves when
+it stands. `yarn bake demo_puppet3d` (`assets/demo_puppet3d.bake.ts`) copies the sheets into
+`assets/cues/`; the walk and upright cues each animal's solvers play are its own sheets there too.
+
+## The pegasus
+
+Station 6 is the pegasus: the horse's definition with a second layout, `wings`, hung `on` the horse's
+`body:spine 5`. The wings are their own glb on their own six bones (`assets/wings/`, built by
+`wings/wings.py` in the bake), beating by the library's `flap` sheet on the clock while the horse walks
+under its solver. The same wings hang on any body by one more layout in its definition.
+
+## The herd
+
+`dev.html?scene=herd` is the AWOL animals as a crowd3d crowd, some walking up and down their lines and
+some standing, drawn from `assets/awol/<animal>.clips.glb`: each animal posed by puppet3d and written
+with a `walk` and an `idle` by `plugins/puppet3d/puppet3d.clips.ts`, which the bake runs. Every body is
+on the horse's skeleton, so crowd3d plays the horse's clips on all four.
+
 ## An animal's files
 
 Each animal is three files in `assets/awol/`:

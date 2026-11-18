@@ -15,7 +15,8 @@
     <script type="module">
       // The testbed: index.html, the manager truth and the scene it enters, in this tab, one seat on it
       // over a loopback, stepped on the page's clock. The truths are kept on `window.__scenes` and the page
-      // on `window.__page`. The readout shows the step, the body at the station the camera is on,
+      // on `window.__page`. `?scene=<scene>` enters that scene, in this page's own copy of the manager's
+      // file, before the boot. The readout shows the step, the body at the station the camera is on,
       // whether it stands upright, its speed, and the last five errors the page threw or wrote.
       // The keys are the seat's (`player.client.ts`).
       import { boot } from '#engine/engine.ts'
@@ -35,6 +36,9 @@
       const written = console.error.bind(console)
       console.error = (...a) => { caught(a.map(x => x?.message ?? x).join(' ')); written(...a) }
 
+      // `?scene=<scene>` enters that scene instead of the entry (`herd`, the AWOL animals in crowd3d).
+      const enter = new URLSearchParams(location.search).get('scene')
+      if (enter) file.prefabs.scenemanager.entry = enter
       const dt = file.prefabs.engine.dt
       const truth = boot(file, sim)
       window.__scenes = await load(truth, import.meta.url)

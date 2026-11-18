@@ -1,0 +1,119 @@
+{
+  "layout": "wings",
+  "bones": [
+    {
+      "name": "left wing 1",
+      "parent": null,
+      "head": [
+        0.08,
+        0.0,
+        0.0
+      ],
+      "tail": [
+        0.55,
+        0.12,
+        -0.05
+      ],
+      "across": [
+        0.0,
+        0.0,
+        -1.0
+      ]
+    },
+    {
+      "name": "left wing 2",
+      "parent": "left wing 1",
+      "head": [
+        0.55,
+        0.12,
+        -0.05
+      ],
+      "tail": [
+        1.05,
+        0.08,
+        -0.18
+      ],
+      "across": [
+        0.0,
+        0.0,
+        -1.0
+      ]
+    },
+    {
+      "name": "left wing 3",
+      "parent": "left wing 2",
+      "head": [
+        1.05,
+        0.08,
+        -0.18
+      ],
+      "tail": [
+        1.6,
+        0.0,
+        -0.4
+      ],
+      "across": [
+        0.0,
+        0.0,
+        -1.0
+      ]
+    },
+    {
+      "name": "right wing 1",
+      "parent": null,
+      "head": [
+        -0.08,
+        0.0,
+        0.0
+      ],
+      "tail": [
+        -0.55,
+        0.12,
+        -0.05
+      ],
+      "across": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "name": "right wing 2",
+      "parent": "right wing 1",
+      "head": [
+        -0.55,
+        0.12,
+        -0.05
+      ],
+      "tail": [
+        -1.05,
+        0.08,
+        -0.18
+      ],
+      "across": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "name": "right wing 3",
+      "parent": "right wing 2",
+      "head": [
+        -1.05,
+        0.08,
+        -0.18
+      ],
+      "tail": [
+        -1.6,
+        0.0,
+        -0.4
+      ],
+      "across": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  ]
+}

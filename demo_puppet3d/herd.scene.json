@@ -1,0 +1,68 @@
+{
+  "world": {
+    "defs": "demo_puppet3d",
+    "loader": {
+      "assets": {
+        "demo_puppet3d": { "type": "json", "url": "/games/demo_puppet3d/assets/demo_puppet3d.json", "preload": true },
+        "horse_1Clips": { "type": "model", "url": "/games/demo_puppet3d/assets/awol/horse_1.clips.glb", "preload": true },
+        "tiger_1Clips": { "type": "model", "url": "/games/demo_puppet3d/assets/awol/tiger_1.clips.glb", "preload": true },
+        "male_lion_1Clips": { "type": "model", "url": "/games/demo_puppet3d/assets/awol/male_lion_1.clips.glb", "preload": true },
+        "cheetah_1Clips": { "type": "model", "url": "/games/demo_puppet3d/assets/awol/cheetah_1.clips.glb", "preload": true }
+      }
+    },
+    "crowd3d": {
+      "bodies": {
+        "horse": "horse_1Clips",
+        "tiger": "tiger_1Clips",
+        "lion": "male_lion_1Clips",
+        "cheetah": "cheetah_1Clips"
+      },
+      "clips": ["walk", "idle"],
+      "rate": 30,
+      "kinds": ["beast"],
+      "poolSize": 64,
+      "fade": 0.3
+    }
+  },
+  "plugins": ["loader", "scenemanager", "crowd3d", "environment3d", "render3d", "stats"],
+  "seats": 1,
+  "prefabs": {
+    "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
+    "scenemanager": { "out": {} },
+    "loader": {},
+    "render3d": {
+      "camera": { "fov": 50, "near": 0.1, "far": 400, "at": [14, 5, -16], "look": [0, 0.8, 0] },
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "background": "#a9c4e0"
+    },
+    "environment3d": {
+      "sun": {
+        "at": [30, 50, 20],
+        "color": "#fff1dc",
+        "power": 2.6,
+        "shadow": { "map": 2048, "half": 30, "near": 1, "far": 200, "distance": 90, "bias": -0.0004, "normalBias": 0.03 }
+      },
+      "sky": { "color": "#cfe0ff", "ground": "#6f6253", "power": 1.1 }
+    },
+    "drover": { "time": 0 },
+    "meadow": {},
+    "beast": { "pos": [0, 0, 0], "to": [0, 0, 0], "yaw": 0, "speed": 0, "body": "horse", "clip": "idle", "since": 0 }
+  },
+  "actors": [
+    { "is": "scenemanager" },
+    { "is": "loader" },
+    { "is": "drover" },
+    { "is": "meadow" },
+    { "is": "beast", "body": "horse", "clip": "walk", "speed": 1.6, "pos": [-6, 0, -12], "to": [-6, 0, 12], "yaw": 0 },
+    { "is": "beast", "body": "horse", "clip": "walk", "speed": 1.6, "pos": [-3, 0, 10], "to": [-3, 0, -10], "yaw": 3.141592653589793 },
+    { "is": "beast", "body": "tiger", "clip": "walk", "speed": 1.6, "pos": [0, 0, -9], "to": [0, 0, 9], "yaw": 0 },
+    { "is": "beast", "body": "lion", "clip": "walk", "speed": 1.6, "pos": [3, 0, 8], "to": [3, 0, -8], "yaw": 3.141592653589793 },
+    { "is": "beast", "body": "cheetah", "clip": "walk", "speed": 1.6, "pos": [6, 0, -11], "to": [6, 0, 11], "yaw": 0 },
+    { "is": "beast", "body": "horse", "clip": "idle", "pos": [-8, 0, 3], "to": [-8, 0, 3], "yaw": 1.2 },
+    { "is": "beast", "body": "lion", "clip": "idle", "pos": [8, 0, -2], "to": [8, 0, -2], "yaw": -2 },
+    { "is": "beast", "body": "cheetah", "clip": "idle", "pos": [9, 0, 4], "to": [9, 0, 4], "yaw": -1 },
+    { "is": "beast", "body": "tiger", "clip": "idle", "pos": [-9, 0, -5], "to": [-9, 0, -5], "yaw": 0.6 }
+  ]
+}

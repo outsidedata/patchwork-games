@@ -1,5 +1,6 @@
 // Writes the `rider` kind into demo_puppet3d.json: the horse's definition, and the X Bot hung on the
-// horse's back as a second layout, posed by cues on the horse's own senses. The pose below is where
+// horse's back as a second layout, posed by its seat, a cue sheet on the horse's own senses,
+// `assets/cues/rider.rider.seat.cues.json` (the catalogue entry `rider_rider_seat`). The pose below is where
 // the rider's angles are tuned: change it, run `node games/demo_puppet3d/rider.cues.mjs`, and press R
 // on `pose.html` to see it from every side.
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -51,9 +52,9 @@ rider.layouts.rider = {
   turn: [0, 0, 0],
   skeleton: 'xbotSkeleton',
   skin: 'xbotSkin',
-  drivers: [{ name: 'seat', weight: [{ by: 'clock', keys: [[0, 1]] }], cues }],
+  drivers: [{ name: 'seat', weight: [{ by: 'clock', keys: [[0, 1]] }], cues: 'rider_rider_seat' }],
 }
 defs.rider = rider
-defs.player.stations = 6
+writeFileSync(new URL('./assets/cues/rider.rider.seat.cues.json', import.meta.url), JSON.stringify(cues, null, 2) + '\n')
 writeFileSync(file, JSON.stringify(defs, null, 2) + '\n')
 console.log('rider written,', Object.keys(cues).length, 'bones cued')

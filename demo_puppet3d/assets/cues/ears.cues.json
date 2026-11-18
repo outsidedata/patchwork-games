@@ -1,0 +1,58 @@
+{
+  "left ear": {
+    "bend": [
+      {
+        "by": "clock",
+        "swing": 0.2,
+        "period": 2.3
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "swing": 0.3,
+        "period": 3.1,
+        "phase": 0.2
+      }
+    ]
+  },
+  "right ear": {
+    "bend": [
+      {
+        "by": "clock",
+        "swing": 0.2,
+        "period": 2.9,
+        "phase": 0.4
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "swing": -0.3,
+        "period": 3.7
+      }
+    ]
+  }
+}

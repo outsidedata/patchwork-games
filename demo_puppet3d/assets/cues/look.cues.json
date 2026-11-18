@@ -1,0 +1,57 @@
+{
+  "neck": {
+    "bend": [
+      {
+        "by": "clock",
+        "swing": 0.1,
+        "period": 4.5
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "swing": 0.45,
+        "period": 6
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "head": {
+    "bend": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "swing": 0.3,
+        "period": 6,
+        "phase": 0.08
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "swing": 0.1,
+        "period": 9
+      }
+    ]
+  }
+}

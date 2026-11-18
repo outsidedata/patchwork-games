@@ -1,6 +1,6 @@
 // The posing page for a body of hung layouts: the kind `?kind=` names (`rider` when it names none) from
 // `assets/demo_puppet3d.json`, its world layout standing at its rest, each other layout posed by its cues
-// driver through puppet3d's own `played`, hung by puppet3d's own `hung` and skinned by its `skinned`, so
+// driver's cue sheet through puppet3d's own `played`, hung by puppet3d's own `hung` and skinned by its `skinned`, so
 // what it shows is what the game draws. The camera orbits freely (drag, wheel), with buttons for the
 // side, front, back and top. The sliders set the senses the cues read; `R` reads the definition again.
 // A solver driver's layout is not stood here: the world layout shows its rest skeleton.
@@ -11,7 +11,7 @@ import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js'
 import { cued, hung, played, posed, skinned, type Bone, type BoneCues, type Cue, type Skeleton, type Skinned, type V3 } from '../../plugins/puppet3d/puppet3d.plugin.ts'
 import file from './main.scene.json' with { type: 'json' }
 
-type Layout = { layout: string; on: string; along?: number; offset?: V3; turn?: V3; skeleton: string; skin: string; drivers: ({ name: string; weight: Cue[]; cues?: BoneCues; solver?: string })[] }
+type Layout = { layout: string; on: string; along?: number; offset?: V3; turn?: V3; skeleton: string; skin: string; drivers: ({ name: string; weight: Cue[]; cues?: string; solver?: string })[] }
 
 const kind = new URLSearchParams(location.search).get('kind') ?? 'rider'
 const assets = file.world.loader.assets as Record<string, { url: string }>
@@ -48,6 +48,7 @@ const senses: Record<string, number> = { clock: 0, speed: 0, stride: 0, upright:
 const ranges: Record<string, [number, number]> = { clock: [0, 20], speed: [0, 12], stride: [0, 1], upright: [0, 1], upstride: [0, 1] }
 
 let layouts: { name: string; L: Layout; rest: Bone[]; body: Skinned }[] = []
+let sheets: Record<string, BoneCues> = {}
 const m = new THREE.Matrix4()
 const readout = document.getElementById('readout')!
 
@@ -56,6 +57,8 @@ async function load() {
   layouts = []
   const defs = await json(url(file.world.defs))
   const d = defs[kind] as { layouts: Record<string, Layout> }
+  sheets = {}
+  for (const L of Object.values(d.layouts)) for (const x of L.drivers) if (x.cues) sheets[x.cues] ??= await json(url(x.cues))
   for (const [name, L] of Object.entries(d.layouts)) {
     const sk = await json(url(L.skeleton)) as Skeleton
     const glb = await loader.loadAsync(url(L.skin))
@@ -71,7 +74,7 @@ function draw() {
     let own = rest
     if (cues.length) {
       const x = cues[0]
-      own = played(`${kind}'s ${x.name}`, rest, x.cues!, senses)
+      own = played(`${kind}'s ${x.name}`, rest, sheets[x.cues!], senses)
       readout.textContent = `${kind}: ${name} posed by ${x.name} (weight ${cued('weight', x.weight, senses).toFixed(2)})`
     }
     if (L.on !== 'world') {
