@@ -695,7 +695,14 @@
       "clock": "clock",
       "speed": "velocity",
       "bank": "aloftBank",
-      "climb": "aloftClimb"
+      "climb": "aloftClimb",
+      "air": "aloftAir",
+      "beat": "aloftBeat",
+      "flap": "aloftFlap",
+      "glide": "aloftGlide",
+      "effort": "aloftEffort",
+      "brake": "aloftBrake",
+      "stoop": "aloftStoop"
     },
     "speeds": [
       0,
@@ -707,6 +714,7 @@
       "height": 9,
       "full": 7,
       "climb": 3.5,
+      "lift": 6,
       "floor": 1.5,
       "ceiling": 80
     },
@@ -733,18 +741,37 @@
             ]
           },
           {
+            "name": "spread",
+            "cues": "hawk_spread",
+            "weight": [
+              {
+                "by": "air",
+                "keys": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    0.3,
+                    1
+                  ]
+                ]
+              }
+            ]
+          },
+          {
             "name": "fly",
             "cues": "hawk_fly",
             "weight": [
               {
-                "by": "speed",
+                "by": "air",
                 "keys": [
                   [
-                    0.3,
+                    0.15,
                     0
                   ],
                   [
-                    3,
+                    1,
                     1
                   ]
                 ]
@@ -754,18 +781,75 @@
             "gait": "hawkSheet"
           },
           {
-            "name": "soar",
-            "cues": "hawk_soar",
+            "name": "power",
+            "cues": "hawk_power",
             "weight": [
               {
-                "by": "speed",
+                "by": "effort",
                 "keys": [
                   [
-                    11,
+                    0,
                     0
                   ],
                   [
-                    13.5,
+                    1,
+                    1
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "name": "glide",
+            "cues": "hawk_glide",
+            "weight": [
+              {
+                "by": "glide",
+                "keys": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    1,
+                    1
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "name": "tuck",
+            "cues": "hawk_tuck",
+            "weight": [
+              {
+                "by": "stoop",
+                "keys": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    1,
+                    1
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "name": "flare",
+            "cues": "hawk_flare",
+            "weight": [
+              {
+                "by": "brake",
+                "keys": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    1,
                     1
                   ]
                 ]
@@ -792,23 +876,15 @@
             "cues": "hawk_beat",
             "weight": [
               {
-                "by": "speed",
+                "by": "flap",
                 "keys": [
                   [
-                    0.3,
+                    0,
                     0
                   ],
                   [
-                    3,
+                    1,
                     1
-                  ],
-                  [
-                    11,
-                    1
-                  ],
-                  [
-                    13.5,
-                    0
                   ]
                 ]
               }

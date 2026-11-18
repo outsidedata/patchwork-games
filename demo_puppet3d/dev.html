@@ -18,7 +18,9 @@
       // on `window.__page`. `?scene=<scene>` enters that scene, in this page's own copy of the manager's
       // file, before the boot. The readout shows the step, the body at the station the camera is on,
       // whether it stands upright, its speed, and the last five errors the page threw or wrote.
-      // The keys are the seat's (`player.client.ts`). `window.__run(frames)` plays frames at once (below).
+      // The keys are the seat's (`player.client.ts`). `window.__run(frames)` plays frames at once (below), and
+      // `window.__hold(true)` stops the page's own clock, so only `__run` moves the game on, a frame at a time
+      // when asked for one; `__hold(false)` starts it again.
       import { boot } from '#engine/engine.ts'
       import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
       import { loopback } from '#addons/loopback/loopback.addon.ts'
@@ -59,7 +61,8 @@
       // `__run(frames)` plays that many frames at once, a step each, the page's clock moved a step on for
       // each, whatever the tab's own frames are doing: a tab behind another window is given almost none,
       // so a console reads the animals and their hair after a known number of frames with this.
-      let running = false
+      let running = false, held = false
+      window.__hold = on => { held = on; last = performance.now(); owed = 0 }
       window.__run = async frames => {
         const real = performance.now
         let t = real.call(performance)
@@ -83,7 +86,7 @@
 
       let last = performance.now(), owed = 0
       const loop = async now => {
-        if (running) { requestAnimationFrame(loop); return }
+        if (running || held) { requestAnimationFrame(loop); return }
         owed += Math.min((now - last) / 1000, 0.25)
         last = now
         try {

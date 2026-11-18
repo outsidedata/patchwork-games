@@ -8,11 +8,13 @@
 // body of two layouts: the horse, and the X Bot hung on its back (`body:spine 4`), seated by cues on
 // the horse's own senses, so it rides each stride the horse's solver stands; and at station 6 the
 // red-tailed hawk, a pro-ng bird (`assets/hawk/`), going round by paddock's `flier`, on the ground at a
-// stand and in the air as it gathers speed, posed by cues alone (`hawk.cues.mjs` writes them): perched,
-// beating its wings, soaring, its long feathers on art bones of their own ruffling whatever the wing does,
-// and drawn in its own looks through supershader3d, which the game's `aviary` plugin dresses its skin in
-// (`plugins/aviary/aviary.plugin.ts`); the keeper can take its controls and fly it (`pilot`), banking
-// and tipping by what aviary's `aloft` solver reads of its flight. Each animal and the X Bot
+// stand and in the air as it gathers speed, posed by cue sheets (`hawk.cues.mjs` writes them) on what
+// aviary's `aloft` solver reads of its flight (`plugins/aviary/aviary.puppet3d.ts`): perched, beating its
+// wings and gliding by turns, beating harder as it climbs, its wings pulled in for a dive, rearing back to
+// land, banking and tipping the way it goes, its long feathers on art bones of their own ruffling whatever
+// the wing does, and drawn in its own looks through supershader3d, which the game's `aviary` plugin dresses
+// its skin in (`plugins/aviary/aviary.plugin.ts`); the keeper can take its controls and fly it (`pilot`).
+// Each animal and the X Bot
 // play cue sheets of the library's over that (`assets/cues/`), each naming only its own bones: a tail's
 // wag, ears, a look round, a roar, grazing, a nod, a wave. Every number that never changes is its
 // definition in `assets/demo_puppet3d.json`, which the scene's `world.defs` names, and its sheet.

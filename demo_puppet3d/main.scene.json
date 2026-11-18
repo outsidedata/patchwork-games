@@ -45,7 +45,11 @@
         "red_tailed_hawk_normal": { "type": "texture", "url": "/games/demo_puppet3d/assets/hawk/looks/red_tailed_hawk_normal.webp", "space": "linear", "wrap": "repeat", "preload": true },
         "hawk_perch": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.perch.cues.json", "preload": true },
         "hawk_fly": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.fly.cues.json", "preload": true },
-        "hawk_soar": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.soar.cues.json", "preload": true },
+        "hawk_spread": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.spread.cues.json", "preload": true },
+        "hawk_power": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.power.cues.json", "preload": true },
+        "hawk_glide": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.glide.cues.json", "preload": true },
+        "hawk_tuck": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.tuck.cues.json", "preload": true },
+        "hawk_flare": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.flare.cues.json", "preload": true },
         "hawk_feathers": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.feathers.cues.json", "preload": true },
         "hawk_beat": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.beat.cues.json", "preload": true },
         "hawk_look": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/hawk.look.cues.json", "preload": true },
@@ -121,7 +125,7 @@
     "lion": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "steer": 0, "piloted": false, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
     "cheetah": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "steer": 0, "piloted": false, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
     "rider": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "steer": 0, "piloted": false, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
-    "hawk": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "alt": 0, "steer": 0, "climb": 0, "piloted": false, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } }
+    "hawk": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "alt": 0, "rise": 0, "steer": 0, "climb": 0, "piloted": false, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } }
   },
   "actors": [
     { "is": "scenemanager" },

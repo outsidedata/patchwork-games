@@ -23,12 +23,15 @@
 //
 // `flier`, the rule of a bird: the speed `speeds` gives the keeper's `gait`, and in the air over the land.
 // Held by none, by how fast it goes: on the ground at a stand, `flight.height` metres up at `flight.full`
-// metres a second and faster, rising and sinking no faster than `flight.climb` metres a second. Held, it
+// metres a second and faster, rising and sinking no faster than `flight.climb` metres a second; slowed to a
+// pace it flies lower at, it comes down to that height first and goes no slower than the height it is at
+// needs, so it lands along a slope and stops as it touches the ground. Held, it
 // rises and sinks by its `climb` (-1 to 1) at `flight.climb`, between `flight.floor` metres over the land
 // and `flight.ceiling`, and both that and its turning are less the slower than `flight.full` it goes, so
-// at a stand it comes down. Its `vel` carries its rise. Its row has `alt`, metres over the land, and
-// `climb` besides. Its definition: `speeds`, `flight { height, full, climb, floor, ceiling }`. Its act
-// besides: `climb(v)`.
+// at a stand it comes down. Its rise gathers and is shed at `flight.lift` metres a second squared, and it
+// slows in time to come to rest at each of those heights. Its `vel` carries its rise. Its row has `alt`,
+// metres over the land, `rise`, metres a second, and `climb` besides. Its definition: `speeds`,
+// `flight { height, full, climb, lift, floor, ceiling }`. Its act besides: `climb(v)`.
 //
 // `keeper`, the rule of the seat's `player` row, which is no body: `station`, the station the camera is
 // on; `gait`; `orbit` and `swing`, the camera turned round what it looks at; `aloft`; `leaps` and
@@ -141,16 +144,32 @@ export const flier: Kind = {
   before: stand,
   tick(me, dt, w) {
     const d = def(w, me.kind), f = d.flight, keeper = keeperOf(me, w), was = me.data.alt
-    const flown = go(me, dt, w, d.speeds[Math.min(keeper.data.gait, d.speeds.length - 1)], f.full)
+    const pace = d.speeds[Math.min(keeper.data.gait, d.speeds.length - 1)]
+    // held by none it goes no slower than its height needs, so it comes down along a slope and is at a stand
+    // as it touches the ground
+    const flown = go(me, dt, w, holderOf(w, me) ? pace : Math.max(pace, f.full * Math.min(1, was / f.height)), f.full)
     const share = clamp(me.data.speed / f.full, 0, 1)
+    // the fastest it may rise or sink `gap` metres short of a height and still come to rest there, shedding
+    // `flight.lift` a second from the step after this one
+    const shed = f.lift * dt
+    const stop = (gap: number) => Math.min(Math.sqrt(shed * shed + 2 * f.lift * gap) - shed, gap / dt)
+    // the height it is coming to rest at, when it is: reached to within what a step's sum loses, it is there
+    let want: number, rest = 0
     if (flown) {
-      // sinking the slower it goes, never over its ceiling, and never under the floor it can reach this step
-      const asked = Math.min(was + (me.data.climb * share - (1 - share)) * f.climb * dt, f.ceiling)
-      me.data.alt = Math.max(0, asked, Math.min(f.floor * share, was + f.climb * dt))
+      // sinking the slower it goes, coming to rest under its ceiling and over its floor
+      const floor = f.floor * share
+      want = Math.min((me.data.climb * share - (1 - share)) * f.climb, stop(Math.max(f.ceiling - was, 0)))
+      want = Math.max(want, was < floor ? Math.min(f.climb, stop(floor - was)) : -stop(was - floor))
     } else {
       me.data.climb = 0
-      me.data.alt = was + clamp(f.height * share - was, -f.climb * dt, f.climb * dt)
+      rest = f.height * Math.min(share, clamp(pace / f.full, 0, 1))
+      const gap = rest - was
+      want = Math.sign(gap) * Math.min(f.climb, stop(Math.abs(gap)))
     }
+    me.data.rise += clamp(want - me.data.rise, -f.lift * dt, f.lift * dt)
+    const alt = Math.max(0, was + me.data.rise * dt)
+    me.data.alt = Math.abs(alt - rest) < 1e-9 ? rest : alt
+    if (me.data.alt === 0 && me.data.rise < 0) me.data.rise = 0
     me.data.pos = [me.data.pos[0], me.data.pos[1] + me.data.alt, me.data.pos[2]]
     me.data.vel = [me.data.vel[0], (me.data.alt - was) / dt, me.data.vel[2]]
   },

@@ -1,0 +1,398 @@
+{
+  "red-tailed hawk/body body": {
+    "bend": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            1.01229
+          ]
+        ]
+      },
+      {
+        "by": "climb",
+        "keys": [
+          [
+            -1.6,
+            1.6
+          ],
+          [
+            1.6,
+            -1.6
+          ]
+        ]
+      }
+    ],
+    "swing": [
+      {
+        "by": "bank",
+        "keys": [
+          [
+            -1.6,
+            1.6
+          ],
+          [
+            1.6,
+            -1.6
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/body head": {
+    "bend": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            -0.24435
+          ]
+        ]
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/body tail": {
+    "bend": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            -0.06981
+          ]
+        ]
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "bank",
+        "keys": [
+          [
+            -1.6,
+            -0.64
+          ],
+          [
+            1.6,
+            0.64
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/left wing shoulder": {
+    "bend": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0.15708
+          ]
+        ]
+      },
+      {
+        "by": "clock",
+        "swing": 0.03491,
+        "period": 3.7,
+        "phase": 0
+      },
+      {
+        "by": "clock",
+        "swing": 0.02618,
+        "period": 4.3,
+        "phase": 0
+      }
+    ],
+    "swing": [
+      {
+        "by": "speed",
+        "keys": [
+          [
+            9,
+            0
+          ],
+          [
+            14,
+            -0.17453
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "swing": 0.02094,
+        "period": 2.9,
+        "phase": 0.2
+      }
+    ]
+  },
+  "red-tailed hawk/right wing shoulder": {
+    "bend": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0.15708
+          ]
+        ]
+      },
+      {
+        "by": "clock",
+        "swing": 0.03491,
+        "period": 3.7,
+        "phase": 0
+      },
+      {
+        "by": "clock",
+        "swing": -0.02618,
+        "period": 4.3,
+        "phase": 0
+      }
+    ],
+    "swing": [
+      {
+        "by": "speed",
+        "keys": [
+          [
+            9,
+            0
+          ],
+          [
+            14,
+            0.17453
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "swing": -0.02094,
+        "period": 2.9,
+        "phase": 0.2
+      }
+    ]
+  },
+  "red-tailed hawk/left wing elbow": {
+    "bend": [
+      {
+        "by": "speed",
+        "keys": [
+          [
+            9,
+            0
+          ],
+          [
+            14,
+            0.20944
+          ]
+        ]
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/right wing elbow": {
+    "bend": [
+      {
+        "by": "speed",
+        "keys": [
+          [
+            9,
+            0
+          ],
+          [
+            14,
+            0.20944
+          ]
+        ]
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/left wing wrist": {
+    "bend": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0.06981
+          ]
+        ]
+      },
+      {
+        "by": "speed",
+        "keys": [
+          [
+            9,
+            0
+          ],
+          [
+            14,
+            0.34907
+          ]
+        ]
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  "red-tailed hawk/right wing wrist": {
+    "bend": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0.06981
+          ]
+        ]
+      },
+      {
+        "by": "speed",
+        "keys": [
+          [
+            9,
+            0
+          ],
+          [
+            14,
+            0.34907
+          ]
+        ]
+      }
+    ],
+    "swing": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "twist": [
+      {
+        "by": "clock",
+        "keys": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  }
+}

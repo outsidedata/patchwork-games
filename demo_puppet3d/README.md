@@ -22,8 +22,10 @@ front, back and top views, a slider for each sense, and `R` to read the definiti
 ## The hawk
 
 Station 6 is the red-tailed hawk, a bird of the library's pro-ng kit (`pro-ng/scenes/animals/red_tailed_hawk.json`),
-posed by cues alone, no solver. Pace 1 perches it on the ground with its wings folded; 2 and 3 fly it,
-beating its wings; 4 and 5 soar it. Its long feathers hang on art bones of their own (each wing's
+posed by cue sheets that read its own flight. Pace 1 perches it on the ground with its wings folded; 2 flies
+it beating its wings with short glides between; 3 glides it longer; 4 and 5 soar it, a few beats now and
+then. It beats harder as it climbs and takes off, pulls its wings in when it dives, and rears back with its
+legs down and its tail spread as it lands. Its long feathers hang on art bones of their own (each wing's
 `primaries.first`, `primaries.last`, `secondaries` and `alula`, the tail's `rectrices.first` and
 `rectrices.last`), which sheets of their own turn, so the feathers ruffle and the tail fans whatever the
 wing does.
@@ -31,17 +33,23 @@ wing does.
 - The bake's `birds` (`assets/demo_puppet3d.bake.json`) builds it with the library's `pro-ng/build.mjs`
   and writes `assets/hawk/`: its glb, its looks file and their pictures for supershader3d, and its rest
   skeleton for puppet3d.
-- `hawk.cues.mjs` writes the `hawk` definition and its six cue sheets (`assets/cues/hawk.*.cues.json`);
-  tune the poses there and run `node games/demo_puppet3d/hawk.cues.mjs`.
+- `hawk.cues.mjs` writes the `hawk` definition, its sheet (`assets/hawk/hawk.json`) and its ten cue sheets
+  (`assets/cues/hawk.*.cues.json`); tune the poses, the wing's stroke and the solver's numbers there and run
+  `node games/demo_puppet3d/hawk.cues.mjs`. Its header says each sheet and when it plays.
 - `plugins/aviary/aviary.plugin.ts` dresses its skin in supershader3d's materials before puppet3d builds
   its body, so it is drawn in its own looks.
 - paddock's `flier` takes it round its circle, on the ground at a stand and in the air as it gathers
-  speed. With `p` the seat's `keeper` takes hold of it (core's `take`) and it is flown by the keys, the
-  camera behind it; `p` again lets go, and its circle goes on from where it is.
+  speed, its rise gathered and shed so it comes to rest at its height, and brought to a stand it comes
+  down along a slope and stops as it touches the ground. With `p` the seat's `keeper` takes hold of it
+  (core's `take`) and it is flown by the keys, the camera behind it; `p` again lets go, and its circle goes
+  on from where it is.
 - `plugins/aviary/aviary.puppet3d.ts` delivers puppet3d the `aloft` solver, the driver of its flying
-  sheet: it stands no bone, and gives off how far the bird leans into its turn and how steeply it climbs,
-  read off the row's own motion, which the sheet's cues roll and tip the body by. Its numbers are
-  `assets/hawk/hawk.json`.
+  sheet. It stands no bone. It reads the row's own motion and gives off what the sheets and their weights
+  read: where the wings are in their beat, how much they are beating or held in a glide, how hard the bird
+  works, brakes and dives, how far it leans into its turn and how steeply it climbs. It lifts the body
+  with each stroke down. Its numbers are `assets/hawk/hawk.json`.
+- `dev.html`'s `__hold(true)` stops the page's clock and `__run(frames)` plays that many frames, so a
+  wing beat can be looked at a frame at a time.
 
 ## Sheets from the library
 
