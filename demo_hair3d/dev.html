@@ -1,0 +1,191 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demo_hair3d dev</title>
+    <style>
+      body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      canvas { grid-area: 1 / 1 }
+      .lil-gui.root { max-height: 100vh; overflow-y: auto }
+      #keys { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px }
+    </style>
+  </head>
+  <body>
+    <div id="keys">W A S D  walk     Shift  run     Space  jump
+right drag  look     wheel  zoom
+gamepad: left stick walk, right stick look, RT or L3 run, A jump, d-pad up and down zoom</div>
+    <script type="module">
+      // The demo of hair3d: index.html, the manager truth and the scenes its row names all in this tab,
+      // one seat on them over a loopback, stepped on the page's clock, and a panel holding every number
+      // of the hairs file `world.hair3d.hairs` names: the wind and its gusts, and each hair's own. `?scene=<scene>` enters that
+      // scene. The truths are kept on `window.__scenes`, the page on `window.__page` and the seat's client
+      // on `window.__client` for the profilers (benchmarking-a-game) and the console. The frame rate is
+      // three's stats panel, the stats plugin, at the top left.
+      //
+      // The panel changes the page's own copy of the hairs file in place, which hair3d reads every frame:
+      // a number a hair is drawn or moved with changes at once, and one its locks are rooted and built
+      // from (where it grows, its density, strands, length, links and segments) roots and builds them
+      // again. Nothing is written to disk: `copy hairs JSON` copies the panel's numbers, for the hairs
+      // file. An error in a step or a frame is shown over the page and kept on `window.__error`.
+      import { boot } from '#engine/engine.ts'
+      import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
+      import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import GUI from 'lil-gui'
+      import { sim } from './demo_hair3d.sim.ts'
+      import file from './demo_hair3d.scene.json'
+
+      const params = new URLSearchParams(location.search)
+      file.prefabs.scenemanager.entry = params.get('scene') ?? file.prefabs.scenemanager.entry
+
+      const dt = file.prefabs.engine.dt
+      const truth = boot(file, sim)
+      window.__scenes = await load(truth, import.meta.url)
+      let client
+      const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+        client = me
+        window.__client = me
+        for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
+          if (!surface) continue
+          const canvas = document.createElement('canvas')
+          canvas.width = scene.prefabs.engine.width
+          canvas.height = scene.prefabs.engine.height
+          document.body.appendChild(canvas)
+          surface.mount(canvas)
+        }
+        me.plugins.stats?.mount(document.body)
+      })
+      window.__page = page
+
+      // The panel. A press on it stops at it, a release does not, and the focus goes back to the page
+      // after a click, so the game's keys never go dead.
+      const gui = new GUI({ title: 'demo_hair3d dev' })
+      for (const type of ['keydown', 'keyup', 'click', 'mousedown', 'contextmenu', 'wheel'])
+        gui.domElement.addEventListener(type, e => e.stopPropagation())
+      gui.domElement.addEventListener('pointerup', () => requestAnimationFrame(() => {
+        const at = document.activeElement
+        if (gui.domElement.contains(at) && !(at.tagName === 'INPUT' && (at.type === 'text' || at.type === 'number'))) at.blur()
+      }))
+      addEventListener('change', e => { if (gui.domElement.contains(e.target)) e.target.blur() })
+
+      // Built once the hairs file has landed: the page's own copy of it.
+      let built = false
+      const build = hair => {
+        built = true
+        const wf = gui.addFolder('wind')
+        wf.add(hair.wind, 'toward', 0, 360, 1).name('toward, degrees')
+        wf.add(hair.wind, 'speed', 0, 20, 0.1).name('speed, m/s')
+        wf.add(hair.gust, 'scale', 0.2, 30, 0.1).name('gust size, m')
+        wf.add(hair.gust, 'strength', 0, 1, 0.01).name('gust strength')
+        wf.add(hair.gust, 'rate', 0, 10, 0.05).name('gust rate, rad/s')
+        wf.close()
+        for (const [name, h] of Object.entries(hair.hairs)) {
+          const f = gui.addFolder(`hair: ${name}`)
+          const grown = f.addFolder('grown (rebuilds)')
+          grown.add(h, 'density', 100, 60000, 100).name('locks a m²')
+          grown.add(h, 'strands', 1, 64, 1).name('strands a lock')
+          grown.add(h.length, 0, 0.005, 1.5, 0.005).name('length, m')
+          grown.add(h.length, 1, 0, 2, 0.01).name('length spread')
+          grown.add(h, 'links', 1, 16, 1).name('links')
+          grown.add(h, 'segments', 1, 32, 1).name('segments')
+          grown.add(h.on, 'weight', 0, 1, 0.01).name('bones hold at least')
+          h.on.cuts.forEach((c, i) => {
+            grown.add(c.normal, 0, -1, 1, 0.01).name(`cut ${i} normal x`)
+            grown.add(c.normal, 1, -1, 1, 0.01).name(`cut ${i} normal y`)
+            grown.add(c.normal, 2, -1, 1, 0.01).name(`cut ${i} normal z`)
+            grown.add(c, 'offset', -0.5, 0.5, 0.005).name(`cut ${i} offset, m`)
+          })
+          h.on.planes.forEach((c, i) => {
+            grown.add(c.normal, 0, -1, 1, 0.01).name(`plane ${i} normal x`)
+            grown.add(c.normal, 1, -1, 1, 0.01).name(`plane ${i} normal y`)
+            grown.add(c.normal, 2, -1, 1, 0.01).name(`plane ${i} normal z`)
+            grown.add(c, 'offset', -3, 3, 0.005).name(`plane ${i} offset, m`)
+          })
+          h.on.faces.forEach((c, i) => {
+            grown.add(c.toward, 0, -1, 1, 0.01).name(`face ${i} toward x`)
+            grown.add(c.toward, 1, -1, 1, 0.01).name(`face ${i} toward y`)
+            grown.add(c.toward, 2, -1, 1, 0.01).name(`face ${i} toward z`)
+            grown.add(c, 'within', 1, 180, 1).name(`face ${i} within, degrees`)
+          })
+          grown.add(h, 'shadow').name('casts shadows')
+          const lies = f.addFolder('how it lies and moves')
+          lies.add(h.comb, 0, -3, 3, 0.01).name('comb x')
+          lies.add(h.comb, 1, -3, 3, 0.01).name('comb y')
+          lies.add(h.comb, 2, -3, 3, 0.01).name('comb z')
+          lies.add(h.stiffness, 0, 0, 200, 0.1).name('stiffness at root, /s')
+          lies.add(h.stiffness, 1, 0, 200, 0.1).name('stiffness at tip, /s')
+          lies.add(h, 'gravity', -5, 30, 0.1).name('gravity, m/s²')
+          lies.add(h, 'damping', 0, 30, 0.05).name('damping, /s')
+          lies.add(h, 'drag', 0, 30, 0.05).name('wind drag, /s')
+          const strands = f.addFolder('strands')
+          strands.add(h.width, 0, 0.0005, 0.03, 0.0005).name('width, m')
+          strands.add(h.width, 1, 0, 2, 0.01).name('width spread')
+          strands.add(h, 'taper', 0, 1, 0.01).name('width left at tip')
+          strands.add(h, 'thin', 0, 0.01, 0.0001).name('thinnest, m a m')
+          strands.add(h.clump, 'radius', 0, 0.1, 0.001).name('clump radius, m')
+          strands.add(h.clump, 'tight', 0, 1, 0.01).name('clump tight')
+          strands.add(h.curl, 'radius', 0, 0.05, 0.0005).name('curl radius, m')
+          strands.add(h.curl, 'turns', 0, 12, 0.1).name('curl turns')
+          strands.add(h, 'ragged', 0, 1, 0.01).name('ragged')
+          const look = f.addFolder('look')
+          look.addColor(h.colours, 'root').name('root')
+          look.addColor(h.colours, 'tip').name('tip')
+          look.add(h, 'vary', 0, 1, 0.01).name('vary')
+          look.add(h, 'ao', 0, 1, 0.01).name('darker at root')
+          look.add(h, 'roughness', 0, 1, 0.01).name('roughness')
+          look.add(h.shine, 'strength', 0, 3, 0.01).name('shine')
+          look.add(h.shine, 'power', 1, 200, 1).name('shine tightness')
+          look.add(h, 'translucency', 0, 3, 0.01).name('translucency')
+          f.close()
+        }
+        gui.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify(hair, null, 2)) }, 'copy').name('copy hairs JSON')
+      }
+
+      // An error in a step or a frame shown over the page, and the loop goes on.
+      const shown = document.createElement('pre')
+      shown.style.cssText = 'position:fixed;left:8px;top:60px;margin:0;color:#ff8a80;font:12px monospace;white-space:pre-wrap;max-width:90vw;z-index:9'
+      document.body.appendChild(shown)
+
+      // `__run(frames)` plays that many frames at once, a step each, the page's clock moved a step on for
+      // each, whatever the tab's own frames are doing: a tab behind another window is given almost none,
+      // so a console reads the hair after a known number of frames with this.
+      let running = false
+      window.__run = async frames => {
+        const real = performance.now
+        let t = real.call(performance)
+        running = true
+        performance.now = () => t
+        try {
+          for (let i = 0; i < frames; i++) {
+            t += dt * 1000
+            page.input()
+            truth.step(dt)
+            await page.frame(0)
+          }
+        } finally {
+          performance.now = real
+          running = false
+          last = performance.now()
+          owed = 0
+        }
+        return frames
+      }
+
+      let last = performance.now(), owed = 0
+      const loop = async now => {
+        if (running) { requestAnimationFrame(loop); return }
+        owed += Math.min((now - last) / 1000, 0.25)
+        last = now
+        try {
+          page.input()
+          while (owed >= dt) { truth.step(dt); owed -= dt }
+          await page.frame(owed / dt)
+          const named = client?.plugins.wire?.scene?.world?.hair3d?.hairs
+          const hair = named && client.plugins.loader.get(named)
+          if (!built && hair) build(hair)
+        } catch (e) { window.__error = e; shown.textContent = String(e?.stack ?? e); owed = 0 }
+        requestAnimationFrame(loop)
+      }
+      requestAnimationFrame(loop)
+    </script>
+  </body>
+</html>

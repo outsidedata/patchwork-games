@@ -1,0 +1,78 @@
+{
+  "wind": { "toward": 210, "speed": 1.5 },
+  "gust": { "scale": 3, "strength": 0.7, "rate": 1.6 },
+  "kinds": {
+    "xbot": {
+      "hairs": ["scalp"],
+      "solids": [
+        { "bone": "Head", "at": [0, 0.09, 0.015], "radius": 0.105 },
+        { "bone": "Neck", "at": [0, 0.03, 0], "radius": 0.065 },
+        { "bone": "Spine2", "at": [0, 0.04, 0], "radius": 0.17 },
+        { "bone": "LeftArm", "at": [0, 0.02, 0], "radius": 0.075 },
+        { "bone": "RightArm", "at": [0, 0.02, 0], "radius": 0.075 }
+      ]
+    },
+    "wanderer": { "hairs": ["fur"], "solids": [] }
+  },
+  "hairs": {
+    "scalp": {
+      "on": {
+        "meshes": "Alpha_Surface",
+        "bones": ["Head"],
+        "weight": 0.5,
+        "cuts": [{ "bone": "Head", "normal": [0, 0.75, -0.66], "offset": 0.07 }],
+        "planes": [],
+        "faces": []
+      },
+      "density": 9000,
+      "strands": 20,
+      "length": [0.3, 0.4],
+      "width": [0.0035, 0.5],
+      "taper": 0.3,
+      "thin": 0.0012,
+      "links": 6,
+      "segments": 10,
+      "comb": [0, -1.1, -0.7],
+      "stiffness": [12, 0.3],
+      "gravity": 9.8,
+      "damping": 2.5,
+      "drag": 1.5,
+      "clump": { "radius": 0.012, "tight": 0.6 },
+      "curl": { "radius": 0.004, "turns": 2 },
+      "ragged": 0.25,
+      "colours": { "root": "#2a160c", "tip": "#8a5a2e" },
+      "vary": 0.25,
+      "ao": 0.5,
+      "roughness": 0.55,
+      "shine": { "strength": 0.1, "power": 60 },
+      "translucency": 0.3,
+      "shadow": true
+    },
+    "fur": {
+      "on": { "meshes": "Alpha_Surface", "bones": [], "weight": 0, "cuts": [], "planes": [], "faces": [] },
+      "density": 8000,
+      "strands": 8,
+      "length": [0.045, 0.5],
+      "width": [0.003, 0.5],
+      "taper": 0.25,
+      "thin": 0.0012,
+      "links": 2,
+      "segments": 3,
+      "comb": [0, -0.8, -0.3],
+      "stiffness": [60, 12],
+      "gravity": 9.8,
+      "damping": 6,
+      "drag": 3,
+      "clump": { "radius": 0.008, "tight": 0.5 },
+      "curl": { "radius": 0, "turns": 0 },
+      "ragged": 0.4,
+      "colours": { "root": "#3a2a1c", "tip": "#c9a36a" },
+      "vary": 0.3,
+      "ao": 0.6,
+      "roughness": 0.7,
+      "shine": { "strength": 0.15, "power": 24 },
+      "translucency": 0.2,
+      "shadow": true
+    }
+  }
+}
