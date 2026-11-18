@@ -13,7 +13,7 @@
 //             held; `fast`, the boost key held.
 //   pace      the fly speed's multiplier, which the wheel moves, from `pace.min` to `pace.max`.
 //   aim       [x, y, z], where the line through the pivot along the way the craft points meets the
-//             ground, y = 0, within `range` metres; else the point `range` metres along it.
+//             ground within `range` metres; else the point `range` metres along it.
 //   kept      the ledger entries this craft holds on to: `{ id, at, to? }`, each moved every step to
 //             where `at` and `to` name (below) while the ledger holds it.
 //
@@ -41,10 +41,30 @@
 // and `fast` (1 held, 0 let go), `pace(d)` the wheel, `look(dyaw, dpitch)` the mouse dragged, and
 // `fire(name)`. A seat's message arrives from outside the program, so each act refuses arguments of
 // the wrong kind and writes nothing.
+//
+// The ground is the scene's: `player` flies over the yard's flat floor at y = 0 (main), and `overland`
+// over terrain3d's land (bounce), each scene's sim naming the one it flies as its `player`.
 import type { Kind, Row, W } from '#engine/engine.ts'
 import { def } from '#plugins/loader/loader.sim.ts'
 import { emit, entry, type Spawn } from '#plugins/gpuparticle3d/gpuparticle3d.sim.ts'
+import { heightAt, ray } from '#plugins/terrain3d/terrain3d.sim.ts'
 import * as math from '#plugins/math/math.sim.ts'
+
+// The ground a craft flies over: its height over a point, and where a line from `from` along the unit
+// `dir` meets it within `range`, undefined where it does not.
+type Ground = {
+  height(w: W, x: number, z: number): number
+  meet(w: W, from: number[], dir: number[], range: number): number[] | undefined
+}
+const flat: Ground = {
+  height: () => 0,
+  meet(_w, from, dir, range) {
+    if (!(dir[1] < 0)) return undefined
+    const reach = from[1] / -dir[1]
+    return reach < range ? [from[0] + dir[0] * reach, 0, from[2] + dir[2] * reach] : undefined
+  },
+}
+const land: Ground = { height: heightAt, meet: ray }
 
 type Emit = Spawn & {
   effect: string; at: 'aim' | 'gun'; lift?: number[]; dir?: 'aim' | number[]; to?: 'aim'
@@ -67,13 +87,10 @@ function axes(d: any) {
 }
 
 // Where the line through the pivot along the way the craft points meets the ground, within `range`.
-function aimOf(d: any, range: number) {
+function aimOf(d: any, range: number, w: W, ground: Ground) {
   const { forward } = axes(d)
   const from = [d.pos[0], d.pos[1] + d.lift, d.pos[2]]
-  const reach = forward[1] < 0 ? Math.min(range, from[1] / -forward[1]) : range
-  const at = [0, 1, 2].map(i => from[i] + forward[i] * reach)
-  if (reach < range) at[1] = 0
-  return at
+  return ground.meet(w, from, forward, range) ?? [0, 1, 2].map(i => from[i] + forward[i] * range)
 }
 
 // The gun's muzzle in the world: the definition's offset, right, up and forward of the craft.
@@ -87,7 +104,7 @@ const pointOf = (d: any, k: any, at: 'aim' | 'gun', lift?: number[]) => {
   return lift ? add(p, lift) : p
 }
 
-function fly(me: Row, w: W, dt: number) {
+function fly(me: Row, w: W, dt: number, ground: Ground) {
   const d = me.data
   const k = def(w, me.kind)
   const boost = d.fast ? k.boost : 1
@@ -102,8 +119,8 @@ function fly(me: Row, w: W, dt: number) {
   const x = d.pos[0] + forward[0] * run * dt
   const z = d.pos[2] + forward[2] * run * dt
   const y = d.pos[1] + (forward[1] * run + rise) * dt
-  d.pos = [x, clamp(y, k.clear, k.ceiling), z]
-  d.aim = aimOf(d, k.range)
+  d.pos = [x, clamp(y, ground.height(w, x, z) + k.clear, k.ceiling), z]
+  d.aim = aimOf(d, k.range, w, ground)
 }
 
 // Each kept entry moved to where it is kept, and the ones the ledger has let go of let go.
@@ -119,19 +136,19 @@ function keep(me: Row, w: W) {
   })
 }
 
-export const player: Kind = {
+const craft = (ground: Ground): Kind => ({
   before(me, _dt, w) {
     const d = me.data
     if (d.stood) return
     const start = w.find('start', s => s.data.slot === d.seat).data
     d.pos = [...start.pos]
     d.look = { ...d.look, yaw: start.yaw, pitch: start.pitch }
-    d.aim = aimOf(d, def(w, me.kind).range)
+    d.aim = aimOf(d, def(w, me.kind).range, w, ground)
     d.stood = true
   },
   tick(me, dt, w) {
     if (!me.data.stood) return
-    fly(me, w, dt)
+    fly(me, w, dt, ground)
     keep(me, w)
   },
   acts: {
@@ -174,4 +191,7 @@ export const player: Kind = {
       }
     },
   },
-}
+})
+
+export const player = craft(flat)
+export const overland = craft(land)

@@ -1,0 +1,94 @@
+{
+  "world": {
+    "defs": "bounce",
+    "loader": {
+      "assets": {
+        "bounce": { "type": "json", "url": "/games/demo_gpuparticle3d/assets/bounce.json", "preload": true },
+        "effects": { "type": "json", "url": "/games/demo_gpuparticle3d/assets/effects.json", "preload": true },
+        "particles": { "type": "sheet", "url": "/games/demo_gpuparticle3d/assets/particles/particles.json", "preload": true },
+        "hills": { "type": "json", "url": "/games/demo_gpuparticle3d/assets/hills.json", "preload": true },
+        "checker": { "type": "texture", "url": "/games/demo_gpuparticle3d/assets/checker-1024.webp", "preload": true, "wrap": "repeat", "anisotropy": 8 }
+      }
+    },
+    "terrain3d": {
+      "field": "hills",
+      "rings": [
+        { "reach": 64, "seg": 256 },
+        { "reach": 320, "seg": 128 },
+        { "reach": 2000, "seg": 100 }
+      ],
+      "shadowReach": 64,
+      "budget": 8,
+      "preload": true
+    },
+    "shapes3d": {
+      "kinds": {
+        "crate": { "shape": { "box": { "size": [3, 2, 3] } }, "look": { "colour": "#c07060", "roughness": 0.8 } },
+        "wall": { "shape": { "box": { "size": [14, 3, 0.6] } }, "look": { "colour": "#8a8f98", "roughness": 0.85 } },
+        "post": { "shape": { "cylinder": { "radius": 0.6, "height": 6 } }, "look": { "colour": "#7a5636", "roughness": 0.9, "sides": 16 } },
+        "ramp": { "shape": { "plane": { "size": [6, 10], "tilt": 0.5 } }, "look": { "colour": "#70a8e8", "roughness": 0.8, "thick": 0.2 } },
+        "slab": { "shape": { "hyperplane": { "size": [8, 8] } }, "look": { "colour": "#e07850", "roughness": 0.7, "thick": 0.2 } }
+      }
+    },
+    "solids": { "mods": { "models": "shapes3d" } },
+    "gpgpu3d": { "reach": 64, "mods": { "things": ["shapes3d", "terrain3d"], "behaviors": ["shapes3d", "terrain3d"] } },
+    "gpuparticle3d": { "effects": "effects", "hold": 0.25, "mods": { "solids": "gpgpu3d" } },
+    "lights3d": { "grid": [16, 9], "slices": 24, "shadows": { "atlas": 4096, "tile": 256, "bias": 0.05, "normalBias": 0.06, "budget": 24 } }
+  },
+  "plugins": ["loader", "scenemanager", "player", "terrain3d", "solids", "gpgpu3d", "gpuparticle3d", "render3d", "lights3d", "chasecamera3d", "stats"],
+  "seats": 1,
+  "prefabs": {
+    "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
+    "scenemanager": { "out": {} },
+    "loader": {},
+    "gpuparticle3d": { "next": 1, "live": [] },
+    "render3d": {
+      "camera": { "fov": 60, "near": 0.1, "far": 3000, "at": [0, 14, -30], "look": [0, 6, 0] },
+      "pixelRatio": 1,
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "background": "#2b3448",
+      "ao": { "on": false, "radius": 0.8, "thickness": 0.3, "falloff": 1, "scale": 1.5, "intensity": 0.8, "samples": 16 },
+      "bloom": { "strength": 0.6, "radius": 0.5, "threshold": 1.2 }
+    },
+    "start": { "slot": 0, "pos": [0, 0, 0], "yaw": 0, "pitch": 0 },
+    "player": {
+      "seat": 0,
+      "stood": false,
+      "pos": [0, 0, 0],
+      "look": { "yaw": 0, "pitch": 0.25, "dist": 9 },
+      "lift": 2.2,
+      "stick": [0, 0],
+      "tilt": 0,
+      "up": false,
+      "down": false,
+      "fast": false,
+      "pace": 1,
+      "aim": [0, 0, 0],
+      "kept": []
+    },
+    "sky": {},
+    "hail": { "pos": [0, 0, 0], "fx": 0 },
+    "crate": { "pos": [0, 0, 0], "yaw": 0 },
+    "wall": { "pos": [0, 0, 0], "yaw": 0 },
+    "post": { "pos": [0, 0, 0], "yaw": 0 },
+    "ramp": { "pos": [0, 0, 0], "yaw": 0 },
+    "slab": { "pos": [0, 0, 0], "rot": [0, 0, 0, 1] }
+  },
+  "actors": [
+    { "is": "scenemanager" },
+    { "is": "loader" },
+    { "is": "gpuparticle3d" },
+    { "is": "sky" },
+    { "is": "start", "slot": 0, "pos": [0, 12, -4], "yaw": 0, "pitch": 0.3 },
+    { "is": "hail", "pos": [0, 30, 14] },
+    { "is": "crate", "pos": [-6, 4.2, 10] },
+    { "is": "crate", "pos": [5, 6.8, 16], "yaw": 0.6 },
+    { "is": "wall", "pos": [0, 7.6, 26] },
+    { "is": "post", "pos": [-12, 4.9, 18] },
+    { "is": "post", "pos": [12, 4.6, 8] },
+    { "is": "ramp", "pos": [8, 12, 22], "yaw": 0.4 },
+    { "is": "slab", "pos": [-8, 11, 28], "rot": [0.19866933079506122, 0, 0, 0.9800665778412416] }
+  ]
+}

@@ -19,6 +19,20 @@ marks. Each number key fires one:
 
 All the effects are in `assets/effects.json`, drawn from one sheet, `assets/particles/`.
 
+## The bounce scene
+
+`dev.html?scene=bounce` is the same craft over rolling hills (terrain3d) with crates, a wall, two posts,
+a ramp and a tilted slab standing on them (shapes3d). gpgpu3d holds the land and the shapes on the GPU,
+and every particle with a `bounce` bounces off them. Hail falls over the middle the whole time, and two
+keys fire at the spot the craft aims at on the land:
+
+| key | effect | what it shows |
+|---|---|---|
+| 1 | shrapnel | a flash and a burst of debris that bounces down the slopes and off the shapes |
+| 2 | spray | four seconds of sparks thrown up, bouncing where they come down |
+
+Its numbers are `assets/bounce.json`, and its land is `assets/hills.json`.
+
 ## Controls
 
 - W and S fly forward and back; A and D turn; Q and E tilt up and down
@@ -54,5 +68,6 @@ then open `/games/demo_gpuparticle3d/client.html`.
 `yarn bake demo_gpuparticle3d` runs `assets/demo_gpuparticle3d.bake.ts`, which runs
 `assets/particles/particles.draw.ts`. That script draws the particle sheet from nothing (a glow, a
 ring, four puffs of smoke, a muzzle star, a spark, a beam and a chunk of debris, each white and
-shaped by its alpha) and writes `assets/particles/particles.png` and `particles.json`. It reads
-nothing from the library. Everything else in the scene is drawn from three.js shapes.
+shaped by its alpha) and writes `assets/particles/particles.png` and `particles.json`. The bake also
+draws `assets/checker-1024.webp`, the checkerboard on bounce's land. It reads nothing from the
+library. Everything else in the scenes is drawn from three.js shapes.
