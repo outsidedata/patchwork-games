@@ -36,9 +36,6 @@
         "graze": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/graze.cues.json", "preload": true },
         "nod": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/nod.cues.json", "preload": true },
         "wave": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/wave.cues.json", "preload": true },
-        "flap": { "type": "json", "url": "/games/demo_puppet3d/assets/cues/flap.cues.json", "preload": true },
-        "wingsSkeleton": { "type": "json", "url": "/games/demo_puppet3d/assets/wings/wings.skeleton.json", "preload": true },
-        "wingsSkin": { "type": "model", "url": "/games/demo_puppet3d/assets/wings/wings.glb", "preload": true },
         "hills": { "type": "json", "url": "/games/demo_puppet3d/assets/hills.json", "preload": true },
         "grass": { "type": "texture", "url": "/games/demo_puppet3d/assets/ground/grass-color-1024.webp", "wrap": "repeat" },
         "grassNormal": { "type": "texture", "url": "/games/demo_puppet3d/assets/ground/grass-normal-1024.webp", "space": "linear", "wrap": "repeat" }
@@ -46,7 +43,7 @@
     },
     "shipped": { "plugins": ["paddock"] },
     "puppet3d": {
-      "kinds": ["horse", "tiger", "xbot", "lion", "cheetah", "rider", "pegasus"],
+      "kinds": ["horse", "tiger", "xbot", "lion", "cheetah", "rider"],
       "mods": { "land": "terrain3d", "behaviors": ["puppet3d", "paddock"] }
     },
     "terrain3d": {
@@ -99,8 +96,7 @@
     "tiger": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
     "lion": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
     "cheetah": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
-    "rider": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } },
-    "pegasus": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } }
+    "rider": { "stood": false, "pos": [0, 0, 0], "yaw": 0, "vel": [0, 0, 0], "at": 0, "home": [0, 0], "angle": 0, "speed": 0, "asked": 0, "leaps": 0, "leapHeight": 0, "upright": 0, "lift": 0, "look": { "yaw": 0, "pitch": 0, "dist": 10 } }
   },
   "actors": [
     { "is": "scenemanager" },
@@ -111,7 +107,6 @@
     { "is": "xbot", "at": 2, "pos": [-40, 0, 0] },
     { "is": "lion", "at": 3, "pos": [80, 0, 0] },
     { "is": "cheetah", "at": 4, "pos": [-80, 0, 0] },
-    { "is": "rider", "at": 5, "pos": [120, 0, 0] },
-    { "is": "pegasus", "at": 6, "pos": [160, 0, 0] }
+    { "is": "rider", "at": 5, "pos": [120, 0, 0] }
   ]
 }

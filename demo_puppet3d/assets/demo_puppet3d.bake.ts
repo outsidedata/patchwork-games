@@ -2,8 +2,6 @@
 // uses is `demo_puppet3d.bake.json`'s, beside this file:
 //   cues     each cue sheet of its `sheets`, copied from the library's `cues/` into `cues/` beside this
 //            file, where the scenes' catalogues read it (`<sheet>.cues.json`, the entry `<sheet>`);
-//   wings    the pegasus's wings, built in Blender by `wings/wings.py` from `wings/wings.json`, packed by
-//            gltfpack into `wings/wings.glb`, with their rest skeleton `wings/wings.skeleton.json`;
 //   clips    each animal of its `clips`, `{ kind, walk, stride, settle, idle }`: its kind in main's scene,
 //            posed by puppet3d's own code from its definition and written with a `walk` (at `walk` metres a
 //            second, a stride being `stride` coming round, after `settle` seconds) and an `idle` (`idle`
@@ -20,7 +18,7 @@ const root = path.join(here, '..', '..', '..')
 
 type Bake = { sheets: string[]; rate: number; mods: string[]; clips: Record<string, { kind: string; walk: number; stride: string; settle: number; idle: number }> }
 
-export default async ({ blender, pack, scratch, library }: Tools) => {
+export default async ({ library }: Tools) => {
   const bake = JSON.parse(fs.readFileSync(path.join(here, 'demo_puppet3d.bake.json'), 'utf8')) as Bake
 
   fs.mkdirSync(path.join(here, 'cues'), { recursive: true })
@@ -28,11 +26,6 @@ export default async ({ blender, pack, scratch, library }: Tools) => {
     fs.copyFileSync(path.join(library, 'cues', `${s}.cues.json`), path.join(here, 'cues', `${s}.cues.json`))
     console.log('wrote', path.relative(root, path.join(here, 'cues', `${s}.cues.json`)))
   }
-
-  const raw = scratch('wings.glb')
-  await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(here, 'wings', 'wings.py'), '--', path.join(here, 'wings', 'wings.json'), raw, path.join(here, 'wings', 'wings.skeleton.json')])
-  await pack(raw, path.join(here, 'wings', 'wings.glb'))
-  console.log('wrote', path.relative(root, path.join(here, 'wings', 'wings.glb')))
 
   for (const [animal, c] of Object.entries(bake.clips)) {
     const out = path.join(here, 'awol', `${animal}.clips.glb`)

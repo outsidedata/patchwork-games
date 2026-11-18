@@ -26,13 +26,6 @@ every ten seconds, the cheetah grazes when it stands and flicks its ears. The X 
 it stands. `yarn bake demo_puppet3d` (`assets/demo_puppet3d.bake.ts`) copies the sheets into
 `assets/cues/`; the walk and upright cues each animal's solvers play are its own sheets there too.
 
-## The pegasus
-
-Station 6 is the pegasus: the horse's definition with a second layout, `wings`, hung `on` the horse's
-`body:spine 5`. The wings are their own glb on their own six bones (`assets/wings/`, built by
-`wings/wings.py` in the bake), beating by the library's `flap` sheet on the clock while the horse walks
-under its solver. The same wings hang on any body by one more layout in its definition.
-
 ## The herd
 
 `dev.html?scene=herd` is the AWOL animals as a crowd3d crowd, some walking up and down their lines and
