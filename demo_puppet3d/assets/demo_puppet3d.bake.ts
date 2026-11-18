@@ -7,7 +7,8 @@
 //   clips    each animal of its `clips`, `{ kind, walk, stride, settle, idle }`: its kind in main's scene,
 //            posed by puppet3d's own code from its definition and written with a `walk` (at `walk` metres a
 //            second, a stride being `stride` coming round, after `settle` seconds) and an `idle` (`idle`
-//            seconds), at `rate` frames a second, into `awol/<animal>.clips.glb` by
+//            seconds), at `rate` frames a second, its solvers delivered by the mod files of its `mods`
+//            (paths from the repo's root, in main's `world.puppet3d.mods.behaviors` order), into `awol/<animal>.clips.glb` by
 //            `plugins/puppet3d/puppet3d.clips.ts`, for the herd scene's crowd3d to bake and play.
 import fs from 'node:fs'
 import path from 'node:path'
@@ -17,7 +18,7 @@ import type { Tools } from '#scripts/bake.ts'
 const here = import.meta.dirname
 const root = path.join(here, '..', '..', '..')
 
-type Bake = { sheets: string[]; rate: number; clips: Record<string, { kind: string; walk: number; stride: string; settle: number; idle: number }> }
+type Bake = { sheets: string[]; rate: number; mods: string[]; clips: Record<string, { kind: string; walk: number; stride: string; settle: number; idle: number }> }
 
 export default async ({ blender, pack, scratch, library }: Tools) => {
   const bake = JSON.parse(fs.readFileSync(path.join(here, 'demo_puppet3d.bake.json'), 'utf8')) as Bake
@@ -36,6 +37,6 @@ export default async ({ blender, pack, scratch, library }: Tools) => {
   for (const [animal, c] of Object.entries(bake.clips)) {
     const out = path.join(here, 'awol', `${animal}.clips.glb`)
     execFileSync('node', ['--experimental-strip-types', path.join(root, 'plugins', 'puppet3d', 'puppet3d.clips.ts'), path.join(here, '..', 'main.scene.json'), c.kind, out,
-      `rate=${bake.rate}`, `walk=${c.walk},${c.stride},${c.settle}`, `idle=${c.idle}`], { stdio: 'inherit' })
+      `rate=${bake.rate}`, `walk=${c.walk},${c.stride},${c.settle}`, `idle=${c.idle}`, `mods=${bake.mods.map(m => path.join(root, m)).join(',')}`], { stdio: 'inherit' })
   }
 }

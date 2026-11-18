@@ -1,6 +1,7 @@
 {
   "sheets": ["wag", "ears", "look", "roar", "graze", "nod", "wave", "flap"],
   "rate": 30,
+  "mods": ["plugins/puppet3d/puppet3d.puppet3d.ts", "games/demo_puppet3d/plugins/paddock/paddock.puppet3d.ts"],
   "clips": {
     "horse_1": { "kind": "horse", "walk": 1.6, "stride": "stride", "settle": 3, "idle": 10 },
     "tiger_1": { "kind": "tiger", "walk": 1.6, "stride": "stride", "settle": 3, "idle": 10 },
