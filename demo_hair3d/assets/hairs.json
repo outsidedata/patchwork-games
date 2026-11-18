@@ -2,17 +2,8 @@
   "wind": { "toward": 210, "speed": 1.5 },
   "gust": { "scale": 3, "strength": 0.7, "rate": 1.6 },
   "kinds": {
-    "xbot": {
-      "hairs": ["scalp"],
-      "solids": [
-        { "bone": "Head", "at": [0, 0.09, 0.015], "radius": 0.105 },
-        { "bone": "Neck", "at": [0, 0.03, 0], "radius": 0.065 },
-        { "bone": "Spine2", "at": [0, 0.04, 0], "radius": 0.17 },
-        { "bone": "LeftArm", "at": [0, 0.02, 0], "radius": 0.075 },
-        { "bone": "RightArm", "at": [0, 0.02, 0], "radius": 0.075 }
-      ]
-    },
-    "wanderer": { "hairs": ["fur"], "solids": [] }
+    "xbot": { "hairs": ["scalp"] },
+    "wanderer": { "hairs": ["fur"] }
   },
   "hairs": {
     "scalp": {

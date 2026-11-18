@@ -2,18 +2,8 @@
   "wind": { "toward": 210, "speed": 2 },
   "gust": { "scale": 4, "strength": 0.7, "rate": 1.4 },
   "kinds": {
-    "horse": {
-      "hairs": ["horseMane", "horseTail"],
-      "solids": [
-        { "bone": "neck", "at": [0, 0.17, 0], "radius": 0.15 },
-        { "bone": "chest", "at": [0, 0.1, 0], "radius": 0.24 },
-        { "bone": "pelvis", "at": [0, -0.05, -0.1], "radius": 0.24 }
-      ]
-    },
-    "lion": {
-      "hairs": ["lionMane"],
-      "solids": [{ "bone": "neck", "at": [0, 0.14, 0], "radius": 0.14 }, { "bone": "chest", "at": [0, 0.12, 0], "radius": 0.2 }]
-    }
+    "horse": { "hairs": ["horseMane", "horseTail"] },
+    "lion": { "hairs": ["lionMane"] }
   },
   "hairs": {
     "horseMane": {

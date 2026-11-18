@@ -1,7 +1,5 @@
 {
   "budget": 3,
-  "hollows": 16,
-  "pushes": 0,
   "wind": { "toward": 210, "speed": 2.5 },
   "gust": { "scale": 14, "strength": 0.7, "flutter": 0.05, "rate": 2.4 },
   "bend": 0.07,

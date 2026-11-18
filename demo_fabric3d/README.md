@@ -7,7 +7,8 @@ a different way.
 - **The cloths** are laid over the table, the drum, the ramp and the slope (shapes3d's box, cylinder,
   hyperplane and tilted plane) and fall onto them.
 - **The capes** are pinned at the neck of the X Bot you walk and of each wanderer, and drape on the capsules
-  `world.fabric3d.capsules` makes of their bones.
+  `world.anim.kinds.<kind>.capsules` makes of their bones, which gpgpu3d holds on the GPU with the yard's
+  shapes (`world.gpgpu3d`), and every fabric meets there.
 - **The ribbon** trails from the stick in your X Bot's left hand.
 - **The colours** fly from the pole each wanderer carries.
 - **The banner** is towed behind the tug, which flies a circle over the yard. The game's own plugin,
@@ -39,7 +40,8 @@ The X Bot and its clips are Adobe Mixamo's.
 
 ## Its files
 
-- `main.scene.json`: the yard, and `world.fabric3d`: which fabric goes on what, the capsules, the wind.
+- `main.scene.json`: the yard, and `world.fabric3d`: which fabric goes on what, and the wind; `world.gpgpu3d`:
+  what the fabrics meet; `world.anim`: each body's capsules.
 - `assets/fabrics.json`: the fabrics.
 - `assets/props.mjs`: builds the pole and the stick, which the bake packs.
 - `tug.sim.ts`, `plugins/towing`: the tug and its tail.

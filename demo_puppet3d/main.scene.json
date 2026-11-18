@@ -58,9 +58,18 @@
     "supershader3d": { "looks": "hawkLooks" },
     "puppet3d": {
       "kinds": ["horse", "tiger", "xbot", "lion", "cheetah", "rider", "hawk"],
+      "capsules": {
+        "horse": [
+          { "bone": "neck", "at": [0, 0.17, 0], "radius": 0.15 },
+          { "bone": "chest", "at": [0, 0.1, 0], "radius": 0.24 },
+          { "bone": "pelvis", "at": [0, -0.05, -0.1], "radius": 0.24 }
+        ],
+        "lion": [{ "bone": "neck", "at": [0, 0.14, 0], "radius": 0.14 }, { "bone": "chest", "at": [0, 0.12, 0], "radius": 0.2 }]
+      },
       "mods": { "land": "terrain3d", "behaviors": ["puppet3d", "paddock", "aviary"] }
     },
-    "hair3d": { "hairs": "hairs", "mods": { "skins": ["puppet3d"], "behaviors": ["render3d"] } },
+    "gpgpu3d": { "reach": 60, "mods": { "things": ["puppet3d"], "behaviors": ["anim"] } },
+    "hair3d": { "hairs": "hairs", "mods": { "skins": ["puppet3d"], "behaviors": ["render3d"], "solids": "gpgpu3d" } },
     "terrain3d": {
       "field": "hills",
       "rings": [
@@ -92,7 +101,7 @@
       "mods": { "land": "terrain3d" }
     }
   },
-  "plugins": ["loader", "scenemanager", "player", "supershader3d", "terrain3d", "skydome3d", "puppet3d", "shipped", "hair3d", "render3d", "chasecamera3d", "stats"],
+  "plugins": ["loader", "scenemanager", "player", "supershader3d", "terrain3d", "skydome3d", "puppet3d", "shipped", "gpgpu3d", "hair3d", "render3d", "chasecamera3d", "stats"],
   "seats": 1,
   "prefabs": {
     "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },

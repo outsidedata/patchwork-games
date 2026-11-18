@@ -60,16 +60,49 @@
         "xbot": {
           "rig": "xbot-rig", "model": "xbot", "fade": 0.2, "falls": [{ "above": 4.3, "role": "fall" }],
           "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
-          "props": [{ "model": "stick", "bone": "LeftHand", "at": [0, 0.09, 0.03], "turn": [-163.8, -79.8, 15.2] }]
+          "props": [{ "model": "stick", "bone": "LeftHand", "at": [0, 0.09, 0.03], "turn": [-163.8, -79.8, 15.2] }],
+          "capsules": [
+            { "from": "Hips", "to": "Spine2", "radius": 0.15 },
+            { "from": "Spine2", "to": "Neck", "radius": 0.16 },
+            { "from": "Neck", "to": "Head", "radius": 0.07 },
+            { "from": "Head", "to": "HeadTop_End", "radius": 0.11 },
+            { "from": "LeftShoulder", "to": "LeftArm", "radius": 0.07 },
+            { "from": "LeftArm", "to": "LeftForeArm", "radius": 0.075 },
+            { "from": "LeftForeArm", "to": "LeftHand", "radius": 0.065 },
+            { "from": "RightShoulder", "to": "RightArm", "radius": 0.07 },
+            { "from": "RightArm", "to": "RightForeArm", "radius": 0.075 },
+            { "from": "RightForeArm", "to": "RightHand", "radius": 0.065 },
+            { "from": "LeftUpLeg", "to": "LeftLeg", "radius": 0.09 },
+            { "from": "LeftLeg", "to": "LeftFoot", "radius": 0.06 },
+            { "from": "RightUpLeg", "to": "RightLeg", "radius": 0.09 },
+            { "from": "RightLeg", "to": "RightFoot", "radius": 0.06 }
+          ]
         },
         "wanderer": {
           "rig": "xbot-rig", "model": "xbot", "fade": 0.25, "falls": [{ "above": 4.3, "role": "fall" }],
           "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
-          "props": [{ "model": "pole", "bone": "RightHand", "at": [0, 0.09, 0.03], "turn": [4.2, 49.2, -161.2] }]
+          "props": [{ "model": "pole", "bone": "RightHand", "at": [0, 0.09, 0.03], "turn": [4.2, 49.2, -161.2] }],
+          "capsules": [
+            { "from": "Hips", "to": "Spine2", "radius": 0.15 },
+            { "from": "Spine2", "to": "Neck", "radius": 0.16 },
+            { "from": "Neck", "to": "Head", "radius": 0.07 },
+            { "from": "Head", "to": "HeadTop_End", "radius": 0.11 },
+            { "from": "LeftShoulder", "to": "LeftArm", "radius": 0.07 },
+            { "from": "LeftArm", "to": "LeftForeArm", "radius": 0.075 },
+            { "from": "LeftForeArm", "to": "LeftHand", "radius": 0.065 },
+            { "from": "RightShoulder", "to": "RightArm", "radius": 0.07 },
+            { "from": "RightArm", "to": "RightForeArm", "radius": 0.075 },
+            { "from": "RightForeArm", "to": "RightHand", "radius": 0.065 },
+            { "from": "LeftUpLeg", "to": "LeftLeg", "radius": 0.09 },
+            { "from": "LeftLeg", "to": "LeftFoot", "radius": 0.06 },
+            { "from": "RightUpLeg", "to": "RightLeg", "radius": 0.09 },
+            { "from": "RightLeg", "to": "RightFoot", "radius": 0.06 }
+          ]
         }
       }
     },
     "shipped": { "plugins": ["towing"] },
+    "gpgpu3d": { "reach": 60, "mods": { "things": ["shapes3d", "anim"], "behaviors": ["shapes3d", "anim"] } },
     "fabric3d": {
       "fabrics": "fabrics",
       "attach": [
@@ -84,40 +117,6 @@
         { "fabric": "colours", "of": "wanderer" },
         { "fabric": "banner", "of": "tug" }
       ],
-      "capsules": {
-        "xbot": [
-          { "from": "Hips", "to": "Spine2", "radius": 0.15 },
-          { "from": "Spine2", "to": "Neck", "radius": 0.16 },
-          { "from": "Neck", "to": "Head", "radius": 0.07 },
-          { "from": "Head", "to": "HeadTop_End", "radius": 0.11 },
-          { "from": "LeftShoulder", "to": "LeftArm", "radius": 0.07 },
-          { "from": "LeftArm", "to": "LeftForeArm", "radius": 0.075 },
-          { "from": "LeftForeArm", "to": "LeftHand", "radius": 0.065 },
-          { "from": "RightShoulder", "to": "RightArm", "radius": 0.07 },
-          { "from": "RightArm", "to": "RightForeArm", "radius": 0.075 },
-          { "from": "RightForeArm", "to": "RightHand", "radius": 0.065 },
-          { "from": "LeftUpLeg", "to": "LeftLeg", "radius": 0.09 },
-          { "from": "LeftLeg", "to": "LeftFoot", "radius": 0.06 },
-          { "from": "RightUpLeg", "to": "RightLeg", "radius": 0.09 },
-          { "from": "RightLeg", "to": "RightFoot", "radius": 0.06 }
-        ],
-        "wanderer": [
-          { "from": "Hips", "to": "Spine2", "radius": 0.15 },
-          { "from": "Spine2", "to": "Neck", "radius": 0.16 },
-          { "from": "Neck", "to": "Head", "radius": 0.07 },
-          { "from": "Head", "to": "HeadTop_End", "radius": 0.11 },
-          { "from": "LeftShoulder", "to": "LeftArm", "radius": 0.07 },
-          { "from": "LeftArm", "to": "LeftForeArm", "radius": 0.075 },
-          { "from": "LeftForeArm", "to": "LeftHand", "radius": 0.065 },
-          { "from": "RightShoulder", "to": "RightArm", "radius": 0.07 },
-          { "from": "RightArm", "to": "RightForeArm", "radius": 0.075 },
-          { "from": "RightForeArm", "to": "RightHand", "radius": 0.065 },
-          { "from": "LeftUpLeg", "to": "LeftLeg", "radius": 0.09 },
-          { "from": "LeftLeg", "to": "LeftFoot", "radius": 0.06 },
-          { "from": "RightUpLeg", "to": "RightLeg", "radius": 0.09 },
-          { "from": "RightLeg", "to": "RightFoot", "radius": 0.06 }
-        ]
-      },
       "gravity": [0, -9.81, 0],
       "wind": [5, 0, 1.5],
       "turbulence": { "size": 2.5, "strength": 0.6 },
@@ -126,13 +125,12 @@
       "most": 0.05,
       "mods": {
         "behaviors": ["shapes3d", "solids"],
-        "solids": ["shapes3d"],
-        "sources": ["shapes3d", "anim", "towing"],
-        "bodies": ["anim"]
+        "solids": "gpgpu3d",
+        "sources": ["shapes3d", "anim", "towing"]
       }
     }
   },
-  "plugins": ["loader", "scenemanager", "player", "terrain3d", "anim", "solids", "shipped", "fabric3d", "environment3d", "render3d", "chasecamera3d", "stats"],
+  "plugins": ["loader", "scenemanager", "player", "terrain3d", "anim", "solids", "shipped", "gpgpu3d", "fabric3d", "environment3d", "render3d", "chasecamera3d", "stats"],
   "seats": 1,
   "prefabs": {
     "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },

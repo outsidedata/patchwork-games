@@ -44,7 +44,14 @@
       "kinds": {
         "xbot": {
           "rig": "xbot-rig", "model": "xbot", "fade": 0.2, "falls": [{ "above": 4.3, "role": "fall" }],
-          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
+          "capsules": [
+            { "bone": "Head", "at": [0, 0.09, 0.015], "radius": 0.105 },
+            { "bone": "Neck", "at": [0, 0.03, 0], "radius": 0.065 },
+            { "bone": "Spine2", "at": [0, 0.04, 0], "radius": 0.17 },
+            { "bone": "LeftArm", "at": [0, 0.02, 0], "radius": 0.075 },
+            { "bone": "RightArm", "at": [0, 0.02, 0], "radius": 0.075 }
+          ]
         },
         "wanderer": {
           "rig": "xbot-rig", "model": "xbot", "fade": 0.25, "falls": [{ "above": 4.3, "role": "fall" }],
@@ -52,9 +59,10 @@
         }
       }
     },
-    "hair3d": { "hairs": "hairs", "mods": { "skins": ["anim"], "behaviors": ["render3d"] } }
+    "gpgpu3d": { "reach": 30, "mods": { "things": ["anim"], "behaviors": ["anim"] } },
+    "hair3d": { "hairs": "hairs", "mods": { "skins": ["anim"], "behaviors": ["render3d"], "solids": "gpgpu3d" } }
   },
-  "plugins": ["loader", "scenemanager", "player", "terrain3d", "anim", "hair3d", "environment3d", "render3d", "chasecamera3d", "stats"],
+  "plugins": ["loader", "scenemanager", "player", "terrain3d", "anim", "gpgpu3d", "hair3d", "environment3d", "render3d", "chasecamera3d", "stats"],
   "seats": 1,
   "prefabs": {
     "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },

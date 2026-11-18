@@ -657,7 +657,8 @@
         "drag": "terrain3d"
       }
     },
-    "grass3d": { "grasses": "grasses", "mods": { "land": "terrain3d", "wind": "weather3d", "hollows": ["box3dvehicle"] } },
+    "gpgpu3d": { "reach": 110, "mods": { "things": ["box3dvehicle"], "behaviors": ["box3dvehicle"] } },
+    "grass3d": { "grasses": "grasses", "mods": { "land": "terrain3d", "wind": "weather3d", "pressed": "gpgpu3d", "behaviors": ["box3dvehicle"] } },
     "seed": 1
   },
   "plugins": [
@@ -670,6 +671,7 @@
     "clouds3d",
     "box3d",
     "box3dvehicle",
+    "gpgpu3d",
     "grass3d",
     "render3d",
     "stats"
