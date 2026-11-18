@@ -122,7 +122,8 @@
           const folder = gui.addFolder(`fabric ${name}`)
           folders.push(folder)
           folder.add(f, 'weight', 0.02, 2, 0.01).name('weight (kg/m²)')
-          for (const k of ['stretch', 'shear', 'bend', 'friction']) folder.add(f, k, 0, 1, 0.01)
+          // a sewn fabric, a garment, has no shear
+          for (const k of ['stretch', 'shear', 'bend', 'friction']) if (f[k] !== undefined) folder.add(f, k, 0, 1, 0.01)
           folder.add(f, 'drag', 0, 5, 0.01).name('drag (1/s)')
           folder.add(f, 'catch', 0, 5, 0.01).name('catch (N/m² per m/s)')
           folder.add(f, 'thick', 0, 0.2, 0.001).name('thick (m)')
@@ -172,7 +173,7 @@
         const fabrics = page.client?.plugins.fabric3d?.fabrics ?? []
         readout.textContent = [
           `${chosen.scene}  step ${truth.n}${clock.paused ? '  paused' : ''}`,
-          ...fabrics.map(f => `${f.fabric} ${f.columns}×${f.rows}${f.of ? ` on ${f.of} ${f.thing}` : ''}`),
+          ...fabrics.map(f => `${f.fabric} ${f.points} points${f.of ? ` on ${f.of} ${f.thing}` : ''}`),
           ...errors,
         ].join('\n')
         requestAnimationFrame(loop)
