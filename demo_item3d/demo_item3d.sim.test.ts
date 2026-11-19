@@ -47,9 +47,13 @@ test('each body holds its items of item3d\'s and its plain glb, and use hands th
   expect(looked(sword)).toBe(false)
   // the runner: the wrench of item3d's
   expect(looked((plugins().motion3d.props(row('runner').id) as THREE.Object3D[])[0])).toBe(true)
-  // the villager: a skullcap and a sword, each a copy drawn; nobody holds the wrench yet
+  // the villager: a skullcap and a sword, each a copy drawn; nobody holds the wrench yet. Beside it stand seven more
+  // villagers, a suit of armor each, every piece of every suit a copy drawn
   const copies = () => Object.fromEntries(Object.entries(plugins().crowd3d.items() as Record<string, { copies: number }>).map(([k, v]) => [k, v.copies]))
-  expect(copies()).toEqual({ wrench: 0, skullcap: 1, sword: 1 })
+  const villagers = room.rows.filter(r => r.kind === 'villager')
+  expect(villagers.length).toBe(8)
+  const worn = villagers.flatMap(r => Object.values(r.data.holding as Record<string, string>))
+  expect(copies()).toEqual({ wrench: 0, ...Object.fromEntries(worn.map(item => [item, 1])) })
   // the loose wrench lies where its row says
   const scene: THREE.Scene = plugins().render3d.scene
   const lying = () => scene.children.find(o => o.name === `item3d wrench ${row('wrench')?.id}`)
