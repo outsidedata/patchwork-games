@@ -113,6 +113,11 @@
           "type": "json",
           "url": "/games/demo_item3d/assets/tee.garment.json",
           "preload": true
+        },
+        "bodies": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/demo_item3d.bodies.json",
+          "preload": true
         }
       }
     },
@@ -156,7 +161,8 @@
         "wrench": {
           "item": "wrench"
         }
-      }
+      },
+      "bodies": "bodies"
     },
     "walker": {
       "kinds": {
@@ -222,37 +228,7 @@
             "vel": "vel",
             "grounded": "grounded",
             "limp": "limp"
-          },
-          "props": [
-            {
-              "item": "wrench",
-              "bone": "RightHand",
-              "at": [
-                -0.068,
-                0.0666,
-                0.0192
-              ],
-              "turn": [
-                6.7,
-                -66,
-                -82.1
-              ]
-            },
-            {
-              "model": "sword",
-              "bone": "LeftHand",
-              "at": [
-                0,
-                0.0703,
-                0
-              ],
-              "turn": [
-                87.3,
-                26.1,
-                98.9
-              ]
-            }
-          ]
+          }
         },
         "guard": {
           "rig": "guard-rig",
@@ -270,68 +246,12 @@
             "vel": "vel",
             "grounded": "grounded",
             "limp": "limp"
-          },
-          "capsules": [
-            {
-              "from": "Hips",
-              "to": "Spine2",
-              "radius": 0.15
-            },
-            {
-              "from": "Spine2",
-              "to": "Neck",
-              "radius": 0.16
-            },
-            {
-              "from": "Neck",
-              "to": "Head",
-              "radius": 0.07
-            },
-            {
-              "from": "LeftShoulder",
-              "to": "LeftArm",
-              "radius": 0.07
-            },
-            {
-              "from": "LeftArm",
-              "to": "LeftForeArm",
-              "radius": 0.075
-            },
-            {
-              "from": "LeftForeArm",
-              "to": "LeftHand",
-              "radius": 0.065
-            },
-            {
-              "from": "RightShoulder",
-              "to": "RightArm",
-              "radius": 0.07
-            },
-            {
-              "from": "RightArm",
-              "to": "RightForeArm",
-              "radius": 0.075
-            },
-            {
-              "from": "RightForeArm",
-              "to": "RightHand",
-              "radius": 0.065
-            },
-            {
-              "from": "LeftUpLeg",
-              "to": "LeftLeg",
-              "radius": 0.09
-            },
-            {
-              "from": "RightUpLeg",
-              "to": "RightLeg",
-              "radius": 0.09
-            }
-          ]
+          }
         }
       },
       "mods": {
-        "props": "item3d"
+        "props": "item3d",
+        "capsules": "item3d"
       }
     },
     "crowd3d": {
@@ -347,53 +267,6 @@
         "villager"
       ],
       "poolSize": 8,
-      "items": {
-        "wrench": {
-          "item": "wrench",
-          "leftHand": {
-            "at": [
-              0.0522,
-              0.0451,
-              0.0407
-            ],
-            "turn": [
-              38.7,
-              54.2,
-              -127.3
-            ]
-          }
-        },
-        "skullcap": {
-          "item": "skullcap",
-          "head": {
-            "at": [
-              0.0004,
-              -1.562,
-              0.0352
-            ],
-            "turn": [
-              0,
-              180,
-              0
-            ]
-          }
-        },
-        "sword": {
-          "model": "sword",
-          "rightHand": {
-            "at": [
-              0,
-              0.07,
-              0
-            ],
-            "turn": [
-              95.6,
-              -4.7,
-              -110
-            ]
-          }
-        }
-      },
       "mods": {
         "items": "item3d"
       }
@@ -419,23 +292,7 @@
             "vel": "vel",
             "grounded": "grounded",
             "limp": "limp"
-          },
-          "props": [
-            {
-              "item": "wrench",
-              "bone": "RightHand",
-              "at": [
-                -0.068,
-                0.0666,
-                0.0192
-              ],
-              "turn": [
-                6.7,
-                -66,
-                -82.1
-              ]
-            }
-          ]
+          }
         }
       },
       "anywhere": {
@@ -523,12 +380,6 @@
     },
     "fabric3d": {
       "fabrics": "fabrics",
-      "attach": [
-        {
-          "fabric": "tee",
-          "of": "guard"
-        }
-      ],
       "gravity": [
         0,
         -9.81,
@@ -545,7 +396,8 @@
         "solids": "gpgpu3d",
         "sources": [
           "anim"
-        ]
+        ],
+        "attach": "item3d"
       }
     }
   },

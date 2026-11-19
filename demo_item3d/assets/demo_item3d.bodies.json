@@ -1,0 +1,38 @@
+{
+  "bodies": {
+    "worker": {
+      "holds": [
+        { "item": "wrench", "bone": "RightHand", "at": [-0.068, 0.0666, 0.0192], "turn": [6.7, -66, -82.1] },
+        { "model": "sword", "bone": "LeftHand", "at": [0, 0.0703, 0], "turn": [87.3, 26.1, 98.9] }
+      ]
+    },
+    "xbot": {
+      "holds": [
+        { "item": "wrench", "bone": "RightHand", "at": [-0.068, 0.0666, 0.0192], "turn": [6.7, -66, -82.1] }
+      ]
+    },
+    "soldier": {
+      "holds": [
+        { "item": "wrench", "place": "leftHand", "at": [0.0522, 0.0451, 0.0407], "turn": [38.7, 54.2, -127.3] },
+        { "item": "skullcap", "place": "head", "at": [0.0004, -1.562, 0.0352], "turn": [0, 180, 0] },
+        { "model": "sword", "place": "rightHand", "at": [0, 0.07, 0], "turn": [95.6, -4.7, -110] }
+      ]
+    },
+    "guard": {
+      "wears": ["tee"],
+      "capsules": [
+        { "from": "Hips", "to": "Spine2", "radius": 0.15 },
+        { "from": "Spine2", "to": "Neck", "radius": 0.16 },
+        { "from": "Neck", "to": "Head", "radius": 0.07 },
+        { "from": "LeftShoulder", "to": "LeftArm", "radius": 0.07 },
+        { "from": "LeftArm", "to": "LeftForeArm", "radius": 0.075 },
+        { "from": "LeftForeArm", "to": "LeftHand", "radius": 0.065 },
+        { "from": "RightShoulder", "to": "RightArm", "radius": 0.07 },
+        { "from": "RightArm", "to": "RightForeArm", "radius": 0.075 },
+        { "from": "RightForeArm", "to": "RightHand", "radius": 0.065 },
+        { "from": "LeftUpLeg", "to": "LeftLeg", "radius": 0.09 },
+        { "from": "RightUpLeg", "to": "RightLeg", "radius": 0.09 }
+      ]
+    }
+  }
+}
