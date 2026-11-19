@@ -1,8 +1,14 @@
 {
   "fabrics": {
     "tee": {
-      "garment": { "model": "tee-cloth", "file": "tee-garment" },
-      "paint": { "colour": "#e9e6df", "roughness": 0.9 },
+      "garment": {
+        "model": "tee-cloth",
+        "file": "tee-garment"
+      },
+      "paint": {
+        "colour": "#e9e6df",
+        "roughness": 0.9
+      },
       "weight": 0.18,
       "stretch": 1,
       "bend": 0.1,
@@ -11,8 +17,108 @@
       "friction": 0.4,
       "thick": 0.012,
       "pins": [
-        { "on": "LeftArm", "piece": "left_sleeve_f" },
-        { "on": "RightArm", "piece": "right_sleeve_f" }
+        {
+          "on": "LeftArm",
+          "piece": "left_sleeve_f"
+        },
+        {
+          "on": "RightArm",
+          "piece": "right_sleeve_f"
+        }
+      ]
+    },
+    "item3d_test_item/cape": {
+      "plane": {
+        "size": [
+          0.12,
+          0.18
+        ]
+      },
+      "paint": {
+        "colour": "#5a2a82",
+        "roughness": 0.8
+      },
+      "points": [
+        7,
+        10
+      ],
+      "weight": 0.3,
+      "stretch": 1,
+      "shear": 0.5,
+      "bend": 0.1,
+      "drag": 1,
+      "catch": 0.3,
+      "friction": 0.2,
+      "thick": 0.004,
+      "pins": [
+        {
+          "on": "item",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            6,
+            0
+          ],
+          "at": [
+            -0.1,
+            0.254,
+            0.147
+          ],
+          "turn": [
+            90,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "item3d_test_item/pennant": {
+      "plane": {
+        "size": [
+          0.06,
+          0.12
+        ]
+      },
+      "paint": {
+        "colour": "#c8a020",
+        "roughness": 0.7
+      },
+      "points": [
+        4,
+        8
+      ],
+      "weight": 0.15,
+      "stretch": 1,
+      "shear": 0.5,
+      "bend": 0.05,
+      "drag": 1,
+      "catch": 0.5,
+      "friction": 0.2,
+      "thick": 0.003,
+      "pins": [
+        {
+          "on": "arm",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            3,
+            0
+          ],
+          "at": [
+            -0.15,
+            0.348,
+            0
+          ],
+          "turn": [
+            90,
+            0,
+            -90
+          ]
+        }
       ]
     }
   }

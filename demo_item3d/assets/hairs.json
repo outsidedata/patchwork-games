@@ -1,0 +1,137 @@
+{
+  "wind": {
+    "toward": 210,
+    "speed": 1.5
+  },
+  "gust": {
+    "scale": 3,
+    "strength": 0.7,
+    "rate": 1.6
+  },
+  "kinds": {
+    "item3d/teststand": {
+      "hairs": [
+        "item3d_test_item/plume",
+        "item3d_test_item/tuft"
+      ]
+    }
+  },
+  "hairs": {
+    "item3d_test_item/plume": {
+      "on": {
+        "meshes": "^(0 crest)$",
+        "bones": [],
+        "weight": 0,
+        "cuts": [],
+        "planes": [],
+        "faces": []
+      },
+      "density": 60000,
+      "strands": 8,
+      "length": [
+        0.14,
+        0.3
+      ],
+      "width": [
+        0.002,
+        0.4
+      ],
+      "taper": 0.3,
+      "thin": 0.0012,
+      "links": 5,
+      "segments": 8,
+      "comb": [
+        0,
+        0.6,
+        -0.5
+      ],
+      "stiffness": [
+        20,
+        1.5
+      ],
+      "gravity": 9.8,
+      "damping": 2.5,
+      "drag": 1.5,
+      "clump": {
+        "radius": 0.006,
+        "tight": 0.5
+      },
+      "curl": {
+        "radius": 0.002,
+        "turns": 1
+      },
+      "ragged": 0.25,
+      "colours": {
+        "root": "#5a0f14",
+        "tip": "#d8343c"
+      },
+      "vary": 0.2,
+      "ao": 0.5,
+      "roughness": 0.55,
+      "shine": {
+        "strength": 0.1,
+        "power": 60
+      },
+      "translucency": 0.3,
+      "shadow": true
+    },
+    "item3d_test_item/tuft": {
+      "on": {
+        "meshes": "^(0 tassel)$",
+        "bones": [],
+        "weight": 0,
+        "cuts": [],
+        "planes": [],
+        "faces": []
+      },
+      "density": 150000,
+      "strands": 6,
+      "length": [
+        0.035,
+        0.3
+      ],
+      "width": [
+        0.0015,
+        0.4
+      ],
+      "taper": 0.4,
+      "thin": 0.0012,
+      "links": 2,
+      "segments": 4,
+      "comb": [
+        0,
+        0,
+        0
+      ],
+      "stiffness": [
+        60,
+        12
+      ],
+      "gravity": 9.8,
+      "damping": 4,
+      "drag": 1,
+      "clump": {
+        "radius": 0.003,
+        "tight": 0.3
+      },
+      "curl": {
+        "radius": 0,
+        "turns": 0
+      },
+      "ragged": 0.3,
+      "colours": {
+        "root": "#2a2418",
+        "tip": "#e0c878"
+      },
+      "vary": 0.25,
+      "ao": 0.5,
+      "roughness": 0.6,
+      "shine": {
+        "strength": 0.05,
+        "power": 40
+      },
+      "translucency": 0.2,
+      "shadow": true
+    }
+  }
+}

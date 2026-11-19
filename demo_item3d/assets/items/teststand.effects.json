@@ -1,0 +1,101 @@
+{
+ "effects": {
+  "item3d_test_item/lamp": [
+   {
+    "lamp": {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "tint": 16753731,
+     "intensity": 0.3,
+     "distance": 1.5,
+     "decay": 2,
+     "shadow": true,
+     "flicker": 0.3
+    }
+   }
+  ],
+  "item3d_test_item/glow": [
+   {
+    "n": [
+     1,
+     2
+    ],
+    "every": 0.05,
+    "life": [
+     0.3,
+     0.5
+    ],
+    "size": [
+     0.02,
+     0.03
+    ],
+    "grow": -0.5,
+    "dir": [
+     0,
+     1,
+     0
+    ],
+    "spread": 0.3,
+    "speed": [
+     0.02,
+     0.05
+    ],
+    "shape": "glow",
+    "tint": 16753731,
+    "tint1": 16733440,
+    "a0": 0.9,
+    "a1": 0,
+    "add": true,
+    "gain": 2
+   }
+  ],
+  "item3d_test_item/sparks": [
+   {
+    "n": [
+     1,
+     1
+    ],
+    "every": 0.25,
+    "life": [
+     0.3,
+     0.6
+    ],
+    "size": [
+     0.003,
+     0.006
+    ],
+    "dir": [
+     0,
+     1,
+     0
+    ],
+    "spread": 0.6,
+    "speed": [
+     0.1,
+     0.25
+    ],
+    "g": -0.2,
+    "shape": "spark",
+    "tint": 16766080,
+    "a0": 1,
+    "a1": 0,
+    "add": true,
+    "gain": 2
+   }
+  ],
+  "item3d_test_item/flame": [
+   {
+    "effect": "item3d_test_item/lamp"
+   },
+   {
+    "effect": "item3d_test_item/glow"
+   },
+   {
+    "effect": "item3d_test_item/sparks"
+   }
+  ]
+ }
+}

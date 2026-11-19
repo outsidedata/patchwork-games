@@ -14,6 +14,13 @@
 //   items/<item>.glb, items/<item>.item.json
 //                        every item of `demo_item3d.items.json`, kit items of the library's pro-ng, by the
 //                        bake's `items` tool (`scripts/items.ts`)
+//   items/<item>.effects.json, effects.json
+//                        each item's own effects and lamps, by the same tool, and the scene's effects file's
+//                        `files`, written to list them, so particle3d holds every item's effects
+//   hairs.json, fabrics.json
+//                        the scene's hairs file and fabrics file, each its own entries written by hand and
+//                        every hair an item grows and fabric an item hangs laid in by the bake, as the items
+//                        tool hands them back; those an earlier bake's items laid in are taken out first
 //   main.looks.json, looks/
 //                        the scene's one looks file and its pictures, by the bake's `looks` tool: the
 //                        scene's own materials (GROUND), then every material the items are drawn in, as
@@ -80,8 +87,36 @@ export default async ({ blender, scratch, items, looks, garment }: Tools) => {
   console.log(await node(['--experimental-strip-types', path.join(root, 'plugins', 'motion3d', 'motion3d.offsets.ts'), rig, path.join(here, 'xbot.motion3d.json')]))
 
   // the items, then the scene's one looks file: its own materials first, then the items'
+  const fabricsFile = path.join(here, 'fabrics.json')
+  const fabricsOf = JSON.parse(fs.readFileSync(fabricsFile, 'utf8'))
+  // what the items of an earlier bake grew and hung, to take out of the hairs and fabrics files before these go in
+  const before = fs.existsSync(path.join(here, 'items'))
+    ? fs.readdirSync(path.join(here, 'items')).filter(f => f.endsWith('.item.json')).map(f => JSON.parse(fs.readFileSync(path.join(here, 'items', f), 'utf8')) as { item: string; grows?: { hair: string }[]; wears?: string[] })
+    : []
   const built = await items({ sheet: path.join(here, 'demo_item3d.items.json'), out: path.join(here, 'items') })
+  // the scene's hairs file: its own wind and gust, and every hair an item grows, by the kind item3d hands its wearers as
+  const hairsFile = path.join(here, 'hairs.json')
+  const hairs = JSON.parse(fs.readFileSync(hairsFile, 'utf8'))
+  for (const old of before) {
+    delete hairs.kinds[`item3d/${old.item}`]
+    for (const g of old.grows ?? []) delete hairs.hairs[g.hair]
+    for (const f of old.wears ?? []) delete fabricsOf.fabrics[f]
+  }
+  Object.assign(hairs.kinds, built.hairs.kinds)
+  Object.assign(hairs.hairs, built.hairs.hairs)
+  fs.writeFileSync(hairsFile, JSON.stringify(hairs, null, 2) + '\n')
+  console.log('wrote', path.relative(root, hairsFile), `${Object.keys(built.hairs.hairs).length} hairs of the items'`)
+  // the scene's fabrics file: its own fabrics, and every fabric an item hangs, with its pins
+  Object.assign(fabricsOf.fabrics, built.fabrics)
+  fs.writeFileSync(fabricsFile, JSON.stringify(fabricsOf, null, 2) + '\n')
+  console.log('wrote', path.relative(root, fabricsFile), `${Object.keys(built.fabrics).length} fabrics of the items'`)
   for (const name of Object.keys(built.items)) console.log('wrote', path.relative(root, path.join(here, 'items', `${name}.glb`)))
+  // the scene's effects file lists every item's effects file
+  const effectsFile = path.join(here, 'effects.json')
+  const effects = JSON.parse(fs.readFileSync(effectsFile, 'utf8'))
+  effects.files = built.effects.map(f => `items/${f}`)
+  fs.writeFileSync(effectsFile, JSON.stringify(effects, null, 2) + '\n')
+  console.log('wrote', path.relative(root, effectsFile), `${effects.files.length} items' effects listed`)
   for (const name of Object.keys(GROUND)) if (built.materials[name]) throw new Error(`the scene's own material ${name} is an item's too: name the scene's another way`)
   fs.rmSync(path.join(here, 'looks'), { recursive: true, force: true })
   const made = await looks({ materials: { ...GROUND, ...built.materials }, out: path.join(here, 'main.looks.json'), pictures: path.join(here, 'looks') })

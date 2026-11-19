@@ -20,12 +20,15 @@ What each body holds and where, what the guard wears and its capsules are in the
   (`world.motion3d.kinds.xbot.props`).
 - **The loose wrench** is a row item3d draws where it lies (`world.item3d.kinds.wrench`).
 
-- **Seven suits of armor** stand in a row behind them, each worn by a crowd3d person of the villager's body: the
-  basic knight's (`armor_basic`) and the champion, ember, frost, ranger, shaman and warlord sets
-  (`armor_fantasy`). Every piece of a suit is an item of the items sheet, built with its kind's own defaults, `Hand`
-  alone chosen for a left and a right, and held on its place in the bodies sheet's `soldier`. A person holds one item
-  on a place, so the knight's couter, rerebrace, poleyn and tasset, which share a bone with a piece that is worn,
-  are not in the sheet.
+- **Three suits of armor** stand in a row behind them, each worn by a crowd3d person of the villager's body: the
+  basic knight's (`armor_basic`), the death knight's (`armor/deathknight`) and the barbarian's (`armor/barbarian`).
+  Every piece of a suit is an item of the items sheet, fitted to the soldier (`Body`), `Hand` chosen for a left and
+  a right, and held on its place in the bodies sheet's `soldier`. A person holds one item on a place, so the
+  couter, rerebrace, poleyn and tasset, which share a bone with a piece that is worn, are not in the sheet.
+- **The test stand** (`teststand`, the library's `item3d_test_item`) stands loose in front, its flame and lamp
+  burning, its plume and tuft of hair grown, its cape and pennant hung, all by item3d through particle3d, hair3d and
+  fabric3d. **A torch** (`fantasy/mmo/weapons/torch_club`) burns in the runner's left hand (motion3d) and in the
+  first villager's (crowd3d).
 
 The sword is a glb with glTF materials of its own, held as a loader `model`, to show that a glb from anywhere
 goes in a hand beside an item.

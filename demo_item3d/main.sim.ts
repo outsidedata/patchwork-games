@@ -11,8 +11,10 @@ import { worker } from './worker.sim.ts'
 import { villager } from './villager.sim.ts'
 import { runner } from './runner.sim.ts'
 import { wrench } from './wrench.sim.ts'
+import { teststand } from './teststand.sim.ts'
+import { particle3d } from '#plugins/particle3d/particle3d.sim.ts'
 import file from './main.scene.json' with { type: 'json' }
 
-export const sim: Sim = { scenemanager, loader, player, start, worker, guard, villager, runner, wrench }
+export const sim: Sim = { scenemanager, loader, player, start, worker, guard, villager, runner, wrench, teststand, particle3d }
 
 export const scene = file as Scene

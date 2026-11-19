@@ -1,0 +1,9 @@
+{
+  "cap": 4000,
+  "alphaTest": 0,
+  "files": [
+    "items/teststand.effects.json",
+    "items/torch.effects.json"
+  ],
+  "effects": {}
+}
