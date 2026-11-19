@@ -11,6 +11,579 @@
    "keys": {
     "Body": "soldier"
    }
+  },
+  "knight_armet": {
+   "kind": "armor_basic/head/armet"
+  },
+  "knight_gorget": {
+   "kind": "armor_basic/neck/gorget"
+  },
+  "knight_breastplate": {
+   "kind": "armor_basic/torso/breastplate"
+  },
+  "knight_backplate": {
+   "kind": "armor_basic/torso/backplate"
+  },
+  "knight_fauld": {
+   "kind": "armor_basic/torso/fauld"
+  },
+  "knight_pauldron_left": {
+   "kind": "armor_basic/arms/pauldron",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "knight_pauldron_right": {
+   "kind": "armor_basic/arms/pauldron",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "knight_vambrace_left": {
+   "kind": "armor_basic/arms/vambrace",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "knight_vambrace_right": {
+   "kind": "armor_basic/arms/vambrace",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "knight_gauntlet_left": {
+   "kind": "armor_basic/arms/gauntlet",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "knight_gauntlet_right": {
+   "kind": "armor_basic/arms/gauntlet",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "knight_cuisse_left": {
+   "kind": "armor_basic/legs/cuisse",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "knight_cuisse_right": {
+   "kind": "armor_basic/legs/cuisse",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "knight_greave_left": {
+   "kind": "armor_basic/legs/greave",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "knight_greave_right": {
+   "kind": "armor_basic/legs/greave",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "knight_sabaton_left": {
+   "kind": "armor_basic/legs/sabaton",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "knight_sabaton_right": {
+   "kind": "armor_basic/legs/sabaton",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "champion_helm": {
+   "kind": "armor_fantasy/champion/head/helm"
+  },
+  "champion_cuirass": {
+   "kind": "armor_fantasy/champion/torso/cuirass"
+  },
+  "champion_belt": {
+   "kind": "armor_fantasy/champion/torso/belt"
+  },
+  "champion_pauldron_left": {
+   "kind": "armor_fantasy/champion/arms/pauldron",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "champion_pauldron_right": {
+   "kind": "armor_fantasy/champion/arms/pauldron",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "champion_bracer_left": {
+   "kind": "armor_fantasy/champion/arms/bracer",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "champion_bracer_right": {
+   "kind": "armor_fantasy/champion/arms/bracer",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "champion_gauntlet_left": {
+   "kind": "armor_fantasy/champion/arms/gauntlet",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "champion_gauntlet_right": {
+   "kind": "armor_fantasy/champion/arms/gauntlet",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "champion_cuisse_left": {
+   "kind": "armor_fantasy/champion/legs/cuisse",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "champion_cuisse_right": {
+   "kind": "armor_fantasy/champion/legs/cuisse",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "champion_greave_left": {
+   "kind": "armor_fantasy/champion/legs/greave",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "champion_greave_right": {
+   "kind": "armor_fantasy/champion/legs/greave",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "champion_boot_left": {
+   "kind": "armor_fantasy/champion/legs/boot",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "champion_boot_right": {
+   "kind": "armor_fantasy/champion/legs/boot",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "ember_helm": {
+   "kind": "armor_fantasy/ember/head/helm"
+  },
+  "ember_cuirass": {
+   "kind": "armor_fantasy/ember/torso/cuirass"
+  },
+  "ember_belt": {
+   "kind": "armor_fantasy/ember/torso/belt"
+  },
+  "ember_pauldron_left": {
+   "kind": "armor_fantasy/ember/arms/pauldron",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "ember_pauldron_right": {
+   "kind": "armor_fantasy/ember/arms/pauldron",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "ember_bracer_left": {
+   "kind": "armor_fantasy/ember/arms/bracer",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "ember_bracer_right": {
+   "kind": "armor_fantasy/ember/arms/bracer",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "ember_gauntlet_left": {
+   "kind": "armor_fantasy/ember/arms/gauntlet",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "ember_gauntlet_right": {
+   "kind": "armor_fantasy/ember/arms/gauntlet",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "ember_cuisse_left": {
+   "kind": "armor_fantasy/ember/legs/cuisse",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "ember_cuisse_right": {
+   "kind": "armor_fantasy/ember/legs/cuisse",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "ember_greave_left": {
+   "kind": "armor_fantasy/ember/legs/greave",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "ember_greave_right": {
+   "kind": "armor_fantasy/ember/legs/greave",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "ember_boot_left": {
+   "kind": "armor_fantasy/ember/legs/boot",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "ember_boot_right": {
+   "kind": "armor_fantasy/ember/legs/boot",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "frost_helm": {
+   "kind": "armor_fantasy/frost/head/helm"
+  },
+  "frost_cuirass": {
+   "kind": "armor_fantasy/frost/torso/cuirass"
+  },
+  "frost_belt": {
+   "kind": "armor_fantasy/frost/torso/belt"
+  },
+  "frost_pauldron_left": {
+   "kind": "armor_fantasy/frost/arms/pauldron",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "frost_pauldron_right": {
+   "kind": "armor_fantasy/frost/arms/pauldron",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "frost_bracer_left": {
+   "kind": "armor_fantasy/frost/arms/bracer",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "frost_bracer_right": {
+   "kind": "armor_fantasy/frost/arms/bracer",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "frost_gauntlet_left": {
+   "kind": "armor_fantasy/frost/arms/gauntlet",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "frost_gauntlet_right": {
+   "kind": "armor_fantasy/frost/arms/gauntlet",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "frost_cuisse_left": {
+   "kind": "armor_fantasy/frost/legs/cuisse",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "frost_cuisse_right": {
+   "kind": "armor_fantasy/frost/legs/cuisse",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "frost_greave_left": {
+   "kind": "armor_fantasy/frost/legs/greave",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "frost_greave_right": {
+   "kind": "armor_fantasy/frost/legs/greave",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "frost_boot_left": {
+   "kind": "armor_fantasy/frost/legs/boot",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "frost_boot_right": {
+   "kind": "armor_fantasy/frost/legs/boot",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "ranger_helm": {
+   "kind": "armor_fantasy/ranger/head/helm"
+  },
+  "ranger_cuirass": {
+   "kind": "armor_fantasy/ranger/torso/cuirass"
+  },
+  "ranger_belt": {
+   "kind": "armor_fantasy/ranger/torso/belt"
+  },
+  "ranger_pauldron_left": {
+   "kind": "armor_fantasy/ranger/arms/pauldron",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "ranger_pauldron_right": {
+   "kind": "armor_fantasy/ranger/arms/pauldron",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "ranger_bracer_left": {
+   "kind": "armor_fantasy/ranger/arms/bracer",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "ranger_bracer_right": {
+   "kind": "armor_fantasy/ranger/arms/bracer",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "ranger_gauntlet_left": {
+   "kind": "armor_fantasy/ranger/arms/gauntlet",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "ranger_gauntlet_right": {
+   "kind": "armor_fantasy/ranger/arms/gauntlet",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "ranger_cuisse_left": {
+   "kind": "armor_fantasy/ranger/legs/cuisse",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "ranger_cuisse_right": {
+   "kind": "armor_fantasy/ranger/legs/cuisse",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "ranger_greave_left": {
+   "kind": "armor_fantasy/ranger/legs/greave",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "ranger_greave_right": {
+   "kind": "armor_fantasy/ranger/legs/greave",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "ranger_boot_left": {
+   "kind": "armor_fantasy/ranger/legs/boot",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "ranger_boot_right": {
+   "kind": "armor_fantasy/ranger/legs/boot",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "shaman_helm": {
+   "kind": "armor_fantasy/shaman/head/helm"
+  },
+  "shaman_cuirass": {
+   "kind": "armor_fantasy/shaman/torso/cuirass"
+  },
+  "shaman_belt": {
+   "kind": "armor_fantasy/shaman/torso/belt"
+  },
+  "shaman_pauldron_left": {
+   "kind": "armor_fantasy/shaman/arms/pauldron",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "shaman_pauldron_right": {
+   "kind": "armor_fantasy/shaman/arms/pauldron",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "shaman_bracer_left": {
+   "kind": "armor_fantasy/shaman/arms/bracer",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "shaman_bracer_right": {
+   "kind": "armor_fantasy/shaman/arms/bracer",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "shaman_gauntlet_left": {
+   "kind": "armor_fantasy/shaman/arms/gauntlet",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "shaman_gauntlet_right": {
+   "kind": "armor_fantasy/shaman/arms/gauntlet",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "shaman_cuisse_left": {
+   "kind": "armor_fantasy/shaman/legs/cuisse",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "shaman_cuisse_right": {
+   "kind": "armor_fantasy/shaman/legs/cuisse",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "shaman_greave_left": {
+   "kind": "armor_fantasy/shaman/legs/greave",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "shaman_greave_right": {
+   "kind": "armor_fantasy/shaman/legs/greave",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "shaman_boot_left": {
+   "kind": "armor_fantasy/shaman/legs/boot",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "shaman_boot_right": {
+   "kind": "armor_fantasy/shaman/legs/boot",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "warlord_helm": {
+   "kind": "armor_fantasy/warlord/head/helm"
+  },
+  "warlord_cuirass": {
+   "kind": "armor_fantasy/warlord/torso/cuirass"
+  },
+  "warlord_belt": {
+   "kind": "armor_fantasy/warlord/torso/belt"
+  },
+  "warlord_pauldron_left": {
+   "kind": "armor_fantasy/warlord/arms/pauldron",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "warlord_pauldron_right": {
+   "kind": "armor_fantasy/warlord/arms/pauldron",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "warlord_bracer_left": {
+   "kind": "armor_fantasy/warlord/arms/bracer",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "warlord_bracer_right": {
+   "kind": "armor_fantasy/warlord/arms/bracer",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "warlord_gauntlet_left": {
+   "kind": "armor_fantasy/warlord/arms/gauntlet",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "warlord_gauntlet_right": {
+   "kind": "armor_fantasy/warlord/arms/gauntlet",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "warlord_cuisse_left": {
+   "kind": "armor_fantasy/warlord/legs/cuisse",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "warlord_cuisse_right": {
+   "kind": "armor_fantasy/warlord/legs/cuisse",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "warlord_greave_left": {
+   "kind": "armor_fantasy/warlord/legs/greave",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "warlord_greave_right": {
+   "kind": "armor_fantasy/warlord/legs/greave",
+   "keys": {
+    "Hand": "right"
+   }
+  },
+  "warlord_boot_left": {
+   "kind": "armor_fantasy/warlord/legs/boot",
+   "keys": {
+    "Hand": "left"
+   }
+  },
+  "warlord_boot_right": {
+   "kind": "armor_fantasy/warlord/legs/boot",
+   "keys": {
+    "Hand": "right"
+   }
   }
  }
 }

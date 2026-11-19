@@ -7,5 +7,14 @@
   "stand": {}
  },
  "clips": {},
- "table": {}
+ "table": {},
+ "ends": {
+  "guard": {}
+ },
+ "grips": {
+  "guard": {}
+ },
+ "touches": {
+  "guard": {}
+ }
 }

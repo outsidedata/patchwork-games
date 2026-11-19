@@ -118,6 +118,1076 @@
           "type": "json",
           "url": "/games/demo_item3d/assets/demo_item3d.bodies.json",
           "preload": true
+        },
+        "knight_armet-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_armet.glb",
+          "preload": true
+        },
+        "knight_armet-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_armet.item.json",
+          "preload": true
+        },
+        "knight_gorget-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_gorget.glb",
+          "preload": true
+        },
+        "knight_gorget-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_gorget.item.json",
+          "preload": true
+        },
+        "knight_breastplate-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_breastplate.glb",
+          "preload": true
+        },
+        "knight_breastplate-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_breastplate.item.json",
+          "preload": true
+        },
+        "knight_backplate-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_backplate.glb",
+          "preload": true
+        },
+        "knight_backplate-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_backplate.item.json",
+          "preload": true
+        },
+        "knight_fauld-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_fauld.glb",
+          "preload": true
+        },
+        "knight_fauld-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_fauld.item.json",
+          "preload": true
+        },
+        "knight_pauldron_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_pauldron_left.glb",
+          "preload": true
+        },
+        "knight_pauldron_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_pauldron_left.item.json",
+          "preload": true
+        },
+        "knight_pauldron_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_pauldron_right.glb",
+          "preload": true
+        },
+        "knight_pauldron_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_pauldron_right.item.json",
+          "preload": true
+        },
+        "knight_vambrace_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_vambrace_left.glb",
+          "preload": true
+        },
+        "knight_vambrace_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_vambrace_left.item.json",
+          "preload": true
+        },
+        "knight_vambrace_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_vambrace_right.glb",
+          "preload": true
+        },
+        "knight_vambrace_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_vambrace_right.item.json",
+          "preload": true
+        },
+        "knight_gauntlet_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_gauntlet_left.glb",
+          "preload": true
+        },
+        "knight_gauntlet_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_gauntlet_left.item.json",
+          "preload": true
+        },
+        "knight_gauntlet_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_gauntlet_right.glb",
+          "preload": true
+        },
+        "knight_gauntlet_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_gauntlet_right.item.json",
+          "preload": true
+        },
+        "knight_cuisse_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_cuisse_left.glb",
+          "preload": true
+        },
+        "knight_cuisse_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_cuisse_left.item.json",
+          "preload": true
+        },
+        "knight_cuisse_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_cuisse_right.glb",
+          "preload": true
+        },
+        "knight_cuisse_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_cuisse_right.item.json",
+          "preload": true
+        },
+        "knight_greave_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_greave_left.glb",
+          "preload": true
+        },
+        "knight_greave_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_greave_left.item.json",
+          "preload": true
+        },
+        "knight_greave_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_greave_right.glb",
+          "preload": true
+        },
+        "knight_greave_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_greave_right.item.json",
+          "preload": true
+        },
+        "knight_sabaton_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_sabaton_left.glb",
+          "preload": true
+        },
+        "knight_sabaton_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_sabaton_left.item.json",
+          "preload": true
+        },
+        "knight_sabaton_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/knight_sabaton_right.glb",
+          "preload": true
+        },
+        "knight_sabaton_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/knight_sabaton_right.item.json",
+          "preload": true
+        },
+        "champion_helm-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/champion_helm.glb",
+          "preload": true
+        },
+        "champion_helm-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/champion_helm.item.json",
+          "preload": true
+        },
+        "champion_cuirass-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/champion_cuirass.glb",
+          "preload": true
+        },
+        "champion_cuirass-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/champion_cuirass.item.json",
+          "preload": true
+        },
+        "champion_belt-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/champion_belt.glb",
+          "preload": true
+        },
+        "champion_belt-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/champion_belt.item.json",
+          "preload": true
+        },
+        "champion_pauldron_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/champion_pauldron_left.glb",
+          "preload": true
+        },
+        "champion_pauldron_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/champion_pauldron_left.item.json",
+          "preload": true
+        },
+        "champion_pauldron_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/champion_pauldron_right.glb",
+          "preload": true
+        },
+        "champion_pauldron_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/champion_pauldron_right.item.json",
+          "preload": true
+        },
+        "champion_bracer_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/champion_bracer_left.glb",
+          "preload": true
+        },
+        "champion_bracer_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/champion_bracer_left.item.json",
+          "preload": true
+        },
+        "champion_bracer_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/champion_bracer_right.glb",
+          "preload": true
+        },
+        "champion_bracer_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/champion_bracer_right.item.json",
+          "preload": true
+        },
+        "champion_gauntlet_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/champion_gauntlet_left.glb",
+          "preload": true
+        },
+        "champion_gauntlet_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/champion_gauntlet_left.item.json",
+          "preload": true
+        },
+        "champion_gauntlet_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/champion_gauntlet_right.glb",
+          "preload": true
+        },
+        "champion_gauntlet_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/champion_gauntlet_right.item.json",
+          "preload": true
+        },
+        "champion_cuisse_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/champion_cuisse_left.glb",
+          "preload": true
+        },
+        "champion_cuisse_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/champion_cuisse_left.item.json",
+          "preload": true
+        },
+        "champion_cuisse_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/champion_cuisse_right.glb",
+          "preload": true
+        },
+        "champion_cuisse_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/champion_cuisse_right.item.json",
+          "preload": true
+        },
+        "champion_greave_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/champion_greave_left.glb",
+          "preload": true
+        },
+        "champion_greave_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/champion_greave_left.item.json",
+          "preload": true
+        },
+        "champion_greave_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/champion_greave_right.glb",
+          "preload": true
+        },
+        "champion_greave_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/champion_greave_right.item.json",
+          "preload": true
+        },
+        "champion_boot_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/champion_boot_left.glb",
+          "preload": true
+        },
+        "champion_boot_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/champion_boot_left.item.json",
+          "preload": true
+        },
+        "champion_boot_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/champion_boot_right.glb",
+          "preload": true
+        },
+        "champion_boot_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/champion_boot_right.item.json",
+          "preload": true
+        },
+        "ember_helm-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ember_helm.glb",
+          "preload": true
+        },
+        "ember_helm-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ember_helm.item.json",
+          "preload": true
+        },
+        "ember_cuirass-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ember_cuirass.glb",
+          "preload": true
+        },
+        "ember_cuirass-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ember_cuirass.item.json",
+          "preload": true
+        },
+        "ember_belt-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ember_belt.glb",
+          "preload": true
+        },
+        "ember_belt-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ember_belt.item.json",
+          "preload": true
+        },
+        "ember_pauldron_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ember_pauldron_left.glb",
+          "preload": true
+        },
+        "ember_pauldron_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ember_pauldron_left.item.json",
+          "preload": true
+        },
+        "ember_pauldron_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ember_pauldron_right.glb",
+          "preload": true
+        },
+        "ember_pauldron_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ember_pauldron_right.item.json",
+          "preload": true
+        },
+        "ember_bracer_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ember_bracer_left.glb",
+          "preload": true
+        },
+        "ember_bracer_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ember_bracer_left.item.json",
+          "preload": true
+        },
+        "ember_bracer_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ember_bracer_right.glb",
+          "preload": true
+        },
+        "ember_bracer_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ember_bracer_right.item.json",
+          "preload": true
+        },
+        "ember_gauntlet_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ember_gauntlet_left.glb",
+          "preload": true
+        },
+        "ember_gauntlet_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ember_gauntlet_left.item.json",
+          "preload": true
+        },
+        "ember_gauntlet_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ember_gauntlet_right.glb",
+          "preload": true
+        },
+        "ember_gauntlet_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ember_gauntlet_right.item.json",
+          "preload": true
+        },
+        "ember_cuisse_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ember_cuisse_left.glb",
+          "preload": true
+        },
+        "ember_cuisse_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ember_cuisse_left.item.json",
+          "preload": true
+        },
+        "ember_cuisse_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ember_cuisse_right.glb",
+          "preload": true
+        },
+        "ember_cuisse_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ember_cuisse_right.item.json",
+          "preload": true
+        },
+        "ember_greave_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ember_greave_left.glb",
+          "preload": true
+        },
+        "ember_greave_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ember_greave_left.item.json",
+          "preload": true
+        },
+        "ember_greave_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ember_greave_right.glb",
+          "preload": true
+        },
+        "ember_greave_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ember_greave_right.item.json",
+          "preload": true
+        },
+        "ember_boot_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ember_boot_left.glb",
+          "preload": true
+        },
+        "ember_boot_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ember_boot_left.item.json",
+          "preload": true
+        },
+        "ember_boot_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ember_boot_right.glb",
+          "preload": true
+        },
+        "ember_boot_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ember_boot_right.item.json",
+          "preload": true
+        },
+        "frost_helm-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/frost_helm.glb",
+          "preload": true
+        },
+        "frost_helm-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/frost_helm.item.json",
+          "preload": true
+        },
+        "frost_cuirass-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/frost_cuirass.glb",
+          "preload": true
+        },
+        "frost_cuirass-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/frost_cuirass.item.json",
+          "preload": true
+        },
+        "frost_belt-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/frost_belt.glb",
+          "preload": true
+        },
+        "frost_belt-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/frost_belt.item.json",
+          "preload": true
+        },
+        "frost_pauldron_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/frost_pauldron_left.glb",
+          "preload": true
+        },
+        "frost_pauldron_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/frost_pauldron_left.item.json",
+          "preload": true
+        },
+        "frost_pauldron_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/frost_pauldron_right.glb",
+          "preload": true
+        },
+        "frost_pauldron_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/frost_pauldron_right.item.json",
+          "preload": true
+        },
+        "frost_bracer_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/frost_bracer_left.glb",
+          "preload": true
+        },
+        "frost_bracer_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/frost_bracer_left.item.json",
+          "preload": true
+        },
+        "frost_bracer_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/frost_bracer_right.glb",
+          "preload": true
+        },
+        "frost_bracer_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/frost_bracer_right.item.json",
+          "preload": true
+        },
+        "frost_gauntlet_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/frost_gauntlet_left.glb",
+          "preload": true
+        },
+        "frost_gauntlet_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/frost_gauntlet_left.item.json",
+          "preload": true
+        },
+        "frost_gauntlet_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/frost_gauntlet_right.glb",
+          "preload": true
+        },
+        "frost_gauntlet_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/frost_gauntlet_right.item.json",
+          "preload": true
+        },
+        "frost_cuisse_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/frost_cuisse_left.glb",
+          "preload": true
+        },
+        "frost_cuisse_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/frost_cuisse_left.item.json",
+          "preload": true
+        },
+        "frost_cuisse_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/frost_cuisse_right.glb",
+          "preload": true
+        },
+        "frost_cuisse_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/frost_cuisse_right.item.json",
+          "preload": true
+        },
+        "frost_greave_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/frost_greave_left.glb",
+          "preload": true
+        },
+        "frost_greave_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/frost_greave_left.item.json",
+          "preload": true
+        },
+        "frost_greave_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/frost_greave_right.glb",
+          "preload": true
+        },
+        "frost_greave_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/frost_greave_right.item.json",
+          "preload": true
+        },
+        "frost_boot_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/frost_boot_left.glb",
+          "preload": true
+        },
+        "frost_boot_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/frost_boot_left.item.json",
+          "preload": true
+        },
+        "frost_boot_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/frost_boot_right.glb",
+          "preload": true
+        },
+        "frost_boot_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/frost_boot_right.item.json",
+          "preload": true
+        },
+        "ranger_helm-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ranger_helm.glb",
+          "preload": true
+        },
+        "ranger_helm-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ranger_helm.item.json",
+          "preload": true
+        },
+        "ranger_cuirass-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ranger_cuirass.glb",
+          "preload": true
+        },
+        "ranger_cuirass-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ranger_cuirass.item.json",
+          "preload": true
+        },
+        "ranger_belt-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ranger_belt.glb",
+          "preload": true
+        },
+        "ranger_belt-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ranger_belt.item.json",
+          "preload": true
+        },
+        "ranger_pauldron_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ranger_pauldron_left.glb",
+          "preload": true
+        },
+        "ranger_pauldron_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ranger_pauldron_left.item.json",
+          "preload": true
+        },
+        "ranger_pauldron_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ranger_pauldron_right.glb",
+          "preload": true
+        },
+        "ranger_pauldron_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ranger_pauldron_right.item.json",
+          "preload": true
+        },
+        "ranger_bracer_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ranger_bracer_left.glb",
+          "preload": true
+        },
+        "ranger_bracer_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ranger_bracer_left.item.json",
+          "preload": true
+        },
+        "ranger_bracer_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ranger_bracer_right.glb",
+          "preload": true
+        },
+        "ranger_bracer_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ranger_bracer_right.item.json",
+          "preload": true
+        },
+        "ranger_gauntlet_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ranger_gauntlet_left.glb",
+          "preload": true
+        },
+        "ranger_gauntlet_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ranger_gauntlet_left.item.json",
+          "preload": true
+        },
+        "ranger_gauntlet_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ranger_gauntlet_right.glb",
+          "preload": true
+        },
+        "ranger_gauntlet_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ranger_gauntlet_right.item.json",
+          "preload": true
+        },
+        "ranger_cuisse_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ranger_cuisse_left.glb",
+          "preload": true
+        },
+        "ranger_cuisse_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ranger_cuisse_left.item.json",
+          "preload": true
+        },
+        "ranger_cuisse_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ranger_cuisse_right.glb",
+          "preload": true
+        },
+        "ranger_cuisse_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ranger_cuisse_right.item.json",
+          "preload": true
+        },
+        "ranger_greave_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ranger_greave_left.glb",
+          "preload": true
+        },
+        "ranger_greave_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ranger_greave_left.item.json",
+          "preload": true
+        },
+        "ranger_greave_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ranger_greave_right.glb",
+          "preload": true
+        },
+        "ranger_greave_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ranger_greave_right.item.json",
+          "preload": true
+        },
+        "ranger_boot_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ranger_boot_left.glb",
+          "preload": true
+        },
+        "ranger_boot_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ranger_boot_left.item.json",
+          "preload": true
+        },
+        "ranger_boot_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/ranger_boot_right.glb",
+          "preload": true
+        },
+        "ranger_boot_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/ranger_boot_right.item.json",
+          "preload": true
+        },
+        "shaman_helm-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/shaman_helm.glb",
+          "preload": true
+        },
+        "shaman_helm-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/shaman_helm.item.json",
+          "preload": true
+        },
+        "shaman_cuirass-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/shaman_cuirass.glb",
+          "preload": true
+        },
+        "shaman_cuirass-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/shaman_cuirass.item.json",
+          "preload": true
+        },
+        "shaman_belt-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/shaman_belt.glb",
+          "preload": true
+        },
+        "shaman_belt-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/shaman_belt.item.json",
+          "preload": true
+        },
+        "shaman_pauldron_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/shaman_pauldron_left.glb",
+          "preload": true
+        },
+        "shaman_pauldron_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/shaman_pauldron_left.item.json",
+          "preload": true
+        },
+        "shaman_pauldron_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/shaman_pauldron_right.glb",
+          "preload": true
+        },
+        "shaman_pauldron_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/shaman_pauldron_right.item.json",
+          "preload": true
+        },
+        "shaman_bracer_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/shaman_bracer_left.glb",
+          "preload": true
+        },
+        "shaman_bracer_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/shaman_bracer_left.item.json",
+          "preload": true
+        },
+        "shaman_bracer_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/shaman_bracer_right.glb",
+          "preload": true
+        },
+        "shaman_bracer_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/shaman_bracer_right.item.json",
+          "preload": true
+        },
+        "shaman_gauntlet_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/shaman_gauntlet_left.glb",
+          "preload": true
+        },
+        "shaman_gauntlet_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/shaman_gauntlet_left.item.json",
+          "preload": true
+        },
+        "shaman_gauntlet_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/shaman_gauntlet_right.glb",
+          "preload": true
+        },
+        "shaman_gauntlet_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/shaman_gauntlet_right.item.json",
+          "preload": true
+        },
+        "shaman_cuisse_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/shaman_cuisse_left.glb",
+          "preload": true
+        },
+        "shaman_cuisse_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/shaman_cuisse_left.item.json",
+          "preload": true
+        },
+        "shaman_cuisse_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/shaman_cuisse_right.glb",
+          "preload": true
+        },
+        "shaman_cuisse_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/shaman_cuisse_right.item.json",
+          "preload": true
+        },
+        "shaman_greave_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/shaman_greave_left.glb",
+          "preload": true
+        },
+        "shaman_greave_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/shaman_greave_left.item.json",
+          "preload": true
+        },
+        "shaman_greave_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/shaman_greave_right.glb",
+          "preload": true
+        },
+        "shaman_greave_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/shaman_greave_right.item.json",
+          "preload": true
+        },
+        "shaman_boot_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/shaman_boot_left.glb",
+          "preload": true
+        },
+        "shaman_boot_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/shaman_boot_left.item.json",
+          "preload": true
+        },
+        "shaman_boot_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/shaman_boot_right.glb",
+          "preload": true
+        },
+        "shaman_boot_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/shaman_boot_right.item.json",
+          "preload": true
+        },
+        "warlord_helm-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/warlord_helm.glb",
+          "preload": true
+        },
+        "warlord_helm-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/warlord_helm.item.json",
+          "preload": true
+        },
+        "warlord_cuirass-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/warlord_cuirass.glb",
+          "preload": true
+        },
+        "warlord_cuirass-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/warlord_cuirass.item.json",
+          "preload": true
+        },
+        "warlord_belt-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/warlord_belt.glb",
+          "preload": true
+        },
+        "warlord_belt-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/warlord_belt.item.json",
+          "preload": true
+        },
+        "warlord_pauldron_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/warlord_pauldron_left.glb",
+          "preload": true
+        },
+        "warlord_pauldron_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/warlord_pauldron_left.item.json",
+          "preload": true
+        },
+        "warlord_pauldron_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/warlord_pauldron_right.glb",
+          "preload": true
+        },
+        "warlord_pauldron_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/warlord_pauldron_right.item.json",
+          "preload": true
+        },
+        "warlord_bracer_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/warlord_bracer_left.glb",
+          "preload": true
+        },
+        "warlord_bracer_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/warlord_bracer_left.item.json",
+          "preload": true
+        },
+        "warlord_bracer_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/warlord_bracer_right.glb",
+          "preload": true
+        },
+        "warlord_bracer_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/warlord_bracer_right.item.json",
+          "preload": true
+        },
+        "warlord_gauntlet_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/warlord_gauntlet_left.glb",
+          "preload": true
+        },
+        "warlord_gauntlet_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/warlord_gauntlet_left.item.json",
+          "preload": true
+        },
+        "warlord_gauntlet_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/warlord_gauntlet_right.glb",
+          "preload": true
+        },
+        "warlord_gauntlet_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/warlord_gauntlet_right.item.json",
+          "preload": true
+        },
+        "warlord_cuisse_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/warlord_cuisse_left.glb",
+          "preload": true
+        },
+        "warlord_cuisse_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/warlord_cuisse_left.item.json",
+          "preload": true
+        },
+        "warlord_cuisse_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/warlord_cuisse_right.glb",
+          "preload": true
+        },
+        "warlord_cuisse_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/warlord_cuisse_right.item.json",
+          "preload": true
+        },
+        "warlord_greave_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/warlord_greave_left.glb",
+          "preload": true
+        },
+        "warlord_greave_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/warlord_greave_left.item.json",
+          "preload": true
+        },
+        "warlord_greave_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/warlord_greave_right.glb",
+          "preload": true
+        },
+        "warlord_greave_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/warlord_greave_right.item.json",
+          "preload": true
+        },
+        "warlord_boot_left-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/warlord_boot_left.glb",
+          "preload": true
+        },
+        "warlord_boot_left-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/warlord_boot_left.item.json",
+          "preload": true
+        },
+        "warlord_boot_right-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/warlord_boot_right.glb",
+          "preload": true
+        },
+        "warlord_boot_right-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/warlord_boot_right.item.json",
+          "preload": true
         }
       }
     },
@@ -155,6 +1225,434 @@
         "skullcap": {
           "glb": "skullcap-glb",
           "file": "skullcap-item"
+        },
+        "knight_armet": {
+          "glb": "knight_armet-glb",
+          "file": "knight_armet-item"
+        },
+        "knight_gorget": {
+          "glb": "knight_gorget-glb",
+          "file": "knight_gorget-item"
+        },
+        "knight_breastplate": {
+          "glb": "knight_breastplate-glb",
+          "file": "knight_breastplate-item"
+        },
+        "knight_backplate": {
+          "glb": "knight_backplate-glb",
+          "file": "knight_backplate-item"
+        },
+        "knight_fauld": {
+          "glb": "knight_fauld-glb",
+          "file": "knight_fauld-item"
+        },
+        "knight_pauldron_left": {
+          "glb": "knight_pauldron_left-glb",
+          "file": "knight_pauldron_left-item"
+        },
+        "knight_pauldron_right": {
+          "glb": "knight_pauldron_right-glb",
+          "file": "knight_pauldron_right-item"
+        },
+        "knight_vambrace_left": {
+          "glb": "knight_vambrace_left-glb",
+          "file": "knight_vambrace_left-item"
+        },
+        "knight_vambrace_right": {
+          "glb": "knight_vambrace_right-glb",
+          "file": "knight_vambrace_right-item"
+        },
+        "knight_gauntlet_left": {
+          "glb": "knight_gauntlet_left-glb",
+          "file": "knight_gauntlet_left-item"
+        },
+        "knight_gauntlet_right": {
+          "glb": "knight_gauntlet_right-glb",
+          "file": "knight_gauntlet_right-item"
+        },
+        "knight_cuisse_left": {
+          "glb": "knight_cuisse_left-glb",
+          "file": "knight_cuisse_left-item"
+        },
+        "knight_cuisse_right": {
+          "glb": "knight_cuisse_right-glb",
+          "file": "knight_cuisse_right-item"
+        },
+        "knight_greave_left": {
+          "glb": "knight_greave_left-glb",
+          "file": "knight_greave_left-item"
+        },
+        "knight_greave_right": {
+          "glb": "knight_greave_right-glb",
+          "file": "knight_greave_right-item"
+        },
+        "knight_sabaton_left": {
+          "glb": "knight_sabaton_left-glb",
+          "file": "knight_sabaton_left-item"
+        },
+        "knight_sabaton_right": {
+          "glb": "knight_sabaton_right-glb",
+          "file": "knight_sabaton_right-item"
+        },
+        "champion_helm": {
+          "glb": "champion_helm-glb",
+          "file": "champion_helm-item"
+        },
+        "champion_cuirass": {
+          "glb": "champion_cuirass-glb",
+          "file": "champion_cuirass-item"
+        },
+        "champion_belt": {
+          "glb": "champion_belt-glb",
+          "file": "champion_belt-item"
+        },
+        "champion_pauldron_left": {
+          "glb": "champion_pauldron_left-glb",
+          "file": "champion_pauldron_left-item"
+        },
+        "champion_pauldron_right": {
+          "glb": "champion_pauldron_right-glb",
+          "file": "champion_pauldron_right-item"
+        },
+        "champion_bracer_left": {
+          "glb": "champion_bracer_left-glb",
+          "file": "champion_bracer_left-item"
+        },
+        "champion_bracer_right": {
+          "glb": "champion_bracer_right-glb",
+          "file": "champion_bracer_right-item"
+        },
+        "champion_gauntlet_left": {
+          "glb": "champion_gauntlet_left-glb",
+          "file": "champion_gauntlet_left-item"
+        },
+        "champion_gauntlet_right": {
+          "glb": "champion_gauntlet_right-glb",
+          "file": "champion_gauntlet_right-item"
+        },
+        "champion_cuisse_left": {
+          "glb": "champion_cuisse_left-glb",
+          "file": "champion_cuisse_left-item"
+        },
+        "champion_cuisse_right": {
+          "glb": "champion_cuisse_right-glb",
+          "file": "champion_cuisse_right-item"
+        },
+        "champion_greave_left": {
+          "glb": "champion_greave_left-glb",
+          "file": "champion_greave_left-item"
+        },
+        "champion_greave_right": {
+          "glb": "champion_greave_right-glb",
+          "file": "champion_greave_right-item"
+        },
+        "champion_boot_left": {
+          "glb": "champion_boot_left-glb",
+          "file": "champion_boot_left-item"
+        },
+        "champion_boot_right": {
+          "glb": "champion_boot_right-glb",
+          "file": "champion_boot_right-item"
+        },
+        "ember_helm": {
+          "glb": "ember_helm-glb",
+          "file": "ember_helm-item"
+        },
+        "ember_cuirass": {
+          "glb": "ember_cuirass-glb",
+          "file": "ember_cuirass-item"
+        },
+        "ember_belt": {
+          "glb": "ember_belt-glb",
+          "file": "ember_belt-item"
+        },
+        "ember_pauldron_left": {
+          "glb": "ember_pauldron_left-glb",
+          "file": "ember_pauldron_left-item"
+        },
+        "ember_pauldron_right": {
+          "glb": "ember_pauldron_right-glb",
+          "file": "ember_pauldron_right-item"
+        },
+        "ember_bracer_left": {
+          "glb": "ember_bracer_left-glb",
+          "file": "ember_bracer_left-item"
+        },
+        "ember_bracer_right": {
+          "glb": "ember_bracer_right-glb",
+          "file": "ember_bracer_right-item"
+        },
+        "ember_gauntlet_left": {
+          "glb": "ember_gauntlet_left-glb",
+          "file": "ember_gauntlet_left-item"
+        },
+        "ember_gauntlet_right": {
+          "glb": "ember_gauntlet_right-glb",
+          "file": "ember_gauntlet_right-item"
+        },
+        "ember_cuisse_left": {
+          "glb": "ember_cuisse_left-glb",
+          "file": "ember_cuisse_left-item"
+        },
+        "ember_cuisse_right": {
+          "glb": "ember_cuisse_right-glb",
+          "file": "ember_cuisse_right-item"
+        },
+        "ember_greave_left": {
+          "glb": "ember_greave_left-glb",
+          "file": "ember_greave_left-item"
+        },
+        "ember_greave_right": {
+          "glb": "ember_greave_right-glb",
+          "file": "ember_greave_right-item"
+        },
+        "ember_boot_left": {
+          "glb": "ember_boot_left-glb",
+          "file": "ember_boot_left-item"
+        },
+        "ember_boot_right": {
+          "glb": "ember_boot_right-glb",
+          "file": "ember_boot_right-item"
+        },
+        "frost_helm": {
+          "glb": "frost_helm-glb",
+          "file": "frost_helm-item"
+        },
+        "frost_cuirass": {
+          "glb": "frost_cuirass-glb",
+          "file": "frost_cuirass-item"
+        },
+        "frost_belt": {
+          "glb": "frost_belt-glb",
+          "file": "frost_belt-item"
+        },
+        "frost_pauldron_left": {
+          "glb": "frost_pauldron_left-glb",
+          "file": "frost_pauldron_left-item"
+        },
+        "frost_pauldron_right": {
+          "glb": "frost_pauldron_right-glb",
+          "file": "frost_pauldron_right-item"
+        },
+        "frost_bracer_left": {
+          "glb": "frost_bracer_left-glb",
+          "file": "frost_bracer_left-item"
+        },
+        "frost_bracer_right": {
+          "glb": "frost_bracer_right-glb",
+          "file": "frost_bracer_right-item"
+        },
+        "frost_gauntlet_left": {
+          "glb": "frost_gauntlet_left-glb",
+          "file": "frost_gauntlet_left-item"
+        },
+        "frost_gauntlet_right": {
+          "glb": "frost_gauntlet_right-glb",
+          "file": "frost_gauntlet_right-item"
+        },
+        "frost_cuisse_left": {
+          "glb": "frost_cuisse_left-glb",
+          "file": "frost_cuisse_left-item"
+        },
+        "frost_cuisse_right": {
+          "glb": "frost_cuisse_right-glb",
+          "file": "frost_cuisse_right-item"
+        },
+        "frost_greave_left": {
+          "glb": "frost_greave_left-glb",
+          "file": "frost_greave_left-item"
+        },
+        "frost_greave_right": {
+          "glb": "frost_greave_right-glb",
+          "file": "frost_greave_right-item"
+        },
+        "frost_boot_left": {
+          "glb": "frost_boot_left-glb",
+          "file": "frost_boot_left-item"
+        },
+        "frost_boot_right": {
+          "glb": "frost_boot_right-glb",
+          "file": "frost_boot_right-item"
+        },
+        "ranger_helm": {
+          "glb": "ranger_helm-glb",
+          "file": "ranger_helm-item"
+        },
+        "ranger_cuirass": {
+          "glb": "ranger_cuirass-glb",
+          "file": "ranger_cuirass-item"
+        },
+        "ranger_belt": {
+          "glb": "ranger_belt-glb",
+          "file": "ranger_belt-item"
+        },
+        "ranger_pauldron_left": {
+          "glb": "ranger_pauldron_left-glb",
+          "file": "ranger_pauldron_left-item"
+        },
+        "ranger_pauldron_right": {
+          "glb": "ranger_pauldron_right-glb",
+          "file": "ranger_pauldron_right-item"
+        },
+        "ranger_bracer_left": {
+          "glb": "ranger_bracer_left-glb",
+          "file": "ranger_bracer_left-item"
+        },
+        "ranger_bracer_right": {
+          "glb": "ranger_bracer_right-glb",
+          "file": "ranger_bracer_right-item"
+        },
+        "ranger_gauntlet_left": {
+          "glb": "ranger_gauntlet_left-glb",
+          "file": "ranger_gauntlet_left-item"
+        },
+        "ranger_gauntlet_right": {
+          "glb": "ranger_gauntlet_right-glb",
+          "file": "ranger_gauntlet_right-item"
+        },
+        "ranger_cuisse_left": {
+          "glb": "ranger_cuisse_left-glb",
+          "file": "ranger_cuisse_left-item"
+        },
+        "ranger_cuisse_right": {
+          "glb": "ranger_cuisse_right-glb",
+          "file": "ranger_cuisse_right-item"
+        },
+        "ranger_greave_left": {
+          "glb": "ranger_greave_left-glb",
+          "file": "ranger_greave_left-item"
+        },
+        "ranger_greave_right": {
+          "glb": "ranger_greave_right-glb",
+          "file": "ranger_greave_right-item"
+        },
+        "ranger_boot_left": {
+          "glb": "ranger_boot_left-glb",
+          "file": "ranger_boot_left-item"
+        },
+        "ranger_boot_right": {
+          "glb": "ranger_boot_right-glb",
+          "file": "ranger_boot_right-item"
+        },
+        "shaman_helm": {
+          "glb": "shaman_helm-glb",
+          "file": "shaman_helm-item"
+        },
+        "shaman_cuirass": {
+          "glb": "shaman_cuirass-glb",
+          "file": "shaman_cuirass-item"
+        },
+        "shaman_belt": {
+          "glb": "shaman_belt-glb",
+          "file": "shaman_belt-item"
+        },
+        "shaman_pauldron_left": {
+          "glb": "shaman_pauldron_left-glb",
+          "file": "shaman_pauldron_left-item"
+        },
+        "shaman_pauldron_right": {
+          "glb": "shaman_pauldron_right-glb",
+          "file": "shaman_pauldron_right-item"
+        },
+        "shaman_bracer_left": {
+          "glb": "shaman_bracer_left-glb",
+          "file": "shaman_bracer_left-item"
+        },
+        "shaman_bracer_right": {
+          "glb": "shaman_bracer_right-glb",
+          "file": "shaman_bracer_right-item"
+        },
+        "shaman_gauntlet_left": {
+          "glb": "shaman_gauntlet_left-glb",
+          "file": "shaman_gauntlet_left-item"
+        },
+        "shaman_gauntlet_right": {
+          "glb": "shaman_gauntlet_right-glb",
+          "file": "shaman_gauntlet_right-item"
+        },
+        "shaman_cuisse_left": {
+          "glb": "shaman_cuisse_left-glb",
+          "file": "shaman_cuisse_left-item"
+        },
+        "shaman_cuisse_right": {
+          "glb": "shaman_cuisse_right-glb",
+          "file": "shaman_cuisse_right-item"
+        },
+        "shaman_greave_left": {
+          "glb": "shaman_greave_left-glb",
+          "file": "shaman_greave_left-item"
+        },
+        "shaman_greave_right": {
+          "glb": "shaman_greave_right-glb",
+          "file": "shaman_greave_right-item"
+        },
+        "shaman_boot_left": {
+          "glb": "shaman_boot_left-glb",
+          "file": "shaman_boot_left-item"
+        },
+        "shaman_boot_right": {
+          "glb": "shaman_boot_right-glb",
+          "file": "shaman_boot_right-item"
+        },
+        "warlord_helm": {
+          "glb": "warlord_helm-glb",
+          "file": "warlord_helm-item"
+        },
+        "warlord_cuirass": {
+          "glb": "warlord_cuirass-glb",
+          "file": "warlord_cuirass-item"
+        },
+        "warlord_belt": {
+          "glb": "warlord_belt-glb",
+          "file": "warlord_belt-item"
+        },
+        "warlord_pauldron_left": {
+          "glb": "warlord_pauldron_left-glb",
+          "file": "warlord_pauldron_left-item"
+        },
+        "warlord_pauldron_right": {
+          "glb": "warlord_pauldron_right-glb",
+          "file": "warlord_pauldron_right-item"
+        },
+        "warlord_bracer_left": {
+          "glb": "warlord_bracer_left-glb",
+          "file": "warlord_bracer_left-item"
+        },
+        "warlord_bracer_right": {
+          "glb": "warlord_bracer_right-glb",
+          "file": "warlord_bracer_right-item"
+        },
+        "warlord_gauntlet_left": {
+          "glb": "warlord_gauntlet_left-glb",
+          "file": "warlord_gauntlet_left-item"
+        },
+        "warlord_gauntlet_right": {
+          "glb": "warlord_gauntlet_right-glb",
+          "file": "warlord_gauntlet_right-item"
+        },
+        "warlord_cuisse_left": {
+          "glb": "warlord_cuisse_left-glb",
+          "file": "warlord_cuisse_left-item"
+        },
+        "warlord_cuisse_right": {
+          "glb": "warlord_cuisse_right-glb",
+          "file": "warlord_cuisse_right-item"
+        },
+        "warlord_greave_left": {
+          "glb": "warlord_greave_left-glb",
+          "file": "warlord_greave_left-item"
+        },
+        "warlord_greave_right": {
+          "glb": "warlord_greave_right-glb",
+          "file": "warlord_greave_right-item"
+        },
+        "warlord_boot_left": {
+          "glb": "warlord_boot_left-glb",
+          "file": "warlord_boot_left-item"
+        },
+        "warlord_boot_right": {
+          "glb": "warlord_boot_right-glb",
+          "file": "warlord_boot_right-item"
         }
       },
       "kinds": {
@@ -695,6 +2193,225 @@
         0
       ],
       "yaw": 3.141592653589793
+    },
+    {
+      "is": "villager",
+      "pos": [
+        -4.5,
+        0,
+        2.5
+      ],
+      "to": [
+        -4.5,
+        0,
+        2.5
+      ],
+      "yaw": 3.141592653589793,
+      "holding": {
+        "head": "knight_armet",
+        "neck": "knight_gorget",
+        "chest": "knight_breastplate",
+        "back": "knight_backplate",
+        "hips": "knight_fauld",
+        "leftArm": "knight_pauldron_left",
+        "rightArm": "knight_pauldron_right",
+        "leftForearm": "knight_vambrace_left",
+        "rightForearm": "knight_vambrace_right",
+        "leftHand": "knight_gauntlet_left",
+        "rightHand": "knight_gauntlet_right",
+        "leftThigh": "knight_cuisse_left",
+        "rightThigh": "knight_cuisse_right",
+        "leftShin": "knight_greave_left",
+        "rightShin": "knight_greave_right",
+        "leftFoot": "knight_sabaton_left",
+        "rightFoot": "knight_sabaton_right"
+      }
+    },
+    {
+      "is": "villager",
+      "pos": [
+        -3,
+        0,
+        2.5
+      ],
+      "to": [
+        -3,
+        0,
+        2.5
+      ],
+      "yaw": 3.141592653589793,
+      "holding": {
+        "head": "champion_helm",
+        "chest": "champion_cuirass",
+        "hips": "champion_belt",
+        "leftArm": "champion_pauldron_left",
+        "rightArm": "champion_pauldron_right",
+        "leftForearm": "champion_bracer_left",
+        "rightForearm": "champion_bracer_right",
+        "leftHand": "champion_gauntlet_left",
+        "rightHand": "champion_gauntlet_right",
+        "leftThigh": "champion_cuisse_left",
+        "rightThigh": "champion_cuisse_right",
+        "leftShin": "champion_greave_left",
+        "rightShin": "champion_greave_right",
+        "leftFoot": "champion_boot_left",
+        "rightFoot": "champion_boot_right"
+      }
+    },
+    {
+      "is": "villager",
+      "pos": [
+        -1.5,
+        0,
+        2.5
+      ],
+      "to": [
+        -1.5,
+        0,
+        2.5
+      ],
+      "yaw": 3.141592653589793,
+      "holding": {
+        "head": "ember_helm",
+        "chest": "ember_cuirass",
+        "hips": "ember_belt",
+        "leftArm": "ember_pauldron_left",
+        "rightArm": "ember_pauldron_right",
+        "leftForearm": "ember_bracer_left",
+        "rightForearm": "ember_bracer_right",
+        "leftHand": "ember_gauntlet_left",
+        "rightHand": "ember_gauntlet_right",
+        "leftThigh": "ember_cuisse_left",
+        "rightThigh": "ember_cuisse_right",
+        "leftShin": "ember_greave_left",
+        "rightShin": "ember_greave_right",
+        "leftFoot": "ember_boot_left",
+        "rightFoot": "ember_boot_right"
+      }
+    },
+    {
+      "is": "villager",
+      "pos": [
+        0,
+        0,
+        2.5
+      ],
+      "to": [
+        0,
+        0,
+        2.5
+      ],
+      "yaw": 3.141592653589793,
+      "holding": {
+        "head": "frost_helm",
+        "chest": "frost_cuirass",
+        "hips": "frost_belt",
+        "leftArm": "frost_pauldron_left",
+        "rightArm": "frost_pauldron_right",
+        "leftForearm": "frost_bracer_left",
+        "rightForearm": "frost_bracer_right",
+        "leftHand": "frost_gauntlet_left",
+        "rightHand": "frost_gauntlet_right",
+        "leftThigh": "frost_cuisse_left",
+        "rightThigh": "frost_cuisse_right",
+        "leftShin": "frost_greave_left",
+        "rightShin": "frost_greave_right",
+        "leftFoot": "frost_boot_left",
+        "rightFoot": "frost_boot_right"
+      }
+    },
+    {
+      "is": "villager",
+      "pos": [
+        1.5,
+        0,
+        2.5
+      ],
+      "to": [
+        1.5,
+        0,
+        2.5
+      ],
+      "yaw": 3.141592653589793,
+      "holding": {
+        "head": "ranger_helm",
+        "chest": "ranger_cuirass",
+        "hips": "ranger_belt",
+        "leftArm": "ranger_pauldron_left",
+        "rightArm": "ranger_pauldron_right",
+        "leftForearm": "ranger_bracer_left",
+        "rightForearm": "ranger_bracer_right",
+        "leftHand": "ranger_gauntlet_left",
+        "rightHand": "ranger_gauntlet_right",
+        "leftThigh": "ranger_cuisse_left",
+        "rightThigh": "ranger_cuisse_right",
+        "leftShin": "ranger_greave_left",
+        "rightShin": "ranger_greave_right",
+        "leftFoot": "ranger_boot_left",
+        "rightFoot": "ranger_boot_right"
+      }
+    },
+    {
+      "is": "villager",
+      "pos": [
+        3,
+        0,
+        2.5
+      ],
+      "to": [
+        3,
+        0,
+        2.5
+      ],
+      "yaw": 3.141592653589793,
+      "holding": {
+        "head": "shaman_helm",
+        "chest": "shaman_cuirass",
+        "hips": "shaman_belt",
+        "leftArm": "shaman_pauldron_left",
+        "rightArm": "shaman_pauldron_right",
+        "leftForearm": "shaman_bracer_left",
+        "rightForearm": "shaman_bracer_right",
+        "leftHand": "shaman_gauntlet_left",
+        "rightHand": "shaman_gauntlet_right",
+        "leftThigh": "shaman_cuisse_left",
+        "rightThigh": "shaman_cuisse_right",
+        "leftShin": "shaman_greave_left",
+        "rightShin": "shaman_greave_right",
+        "leftFoot": "shaman_boot_left",
+        "rightFoot": "shaman_boot_right"
+      }
+    },
+    {
+      "is": "villager",
+      "pos": [
+        4.5,
+        0,
+        2.5
+      ],
+      "to": [
+        4.5,
+        0,
+        2.5
+      ],
+      "yaw": 3.141592653589793,
+      "holding": {
+        "head": "warlord_helm",
+        "chest": "warlord_cuirass",
+        "hips": "warlord_belt",
+        "leftArm": "warlord_pauldron_left",
+        "rightArm": "warlord_pauldron_right",
+        "leftForearm": "warlord_bracer_left",
+        "rightForearm": "warlord_bracer_right",
+        "leftHand": "warlord_gauntlet_left",
+        "rightHand": "warlord_gauntlet_right",
+        "leftThigh": "warlord_cuisse_left",
+        "rightThigh": "warlord_cuisse_right",
+        "leftShin": "warlord_greave_left",
+        "rightShin": "warlord_greave_right",
+        "leftFoot": "warlord_boot_left",
+        "rightFoot": "warlord_boot_right"
+      }
     }
   ]
 }
