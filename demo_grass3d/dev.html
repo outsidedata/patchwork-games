@@ -17,7 +17,7 @@
       //
       // The grass folder sets every number and colour of this page's own copy of the grasses file
       // (`world.grass3d.grasses`), and the wind folder its gusts, bend and trampling; grass3d reads the
-      // file every frame, and a change makes the grass again. The weather folder fades the weather3d row to any weather of the weathers
+      // file every frame, and a change makes the grass again, the numbers of the meadow's program among them. The weather folder fades the weather3d row to any weather of the weathers
       // file and sets the wind's way, on the truth in this tab, as its `weather` act does; the clock sets
       // the sky's hour. Nothing is written to disk and the truth keeps the file's: `copy JSON` copies
       // the grasses file as the panel has it, for `assets/grasses.json`.
@@ -30,12 +30,15 @@
       // The readout: frames a second over the last second, the blocks of ground grass3d holds of its
       // window, its chunks drawn and casting, and the car's speed.
       //
+      // `?program=0` is the grass with no program, `?grass=0` no grass at all, each to measure it against.
+      //
       // The truths this tab holds are on `window.__scenes` and the page on `window.__page`, and
       // `window.__view(name)` sets a view, for the benchmarking skill's profilers and for screenshots.
       import { boot } from '#engine/engine.ts'
       import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
       import { loopback } from '#addons/loopback/loopback.addon.ts'
       import GUI from 'lil-gui'
+      import { opsOf, rangeOf } from '#plugins/gpgpu3d/gpgpu3d.ops.ts'
       import { sim } from './demo_grass3d.sim.ts'
       import { scene as main } from './main.sim.ts'
       import file from './demo_grass3d.scene.json'
@@ -47,6 +50,15 @@
         main.plugins = main.plugins.filter(p => p !== 'grass3d')
         delete main.world.grass3d
         main.world.terrain3d.mods.ready = main.world.terrain3d.mods.ready.filter(p => p !== 'grass3d')
+      }
+
+      // `?program=0`: the same, with the grasses file this page's copy of which has no program, before the
+      // boot reads it, so what the program costs is measured against the scene without it.
+      if (params.get('program') === '0') {
+        const own = main.world.loader.assets.grasses
+        const plain = await (await fetch(own.url)).json()
+        for (const g of Object.values(plain.grasses)) delete g.program
+        own.url = URL.createObjectURL(new Blob([JSON.stringify(plain)], { type: 'application/json' }))
       }
 
       const dt = file.prefabs.engine.dt
@@ -127,6 +139,18 @@
           gf.addColor(g.colours, 'dry').onChange(set)
           gf.add(g.dry, 'amount', 0, 1, 0.01).name('dry amount').onChange(set)
           gf.add(g.dry, 'scale', 1, 80, 0.5).name('dry scale').onChange(set)
+          // the numbers of the grass's program, node by node, in the range each op gives them
+          if (g.program) {
+            const pf = gf.addFolder('program')
+            const ops = opsOf(world)
+            for (const node of g.program.nodes) {
+              for (const [key, p] of Object.entries(ops[node.op]?.params ?? {})) {
+                const v = node[key]
+                if (typeof v === 'number') { const r = rangeOf(p, v); pf.add(node, key, r.min, r.max, r.step).name(`${node.id} ${key}`).onChange(set) }
+                else if (p.type === 'vec3' && Array.isArray(v)) v.forEach((n, i) => { const r = rangeOf({ type: 'number' }, n); pf.add(v, i, r.min, r.max, r.step).name(`${node.id} ${key} ${'xyz'[i]}`).onChange(set) })
+              }
+            }
+          }
         }
         const wf = folder.addFolder('wind and trampling')
         sliders(wf, copy.gust, { scale: [1, 80, 0.5], strength: [0, 1, 0.01], flutter: [0, 0.5, 0.005], rate: [0, 12, 0.05] }, set)

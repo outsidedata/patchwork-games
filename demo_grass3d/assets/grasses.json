@@ -7,6 +7,17 @@
   "grasses": {
     "meadow": {
       "rules": [{ "q": "layer:rock", "lo": 0.5, "hi": 0.15 }, { "q": "slope", "lo": 0.45, "hi": 0.3 }],
+      "program": {
+        "nodes": [
+          { "id": "lush", "op": "noise", "kind": "simplex", "freq": 0.045, "seed": 3, "octaves": 3 },
+          { "id": "patches", "op": "remap", "input": "lush", "inLo": 0.3, "inHi": 0.7, "outLo": 0.55, "outHi": 1.5, "ease": "smooth" },
+          { "id": "clumps", "op": "noise", "kind": "worley", "metric": "f1", "freq": 0.8, "seed": 9 },
+          { "id": "tufts", "op": "remap", "input": "clumps", "inLo": 0, "inHi": 0.6, "outLo": 1.25, "outHi": 0.75 },
+          { "id": "tall", "op": "combine", "a": "patches", "b": "tufts", "mode": "mul" },
+          { "id": "pale", "op": "remap", "input": "lush", "inLo": 0.5, "inHi": 0.3, "outLo": 0, "outHi": 1, "ease": "smooth" }
+        ],
+        "out": { "height": "tall", "dry": "pale" }
+      },
       "density": 260,
       "full": 6,
       "reach": 110,
