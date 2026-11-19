@@ -7,6 +7,11 @@ Kit items of the library's pro-ng in the hands of every kind of body core draws,
   plain glb sword in its left (`world.anim.kinds.worker.props`).
 - **The villager** is a crowd3d person. It wears a skullcap of item3d's and holds the plain glb sword in its
   right hand (`world.crowd3d.items`, the row's `holding`).
+- **The guard** is the same soldier, walked by walker and drawn by anim. It wears a tee the library's garment
+  shop draped on its own body in its T-pose (the bake's `garment` tool, `assets/tee.glb` and
+  `assets/tee.garment.json`), moved as cloth by fabric3d (`world.fabric3d`, `assets/fabrics.json`): the front
+  of each sleeve is pinned to its upper arm and the rest hangs against the body's capsules
+  (`world.anim.kinds.guard.capsules`).
 - **The runner** is moved by kinematics3d and drawn by motion3d. It holds a wrench of item3d's in its right hand
   (`world.motion3d.kinds.xbot.props`).
 - **The loose wrench** is a row item3d draws where it lies (`world.item3d.kinds.wrench`).

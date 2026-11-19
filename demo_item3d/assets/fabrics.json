@@ -1,0 +1,19 @@
+{
+  "fabrics": {
+    "tee": {
+      "garment": { "model": "tee-cloth", "file": "tee-garment" },
+      "paint": { "colour": "#e9e6df", "roughness": 0.9 },
+      "weight": 0.18,
+      "stretch": 1,
+      "bend": 0.1,
+      "drag": 1,
+      "catch": 0.2,
+      "friction": 0.4,
+      "thick": 0.012,
+      "pins": [
+        { "on": "LeftArm", "piece": "left_sleeve_f" },
+        { "on": "RightArm", "piece": "right_sleeve_f" }
+      ]
+    }
+  }
+}

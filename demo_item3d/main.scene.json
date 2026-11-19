@@ -88,6 +88,31 @@
           "type": "json",
           "url": "/games/demo_item3d/assets/xbot.motion3d.baked.json",
           "preload": true
+        },
+        "guard": {
+          "type": "model",
+          "url": "/games/demo_item3d/assets/guard.glb",
+          "preload": true
+        },
+        "guard-rig": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/guard.rig.json",
+          "preload": true
+        },
+        "fabrics": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/fabrics.json",
+          "preload": true
+        },
+        "tee-cloth": {
+          "type": "model",
+          "url": "/games/demo_item3d/assets/tee.glb",
+          "preload": true
+        },
+        "tee-garment": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/tee.garment.json",
+          "preload": true
         }
       }
     },
@@ -136,6 +161,22 @@
     "walker": {
       "kinds": {
         "worker": {
+          "radius": 0.3,
+          "height": 1.8,
+          "accel": 8,
+          "turnRate": 6,
+          "gravity": 20,
+          "jumpH": 1.1,
+          "step": 0.45,
+          "maxSlope": 0.9,
+          "slopeBand": 0.2,
+          "slide": 4,
+          "wade": 0.8,
+          "span": 0.3,
+          "probe": 0.5,
+          "seekSpeed": 1.4
+        },
+        "guard": {
           "radius": 0.3,
           "height": 1.8,
           "accel": 8,
@@ -210,6 +251,81 @@
                 26.1,
                 98.9
               ]
+            }
+          ]
+        },
+        "guard": {
+          "rig": "guard-rig",
+          "model": "guard",
+          "fade": 0.25,
+          "falls": [
+            {
+              "above": 4.3,
+              "role": "fall"
+            }
+          ],
+          "reads": {
+            "pos": "pos",
+            "yaw": "yaw",
+            "vel": "vel",
+            "grounded": "grounded",
+            "limp": "limp"
+          },
+          "capsules": [
+            {
+              "from": "Hips",
+              "to": "Spine2",
+              "radius": 0.15
+            },
+            {
+              "from": "Spine2",
+              "to": "Neck",
+              "radius": 0.16
+            },
+            {
+              "from": "Neck",
+              "to": "Head",
+              "radius": 0.07
+            },
+            {
+              "from": "LeftShoulder",
+              "to": "LeftArm",
+              "radius": 0.07
+            },
+            {
+              "from": "LeftArm",
+              "to": "LeftForeArm",
+              "radius": 0.075
+            },
+            {
+              "from": "LeftForeArm",
+              "to": "LeftHand",
+              "radius": 0.065
+            },
+            {
+              "from": "RightShoulder",
+              "to": "RightArm",
+              "radius": 0.07
+            },
+            {
+              "from": "RightArm",
+              "to": "RightForeArm",
+              "radius": 0.075
+            },
+            {
+              "from": "RightForeArm",
+              "to": "RightHand",
+              "radius": 0.065
+            },
+            {
+              "from": "LeftUpLeg",
+              "to": "LeftLeg",
+              "radius": 0.09
+            },
+            {
+              "from": "RightUpLeg",
+              "to": "RightLeg",
+              "radius": 0.09
             }
           ]
         }
@@ -393,6 +509,44 @@
           "stance"
         ]
       }
+    },
+    "gpgpu3d": {
+      "reach": 60,
+      "mods": {
+        "things": [
+          "anim"
+        ],
+        "behaviors": [
+          "anim"
+        ]
+      }
+    },
+    "fabric3d": {
+      "fabrics": "fabrics",
+      "attach": [
+        {
+          "fabric": "tee",
+          "of": "guard"
+        }
+      ],
+      "gravity": [
+        0,
+        -9.81,
+        0
+      ],
+      "substep": 0.004166666666666667,
+      "passes": 6,
+      "most": 0.05,
+      "mods": {
+        "behaviors": [
+          "loader",
+          "solids"
+        ],
+        "solids": "gpgpu3d",
+        "sources": [
+          "anim"
+        ]
+      }
     }
   },
   "plugins": [
@@ -406,6 +560,8 @@
     "crowd3d",
     "anim",
     "motion3d",
+    "gpgpu3d",
+    "fabric3d",
     "environment3d",
     "render3d",
     "stats"
@@ -582,6 +738,31 @@
         0,
         1
       ]
+    },
+    "guard": {
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0,
+      "vel": [
+        0,
+        0,
+        0
+      ],
+      "grounded": false,
+      "sliding": false,
+      "speed": 0,
+      "side": 0,
+      "turned": 0,
+      "want": [
+        0,
+        0
+      ],
+      "face": null,
+      "jump": false,
+      "rig": "stand"
     }
   },
   "actors": [
@@ -653,6 +834,15 @@
         0,
         0.9238795325112867
       ]
+    },
+    {
+      "is": "guard",
+      "pos": [
+        4,
+        0,
+        0
+      ],
+      "yaw": 3.141592653589793
     }
   ]
 }

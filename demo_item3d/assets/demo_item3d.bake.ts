@@ -19,6 +19,14 @@
 //                        scene's own materials (GROUND), then every material the items are drawn in, as
 //                        the items tool hands them back; its pictures' stack listed in the scene's
 //                        catalogue (`main.scene.json`), the entries of an earlier bake taken out first
+//   guard.glb            the guard's body: the library's soldier with every clip of `guard.rig.json`, by the
+//                        same export; the rig's measured `table` and `ends` are written back into
+//                        `guard.rig.json`
+//   tee.glb, tee.garment.json
+//                        the guard's tee, by the bake's `garment` tool (`scripts/garment.ts`): the garment
+//                        shop's tee draped on `guard.glb` as it stands at rest in that file, its T-pose,
+//                        before any clip, a mesh a pattern piece, and its sidecar; fabric3d cuts its
+//                        fabric `tee` from the two (`fabrics.json`)
 // Change the sheet, a kind, a material or a look in the library and bake again.
 import { execFile } from 'node:child_process'
 import fs from 'node:fs'
@@ -35,7 +43,7 @@ const node = (args: string[]) =>
   new Promise<string>((done, fail) => execFile(process.execPath, args, (e, stdout, stderr) =>
     e ? fail(new Error(`node ${args.join(' ')} failed:\n${stdout}${stderr}`)) : done(`${stdout}${stderr}`)))
 
-export default async ({ blender, scratch, items, looks }: Tools) => {
+export default async ({ blender, scratch, items, looks, garment }: Tools) => {
   const exported = (rig: string, table: string, outs: string[]) =>
     blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(root, 'plugins', 'anim', 'anim.export.py'), '--', rig, table, ...outs])
   const merge = path.join(root, '.claude', 'skills', 'using-mixamo-assets', 'scripts', 'merge-table.mjs')
@@ -52,6 +60,14 @@ export default async ({ blender, scratch, items, looks }: Tools) => {
   console.log(await exported(workerRig, workerTable, [`worker=${path.join(here, 'worker.glb')}`]))
   console.log(await node([merge, workerRig, workerTable, workerRig]))
   console.log('wrote', path.relative(root, path.join(here, 'worker.glb')))
+
+  // the guard's body and its rig's measures, then its tee, draped on that body as it stands at rest
+  const guardRig = path.join(here, 'guard.rig.json'), guardTable = scratch('guard.table.json')
+  console.log(await exported(guardRig, guardTable, [`guard=${path.join(here, 'guard.glb')}`]))
+  console.log(await node([merge, guardRig, guardTable, guardRig]))
+  console.log('wrote', path.relative(root, path.join(here, 'guard.glb')))
+  const tee = await garment({ body: path.join(here, 'guard.glb'), figure: 'demo_item3d_guard', kit: 'tee', config: 'default', garment: 'tee', out: path.join(here, 'tee.glb') })
+  console.log('wrote', path.relative(root, path.join(here, 'tee.glb')), `${tee.pieces.length} pieces, ${tee.points} points, ${tee.triangles} triangles`)
 
   // the runner's body, its rig's measures, and each clip's offsets
   const rig = path.join(here, 'xbot.rig.json'), table = scratch('xbot.table.json'), merged = scratch('xbot.merged.json')

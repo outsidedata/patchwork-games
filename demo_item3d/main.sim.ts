@@ -6,12 +6,13 @@ import { scenemanager } from '#plugins/scenemanager/scenemanager.sim.ts'
 import { loader } from '#plugins/loader/loader.sim.ts'
 import { player } from './player.sim.ts'
 import { start } from './start.sim.ts'
+import { guard } from './guard.sim.ts'
 import { worker } from './worker.sim.ts'
 import { villager } from './villager.sim.ts'
 import { runner } from './runner.sim.ts'
 import { wrench } from './wrench.sim.ts'
 import file from './main.scene.json' with { type: 'json' }
 
-export const sim: Sim = { scenemanager, loader, player, start, worker, villager, runner, wrench }
+export const sim: Sim = { scenemanager, loader, player, start, worker, guard, villager, runner, wrench }
 
 export const scene = file as Scene
