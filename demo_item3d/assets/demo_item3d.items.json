@@ -1,0 +1,6 @@
+{
+ "items": {
+  "wrench": { "kind": "modern/colonial/garage/tools/adjustable_wrench", "keys": { "Length": 0.3 } },
+  "skullcap": { "kind": "armor_basic/head/skullcap", "keys": { "Body": "soldier" } }
+ }
+}

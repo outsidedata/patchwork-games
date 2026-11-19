@@ -1,0 +1,9 @@
+{
+ "bodies": {
+  "soldier": "characters/soldier/soldier.fbx"
+ },
+ "clips": {
+  "idle": "packs/mixamo-motions/Breathing Idle.fbx",
+  "look": "packs/mixamo-motions/Looking Around.fbx"
+ }
+}

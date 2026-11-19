@@ -1,0 +1,658 @@
+{
+  "world": {
+    "defs": "demo_item3d",
+    "seed": 7,
+    "loader": {
+      "assets": {
+        "demo_item3d": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/demo_item3d.json",
+          "preload": true
+        },
+        "land": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/land.json",
+          "preload": true
+        },
+        "looks": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/main.looks.json",
+          "preload": true
+        },
+        "wrench-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/wrench.glb",
+          "preload": true
+        },
+        "wrench-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/wrench.item.json",
+          "preload": true
+        },
+        "skullcap-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/items/skullcap.glb",
+          "preload": true
+        },
+        "skullcap-item": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/items/skullcap.item.json",
+          "preload": true
+        },
+        "sword": {
+          "type": "model",
+          "url": "/games/demo_item3d/assets/sword.glb",
+          "preload": true
+        },
+        "soldier": {
+          "type": "model",
+          "url": "/games/demo_item3d/assets/soldier.glb",
+          "preload": true
+        },
+        "worker": {
+          "type": "model",
+          "url": "/games/demo_item3d/assets/worker.glb",
+          "preload": true
+        },
+        "worker-rig": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/worker.rig.json",
+          "preload": true
+        },
+        "xbot": {
+          "type": "model",
+          "url": "/games/demo_item3d/assets/xbot.glb",
+          "preload": true
+        },
+        "xbot-glb": {
+          "type": "binary",
+          "url": "/games/demo_item3d/assets/xbot.glb",
+          "preload": true
+        },
+        "xbot-rig": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/xbot.rig.json",
+          "preload": true
+        },
+        "xbot-rig-baked": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/xbot.rig.baked.json",
+          "preload": true
+        },
+        "xbot-motion3d": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/xbot.motion3d.json",
+          "preload": true
+        },
+        "xbot-motion3d-baked": {
+          "type": "json",
+          "url": "/games/demo_item3d/assets/xbot.motion3d.baked.json",
+          "preload": true
+        }
+      }
+    },
+    "supershader3d": {
+      "looks": "looks"
+    },
+    "terrain3d": {
+      "field": "land",
+      "rings": [
+        {
+          "reach": 64,
+          "seg": 128
+        },
+        {
+          "reach": 320,
+          "seg": 64
+        }
+      ],
+      "shadowReach": 64,
+      "budget": 8,
+      "seabed": false,
+      "preload": true,
+      "mods": {
+        "behaviors": [
+          "supershader3d"
+        ]
+      }
+    },
+    "item3d": {
+      "items": {
+        "wrench": {
+          "glb": "wrench-glb",
+          "file": "wrench-item"
+        },
+        "skullcap": {
+          "glb": "skullcap-glb",
+          "file": "skullcap-item"
+        }
+      },
+      "kinds": {
+        "wrench": {
+          "item": "wrench"
+        }
+      }
+    },
+    "walker": {
+      "kinds": {
+        "worker": {
+          "radius": 0.3,
+          "height": 1.8,
+          "accel": 8,
+          "turnRate": 6,
+          "gravity": 20,
+          "jumpH": 1.1,
+          "step": 0.45,
+          "maxSlope": 0.9,
+          "slopeBand": 0.2,
+          "slide": 4,
+          "wade": 0.8,
+          "span": 0.3,
+          "probe": 0.5,
+          "seekSpeed": 1.4
+        }
+      },
+      "mods": {
+        "height": "terrain3d",
+        "depth": "terrain3d"
+      }
+    },
+    "anim": {
+      "still": 0.05,
+      "shift": 0.75,
+      "leap": 0.5,
+      "landFall": 7.5,
+      "moves": 0.05,
+      "turns": 30,
+      "kinds": {
+        "worker": {
+          "rig": "worker-rig",
+          "model": "worker",
+          "fade": 0.25,
+          "falls": [
+            {
+              "above": 4.3,
+              "role": "fall"
+            }
+          ],
+          "reads": {
+            "pos": "pos",
+            "yaw": "yaw",
+            "vel": "vel",
+            "grounded": "grounded",
+            "limp": "limp"
+          },
+          "props": [
+            {
+              "item": "wrench",
+              "bone": "RightHand",
+              "at": [
+                -0.068,
+                0.0666,
+                0.0192
+              ],
+              "turn": [
+                6.7,
+                -66,
+                -82.1
+              ]
+            },
+            {
+              "model": "sword",
+              "bone": "LeftHand",
+              "at": [
+                0,
+                0.0703,
+                0
+              ],
+              "turn": [
+                87.3,
+                26.1,
+                98.9
+              ]
+            }
+          ]
+        }
+      },
+      "mods": {
+        "props": "item3d"
+      }
+    },
+    "crowd3d": {
+      "bodies": {
+        "soldier": "soldier"
+      },
+      "clips": [
+        "idle",
+        "look"
+      ],
+      "rate": 30,
+      "kinds": [
+        "villager"
+      ],
+      "poolSize": 8,
+      "items": {
+        "wrench": {
+          "item": "wrench",
+          "leftHand": {
+            "at": [
+              0.0522,
+              0.0451,
+              0.0407
+            ],
+            "turn": [
+              38.7,
+              54.2,
+              -127.3
+            ]
+          }
+        },
+        "skullcap": {
+          "item": "skullcap",
+          "head": {
+            "at": [
+              0.0004,
+              -1.562,
+              0.0352
+            ],
+            "turn": [
+              0,
+              180,
+              0
+            ]
+          }
+        },
+        "sword": {
+          "model": "sword",
+          "rightHand": {
+            "at": [
+              0,
+              0.07,
+              0
+            ],
+            "turn": [
+              95.6,
+              -4.7,
+              -110
+            ]
+          }
+        }
+      },
+      "mods": {
+        "items": "item3d"
+      }
+    },
+    "motion3d": {
+      "kinds": {
+        "xbot": {
+          "motion": "xbot-motion3d",
+          "baked": "xbot-motion3d-baked",
+          "rig": "xbot-rig",
+          "measured": "xbot-rig-baked",
+          "model": "xbot",
+          "glb": "xbot-glb",
+          "fade": 0.2,
+          "blend": "inertial",
+          "lean": {
+            "most": 0.25,
+            "ease": 0.12
+          },
+          "reads": {
+            "pos": "pos",
+            "yaw": "yaw",
+            "vel": "vel",
+            "grounded": "grounded",
+            "limp": "limp"
+          },
+          "props": [
+            {
+              "item": "wrench",
+              "bone": "RightHand",
+              "at": [
+                -0.068,
+                0.0666,
+                0.0192
+              ],
+              "turn": [
+                6.7,
+                -66,
+                -82.1
+              ]
+            }
+          ]
+        }
+      },
+      "anywhere": {
+        "shape": {
+          "box": {
+            "size": [
+              1000000000,
+              1000000000,
+              1000000000
+            ]
+          }
+        },
+        "activities": [
+          "walk"
+        ],
+        "priority": 0,
+        "data": {
+          "motion3d": {
+            "autoChange": true
+          }
+        }
+      },
+      "ease": 0.15,
+      "mods": {
+        "props": "item3d"
+      }
+    },
+    "shipped": {
+      "plugins": [
+        "stance"
+      ]
+    },
+    "kinematics3d": {
+      "kinds": {
+        "xbot": {
+          "triangles": {
+            "radius": 0.3,
+            "height": 1.8,
+            "step": 0.45,
+            "maxSlope": 0.9,
+            "slopeBand": 0.2,
+            "slide": 4,
+            "wade": 0.8,
+            "span": 0.3,
+            "probe": 0.5
+          },
+          "move": {
+            "accel": 12,
+            "turnRate": 12,
+            "still": 0.05,
+            "reverse": 135
+          },
+          "fall": {
+            "gravity": 20,
+            "airAccel": 2
+          },
+          "jump": {
+            "jumpH": 2,
+            "jumpVelocityBoostMagnitude": 2,
+            "cut": 0.4
+          }
+        }
+      },
+      "mods": {
+        "behaviors": [
+          "terrain3d",
+          "motion3d"
+        ],
+        "states": [
+          "motion3d",
+          "stance"
+        ]
+      }
+    }
+  },
+  "plugins": [
+    "loader",
+    "scenemanager",
+    "player",
+    "supershader3d",
+    "terrain3d",
+    "item3d",
+    "shipped",
+    "crowd3d",
+    "anim",
+    "motion3d",
+    "environment3d",
+    "render3d",
+    "stats"
+  ],
+  "seats": 1,
+  "prefabs": {
+    "engine": {
+      "dt": 0.016666666666666666,
+      "width": 1280,
+      "height": 720
+    },
+    "scenemanager": {
+      "out": {}
+    },
+    "loader": {},
+    "render3d": {
+      "camera": {
+        "fov": 50,
+        "near": 0.05,
+        "far": 800,
+        "at": [
+          0,
+          1.5,
+          -5
+        ],
+        "look": [
+          0,
+          1.1,
+          0
+        ]
+      },
+      "pixelRatio": 2,
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "background": "#bcd4e8",
+      "ao": {
+        "on": false,
+        "radius": 0.6,
+        "thickness": 0.5,
+        "falloff": 1,
+        "scale": 1,
+        "intensity": 1,
+        "samples": 16
+      },
+      "bloom": {
+        "strength": 0.15,
+        "radius": 0.4,
+        "threshold": 1.5
+      }
+    },
+    "environment3d": {
+      "sun": {
+        "color": "#fff3e0",
+        "power": 2.6,
+        "at": [
+          -30,
+          60,
+          -40
+        ],
+        "shadow": {
+          "map": 4096,
+          "half": 12,
+          "near": 1,
+          "far": 200,
+          "distance": 100,
+          "bias": -0.0002,
+          "normalBias": 0.02
+        }
+      },
+      "sky": {
+        "color": "#dbe8f5",
+        "ground": "#6b6252",
+        "power": 1.1
+      }
+    },
+    "start": {
+      "slot": 0,
+      "pos": [
+        0,
+        1.5,
+        -5
+      ],
+      "view": [
+        0,
+        0
+      ]
+    },
+    "player": {
+      "seat": 0,
+      "pos": [
+        0,
+        1.5,
+        -5
+      ],
+      "view": [
+        0,
+        0
+      ],
+      "stick": [
+        0,
+        0
+      ],
+      "up": false,
+      "down": false,
+      "pace": 0,
+      "placed": false
+    },
+    "worker": {
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0,
+      "vel": [
+        0,
+        0,
+        0
+      ],
+      "grounded": false,
+      "sliding": false,
+      "speed": 0,
+      "side": 0,
+      "turned": 0,
+      "want": [
+        0,
+        0
+      ],
+      "face": null,
+      "jump": false,
+      "rig": "stand"
+    },
+    "villager": {
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0,
+      "speed": 0,
+      "body": "soldier",
+      "clip": "idle",
+      "since": 0,
+      "holding": {}
+    },
+    "runner": {
+      "as": "xbot",
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0,
+      "stood": false,
+      "queued": [],
+      "fast": false,
+      "guard": false
+    },
+    "wrench": {
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "rot": [
+        0,
+        0,
+        0,
+        1
+      ]
+    }
+  },
+  "actors": [
+    {
+      "is": "scenemanager"
+    },
+    {
+      "is": "loader"
+    },
+    {
+      "is": "start",
+      "slot": 0,
+      "pos": [
+        0,
+        1.5,
+        -5
+      ],
+      "view": [
+        0,
+        -0.08
+      ]
+    },
+    {
+      "is": "worker",
+      "pos": [
+        2,
+        0,
+        0
+      ],
+      "yaw": 3.141592653589793
+    },
+    {
+      "is": "villager",
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 3.141592653589793,
+      "holding": {
+        "head": "skullcap",
+        "rightHand": "sword"
+      }
+    },
+    {
+      "is": "runner",
+      "pos": [
+        -2,
+        0,
+        0
+      ],
+      "yaw": 3.141592653589793
+    },
+    {
+      "is": "wrench",
+      "pos": [
+        0,
+        0.012,
+        -1.5
+      ],
+      "rot": [
+        0,
+        0.3826834323650898,
+        0,
+        0.9238795325112867
+      ]
+    }
+  ]
+}
