@@ -14,9 +14,11 @@
           { "id": "clumps", "op": "noise", "kind": "worley", "metric": "f1", "freq": 0.8, "seed": 9 },
           { "id": "tufts", "op": "remap", "input": "clumps", "inLo": 0, "inHi": 0.6, "outLo": 1.25, "outHi": 0.75 },
           { "id": "tall", "op": "combine", "a": "patches", "b": "tufts", "mode": "mul" },
-          { "id": "pale", "op": "remap", "input": "lush", "inLo": 0.5, "inHi": 0.3, "outLo": 0, "outHi": 1, "ease": "smooth" }
+          { "id": "pale", "op": "remap", "input": "lush", "inLo": 0.5, "inHi": 0.3, "outLo": 0, "outHi": 1, "ease": "smooth" },
+          { "id": "bloom", "op": "noise", "kind": "value", "freq": 0.35, "seed": 5 },
+          { "id": "blooms", "op": "remap", "input": "bloom", "inLo": 0.7, "inHi": 0.76, "outLo": 0, "outHi": 1, "ease": "smooth" }
         ],
-        "out": { "height": "tall", "dry": "pale" }
+        "out": { "height": "tall", "dry": "pale", "tipColour": { "to": "#d9506a", "by": "blooms" } }
       },
       "density": 260,
       "full": 6,

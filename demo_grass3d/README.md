@@ -3,7 +3,8 @@
 A hatch driven through a meadow of grass3d's grass. The blades thin out with distance, sway as gusts
 roll across the field in weather3d's wind, part round the car and lie down in its tracks, standing back up
 over the next half minute. The meadow's `program` (`assets/grasses.json`) is gpgpu3d's list of ops: patches
-of tall lush grass and short dry grass by noise, and clumps by worley noise.
+of tall lush grass and short dry grass by noise, clumps by worley noise, and patches of blooms, the blades' tips
+tinted toward pink where a sparse noise is high (`tipColour`).
 
 - `yarn dev`, then `localhost:5173/games/demo_grass3d/index.html` to drive it: w and s or the triggers are
   the pedal (s from a stop reverses), a and d or the stick steer, space brakes.
