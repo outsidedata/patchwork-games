@@ -60,7 +60,7 @@
       }
     },
     "gpgpu3d": { "reach": 30, "mods": { "things": ["anim"], "behaviors": ["anim"] } },
-    "hair3d": { "hairs": "hairs", "mods": { "skins": ["anim"], "behaviors": ["render3d"], "solids": "gpgpu3d" } }
+    "hair3d": { "hairs": "hairs", "mods": { "skins": ["anim"], "behaviors": ["render3d"], "keeper": "gpgpu3d", "solids": "gpgpu3d" } }
   },
   "plugins": ["loader", "scenemanager", "player", "terrain3d", "anim", "gpgpu3d", "hair3d", "environment3d", "render3d", "chasecamera3d", "stats"],
   "seats": 1,

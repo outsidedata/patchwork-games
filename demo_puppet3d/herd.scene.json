@@ -24,9 +24,10 @@
       "poolSize": 64,
       "fade": 0.3
     },
-    "hair3d": { "hairs": "hairs", "mods": { "skins": ["crowd3d"], "behaviors": ["crowd3d"] } }
+    "gpgpu3d": { "reach": 60 },
+    "hair3d": { "hairs": "hairs", "mods": { "skins": ["crowd3d"], "behaviors": ["crowd3d"], "keeper": "gpgpu3d" } }
   },
-  "plugins": ["loader", "scenemanager", "crowd3d", "hair3d", "environment3d", "render3d", "stats"],
+  "plugins": ["loader", "scenemanager", "crowd3d", "gpgpu3d", "hair3d", "environment3d", "render3d", "stats"],
   "seats": 1,
   "prefabs": {
     "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },

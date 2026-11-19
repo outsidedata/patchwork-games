@@ -73,7 +73,7 @@
       "mods": { "land": "terrain3d", "behaviors": ["puppet3d", "paddock", "aviary"] }
     },
     "gpgpu3d": { "reach": 60, "mods": { "things": ["puppet3d"], "behaviors": ["anim"] } },
-    "hair3d": { "hairs": "hairs", "mods": { "skins": ["puppet3d"], "behaviors": ["render3d"], "solids": "gpgpu3d" } },
+    "hair3d": { "hairs": "hairs", "mods": { "skins": ["puppet3d"], "behaviors": ["render3d"], "keeper": "gpgpu3d", "solids": "gpgpu3d" } },
     "terrain3d": {
       "field": "hills",
       "rings": [
