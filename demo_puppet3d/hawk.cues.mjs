@@ -207,16 +207,16 @@ const flare = {
 
 // the art bones: `beating` 1 with the sweep of each wing beat, 0 without
 const feathered = beating => ({
-  ...sides('wing primaries.first', s => bone(k([sway(3, 2.3, s * 0.1), ...(beating ? [beat(p => 6 * Math.sin(2 * Math.PI * (p - 0.4)))] : [])]))),
-  ...sides('wing primaries.last', s => bone(
+  ...sides('wing wrist feathers primaries.first', s => bone(k([sway(3, 2.3, s * 0.1), ...(beating ? [beat(p => 6 * Math.sin(2 * Math.PI * (p - 0.4)))] : [])]))),
+  ...sides('wing wrist feathers primaries.last', s => bone(
     k([sway(4, 2.9, s * 0.15), bySpeed(-8, 8), ...(beating ? [beat(p => 9 * Math.sin(2 * Math.PI * (p - 0.45)))] : [])]),
     beating ? [sided(beat(p => 10 * pulse(DOWN * 0.5, 0.3)(p) - 14 * pulse(midUp, 0.22)(p)), s)] : still)),
-  ...sides('wing secondaries', s => bone(
+  ...sides('wing elbow feathers secondaries', s => bone(
     k([sway(3, 3.4, s * 0.2), ...(beating ? [beat(p => 5 * Math.sin(2 * Math.PI * (p - 0.35)))] : [])]),
     beating ? [sided(beat(p => 5 * pulse(DOWN * 0.5, 0.3)(p) - 6 * pulse(midUp, 0.22)(p)), s)] : still)),
-  ...sides('wing alula', s => bone(k([sway(7, 1.7, s * 0.25), ...(beating ? [beat(p => 5 * Math.sin(2 * Math.PI * (p - 0.5)))] : [])]))),
-  [`${P}/body rectrices.first`]: bone(k([sway(4, 3.1), bySpeed(-14, 8), by('brake', 0, 1, -24), byTurn(-12)])),
-  [`${P}/body rectrices.last`]: bone(k([sway(4, 3.1), bySpeed(14, 8), by('brake', 0, 1, 24), byTurn(12)])),
+  ...sides('wing wrist feathers alula', s => bone(k([sway(7, 1.7, s * 0.25), ...(beating ? [beat(p => 5 * Math.sin(2 * Math.PI * (p - 0.5)))] : [])]))),
+  [`${P}/tail feathers rectrices.first`]: bone(k([sway(4, 3.1), bySpeed(-14, 8), by('brake', 0, 1, -24), byTurn(-12)])),
+  [`${P}/tail feathers rectrices.last`]: bone(k([sway(4, 3.1), bySpeed(14, 8), by('brake', 0, 1, 24), byTurn(12)])),
 })
 
 const look = {

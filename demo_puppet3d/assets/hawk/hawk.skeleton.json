@@ -50,8 +50,8 @@
    ],
    "tail": [
     0,
-    0.127673,
-    0.073188
+    0.232197,
+    0
    ],
    "across": [
     1,
@@ -60,17 +60,36 @@
    ]
   },
   {
-   "name": "red-tailed hawk/body rectrices.first",
+   "name": "red-tailed hawk tail feathers mount",
    "parent": "red-tailed hawk/body tail",
+   "head": [
+    0,
+    0.232197,
+    0
+   ],
+   "tail": [
+    0,
+    0.282197,
+    0
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/tail feathers rectrices.first",
+   "parent": "red-tailed hawk tail feathers mount",
    "head": [
     -0.010395,
     0.14019,
     0.064424
    ],
    "tail": [
-    -0.028656,
-    0.126204,
-    0.074218
+    -0.02079,
+    0.048183,
+    0.128848
    ],
    "across": [
     0,
@@ -79,17 +98,17 @@
    ]
   },
   {
-   "name": "red-tailed hawk/body rectrices.last",
-   "parent": "red-tailed hawk/body tail",
+   "name": "red-tailed hawk/tail feathers rectrices.last",
+   "parent": "red-tailed hawk tail feathers mount",
    "head": [
     0.010395,
     0.14019,
     0.064424
    ],
    "tail": [
-    0.028656,
-    0.126204,
-    0.074218
+    0.02079,
+    0.048183,
+    0.128848
    ],
    "across": [
     0,
@@ -326,6 +345,25 @@
    ]
   },
   {
+   "name": "red-tailed hawk left wing shoulder feathers mount",
+   "parent": "red-tailed hawk/left wing shoulder",
+   "head": [
+    0.046872,
+    0.291521,
+    -0.000008
+   ],
+   "tail": [
+    0.046872,
+    0.341521,
+    -0.000008
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
    "name": "red-tailed hawk/left wing elbow",
    "parent": "red-tailed hawk/left wing shoulder",
    "head": [
@@ -334,13 +372,51 @@
     0.043992
    ],
    "tail": [
-    0.431872,
+    0.046872,
     0.291521,
     -0.000008
    ],
    "across": [
     0,
     -1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk left wing elbow feathers mount",
+   "parent": "red-tailed hawk/left wing elbow",
+   "head": [
+    0.046872,
+    0.291521,
+    -0.000008
+   ],
+   "tail": [
+    0.046872,
+    0.341521,
+    -0.000008
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left wing elbow feathers secondaries",
+   "parent": "red-tailed hawk left wing elbow feathers mount",
+   "head": [
+    0.301178,
+    0.288373,
+    0.034526
+   ],
+   "tail": [
+    0.555484,
+    0.288373,
+    0.069059
+   ],
+   "across": [
+    0,
+    1,
     0
    ]
   },
@@ -353,9 +429,9 @@
     -0.000008
    ],
    "tail": [
-    0.448045,
+    0.046872,
     0.291521,
-    0.019056
+    -0.000008
    ],
    "across": [
     0,
@@ -364,17 +440,36 @@
    ]
   },
   {
-   "name": "red-tailed hawk/left wing primaries.first",
+   "name": "red-tailed hawk left wing wrist feathers mount",
    "parent": "red-tailed hawk/left wing wrist",
+   "head": [
+    0.046872,
+    0.291521,
+    -0.000008
+   ],
+   "tail": [
+    0.046872,
+    0.341521,
+    -0.000008
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/left wing wrist feathers primaries.first",
+   "parent": "red-tailed hawk left wing wrist feathers mount",
    "head": [
     0.440122,
     0.28831,
     0.009717
    ],
    "tail": [
-    0.456295,
+    0.833372,
     0.28831,
-    0.028781
+    0.019441
    ],
    "across": [
     0,
@@ -383,17 +478,17 @@
    ]
   },
   {
-   "name": "red-tailed hawk/left wing primaries.last",
-   "parent": "red-tailed hawk/left wing wrist",
+   "name": "red-tailed hawk/left wing wrist feathers primaries.last",
+   "parent": "red-tailed hawk left wing wrist feathers mount",
    "head": [
     0.588622,
     0.290667,
     0.012881
    ],
    "tail": [
-    0.745372,
+    1.130372,
     0.290667,
-    0.02577
+    0.025769
    ],
    "across": [
     0,
@@ -402,36 +497,17 @@
    ]
   },
   {
-   "name": "red-tailed hawk/left wing alula",
-   "parent": "red-tailed hawk/left wing wrist",
+   "name": "red-tailed hawk/left wing wrist feathers alula",
+   "parent": "red-tailed hawk left wing wrist feathers mount",
    "head": [
     0.448372,
     0.305618,
     -0.021284
    ],
    "tail": [
-    0.464872,
+    0.849872,
     0.305618,
-    -0.04256
-   ],
-   "across": [
-    0,
-    1,
-    0
-   ]
-  },
-  {
-   "name": "red-tailed hawk/left wing secondaries",
-   "parent": "red-tailed hawk/left wing elbow",
-   "head": [
-    0.301178,
-    0.288373,
-    0.034526
-   ],
-   "tail": [
-    0.379484,
-    0.288373,
-    0.02506
+    -0.042561
    ],
    "across": [
     0,
@@ -497,6 +573,25 @@
    ]
   },
   {
+   "name": "red-tailed hawk right wing shoulder feathers mount",
+   "parent": "red-tailed hawk/right wing shoulder",
+   "head": [
+    -0.046872,
+    0.291521,
+    -0.000008
+   ],
+   "tail": [
+    -0.046872,
+    0.341521,
+    -0.000008
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
    "name": "red-tailed hawk/right wing elbow",
    "parent": "red-tailed hawk/right wing shoulder",
    "head": [
@@ -505,13 +600,51 @@
     0.043992
    ],
    "tail": [
-    -0.431872,
+    -0.046872,
     0.291521,
     -0.000008
    ],
    "across": [
     0,
     1,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk right wing elbow feathers mount",
+   "parent": "red-tailed hawk/right wing elbow",
+   "head": [
+    -0.046872,
+    0.291521,
+    -0.000008
+   ],
+   "tail": [
+    -0.046872,
+    0.341521,
+    -0.000008
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right wing elbow feathers secondaries",
+   "parent": "red-tailed hawk right wing elbow feathers mount",
+   "head": [
+    -0.301178,
+    0.288373,
+    0.034526
+   ],
+   "tail": [
+    -0.555484,
+    0.288373,
+    0.069059
+   ],
+   "across": [
+    0,
+    -1,
     0
    ]
   },
@@ -524,9 +657,9 @@
     -0.000008
    ],
    "tail": [
-    -0.448045,
+    -0.046872,
     0.291521,
-    0.019056
+    -0.000008
    ],
    "across": [
     0,
@@ -535,17 +668,36 @@
    ]
   },
   {
-   "name": "red-tailed hawk/right wing primaries.first",
+   "name": "red-tailed hawk right wing wrist feathers mount",
    "parent": "red-tailed hawk/right wing wrist",
+   "head": [
+    -0.046872,
+    0.291521,
+    -0.000008
+   ],
+   "tail": [
+    -0.046872,
+    0.341521,
+    -0.000008
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "red-tailed hawk/right wing wrist feathers primaries.first",
+   "parent": "red-tailed hawk right wing wrist feathers mount",
    "head": [
     -0.440122,
     0.28831,
     0.009717
    ],
    "tail": [
-    -0.456295,
+    -0.833372,
     0.28831,
-    0.028781
+    0.019441
    ],
    "across": [
     0,
@@ -554,17 +706,17 @@
    ]
   },
   {
-   "name": "red-tailed hawk/right wing primaries.last",
-   "parent": "red-tailed hawk/right wing wrist",
+   "name": "red-tailed hawk/right wing wrist feathers primaries.last",
+   "parent": "red-tailed hawk right wing wrist feathers mount",
    "head": [
     -0.588622,
     0.290667,
     0.012881
    ],
    "tail": [
-    -0.745372,
+    -1.130372,
     0.290667,
-    0.02577
+    0.025769
    ],
    "across": [
     0,
@@ -573,36 +725,17 @@
    ]
   },
   {
-   "name": "red-tailed hawk/right wing alula",
-   "parent": "red-tailed hawk/right wing wrist",
+   "name": "red-tailed hawk/right wing wrist feathers alula",
+   "parent": "red-tailed hawk right wing wrist feathers mount",
    "head": [
     -0.448372,
     0.305618,
     -0.021284
    ],
    "tail": [
-    -0.464872,
+    -0.849872,
     0.305618,
-    -0.04256
-   ],
-   "across": [
-    0,
-    -1,
-    0
-   ]
-  },
-  {
-   "name": "red-tailed hawk/right wing secondaries",
-   "parent": "red-tailed hawk/right wing elbow",
-   "head": [
-    -0.301178,
-    0.288373,
-    0.034526
-   ],
-   "tail": [
-    -0.379484,
-    0.288373,
-    0.02506
+    -0.042561
    ],
    "across": [
     0,

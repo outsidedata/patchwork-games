@@ -1,5 +1,5 @@
 {
-  "red-tailed hawk/left wing primaries.first": {
+  "red-tailed hawk/left wing wrist feathers primaries.first": {
     "bend": [
       {
         "by": "clock",
@@ -137,7 +137,7 @@
       }
     ]
   },
-  "red-tailed hawk/right wing primaries.first": {
+  "red-tailed hawk/right wing wrist feathers primaries.first": {
     "bend": [
       {
         "by": "clock",
@@ -275,7 +275,7 @@
       }
     ]
   },
-  "red-tailed hawk/left wing primaries.last": {
+  "red-tailed hawk/left wing wrist feathers primaries.last": {
     "bend": [
       {
         "by": "clock",
@@ -523,7 +523,7 @@
       }
     ]
   },
-  "red-tailed hawk/right wing primaries.last": {
+  "red-tailed hawk/right wing wrist feathers primaries.last": {
     "bend": [
       {
         "by": "clock",
@@ -771,7 +771,7 @@
       }
     ]
   },
-  "red-tailed hawk/left wing secondaries": {
+  "red-tailed hawk/left wing elbow feathers secondaries": {
     "bend": [
       {
         "by": "clock",
@@ -1006,7 +1006,7 @@
       }
     ]
   },
-  "red-tailed hawk/right wing secondaries": {
+  "red-tailed hawk/right wing elbow feathers secondaries": {
     "bend": [
       {
         "by": "clock",
@@ -1241,7 +1241,7 @@
       }
     ]
   },
-  "red-tailed hawk/left wing alula": {
+  "red-tailed hawk/left wing wrist feathers alula": {
     "bend": [
       {
         "by": "clock",
@@ -1379,7 +1379,7 @@
       }
     ]
   },
-  "red-tailed hawk/right wing alula": {
+  "red-tailed hawk/right wing wrist feathers alula": {
     "bend": [
       {
         "by": "clock",
@@ -1517,7 +1517,7 @@
       }
     ]
   },
-  "red-tailed hawk/body rectrices.first": {
+  "red-tailed hawk/tail feathers rectrices.first": {
     "bend": [
       {
         "by": "clock",
@@ -1592,7 +1592,7 @@
       }
     ]
   },
-  "red-tailed hawk/body rectrices.last": {
+  "red-tailed hawk/tail feathers rectrices.last": {
     "bend": [
       {
         "by": "clock",

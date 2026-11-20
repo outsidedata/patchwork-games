@@ -25,10 +25,11 @@ Station 6 is the red-tailed hawk, a bird of the library's pro-ng kit (`pro-ng/sc
 posed by cue sheets that read its own flight. Pace 1 perches it on the ground with its wings folded; 2 flies
 it beating its wings with short glides between; 3 glides it longer; 4 and 5 soar it, a few beats now and
 then. It beats harder as it climbs and takes off, pulls its wings in when it dives, and rears back with its
-legs down and its tail spread as it lands. Its long feathers hang on art bones of their own (each wing's
-`primaries.first`, `primaries.last`, `secondaries` and `alula`, the tail's `rectrices.first` and
-`rectrices.last`), which sheets of their own turn, so the feathers ruffle and the tail fans whatever the
-wing does.
+legs down and its tail spread as it lands. Its long feathers are the kit's `feathers` parts, laid on the
+wing and the tail, and hang on art bones of their own (each wing's `wrist feathers primaries.first`,
+`wrist feathers primaries.last`, `wrist feathers alula` and `elbow feathers secondaries`, the tail's
+`tail feathers rectrices.first` and `tail feathers rectrices.last`), which sheets of their own turn, so the
+feathers ruffle and the tail fans whatever the wing does.
 
 - The bake's `birds` (`assets/demo_puppet3d.bake.json`) builds it with the library's `pro-ng/build.mjs`
   and writes `assets/hawk/`: its glb, its looks file and their pictures for supershader3d, and its rest
