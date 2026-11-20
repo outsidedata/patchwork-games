@@ -101,7 +101,7 @@ const chosen = process.argv[3]
 const baked = chosen ? PLACES.filter(place => place.scene === `${chosen}.scene.json`) : PLACES
 if (chosen && !baked.length) throw new Error(`demo_world3d's bake: no place is baked for the scene ${chosen}; the scenes with places are ${PLACES.map(place => place.scene.replace('.scene.json', '')).join(', ')}`)
 // what pro-ng's build writes for a scene, each `<name><suffix>`
-const MADE = ['.glb', '.looks.json', '.clips.json', '.shapes3d.json', '.nav.json', '.terrain3d_layers.json', '.hollows.json', '.effects.json', '.crowd.json']
+const MADE = ['.glb', '.looks.json', '.clips.json', '.shapes3d.json', '.nav.json', '.terrain3d_layers.json', '.hollows.json', '.effects.json', '.crowd.json', '.hairs.json']
 
 export default async ({ blender, scratch, library, stack }: Tools) => {
   // each place made into every file a game boots from by the library's pro-ng (`pro-ng/build.mjs`), on core's Blender
