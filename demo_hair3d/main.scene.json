@@ -35,6 +35,31 @@
           "radius": 0.3, "height": 1.8, "accel": 8, "turnRate": 6, "gravity": 20, "jumpH": 1.1,
           "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5, "seekSpeed": 1.4,
           "bodies": ["player", "wanderer"], "agent": 0.25
+        },
+        "ponytail": {
+          "radius": 0.3, "height": 1.8, "accel": 8, "turnRate": 6, "gravity": 20, "jumpH": 1.1,
+          "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5, "seekSpeed": 1.4,
+          "bodies": ["player", "wanderer"], "agent": 0.25
+        },
+        "pigtails": {
+          "radius": 0.3, "height": 1.8, "accel": 8, "turnRate": 6, "gravity": 20, "jumpH": 1.1,
+          "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5, "seekSpeed": 1.4,
+          "bodies": ["player", "wanderer"], "agent": 0.25
+        },
+        "braid": {
+          "radius": 0.3, "height": 1.8, "accel": 8, "turnRate": 6, "gravity": 20, "jumpH": 1.1,
+          "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5, "seekSpeed": 1.4,
+          "bodies": ["player", "wanderer"], "agent": 0.25
+        },
+        "braided_pigtails": {
+          "radius": 0.3, "height": 1.8, "accel": 8, "turnRate": 6, "gravity": 20, "jumpH": 1.1,
+          "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5, "seekSpeed": 1.4,
+          "bodies": ["player", "wanderer"], "agent": 0.25
+        },
+        "coolio": {
+          "radius": 0.3, "height": 1.8, "accel": 8, "turnRate": 6, "gravity": 20, "jumpH": 1.1,
+          "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5, "seekSpeed": 1.4,
+          "bodies": ["player", "wanderer"], "agent": 0.25
         }
       },
       "mods": { "height": "terrain3d" }
@@ -56,6 +81,61 @@
         "wanderer": {
           "rig": "xbot-rig", "model": "xbot", "fade": 0.25, "falls": [{ "above": 4.3, "role": "fall" }],
           "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
+        },
+        "ponytail": {
+          "rig": "xbot-rig", "model": "xbot", "fade": 0.25, "falls": [{ "above": 4.3, "role": "fall" }],
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
+          "capsules": [
+            { "bone": "Head", "at": [0, 0.09, 0.015], "radius": 0.105 },
+            { "bone": "Neck", "at": [0, 0.03, 0], "radius": 0.065 },
+            { "bone": "Spine2", "at": [0, 0.04, 0], "radius": 0.17 },
+            { "bone": "LeftArm", "at": [0, 0.02, 0], "radius": 0.075 },
+            { "bone": "RightArm", "at": [0, 0.02, 0], "radius": 0.075 }
+          ]
+        },
+        "pigtails": {
+          "rig": "xbot-rig", "model": "xbot", "fade": 0.25, "falls": [{ "above": 4.3, "role": "fall" }],
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
+          "capsules": [
+            { "bone": "Head", "at": [0, 0.09, 0.015], "radius": 0.105 },
+            { "bone": "Neck", "at": [0, 0.03, 0], "radius": 0.065 },
+            { "bone": "Spine2", "at": [0, 0.04, 0], "radius": 0.17 },
+            { "bone": "LeftArm", "at": [0, 0.02, 0], "radius": 0.075 },
+            { "bone": "RightArm", "at": [0, 0.02, 0], "radius": 0.075 }
+          ]
+        },
+        "braid": {
+          "rig": "xbot-rig", "model": "xbot", "fade": 0.25, "falls": [{ "above": 4.3, "role": "fall" }],
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
+          "capsules": [
+            { "bone": "Head", "at": [0, 0.09, 0.015], "radius": 0.105 },
+            { "bone": "Neck", "at": [0, 0.03, 0], "radius": 0.065 },
+            { "bone": "Spine2", "at": [0, 0.04, 0], "radius": 0.17 },
+            { "bone": "LeftArm", "at": [0, 0.02, 0], "radius": 0.075 },
+            { "bone": "RightArm", "at": [0, 0.02, 0], "radius": 0.075 }
+          ]
+        },
+        "braided_pigtails": {
+          "rig": "xbot-rig", "model": "xbot", "fade": 0.25, "falls": [{ "above": 4.3, "role": "fall" }],
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
+          "capsules": [
+            { "bone": "Head", "at": [0, 0.09, 0.015], "radius": 0.105 },
+            { "bone": "Neck", "at": [0, 0.03, 0], "radius": 0.065 },
+            { "bone": "Spine2", "at": [0, 0.04, 0], "radius": 0.17 },
+            { "bone": "LeftArm", "at": [0, 0.02, 0], "radius": 0.075 },
+            { "bone": "RightArm", "at": [0, 0.02, 0], "radius": 0.075 }
+          ]
+        },
+        "coolio": {
+          "rig": "xbot-rig", "model": "xbot", "fade": 0.25, "falls": [{ "above": 4.3, "role": "fall" }],
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
+          "capsules": [
+            { "bone": "Head", "at": [0, 0.09, 0.015], "radius": 0.105 },
+            { "bone": "Neck", "at": [0, 0.03, 0], "radius": 0.065 },
+            { "bone": "Spine2", "at": [0, 0.04, 0], "radius": 0.17 },
+            { "bone": "LeftArm", "at": [0, 0.02, 0], "radius": 0.075 },
+            { "bone": "RightArm", "at": [0, 0.02, 0], "radius": 0.075 }
+          ]
         }
       }
     },
@@ -107,6 +187,7 @@
     },
     "spot": { "pos": [0, 0] },
     "wanderer": {
+      "as": "wanderer",
       "pos": [0, 0, 0],
       "yaw": 0,
       "vel": [0, 0, 0],
@@ -133,7 +214,14 @@
     { "is": "spot", "pos": [0, 9] },
     { "is": "spot", "pos": [-7, -6] },
     { "is": "spot", "pos": [7, -6] },
-    { "is": "wanderer", "pos": [-5, 0, 3], "yaw": 1.2 },
-    { "is": "wanderer", "pos": [5, 0, 3], "yaw": -2 }
+    { "is": "spot", "pos": [-10, 0] },
+    { "is": "spot", "pos": [10, 0] },
+    { "is": "spot", "pos": [0, -9] },
+    { "is": "wanderer", "as": "wanderer", "pos": [-5, 0, 3], "yaw": 1.2 },
+    { "is": "wanderer", "as": "ponytail", "pos": [5, 0, 3], "yaw": -2 },
+    { "is": "wanderer", "as": "pigtails", "pos": [0, 0, 9], "yaw": 3 },
+    { "is": "wanderer", "as": "braid", "pos": [-7, 0, -6], "yaw": 0.4 },
+    { "is": "wanderer", "as": "braided_pigtails", "pos": [7, 0, -6], "yaw": -0.6 },
+    { "is": "wanderer", "as": "coolio", "pos": [-10, 0, 0], "yaw": 1.6 }
   ]
 }

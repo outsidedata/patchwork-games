@@ -1,6 +1,7 @@
-// A bystander that strolls between the scene's spots: an X Bot (`as: "xbot"` for anim and hair3d)
-// walked by walker as one of its agents (its numbers `world.walker.kinds.wanderer`), played by anim and
-// wearing hair3d's hairs as the seat's body does. It stands at `pos` [x, y, z] in its `actors` entry;
+// A bystander that strolls between the scene's spots: an X Bot walked by walker as one of its agents,
+// played by anim and wearing hair3d's hairs as the seat's body does. Its `as` names its look: the kind of
+// `world.anim.kinds`, `world.walker.kinds` (its numbers) and the hairs file's `kinds` it is, so one wanders
+// in fur, another in a ponytail, another in braids. It stands at `pos` [x, y, z] in its `actors` entry;
 // its own fields, beside walker's and anim's: `spot`, the id of the `spot` row it heads for or rests at
 // (0 before it has chosen one), and `wait`, the seconds it rests there yet.
 //
