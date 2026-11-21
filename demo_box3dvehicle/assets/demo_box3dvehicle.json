@@ -1,0 +1,43 @@
+{
+  "motorcycle": {
+    "frame": { "length": 1.5, "height": 0.4, "width": 0.24, "mass": 190, "friction": 0.4, "inertia": [35, 90, 90] },
+    "ride": 0.6,
+    "lift": 0.02,
+    "axles": { "front": 0.72, "rear": -0.72 },
+    "wheel": { "radius": 0.32, "width": 0.16, "mass": 10, "friction": 1.2, "rollingResistance": 0.005 },
+    "suspension": { "sag": 0.08, "travel": 0.22, "damping": 0.4 },
+    "engine": { "spinSpeed": 80, "spinTorque": 260, "coastTorque": 3, "brakeTorque": { "front": 300, "rear": 40 } },
+    "steering": { "angle": 0.5, "reference": 10, "floor": 3, "hertz": 8, "dampingRatio": 1, "maxTorque": 400 },
+    "balance": { "hertz": 3, "dampingRatio": 1, "torque": 3000, "lean": 0.75, "rate": 1 },
+    "look": {
+      "paint": { "body": "#c2331f", "frame": "#2a2a30", "metal": "#a9aeb6", "seat": "#18181b", "tyre": "#141416", "rim": "#cfd3da", "light": "#fff1c4" },
+      "finish": {
+        "body": { "roughness": 0.3, "metalness": 0.35 }, "frame": { "roughness": 0.5, "metalness": 0.6 }, "metal": { "roughness": 0.25, "metalness": 0.9 },
+        "seat": { "roughness": 0.85, "metalness": 0 },
+        "tyre": { "roughness": 0.95, "metalness": 0 }, "rim": { "roughness": 0.3, "metalness": 0.85 }, "light": { "roughness": 0.1, "metalness": 0 }
+      },
+      "tyre": { "section": 0.085, "squash": 1, "rim": 0.12, "spokes": 4, "spoke": 0.012, "disc": 0.15, "hub": 0.04, "segments": 40 },
+      "frame": [
+        { "shape": "capsule", "size": [0.13, 0.32], "at": [0.2, 0.17, 0], "turn": [0, 0, 1.5708], "paint": "body" },
+        { "shape": "box", "size": [0.5, 0.09, 0.22], "at": [-0.2, 0.2, 0], "turn": [0, 0, 0.05], "paint": "seat" },
+        { "shape": "box", "size": [0.36, 0.09, 0.17], "at": [-0.58, 0.26, 0], "turn": [0, 0, 0.18], "paint": "body" },
+        { "shape": "box", "size": [0.42, 0.34, 0.26], "at": [0.02, -0.15, 0], "turn": [0, 0, 0], "paint": "metal" },
+        { "shape": "box", "size": [0.5, 0.05, 0.1], "at": [0.1, 0.03, 0], "turn": [0, 0, -0.5], "paint": "frame" },
+        { "shape": "cylinder", "size": [0.045, 0.85], "at": [-0.3, -0.27, 0.16], "turn": [0, 0, 1.5708], "paint": "metal" },
+        { "shape": "box", "size": [0.62, 0.055, 0.07], "at": [-0.43, -0.25, 0.1], "turn": [0, 0, 0], "paint": "frame" },
+        { "shape": "box", "size": [0.62, 0.055, 0.07], "at": [-0.43, -0.25, -0.1], "turn": [0, 0, 0], "paint": "frame" },
+        { "shape": "box", "size": [0.3, 0.02, 0.15], "at": [-0.72, 0.05, 0], "turn": [0, 0, -0.1], "paint": "body" }
+      ],
+      "fork": [
+        { "shape": "cylinder", "size": [0.024, 0.66], "at": [0, 0.3, 0.09], "turn": [0, 0, 0.1], "paint": "metal" },
+        { "shape": "cylinder", "size": [0.024, 0.66], "at": [0, 0.3, -0.09], "turn": [0, 0, 0.1], "paint": "metal" },
+        { "shape": "cylinder", "size": [0.017, 0.72], "at": [-0.04, 0.64, 0], "turn": [1.5708, 0, 0], "paint": "metal" },
+        { "shape": "sphere", "size": [0.095], "at": [0.1, 0.5, 0], "turn": [0, 0, 0], "paint": "light" },
+        { "shape": "box", "size": [0.36, 0.015, 0.14], "at": [0, 0.4, 0], "turn": [0, 0, 0.04], "paint": "body" }
+      ]
+    }
+  },
+  "player": {
+    "camera": { "back": 5, "high": 1.6, "aim": 0.7, "followHz": 4, "riseHz": 2, "turnHz": 2 }
+  }
+}

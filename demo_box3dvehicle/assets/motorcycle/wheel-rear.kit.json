@@ -1,0 +1,5 @@
+{
+ "buildings": [
+  {"kind": "modern/vehicles/motorcycle/wheels/wheel", "name": "wheel", "End": "rear", "Rolling": false}
+ ]
+}

@@ -1,0 +1,5 @@
+{
+ "buildings": [
+  {"kind":"modern/vehicles/motorcycle/motorcycle","name":"motorcycle","Wheels":false,"Lit":false,"Braking":false,"FrontSag":0.08,"FrontTravel":0.22,"RearSag":0.08,"RearTravel":0.22,"Lock":28.6479}
+ ]
+}

@@ -1,0 +1,10 @@
+{
+ "buildings": [
+  {"kind": "modern/vehicles/motorcycle/motorcycle", "name": "motorcycle", "place": [0, 0], "Wheels": false, "Lit": false, "Braking": false, "FrontSag": 0.08, "FrontTravel": 0.22, "RearSag": 0.08, "RearTravel": 0.22, "Lock": 28.6479},
+  {"kind": "modern/vehicles/motorcycle/lamps/headlamp", "name": "lit headlamp", "place": [4, 0], "Lit": true},
+  {"kind": "modern/vehicles/motorcycle/lamps/tail_lamp", "name": "lit tail lamp", "place": [6, 0], "Lit": true, "Braking": true},
+  {"kind": "modern/vehicles/motorcycle/lamps/indicator", "name": "lit indicator", "place": [8, 0], "Lit": true, "Hand": 1, "End": "front"},
+  {"kind": "modern/vehicles/motorcycle/wheels/wheel", "name": "front wheel", "place": [-4, 0], "End": "front", "Rolling": false},
+  {"kind": "modern/vehicles/motorcycle/wheels/wheel", "name": "rear wheel", "place": [-6, 0], "End": "rear", "Rolling": false}
+ ]
+}

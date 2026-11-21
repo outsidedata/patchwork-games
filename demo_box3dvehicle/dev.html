@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demo_box3dvehicle dev</title>
+    <style>
+      body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      canvas { grid-area: 1 / 1 }
+      .lil-gui.root { max-height: 100vh; overflow-y: auto }
+      #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px; pointer-events: none }
+    </style>
+  </head>
+  <body>
+    <div id="readout"></div>
+    <script type="module">
+      // The testbed: index.html, the manager truth and the scenes its row names all in this tab, one
+      // seat on them over a loopback, stepped on the page's clock. `?scene=<scene>` enters that scene.
+      // The truths are kept on `window.__scenes` and the page on `window.__page` for the profilers
+      // (benchmarking-a-game). The frame rate is the stats plugin's panel at the top left. The readout
+      // shows the scene, the step, the bike's speed and lean, and the last five errors the page threw or
+      // wrote. The panel tunes the numbers that change how the motorcycle rides, the engine and the handling of its
+      // entry in the scene (world.box3dvehicle.vehicles.motorcycle), laid into the truth and the page; each is read
+      // every step, so a change shows on the next one. The springs and the look are the kit's.
+      import { boot } from '#engine/engine.ts'
+      import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
+      import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import GUI from 'lil-gui'
+      import { sim } from './demo_box3dvehicle.sim.ts'
+      import file from './demo_box3dvehicle.scene.json'
+
+      // Every error the page throws or writes, the last five, shown under the readout.
+      const errors = []
+      const caught = e => {
+        errors.push(String(e?.message ?? e))
+        if (errors.length > 5) errors.shift()
+      }
+      addEventListener('error', e => caught(e.error ?? e.message))
+      addEventListener('unhandledrejection', e => caught(e.reason))
+      const written = console.error.bind(console)
+      console.error = (...a) => { caught(a.map(x => x?.message ?? x).join(' ')); written(...a) }
+
+      file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
+
+      const dt = file.prefabs.engine.dt
+      const truth = boot(file, sim)
+      window.__scenes = await load(truth, import.meta.url)
+      const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+        for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
+          if (!surface) continue
+          const canvas = document.createElement('canvas')
+          canvas.width = scene.prefabs.engine.width
+          canvas.height = scene.prefabs.engine.height
+          document.body.appendChild(canvas)
+          surface.mount(canvas)
+        }
+        me.plugins.stats?.mount(document.body)
+      })
+      window.__page = page
+      const readout = document.getElementById('readout')
+
+      // The panel. A press on it stops at it, a release never does, and after a click the focus goes
+      // back to the page unless it went into a number to type or a list to pick from.
+      const gui = new GUI({ title: 'demo_box3dvehicle dev' })
+      for (const type of ['keydown', 'keyup', 'click', 'mousedown', 'contextmenu', 'wheel'])
+        gui.domElement.addEventListener(type, e => e.stopPropagation())
+      gui.domElement.addEventListener('pointerup', () => requestAnimationFrame(() => {
+        const at = document.activeElement
+        if (gui.domElement.contains(at) && at.tagName !== 'SELECT' && !(at.tagName === 'INPUT' && (at.type === 'text' || at.type === 'number'))) at.blur()
+      }))
+      addEventListener('change', e => { if (gui.domElement.contains(e.target)) e.target.blur() })
+
+      // The scene, chosen from the manager's table, the page loaded again on it.
+      const chosen = { scene: file.prefabs.scenemanager.entry }
+      const reload = (key, value) => { const url = new URL(location.href); url.searchParams.set(key, value); location.href = url.href }
+      gui.add(chosen, 'scene', Object.keys(file.prefabs.scenemanager.scenes)).onChange(s => reload('scene', s))
+      const room = () => window.__scenes.get(chosen.scene)
+
+      // The sky: the hour of the 1200 s day (the scene starts it at noon, standing still).
+      const skyRow = () => room()?.rows.find(r => r.kind === 'skydome3d')
+      const clock = { get t() { return skyRow()?.data.t ?? 0 }, set t(v) { const r = skyRow(); if (r) r.data.t = v } }
+      gui.add(clock, 't', 0, 1200, 1).name('time of day').listen()
+
+      // The bike's numbers, the entry `world.box3dvehicle.vehicles.motorcycle` of the scene: the panel keeps its own copy and lays it
+      // into the truth's world and the page's, so the rules and the look read the same numbers. Every one is read each step (the page
+      // draws the bike again from the entry when it changes), so a change shows on the next one; the springs' travel and the look are the kit's.
+      const own = structuredClone(room().world.box3dvehicle.vehicles.motorcycle)
+      const bikeRow = () => room()?.rows.find(r => r.kind === 'box3dvehicle' && r.data.name === 'bike')
+      let timer
+      const apply = () => {
+        clearTimeout(timer)
+        timer = setTimeout(() => {
+          for (const world of [room()?.world, page.client?.plugins.wire.scene.world]) if (world) world.box3dvehicle.vehicles.motorcycle = structuredClone(own)
+          for (const id of bikeRow()?.data.wheels ?? []) {
+            const tyre = room().rows.find(r => r.id === id)
+            if (tyre) tyre.data.friction = own.axles[0].wheel.friction
+          }
+        }, 250)
+      }
+      const [front, rear] = own.axles
+
+      const engine = gui.addFolder('engine')
+      const top = { get v() { return own.engine.spinSpeed * rear.wheel.radius }, set v(x) { own.engine.spinSpeed = x / rear.wheel.radius } }
+      engine.add(top, 'v', 5, 80, 0.5).name('top speed (m/s)').onChange(apply)
+      engine.add(own.engine, 'spinTorque', 20, 800, 5).name('acceleration (rear torque, N·m)').onChange(apply)
+      engine.add(front, 'brakeTorque', 0, 800, 5).name('front brake (N·m)').onChange(apply)
+      engine.add(rear, 'brakeTorque', 0, 200, 1).name('rear brake (N·m)').onChange(apply)
+
+      const handling = gui.addFolder('handling')
+      handling.add(own.steering, 'angle', 0.1, 1, 0.01).name('full lock at a walk (rad)').onChange(apply)
+      handling.add(own.balance, 'lean', 0.1, 1.2, 0.01).name('most lean (rad)').onChange(apply)
+      handling.add(own.balance, 'rate', 0.2, 6, 0.05).name('how fast it leans (rad/s)').onChange(apply)
+      const grip = { get v() { return front.wheel.friction }, set v(x) { front.wheel.friction = x; rear.wheel.friction = x } }
+      handling.add(grip, 'v', 0.2, 2.5, 0.05).name('tyre grip').onChange(apply)
+
+      let last = performance.now(), owed = 0
+      const loop = async now => {
+        owed += Math.min((now - last) / 1000, 0.25)
+        last = now
+        // A frame that throws is shown, and the next frame goes on.
+        try {
+          page.input()
+          while (owed >= dt) { truth.step(dt); owed -= dt }
+          await page.frame(owed / dt)
+        } catch (e) { caught(e) }
+        const b = bikeRow()?.data
+        const ride = b?.speed !== undefined ? `  speed ${b.speed.toFixed(1)} m/s  lean ${(b.lean * 57.3).toFixed(0)}°` : ''
+        readout.textContent = [`${chosen.scene}  step ${truth.n}${ride}`, ...errors].join('\n')
+        requestAnimationFrame(loop)
+      }
+      requestAnimationFrame(loop)
+    </script>
+  </body>
+</html>
