@@ -5,8 +5,9 @@
 //
 // The song is audiodaw's, in Tone's own words: a note is `{ time, note, duration, velocity }`, its
 // times in ticks at the song's `ppq` (192, so a sixteenth is 48) and its `note` Tone's name of a
-// pitch ("C4"); a clip is `{ track, pattern, start, length }` on the song. A track holds notes and
-// sends them to the device of the rack it targets.
+// pitch ("C4"); a clip is `{ track, pattern, start, length?, offset? }` on the song, its pattern's
+// loop repeated over its length. A track holds notes and sends them to the device of the rack it
+// targets.
 //
 // Rows. A note's row is its MIDI number, `Tone.Frequency(note).toMidi()`, 0 to 127, and a row's
 // note is `Tone.Frequency(row, 'midi').toNote()`, so a nudge up a row is a semitone.
@@ -24,7 +25,7 @@
 // Grains (`GRAINS`): the steps a click, a drag, a nudge and quantize snap to, in ticks: 1/32, 1/16,
 // 1/8, 1/4, 1/2, a bar, 1/16 triplets, 1/8 triplets, and Off, one tick.
 import * as Tone from 'tone'
-import { addAutomationPattern, addPattern, clipEnd, freeName, fromOf, moveClipsTo, noteTrack, patternOf, setFrom, setLength, type Clip, type Note, type Pattern, type Project } from '#plugins/audiodaw/audiodaw.sim.ts'
+import { addAutomationPattern, addPattern, clipEnd, clipLength, freeName, moveClip, moveClipsTo, noteTrack, patternOf, playedOf, round, type Clip, type Note, type Pattern, type Project } from '#plugins/audiodaw/audiodaw.sim.ts'
 
 // The studio's songs' ticks a beat, Tone's PPQ.
 export const PPQ = 192
@@ -149,7 +150,7 @@ export function overlaps(pattern: Pattern, edited: number[]): Edited {
 // or clips, each with its track's place among the copied tracks and its start from the first's.
 export type Copied =
   | { kind: 'notes'; notes: Note[]; span: number }
-  | { kind: 'clips'; clips: { track: number; source: number; pattern: string; start: number }[]; span: number; first: number }
+  | { kind: 'clips'; clips: { track: number; source: number; pattern: string; start: number; length?: number; offset?: number }[]; span: number; first: number }
 
 export function copyNotes(pattern: Pattern, picked: number[]): Copied | undefined {
   const notes = picked.map(i => pattern.notes[i]!)
@@ -269,7 +270,12 @@ export function copyClips(p: Project, picked: number[]): Copied | undefined {
   const from = Math.min(...clips.map(c => c.start))
   const to = Math.max(...clips.map(c => clipEnd(p, c)))
   const first = Math.min(...clips.map(c => c.track))
-  return { kind: 'clips', clips: clips.map(c => ({ track: c.track - first, source: c.track, pattern: c.pattern, start: c.start - from })), span: to - from, first }
+  return {
+    kind: 'clips',
+    clips: clips.map(c => ({ track: c.track - first, source: c.track, pattern: c.pattern, start: c.start - from, ...(c.length === undefined ? {} : { length: c.length }), ...(c.offset === undefined ? {} : { offset: c.offset }) })),
+    span: to - from,
+    first,
+  }
 }
 
 // Copied clips placed from `at`, on the tracks they came from counted from `track`, each carrying its
@@ -283,7 +289,7 @@ export function pasteClips(p: Project, copied: Extract<Copied, { kind: 'clips' }
   for (const c of copied.clips) {
     const t = track + c.track
     if (!p.tracks[t] || !Object.hasOwn(p.tracks[c.source]?.patterns ?? {}, c.pattern) || p.tracks[t]!.kind !== p.tracks[c.source]!.kind) continue
-    added.push({ track: c.source, pattern: c.pattern, start: base + c.start })
+    added.push({ track: c.source, pattern: c.pattern, start: base + c.start, ...(c.length === undefined ? {} : { length: c.length }), ...(c.offset === undefined ? {} : { offset: c.offset }) })
     dest.push(t)
   }
   if (!added.length) return { project: p, picked: [] }
@@ -309,18 +315,22 @@ export function boxedClips(p: Project, t0: number, t1: number, k0: number, k1: n
   return out
 }
 
-// A clip resized from either edge to the song's tick `to`, which resizes its pattern, and so every
-// clip of it. The right edge sets where the pattern ends (`setLength`), a tick past its start at
-// least. The left edge trims or uncovers the pattern's start (`setFrom`): the notes it still plays
-// stay where they were in the song, and those before it are kept and not played. Nothing repeats.
+// A clip resized from either edge to the song's tick `to`, as Ableton's arrangement does: its pattern
+// stays as it is, and so every other clip of it. The right edge sets where the clip ends, a tick past
+// its start at least, its pattern's loop repeated to fill it. The left edge trims or uncovers its
+// front, kept a tick before its end and from before the song's start: it begins that much further
+// into its loop, so every note it still plays stays where it was in the song.
 export function resizeClip(p: Project, i: number, edge: 'left' | 'right', to: number): Project {
   const c = p.clips[i]!
-  const x = patternOf(p, c)
+  const end = clipEnd(p, c)
   if (edge === 'right') {
-    const length = Math.max(fromOf(x) + 1, fromOf(x) + Math.round(to - c.start))
-    return length === x.length ? p : setLength(p, c.track, c.pattern, length)
+    const length = Math.max(1, Math.round(to - c.start))
+    return length === clipLength(p, c) && c.length !== undefined ? p : moveClip(p, i, { length })
   }
-  return setFrom(p, c.track, c.pattern, fromOf(x) + Math.round(to - c.start))
+  const start = Math.max(0, Math.min(end - 1, Math.round(to)))
+  if (start === c.start) return p
+  const played = playedOf(patternOf(p, c))
+  return moveClip(p, i, { start, length: end - start, offset: round((c.offset ?? 0) + start - c.start, played) })
 }
 
 // The pattern of a note track set, the song's other values kept.

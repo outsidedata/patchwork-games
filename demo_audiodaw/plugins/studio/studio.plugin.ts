@@ -2,7 +2,7 @@
 // share and nothing they draw. It has no row and reads no rows: the song is a value only this page
 // holds, made from `songs.ts` or opened from the songs file (`songs` below), in audiodaw's words
 // (Tone's), played through `plugins.audiodaw` and
-// drawn by the screens (`roll`, `arrange`, `rack`, `mixer`, `transport`, each a kind of one
+// drawn by the screens (`session`, `roll`, `arrange`, `rack`, `mixer`, `transport`, each a kind of one
 // `actors` entry whose `<kind>.client.ts` draws through `plugins.renderdom`). It is listed after
 // `audiodaw` and `renderdom`, and after `store`, and its own `tick`:
 //   - on the first frame, opens the first song and loads it into audiodaw;
@@ -35,6 +35,12 @@
 // knob's travel is the faceplates' (`rangeOf`), handed to audiodaw when a song loads; `glides` asks
 // audiodaw whether a knob sweeps or is set on 16ths, so the screens draw its steps.
 //
+// The session, Ableton's Session View (`session.client.ts`). The song's scenes and each track's slots
+// are the song's, edits like any other (`addScene`, `setSlot`, `newSlot`, `setLaunch`, …). Launching
+// is not: `launch`, `launchScene`, `stopTrack`, `stopAll` and `backToArrangement` hand it to audiodaw,
+// play starting with a launch made while stopped, and `session()` reads back what each track plays.
+// A track the session holds is not heard from its arrangement, which dims it, until ◀ ARRANGEMENT.
+//
 // Time is Tone's Transport. `cue` is where play starts, in ticks: where it stopped, after a second
 // stop the loop's start with the cycle on and the song's start with it off, the song's start after
 // Home, or a tick pressed on the arrangement's ruler (`locate`). The playhead is `transport.ticks`
@@ -46,8 +52,10 @@
 // and moves no clip.
 //
 // The view (`view`), what only this page shows:
-//   screen       which of roll, arrange or mixer fills the editor's place; every track's pattern
-//                is edited on the roll, a drum kit's too (each of its pads is a note).
+//   screen       which of session, arrange, roll or mixer fills the editor's place; every track's
+//                pattern is edited on the roll, a drum kit's too (each of its pads is a note).
+//   slot         the session's picked slot, by its track and scene; `sceneFrom` the first scene
+//                shown across the session.
 //   track        the picked track, whose pattern the roll edits and whose target the note
 //                keys play; `pattern` the name of that pattern.
 //   device       the device of the rack whose faceplate the rack shows: the picked track's target,
@@ -97,16 +105,28 @@
 // `assets/songs/jungle.song.ts`. A song of the file opens as a copy of its project.
 //
 // The edits on what is picked act on the screen shown: the notes of the picked pattern on the roll,
-// the clips on the arrangement. Paste goes at the playhead while playing, else at the
+// the clips on the arrangement, nothing on the session or the mixer. Paste goes at the playhead while playing, else at the
 // last step clicked. Each is one step of undo, clamped at the pattern's edges (`edits.ts`).
 import {
   addAutomationPattern,
   addBus,
   addDevice,
   addPattern,
+  addScene,
   addTrack,
   clipEnd,
   deviceFrom,
+  duplicateScene,
+  launchOf,
+  moveScene,
+  passes,
+  removeScene,
+  renameScene,
+  round,
+  scenesOf,
+  setLaunch,
+  setSlot,
+  slotOf,
   deviceOf,
   fromOf,
   loadPreset,
@@ -143,7 +163,7 @@ import {
 import type { Plugins } from '#engine/browser.ts'
 import type { Key, Renderdom } from '#plugins/renderdom/renderdom.plugin.ts'
 import { controls } from '#plugins/renderdom/controls.ts'
-import type { audiodaw as Daw, Timing } from '#plugins/audiodaw/audiodaw.plugin.ts'
+import type { audiodaw as Daw, Launched, Timing } from '#plugins/audiodaw/audiodaw.plugin.ts'
 import type { store as Kept } from '#plugins/store/store.plugin.ts'
 import type { Value } from '#addons/scenemanager/scenemanager.addon.ts'
 import { def, json } from '#plugins/loader/loader.sim.ts'
@@ -183,7 +203,7 @@ import { panel, type Panel } from './panels.ts'
 export type Audio = ReturnType<typeof Daw>
 export type Store = ReturnType<typeof Kept>
 export type Kit = ReturnType<typeof controls>
-export type Screen = 'roll' | 'arrange' | 'mixer'
+export type Screen = 'session' | 'arrange' | 'roll' | 'mixer'
 export type Studio = ReturnType<typeof studio>
 // Whose effects: a device's index, a bus's name, or 'master'.
 export type Target = number | string
@@ -311,8 +331,12 @@ export type View = {
   // together; and a track picked (`pick`) that the tracks scroll to show on their next frame.
   tracksTop: number
   reveal?: number
-  // The name being typed (`field`), by its key: a track's, a pattern's, a clip's or a device's.
+  // The name being typed (`field`), by its key: a track's, a pattern's, a clip's, a scene's or a
+  // device's.
   editing?: string
+  // The session's picked slot, by its track and scene, and the first scene shown across it.
+  slot?: { track: number; scene: number }
+  sceneFrom: number
 }
 
 // One binding of the key table: the key by its `code`, whether Mod and Shift are held, and what it
@@ -392,6 +416,7 @@ export function studio() {
     songZoom: 0,
     tracksTop: 0,
     voice: 0,
+    sceneFrom: 0,
   }
   let past: Snapshot[] = []
   let future: Snapshot[] = []
@@ -447,6 +472,8 @@ export function studio() {
     const pat = me.pattern()
     view.notes = pat ? view.notes.filter(i => i < pat.notes.length) : []
     view.clips = view.clips.filter(i => i < project.clips.length)
+    if (view.slot && (!project.tracks[view.slot.track] || view.slot.scene >= scenesOf(project).length)) view.slot = undefined
+    view.sceneFrom = Math.max(0, Math.min(scenesOf(project).length - 1, view.sceneFrom))
     if (typeof view.target === 'number' ? !project.rack[view.target] : view.target !== 'master' && !Object.hasOwn(project.buses, view.target)) view.target = project.rack.length ? view.device : 'master'
   }
 
@@ -573,6 +600,8 @@ export function studio() {
       view.pattern = ''
       view.notes = []
       view.clips = []
+      view.slot = undefined
+      view.sceneFrom = 0
       view.cycle = false
       fit()
       me.pick(0)
@@ -593,7 +622,7 @@ export function studio() {
       view.notes = []
       fit()
       const t = project.tracks[track]
-      if (t && view.screen !== 'arrange' && view.screen !== 'mixer') view.screen = 'roll'
+      if (t && view.screen !== 'arrange' && view.screen !== 'mixer' && view.screen !== 'session') view.screen = 'roll'
       const pat = me.pattern()
       if (pat && t) {
         const rows = pat.notes.map(row)
@@ -919,6 +948,111 @@ export function studio() {
       if (x?.kind !== 'automation' || (knob ? sameKnob(x.target, knob) : x.target === undefined)) return
       me.edit(p => setKnob(p, i, knob))
     },
+    // ---- the session ----
+    // What each track of the session plays and waits to (`audiodaw.session`); none before audiodaw has
+    // the song.
+    session(): Launched[] {
+      return audio && me.ready ? audio.session() : []
+    },
+    // Whether the session holds a track, or any, so its arrangement is not heard.
+    held(t: number): boolean {
+      return me.session()[t]?.held === true
+    },
+    get anyHeld(): boolean {
+      return me.session().some(l => l.held)
+    },
+    // A slot picked: its track, and its pattern for the roll.
+    pickSlot(t: number, s: number) {
+      view.slot = { track: t, scene: s }
+      const name = slotOf(project, t, s)
+      if (view.track !== t) me.pick(t, name)
+      else if (name !== undefined) {
+        view.pattern = name
+        view.notes = []
+      }
+      view.reveal = undefined
+    },
+    // Track `t`'s slot of scene `s` launched, and play started for it when stopped; picked.
+    launch(t: number, s: number) {
+      me.pickSlot(t, s)
+      me.wake(() => {
+        if (!audio || !me.ready) return
+        audio.launch(t, s)
+        if (!audio.playing) me.play()
+      })
+    },
+    // Every track's slot of scene `s` launched together, and play started for them when stopped.
+    launchScene(s: number) {
+      me.wake(() => {
+        if (!audio || !me.ready) return
+        audio.launchScene(s)
+        if (!audio.playing) me.play()
+      })
+    },
+    // Track `t` stopped at the launch's tick; the session keeps hold of it.
+    stopTrack(t: number) {
+      if (audio && me.ready) audio.halt(t)
+    },
+    stopAll() {
+      if (audio && me.ready) audio.haltAll()
+    },
+    // Every track back to its arrangement (Ableton's BACK TO ARRANGEMENT).
+    backToArrangement() {
+      if (audio && me.ready) audio.arrange()
+    },
+    // A scene put in at `at` (at the end when left out), named the next free SCENE number.
+    addScene(at?: number) {
+      const taken = scenesOf(project).map(x => x.name)
+      let k = taken.length + 1
+      while (taken.includes(`SCENE ${k}`)) k++
+      me.edit(p => addScene(p, { name: `SCENE ${k}` }, at))
+    },
+    // A scene renamed; an empty name is refused.
+    renameScene(i: number, name: string): boolean {
+      const clean = name.trim()
+      if (!scenesOf(project)[i] || !clean) return false
+      if (clean !== scenesOf(project)[i]!.name) me.edit(p => renameScene(p, i, clean))
+      return true
+    },
+    removeScene(i: number) {
+      if (!scenesOf(project)[i]) return
+      me.edit(p => removeScene(p, i))
+      fit()
+    },
+    // A copy of a scene after it, named after it with the least number from 2 no scene has.
+    duplicateScene(i: number) {
+      const x = scenesOf(project)[i]
+      if (!x) return
+      const taken = scenesOf(project).map(s => s.name)
+      let k = 2
+      while (taken.includes(`${x.name} ${k}`)) k++
+      me.edit(p => duplicateScene(p, i, `${x.name} ${k}`))
+    },
+    moveScene(from: number, to: number) {
+      if (!scenesOf(project)[from] || !scenesOf(project)[to] || from === to) return
+      me.edit(p => moveScene(p, from, to))
+    },
+    // Track `t`'s slot of scene `s` set to one of its patterns, or emptied.
+    setSlot(t: number, s: number, pattern: string | undefined) {
+      if (slotOf(project, t, s) === pattern) return
+      me.edit(p => setSlot(p, t, s, pattern))
+      me.pickSlot(t, s)
+    },
+    // A new empty pattern a bar long, of the track's kind, under the next free letter, put in track
+    // `t`'s slot of scene `s`; picked, so the roll edits it.
+    newSlot(t: number, s: number) {
+      const x = project.tracks[t]
+      if (!x || !scenesOf(project)[s]) return
+      const name = nextName(Object.keys(x.patterns))
+      me.edit(p => setSlot(x.kind === 'notes' ? addPattern(p, t, name, { length: BAR, notes: [] }) : addAutomationPattern(p, t, name, { length: BAR, notes: [] }), t, s, name))
+      me.pickSlot(t, s)
+    },
+    // The ticks a launch waits for.
+    setLaunch(ticks: number) {
+      if (launchOf(project) === ticks) return
+      me.edit(p => setLaunch(p, ticks))
+    },
+
     // A device of the instrument `kind` (an instrument's `is`) from its first preset, named after it,
     // and picked.
     addDevice(kind: string) {
@@ -937,12 +1071,22 @@ export function studio() {
       if (typeof view.target === 'number') view.target = view.device
       fit()
     },
-    // A song's tick in the picked pattern's ticks: in the clip of it the song is in there, if any.
+    // A song's tick in the picked pattern's ticks: in the slot of the session playing it there, else in
+    // the pass of the clip of it the song is in there, if any.
     patternAt(at: number): number | undefined {
       const pat = me.lane()
       if (!pat) return undefined
-      const c = project.clips.find(c => c.track === view.track && c.pattern === view.pattern && at >= c.start && at < clipEnd(project, c))
-      return c ? at - c.start + fromOf(pat) : undefined
+      const l = me.session()[view.track]
+      if (l?.held) {
+        if (l.scene === undefined || l.through === undefined || slotOf(project, view.track, l.scene) !== view.pattern) return undefined
+        return fromOf(pat) + round(l.through * playedOf(pat) + at - me.playhead(), playedOf(pat))
+      }
+      for (const c of project.clips) {
+        if (c.track !== view.track || c.pattern !== view.pattern) continue
+        const pass = passes(project, c).find(q => at >= q.start && at < q.end)
+        if (pass) return at - pass.base + fromOf(pat)
+      }
+      return undefined
     },
     // The playhead in the picked pattern's ticks.
     patternTick(): number | undefined {
@@ -1004,7 +1148,7 @@ export function studio() {
     // ---- what is picked ----
     selectAll() {
       if (view.screen === 'arrange') view.clips = project.clips.map((_, i) => i)
-      else if (view.screen !== 'mixer') view.notes = me.pattern()?.notes.map((_, i) => i) ?? []
+      else if (view.screen === 'roll') view.notes = me.pattern()?.notes.map((_, i) => i) ?? []
     },
     clear() {
       view.notes = []
@@ -1013,11 +1157,11 @@ export function studio() {
     removePicked() {
       if (view.screen === 'arrange') {
         if (view.clips.length) me.edit(p => removeClips(p, view.clips), { clips: [] })
-      } else if (view.screen !== 'mixer' && view.notes.length) me.write(pat => remove(pat, view.notes))
+      } else if (view.screen === 'roll' && view.notes.length) me.write(pat => remove(pat, view.notes))
     },
     copy() {
       if (view.screen === 'arrange') clipboard = copyClips(project, view.clips) ?? clipboard
-      else if (view.screen !== 'mixer') {
+      else if (view.screen === 'roll') {
         const pat = me.pattern()
         if (pat) clipboard = copyNotes(pat, view.notes) ?? clipboard
       }
@@ -1034,7 +1178,7 @@ export function studio() {
         const where = at ?? (me.playing ? me.playhead() : view.songStep)
         const out = pasteClips(project, c, where, c.first)
         if (out.picked.length) me.edit(() => out.project, { clips: out.picked })
-      } else if (view.screen !== 'mixer') {
+      } else if (view.screen === 'roll') {
         if (clipboard.kind !== 'notes') return
         const c = clipboard
         const where = at ?? (me.playing ? (me.patternTick() ?? view.step) : view.step)
@@ -1045,12 +1189,12 @@ export function studio() {
       if (view.screen === 'arrange') {
         const out = duplicateClips(project, view.clips)
         if (out.picked.length && out.project !== project) me.edit(() => out.project, { clips: out.picked })
-      } else if (view.screen !== 'mixer' && view.notes.length) me.write(pat => duplicate(pat, view.notes))
+      } else if (view.screen === 'roll' && view.notes.length) me.write(pat => duplicate(pat, view.notes))
     },
     nudge(dt: number, dr: number) {
       if (view.screen === 'arrange') {
         if (view.clips.length && dt) me.edit(p => shiftClips(p, view.clips, dt), { clips: view.clips })
-      } else if (view.screen !== 'mixer' && view.notes.length) {
+      } else if (view.screen === 'roll' && view.notes.length) {
         me.write(pat => {
           const out = shift(pat, view.notes, dt, dr)
           return out.pattern === pat ? out : overlaps(out.pattern, out.picked)
@@ -1062,7 +1206,7 @@ export function studio() {
     },
     // Quantizes what is picked, or, with nothing picked, every note of the pattern.
     quantize() {
-      if (view.screen === 'arrange' || view.screen === 'mixer') return
+      if (view.screen !== 'roll') return
       const pat = me.pattern()
       if (!pat) return
       const picked = view.notes.length ? view.notes : pat.notes.map((_, i) => i)
@@ -1072,7 +1216,7 @@ export function studio() {
       })
     },
     reverse() {
-      if (view.screen === 'arrange' || view.screen === 'mixer' || !view.notes.length) return
+      if (view.screen !== 'roll' || !view.notes.length) return
       me.write(pat => reverse(pat, view.notes))
     },
 

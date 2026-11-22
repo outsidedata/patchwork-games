@@ -8,6 +8,10 @@
 // it starts at (◀ ▶ a bar either way) and BARS how many bars it runs (◀ ▶ a bar fewer or more), so a
 // four-bar loop from bar 9 is FROM 9 and BARS 4. Each change is one step of undo.
 //
+// ◀ ARRANGEMENT is Ableton's BACK TO ARRANGEMENT: lit while the session holds any track (a slot of it
+// launched, so its arrangement is not heard), a press stops every slot and hands every track back to
+// its arrangement at once.
+//
 // BUFFER, at the right, opens a menu over the screens below it, in a panel of its own: Tone's
 // LOOKAHEAD (how far ahead of the audio each note is handed over, so a page busy that long is not
 // late) and the browser's BUFFER (how much audio is mixed ahead of the speaker), each a knob, from
@@ -122,6 +126,7 @@ export function tick(_row: Row, plugins: Plugins) {
   kit.lcd(P, 'bars', { at: [916, 20], size: [76, 24], lines: [`BARS ${bars}`] })
   kit.button(P, 'bars+', { at: [994, 20], size: [20, 24], label: '▶', onPress: () => set(from, bars + 1) })
   kit.lcd(P, 'loop:range', { at: [1020, 20], size: [92, 24], lines: [s.project.loop ? `${where(loop.start)}–${where(loop.end)}` : '—'] })
+  kit.button(P, 'arrangement', { at: [1124, 20], size: [128, 24], label: '◀ ARRANGEMENT', lit: s.anyHeld, accent: LOOP, onPress: () => s.backToArrangement() })
   kit.button(P, 'buffer', { at: [box[2] - 16 - BUFFER_W, 20], size: [BUFFER_W, 24], label: 'BUFFER', lit: draft !== undefined, accent: ACCENT, onPress: () => {
     const t = s.timing
     draft = draft || !t ? undefined : { lookAhead: t.lookAhead, latencyHint: t.latencyHint }

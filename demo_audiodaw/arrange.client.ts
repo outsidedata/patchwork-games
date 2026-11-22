@@ -2,9 +2,10 @@
 // song. Every number of its layout is here; the clips are one renderdom canvas, their pointer a
 // surface.
 //
-// The tracks' panel is drawn whatever the screen is: over the headers, ARRANGE, PIANO ROLL and MIXER
-// pick the screen beside them, the one showing lit. The arrangement is that screen while ARRANGE is
-// lit; the roll and the mixer take its place otherwise, and the headers stay as they are.
+// The tracks' panel is drawn whatever the screen is: over the headers, SESSION, ARRANGE, PIANO ROLL
+// and MIXER pick the screen beside them, the one showing lit. The arrangement is that screen while
+// ARRANGE is lit; the session, the roll and the mixer take its place otherwise, and the headers stay
+// as they are.
 //
 // The view. The song is shown from `view.songFrom` at `view.songZoom` pixels a tick; a zoom of 0 is
 // the whole song across, one bar past the furthest of the span's end, the last clip and the loop,
@@ -34,13 +35,16 @@
 // the bar and turns cycle on.
 //
 // A clip is a box of its track's colour, its pattern's name along its top and the notes it plays
-// drawn small: a clip plays its pattern once, from the pattern's `from` to its `length`, and is as
-// long as that. Clips are picked as the roll's notes are: a press picks one (Shift adds or takes it
+// drawn small: a clip plays its pattern's loop (the pattern from its `from` to its `length`) over and
+// over for the clip's own length, each pass after the first marked by a notch along its top. A track
+// the session holds is dimmed: its arrangement is not heard until BACK TO ARRANGEMENT. Clips are
+// picked as the roll's notes are: a press picks one (Shift adds or takes it
 // away), a drag moves every picked clip together by the grain along the song and by tracks up and
 // down, a clip moved onto another track carrying its pattern there; Alt held as a clip is pressed
 // drags copies of the picked clips and leaves them where they were. With Alt held a drag on empty
-// song draws a box and picks the clips it touches. The right edge of a clip sets where its pattern
-// ends and the left edge trims its start (`resizeClip`), so every clip of that pattern follows.
+// song draws a box and picks the clips it touches. The right edge of a clip sets where it ends, its
+// loop repeated to fill it, and the left edge trims its front, the clip begun that much further into
+// its loop (`resizeClip`); its pattern, and every other clip of it, stays as it is.
 // Two presses anywhere on a clip open its pattern on the roll (RENAME on its menu renames it); two
 // presses on empty song make a new clip of a new empty pattern a bar
 // long, at the bar pressed. A press on empty song is where a paste goes, and picks that track. The
@@ -68,7 +72,7 @@
 import type { Row } from '#engine/engine.ts'
 import type { Plugins } from '#engine/browser.ts'
 import type { Mods } from '#plugins/renderdom/renderdom.plugin.ts'
-import { clipEnd, fromOf, patternOf, spanOf, valueAt, type AutomationPattern, type Project } from '#plugins/audiodaw/audiodaw.sim.ts'
+import { clipEnd, fromOf, passes, patternOf, spanOf, valueAt, type AutomationPattern, type Project } from '#plugins/audiodaw/audiodaw.sim.ts'
 import { sameKnob } from './plugins/studio/faceplate.ts'
 import { LAYOUT, type Screen, type Studio } from './plugins/studio/studio.plugin.ts'
 import { heard } from './mixer.client.ts'
@@ -80,7 +84,7 @@ const [, , W, H] = LAYOUT.view
 const NAMES_X = 12
 const NAMES_W = 240
 // The screens, each a button over the headers, side by side across them.
-const SCREENS: [Screen, string][] = [['arrange', 'ARRANGE'], ['roll', 'PIANO ROLL'], ['mixer', 'MIXER']]
+const SCREENS: [Screen, string][] = [['session', 'SESSION'], ['arrange', 'ARRANGE'], ['roll', 'PIANO ROLL'], ['mixer', 'MIXER']]
 const SCREEN_Y = 14
 const SCREEN_H = 28
 const SCREEN_GAP = 3
@@ -937,7 +941,8 @@ export function tick(_row: Row, plugins: Plugins) {
     const x0 = x(c.start), w = x(clipEnd(p, c)) - x0
     if (x0 + w < 0 || x0 > SONG_W) return
     if ((ti + 1) * ROW_H <= top || ti * ROW_H >= top + ROWS_H) return
-    ctx.globalAlpha = heard(p, ti) ? 1 : UNHEARD
+    // A track the session holds is not heard from its arrangement: dimmed, as Ableton greys it.
+    ctx.globalAlpha = heard(p, ti) && !s.held(ti) ? 1 : UNHEARD
     const picked = v.clips.includes(ci)
     ctx.fillStyle = t.color
     ctx.fillRect(x0 + 1, ti * ROW_H + 3, w - 2, ROW_H - 6)
@@ -948,56 +953,77 @@ export function tick(_row: Row, plugins: Plugins) {
     ctx.fillRect(x0 + 2, ti * ROW_H + 4, w - 4, NAME_H - 2)
     ctx.fillStyle = C.text
     ctx.fillText(c.pattern.toUpperCase(), x0 + 6, ti * ROW_H + 6)
-    // An automation clip's notes, each its line from 0 at the bottom to 1 at the top, filled under:
-    // a knob that sweeps drawn as it moves, one set on 16ths as the steps it takes.
+    // Each pass of its pattern's loop after the first begins at a notch along the clip's top.
+    const laps = passes(p, c)
+    ctx.fillStyle = C.ink
+    for (const lap of laps.slice(1)) {
+      ctx.beginPath()
+      ctx.moveTo(x(lap.start), ti * ROW_H + 3)
+      ctx.lineTo(x(lap.start) + 5, ti * ROW_H + 3)
+      ctx.lineTo(x(lap.start), ti * ROW_H + 8)
+      ctx.closePath()
+      ctx.fill()
+      ctx.fillRect(x(lap.start), ti * ROW_H + 3, 1, NAME_H - 1)
+    }
+    // An automation clip's notes, pass by pass, each its line from 0 at the bottom to 1 at the top,
+    // filled under: a knob that sweeps drawn as it moves, one set on 16ths as the steps it takes.
     if (t.kind === 'automation') {
       const lane = t.patterns[c.pattern] as AutomationPattern
       const roof = ti * ROW_H + NAME_H + 4, bottom = ti * ROW_H + ROW_H - 6
       const yOf = (value: number) => bottom - value * (bottom - roof)
       const steps = t.target ? s.glides(t.target) === false : false
       const sixteenth = BEAT / 4
-      for (const n of lane.notes) {
-        if (n.time < fromOf(pat) || n.time >= pat.length) continue
-        const end = Math.min(n.time + n.duration, pat.length)
-        const from = c.start + n.time - fromOf(pat)
-        const long = end - n.time
-        ctx.beginPath()
-        ctx.moveTo(x(from), bottom)
-        if (steps) {
-          // Set on its first tick and on every 16th of the song after, each value held to the next.
-          const at = [0]
-          for (let k = Math.ceil((from + 1) / sixteenth) * sixteenth; k < from + long; k += sixteenth) at.push(k - from)
-          at.forEach((a, j) => {
-            const value = valueAt(n, a)
-            ctx.lineTo(x(from + a), yOf(value))
-            ctx.lineTo(x(from + (at[j + 1] ?? long)), yOf(value))
-          })
-        } else {
-          for (let px = 0; px < long * zoom; px += 2) ctx.lineTo(x(from) + px, yOf(valueAt(n, px / zoom)))
-          ctx.lineTo(x(from + long), yOf(valueAt(n, long)))
+      for (const lap of laps) {
+        for (const n of lane.notes) {
+          if (n.time < fromOf(pat) || n.time >= pat.length) continue
+          // The note's ticks on the song, cut to this pass of the clip: `a0` to `a1` of the note.
+          const begins = lap.base + n.time - fromOf(pat)
+          const from = Math.max(begins, lap.start)
+          const until = Math.min(begins + Math.min(n.time + n.duration, pat.length) - n.time, lap.end)
+          if (until <= from) continue
+          const a0 = from - begins, a1 = until - begins
+          ctx.beginPath()
+          ctx.moveTo(x(from), bottom)
+          if (steps) {
+            // Set on its first tick and on every 16th of the song after, each value held to the next.
+            const at = [a0]
+            for (let k = Math.ceil((from + 1) / sixteenth) * sixteenth; k < until; k += sixteenth) at.push(k - begins)
+            at.forEach((a, j) => {
+              const value = valueAt(n, a)
+              ctx.lineTo(x(begins + a), yOf(value))
+              ctx.lineTo(x(begins + (at[j + 1] ?? a1)), yOf(value))
+            })
+          } else {
+            for (let px = 0; px < (a1 - a0) * zoom; px += 2) ctx.lineTo(x(from) + px, yOf(valueAt(n, a0 + px / zoom)))
+            ctx.lineTo(x(until), yOf(valueAt(n, a1)))
+          }
+          ctx.lineTo(x(until), bottom)
+          ctx.closePath()
+          ctx.fillStyle = 'rgba(35,40,49,0.18)'
+          ctx.fill()
+          ctx.strokeStyle = C.ink
+          ctx.lineWidth = 1.5
+          ctx.stroke()
         }
-        ctx.lineTo(x(from + long), bottom)
-        ctx.closePath()
-        ctx.fillStyle = 'rgba(35,40,49,0.18)'
-        ctx.fill()
-        ctx.strokeStyle = C.ink
-        ctx.lineWidth = 1.5
-        ctx.stroke()
       }
       return
     }
-    // The notes it plays, small, from the pattern's `from` to its end.
+    // The notes it plays, small, pass by pass, from the pattern's `from` to its end, each cut at its
+    // pass's end.
     const notes = t.patterns[c.pattern]!
     const playing = notes.notes.filter(n => n.time >= fromOf(pat) && n.time < pat.length)
     if (!playing.length) return
     const rows = playing.map(row)
     const lo = Math.min(...rows), hi = Math.max(...rows)
     ctx.fillStyle = 'rgba(35,40,49,0.55)'
-    playing.forEach((n, j) => {
-      const at = c.start + n.time - fromOf(pat)
-      const yy = ti * ROW_H + ROW_H - 8 - (hi > lo ? ((rows[j]! - lo) / (hi - lo)) * (ROW_H - 26) : (ROW_H - 26) / 2)
-      ctx.fillRect(x(at) + 1, yy, Math.max(1, Math.min(n.duration, pat.length - n.time) * zoom - 1), 2)
-    })
+    for (const lap of laps) {
+      playing.forEach((n, j) => {
+        const at = lap.base + n.time - fromOf(pat)
+        if (at < lap.start || at >= lap.end) return
+        const yy = ti * ROW_H + ROW_H - 8 - (hi > lo ? ((rows[j]! - lo) / (hi - lo)) * (ROW_H - 26) : (ROW_H - 26) / 2)
+        ctx.fillRect(x(at) + 1, yy, Math.max(1, Math.min(n.duration, pat.length - n.time, lap.end - at) * zoom - 1), 2)
+      })
+    }
   })
   ctx.globalAlpha = 1
   // Outside the song's span is shaded: what is there is kept and not heard.
