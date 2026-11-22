@@ -107,57 +107,14 @@
           "url": "/games/demo_world3d/assets/spire/spire.art.crowd.json",
           "preload": true
         },
-        "Rock013_4K_Color": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/spire/looks/Rock013_4K_Color.webp",
-          "wrap": "repeat",
+        "spire.art.hairs": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/spire/spire.art.hairs.json",
           "preload": true
         },
-        "Rock013_4K_Displacement": {
+        "spire.art_pictures": {
           "type": "texture",
-          "url": "/games/demo_world3d/assets/spire/looks/Rock013_4K_Displacement.webp",
-          "space": "linear",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Rock013_4K_NormalGL": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/spire/looks/Rock013_4K_NormalGL.webp",
-          "space": "linear",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Concrete034_4K_Color": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/spire/looks/Concrete034_4K_Color.webp",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Concrete034_4K_Displacement": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/spire/looks/Concrete034_4K_Displacement.webp",
-          "space": "linear",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Wood036_4K_Color": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/spire/looks/Wood036_4K_Color.webp",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Wood036_4K_NormalGL": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/spire/looks/Wood036_4K_NormalGL.webp",
-          "space": "linear",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Wood036_4K_Roughness": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/spire/looks/Wood036_4K_Roughness.webp",
-          "space": "linear",
-          "wrap": "repeat",
+          "url": "/games/demo_world3d/assets/spire/looks/spire.art.pictures.ktx2",
           "preload": true
         }
       }

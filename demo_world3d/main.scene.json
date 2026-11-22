@@ -107,6 +107,11 @@
           "url": "/games/demo_world3d/assets/smallville.town.crowd.json",
           "preload": true
         },
+        "smallville.town.hairs": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/smallville.town.hairs.json",
+          "preload": true
+        },
         "smallville.town_pictures": {
           "type": "texture",
           "url": "/games/demo_world3d/assets/looks/smallville.town.pictures.ktx2",
