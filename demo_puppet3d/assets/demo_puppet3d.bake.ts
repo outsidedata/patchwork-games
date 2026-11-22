@@ -1,6 +1,6 @@
 // demo_puppet3d's bake, `yarn bake demo_puppet3d` (core's `scripts/bake.ts`). Every number and name it
 // uses is `demo_puppet3d.bake.json`'s, beside this file:
-//   cues     each cue sheet of its `sheets`, copied from the library's `cues/` into `cues/` beside this
+//   cues     each cue sheet of its `sheets`, copied from the library's `pro-ng/cues/` into `cues/` beside this
 //            file, where the scenes' catalogues read it (`<sheet>.cues.json`, the entry `<sheet>`);
 //   clips    each animal of its `clips`, `{ kind, walk, stride, settle, idle }`: its kind in main's scene,
 //            posed by puppet3d's own code from its definition and written with a `walk` (at `walk` metres a
@@ -96,7 +96,7 @@ export default async ({ library, scratch, blender }: Tools) => {
 
   fs.mkdirSync(path.join(here, 'cues'), { recursive: true })
   for (const s of bake.sheets) {
-    fs.copyFileSync(path.join(library, 'cues', `${s}.cues.json`), path.join(here, 'cues', `${s}.cues.json`))
+    fs.copyFileSync(path.join(library, 'pro-ng', 'cues', `${s}.cues.json`), path.join(here, 'cues', `${s}.cues.json`))
     console.log('wrote', path.relative(root, path.join(here, 'cues', `${s}.cues.json`)))
   }
 
