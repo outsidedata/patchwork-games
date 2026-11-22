@@ -319,11 +319,6 @@
           "url": "/games/demo_item3d/assets/hairs.json",
           "preload": true
         },
-        "main_pictures": {
-          "type": "texture",
-          "url": "/games/demo_item3d/assets/looks/main.pictures.ktx2",
-          "preload": true
-        },
         "deathknight_helm-glb": {
           "type": "binary",
           "url": "/games/demo_item3d/assets/items/deathknight_helm.glb",
@@ -662,6 +657,11 @@
         "barbarian_sabaton_right-item": {
           "type": "json",
           "url": "/games/demo_item3d/assets/items/barbarian_sabaton_right.item.json",
+          "preload": true
+        },
+        "main_pictures": {
+          "type": "texture",
+          "url": "/games/demo_item3d/assets/looks/main.pictures.ktx2",
           "preload": true
         }
       }
