@@ -1,7 +1,7 @@
 // demo_audio's bake, `yarn bake demo_audio` (core's `scripts/bake.ts`): every car's engine, made by the
 // library's `sounds/sounds.mjs` from `demo_audio.sounds.json` beside this file, and the truck's body,
 // made by box3dvehicle's own script and packed by gltfpack, each written where the catalogue reads it:
-//   sounds/   each car's engine as loops held at fixed rpms, a file a stem, `<car>-<rpm>-<stem>.wav`,
+//   sounds/   each car's engine as loops held at fixed rpms, a file a stem, `<car>-<rpm>-<stem>.ogg`,
 //             and its manifest, `<car>.engine.json`, which the car's `look.sound.engine` names: the
 //             kart's a two-stroke single, the hatch's an inline four, the muscle car's a cross-plane V8,
 //             the exotic's a flat-plane V8, the grand tourer's a V12, the truck's a straight-six diesel,

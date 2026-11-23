@@ -247,67 +247,67 @@
         },
         "dirt-1": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/dirt-1.wav"
+          "url": "/games/demo_audio/assets/sounds/dirt-1.ogg"
         },
         "dirt-2": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/dirt-2.wav"
+          "url": "/games/demo_audio/assets/sounds/dirt-2.ogg"
         },
         "dirt-3": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/dirt-3.wav"
+          "url": "/games/demo_audio/assets/sounds/dirt-3.ogg"
         },
         "dirt-4": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/dirt-4.wav"
+          "url": "/games/demo_audio/assets/sounds/dirt-4.ogg"
         },
         "dirt-5": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/dirt-5.wav"
+          "url": "/games/demo_audio/assets/sounds/dirt-5.ogg"
         },
         "dirt-6": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/dirt-6.wav"
+          "url": "/games/demo_audio/assets/sounds/dirt-6.ogg"
         },
         "scorch-1": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/scorch-1.wav"
+          "url": "/games/demo_audio/assets/sounds/scorch-1.ogg"
         },
         "scorch-2": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/scorch-2.wav"
+          "url": "/games/demo_audio/assets/sounds/scorch-2.ogg"
         },
         "scorch-3": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/scorch-3.wav"
+          "url": "/games/demo_audio/assets/sounds/scorch-3.ogg"
         },
         "scorch-4": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/scorch-4.wav"
+          "url": "/games/demo_audio/assets/sounds/scorch-4.ogg"
         },
         "beam-on-1": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/beam-on-1.wav"
+          "url": "/games/demo_audio/assets/sounds/beam-on-1.ogg"
         },
         "beam-on-2": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/beam-on-2.wav"
+          "url": "/games/demo_audio/assets/sounds/beam-on-2.ogg"
         },
         "beam-off-1": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/beam-off-1.wav"
+          "url": "/games/demo_audio/assets/sounds/beam-off-1.ogg"
         },
         "beam-off-2": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/beam-off-2.wav"
+          "url": "/games/demo_audio/assets/sounds/beam-off-2.ogg"
         },
         "beam-hum": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/beam-hum.wav"
+          "url": "/games/demo_audio/assets/sounds/beam-hum.ogg"
         },
         "chaingun-motor": {
           "type": "sound",
-          "url": "/games/demo_audio/assets/sounds/chaingun-motor.wav"
+          "url": "/games/demo_audio/assets/sounds/chaingun-motor.ogg"
         }
       }
     },
