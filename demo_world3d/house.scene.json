@@ -107,44 +107,14 @@
           "url": "/games/demo_world3d/assets/house/yard.art.crowd.json",
           "preload": true
         },
-        "Concrete034_4K_Color": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/house/looks/Concrete034_4K_Color.webp",
-          "wrap": "repeat",
+        "yard.art.hairs": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/house/yard.art.hairs.json",
           "preload": true
         },
-        "Concrete034_4K_NormalGL": {
+        "yard.art_pictures": {
           "type": "texture",
-          "url": "/games/demo_world3d/assets/house/looks/Concrete034_4K_NormalGL.webp",
-          "space": "linear",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Wood036_4K_Color": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/house/looks/Wood036_4K_Color.webp",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Wood036_4K_Displacement": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/house/looks/Wood036_4K_Displacement.webp",
-          "space": "linear",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Wood036_4K_NormalGL": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/house/looks/Wood036_4K_NormalGL.webp",
-          "space": "linear",
-          "wrap": "repeat",
-          "preload": true
-        },
-        "Wood036_4K_Roughness": {
-          "type": "texture",
-          "url": "/games/demo_world3d/assets/house/looks/Wood036_4K_Roughness.webp",
-          "space": "linear",
-          "wrap": "repeat",
+          "url": "/games/demo_world3d/assets/house/looks/yard.art.pictures.ktx2",
           "preload": true
         }
       }
