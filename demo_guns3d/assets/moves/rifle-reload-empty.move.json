@@ -1,0 +1,51 @@
+{
+  "length": 2.15,
+  "loop": false,
+  "done": 1.55,
+  "fade": [0.15, 0.2],
+  "hands": {
+    "left": [
+      [0, { "gun": "support" }, "linear"],
+      [0.28, { "gun": "magazine" }, "both"],
+      [0.5, { "gun": "magazine" }, "linear"],
+      [0.85, { "body": "pouch" }, "both"],
+      [1.25, { "gun": "magazine" }, "both"],
+      [1.35, { "gun": "magazine" }, "linear"],
+      [1.5, { "gun": "bolt catch" }, "both"],
+      [1.58, { "gun": "bolt catch" }, "linear"],
+      [1.95, { "gun": "support" }, "both"]
+    ]
+  },
+  "grips": {
+    "left": [
+      [0, "grip", "linear"],
+      [0.18, "open", "both"],
+      [0.3, "grip", "out"],
+      [0.6, "open", "both"],
+      [0.85, "grip", "out"],
+      [1.32, "grip", "linear"],
+      [1.42, "pinch", "both"],
+      [1.6, "open", "both"],
+      [1.95, "grip", "both"]
+    ]
+  },
+  "gun": [
+    [0, [0, 0, 0], [0, 0, 0], "linear"],
+    [0.3, [0, -0.03, 0.02], [-10, 0, -28], "both"],
+    [1.6, [0, -0.03, 0.02], [-10, 0, -28], "linear"],
+    [2.05, [0, 0, 0], [0, 0, 0], "both"]
+  ],
+  "body": [
+    [0, { "Head": [0, 0, 0], "Spine2": [0, 0, 0] }, "linear"],
+    [0.35, { "Head": [22, 8, 0], "Spine2": [4, 0, 0] }, "both"],
+    [1.6, { "Head": [22, 8, 0], "Spine2": [4, 0, 0] }, "linear"],
+    [2.05, { "Head": [0, 0, 0], "Spine2": [0, 0, 0] }, "both"]
+  ],
+  "clips": [[1.52, "bolt_close"]],
+  "parts": [
+    [0.3, "grab", "magazine", "left"],
+    [0.55, "drop", "magazine", "magazine", [0, 0, -1]],
+    [0.85, "take", "magazine", "left"],
+    [1.3, "seat", "magazine"]
+  ]
+}

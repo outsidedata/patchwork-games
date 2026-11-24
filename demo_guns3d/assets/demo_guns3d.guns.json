@@ -1,0 +1,339 @@
+{
+  "guns": {
+    "g95": {
+      "item": "g95",
+      "damage": 1,
+      "carry": "ready",
+      "words": {
+        "aim": {
+          "eye": {}
+        },
+        "trigger": {
+          "select": {
+            "modes": [
+              {
+                "name": "semi",
+                "rounds": 1,
+                "move": "select semi",
+                "clip": "select_semi"
+              },
+              {
+                "name": "auto",
+                "rounds": null,
+                "move": "select auto",
+                "clip": "select_auto"
+              }
+            ]
+          }
+        },
+        "action": {
+          "cycle": {
+            "rpm": 850
+          }
+        },
+        "feed": {
+          "magazine": {
+            "size": 30,
+            "chamber": 1,
+            "fire": "shot",
+            "last": "shot last",
+            "reload": "reload",
+            "empty": "reload empty",
+            "count": "count"
+          }
+        },
+        "spread": {
+          "cone": {
+            "base": 0.35,
+            "per": 0.45,
+            "most": 4,
+            "settle": 6
+          }
+        },
+        "flight": {
+          "hitscan": {
+            "speed": 905,
+            "range": 600
+          }
+        },
+        "after": {
+          "kick": {
+            "up": 0.012,
+            "across": 0.004,
+            "back": 0.06
+          }
+        }
+      },
+      "look": {
+        "flash": {
+          "effect": "flash"
+        },
+        "smoke": {
+          "effect": "smoke"
+        },
+        "tracer": {
+          "effect": "tracer",
+          "every": 3
+        },
+        "impact": {
+          "ground": "impact ground",
+          "body": "impact plate"
+        }
+      },
+      "points": {
+        "muzzle": {
+          "at": [
+            0,
+            0.9335,
+            0.207158
+          ]
+        },
+        "port": {
+          "at": [
+            0.024,
+            0.398,
+            0.2118
+          ]
+        },
+        "stock": {
+          "at": [
+            0,
+            0.012,
+            0.163
+          ],
+          "bone": "stock stock"
+        },
+        "grip": {
+          "at": [
+            0,
+            0.268,
+            0.118
+          ],
+          "turn": [
+            0,
+            0,
+            90
+          ]
+        },
+        "support": {
+          "at": [
+            0,
+            0.56,
+            0.166
+          ],
+          "turn": [
+            0,
+            90,
+            -90
+          ]
+        },
+        "magazine": {
+          "at": [
+            0,
+            0.4,
+            0.035
+          ],
+          "bone": "magazine magazine",
+          "turn": [
+            0,
+            90,
+            -90
+          ]
+        },
+        "bolt catch": {
+          "at": [
+            -0.03,
+            0.33,
+            0.19
+          ],
+          "bone": "bolt catch bolt_catch",
+          "turn": [
+            0,
+            90,
+            -90
+          ]
+        },
+        "charging handle": {
+          "at": [
+            -0.02,
+            0.22,
+            0.232
+          ],
+          "bone": "charging handle charging_handle",
+          "turn": [
+            0,
+            90,
+            -90
+          ]
+        },
+        "forward assist": {
+          "at": [
+            0.03,
+            0.24,
+            0.207
+          ],
+          "bone": "forward assist forward_assist",
+          "turn": [
+            0,
+            90,
+            -90
+          ]
+        }
+      },
+      "moves": {
+        "ready": "move-rifle-ready",
+        "low": "move-rifle-low",
+        "aim": "move-rifle-aim",
+        "sprint": "move-rifle-sprint",
+        "shot": "move-rifle-shot",
+        "shot last": "move-rifle-shot-last",
+        "reload": "move-rifle-reload",
+        "reload empty": "move-rifle-reload-empty",
+        "select semi": "move-rifle-select-semi",
+        "select auto": "move-rifle-select-auto",
+        "inspect": "move-rifle-inspect",
+        "charge": "move-rifle-charge",
+        "check": "move-rifle-check"
+      }
+    }
+  },
+  "holders": {
+    "xbot": {
+      "stock": {
+        "bone": "RightShoulder",
+        "at": [
+          0.123,
+          0.055,
+          -0.064
+        ],
+        "turn": [
+          -64.5,
+          -30.4,
+          43.9
+        ]
+      },
+      "poles": {
+        "left": [
+          1,
+          -1,
+          0
+        ],
+        "right": [
+          -1,
+          -1,
+          0
+        ]
+      },
+      "points": {
+        "pouch": {
+          "bone": "Spine1",
+          "at": [
+            0.08,
+            0.02,
+            0.13
+          ],
+          "turn": [
+            0,
+            0,
+            0
+          ]
+        },
+        "chest": {
+          "bone": "Spine2",
+          "at": [
+            0.02,
+            0.05,
+            0.16
+          ],
+          "turn": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  },
+  "grips": {
+    "open": {
+      "left": {
+        "thumb": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        "index": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        "middle": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        "ring": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        "pinky": [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+      },
+      "right": {
+        "thumb": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        "index": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        "middle": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        "ring": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        "pinky": [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+      }
+    },
+    "grip": {
+      "left": {
+        "thumb": [[30, 0, 0], [30, 0, 0], [20, 0, 0]],
+        "index": [[60, 0, 0], [70, 0, 0], [50, 0, 0]],
+        "middle": [[65, 0, 0], [75, 0, 0], [50, 0, 0]],
+        "ring": [[70, 0, 0], [75, 0, 0], [50, 0, 0]],
+        "pinky": [[75, 0, 0], [75, 0, 0], [50, 0, 0]]
+      },
+      "right": {
+        "thumb": [[30, 0, 0], [30, 0, 0], [21, 0, 0]],
+        "index": [[60, 0, 0], [70, 0, 0], [50, 0, 0]],
+        "middle": [[65, 0, 0], [75, 0, 0], [50, 0, 0]],
+        "ring": [[70, 0, 0], [75, 0, 0], [50, 0, 0]],
+        "pinky": [[75, 0, 0], [75, 0, 0], [50, 0, 0]]
+      }
+    },
+    "trigger": {
+      "left": {
+        "thumb": [[30, 0, 0], [30, 0, 0], [20, 0, 0]],
+        "index": [[25, 0, 0], [35, 0, 0], [20, 0, 0]],
+        "middle": [[65, 0, 0], [75, 0, 0], [50, 0, 0]],
+        "ring": [[70, 0, 0], [75, 0, 0], [50, 0, 0]],
+        "pinky": [[75, 0, 0], [75, 0, 0], [50, 0, 0]]
+      },
+      "right": {
+        "thumb": [[30, 0, 0], [30, 0, 0], [21, 0, 0]],
+        "index": [[25, 0, 0], [35, 0, 0], [20, 0, 0]],
+        "middle": [[65, 0, 0], [75, 0, 0], [50, 0, 0]],
+        "ring": [[70, 0, 0], [75, 0, 0], [50, 0, 0]],
+        "pinky": [[75, 0, 0], [75, 0, 0], [50, 0, 0]]
+      }
+    },
+    "pinch": {
+      "left": {
+        "thumb": [[30, 0, 0], [30, 0, 0], [20, 0, 0]],
+        "index": [[40, 0, 0], [45, 0, 0], [30, 0, 0]],
+        "middle": [[55, 0, 0], [65, 0, 0], [45, 0, 0]],
+        "ring": [[70, 0, 0], [75, 0, 0], [50, 0, 0]],
+        "pinky": [[75, 0, 0], [75, 0, 0], [50, 0, 0]]
+      },
+      "right": {
+        "thumb": [[30, 0, 0], [30, 0, 0], [21, 0, 0]],
+        "index": [[40, 0, 0], [45, 0, 0], [30, 0, 0]],
+        "middle": [[55, 0, 0], [65, 0, 0], [45, 0, 0]],
+        "ring": [[70, 0, 0], [75, 0, 0], [50, 0, 0]],
+        "pinky": [[75, 0, 0], [75, 0, 0], [50, 0, 0]]
+      }
+    },
+    "thumb": {
+      "left": {
+        "thumb": [[30, 0, 0], [30, 0, 0], [20, 0, 0]],
+        "index": [[60, 0, 0], [70, 0, 0], [50, 0, 0]],
+        "middle": [[65, 0, 0], [75, 0, 0], [50, 0, 0]],
+        "ring": [[70, 0, 0], [75, 0, 0], [50, 0, 0]],
+        "pinky": [[75, 0, 0], [75, 0, 0], [50, 0, 0]]
+      },
+      "right": {
+        "thumb": [[30, 0, 0], [30, 0, 0], [21, 0, 0]],
+        "index": [[25, 0, 0], [35, 0, 0], [20, 0, 0]],
+        "middle": [[65, 0, 0], [75, 0, 0], [50, 0, 0]],
+        "ring": [[70, 0, 0], [75, 0, 0], [50, 0, 0]],
+        "pinky": [[75, 0, 0], [75, 0, 0], [50, 0, 0]]
+      }
+    }
+  }
+}

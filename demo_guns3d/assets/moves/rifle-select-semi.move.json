@@ -1,0 +1,20 @@
+{
+  "length": 0.4,
+  "loop": false,
+  "done": 0.15,
+  "fade": [0.06, 0.1],
+  "grips": {
+    "right": [
+      [0, "trigger", "linear"],
+      [0.1, "thumb", "both"],
+      [0.25, "thumb", "linear"],
+      [0.4, "trigger", "both"]
+    ]
+  },
+  "gun": [
+    [0, [0, 0, 0], [0, 0, 0], "linear"],
+    [0.15, [0, 0, 0], [0, 0, -6], "both"],
+    [0.4, [0, 0, 0], [0, 0, 0], "both"]
+  ],
+  "clips": [[0.12, "select_semi"]]
+}

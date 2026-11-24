@@ -1,0 +1,42 @@
+{
+  "length": 3,
+  "loop": false,
+  "done": 3,
+  "fade": [0.2, 0.3],
+  "hands": {
+    "left": [
+      [0, { "gun": "support" }, "linear"],
+      [0.35, { "gun": "charging handle" }, "both"],
+      [0.9, { "gun": "charging handle" }, "linear"],
+      [1.05, { "gun": "forward assist" }, "both"],
+      [1.2, { "gun": "forward assist" }, "linear"],
+      [1.5, { "gun": "support" }, "both"]
+    ]
+  },
+  "grips": {
+    "left": [
+      [0, "grip", "linear"],
+      [0.3, "pinch", "both"],
+      [0.95, "pinch", "linear"],
+      [1.1, "open", "both"],
+      [1.5, "grip", "both"]
+    ]
+  },
+  "gun": [
+    [0, [0, 0, 0], [0, 0, 0], "linear"],
+    [0.4, [0, 0.02, 0.06], [8, -12, -35], "both"],
+    [1.5, [0, 0.02, 0.06], [8, -12, -35], "linear"],
+    [2.1, [0, 0.03, 0.08], [10, 10, 40], "both"],
+    [2.6, [0, 0.03, 0.08], [10, 10, 40], "linear"],
+    [3, [0, 0, 0], [0, 0, 0], "both"]
+  ],
+  "body": [
+    [0, { "Head": [0, 0, 0] }, "linear"],
+    [0.4, { "Head": [16, 10, 0] }, "both"],
+    [1.5, { "Head": [16, 10, 0] }, "linear"],
+    [2.1, { "Head": [14, -6, 0] }, "both"],
+    [2.6, { "Head": [14, -6, 0] }, "linear"],
+    [3, { "Head": [0, 0, 0] }, "both"]
+  ],
+  "clips": [[0.1, "inspect"]]
+}

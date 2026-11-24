@@ -25,6 +25,9 @@
     ],
     "case": [
       { "n": [1, 1], "life": [3, 3], "speed": [2.6, 3.4], "spread": 0.25, "g": 9.8, "spin": 22, "bounce": 0.35, "drag": 0.2, "size": [1, 1], "a0": 1, "a1": 1, "item": { "item": "case556" } }
+    ],
+    "magazine": [
+      { "n": [1, 1], "life": [6, 6], "speed": [0.6, 0.9], "spread": 0.15, "g": 9.8, "spin": 5, "bounce": 0.2, "drag": 0.3, "size": [1, 1], "a0": 1, "a1": 1, "item": { "item": "mag556" } }
     ]
   }
 }

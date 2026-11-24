@@ -9,6 +9,9 @@
     "Calibre": "556x45",
     "Spent": true
    }
+  },
+  "mag556": {
+   "kind": "modern/firearms/rifles/g95/magazine"
   }
  }
 }

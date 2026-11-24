@@ -64,6 +64,86 @@
           "type": "json",
           "url": "/games/demo_guns3d/assets/items/case556.item.json",
           "preload": true
+        },
+        "mag556-glb": {
+          "type": "binary",
+          "url": "/games/demo_guns3d/assets/items/mag556.glb",
+          "preload": true
+        },
+        "mag556-item": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/items/mag556.item.json",
+          "preload": true
+        },
+        "guns": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/demo_guns3d.guns.json",
+          "preload": true
+        },
+        "move-rifle-ready": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/rifle-ready.move.json",
+          "preload": true
+        },
+        "move-rifle-low": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/rifle-low.move.json",
+          "preload": true
+        },
+        "move-rifle-aim": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/rifle-aim.move.json",
+          "preload": true
+        },
+        "move-rifle-sprint": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/rifle-sprint.move.json",
+          "preload": true
+        },
+        "move-rifle-shot": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/rifle-shot.move.json",
+          "preload": true
+        },
+        "move-rifle-shot-last": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/rifle-shot-last.move.json",
+          "preload": true
+        },
+        "move-rifle-reload": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/rifle-reload.move.json",
+          "preload": true
+        },
+        "move-rifle-reload-empty": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/rifle-reload-empty.move.json",
+          "preload": true
+        },
+        "move-rifle-select-semi": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/rifle-select-semi.move.json",
+          "preload": true
+        },
+        "move-rifle-select-auto": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/rifle-select-auto.move.json",
+          "preload": true
+        },
+        "move-rifle-inspect": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/rifle-inspect.move.json",
+          "preload": true
+        },
+        "move-rifle-charge": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/rifle-charge.move.json",
+          "preload": true
+        },
+        "move-rifle-check": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/rifle-check.move.json",
+          "preload": true
         }
       }
     },
@@ -96,6 +176,10 @@
         "case556": {
           "glb": "case556-glb",
           "file": "case556-item"
+        },
+        "mag556": {
+          "glb": "mag556-glb",
+          "file": "mag556-item"
         }
       }
     },
@@ -156,81 +240,15 @@
               "Spine1": 0.3,
               "Spine2": 0.4
             }
-          },
-          "props": [
-            {
-              "item": "g95",
-              "bone": "RightHand",
-              "at": [
-                0,
-                0,
-                0
-              ],
-              "turn": [
-                0,
-                0,
-                0
-              ]
-            }
-          ]
+          }
         }
-      },
-      "mods": {
-        "props": "item3d"
       }
     },
     "ik3d": {
-      "kinds": {
-        "xbot": {
-          "anchor": {
-            "prop": "g95",
-            "bone": "RightShoulder",
-            "at": [
-              0.123,
-              0.055,
-              -0.064
-            ],
-            "turn": [
-              -64.5,
-              -30.4,
-              43.9
-            ],
-            "point": "stock"
-          },
-          "limbs": [
-            {
-              "bones": [
-                "RightArm",
-                "RightForeArm",
-                "RightHand"
-              ],
-              "prop": "g95",
-              "target": "right hand",
-              "pole": [
-                -1,
-                -1,
-                0
-              ]
-            },
-            {
-              "bones": [
-                "LeftArm",
-                "LeftForeArm",
-                "LeftHand"
-              ],
-              "prop": "g95",
-              "target": "left hand",
-              "pole": [
-                1,
-                -1,
-                0
-              ]
-            }
-          ]
-        }
-      },
+      "kinds": {},
       "mods": {
-        "body": "anim"
+        "body": "anim",
+        "limbs": "guns3d"
       }
     },
     "hitscan3d": {
@@ -246,56 +264,12 @@
       }
     },
     "guns3d": {
+      "sheet": "guns",
       "hold": 0.5,
-      "guns": {
-        "g95": {
-          "item": "g95",
-          "damage": 1,
-          "aim": {
-            "eye": {}
-          },
-          "spread": {
-            "cone": {
-              "base": 0.35,
-              "per": 0.45,
-              "most": 4,
-              "settle": 6
-            }
-          },
-          "after": {
-            "kick": {
-              "up": 0.012,
-              "across": 0.004,
-              "back": 0.06
-            }
-          },
-          "look": {
-            "clips": {},
-            "flash": {
-              "effect": "flash"
-            },
-            "smoke": {
-              "effect": "smoke"
-            },
-            "tracer": {
-              "effect": "tracer",
-              "every": 3
-            },
-            "impact": {
-              "ground": "impact ground",
-              "body": "impact plate"
-            },
-            "case": {
-              "effect": "case"
-            }
-          }
-        }
-      },
       "mods": {
-        "gun": "item3d",
         "holder": "anim",
         "behaviors": [
-          "item3d",
+          "guns3d",
           "hitscan3d",
           "chasecamera3d",
           "particle3d"
@@ -385,8 +359,8 @@
             8
           ],
           "size": [
-            280,
-            240
+            300,
+            330
           ]
         },
         "ammo": {
@@ -461,8 +435,8 @@
     "item3d",
     "shipped",
     "anim",
-    "ik3d",
     "guns3d",
+    "ik3d",
     "particle3d",
     "environment3d",
     "render3d",
@@ -598,6 +572,8 @@
       },
       "lift": 1.6,
       "aim": 0,
+      "aiming": false,
+      "lowered": false,
       "rig": "stand",
       "gun": {
         "name": "g95"

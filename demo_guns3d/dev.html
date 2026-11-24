@@ -17,16 +17,14 @@
       // over a loopback, stepped on the page's clock. `?scene=<scene>` enters that scene. The truths are kept on
       // `window.__scenes` and the page on `window.__page` for the profilers (benchmarking-a-game). The frame rate is
       // the stats plugin's panel at the top left. The readout shows the scene and the step, the seat's gun (its mode,
-      // its rounds, the clip it plays and how far in) and each hand's reach, and the last five errors the page threw
-      // or wrote.
+      // its rounds, the carry it is held in, the act it plays and how far in) and each hand's reach, and the last
+      // five errors the page threw or wrote.
       //
-      // `window.__hold`, set true, stops the truth stepping while the page goes on drawing, so a moment of a clip can
+      // `window.__hold`, set true, stops the truth stepping while the page goes on drawing, so a moment of a move can
       // be looked at from any camera; false lets it go on.
       //
-      // The `fit` folder holds the gun against the body while the game runs: the X Bot's ik3d anchor, where the
-      // G95's `stock` sits on the right shoulder (`at`, metres, and `turn`, degrees, in the shoulder's frame), and
-      // each arm's pole. It writes the page's own copy of the scene's `world.ik3d`, which ik3d reads again the frame
-      // it changes; what is found is written into `main.scene.json`.
+      // How the gun is held and handled is tuned in the guns3d workshop (`yarn workshop guns3d demo_guns3d`), which
+      // writes the sheet and the moves this page reads.
       import { boot } from '#engine/engine.ts'
       import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
       import { loopback } from '#addons/loopback/loopback.addon.ts'
@@ -85,25 +83,6 @@
       const reload = (key, value) => { const url = new URL(location.href); url.searchParams.set(key, value); location.href = url.href }
       gui.add(chosen, 'scene', Object.keys(file.prefabs.scenemanager.scenes)).onChange(s => reload('scene', s))
 
-      // The fit: the page's own copy of world.ik3d, edited in place, its fields the panel's.
-      let fitted = false
-      const fit = gui.addFolder('fit')
-      const fitOn = ik => {
-        if (fitted) return
-        fitted = true
-        const a = ik.kinds.xbot.anchor
-        const v = { x: a.at[0], y: a.at[1], z: a.at[2], rx: a.turn[0], ry: a.turn[1], rz: a.turn[2] }
-        const write = () => { a.at = [v.x, v.y, v.z]; a.turn = [v.rx, v.ry, v.rz] }
-        for (const k of ['x', 'y', 'z']) fit.add(v, k, -0.4, 0.4, 0.001).name(`stock at ${k}`).onChange(write)
-        for (const k of ['rx', 'ry', 'rz']) fit.add(v, k, -180, 180, 0.5).name(`stock turn ${k.slice(1)}`).onChange(write)
-        ik.kinds.xbot.limbs.forEach((l, i) => {
-          const p = { x: l.pole[0], y: l.pole[1], z: l.pole[2] }
-          const side = i === 0 ? 'right' : 'left'
-          for (const k of ['x', 'y', 'z']) fit.add(p, k, -1, 1, 0.01).name(`${side} pole ${k}`).onChange(() => { l.pole = [p.x, p.y, p.z] })
-        })
-        fit.add({ print: () => console.log(JSON.stringify(ik.kinds.xbot)) }, 'print').name('print to the console')
-      }
-
       // `window.__advance(n)` holds the truth (`window.__hold`), and steps it `n` steps of its own `dt`, taking the
       // page's input and drawing a frame after each, so what the page runs a frame at a time (particles, a clip's
       // pose) keeps pace with the truth; with 0 it draws one frame where it is. A moment is reached exactly, whatever
@@ -136,12 +115,10 @@
         } catch (e) { caught(e) }
         const plugins = page.client?.plugins
         const lines = [`${chosen.scene}  step ${truth.n}`]
-        const ik = plugins?.wire?.scene?.world?.ik3d
-        if (ik) fitOn(ik)
         const me = plugins?.wire ? possessed(plugins.wire.rows) : undefined
         const g = me?.data.gun
         if (g?.mode !== undefined) {
-          lines.push(`gun ${g.name}  ${g.mode}  ${g.chambered}+${g.rounds}  ${g.clip || '-'} ${g.clipT.toFixed(2)}s${g.act ? ' (act)' : ''}  shots ${g.shots}`)
+          lines.push(`gun ${g.name}  ${g.mode}  ${g.chambered}+${g.rounds}  carried ${g.carry}  ${g.move || '-'} ${g.moveT.toFixed(2)}s${g.act ? ' (act)' : ''}  shots ${g.shots}`)
           const short = plugins.ik3d?.short(me.id)
           if (short) lines.push(`reach short  right ${(short[0] * 1000).toFixed(1)} mm  left ${(short[1] * 1000).toFixed(1)} mm`)
         }

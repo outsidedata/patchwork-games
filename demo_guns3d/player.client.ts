@@ -6,9 +6,9 @@
 //   stick     the way to walk, left, right, forward and back: read analog, so a stick pushed part way walks part speed
 //   look      the right stick, read analog, sent as `turn` with how far it is pushed across and down: the rule turns
 //             the view at the definition's `camera.turn` and `tilt` while it is held
-//   fast      held to run; `fire` held to hold the trigger, heard only while the page holds the pointer lock, so
-//             the click that takes the lock fires nothing
-//   jump, reload, select, inspect   each pressed
+//   fast      held to run; `aim` held to aim down the gun; `fire` held to hold the trigger, heard only while the page
+//             holds the pointer lock, so the click that takes the lock fires nothing
+//   jump, reload, select, lower, inspect, charge, check   each pressed
 //   nearer, further   the camera in and out by `camera.step` of the wheel's pixels a press
 // A click takes the pointer lock, and the mouse then sends `look` with its pixels times `sens`, right turning the
 // view right and down tilting it down; the wheel sends `zoom` with the pixels it turned. chasecamera3d follows the
@@ -27,7 +27,7 @@ export function setup(row: Row, plugins: Plugins) {
   const keys = k.keys
   const press: Record<string, Input> = {}
   const button = (list: string[], input: Input) => { for (const key of list) press[key] = input }
-  for (const act of ['jump', 'reload', 'select', 'inspect']) button(keys[act], [act])
+  for (const act of ['jump', 'reload', 'select', 'lower', 'inspect', 'charge', 'check']) button(keys[act], [act])
   button(keys.nearer, ['zoom', -k.camera.step])
   button(keys.further, ['zoom', k.camera.step])
   // chasecamera3d looks along (sin yaw, cos yaw), so a larger yaw turns the view left: right on the mouse is less
@@ -39,12 +39,13 @@ export function setup(row: Row, plugins: Plugins) {
     ],
     hold: [
       { keys: keys.fast, send: v => ['fast', v] },
+      { keys: keys.aim, send: v => ['aim', v] },
       { keys: keys.fire, send: v => ['fire', v] },
     ],
     press,
     pointer: (dx, dy) => ['look', -dx * k.sens, dy * k.sens],
     wheel: dy => ['zoom', dy],
-    locked: keys.fire.filter((key: string) => key.startsWith('Mouse')),
+    locked: [...keys.fire, ...keys.aim].filter((key: string) => key.startsWith('Mouse')),
   } satisfies Binds)
   plugins.chasecamera3d.follow(row.id)
 }

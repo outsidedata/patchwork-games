@@ -1,10 +1,15 @@
 // The row one seat possesses, and the body it plays: an X Bot (`as: "xbot"`) that walks on walker (its numbers
 // `world.walker.kinds.xbot`), is drawn and played by anim (`world.anim.kinds.xbot`, the Rifle 8-Way Locomotion
-// Pack's clips), and holds the G95, a gun of guns3d's (`world.guns3d.guns.g95`) whose state is its `gun`. Every seat is
-// sent every `player` row. Its own fields, beside walker's, anim's and guns3d's: `stick` [x, z], the keys' way, right
-// and forward; `fast`, the run key held; `look` `{ yaw, pitch, dist, side }`, chasecamera3d's orbit about it, `lift`
-// metres over its feet; `turning` [x, y], how far a gamepad's right stick is pushed right and down; `aim`, the pitch
-// anim lifts its upper body by, radians up; and `stood`, once it stands on its slot's start.
+// Pack's clips), and holds the G95, a gun of guns3d's sheet (`assets/demo_guns3d.guns.json`) whose state is its `gun`.
+// Every seat is sent every `player` row. Its own fields, beside walker's, anim's and guns3d's: `stick` [x, z], the
+// keys' way, right and forward; `fast`, the run key held; `aiming`, the aim key held; `lowered`, the gun lowered by
+// the lower key; `look` `{ yaw, pitch, dist, side }`, chasecamera3d's orbit about it, `lift` metres over its feet;
+// `turning` [x, y], how far a gamepad's right stick is pushed right and down; `aim`, the pitch anim lifts its upper
+// body by, radians up; and `stood`, once it stands on its slot's start.
+//
+// How it holds the gun is its definition's `carries`, each a carry move of the gun's (`{ stand, aim, run, low }`):
+// `run` while it runs and walks, `aim` while the aim key is held, `low` while it is lowered, else `stand`, set each
+// step with guns3d's `carry`. Its definition's `acts` are the moves its keys play (`{ inspect, charge, check }`).
 //
 // `before` stands it once on the land at its slot's `start`, facing the start's `yaw`, its look along it. Each step
 // its look turns while `turning` is held, at the definition's `camera.turn` across and `tilt` up and down a second at
@@ -14,7 +19,8 @@
 // since a camera that tilts down looks down); and its gun runs a step (guns3d's `run`).
 //
 // The acts are the page's keys: `stick(x, y)` (y down, as a stick reads), `turn(x, y)` (the right stick, the same),
-// `fast(v)` and `fire(v)` (1 held, 0 let go), `jump`, `reload`, `select` (the gun's next mode), `inspect`,
+// `fast(v)`, `fire(v)` and `aim(v)` (1 held, 0 let go), `jump`, `reload`, `select` (the gun's next mode), `lower`
+// (lowered or raised), `inspect`, `charge` and `check` (each the move its definition's `acts` names),
 // `look(dyaw, dpitch)` and `zoom(by)`, the wheel's pixels. A seat's message arrives from outside the program, so each
 // refuses arguments of the wrong kind and writes nothing.
 import type { Kind, Row, W } from '#engine/engine.ts'
@@ -68,6 +74,8 @@ export const player: Kind = {
     d.face = d.look.yaw
     walk(me, w, dt, groundOf(w))
     animate(me, w, dt)
+    const running = d.fast && (d.stick[0] !== 0 || d.stick[1] !== 0)
+    guns3d.carry(me, w, running ? k.carries.run : d.aiming ? k.carries.aim : d.lowered ? k.carries.low : k.carries.stand)
     guns3d.run(me, w, dt)
     // after the gun's kick has moved the look this step, the body aims where the camera looks
     d.aim = 0 - d.look.pitch
@@ -96,8 +104,20 @@ export const player: Kind = {
     select(me, w) {
       guns3d.select(me, w)
     },
+    aim(me, _w, _seat, v: unknown) {
+      if (held(v)) me.data.aiming = v === 1
+    },
+    lower(me) {
+      me.data.lowered = !me.data.lowered
+    },
     inspect(me, w) {
-      guns3d.play(me, w, 'inspect')
+      guns3d.play(me, w, def(w, me.kind).acts.inspect)
+    },
+    charge(me, w) {
+      guns3d.play(me, w, def(w, me.kind).acts.charge)
+    },
+    check(me, w) {
+      guns3d.play(me, w, def(w, me.kind).acts.check)
     },
     look(me, w, _seat, dyaw: unknown, dpitch: unknown) {
       if (!finite(dyaw, dpitch)) return
