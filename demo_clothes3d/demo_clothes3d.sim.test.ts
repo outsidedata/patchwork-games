@@ -32,3 +32,20 @@ test('a seat joins main, stands on its start clothed, and dress takes the clothe
   dress(2)
   expect(me().data.clothing).toEqual(defs.player.clothing)
 })
+
+test('every bystander stands on the ground where its entry puts it, wearing its definition\'s clothing', async () => {
+  const truth = boot(file as Scene, sim)
+  const room = (await load(truth, import.meta.url)).get('main')!
+  connection(manager(truth), () => {})
+  truth.step(DT)
+  truth.step(DT)
+  const entries = (room.scene.actors ?? []).filter(a => a.is === 'bystander')
+  const rows = room.rows.filter(r => r.kind === 'bystander')
+  expect(rows.length).toBe(entries.length)
+  expect(rows.length).toBeGreaterThan(1)
+  for (const [i, row] of rows.entries()) {
+    expect([row.data.pos[0], row.data.pos[2]]).toEqual(entries[i].pos)
+    expect(row.data.grounded).toBe(true)
+    expect(row.data.clothing).toEqual(defs.bystander.clothing)
+  }
+})

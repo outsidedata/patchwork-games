@@ -9,7 +9,8 @@
         "checker": { "type": "texture", "url": "/games/demo_clothes3d/assets/checker-1024.webp", "preload": true, "wrap": "repeat", "anisotropy": 8 },
         "robed_person-rig": { "type": "json", "url": "/games/demo_clothes3d/assets/robed_person.rig.json", "preload": true },
         "robed_person_bare": { "type": "model", "url": "/games/demo_clothes3d/assets/robed_person_bare.glb", "preload": true },
-        "robed_person_garments": { "type": "model", "url": "/games/demo_clothes3d/assets/robed_person_garments.glb", "preload": true }
+        "robed_person_garments": { "type": "model", "url": "/games/demo_clothes3d/assets/robed_person_garments.glb", "preload": true },
+        "clothes": { "type": "json", "url": "/games/demo_clothes3d/assets/clothes.looks.json", "preload": true }
       }
     },
     "terrain3d": {
@@ -28,7 +29,12 @@
         "robed": {
           "radius": 0.3, "height": 1.7, "accel": 12, "airAccel": 2, "turnRate": 12, "gravity": 20, "jumpH": 1.1,
           "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5, "seekSpeed": 1.7,
-          "bodies": ["player"]
+          "bodies": ["player", "bystander"]
+        },
+        "bystander": {
+          "radius": 0.3, "height": 1.7, "accel": 12, "airAccel": 2, "turnRate": 12, "gravity": 20, "jumpH": 1.1,
+          "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5, "seekSpeed": 1.7,
+          "bodies": ["player", "bystander"]
         }
       },
       "mods": { "height": "terrain3d" }
@@ -39,12 +45,25 @@
         "robed": {
           "rig": "robed_person-rig", "model": "robed_person_bare", "fade": 0.2, "falls": [{ "above": 4.3, "role": "fall" }],
           "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
+        },
+        "bystander": {
+          "rig": "robed_person-rig", "model": "robed_person_bare", "fade": 0.2, "falls": [{ "above": 4.3, "role": "fall" }],
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
         }
       }
     },
-    "clothing3d": { "mods": { "bodies": ["anim"] } }
+    "supershader3d": { "looks": "clothes" },
+    "clothing3d": {
+      "models": {
+        "robed_person_garments": {
+          "Top": { "look": "robe", "uvScale": 21.2 },
+          "Bottom": { "look": "belt", "uvScale": 9.83 }
+        }
+      },
+      "mods": { "bodies": ["anim"], "looks": "supershader3d" }
+    }
   },
-  "plugins": ["loader", "scenemanager", "player", "terrain3d", "anim", "clothing3d", "environment3d", "render3d", "chasecamera3d", "stats"],
+  "plugins": ["loader", "scenemanager", "player", "terrain3d", "anim", "supershader3d", "clothing3d", "environment3d", "render3d", "chasecamera3d", "stats"],
   "seats": 1,
   "prefabs": {
     "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
@@ -86,12 +105,40 @@
       "rig": "stand",
       "clothing": ["robed_person_garments"]
     },
+    "bystander": {
+      "stood": false,
+      "pos": [0, 0],
+      "yaw": 0,
+      "vel": [0, 0, 0],
+      "grounded": false,
+      "sliding": false,
+      "speed": 0,
+      "side": 0,
+      "turned": 0,
+      "want": [0, 0],
+      "face": null,
+      "jump": false,
+      "rig": "stand",
+      "clothing": []
+    },
     "walker": {}
   },
   "actors": [
     { "is": "scenemanager" },
     { "is": "loader" },
     { "is": "walker" },
-    { "is": "start", "slot": 0, "pos": [0, 0], "yaw": 0 }
+    { "is": "start", "slot": 0, "pos": [0, 0], "yaw": 0 },
+    { "is": "bystander", "pos": [0, 4], "yaw": 3.1416 },
+    { "is": "bystander", "pos": [2, 3.464], "yaw": -2.618 },
+    { "is": "bystander", "pos": [3.464, 2], "yaw": -2.094 },
+    { "is": "bystander", "pos": [4, 0], "yaw": -1.571 },
+    { "is": "bystander", "pos": [3.464, -2], "yaw": -1.047 },
+    { "is": "bystander", "pos": [2, -3.464], "yaw": -0.524 },
+    { "is": "bystander", "pos": [0, -4], "yaw": 0 },
+    { "is": "bystander", "pos": [-2, -3.464], "yaw": 0.524 },
+    { "is": "bystander", "pos": [-3.464, -2], "yaw": 1.047 },
+    { "is": "bystander", "pos": [-4, 0], "yaw": 1.571 },
+    { "is": "bystander", "pos": [-3.464, 2], "yaw": 2.094 },
+    { "is": "bystander", "pos": [-2, 3.464], "yaw": 2.618 }
   ]
 }

@@ -6,5 +6,8 @@
       "stick": [["a", "ArrowLeft"], ["d", "ArrowRight"], ["w", "ArrowUp"], ["s", "ArrowDown"]],
       "dress": ["c"]
     }
+  },
+  "bystander": {
+    "clothing": ["robed_person_garments"]
   }
 }
