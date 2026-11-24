@@ -105,10 +105,10 @@
   "fight": {
    "normal": [0, 1, 0],
    "motions": {
-    "light1": { "target": "triangles", "clips": ["uajab"], "press": "light", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "warp": { "until": "strike", "reach": 0.5, "turn": 60, "accel": 60, "short": 0.35 } },
-    "light2": { "target": "triangles", "clips": ["uacross"], "press": "light", "when": ["ground"], "from": ["light1"], "warp": { "until": "strike", "reach": 0.5, "turn": 60, "accel": 60, "short": 0.35 } },
-    "light3": { "target": "triangles", "clips": ["uahook"], "press": "light", "when": ["ground"], "from": ["light2"], "warp": { "until": "strike", "reach": 0.5, "turn": 60, "accel": 60, "short": 0.35 } },
-    "finisher": { "target": "triangles", "clips": ["uauppercut"], "press": "heavy", "when": ["ground"], "from": ["light1", "light2", "light3"], "warp": { "until": "strike", "reach": 0.8, "turn": 60, "accel": 60, "short": 0.35 } },
+    "light1": { "target": "triangles", "clips": ["uajab"], "press": "light", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "warp": { "until": "strike", "reach": 0.5, "turn": 60, "accel": 60, "short": 0.15 } },
+    "light2": { "target": "triangles", "clips": ["uacross"], "press": "light", "when": ["ground"], "from": ["light1"], "warp": { "until": "strike", "reach": 0.5, "turn": 60, "accel": 60, "short": 0.15 } },
+    "light3": { "target": "triangles", "clips": ["uahook"], "press": "light", "when": ["ground"], "from": ["light2"], "warp": { "until": "strike", "reach": 0.5, "turn": 60, "accel": 60, "short": 0.15 } },
+    "finisher": { "target": "triangles", "clips": ["uauppercut"], "press": "heavy", "when": ["ground"], "from": ["light1", "light2", "light3"], "warp": { "until": "strike", "reach": 0.8, "turn": 60, "accel": 60, "short": 0.15 } },
     "finisher2": { "target": "triangles", "clips": ["uahurricane"], "press": "heavy", "when": ["ground"], "from": ["finisher"], "warp": { "until": "strike", "reach": 0.8, "turn": 60, "accel": 60, "short": 0.35 } },
     "heavy": { "target": "triangles", "clips": ["uakick"], "press": "heavy", "when": ["ground"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "warp": { "until": "strike", "reach": 0.8, "turn": 60, "accel": 60, "short": 0.35 } },
     "runspecial": { "target": "triangles", "clips": ["uaflykick"], "press": "special", "when": ["ground", "pushed"], "from": ["stand", "walk", "run", "guardwalk", "guardrun", "block", "start", "stopwalk", "turnwalk", "stoprun", "turnrun"], "warp": { "until": "strike", "reach": 1.5, "turn": 60, "accel": 60, "short": 0.35 } },

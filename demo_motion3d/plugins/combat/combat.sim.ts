@@ -2,7 +2,8 @@
 // a walker body played by anim). It has no row and no numbers of its own: each function is handed the row it works on
 // and reads every number off that row's kind's definition (`assets/demo_motion3d.json`).
 //
-// `blows(w, me, dt)`, each step once the body is posed: melee3d's `swing` (`plugins/melee3d`), the body's blade swept
+// `blows(w, me, dt)`, each step once the body is posed: melee3d's `swing` (`plugins/melee3d`), the body's blade (with
+// nothing in its hands, the fist or shin its swing strikes with, motion3d's `strikers`) swept
 // from where it stood at the last step to where it stands now through every body melee3d knows, while its swing's
 // blow is open. A scene that gives no `world.melee3d` has no blades, and nothing is swept. A swing lands once on a
 // body: the soonest limb of it the blade meets is that body's `hit` act (no seat may send it), handed melee3d's

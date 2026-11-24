@@ -1,11 +1,13 @@
 // The kinds of combat and the combat.scene.json file next to this one: the first stage of motion3d's combat lift
 // (`plugins/motion3d/combat-lift.md`), reached through `dev.html?scene=combat`, and its one question: does a hit feel
-// right. On terrain3d's level checkerboard land, the seat's X Bot (`player.sim.ts`, played by motion3d, the sword and
-// shield drawn with G) faces a `foe` 2.2 metres ahead (`foe.sim.ts`, a walker body played by anim). Its blade is a
-// melee3d blade (motion3d's mod, `motion3d.melee3d.ts`), the foe's limbs melee3d limbs (anim's, `anim.melee3d.ts`); a
-// blow freezes both, throws blood where it lands (particle3d's), and the foe flinches by the way the blade came and
-// the blow's weight, then walks back to its spot (the combat plugin, `plugins/combat`). Every number that never
-// changes is the scene's `world` or a definition in `assets/combat.json`.
+// right. On terrain3d's level checkerboard land, the seat's X Bot (`player.sim.ts`, played by motion3d, unarmed: J
+// the jab, cross and hook, K the roundhouse or, after a light, the uppercut and hurricane kick, L the MMA kick) faces
+// a `foe` 1.4 metres ahead (`foe.sim.ts`, a walker body played by anim). Each strike lands with the striker its clip
+// strikes by, a fist from the forearm to the knuckles or a shin from the knee to the toes (motion3d's mod,
+// `motion3d.melee3d.ts`, its `strikers`), on the foe's limbs (anim's, `anim.melee3d.ts`); a blow freezes both, throws
+// blood where it lands (particle3d's), and the foe flinches by the way the strike came and the blow's weight, then
+// walks back to its spot (the combat plugin, `plugins/combat`). Every number that never changes is the scene's
+// `world` or a definition in `assets/combat.json`.
 import type { Scene, Sim } from '#engine/engine.ts'
 import { scenemanager } from '#plugins/scenemanager/scenemanager.sim.ts'
 import { loader } from '#plugins/loader/loader.sim.ts'

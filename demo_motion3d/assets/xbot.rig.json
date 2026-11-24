@@ -1529,6 +1529,81 @@
   },
   "reactlegs": {
    "file": "packs/mixamo-motions/Hit On Legs.fbx"
+  },
+  "uaelbow": {
+   "file": "packs/mixamo-motions/Elbow Punch.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uahook2": {
+   "file": "packs/mixamo-motions/Hook (2).fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uasurprise": {
+   "file": "packs/mixamo-motions/Surprise Uppercut.fbx",
+   "strike": "handL",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uaknee": {
+   "file": "packs/mixamo-motions/Knee Jab.fbx",
+   "strike": "footR",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uaillegalknee": {
+   "file": "packs/mixamo-motions/Illegal Knee.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uasidekick": {
+   "file": "packs/mixamo-motions/Side Kick.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uasweep": {
+   "file": "packs/mixamo-motions/Leg Sweep.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uacrescent": {
+   "file": "packs/mixamo-motions/Inside Crescent Kick.fbx",
+   "strike": "footR",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
   }
  },
  "roles": {

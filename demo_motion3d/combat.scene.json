@@ -132,7 +132,17 @@
     },
     "melee3d": {
       "kinds": {
-        "player": { "motion3d": { "blades": { "sword": { "glb": "sword-glb" }, "greatsword": { "glb": "greatsword-glb" }, "axe": { "glb": "axe-glb" } } } },
+        "player": {
+          "motion3d": {
+            "blades": { "sword": { "glb": "sword-glb" }, "greatsword": { "glb": "greatsword-glb" }, "axe": { "glb": "axe-glb" } },
+            "strikers": {
+              "fistL": { "limb": "handL", "from": "LeftForeArm", "to": "LeftHandMiddle4" },
+              "fistR": { "limb": "handR", "from": "RightForeArm", "to": "RightHandMiddle4" },
+              "shinL": { "limb": "footL", "from": "LeftLeg", "to": "LeftToe_End" },
+              "shinR": { "limb": "footR", "from": "RightLeg", "to": "RightToe_End" }
+            }
+          }
+        },
         "foe": { "anim": {} }
       },
       "limbs": {
@@ -232,7 +242,7 @@
     { "is": "scenemanager" },
     { "is": "loader" },
     { "is": "start", "slot": 0, "pos": [0, 0], "yaw": 0 },
-    { "is": "foe", "at": [0, 2.2], "facing": 3.141592653589793 },
+    { "is": "foe", "at": [0, 1.4], "facing": 3.141592653589793 },
     { "is": "particle3d" }
   ]
 }

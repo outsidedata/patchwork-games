@@ -86,9 +86,10 @@
       // `copy motion3d JSON` copies the panel's numbers, and `reset to the file` puts the file's back.
       //
       // The combat panel, in the combat scene (`?scene=combat`): the hitstop of each side and the share of a step it
-      // runs at while frozen, how fast a blade lands, the large reaction's damage and melee3d's blade and limb lines (off at first), laid into
-      // the truth's and the page's definitions and world as they change; and the readout's lines of the seat's swing
-      // and the foe's blows.
+      // runs at while frozen, how fast a fist or a foot lands, the large reaction's damage and melee3d's striker and limb
+      // lines (off at first), laid into the truth's and the page's definitions and world as they change; the combo
+      // panel, the clip and warp of each of the three light hits, picked from every unarmed strike; and the readout's
+      // lines of the seat's swing and the foe's blows.
       //
       // The rifle carry: the rifle's anchor in the X Bot's motion3d file (`at`, metres, and `turn`, degrees,
       // in the anchor bone's frame), laid into the truth's and the page's copies as it changes. The
@@ -1267,16 +1268,15 @@
         xf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify(fight, null, 2)) }, 'copy').name('copy combat JSON')
         xf.add({ reset: () => { Object.assign(fight, firstFight); for (const c of gui.controllersRecursive()) c.updateDisplay(); layFight() } }, 'reset').name('reset to the file')
 
-        // The combo's three hits, J pressed again within each one: the clip each plays, picked from every one-handed
-        // sword strike the rig has baked (its file named beside it), and each one's warp. The pick is laid into the
+        // The combo's three hits, J pressed again within each one: the clip each plays, picked from every unarmed
+        // strike the rig has baked (its file named beside it), and each one's warp. The pick is laid into the
         // truth's and the page's motion file; a clip picked that the definition gives no strike for is given the
         // slot's own. `own speed` plays every pickable clip at the speed it was made at, its rig's `rate` ramp off.
-        const SLOTS = ['swordshieldlight1', 'swordshieldlight2', 'swordshieldlight3']
-        // The strikes that measured as standing hits beside ssslash3 (no crouch, jump, run or low blow) and land on
-        // the foe in the chain, and the Mixamo sword and greatsword slashes.
-        const PICKS = ['ssslash3', 'osoutward', 'ssslash4', 'axdownward', 'axhorizontal',
-          'mmsscross', 'mmssdown', 'mmsshigh', 'osinward', 'mmgsdown', 'mmgspower']
-        const motionsOf = () => [room() && json(readerOf(room()), MOTION), client && json(client.plugins.wire, MOTION)].filter(Boolean).map(f => f.activities.swordshield.motions)
+        const SLOTS = ['light1', 'light2', 'light3']
+        // Every unarmed strike of one blow the rig has: the punches, elbows, knees and kicks.
+        const PICKS = ['uajab', 'uacross', 'uahook', 'uahook2', 'uauppercut', 'uasurprise', 'uaelbow',
+          'uaknee', 'uaillegalknee', 'uakick', 'uammakick', 'uasidekick', 'uacrescent', 'uasweep']
+        const motionsOf = () => [room() && json(readerOf(room()), MOTION), client && json(client.plugins.wire, MOTION)].filter(Boolean).map(f => f.activities.fight.motions)
         const rigs = () => [room() && rigOf(readerOf(room()), 'xbot'), client && rigOf(client.plugins.wire, 'xbot')].filter(Boolean)
         const fileName = clip => rigs()[0].clips[clip].file.split('/').pop().replace('.fbx', '')
         const label = clip => `${clip} (${fileName(clip)})`

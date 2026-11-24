@@ -1287,6 +1287,38 @@
   "reactlegs": {
    "spot": ["LeftFoot", "RightFoot"],
    "on": "begin"
+  },
+  "uaelbow": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uahook2": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uasurprise": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uaknee": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uaillegalknee": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uasidekick": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uasweep": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uacrescent": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
   }
  },
  "offsets": {
@@ -2902,6 +2934,46 @@
    "reactlegs": {
     "beginOffset": [0, 0, 0],
     "endOffset": [-0.023, -0.213, 2.533],
+    "beginTurn": 0
+   },
+   "uaelbow": {
+    "beginOffset": [0, 0.082, 0],
+    "endOffset": [0, 0.082, 0],
+    "beginTurn": 0
+   },
+   "uahook2": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [0, 0.083, 0],
+    "beginTurn": 0
+   },
+   "uasurprise": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [-0.637, -0.122, 1.863],
+    "beginTurn": 0
+   },
+   "uaknee": {
+    "beginOffset": [0, 0.078, 0],
+    "endOffset": [0, 0.078, 0],
+    "beginTurn": 0
+   },
+   "uaillegalknee": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [0, 0.083, 0],
+    "beginTurn": 0
+   },
+   "uasidekick": {
+    "beginOffset": [0, 0.088, 0],
+    "endOffset": [0, 0.088, 0],
+    "beginTurn": 0
+   },
+   "uasweep": {
+    "beginOffset": [0, 0.089, 0],
+    "endOffset": [0.069, 0.104, 1.127],
+    "beginTurn": 0
+   },
+   "uacrescent": {
+    "beginOffset": [0, 0.081, 0],
+    "endOffset": [0, 0.081, 0],
     "beginTurn": 0
    }
   }
