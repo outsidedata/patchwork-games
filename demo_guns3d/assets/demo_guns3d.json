@@ -1,0 +1,48 @@
+{
+  "player": {
+    "walk": 1.6,
+    "run": 3.8,
+    "sens": 0.0022,
+    "camera": { "minPitch": -0.7, "maxPitch": 0.9, "minDist": 1.4, "maxDist": 5, "zoom": 0.0015, "turn": 2.4, "tilt": 1.6, "step": 120 },
+    "keys": {
+      "stick": [["a", "ArrowLeft", "PadStickLeft"], ["d", "ArrowRight", "PadStickRight"], ["w", "ArrowUp", "PadStickUp"], ["s", "ArrowDown", "PadStickDown"]],
+      "look": ["PadRightStickLeft", "PadRightStickRight", "PadRightStickUp", "PadRightStickDown"],
+      "fast": ["Shift", "Pad10"],
+      "jump": [" ", "Pad0"],
+      "fire": ["Mouse0", "Pad7"],
+      "reload": ["r", "Pad2"],
+      "select": ["b", "Pad3"],
+      "inspect": ["i", "Pad1"],
+      "nearer": ["Pad12"],
+      "further": ["Pad13"]
+    },
+    "controls": {
+      "first": [16, 14],
+      "step": 22,
+      "text": 104,
+      "lines": [
+        { "key": "Click", "text": "take the mouse" },
+        { "key": "Mouse", "text": "aim" },
+        { "key": "Left button", "text": "fire" },
+        { "key": "W A S D", "text": "walk" },
+        { "key": "Shift", "text": "run" },
+        { "key": "R", "text": "reload" },
+        { "key": "B", "text": "semi or auto" },
+        { "key": "I", "text": "inspect" },
+        { "key": "Space", "text": "jump" },
+        { "key": "Esc", "text": "let go of the mouse" }
+      ]
+    }
+  },
+  "plate": {
+    "radius": 0.22,
+    "post": 1.1,
+    "pole": 0.03,
+    "thick": 0.012,
+    "down": 2.5,
+    "fall": 0.18,
+    "plate": "#e9e3d2",
+    "struck": "#c8452c",
+    "stand": "#3d3b36"
+  }
+}

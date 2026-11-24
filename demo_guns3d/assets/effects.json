@@ -1,0 +1,30 @@
+{
+  "cap": 6000,
+  "effects": {
+    "flash": [
+      { "n": [1, 1], "life": [0.03, 0.04], "shape": "glow", "size": [0.12, 0.16], "tint": 16773584, "gain": 3, "add": true, "alphas": [[0, 1], [1, 0]] },
+      { "n": [4, 6], "life": [0.025, 0.04], "shape": "glow", "spread": 0.25, "speed": [8, 14], "drag": 20, "size": [0.05, 0.08], "tints": [[0, 16767114], [1, 15234092]], "gain": 1.6, "add": true, "a1": 0 },
+      { "lamp": { "intensity": 2.5, "distance": 2.5, "decay": 2, "tint": 16760944 } }
+    ],
+    "smoke": [
+      { "n": [4, 6], "life": [0.7, 1.3], "shape": "puff", "spread": 0.35, "speed": [0.8, 1.8], "drag": 3, "g": -0.15, "size": [0.05, 0.08], "grows": [[0, 1], [1, 5]], "tint": 9078656, "alphas": [[0, 0], [0.06, 0.22], [1, 0]] }
+    ],
+    "tracer": [
+      { "n": [1, 1], "lasts": true, "follow": true, "shape": "glow", "size": [0.07, 0.07], "tint": 16756838, "gain": 2.4, "add": true },
+      { "every": 0.0008, "life": [0.025, 0.035], "shape": "glow", "size": [0.03, 0.04], "tints": [[0, 16761466], [1, 13789214]], "gain": 1.4, "add": true, "a1": 0 }
+    ],
+    "impact ground": [
+      { "n": [6, 9], "life": [0.5, 1], "shape": "puff2", "spread": 0.6, "speed": [0.6, 1.6], "drag": 3, "g": 0.6, "size": [0.05, 0.09], "grows": [[0, 1], [1, 4]], "tint": 9337440, "alphas": [[0, 0.55], [1, 0]] },
+      { "n": [5, 8], "life": [0.4, 0.7], "shape": "spark", "spread": 0.5, "speed": [1.5, 3.5], "g": 9.8, "bounce": 0.3, "size": [0.012, 0.018], "tint": 4865843 },
+      { "n": [1, 1], "life": [30, 30], "shape": "glow", "face": true, "size": [0.045, 0.055], "box": [0, 0.003, 0, 0, 0.003, 0], "tint": 1314570, "alphas": [[0, 0.95], [0.9, 0.95], [1, 0]] }
+    ],
+    "impact plate": [
+      { "n": [1, 1], "life": [0.04, 0.05], "shape": "glow", "size": [0.08, 0.1], "tint": 16771520, "gain": 2, "add": true, "a1": 0 },
+      { "n": [8, 12], "life": [0.1, 0.22], "shape": "spark", "spread": 1.2, "speed": [3, 6], "g": 9.8, "drag": 1, "size": [0.012, 0.02], "tints": [[0, 16774358], [1, 16747066]], "gain": 2, "add": true, "a1": 0 },
+      { "n": [2, 3], "life": [0.4, 0.6], "shape": "puff", "spread": 0.8, "speed": [0.3, 0.7], "drag": 2, "size": [0.04, 0.06], "grows": [[0, 1], [1, 3]], "tint": 10130828, "alphas": [[0, 0.3], [1, 0]] }
+    ],
+    "case": [
+      { "n": [1, 1], "life": [3, 3], "speed": [2.6, 3.4], "spread": 0.25, "g": 9.8, "spin": 22, "bounce": 0.35, "drag": 0.2, "size": [1, 1], "a0": 1, "a1": 1, "item": { "item": "case556" } }
+    ]
+  }
+}

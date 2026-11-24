@@ -1,0 +1,732 @@
+{
+  "world": {
+    "defs": "demo_guns3d",
+    "seed": 11,
+    "player": {
+      "deadzone": 0.2,
+      "resolution": 32
+    },
+    "loader": {
+      "assets": {
+        "demo_guns3d": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/demo_guns3d.json",
+          "preload": true
+        },
+        "land": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/land.json",
+          "preload": true
+        },
+        "checker": {
+          "type": "texture",
+          "url": "/games/demo_guns3d/assets/checker-1024.webp",
+          "preload": true,
+          "wrap": "repeat",
+          "anisotropy": 8
+        },
+        "looks": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/main.looks.json",
+          "preload": true
+        },
+        "effects": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/effects.json",
+          "preload": true
+        },
+        "xbot": {
+          "type": "model",
+          "url": "/games/demo_guns3d/assets/xbot.glb",
+          "preload": true
+        },
+        "xbot-rig": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/xbot.rig.json",
+          "preload": true
+        },
+        "g95-glb": {
+          "type": "binary",
+          "url": "/games/demo_guns3d/assets/items/g95.glb",
+          "preload": true
+        },
+        "g95-item": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/items/g95.item.json",
+          "preload": true
+        },
+        "case556-glb": {
+          "type": "binary",
+          "url": "/games/demo_guns3d/assets/items/case556.glb",
+          "preload": true
+        },
+        "case556-item": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/items/case556.item.json",
+          "preload": true
+        }
+      }
+    },
+    "supershader3d": {
+      "looks": "looks"
+    },
+    "terrain3d": {
+      "field": "land",
+      "rings": [
+        {
+          "reach": 64,
+          "seg": 128
+        },
+        {
+          "reach": 320,
+          "seg": 64
+        }
+      ],
+      "shadowReach": 64,
+      "budget": 8,
+      "seabed": false,
+      "preload": true
+    },
+    "item3d": {
+      "items": {
+        "g95": {
+          "glb": "g95-glb",
+          "file": "g95-item"
+        },
+        "case556": {
+          "glb": "case556-glb",
+          "file": "case556-item"
+        }
+      }
+    },
+    "walker": {
+      "kinds": {
+        "xbot": {
+          "radius": 0.3,
+          "height": 1.8,
+          "accel": 14,
+          "airAccel": 2,
+          "turnRate": 14,
+          "gravity": 20,
+          "jumpH": 1.1,
+          "step": 0.45,
+          "maxSlope": 0.9,
+          "slopeBand": 0.2,
+          "slide": 4,
+          "wade": 0.8,
+          "span": 0.3,
+          "probe": 0.5,
+          "seekSpeed": 1.6
+        }
+      },
+      "mods": {
+        "height": "terrain3d",
+        "depth": "terrain3d"
+      }
+    },
+    "anim": {
+      "still": 0.05,
+      "shift": 0.75,
+      "leap": 0.5,
+      "landFall": 7.5,
+      "moves": 0.05,
+      "turns": 30,
+      "kinds": {
+        "xbot": {
+          "rig": "xbot-rig",
+          "model": "xbot",
+          "fade": 0.2,
+          "falls": [
+            {
+              "above": 4.3,
+              "role": "fall"
+            }
+          ],
+          "reads": {
+            "pos": "pos",
+            "yaw": "yaw",
+            "vel": "vel",
+            "grounded": "grounded",
+            "limp": "limp",
+            "aim": "aim"
+          },
+          "aim": {
+            "bones": {
+              "Spine": 0.3,
+              "Spine1": 0.3,
+              "Spine2": 0.4
+            }
+          },
+          "props": [
+            {
+              "item": "g95",
+              "bone": "RightHand",
+              "at": [
+                0,
+                0,
+                0
+              ],
+              "turn": [
+                0,
+                0,
+                0
+              ]
+            }
+          ]
+        }
+      },
+      "mods": {
+        "props": "item3d"
+      }
+    },
+    "ik3d": {
+      "kinds": {
+        "xbot": {
+          "anchor": {
+            "prop": "g95",
+            "bone": "RightShoulder",
+            "at": [
+              0.123,
+              0.055,
+              -0.064
+            ],
+            "turn": [
+              -64.5,
+              -30.4,
+              43.9
+            ],
+            "point": "stock"
+          },
+          "limbs": [
+            {
+              "bones": [
+                "RightArm",
+                "RightForeArm",
+                "RightHand"
+              ],
+              "prop": "g95",
+              "target": "right hand",
+              "pole": [
+                -1,
+                -1,
+                0
+              ]
+            },
+            {
+              "bones": [
+                "LeftArm",
+                "LeftForeArm",
+                "LeftHand"
+              ],
+              "prop": "g95",
+              "target": "left hand",
+              "pole": [
+                1,
+                -1,
+                0
+              ]
+            }
+          ]
+        }
+      },
+      "mods": {
+        "body": "anim"
+      }
+    },
+    "hitscan3d": {
+      "kinds": {
+        "plate": {
+          "off": "down"
+        }
+      },
+      "rewind": 0,
+      "mods": {
+        "ground": "terrain3d",
+        "bodies": "range"
+      }
+    },
+    "guns3d": {
+      "hold": 0.5,
+      "guns": {
+        "g95": {
+          "item": "g95",
+          "damage": 1,
+          "aim": {
+            "eye": {}
+          },
+          "spread": {
+            "cone": {
+              "base": 0.35,
+              "per": 0.45,
+              "most": 4,
+              "settle": 6
+            }
+          },
+          "after": {
+            "kick": {
+              "up": 0.012,
+              "across": 0.004,
+              "back": 0.06
+            }
+          },
+          "look": {
+            "clips": {},
+            "flash": {
+              "effect": "flash"
+            },
+            "smoke": {
+              "effect": "smoke"
+            },
+            "tracer": {
+              "effect": "tracer",
+              "every": 3
+            },
+            "impact": {
+              "ground": "impact ground",
+              "body": "impact plate"
+            },
+            "case": {
+              "effect": "case"
+            }
+          }
+        }
+      },
+      "mods": {
+        "gun": "item3d",
+        "holder": "anim",
+        "behaviors": [
+          "item3d",
+          "hitscan3d",
+          "chasecamera3d",
+          "particle3d"
+        ]
+      }
+    },
+    "particle3d": {
+      "effects": "effects",
+      "mods": {
+        "behaviors": [
+          "item3d"
+        ],
+        "solids": [
+          "terrain3d"
+        ]
+      }
+    },
+    "lights3d": {
+      "grid": [
+        16,
+        9
+      ],
+      "slices": 24,
+      "shadows": {
+        "atlas": 4096,
+        "tile": 256,
+        "bias": 0.04,
+        "normalBias": 0.05,
+        "budget": 16
+      }
+    },
+    "shipped": {
+      "plugins": [
+        "range"
+      ]
+    },
+    "ui": {
+      "styles": {
+        "key": {
+          "fontFamily": "Arial, sans-serif",
+          "fontSize": 15,
+          "fontWeight": "bold",
+          "fill": 16777215,
+          "stroke": {
+            "color": 0,
+            "width": 3,
+            "join": "round"
+          }
+        },
+        "does": {
+          "fontFamily": "Arial, sans-serif",
+          "fontSize": 15,
+          "fill": 15263976,
+          "stroke": {
+            "color": 0,
+            "width": 3,
+            "join": "round"
+          }
+        },
+        "rounds": {
+          "fontFamily": "Arial, sans-serif",
+          "fontSize": 44,
+          "fontWeight": "bold",
+          "fill": 16777215,
+          "stroke": {
+            "color": 0,
+            "width": 4,
+            "join": "round"
+          }
+        },
+        "mode": {
+          "fontFamily": "Arial, sans-serif",
+          "fontSize": 18,
+          "fill": 16777215,
+          "stroke": {
+            "color": 0,
+            "width": 3,
+            "join": "round"
+          }
+        }
+      },
+      "panels": {
+        "controls": {
+          "anchor": "top-left",
+          "at": [
+            8,
+            8
+          ],
+          "size": [
+            280,
+            240
+          ]
+        },
+        "ammo": {
+          "anchor": "bottom-right",
+          "at": [
+            -24,
+            -24
+          ],
+          "size": [
+            160,
+            90
+          ],
+          "ammo": {
+            "rounds": {
+              "style": "rounds",
+              "at": [
+                80,
+                34
+              ]
+            },
+            "mode": {
+              "style": "mode",
+              "at": [
+                80,
+                72
+              ]
+            }
+          }
+        },
+        "reticle": {
+          "anchor": "center",
+          "size": [
+            200,
+            200
+          ],
+          "reticle": {
+            "colour": 16777215,
+            "width": 2,
+            "length": 9,
+            "gap": 4,
+            "per": 9
+          }
+        },
+        "marker": {
+          "anchor": "center",
+          "size": [
+            200,
+            200
+          ],
+          "layer": 1,
+          "marker": {
+            "colour": 16728128,
+            "width": 2.5,
+            "size": 22,
+            "seconds": 0.25
+          }
+        }
+      },
+      "mods": {
+        "behaviors": [
+          "guns3d"
+        ]
+      }
+    }
+  },
+  "plugins": [
+    "loader",
+    "scenemanager",
+    "player",
+    "supershader3d",
+    "terrain3d",
+    "item3d",
+    "shipped",
+    "anim",
+    "ik3d",
+    "guns3d",
+    "particle3d",
+    "environment3d",
+    "render3d",
+    "lights3d",
+    "chasecamera3d",
+    "ui",
+    "stats"
+  ],
+  "seats": 1,
+  "prefabs": {
+    "engine": {
+      "dt": 0.016666666666666666,
+      "width": 1280,
+      "height": 720
+    },
+    "scenemanager": {
+      "out": {}
+    },
+    "loader": {},
+    "render3d": {
+      "camera": {
+        "fov": 55,
+        "near": 0.05,
+        "far": 1500,
+        "at": [
+          0,
+          1.7,
+          -3
+        ],
+        "look": [
+          0,
+          1.4,
+          4
+        ]
+      },
+      "pixelRatio": 2,
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "background": "#bcd4e8",
+      "ao": {
+        "on": false,
+        "radius": 0.6,
+        "thickness": 0.5,
+        "falloff": 1,
+        "scale": 1,
+        "intensity": 1,
+        "samples": 16
+      },
+      "bloom": {
+        "strength": 0.25,
+        "radius": 0.4,
+        "threshold": 1.2
+      }
+    },
+    "environment3d": {
+      "sun": {
+        "color": "#fff3e0",
+        "power": 2.6,
+        "at": [
+          -30,
+          60,
+          -40
+        ],
+        "shadow": {
+          "map": 4096,
+          "half": 16,
+          "near": 1,
+          "far": 200,
+          "distance": 100,
+          "bias": -0.0002,
+          "normalBias": 0.02
+        }
+      },
+      "sky": {
+        "color": "#dbe8f5",
+        "ground": "#6b6252",
+        "power": 1.1
+      }
+    },
+    "particle3d": {
+      "next": 1,
+      "live": []
+    },
+    "start": {
+      "slot": 0,
+      "pos": [
+        0,
+        0
+      ],
+      "yaw": 0
+    },
+    "player": {
+      "seat": 0,
+      "stood": false,
+      "as": "xbot",
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0,
+      "vel": [
+        0,
+        0,
+        0
+      ],
+      "grounded": false,
+      "sliding": false,
+      "speed": 0,
+      "side": 0,
+      "turned": 0,
+      "want": [
+        0,
+        0
+      ],
+      "face": null,
+      "jump": false,
+      "stick": [
+        0,
+        0
+      ],
+      "turning": [
+        0,
+        0
+      ],
+      "fast": false,
+      "look": {
+        "yaw": 0,
+        "pitch": 0.08,
+        "dist": 2.4,
+        "side": 0.55
+      },
+      "lift": 1.6,
+      "aim": 0,
+      "rig": "stand",
+      "gun": {
+        "name": "g95"
+      }
+    },
+    "plate": {
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "down": 0,
+      "hits": 0
+    }
+  },
+  "actors": [
+    {
+      "is": "scenemanager"
+    },
+    {
+      "is": "loader"
+    },
+    {
+      "is": "particle3d"
+    },
+    {
+      "is": "start",
+      "slot": 0,
+      "pos": [
+        0,
+        0
+      ],
+      "yaw": 0
+    },
+    {
+      "is": "plate",
+      "pos": [
+        -3,
+        0,
+        10
+      ]
+    },
+    {
+      "is": "plate",
+      "pos": [
+        -1,
+        0,
+        10
+      ]
+    },
+    {
+      "is": "plate",
+      "pos": [
+        1,
+        0,
+        10
+      ]
+    },
+    {
+      "is": "plate",
+      "pos": [
+        3,
+        0,
+        10
+      ]
+    },
+    {
+      "is": "plate",
+      "pos": [
+        -4,
+        0,
+        20
+      ]
+    },
+    {
+      "is": "plate",
+      "pos": [
+        0,
+        0,
+        20
+      ]
+    },
+    {
+      "is": "plate",
+      "pos": [
+        4,
+        0,
+        20
+      ]
+    },
+    {
+      "is": "plate",
+      "pos": [
+        -6,
+        0,
+        35
+      ]
+    },
+    {
+      "is": "plate",
+      "pos": [
+        0,
+        0,
+        35
+      ]
+    },
+    {
+      "is": "plate",
+      "pos": [
+        6,
+        0,
+        35
+      ]
+    },
+    {
+      "is": "plate",
+      "pos": [
+        -2,
+        0,
+        60
+      ]
+    },
+    {
+      "is": "plate",
+      "pos": [
+        2,
+        0,
+        60
+      ]
+    }
+  ]
+}

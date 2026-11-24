@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demo_guns3d dev</title>
+    <style>
+      body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      canvas { grid-area: 1 / 1 }
+      .lil-gui.root { max-height: 100vh; overflow-y: auto }
+      #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px; pointer-events: none }
+    </style>
+  </head>
+  <body>
+    <div id="readout"></div>
+    <script type="module">
+      // The testbed: index.html, the manager truth and the scenes its row names all in this tab, one seat on them
+      // over a loopback, stepped on the page's clock. `?scene=<scene>` enters that scene. The truths are kept on
+      // `window.__scenes` and the page on `window.__page` for the profilers (benchmarking-a-game). The frame rate is
+      // the stats plugin's panel at the top left. The readout shows the scene and the step, the seat's gun (its mode,
+      // its rounds, the clip it plays and how far in) and each hand's reach, and the last five errors the page threw
+      // or wrote.
+      //
+      // `window.__hold`, set true, stops the truth stepping while the page goes on drawing, so a moment of a clip can
+      // be looked at from any camera; false lets it go on.
+      //
+      // The `fit` folder holds the gun against the body while the game runs: the X Bot's ik3d anchor, where the
+      // G95's `stock` sits on the right shoulder (`at`, metres, and `turn`, degrees, in the shoulder's frame), and
+      // each arm's pole. It writes the page's own copy of the scene's `world.ik3d`, which ik3d reads again the frame
+      // it changes; what is found is written into `main.scene.json`.
+      import { boot } from '#engine/engine.ts'
+      import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
+      import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import { possessed } from '#plugins/player/player.plugin.ts'
+      import GUI from 'lil-gui'
+      import { sim } from './demo_guns3d.sim.ts'
+      import file from './demo_guns3d.scene.json'
+
+      // Every error the page throws or writes, each once, the last five, shown under the readout, so one thrown
+      // every frame does not hide the one that came before it.
+      const errors = []
+      const caught = e => {
+        const said = String(e?.message ?? e)
+        const was = errors.indexOf(said)
+        if (was >= 0) errors.splice(was, 1)
+        errors.push(said)
+        if (errors.length > 5) errors.shift()
+      }
+      addEventListener('error', e => caught(e.error ?? e.message))
+      addEventListener('unhandledrejection', e => caught(e.reason))
+      const written = console.error.bind(console)
+      console.error = (...a) => { caught(a.map(x => x?.message ?? x).join(' ')); written(...a) }
+
+      file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
+
+      const dt = file.prefabs.engine.dt
+      const truth = boot(file, sim)
+      window.__scenes = await load(truth, import.meta.url)
+      const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+        for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
+          if (!surface) continue
+          const canvas = document.createElement('canvas')
+          canvas.width = scene.prefabs.engine.width
+          canvas.height = scene.prefabs.engine.height
+          document.body.appendChild(canvas)
+          surface.mount(canvas)
+        }
+        me.plugins.stats?.mount(document.body)
+      })
+      window.__page = page
+      const readout = document.getElementById('readout')
+
+      // The panel. A press on it stops at it, a release never does, and after a click the focus goes back to the
+      // page unless it went into a number to type or a list to pick from.
+      const gui = new GUI({ title: 'demo_guns3d dev' })
+      for (const type of ['keydown', 'keyup', 'click', 'mousedown', 'contextmenu', 'wheel'])
+        gui.domElement.addEventListener(type, e => e.stopPropagation())
+      gui.domElement.addEventListener('pointerup', () => requestAnimationFrame(() => {
+        const at = document.activeElement
+        if (gui.domElement.contains(at) && at.tagName !== 'SELECT' && !(at.tagName === 'INPUT' && (at.type === 'text' || at.type === 'number'))) at.blur()
+      }))
+      addEventListener('change', e => { if (gui.domElement.contains(e.target)) e.target.blur() })
+
+      // The scene, chosen from the manager's table, the page loaded again on it.
+      const chosen = { scene: file.prefabs.scenemanager.entry }
+      const reload = (key, value) => { const url = new URL(location.href); url.searchParams.set(key, value); location.href = url.href }
+      gui.add(chosen, 'scene', Object.keys(file.prefabs.scenemanager.scenes)).onChange(s => reload('scene', s))
+
+      // The fit: the page's own copy of world.ik3d, edited in place, its fields the panel's.
+      let fitted = false
+      const fit = gui.addFolder('fit')
+      const fitOn = ik => {
+        if (fitted) return
+        fitted = true
+        const a = ik.kinds.xbot.anchor
+        const v = { x: a.at[0], y: a.at[1], z: a.at[2], rx: a.turn[0], ry: a.turn[1], rz: a.turn[2] }
+        const write = () => { a.at = [v.x, v.y, v.z]; a.turn = [v.rx, v.ry, v.rz] }
+        for (const k of ['x', 'y', 'z']) fit.add(v, k, -0.4, 0.4, 0.001).name(`stock at ${k}`).onChange(write)
+        for (const k of ['rx', 'ry', 'rz']) fit.add(v, k, -180, 180, 0.5).name(`stock turn ${k.slice(1)}`).onChange(write)
+        ik.kinds.xbot.limbs.forEach((l, i) => {
+          const p = { x: l.pole[0], y: l.pole[1], z: l.pole[2] }
+          const side = i === 0 ? 'right' : 'left'
+          for (const k of ['x', 'y', 'z']) fit.add(p, k, -1, 1, 0.01).name(`${side} pole ${k}`).onChange(() => { l.pole = [p.x, p.y, p.z] })
+        })
+        fit.add({ print: () => console.log(JSON.stringify(ik.kinds.xbot)) }, 'print').name('print to the console')
+      }
+
+      // `window.__advance(n)` holds the truth (`window.__hold`), and steps it `n` steps of its own `dt`, taking the
+      // page's input and drawing a frame after each, so what the page runs a frame at a time (particles, a clip's
+      // pose) keeps pace with the truth; with 0 it draws one frame where it is. A moment is reached exactly, whatever
+      // frames the tab is given.
+      // `window.__advancing` is true until it is done.
+      window.__advance = async n => {
+        window.__hold = true
+        window.__advancing = true
+        for (let i = 0; i < n; i++) {
+          truth.step(dt)
+          page.input()
+          await page.frame(0)
+        }
+        if (n === 0) { page.input(); await page.frame(0) }
+        window.__advancing = false
+        return truth.n
+      }
+
+      let last = performance.now(), owed = 0
+      const loop = async now => {
+        owed += Math.min((now - last) / 1000, 0.25)
+        last = now
+        // A frame that throws is shown, and the next frame goes on.
+        try {
+          page.input()
+          // `window.__hold` stops the truth where it is, the page drawing on, so a moment can be looked at
+          if (window.__hold) owed = 0
+          while (owed >= dt) { truth.step(dt); owed -= dt }
+          await page.frame(owed / dt)
+        } catch (e) { caught(e) }
+        const plugins = page.client?.plugins
+        const lines = [`${chosen.scene}  step ${truth.n}`]
+        const ik = plugins?.wire?.scene?.world?.ik3d
+        if (ik) fitOn(ik)
+        const me = plugins?.wire ? possessed(plugins.wire.rows) : undefined
+        const g = me?.data.gun
+        if (g?.mode !== undefined) {
+          lines.push(`gun ${g.name}  ${g.mode}  ${g.chambered}+${g.rounds}  ${g.clip || '-'} ${g.clipT.toFixed(2)}s${g.act ? ' (act)' : ''}  shots ${g.shots}`)
+          const short = plugins.ik3d?.short(me.id)
+          if (short) lines.push(`reach short  right ${(short[0] * 1000).toFixed(1)} mm  left ${(short[1] * 1000).toFixed(1)} mm`)
+        }
+        readout.textContent = [...lines, ...errors].join('\n')
+        requestAnimationFrame(loop)
+      }
+      requestAnimationFrame(loop)
+    </script>
+  </body>
+</html>

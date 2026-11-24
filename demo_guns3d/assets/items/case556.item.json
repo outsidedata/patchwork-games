@@ -1,0 +1,486 @@
+{
+ "item": "case556",
+ "kind": "modern/firearms/ammo/cartridge",
+ "keys": {
+  "Calibre": "556x45",
+  "Spent": true,
+  "Feed": [
+   0,
+   0,
+   0
+  ],
+  "FeedAt": 0,
+  "Eject": [
+   0,
+   0,
+   0
+  ],
+  "EjectAt": 0,
+  "Pull": 0
+ },
+ "materials": [
+  "cartridge_brass_fired",
+  "cartridge_primer"
+ ],
+ "clips": {
+  "about": "Each kit thing that moves: its clips as its kind wrote them (what it is and how a player meets it, whether it plays at the start, whether it loops, its seconds). A clip of tracks is the glb's animation named in its `animation`, moving the bones of the kit mesh's skin. A clip of poses moves the parts it names: each pose a time and its morph target on the glb's kit mesh, null where the pose is the thing as it stands, each corner going in a straight line between two poses. Each joint is a bone a game may pose with no clip: `joint` its node among the skin's joints, `axis` in that node's own space, `range` the degrees from rest it may turn, and `couple` (where it has one) the joint whose turn drives it, `ratio` times over, as the thing's own linkage does.",
+  "things": [
+   {
+    "thing": "case556",
+    "kind": "modern/firearms/ammo/cartridge",
+    "row": 0,
+    "clips": {
+     "shot": {
+      "about": "Fired: the bullet gone down the bore, the case drawn back with the breech and thrown from the port tumbling, then the next round chambered in its place.",
+      "how": "Each shot: its gun plays fire on every piece.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.1,
+      "tracks": {
+       "round": {
+        "path": {
+         "keys": [
+          [
+           0,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0.005,
+           [
+            0,
+            0,
+            -0.00012250000000000002
+           ]
+          ],
+          [
+           0.01,
+           [
+            0,
+            0,
+            -0.0004900000000000001
+           ]
+          ],
+          [
+           0.015,
+           [
+            0,
+            0,
+            -0.0011025
+           ]
+          ],
+          [
+           0.02,
+           [
+            0,
+            0,
+            -0.0019600000000000004
+           ]
+          ],
+          [
+           0.024999999999999998,
+           [
+            0,
+            0,
+            -0.0030624999999999997
+           ]
+          ],
+          [
+           0.03,
+           [
+            0,
+            0,
+            -0.00441
+           ]
+          ],
+          [
+           0.022,
+           [
+            0,
+            0,
+            -0.00441
+           ]
+          ],
+          [
+           0.0225,
+           [
+            0,
+            0,
+            0
+           ]
+          ]
+         ]
+        },
+        "scale": {
+         "keys": [
+          [
+           0,
+           1
+          ],
+          [
+           0.03,
+           1
+          ],
+          [
+           0.0305,
+           0
+          ],
+          [
+           0.022,
+           0
+          ],
+          [
+           0.0225,
+           1
+          ]
+         ]
+        },
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0,
+           0
+          ],
+          [
+           0.03,
+           -540
+          ],
+          [
+           0.022,
+           -540
+          ],
+          [
+           0.0225,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "release": {
+       "seconds": 0.03,
+       "at": [
+        0,
+        0,
+        -0.00441
+       ],
+       "speed": [
+        0,
+        0,
+        -0.294
+       ]
+      },
+      "animation": "case556 shot"
+     },
+     "shot_last": {
+      "about": "Fired, the last round: the bullet gone, the case thrown, nothing chambered after it.",
+      "how": "The shot that empties the gun.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.13,
+      "tracks": {
+       "round": {
+        "path": {
+         "keys": [
+          [
+           0,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0.005,
+           [
+            0,
+            0,
+            -0.00012250000000000002
+           ]
+          ],
+          [
+           0.01,
+           [
+            0,
+            0,
+            -0.0004900000000000001
+           ]
+          ],
+          [
+           0.015,
+           [
+            0,
+            0,
+            -0.0011025
+           ]
+          ],
+          [
+           0.02,
+           [
+            0,
+            0,
+            -0.0019600000000000004
+           ]
+          ],
+          [
+           0.024999999999999998,
+           [
+            0,
+            0,
+            -0.0030624999999999997
+           ]
+          ],
+          [
+           0.03,
+           [
+            0,
+            0,
+            -0.00441
+           ]
+          ]
+         ]
+        },
+        "scale": {
+         "keys": [
+          [
+           0,
+           1
+          ],
+          [
+           0.03,
+           1
+          ],
+          [
+           0.0305,
+           0
+          ]
+         ]
+        },
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0,
+           0
+          ],
+          [
+           0.03,
+           -540
+          ]
+         ]
+        }
+       }
+      },
+      "release": {
+       "seconds": 0.03,
+       "at": [
+        0,
+        0,
+        -0.00441
+       ],
+       "speed": [
+        0,
+        0,
+        -0.294
+       ]
+      },
+      "animation": "case556 shot_last"
+     },
+     "feed": {
+      "about": "Fed: from where it lies to the chamber as the breech runs home, then back as it lay, the next round up.",
+      "how": "Each shot that leaves a round to feed.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.05,
+      "tracks": {
+       "round": {
+        "path": {
+         "keys": [
+          [
+           0,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0.012,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0.022,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0.0225,
+           [
+            0,
+            0,
+            0
+           ]
+          ]
+         ]
+        },
+        "scale": {
+         "keys": [
+          [
+           0,
+           1
+          ],
+          [
+           0.022,
+           1
+          ],
+          [
+           0.0225,
+           1
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "case556 feed"
+     },
+     "load": {
+      "about": "Loaded: there, where it was not.",
+      "how": "A round chambered or put in a chamber by hand.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.1,
+      "tracks": {
+       "round": {
+        "scale": {
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.05,
+           0
+          ],
+          [
+           0.0505,
+           1
+          ],
+          [
+           0.1,
+           1
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "case556 load"
+     },
+     "unload": {
+      "about": "Unloaded: gone from where it was.",
+      "how": "A round taken out.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.1,
+      "tracks": {
+       "round": {
+        "scale": {
+         "keys": [
+          [
+           0,
+           1
+          ],
+          [
+           0.05,
+           1
+          ],
+          [
+           0.0505,
+           0
+          ],
+          [
+           0.1,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "case556 unload"
+     }
+    }
+   }
+  ],
+  "joints": []
+ },
+ "spawns": [],
+ "grows": [],
+ "wears": [],
+ "guns": null
+}

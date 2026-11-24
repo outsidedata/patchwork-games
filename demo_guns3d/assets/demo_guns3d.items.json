@@ -1,0 +1,14 @@
+{
+ "items": {
+  "g95": {
+   "kind": "modern/firearms/rifles/g95/g95"
+  },
+  "case556": {
+   "kind": "modern/firearms/ammo/cartridge",
+   "keys": {
+    "Calibre": "556x45",
+    "Spent": true
+   }
+  }
+ }
+}
