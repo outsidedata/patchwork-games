@@ -1,0 +1,10 @@
+{
+  "player": {
+    "walk": 1.7,
+    "clothing": ["robed_person_garments"],
+    "keys": {
+      "stick": [["a", "ArrowLeft"], ["d", "ArrowRight"], ["w", "ArrowUp"], ["s", "ArrowDown"]],
+      "dress": ["c"]
+    }
+  }
+}
