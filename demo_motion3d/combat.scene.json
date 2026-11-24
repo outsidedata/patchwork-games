@@ -1,0 +1,238 @@
+{
+  "world": {
+    "defs": "combat",
+    "seed": 7,
+    "player": { "deadzone": 0.2, "resolution": 32 },
+    "loader": {
+      "assets": {
+        "combat": { "type": "json", "url": "/games/demo_motion3d/assets/combat.json", "preload": true },
+        "land": { "type": "json", "url": "/games/demo_motion3d/assets/land.json", "preload": true },
+        "checker": { "type": "texture", "url": "/games/demo_motion3d/assets/checker-1024.webp", "preload": true, "wrap": "repeat", "anisotropy": 8 },
+        "xbot-rig": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.rig.json", "preload": true },
+        "xbot-rig-baked": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.rig.baked.json", "preload": true },
+        "xbot-anim": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.anim.json", "preload": true },
+        "xbot": { "type": "model", "url": "/games/demo_motion3d/assets/xbot.glb", "preload": true },
+        "xbot-glb": { "type": "binary", "url": "/games/demo_motion3d/assets/xbot.glb", "preload": true },
+        "greatsword": { "type": "model", "url": "/games/demo_motion3d/assets/greatsword.glb", "preload": true },
+        "greatsword-glb": { "type": "binary", "url": "/games/demo_motion3d/assets/greatsword.glb", "preload": true },
+        "sword": { "type": "model", "url": "/games/demo_motion3d/assets/sword.glb", "preload": true },
+        "sword-glb": { "type": "binary", "url": "/games/demo_motion3d/assets/sword.glb", "preload": true },
+        "axe": { "type": "model", "url": "/games/demo_motion3d/assets/axe.glb", "preload": true },
+        "axe-glb": { "type": "binary", "url": "/games/demo_motion3d/assets/axe.glb", "preload": true },
+        "rifle": { "type": "model", "url": "/games/demo_motion3d/assets/rifle.glb", "preload": true },
+        "cup": { "type": "model", "url": "/games/demo_motion3d/assets/cup.glb", "preload": true },
+        "pistol": { "type": "model", "url": "/games/demo_motion3d/assets/pistol.glb", "preload": true },
+        "bow": { "type": "model", "url": "/games/demo_motion3d/assets/bow.glb", "preload": true },
+        "torch": { "type": "model", "url": "/games/demo_motion3d/assets/torch.glb", "preload": true },
+        "wand": { "type": "model", "url": "/games/demo_motion3d/assets/wand.glb", "preload": true },
+        "xbot-motion3d": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.motion3d.json", "preload": true },
+        "xbot-motion3d-baked": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.motion3d.baked.json", "preload": true },
+        "effects": { "type": "json", "url": "/games/demo_motion3d/assets/effects.json", "preload": true }
+      }
+    },
+    "terrain3d": {
+      "field": "land",
+      "rings": [{ "reach": 64, "seg": 256 }, { "reach": 320, "seg": 128 }, { "reach": 2000, "seg": 100 }],
+      "shadowReach": 64,
+      "budget": 8,
+      "preload": true
+    },
+    "shapes3d": { "kinds": {}, "mods": { "height": "terrain3d" } },
+    "motion3d": {
+      "kinds": {
+        "xbot": {
+          "motion": "xbot-motion3d",
+          "baked": "xbot-motion3d-baked",
+          "rig": "xbot-rig",
+          "measured": "xbot-rig-baked",
+          "model": "xbot",
+          "glb": "xbot-glb",
+          "fade": 0.2,
+          "blend": "inertial",
+          "lean": { "most": 0.25, "ease": 0.12 },
+          "pace": 0.05,
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
+          "props": [
+            { "model": "rifle", "bone": "RightHand", "at": [0.0033, 0.1072, 0.0122], "turn": [91.56, 27.38, -95.79] },
+            { "model": "cup", "bone": "LeftHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
+            { "model": "greatsword", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
+            { "model": "sword", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
+            { "model": "axe", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
+            { "model": "pistol", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
+            { "model": "bow", "bone": "LeftHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
+            { "model": "torch", "bone": "LeftHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
+            { "model": "wand", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] }
+          ]
+        }
+      },
+      "anywhere": {
+        "shape": { "box": { "size": [1000000000, 1000000000, 1000000000] } },
+        "activities": ["walk", "roll", "fight", "hurt", "cup", "greatsword", "swordshield", "sword", "axe", "rifle", "pistol", "bow", "torch", "magic"],
+        "priority": 0,
+        "data": { "motion3d": { "autoChange": true } }
+      },
+      "ease": 0.15,
+      "mods": { "spaces": "shapes3d", "faces": "shapes3d" }
+    },
+    "shipped": { "plugins": ["yard"] },
+    "kinematics3d": {
+      "kinds": {
+        "xbot": {
+          "triangles": { "radius": 0.3, "height": 1.8, "step": 0.45, "maxSlope": 0.9, "slopeBand": 0.2, "slide": 4, "wade": 0.8, "span": 0.3, "probe": 0.5 },
+          "move": { "accel": 12, "turnRate": 12, "still": 0.05, "reverse": 135 },
+          "fall": { "gravity": 20, "airAccel": 2 },
+          "jump": { "jumpH": 2, "jumpVelocityBoostMagnitude": 2, "cut": 0.4 }
+        }
+      },
+      "mods": {
+        "behaviors": ["shapes3d", "terrain3d", "motion3d"],
+        "solids": ["shapes3d"],
+        "footprints": ["shapes3d"],
+        "states": ["motion3d", "yard"]
+      }
+    },
+    "anim": {
+      "still": 0.05,
+      "shift": 0.75,
+      "leap": 0.5,
+      "landFall": 7.5,
+      "moves": 0.05,
+      "turns": 30,
+      "kinds": {
+        "foe": {
+          "rig": "xbot-anim",
+          "measured": "xbot-rig-baked",
+          "model": "xbot",
+          "glb": "xbot-glb",
+          "fade": 0.06,
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
+        }
+      }
+    },
+    "walker": {
+      "kinds": {
+        "foe": {
+          "radius": 0.35,
+          "height": 1.7,
+          "accel": 14,
+          "turnRate": 12,
+          "gravity": 20,
+          "jumpH": 0.9,
+          "step": 0.55,
+          "maxSlope": 0.55,
+          "slopeBand": 0.05,
+          "slide": 2,
+          "wade": 0.6,
+          "span": 0.7,
+          "probe": 1.5,
+          "seekSpeed": 1.5
+        }
+      },
+      "mods": { "height": "terrain3d" }
+    },
+    "melee3d": {
+      "kinds": {
+        "player": { "motion3d": { "blades": { "sword": { "glb": "sword-glb" }, "greatsword": { "glb": "greatsword-glb" }, "axe": { "glb": "axe-glb" } } } },
+        "foe": { "anim": {} }
+      },
+      "limbs": {
+        "head": { "from": "Neck", "to": "HeadTop_End", "radius": 0.1 },
+        "torso": { "from": "Hips", "to": "Neck", "radius": 0.15 },
+        "armL": { "from": "LeftArm", "to": "LeftForeArm", "radius": 0.06 },
+        "forearmL": { "from": "LeftForeArm", "to": "LeftHand", "radius": 0.05 },
+        "handL": { "from": "LeftHand", "to": "LeftHandMiddle4", "radius": 0.045 },
+        "armR": { "from": "RightArm", "to": "RightForeArm", "radius": 0.06 },
+        "forearmR": { "from": "RightForeArm", "to": "RightHand", "radius": 0.05 },
+        "handR": { "from": "RightHand", "to": "RightHandMiddle4", "radius": 0.045 },
+        "uplegL": { "from": "LeftUpLeg", "to": "LeftLeg", "radius": 0.08 },
+        "legL": { "from": "LeftLeg", "to": "LeftFoot", "radius": 0.06 },
+        "footL": { "from": "LeftFoot", "to": "LeftToe_End", "radius": 0.05 },
+        "uplegR": { "from": "RightUpLeg", "to": "RightLeg", "radius": 0.08 },
+        "legR": { "from": "RightLeg", "to": "RightFoot", "radius": 0.06 },
+        "footR": { "from": "RightFoot", "to": "RightToe_End", "radius": 0.05 }
+      },
+      "spacing": 0.04,
+      "edge": 2.5,
+      "clash": 0.04,
+      "mods": { "behaviors": ["anim", "motion3d"] }
+    },
+    "particle3d": { "effects": "effects", "hold": 0.3 }
+  },
+  "plugins": ["loader", "scenemanager", "player", "terrain3d", "shipped", "motion3d", "anim", "melee3d", "particle3d", "environment3d", "render3d", "chasecamera3d", "stats"],
+  "seats": 1,
+  "prefabs": {
+    "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
+    "scenemanager": { "out": {} },
+    "loader": {},
+    "render3d": {
+      "camera": { "fov": 55, "near": 0.1, "far": 3000, "at": [0, 3, -6], "look": [0, 1, 0] },
+      "pixelRatio": 2,
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "background": "#bcd4e8",
+      "ao": { "on": false, "radius": 0.6, "thickness": 0.5, "falloff": 1, "scale": 1, "intensity": 1, "samples": 16 },
+      "bloom": { "strength": 0.15, "radius": 0.4, "threshold": 1.5 }
+    },
+    "environment3d": {
+      "sun": {
+        "color": "#fff3e0",
+        "power": 2.6,
+        "at": [-30, 60, -40],
+        "shadow": { "map": 4096, "half": 40, "near": 1, "far": 200, "distance": 100, "bias": -0.0002, "normalBias": 0.02 }
+      },
+      "sky": { "color": "#dbe8f5", "ground": "#6b6252", "power": 1.1 }
+    },
+    "start": { "slot": 0, "pos": [0, 0], "yaw": 0 },
+    "player": {
+      "seat": 0,
+      "stood": false,
+      "as": "xbot",
+      "stick": [0, 0],
+      "turning": [0, 0],
+      "fast": false,
+      "guard": false,
+      "jumpHeld": true,
+      "target": null,
+      "weapon": "swordshield",
+      "queued": [],
+      "look": { "yaw": 0, "pitch": 0.35, "dist": 5 },
+      "lift": 1.4,
+      "stop": 0,
+      "edges": {},
+      "swing": null,
+      "struck": []
+    },
+    "foe": {
+      "at": [0, 0],
+      "facing": 0,
+      "stood": false,
+      "pos": [0, 0, 0],
+      "yaw": 0,
+      "vel": [0, 0, 0],
+      "grounded": true,
+      "sliding": false,
+      "speed": 0,
+      "want": [0, 0],
+      "face": null,
+      "jump": false,
+      "side": 0,
+      "turned": 0,
+      "limp": false,
+      "stop": 0,
+      "hits": 0,
+      "shove": [0, 0],
+      "edges": {},
+      "swing": null,
+      "struck": []
+    },
+    "particle3d": { "next": 1, "live": [] }
+  },
+  "actors": [
+    { "is": "scenemanager" },
+    { "is": "loader" },
+    { "is": "start", "slot": 0, "pos": [0, 0], "yaw": 0 },
+    { "is": "foe", "at": [0, 2.2], "facing": 3.141592653589793 },
+    { "is": "particle3d" }
+  ]
+}

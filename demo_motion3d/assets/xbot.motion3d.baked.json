@@ -576,6 +576,10 @@
    "spot": ["LeftFoot", "RightFoot"],
    "on": "begin"
   },
+  "ssslash4": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
   "sshigh": {
    "spot": ["LeftFoot", "RightFoot"],
    "on": "begin"
@@ -649,6 +653,26 @@
    "on": "begin"
   },
   "osinward": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "mmsscross": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "mmssdown": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "mmsshigh": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "mmgsdown": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "mmgspower": {
    "spot": ["LeftFoot", "RightFoot"],
    "on": "begin"
   },
@@ -1225,6 +1249,42 @@
    "on": "begin"
   },
   "mgdeath": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactsmallfront": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactsmallback": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactsmallleft": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactsmallright": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactlargefront": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactlargeback": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactlargeleft": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactlargeright": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactlegs": {
    "spot": ["LeftFoot", "RightFoot"],
    "on": "begin"
   }
@@ -1954,6 +2014,11 @@
     "endOffset": [0, 0.083, 0],
     "beginTurn": 0
    },
+   "ssslash4": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [0, 0.083, 0],
+    "beginTurn": 0
+   },
    "sshigh": {
     "beginOffset": [0, 0, 0],
     "endOffset": [-0.017, -0.115, 3.867],
@@ -2047,6 +2112,31 @@
    "osinward": {
     "beginOffset": [0, 0.08, 0],
     "endOffset": [0, 0.08, 0],
+    "beginTurn": 0
+   },
+   "mmsscross": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [0, 0.083, 0],
+    "beginTurn": 0
+   },
+   "mmssdown": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [0, 0.083, 0],
+    "beginTurn": 0
+   },
+   "mmsshigh": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [1.087, -0.118, 2.926],
+    "beginTurn": 0
+   },
+   "mmgsdown": {
+    "beginOffset": [0, 0.076, 0],
+    "endOffset": [0, 0.076, 0],
+    "beginTurn": 0
+   },
+   "mmgspower": {
+    "beginOffset": [0, 0.076, 0],
+    "endOffset": [0, 0.09, 1.15],
     "beginTurn": 0
    },
    "osthrust": {
@@ -2767,6 +2857,51 @@
    "mgdeath": {
     "beginOffset": [0, 0.085, 0],
     "endOffset": [-0.305, 0.054, -0.092],
+    "beginTurn": 0
+   },
+   "reactsmallfront": {
+    "beginOffset": [0, 0.085, 0],
+    "endOffset": [0, 0.085, 0],
+    "beginTurn": 0
+   },
+   "reactsmallback": {
+    "beginOffset": [0, 0.085, 0],
+    "endOffset": [0, 0.085, 0],
+    "beginTurn": 0
+   },
+   "reactsmallleft": {
+    "beginOffset": [0, 0.084, 0],
+    "endOffset": [0, 0.084, 0],
+    "beginTurn": 0
+   },
+   "reactsmallright": {
+    "beginOffset": [0, 0.085, 0],
+    "endOffset": [0, 0.085, 0],
+    "beginTurn": 0
+   },
+   "reactlargefront": {
+    "beginOffset": [0, 0.084, 0],
+    "endOffset": [0, 0.067, -1.371],
+    "beginTurn": 0
+   },
+   "reactlargeback": {
+    "beginOffset": [0, 0.085, 0],
+    "endOffset": [0, 0.106, 1.624],
+    "beginTurn": 0
+   },
+   "reactlargeleft": {
+    "beginOffset": [0, 0.084, 0],
+    "endOffset": [0, 0.084, 0],
+    "beginTurn": 0
+   },
+   "reactlargeright": {
+    "beginOffset": [0, 0.084, 0],
+    "endOffset": [0.888, 0.084, 0],
+    "beginTurn": 0
+   },
+   "reactlegs": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [-0.023, -0.213, 2.533],
     "beginTurn": 0
    }
   }

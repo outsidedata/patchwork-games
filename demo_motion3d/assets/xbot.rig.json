@@ -634,6 +634,8 @@
   },
   "ssslash1": {
    "file": "packs/Pro Sword and Shield Pack 30FPS/sword and shield slash (5).fbx",
+   "strike": "handR",
+   "rate": [[0, 2.4], ["strike-0.1", 2.6], ["strike-0.05", 1.5], ["strike+0.08", 1.5], ["strike+0.25", 2.2], ["100%", 2.4]],
    "markers": {
     "blow": [
      "strike-0.08",
@@ -643,6 +645,8 @@
   },
   "ssslash2": {
    "file": "packs/Pro Sword and Shield Pack 30FPS/sword and shield slash (2).fbx",
+   "strike": "handR",
+   "rate": [[0, 2.4], ["strike-0.1", 2.6], ["strike-0.05", 1.5], ["strike+0.08", 1.5], ["strike+0.25", 2.2], ["100%", 2.4]],
    "markers": {
     "blow": [
      "strike-0.08",
@@ -652,6 +656,18 @@
   },
   "ssslash3": {
    "file": "packs/Pro Sword and Shield Pack 30FPS/sword and shield slash.fbx",
+   "strike": "handR",
+   "rate": [[0, 2], ["strike-0.1", 2.4], ["strike-0.05", 1.3], ["strike+0.08", 1.3], ["strike+0.25", 2], ["100%", 2.2]],
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "ssslash4": {
+   "file": "packs/Pro Sword and Shield Pack 30FPS/sword and shield slash (3).fbx",
+   "strike": "handR",
    "markers": {
     "blow": [
      "strike-0.08",
@@ -679,6 +695,8 @@
   },
   "ssjumpattack": {
    "file": "packs/Pro Sword and Shield Pack 30FPS/sword and shield attack (2).fbx",
+   "strike": "handR",
+   "rate": [[0, 2.4], ["strike-0.1", 2.6], ["strike-0.05", 1.5], ["strike+0.08", 1.5], ["strike+0.25", 2.2], ["100%", 2.4]],
    "markers": {
     "blow": [
      "strike-0.08",
@@ -753,6 +771,51 @@
   },
   "osinward": {
    "file": "packs/mixamo-motions/Stable Sword Inward Slash.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "mmsscross": {
+   "file": "packs/mixamo-motions/Sword And Shield Slash (5).fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "mmssdown": {
+   "file": "packs/mixamo-motions/Sword And Shield Slash (2).fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "mmsshigh": {
+   "file": "packs/mixamo-motions/Sword And Shield Attack.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "mmgsdown": {
+   "file": "packs/mixamo-motions/Great Sword Slash (4).fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "mmgspower": {
+   "file": "packs/mixamo-motions/Great Sword Slash (2).fbx",
    "markers": {
     "blow": [
      "strike-0.08",
@@ -1439,6 +1502,33 @@
   },
   "mgdeath": {
    "file": "packs/Pro Magic Pack 30FPS/Standing React Death Backward.fbx"
+  },
+  "reactsmallfront": {
+   "file": "packs/mixamo-motions/Standing React Small From Front.fbx"
+  },
+  "reactsmallback": {
+   "file": "packs/mixamo-motions/Standing React Small From Back.fbx"
+  },
+  "reactsmallleft": {
+   "file": "packs/mixamo-motions/Standing React Small From Left.fbx"
+  },
+  "reactsmallright": {
+   "file": "packs/mixamo-motions/Standing React Small From Right.fbx"
+  },
+  "reactlargefront": {
+   "file": "packs/mixamo-motions/Standing React Large From Front.fbx"
+  },
+  "reactlargeback": {
+   "file": "packs/mixamo-motions/Standing React Large From Back.fbx"
+  },
+  "reactlargeleft": {
+   "file": "packs/mixamo-motions/Standing React Large From Left.fbx"
+  },
+  "reactlargeright": {
+   "file": "packs/mixamo-motions/Standing React Large From Right.fbx"
+  },
+  "reactlegs": {
+   "file": "packs/mixamo-motions/Hit On Legs.fbx"
   }
  },
  "roles": {

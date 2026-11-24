@@ -85,6 +85,11 @@
       //                     eases toward the stick's in the air
       // `copy motion3d JSON` copies the panel's numbers, and `reset to the file` puts the file's back.
       //
+      // The combat panel, in the combat scene (`?scene=combat`): the hitstop of each side and the share of a step it
+      // runs at while frozen, how fast a blade lands, the large reaction's damage and melee3d's blade and limb lines (off at first), laid into
+      // the truth's and the page's definitions and world as they change; and the readout's lines of the seat's swing
+      // and the foe's blows.
+      //
       // The rifle carry: the rifle's anchor in the X Bot's motion3d file (`at`, metres, and `turn`, degrees,
       // in the anchor bone's frame), laid into the truth's and the page's copies as it changes. The
       // readout says how far the spine turns to aim the rifle level ahead of the legs; `fit it to the
@@ -1093,7 +1098,7 @@
           world.motion3d.kinds.xbot.fade = own.fade
           if (own.object) world.motion3d.mods.object = 'yard'
           else delete world.motion3d.mods.object
-          for (const name of spaces) world.shapes3d.kinds[name].priority = own.priority[name]
+          for (const name of spaces) if (world.shapes3d.kinds[name]) world.shapes3d.kinds[name].priority = own.priority[name]
           world.kinematics3d.kinds.xbot.jump.jumpH = own.jumpH
           world.kinematics3d.kinds.xbot.jump.jumpVelocityBoostMagnitude = own.boost
           world.kinematics3d.kinds.xbot.fall.airAccel = own.airAccel
@@ -1217,6 +1222,125 @@
       rf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({ at: anchors()[0].at, turn: anchors()[0].turn })) }, 'copy').name('copy the anchor JSON')
       rf.add({ reset: () => { fromFile(anchorWas); for (const c of gui.controllersRecursive()) c.updateDisplay(); setRifle() } }, 'reset').name('reset to the file')
 
+      // ---------- combat ----------
+
+      // The combat scene's numbers, laid into the truth's and the page's copies of the definitions and the world as
+      // they change: the freeze a blow puts the striker and the foe in, the share of a step each runs while frozen,
+      // how fast a blade must move to land at all, the damage from which a reaction is the large one, and melee3d's
+      // blade and limb lines, off until turned on.
+      const defsOf = () => room() ? [json(readerOf(room()), room().world.defs), client && json(client.plugins.wire, room().world.defs)].filter(Boolean) : []
+      const fight = {}
+      const fightWas = () => {
+        const d = defsOf()[0], world = room()?.world
+        return d && world?.melee3d ? {
+          stop: d.player.stop, foeStop: d.foe.stop, foePace: d.foe.pace, drag: d.foe.drag, lock: d.player.lock, heroPace: world.motion3d.kinds.xbot.pace,
+          edge: world.melee3d.edge, large: d.foe.large, debug: !!world.melee3d.show,
+        } : undefined
+      }
+      const layFight = () => {
+        for (const d of defsOf()) {
+          Object.assign(d.player, { stop: fight.stop, lock: fight.lock })
+          Object.assign(d.foe, { stop: fight.foeStop, pace: fight.foePace, drag: fight.drag, large: fight.large })
+        }
+        for (const world of worlds()) {
+          world.motion3d.kinds.xbot.pace = fight.heroPace
+          world.melee3d.edge = fight.edge
+          if (fight.debug) world.melee3d.show = { colour: '#ffd040', radius: 0.012, limbs: '#60c0ff', struck: '#ff4040' }
+          else delete world.melee3d.show
+        }
+      }
+      // The yard's own folders are the yard's: another scene shows only its own.
+      if (chosen.scene !== 'main') for (const f of [sf, mf, rf]) f.hide()
+      const firstFight = fightWas()
+      if (firstFight) {
+        Object.assign(fight, firstFight)
+        const xf = gui.addFolder('combat')
+        xf.add(fight, 'stop', 0, 0.5, 0.01).name('hitstop, striker, s').onChange(layFight)
+        xf.add(fight, 'foeStop', 0, 0.5, 0.01).name('hitstop, foe, s').onChange(layFight)
+        xf.add(fight, 'heroPace', 0, 1, 0.01).name('frozen pace, X Bot').onChange(layFight)
+        xf.add(fight, 'foePace', 0, 1, 0.01).name('frozen pace, foe').onChange(layFight)
+        xf.add(fight, 'drag', 0.5, 40, 0.5).name('knockback drag, 1/s').onChange(layFight)
+        xf.add(fight, 'lock', 0, 8, 0.1).name('warps onto foe within, m').onChange(layFight)
+        xf.add(fight, 'edge', 0, 10, 0.1).name('lands from, m/s').onChange(layFight)
+        xf.add(fight, 'large', 0, 100, 1).name('large reaction from, damage').onChange(layFight)
+        xf.add(fight, 'debug').name('blade and limb lines').onChange(layFight)
+        xf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify(fight, null, 2)) }, 'copy').name('copy combat JSON')
+        xf.add({ reset: () => { Object.assign(fight, firstFight); for (const c of gui.controllersRecursive()) c.updateDisplay(); layFight() } }, 'reset').name('reset to the file')
+
+        // The combo's three hits, J pressed again within each one: the clip each plays, picked from every one-handed
+        // sword strike the rig has baked (its file named beside it), and each one's warp. The pick is laid into the
+        // truth's and the page's motion file; a clip picked that the definition gives no strike for is given the
+        // slot's own. `own speed` plays every pickable clip at the speed it was made at, its rig's `rate` ramp off.
+        const SLOTS = ['swordshieldlight1', 'swordshieldlight2', 'swordshieldlight3']
+        // The strikes that measured as standing hits beside ssslash3 (no crouch, jump, run or low blow) and land on
+        // the foe in the chain, and the Mixamo sword and greatsword slashes.
+        const PICKS = ['ssslash3', 'osoutward', 'ssslash4', 'axdownward', 'axhorizontal',
+          'mmsscross', 'mmssdown', 'mmsshigh', 'osinward', 'mmgsdown', 'mmgspower']
+        const motionsOf = () => [room() && json(readerOf(room()), MOTION), client && json(client.plugins.wire, MOTION)].filter(Boolean).map(f => f.activities.swordshield.motions)
+        const rigs = () => [room() && rigOf(readerOf(room()), 'xbot'), client && rigOf(client.plugins.wire, 'xbot')].filter(Boolean)
+        const fileName = clip => rigs()[0].clips[clip].file.split('/').pop().replace('.fbx', '')
+        const label = clip => `${clip} (${fileName(clip)})`
+        const byLabel = Object.fromEntries(PICKS.map(c => [label(c), c]))
+        // Each pickable clip's speed as the rig gives it, kept so `own speed` can be turned off again.
+        const speedWas = Object.fromEntries(PICKS.map(c => { const k = clipOf(rigs()[0], c); return [c, { rate: k.rate, ramp: k.ramp }] }))
+        const firstMotions = motionsOf()[0]
+        const firstStrikes = defsOf()[0].player.strikes
+        const combo = { own: false }
+        const slotsWas = SLOTS.map(name => {
+          const m = firstMotions[name]
+          return { clip: label(m.clips[0]), speed: 1, reach: m.warp.reach, short: m.warp.short, accel: m.warp.accel, turn: m.warp.turn }
+        })
+        const slots = clone(slotsWas)
+        const laySlots = () => {
+          for (const motions of motionsOf()) SLOTS.forEach((name, i) => {
+            const s = slots[i]
+            motions[name].clips = [byLabel[s.clip]]
+            Object.assign(motions[name].warp, { reach: s.reach, short: s.short, accel: s.accel, turn: s.turn })
+          })
+          for (const d of defsOf()) SLOTS.forEach((name, i) => {
+            const clip = byLabel[slots[i].clip]
+            d.player.strikes[clip] ??= { ...firstStrikes[firstMotions[name].clips[0]] }
+          })
+          // Each clip at its slot's speed, times its rig's own (or 1 with `own speed`); a clip in no slot at its rig's.
+          const speedOf = c => slots.find(s => byLabel[s.clip] === c)?.speed ?? 1
+          for (const rig of rigs()) for (const c of PICKS) {
+            const base = combo.own ? { rate: 1, ramp: null } : speedWas[c], k = speedOf(c)
+            Object.assign(clipOf(rig, c), { rate: base.rate * k, ramp: base.ramp && base.ramp.map(p => ({ at: p.at, rate: p.rate * k })) })
+          }
+        }
+        // A clip in two slots plays at one speed: a slot's speed set is the speed of every slot playing its clip.
+        const sameSpeed = i => { slots.forEach(s => { if (s.clip === slots[i].clip) s.speed = slots[i].speed }); for (const c of gui.controllersRecursive()) c.updateDisplay(); laySlots() }
+        const comboFolder = gui.addFolder('combo')
+        slots.forEach((s, i) => {
+          const f = comboFolder.addFolder(`hit ${i + 1}`)
+          f.add(s, 'clip', Object.keys(byLabel)).name('clip').onChange(() => sameSpeed(i))
+          f.add(s, 'speed', 0.25, 3, 0.05).name('speed, ×').onChange(() => sameSpeed(i))
+          f.add(s, 'reach', 0, 3, 0.05).name('warp reach, m').onChange(laySlots)
+          f.add(s, 'short', 0, 2, 0.05).name('lands short of target, m').onChange(laySlots)
+          f.add(s, 'accel', 0, 200, 1).name('warp accel, m/s²').onChange(laySlots)
+          f.add(s, 'turn', 0, 180, 1).name('warp turn, °').onChange(laySlots)
+        })
+        comboFolder.add(combo, 'own').name('own speed (rig ramp off, slot speed kept)').onChange(laySlots)
+        // The motions as the motion file gives them, and each slot's clip's `rate` as the rig file gives it.
+        const rigRate = c => { const k = clipOf(rigs()[0], c); return k.ramp ? k.ramp.map(p => [p.at, Number(p.rate.toFixed(3))]) : Number(k.rate.toFixed(3)) }
+        comboFolder.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({
+          motions: Object.fromEntries(SLOTS.map((name, i) => [name, { clips: [byLabel[slots[i].clip]], warp: { until: 'strike', reach: slots[i].reach, turn: slots[i].turn, accel: slots[i].accel, short: slots[i].short } }])),
+          rig: Object.fromEntries(slots.map(s => [byLabel[s.clip], { rate: rigRate(byLabel[s.clip]) }])),
+        }, null, 2)) }, 'copy').name('copy combo JSON')
+        comboFolder.add({ reset: () => { slots.forEach((s, i) => Object.assign(s, slotsWas[i])); combo.own = false; for (const c of gui.controllersRecursive()) c.updateDisplay(); laySlots() } }, 'reset').name('reset to the file')
+      }
+      // What the fight did, off the rows: the seat's swing, what it has met, its freeze; the foe's blows, reaction and
+      // freeze.
+      const fought = () => {
+        const me = meIn(room()), foe = rowOf('foe')
+        if (!me || !foe || !room()?.world.melee3d) return []
+        const f = foe.data
+        return [
+          `swing ${me.data.swing ?? 'none'}   met ${(me.data.struck ?? []).join(', ') || 'nothing'}   frozen ${fixed(me.data.stop ?? 0)} s`,
+          `foe blows ${f.hits}   ${f.clip ?? ''}   frozen ${fixed(f.stop ?? 0)} s`,
+        ]
+      }
+
       // ---------- the readout ----------
 
       // What motion3d has the seat's body doing, off its row in the scene's truth, and the limbs it bends.
@@ -1270,13 +1394,13 @@
       const controls = () => {
         const t = room()
         if (!t) return []
-        const k = json(readerOf(t), 'demo_motion3d').player
+        const k = json(readerOf(t), t.world.defs).player
         const named = list => {
           const pad = list.filter(key => PAD[key]).map(key => PAD[key])
           const keys = list.filter(key => !PAD[key]).map(key => (key === ' ' ? 'Space' : key === 'Mouse0' ? 'left click' : key.length === 1 ? key.toUpperCase() : key))
           return `${keys.join(' ').padEnd(14)}${pad.join(' ').padEnd(16)}`
         }
-        const rows = [['fast', k.keys.fast], ['guard', k.keys.guard], ...Object.entries(k.keys.motions), ['nearer', k.keys.nearer], ['further', k.keys.further]]
+        const rows = [['fast', k.keys.fast], ['guard', k.keys.guard], ...Object.entries(k.keys.motions), ['nearer', k.keys.nearer], ['further', k.keys.further]].filter(([, list]) => list.length)
         const me = meIn(t)
         const d = me?.data ?? {}
         const drawn = k.weapons.includes(d.upperMotion) || Object.values(k.aimOf).includes(d.upperMotion) ? d.upperMotion : d.upperMotion ?? 'nothing drawn'
@@ -1459,19 +1583,23 @@
             }
           }
         } catch (e) { caught(e) }
+        const yard = chosen.scene === 'main'
         readoutEl.textContent = [
-          'W A S D  walk     Shift  run     Space  jump     right drag  look     wheel  zoom     E  use',
-          'mats: backflip (pink), pick up (blue), shiver (pale blue, stand still)',
-          'orange wall: hang; A D shimmy, W + E climb up, S + E drop      chair: sit, E again to stand',
-          'bar and ceiling: hang; A D along, E drop      rope and climbing wall: hold W to climb (S down the wall), E let go',
-          'swing, run wall, vault: E      edge: E teeter, E again step down, S step back      stairs: hold W to climb',
-          'pool: E fall in, hold W to swim, E by the far wall to climb out      desk, bed: E, and E again to get up',
-          'car: E get in, W A S D drive, Space honk, E get out      beam: E get on, hold W to sneak along it, E get off',
+          ...(yard ? [
+            'W A S D  walk     Shift  run     Space  jump     right drag  look     wheel  zoom     E  use',
+            'mats: backflip (pink), pick up (blue), shiver (pale blue, stand still)',
+            'orange wall: hang; A D shimmy, W + E climb up, S + E drop      chair: sit, E again to stand',
+            'bar and ceiling: hang; A D along, E drop      rope and climbing wall: hold W to climb (S down the wall), E let go',
+            'swing, run wall, vault: E      edge: E teeter, E again step down, S step back      stairs: hold W to climb',
+            'pool: E fall in, hold W to swim, E by the far wall to climb out      desk, bed: E, and E again to get up',
+            'car: E get in, W A S D drive, Space honk, E get out      beam: E get on, hold W to sneak along it, E get off',
+          ] : ['left stick / W A S D  walk     right stick / right drag  look']),
           ...controls(),
-          '` pause     . one step on     , one step back     left drag  turn the station camera     wheel  its distance',
+          '` pause     . one step on     , one step back',
           `${frames.length} fps  longest frame ${worst.toFixed(1)} ms`,
           `${chosen.scene}  step ${rec.n}`,
-          ...runLines(),
+          ...(yard ? runLines() : []),
+          ...fought(),
           ...doing(),
           ...errors,
         ].join('\n')

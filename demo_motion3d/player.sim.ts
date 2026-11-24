@@ -6,8 +6,10 @@
 // chasecamera3d's orbit about it, `lift` metres over its feet; `turning` [x, y], how far a gamepad's right
 // stick is pushed right and down; `aim`, the way the camera looks, which motion3d points a carried prop
 // along while an aim is up; `weapon`, the stance the draw key draws, one of the definition's `weapons`;
-// `target`, the middle of the nearest dummy within the definition's `lock` metres, or null, which
-// motion3d bends an attack onto (its Warp); and `stood`, once it stands on its slot's start.
+// `target`, the middle of the nearest row of the definition's `targets` kinds (the yard's dummy, the combat
+// scene's foe) within its `lock` metres, or null, which motion3d bends an attack onto (its Warp); `stop`,
+// seconds left of the freeze a blow it landed put it in, which motion3d's `drive` honours (its Hitstop); and
+// `stood`, once it stands on its slot's start.
 //
 // Facing. With an aim up (the upper half playing one of the definition's `aimOf`, each weapon's aim by
 // its name) the legs keep the way
@@ -29,11 +31,13 @@
 // `weapon` follows. Whichever weapon's stance is up is `weapon`.
 //
 // `before` stands it once on the ground at its slot's start, facing the start's `yaw`, its look along
-// it. Each step its look turns while `turning` is held, at the definition's `camera.turn` across and
+// it, and when its definition gives `drawn` (the combat scene's), draws that weapon. Each step its look turns while `turning` is held, at the definition's `camera.turn` across and
 // `tilt` up and down a second at full push, the yaw less for a push right and the pitch more for a push
 // down, within `minPitch` and `maxPitch`. The stick is its want: kinematics3d's `want`, the way the stick
 // points from the camera's yaw, as hard as it is pushed (the clip it plays says how fast); and
-// motion3d's `drive`, which moves and plays the body by it.
+// motion3d's `drive`, which moves and plays the body by it. Then its blade is swept (the combat plugin's `blows`,
+// `plugins/combat`): in a scene that gives melee3d, a swing whose blow is open lands on every limb its sword
+// passes through, and freezes the body for the definition's `stop`.
 //
 // The acts are the page's keys: `stick(x, y)` (y down, as a stick reads), `turn(x, y)` (the right
 // stick, the same), `fast(v)`, `guard(v)` and `jumping(v)` (1 held, 0 let go; `jumping` is the jump key,
@@ -47,6 +51,7 @@ import { activityOf, drive, motionOf, press, queue } from '#plugins/motion3d/mot
 import { playKind, rigOf } from '#plugins/motion3d/motion3d.play.ts'
 import { nearest, relative } from '#plugins/kinematics3d/kinematics3d.sim.ts'
 import { pads } from './plugins/jumppad/jumppad.sim.ts'
+import { blows } from './plugins/combat/combat.sim.ts'
 
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
@@ -71,6 +76,12 @@ function stood(me: Row, w: W) {
   d.yaw = start.yaw
   d.look = { ...d.look, yaw: start.yaw }
   d.stood = true
+  // A definition that gives `drawn` stands with that weapon drawing from the start.
+  const k = def(w, me.kind)
+  if (k.drawn) {
+    d.weapon = k.drawn
+    queue(me, w, `draw.${k.drawn}`)
+  }
 }
 
 // A key pressed (The keys, the header): the switch key with nothing drawn picks the next weapon; the draw
@@ -97,11 +108,13 @@ function stanceOf(me: Row, k: any): string | undefined {
   return Object.entries(k.aimOf as Record<string, string>).find(([, aim]) => aim === u)?.[0]
 }
 
-// The middle of the nearest dummy within `lock` metres across the ground, at its feet, or null.
-function targetOf(me: Row, w: W, lock: number): number[] | null {
+// The middle of the nearest standing row of the `targets` kinds within `lock` metres across the ground, at
+// its feet, or null.
+function targetOf(me: Row, w: W, targets: string[], lock: number): number[] | null {
   const [x, , z] = me.data.pos
   let best: number[] | null = null, most = lock
-  for (const t of w.all('dummy')) {
+  for (const t of targets.flatMap(kind => w.all(kind))) {
+    if (t.data.limp) continue
     const far = Math.hypot(t.data.pos[0] - x, t.data.pos[2] - z)
     if (far <= most) { most = far; best = [...t.data.pos] }
   }
@@ -133,9 +146,11 @@ export const player: Kind = {
     d.aim = [math.sin(d.look.yaw) * math.cos(up), math.sin(up), math.cos(d.look.yaw) * math.cos(up)]
     // The guard held raises a block or an aim whenever one may come up, and let go lowers it.
     press(me, w, d.guard ? 'guard' : 'unguard', d.stick)
-    // The target an attack is bent onto (motion3d's Warp): the nearest dummy within `lock` metres.
-    d.target = targetOf(me, w, k.lock)
+    // The target an attack is bent onto (motion3d's Warp): the nearest of `targets` within `lock` metres.
+    d.target = targetOf(me, w, k.targets, k.lock)
     drive(me, w, dt, d.stick)
+    // The blade swept through what it meets.
+    blows(w, me, dt)
     // The jump pad the body has just come onto, if any, throws it (`plugins/jumppad`).
     pads(me, w)
   },

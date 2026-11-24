@@ -2,8 +2,10 @@
 // beside it built of boxes and cylinders, as cup.mjs makes the cup. Each prop's frame: metres, its `grip`
 // empty at the origin, where the hand that holds it closes; its blade, haft or stave up +y from there; a
 // gun's barrel and a bow's arrow along −z, the way motion3d's aim points a carried prop's anchor point. A
-// prop held in two hands has a `second` empty where the other hand closes. Each part is a mesh of its
-// own, `[shape, size, at, colour]`:
+// prop held in two hands has a `second` empty where the other hand closes. A prop that is a blade has a
+// `guard` and a `tip` empty, the two ends of its edge, which melee3d sweeps (`motion3d.melee3d.ts`): a
+// sword's from the crossguard to its point, an axe's from the haft across its head to the bit. Each
+// part is a mesh of its own, `[shape, size, at, colour]`:
 //   box       size [x, y, z], its middle at `at`
 //   cylinder  size [radius, length], its middle at `at`, its length along `axis` (y unless given)
 // A colour's fourth number, when it has one, is how much it glows. Run with
@@ -24,6 +26,7 @@ const PROPS = {
       ['cylinder', [0.03, 0.05], [0, -0.255, 0], GOLD],
     ],
     second: [0, -0.17, 0],
+    blade: [[0, 0.145, 0], [0, 1.37, 0]],
   },
   sword: {
     parts: [
@@ -32,6 +35,7 @@ const PROPS = {
       ['box', [0.045, 0.72, 0.01], [0, 0.48, 0], STEEL],
       ['cylinder', [0.024, 0.04], [0, -0.095, 0], GOLD],
     ],
+    blade: [[0, 0.12, 0], [0, 0.84, 0]],
   },
   shield: {
     parts: [
@@ -46,6 +50,7 @@ const PROPS = {
       ['box', [0.16, 0.13, 0.022], [0.07, 0.4, 0], STEEL],
       ['box', [0.05, 0.05, 0.04], [-0.02, 0.4, 0], DARK],
     ],
+    blade: [[0, 0.4, 0], [0.15, 0.4, 0]],
   },
   pistol: {
     parts: [
@@ -117,7 +122,7 @@ function mesh([shape, size, at, , axis = 'y']) {
   return { pos, nrm, idx }
 }
 
-function glb(name, { parts, second }) {
+function glb(name, { parts, second, blade }) {
   const f32 = a => Buffer.from(new Float32Array(a).buffer)
   const u16 = a => Buffer.from(new Uint16Array(a).buffer)
   const pad = b => (b.length % 4 ? Buffer.concat([b, Buffer.alloc(4 - (b.length % 4))]) : b)
@@ -147,6 +152,12 @@ function glb(name, { parts, second }) {
   if (second) {
     nodes.push({ name: 'second', translation: second })
     nodes[0].children.push(nodes.length - 1)
+  }
+  if (blade) {
+    for (const [i, end] of ['guard', 'tip'].entries()) {
+      nodes.push({ name: end, translation: blade[i] })
+      nodes[0].children.push(nodes.length - 1)
+    }
   }
   const glow = materials.some(m => m.extensions)
   const gltf = {

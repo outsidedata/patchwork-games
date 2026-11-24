@@ -226,7 +226,7 @@ test('the use key plays each zone\'s own clip in it, holding the body still, and
   }
 })
 
-test('a light pressed three times during the first swing plays the whole chain, each swing starting as the one before strikes', async () => {
+test('a light pressed three times during the first swing plays the whole chain, each swing starting at the one before\'s cancel point', async () => {
   const { truth, room, send, me, until } = await joined()
   until(() => me().data.clip === clipsOf('walk', 'stand')[0], 30)
   send('press', 'light')
@@ -247,11 +247,12 @@ test('a light pressed three times during the first swing plays the whole chain, 
     was = { motion: d.motion, clip: d.clip, t: d.clipT }
   }
   expect(chain.map(c => c.motion)).toEqual(['light2', 'light3'])
-  // Each played at the swing before's strike: on the step after the first whose playhead reached it.
+  // Each played at the swing before's cancel point by a light (the file's `buffer.cancel.light.light`): on the
+  // step after the first whose playhead reached it, which goes at most a step of the swing before's speed there.
   for (const c of chain) {
-    const strike = secondsIn(reader(room), me(), c.from, 'strike', 'strike')
-    expect(c.at, `${c.motion} from ${c.from}`).toBeGreaterThanOrEqual(strike - 1e-9)
-    expect(c.at - DT * 1.01, `${c.motion} from ${c.from}`).toBeLessThan(strike)
+    const point = secondsIn(reader(room), me(), c.from, 'cancel', MOTION.buffer!.cancel!.light.light)
+    expect(c.at, `${c.motion} from ${c.from}`).toBeGreaterThanOrEqual(point - 1e-9)
+    expect(c.at - DT * 1.01, `${c.motion} from ${c.from}`).toBeLessThan(point)
   }
   expect(me().data.queued).toEqual([])
 })

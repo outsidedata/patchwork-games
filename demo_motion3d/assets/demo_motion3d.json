@@ -27,7 +27,8 @@
     },
     "weapons": ["greatsword", "swordshield", "sword", "axe", "rifle", "pistol", "bow", "torch", "magic"],
     "aimOf": { "rifle": "aim", "pistol": "pistolaim", "bow": "bowaim" },
-    "lock": 4
+    "lock": 4,
+    "targets": ["dummy"]
   },
   "dummy": { "weapons": [], "aimOf": {}, "reach": 0.7, "height": [0.3, 2] },
   "swingzone": { "rope": { "colour": "#b08a5a", "radius": 0.02 }, "pivot": [0.135, 7.136, 1.603], "length": 4.207 },
