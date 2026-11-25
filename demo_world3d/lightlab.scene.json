@@ -140,8 +140,6 @@
       "file": "lightlab.art.light",
       "fire": "#ff9a50",
       "fireGain": 10,
-      "wide": 2048,
-      "match": 0.001,
       "flicker": [
         [0.12, 7, 0],
         [0.08, 13.7, 1],
