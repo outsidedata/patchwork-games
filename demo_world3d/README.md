@@ -125,6 +125,21 @@ every override or ask the solvers refused, `[{ path, reason }]`, `path` the solv
 
 `yarn bake demo_world3d <scene>` (`spire`, `house`, …) bakes that one scene's place and nothing else, no bodies.
 
+The light lab (`lightlab.scene.json`, stronghold's `lightlab` solver: a sun room, two rooms joined by a doorway, a
+hearth room, a long room, a crowded room and a stairwell) has its rooms' light baked from its light hints alone
+(`assets/demo_world3d.light.ts`, run by the bake for a place with `light`, or alone with `node
+assets/demo_world3d.light.ts <folder> <place> <scene file>`): each sky opening lets in the sky and the ground seen
+through its rectangle, a beam opening casts the key light at the scene's clock where the line toward it passes
+through the rectangle, a lamp is a fire, a dark hint darkens what is under it, and an opening between rooms passes
+one room's light into the other `pass` times over. Furniture and timber keep it per vertex, walls, floors and ceilings
+in a lightmap, and each sun patch's edge in a second map as each texel's distance to it, so the edge draws sharp. It
+writes `assets/lightlab/lightlab.art.light.bin`, catalogued as `lightlab.art.light`. Every number is in
+`world.bakedlight.bake`. The game's own plugin `bakedlight` (`plugins/bakedlight/`, loaded by `shipped`) lights the
+place from it through a render3d splice on every dressed material, coloured by skydome3d's sky, ground and key light
+and the fires' colour and flicker (`world.bakedlight`), so the rooms run no light; lights3d's lamps (your torch) still
+add on top. The key light is baked at the scene's clock, so moving the hour moves the sky's colours but not the sun
+patches. Change the solver, the scene's clock or a number of the bake and bake the lab again.
+
 ## Tests
 
 `yarn vitest run games/demo_world3d/demo_world3d.sim.test.ts`: you start on the town's start place and stand on it; a visitor walks the town to one of its places and stops on it at its height, its course written once

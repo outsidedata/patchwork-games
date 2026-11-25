@@ -54,6 +54,7 @@
       import tavern from './assets/tavern/tavern.art.nav.json'
       import spire from './assets/spire/spire.art.nav.json'
       import house from './assets/house/yard.art.nav.json'
+      import lightlab from './assets/lightlab/lightlab.art.nav.json'
 
       file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
 
@@ -121,7 +122,7 @@
       window.__page = page
       const room = window.__scenes.get(file.prefabs.scenemanager.entry)
       // the scene's graph, the one its page draws
-      const graph = { main: town, village, tavern, spire, house }[file.prefabs.scenemanager.entry]
+      const graph = { main: town, village, tavern, spire, house, lightlab }[file.prefabs.scenemanager.entry]
       const tagsOf = p => p.data?.nav3d?.tags ?? []
       const places = [...new Set(graph.places.flatMap(tagsOf))].sort()
       const me = () => room.rows.find(r => r.kind === 'player')
@@ -151,6 +152,7 @@
       // `copy` puts it on the clipboard for `assets/demo_world3d.json`.
       const carry = gui.addFolder('carry')
       const held = defs.player.carry
+      window.__defs = defs
       carry.add(held, 'bone', ['RightHand', 'LeftHand'])
       for (const [i, axis] of ['x', 'y', 'z'].entries()) carry.add(held.at, i, -0.4, 0.4, 0.005).name(`at ${axis} (m)`)
       carry.addColor(held.light, 'color').name('light colour')
@@ -607,6 +609,151 @@
         }
       }
 
+      // The light lab's light, from its hints: every room, opening, fire and dark patch is a place of its nav graph
+      // (`assets/lightlab/lightlab.art.nav.json`), written by each room's solver (the library's
+      // `stronghold/src/lib/util/light.mjs`), its data `{ light }`; nothing is placed by hand. A room is a box from
+      // its `low`, `high` and `across` places; an opening faces its `inward` place and runs its width toward its
+      // `across` place. The rooms' light itself is baked (the game's plugin bakedlight, `assets/demo_world3d.light.ts`):
+      // the sky and the ground through the openings, the key light, the fires and their bounce, with no light running.
+      // What is left here is what is seen in the air: a beam opening throws a prism of light from its corners along the
+      // sun to the floor, with dust in it, while the sun shines in through it, shown only while the player stands in
+      // its room or in a room an opening between rooms joins to it; and the exposure eases to the room's while the
+      // player is in one. The panel's `hinted light` folder has the exposure and the beams. Light lab only, once per
+      // client.
+      const hinted = {
+        client: null, built: false, rooms: [], k: 0, lastE: -1, time: 0, base: null, here: 'outside',
+        knobs: { exposure: 8, beam: 0.18 },
+      }
+      window.__hinted = hinted
+      const hint = () => {
+        const client = window.__client
+        if (file.prefabs.scenemanager.entry !== 'lightlab' || !client?.plugins.render3d?.scene || !client.plugins.skydome3d?.light() || hinted.client === client) return
+        hinted.client = client
+        const r3 = client.plugins.render3d
+        const T = r3.THREE
+        const V = a => new T.Vector3(...a)
+        const up = new T.Vector3(0, 1, 0)
+        hinted.base = structuredClone(client.plugins.wire.scene.world.skydome3d.look)
+        // each hint by its whole name: where it stands and its data
+        const at = new Map(), light = new Map()
+        for (const p of lightlab.places) {
+          if (!p.data?.light) continue
+          for (const n of p.data.nav3d.tags) { at.set(n, V(p.point.at)); light.set(n, p.data.light) }
+        }
+        const prefix = n => n.slice(0, n.lastIndexOf('/') + 1)
+        // a box from its low, high and across places: its corner, its two ways across the floor and its extents
+        const boxOf = n => {
+          const low = at.get(`${n} low`), high = at.get(`${n} high`), u = at.get(`${n} across`).clone().sub(low).normalize()
+          const w = new T.Vector3().crossVectors(up, u)
+          const d = high.clone().sub(low)
+          return { low, u, w, a: d.dot(u), b: d.dot(w), top: high.y }
+        }
+        // the rooms, each by its whole name
+        const rooms = new Map()
+        for (const [n, l] of light) {
+          if (l.part !== 'room' || l.corner !== 'low') continue
+          const key = prefix(n) + l.room
+          rooms.set(key, { key, box: boxOf(key), meshes: [], beams: [], joins: new Set() })
+        }
+        const texture = draw => {
+          const c = document.createElement('canvas')
+          c.width = c.height = 64
+          draw(c.getContext('2d'))
+          return new T.CanvasTexture(c)
+        }
+        const radial = texture(g => {
+          const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32)
+          gr.addColorStop(0, '#fff')
+          gr.addColorStop(1, '#000')
+          g.fillStyle = gr
+          g.fillRect(0, 0, 64, 64)
+        })
+        for (const [n, l] of light) {
+          const room = rooms.get(prefix(n) + l.room)
+          if (l.part !== 'opening') continue
+          const mid = at.get(n), inward = at.get(`${n} inward`).clone().sub(mid).normalize(), across = at.get(`${n} across`).clone().sub(mid).normalize()
+          const along = new T.Vector3().crossVectors(inward, across).normalize()
+          if (l.rooms) {
+            // the rooms an opening between rooms joins, whose beams are seen from each other
+            const joined = l.rooms.map(r => rooms.get(prefix(n) + r))
+            joined[0].joins.add(joined[1])
+            joined[1].joins.add(joined[0])
+          }
+          if (!l.beam) continue
+          // the beam: its four corners on the opening, each thrown along the sun to the room's floor every frame
+          const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([x, y]) => mid.clone().addScaledVector(across, x * l.width / 2).addScaledVector(along, y * l.height / 2))
+          const geometry = new T.BufferGeometry()
+          geometry.setAttribute('position', new T.Float32BufferAttribute(new Array(24).fill(0), 3))
+          geometry.setAttribute('color', new T.Float32BufferAttribute([...corners.flatMap(() => [1, 0.92, 0.75]), ...corners.flatMap(() => [0.35, 0.32, 0.26])], 3))
+          geometry.setIndex(corners.flatMap((_, i) => { const j = (i + 1) % 4; return [i, j, 4 + j, i, 4 + j, 4 + i] }))
+          const mesh = new T.Mesh(geometry, new T.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0, blending: T.AdditiveBlending, side: T.DoubleSide, depthWrite: false }))
+          mesh.frustumCulled = false
+          r3.scene.add(mesh)
+          const count = 50
+          const motes = { s: Float32Array.from({ length: count * 3 }, () => Math.random()), phase: Float32Array.from({ length: count }, () => Math.random() * 6.28) }
+          const points = new T.Points(new T.BufferGeometry(), new T.PointsMaterial({ color: '#fff2d0', size: 0.035, alphaMap: radial, transparent: true, opacity: 0, blending: T.AdditiveBlending, depthWrite: false }))
+          points.geometry.setAttribute('position', new T.Float32BufferAttribute(new Array(count * 3).fill(0), 3))
+          points.frustumCulled = false
+          r3.scene.add(points)
+          room.beams.push({ mesh, points, motes, corners, inward, across, along, mid, width: l.width, height: l.height })
+          room.meshes.push(mesh, points)
+        }
+        hinted.rooms = [...rooms.values()]
+        const f = gui.addFolder('hinted light')
+        f.add(hinted.knobs, 'exposure', 0.5, 40, 0.1).name('exposure inside')
+        f.add(hinted.knobs, 'beam', 0, 0.5, 0.005).name('sunbeams')
+        f.add(hinted, 'here').name('room you are in').listen().disable()
+        hinted.built = true
+      }
+      const hintUpdate = () => {
+        if (!hinted.built) return
+        const client = hinted.client, k = hinted.knobs, T = client.plugins.render3d.THREE
+        hinted.time += dt
+        const sky = client.plugins.skydome3d.light()
+        const p = me()?.data.pos
+        const here = p ? hinted.rooms.find(r => {
+          const d = new T.Vector3(...p).sub(r.box.low), a = d.dot(r.box.u), b = d.dot(r.box.w)
+          return a > 0 && a < r.box.a && b > 0 && b < r.box.b && p[1] > r.box.low.y - 0.5 && p[1] < r.box.top
+        }) : undefined
+        hinted.here = here ? here.key : 'outside'
+        const on = new Set(here ? [here, ...here.joins] : [])
+        hinted.k += ((here ? 1 : 0) - hinted.k) * (1 - Math.exp(-dt * 3))
+        const exposure = 1 + (k.exposure - 1) * hinted.k
+        if (Math.abs(exposure - hinted.lastE) > 0.002) {
+          hinted.lastE = exposure
+          client.plugins.wire.scene.world.skydome3d.look = { ...hinted.base, exposure: hinted.base.exposure * exposure }
+        }
+        // the sun's brightness as a share of its noon (the key's strongest channel while the key is the sun, over the
+        // look's sun at its highest, skydome3d's 0.5 + sunIntensity)
+        const sunLevel = sky.sunColor.r + sky.sunColor.g + sky.sunColor.b > 0 ? Math.max(sky.keyColor.r, sky.keyColor.g, sky.keyColor.b) / (0.5 + hinted.base.sunIntensity) : 0
+        const ray = sky.key.clone().normalize().negate()
+        for (const room of hinted.rooms) {
+          const lit = on.has(room)
+          for (const beam of room.beams) {
+            // the sun shines in through it while it is up and on the opening's outside
+            const shines = lit && sunLevel > 0 && ray.y < -0.02 && ray.dot(beam.inward) > 0.02
+            beam.mesh.visible = beam.points.visible = shines
+            if (!shines) continue
+            const floorY = room.box.low.y
+            const hit = c => c.clone().addScaledVector(ray, (c.y - floorY) / -ray.y)
+            const bottom = beam.corners.map(hit)
+            const pos = beam.mesh.geometry.attributes.position
+            ;[...beam.corners, ...bottom].forEach((c, i) => pos.setXYZ(i, c.x, c.y, c.z))
+            pos.needsUpdate = true
+            beam.mesh.material.opacity = k.beam * sunLevel
+            beam.points.material.opacity = Math.min(0.8, k.beam * 5 * sunLevel)
+            const mp = beam.points.geometry.attributes.position
+            for (let i = 0; i < beam.motes.phase.length; i++) {
+              const [x, y, f] = [beam.motes.s[i * 3] - 0.5, beam.motes.s[i * 3 + 1] - 0.5, beam.motes.s[i * 3 + 2]]
+              const c = beam.mid.clone().addScaledVector(beam.across, x * beam.width).addScaledVector(beam.along, y * beam.height)
+              c.addScaledVector(ray, (c.y - floorY) / -ray.y * f)
+              const ph = beam.motes.phase[i]
+              mp.setXYZ(i, c.x + 0.06 * Math.sin(hinted.time * 0.6 + ph), c.y + 0.08 * Math.sin(hinted.time * 0.45 + ph * 2), c.z + 0.06 * Math.cos(hinted.time * 0.5 + ph))
+            }
+            mp.needsUpdate = true
+          }
+        }
+      }
 
       const readout = document.getElementById('readout')
       const frames = []
@@ -629,6 +776,8 @@
           lights()
           fake()
           fakeUpdate()
+          hint()
+          hintUpdate()
         } catch (e) { caught(e) }
         const p = me()
         const where = v => (v.data.doing === 'go' ? `sent to ${v.data.told.map(n => n.toFixed(1)).join(', ')}` : v.data.going)

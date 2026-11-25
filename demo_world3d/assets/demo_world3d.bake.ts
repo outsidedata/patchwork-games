@@ -72,6 +72,7 @@ import type { Looks, Tools } from '#scripts/bake.ts'
 import { packLooks } from '#scripts/pack-looks.ts'
 import { PARTS } from '#plugins/world3d/world3d.sim.ts'
 import player from './player.rig.json' with { type: 'json' }
+import { bakeLight } from './demo_world3d.light.ts'
 
 const here = import.meta.dirname
 const root = path.join(here, '..', '..', '..')
@@ -90,12 +91,16 @@ const merge = path.join(root, '.claude', 'skills', 'using-mixamo-assets', 'scrip
 // what the solvers placed or is refused in the run, by its key chain.
 // `yarn bake demo_world3d <scene>` bakes that scene's place alone (`main`, `village`, `tavern`, `spire`, `house`: its scene
 // file's name), and not the bodies; `yarn bake demo_world3d` bakes every place and the bodies.
-const PLACES: { pro?: string; stronghold?: string; folder: string; scene: string; field: string; at?: [number, number]; overrides?: string }[] = [
+// A place with `light` has its rooms' light baked (`demo_world3d.light.ts`, by its scene's `world.bakedlight.bake`) into
+// `<place>.light.bin` beside its files, listed in its scene's catalogue as `<place>.light`, which the game's own plugin
+// bakedlight lights it by.
+const PLACES: { pro?: string; stronghold?: string; folder: string; scene: string; field: string; at?: [number, number]; overrides?: string; light?: boolean }[] = [
   { pro: 'castle/smallville/smallville.town', folder: '', scene: 'main.scene.json', field: 'demo_world3d.field.json' },
   { stronghold: 'winterfell/village', folder: 'village', scene: 'village.scene.json', field: 'village/village.field.json' },
   { stronghold: 'winterfell/tavern', folder: 'tavern', scene: 'tavern.scene.json', field: 'tavern/tavern.field.json' },
   { stronghold: 'winterfell/spire', folder: 'spire', scene: 'spire.scene.json', field: 'spire/spire.field.json' },
   { stronghold: 'colonial/yard', folder: 'house', scene: 'house.scene.json', field: 'house/house.field.json' },
+  { stronghold: 'lightlab', folder: 'lightlab', scene: 'lightlab.scene.json', field: 'lightlab/lightlab.field.json', light: true },
 ]
 const chosen = process.argv[3]
 const baked = chosen ? PLACES.filter(place => place.scene === `${chosen}.scene.json`) : PLACES
@@ -188,6 +193,12 @@ export default async ({ blender, scratch, library, stack }: Tools) => {
       else catalogued[asset] = a
     }
     for (const part of Object.values(parts)) catalogued[part.name] ??= part.entry
+    // the rooms' light, baked from the place's files as they now stand
+    if (place.light) {
+      await bakeLight(into, name, sceneFile)
+      catalogued[`${name}.light`] = { type: 'binary', url: `${folder}${name}.light.bin`, preload: true } as any
+      console.log('wrote', path.relative(root, path.join(into, `${name}.light.bin`)))
+    }
     scene.world.loader.assets = catalogued
     // the pictures' stack in the scene's catalogue, the one entry supershader3d binds, in place of every earlier bake's
     // pictures and stack
