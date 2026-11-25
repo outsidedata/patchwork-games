@@ -121,36 +121,14 @@ demo_particle3d's and demo_motion3d's, copied. Change the town, a material or a 
 The village, tavern, spire and house are stronghold places: the bake runs stronghold's `build.mjs` on each, with its
 overrides, plus `<playerStart with dots for slashes>.world3d_playerStart` set to true when the scene gives
 `world.world3d.playerStart`, and copies its files into `assets/<scene>/`, with `<place>.refusals.json` beside them:
-every override or ask the solvers refused, `[{ path, reason }]`, `path` the solvers' names from the top one down, and
-`<place>.light.json`: the light hints stronghold's build reads off the run (`stronghold/light-hints.mjs`), world3d's
-`light` part.
+every override or ask the solvers refused, `[{ path, reason }]`, `path` the solvers' names from the top one down.
 
 `yarn bake demo_world3d <scene>` (`spire`, `house`, …) bakes that one scene's place and nothing else, no bodies.
-
-The light lab (`lightlab.scene.json`, stronghold's `lightlab` solver: a sun room, two rooms joined by a doorway, a
-hearth room, a long room, a crowded room and a stairwell) and the tavern (its taproom and chambers) are lit and drawn
-by world3d (`plugins/world3d/world3d.rooms.ts` says all of it) from the place's light hints, `<place>.light.json`,
-which stronghold's build reads off the run. Every surface in a room is lit in the shader from its room's hints: the sky
-and the ground through each opening, the sun through each beam opening where the sky has it at the scene's hour, light
-passed through a doorway or up a stair from the room beyond, and dark under every solid thing standing on the floor.
-What burns (a hearth, a candle, a brazier) declares its own fire and lamp in the kit; world3d burns it from the place's
-effects, and its lamp lights the room through lights3d. While the camera stands in a room the outdoors is not drawn (the place's other rooms,
-the land, and what world3d's `outdoors` mods hand: lod3d's vegetation through instances3d, grass3d's meadow) unless an
-opening of the room is in view, the sun casts no shadow map, the exposure eases up and each sunlit opening throws a
-beam with dust; lights3d's lamps (your torch, the fires) light everything as ever. Every number is `world.world3d.rooms` in the
-scene, and the sky reaches world3d through `world.world3d.mods`' `light` and `key`, skydome3d's.
-The light lab also grows grass3d's meadow (`assets/grasses.json`), kept out of the buildings by world3d's hollows.
-Change a solver and bake its place again.
 
 ## Tests
 
 `yarn vitest run games/demo_world3d/demo_world3d.sim.test.ts`: you start on the town's start place and stand on it; a visitor walks the town to one of its places and stops on it at its height, its course written once
 a leg; and in the tavern, each person loiters on a clip of a loiter verb of its landmark.
-
-`yarn vitest run games/demo_world3d/lightlab.test.ts`: the light lab's light hints read as its rooms, the
-sun at the scene's hour lands through the sun room's window on its floor and not in the corner behind it, the east
-room's only opening is the doorway, the floor under the crowded room's table is darker than open floor, and a wall running up both storeys of the
-stairwell is drawn with either room.
 
 How world3d draws a place, plays its clips and hands its files on is proven by world3d's own tests
 (`plugins/world3d/*.test.ts`).

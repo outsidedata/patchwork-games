@@ -1,9 +1,5 @@
 # Issue 76, faked
 
-The faked block in `dev.html` and its `assets/tavern/tavern.hints.json` are gone: the tavern's solver now writes its
-light hints, and the game's own plugin `rooms` lights and draws it from them (README, the light lab). What follows
-is the record of the experiment as it was.
-
 Issue 76 (core, "Built light: interiors lit from the space description stronghold and pro-ng write") lists eleven
 things the renderer would work out from a space description the build writes. Before building any of that, we
 faked it by hand in one scene, the tavern, to see what each thing looks like and how many numbers it takes. This

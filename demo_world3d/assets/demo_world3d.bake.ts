@@ -47,10 +47,6 @@
 //   <place>.refusals.json
 //                 a stronghold place's refusals, `[{ path, reason }]`: everything its run refused, each with the path
 //                 of names from the top solver down to the one that said it (stronghold's build.mjs)
-//   <place>.light.json
-//                 a stronghold place's light hints, its rooms, openings, lamps and darks, which stronghold's build reads
-//                 off the run (`stronghold/light-hints.mjs`), world3d's `light` part, by which it lights the rooms of a
-//                 scene giving `world.world3d.rooms` (`plugins/world3d/world3d.rooms.ts`)
 //   smallville.town.hollows.json
 //                 the boxes lod3d draws no grass, trees or stones in: one round each building standing at elevation 0,
 //                 which procedural.py writes beside the glb, handed to lod3d by world3d (`world3d.lod3d.ts`)
@@ -100,7 +96,6 @@ const PLACES: { pro?: string; stronghold?: string; folder: string; scene: string
   { stronghold: 'winterfell/tavern', folder: 'tavern', scene: 'tavern.scene.json', field: 'tavern/tavern.field.json' },
   { stronghold: 'winterfell/spire', folder: 'spire', scene: 'spire.scene.json', field: 'spire/spire.field.json' },
   { stronghold: 'colonial/yard', folder: 'house', scene: 'house.scene.json', field: 'house/house.field.json' },
-  { stronghold: 'lightlab', folder: 'lightlab', scene: 'lightlab.scene.json', field: 'lightlab/lightlab.field.json' },
 ]
 const chosen = process.argv[3]
 const baked = chosen ? PLACES.filter(place => place.scene === `${chosen}.scene.json`) : PLACES
@@ -138,9 +133,8 @@ export default async ({ blender, scratch, library, stack }: Tools) => {
     }
     const into = path.join(here, place.folder)
     fs.mkdirSync(into, { recursive: true })
-    // a stronghold run also writes its refusals, every one of the run with the path to the solver that said it, and its
-    // light hints, read off the run
-    for (const suffix of place.stronghold ? [...MADE, '.refusals.json', '.light.json'] : MADE) {
+    // a stronghold run also writes its refusals, every one of the run with the path to the solver that said it
+    for (const suffix of place.stronghold ? [...MADE, '.refusals.json'] : MADE) {
       fs.copyFileSync(path.join(out, name + suffix), path.join(into, name + suffix))
       console.log('wrote', path.relative(root, path.join(into, name + suffix)))
     }
@@ -177,14 +171,13 @@ export default async ({ blender, scratch, library, stack }: Tools) => {
     const stacked: Looks = await stack(looks, path.join(into, 'looks'), looksFile)
     fs.writeFileSync(looksFile, JSON.stringify(stacked, null, 1) + '\n')
     if (stacked.stack) console.log('wrote', path.relative(root, path.join(into, 'looks', stacked.stack.file)))
-    // the place world3d's: its name, and each part of it the build wrote an entry named as world3d reads it, standing
-    // where the entry of its file stood in the catalogue, or after the rest
+    // the place world3d's: its name, and each part of it an entry named as world3d reads it, standing where the entry of
+    // its file stood in the catalogue, or after the rest
     const folder = `/games/demo_world3d/assets/${place.folder ? `${place.folder}/` : ''}`
     const sceneFile = path.join(here, '..', place.scene)
     const scene = JSON.parse(fs.readFileSync(sceneFile, 'utf8'))
     scene.world.world3d = { ...scene.world.world3d, place: name }
-    const written = PARTS.filter(part => fs.existsSync(path.join(into, part === 'glb' ? `${name}.glb` : `${name}.${part}.json`)))
-    const parts = Object.fromEntries(written.map(part => {
+    const parts = Object.fromEntries(PARTS.map(part => {
       const glb = part === 'glb'
       return [`${folder}${name}${glb ? '.glb' : `.${part}.json`}`, { name: `${name}.${part}`, entry: { type: glb ? 'binary' : 'json', url: `${folder}${name}${glb ? '.glb' : `.${part}.json`}`, preload: true } }]
     }))
@@ -203,7 +196,7 @@ export default async ({ blender, scratch, library, stack }: Tools) => {
     for (const [asset, a] of Object.entries(assets)) if (a.url.startsWith(url)) delete assets[asset]
     if (stacked.stack) assets[stacked.stack.asset] = { type: 'texture', url: `${url}${stacked.stack.file}`, preload: true } as any
     fs.writeFileSync(sceneFile, JSON.stringify(scene, null, 2) + '\n')
-    console.log('wrote', path.relative(root, sceneFile), `world3d's place ${name}, its catalogue's ${written.length} parts and its pictures' stack`)
+    console.log('wrote', path.relative(root, sceneFile), `world3d's place ${name}, its catalogue's ${PARTS.length} parts and its pictures' stack`)
     // the place's flatten laid into its field, its one painted layer
     const fieldFile = path.join(here, place.field)
     const field = JSON.parse(fs.readFileSync(fieldFile, 'utf8'))

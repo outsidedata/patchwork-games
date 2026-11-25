@@ -2,7 +2,7 @@
   "cap": 20000,
   "alphaTest": 0,
   "ppm": 64,
-  "files": ["smallville.town.effects.json", "village/village.art.effects.json", "tavern/tavern.art.effects.json", "lightlab/lightlab.art.effects.json"],
+  "files": ["smallville.town.effects.json", "village/village.art.effects.json", "tavern/tavern.art.effects.json"],
   "effects": {
     "firebolt": [
       { "sheet": "particles", "clip": "glow", "lasts": true, "follow": true, "size": [0.7, 0.7], "add": true, "gain": 3, "tint": 16742944 },
