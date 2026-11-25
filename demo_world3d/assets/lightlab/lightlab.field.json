@@ -40,22 +40,22 @@
   "layers": [
     {
       "at": [
-        35.37,
+        43.45,
         -13.885
       ],
-      "size": 67,
-      "px": 67,
+      "size": 83,
+      "px": 83,
       "strokes": [
         {
           "verb": "flatten",
-          "radius": 32.346,
+          "radius": 40.23,
           "hardness": 1,
           "strength": 0,
           "level": 0,
           "surface": "",
           "path": [
             [
-              35.37,
+              43.45,
               -13.885
             ]
           ]

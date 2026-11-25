@@ -138,7 +138,8 @@
         "reach": 12,
         "cone": 150,
         "under": 0.8,
-        "soft": 0.35
+        "soft": 0.35,
+        "through": 0.8
       },
       "mods": {
         "sky": "skydome3d"
