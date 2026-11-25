@@ -268,12 +268,18 @@
       "hold": 0.5,
       "mods": {
         "holder": "anim",
+        "body": "anim",
         "behaviors": [
           "guns3d",
           "hitscan3d",
           "chasecamera3d",
           "particle3d"
         ]
+      }
+    },
+    "chasecamera3d": {
+      "mods": {
+        "eye": "guns3d"
       }
     },
     "particle3d": {
