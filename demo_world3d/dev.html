@@ -477,7 +477,7 @@
         readout.textContent = [
           `${frames.length} fps  longest frame ${worst.toFixed(1)} ms  step ${truth.n}`,
           (l3 => l3 ? `lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} still tiles drawn this frame, ${l3.moving} moving tiles, ${l3.owed} faces owed` : '')(window.__client?.plugins.lights3d),
-          (r => r ? `rooms: ${r.room ? `inside ${r.room}, drawing ${r.drawn.join(' + ')}${r.seen ? ' and the outdoors through an opening' : ''}, ${r.hidden} objects hidden` : 'outside'}; ${r.calls} draw calls, ${r.programs} programs` : '')(window.__client?.plugins.rooms?.state()),
+          (r => r ? `rooms: ${r.room ? `inside ${r.room}, drawing ${r.drawn.join(' + ')}${r.seen ? ' and the outdoors through an opening' : ''}, ${r.hidden} objects hidden` : 'outside'}; ${r.calls} draw calls, ${r.programs} programs` : '')(window.__client?.plugins.world3d?.rooms()),
           p?.data.pos ? `you (${p.data.pos.map(v => v.toFixed(2)).join(', ')}) ${p.data.grounded ? 'on the ground' : 'in the air'}` : '',
           ...visitors().map(v => `${v.id === picked.id ? '> ' : ''}visitor ${v.id} ${v.data.body}: ${v.data.speed > 0 ? `going to ${where(v)}, ${left(v)} places left` : `standing at ${where(v)}`} at y ${bodies.crowd3d.where(v, time())[1].toFixed(2)}, switched courses ${switches.get(v.id) ?? 0}`),
           ...errors,

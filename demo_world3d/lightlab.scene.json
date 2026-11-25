@@ -117,6 +117,11 @@
           "url": "/games/demo_world3d/assets/lightlab/lightlab.art.hairs.json",
           "preload": true
         },
+        "lightlab.art.light": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/lightlab/lightlab.art.light.json",
+          "preload": true
+        },
         "lightlab.art_pictures": {
           "type": "texture",
           "url": "/games/demo_world3d/assets/lightlab/looks/lightlab.art.pictures.ktx2",
@@ -126,59 +131,56 @@
     },
     "world3d": {
       "place": "lightlab.art",
-      "people": "person"
+      "people": "person",
+      "mods": {
+        "light": "skydome3d",
+        "key": "skydome3d",
+        "outdoors": [
+          "instances3d",
+          "grass3d"
+        ]
+      },
+      "rooms": {
+        "margin": 0.05,
+        "grid": 2,
+        "sample": 0.5,
+        "resample": 0.01,
+        "under": 0.5,
+        "pass": 6,
+        "portal": 0.5,
+        "exposure": {
+          "inside": 8,
+          "rate": 3
+        },
+        "beams": {
+          "opacity": 0.06,
+          "dust": 50,
+          "size": 0.035,
+          "drift": [
+            0.06,
+            0.08,
+            0.06
+          ],
+          "rates": [
+            0.6,
+            0.45,
+            0.5
+          ],
+          "near": "#fff0c0",
+          "far": "#5a5242",
+          "mote": "#fff2d0"
+        }
+      }
     },
     "particle3d": {
       "effects": "effects"
     },
-    "shipped": {
-      "plugins": [
-        "rooms"
-      ]
-    },
-    "rooms": {
-      "hints": "lightlab.art.nav",
-      "mods": {
-        "outdoors": ["instances3d", "grass3d"]
-      },
-      "margin": 0.05,
-      "grid": 2,
-      "sample": 0.5,
-      "resample": 0.01,
-      "under": 0.5,
-      "pass": 6,
-      "lampNear": 0.3,
-      "portal": 0.5,
-      "fires": {
-        "hearth": {
-          "colour": "#ff9a50",
-          "gain": 2,
-          "flicker": [
-            [0.12, 7, 0],
-            [0.08, 13.7, 1],
-            [0.05, 31, 0]
-          ]
-        }
-      },
-      "exposure": {
-        "inside": 8,
-        "rate": 3
-      },
-      "beams": {
-        "opacity": 0.06,
-        "dust": 50,
-        "size": 0.035,
-        "drift": [0.06, 0.08, 0.06],
-        "rates": [0.6, 0.45, 0.5],
-        "near": "#fff0c0",
-        "far": "#5a5242",
-        "mote": "#fff2d0"
-      }
-    },
     "gpgpu3d": {
       "reach": 110,
       "mods": {
-        "ops": ["grass3d"]
+        "ops": [
+          "grass3d"
+        ]
       }
     },
     "grass3d": {
@@ -187,14 +189,19 @@
       "mods": {
         "land": "terrain3d",
         "keeper": "gpgpu3d",
-        "hollows": ["world3d"]
+        "hollows": [
+          "world3d"
+        ]
       }
     },
     "chasecamera3d": {
       "radius": 0.2,
       "step": 0.25,
       "mods": {
-        "reach": ["shapes3d", "terrain3d"]
+        "reach": [
+          "shapes3d",
+          "terrain3d"
+        ]
       }
     },
     "lights3d": {
@@ -663,10 +670,9 @@
     "solids",
     "skydome3d",
     "particle3d",
-    "world3d",
     "gpgpu3d",
     "grass3d",
-    "shipped",
+    "world3d",
     "render3d",
     "lights3d",
     "chasecamera3d"

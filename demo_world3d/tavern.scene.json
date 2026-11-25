@@ -112,6 +112,11 @@
           "url": "/games/demo_world3d/assets/tavern/tavern.art.hairs.json",
           "preload": true
         },
+        "tavern.art.light": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/tavern/tavern.art.light.json",
+          "preload": true
+        },
         "tavern.art_pictures": {
           "type": "texture",
           "url": "/games/demo_world3d/assets/tavern/looks/tavern.art.pictures.ktx2",
@@ -121,72 +126,58 @@
     },
     "world3d": {
       "place": "tavern.art",
-      "people": "person"
-    },
-    "shipped": {
-      "plugins": [
-        "rooms"
-      ]
-    },
-    "rooms": {
-      "hints": "tavern.art.nav",
+      "people": "person",
       "mods": {
+        "light": "skydome3d",
+        "key": "skydome3d",
         "outdoors": [
           "instances3d"
         ]
       },
-      "margin": 0.05,
-      "grid": 2,
-      "sample": 0.5,
-      "resample": 0.01,
-      "under": 0.5,
-      "pass": 6,
-      "lampNear": 0.3,
-      "portal": 0.5,
-      "fires": {
-        "hearth": {
-          "colour": "#ff9a50",
-          "gain": 2,
-          "flicker": [
-            [
-              0.12,
-              7,
-              0
-            ],
-            [
-              0.08,
-              13.7,
-              1
-            ],
-            [
-              0.05,
-              31,
-              0
-            ]
-          ]
+      "rooms": {
+        "margin": 0.05,
+        "grid": 2,
+        "sample": 0.5,
+        "resample": 0.01,
+        "under": 0.5,
+        "pass": 6,
+        "portal": 0.5,
+        "exposure": {
+          "inside": 8,
+          "rate": 3
+        },
+        "beams": {
+          "opacity": 0.06,
+          "dust": 50,
+          "size": 0.035,
+          "drift": [
+            0.06,
+            0.08,
+            0.06
+          ],
+          "rates": [
+            0.6,
+            0.45,
+            0.5
+          ],
+          "near": "#fff0c0",
+          "far": "#5a5242",
+          "mote": "#fff2d0"
         }
-      },
-      "exposure": {
-        "inside": 8,
-        "rate": 3
-      },
-      "beams": {
-        "opacity": 0.06,
-        "dust": 50,
-        "size": 0.035,
-        "drift": [
-          0.06,
-          0.08,
-          0.06
-        ],
-        "rates": [
-          0.6,
-          0.45,
-          0.5
-        ],
-        "near": "#fff0c0",
-        "far": "#5a5242",
-        "mote": "#fff2d0"
+      }
+    },
+    "lights3d": {
+      "grid": [
+        16,
+        9
+      ],
+      "slices": 24,
+      "shadows": {
+        "atlas": 4096,
+        "tile": 256,
+        "bias": 0.04,
+        "normalBias": 0.05,
+        "budget": 48
       }
     },
     "chasecamera3d": {
@@ -655,8 +646,8 @@
     "skydome3d",
     "particle3d",
     "world3d",
-    "shipped",
     "render3d",
+    "lights3d",
     "chasecamera3d"
   ],
   "seats": 1,
