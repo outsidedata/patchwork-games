@@ -44,16 +44,13 @@
       import { loopback } from '#addons/loopback/loopback.addon.ts'
       import GUI from 'lil-gui'
       import { bodies } from '#plugins/npc3d/npc3d.sim.ts'
-      import { prepared } from '#plugins/loader/loader.sim.ts'
+      import { json, prepared } from '#plugins/loader/loader.sim.ts'
+      import { entry } from '#plugins/world3d/world3d.sim.ts'
       import { sim } from './demo_world3d.sim.ts'
       import { scene as main } from './main.sim.ts'
+      import { scene as lightlab } from './lightlab.sim.ts'
       import { visitor } from './visitor.sim.ts'
       import file from './demo_world3d.scene.json'
-      import town from './assets/smallville.town.nav.json'
-      import village from './assets/village/village.art.nav.json'
-      import tavern from './assets/tavern/tavern.art.nav.json'
-      import spire from './assets/spire/spire.art.nav.json'
-      import house from './assets/house/yard.art.nav.json'
 
       file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
 
@@ -76,6 +73,9 @@
         main.plugins = main.plugins.filter(p => p !== 'lights3d')
         delete main.world.lights3d
       }
+
+      // `?indoors=0` takes the sky's `indoors` mod out of the light lab, so its rooms are drawn with no room switch
+      if (query.get('indoors') === '0') delete lightlab.world.skydome3d.mods.indoors
 
       // A visitor sent somewhere walks there on npc3d's `go` at its tour's pace, and, committed, stands
       // there until it is sent again or put back on its tour.
@@ -120,8 +120,8 @@
       })
       window.__page = page
       const room = window.__scenes.get(file.prefabs.scenemanager.entry)
-      // the scene's graph, the one its page draws
-      const graph = { main: town, village, tavern, spire, house }[file.prefabs.scenemanager.entry]
+      // the scene's graph, its place's nav part, as its truth's loader holds it
+      const graph = json(room, entry(room.world, 'nav'))
       const tagsOf = p => p.data?.nav3d?.tags ?? []
       const places = [...new Set(graph.places.flatMap(tagsOf))].sort()
       const me = () => room.rows.find(r => r.kind === 'player')
@@ -145,6 +145,55 @@
       } }
       gui.add(jump, 'place', places)
       gui.add(jump, 'go to')
+
+      // The place's rooms, a scene giving `world.world3d.rooms` (world3d's `world3d.rooms.ts`): `stand in` puts the
+      // camera in the middle of the room picked, `outside` gives it back to the chase camera. `window.__stand(name)`
+      // does the same for a script.
+      // The readout names the room the camera is in, the sky's share of indoors and whether the sun's shadow map is
+      // drawn. `?indoors=0` takes the sky's `indoors` mod out of the scene before the boot, so the same place is drawn
+      // with no room switch.
+      const roomsOf = () => window.__page.client?.plugins.world3d?.rooms() ?? []
+      // The camera held by the page: render3d's camera claimed and stood in the room facing the wall of its first
+      // opening in a wall (the room's middle, looking along its longer side, for a room with none), until `window.__stand()` with no name lets it go back to the chase camera.
+      const standing = {}
+      window.__stand = name => {
+        const r3 = window.__page.client?.plugins.render3d
+        if (!r3) return false
+        if (name === undefined) { r3.release(standing); return true }
+        const r = roomsOf().find(q => q.name === name)
+        if (!r || !r3.claim(standing)) return false
+        const mid = [0, 1, 2].map(i => r.low[i] + r.u[i] * r.size[0] / 2 + r.w[i] * r.size[1] / 2)
+        r3.camera.up.set(0, 1, 0)
+        // facing the wall of the room's first opening into it, from a metre short of the far wall, a little above
+        // head height and looking down onto the floor before that wall
+        // an opening out of the room, or one of the next room's opening into it, turned to face in
+        const found = window.__page.client.plugins.world3d.openings().find(q => (q.room === r.name || q.to === r.name) && q.inward[1] === 0)
+        const o = found && (found.room === r.name ? found : { ...found, inward: found.inward.map(v => -v) })
+        if (!o) {
+          r3.camera.position.set(mid[0], r.low[1] + 1.6, mid[2])
+          const along = r.size[0] >= r.size[1] ? r.u : r.w
+          r3.camera.lookAt(mid[0] + along[0], r.low[1] + 1.6, mid[2] + along[2])
+          return true
+        }
+        const deep = Math.abs(o.inward[0] * r.u[0] + o.inward[2] * r.u[2]) > 0.5 ? r.size[0] : r.size[1]
+        const back = [o.mid[0] + o.inward[0] * (deep - 1), r.low[1] + 2.2, o.mid[2] + o.inward[2] * (deep - 1)]
+        r3.camera.position.set(back[0], back[1], back[2])
+        r3.camera.lookAt(o.mid[0] + o.inward[0] * 1.5, r.low[1] + 0.6, o.mid[2] + o.inward[2] * 1.5)
+        return true
+      }
+      // the folder is made once world3d has read the rooms, on its first tick
+      if (room.world.world3d?.rooms) {
+        const fill = () => {
+          const names = roomsOf().map(r => r.name)
+          if (!names.length) return requestAnimationFrame(fill)
+          const folder = gui.addFolder('rooms')
+          const pick = { room: names[0], 'stand in': () => window.__stand(pick.room), outside: () => window.__stand() }
+          folder.add(pick, 'room', names)
+          folder.add(pick, 'stand in')
+          folder.add(pick, 'outside')
+        }
+        fill()
+      }
 
       // What the body carries in its hand: the player's definition's `carry.at`, metres off the bone in
       // its own frame, on the tab's one copy of the definitions, which the look reads every frame.
@@ -636,6 +685,7 @@
           `${frames.length} fps  longest frame ${worst.toFixed(1)} ms  step ${truth.n}`,
           (l3 => l3 ? `lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} still tiles drawn this frame, ${l3.moving} moving tiles, ${l3.owed} faces owed` : '')(window.__client?.plugins.lights3d),
           p?.data.pos ? `you (${p.data.pos.map(v => v.toFixed(2)).join(', ')}) ${p.data.grounded ? 'on the ground' : 'in the air'}` : '',
+          ((c, sky) => c?.world3d?.rooms().length ? `camera in ${c.world3d.room(c)?.name ?? 'no room'}, the sky ${Math.round((sky?.indoors ?? 0) * 100)}% indoors, the sun's shadow map ${sky?.key.shadow.autoUpdate === false ? 'not drawn' : 'drawn'}` : '')(window.__client?.plugins, window.__client?.plugins.skydome3d?.sky()),
           ...visitors().map(v => `${v.id === picked.id ? '> ' : ''}visitor ${v.id} ${v.data.body}: ${v.data.speed > 0 ? `going to ${where(v)}, ${left(v)} places left` : `standing at ${where(v)}`} at y ${bodies.crowd3d.where(v, time())[1].toFixed(2)}, switched courses ${switches.get(v.id) ?? 0}`),
           ...errors,
         ].join('\n')

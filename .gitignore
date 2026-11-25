@@ -43,6 +43,7 @@
 /demo_world3d/assets/tavern/*
 /demo_world3d/assets/spire/*
 /demo_world3d/assets/house/*
+/demo_world3d/assets/lightlab/*
 !/demo_world3d/assets/*/*.field.json
 # the tavern's hand-written light hints are not baked, so they are kept
 !/demo_world3d/assets/tavern/tavern.hints.json

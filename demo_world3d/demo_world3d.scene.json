@@ -25,6 +25,10 @@
         "house": {
           "file": "house.scene.json",
           "suspend": true
+        },
+        "lightlab": {
+          "file": "lightlab.scene.json",
+          "suspend": true
         }
       },
       "dt": 0.016666666666666666,

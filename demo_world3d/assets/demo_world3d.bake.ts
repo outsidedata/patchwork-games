@@ -70,7 +70,7 @@ import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 import type { Looks, Tools } from '#scripts/bake.ts'
 import { packLooks } from '#scripts/pack-looks.ts'
-import { PARTS } from '#plugins/world3d/world3d.sim.ts'
+import { LIGHT, PARTS } from '#plugins/world3d/world3d.sim.ts'
 import player from './player.rig.json' with { type: 'json' }
 
 const here = import.meta.dirname
@@ -88,14 +88,17 @@ const merge = path.join(root, '.claude', 'skills', 'using-mixamo-assets', 'scrip
 // painted layer in place of one flatten under the whole place. A stronghold place's `overrides` (under this folder) is
 // its override strings, `{ "<key chain>": value }`, handed to its solver in its asks: each one either resolves on
 // what the solvers placed or is refused in the run, by its key chain.
-// `yarn bake demo_world3d <scene>` bakes that scene's place alone (`main`, `village`, `tavern`, `spire`, `house`: its scene
-// file's name), and not the bodies; `yarn bake demo_world3d` bakes every place and the bodies.
-const PLACES: { pro?: string; stronghold?: string; folder: string; scene: string; field: string; at?: [number, number]; overrides?: string }[] = [
+// `yarn bake demo_world3d <scene>` bakes that scene's place alone (`main`, `village`, `tavern`, `spire`, `house`,
+// `lightlab`: its scene file's name), and not the bodies; `yarn bake demo_world3d` bakes every place and the bodies.
+// `lightlab.bake.ts` beside this file bakes the light lab alone, run by hand, with nothing else of the game's bake.
+export type Place = { pro?: string; stronghold?: string; folder: string; scene: string; field: string; at?: [number, number]; overrides?: string }
+export const PLACES: Place[] = [
   { pro: 'castle/smallville/smallville.town', folder: '', scene: 'main.scene.json', field: 'demo_world3d.field.json' },
   { stronghold: 'winterfell/village', folder: 'village', scene: 'village.scene.json', field: 'village/village.field.json' },
   { stronghold: 'winterfell/tavern', folder: 'tavern', scene: 'tavern.scene.json', field: 'tavern/tavern.field.json' },
   { stronghold: 'winterfell/spire', folder: 'spire', scene: 'spire.scene.json', field: 'spire/spire.field.json' },
   { stronghold: 'colonial/yard', folder: 'house', scene: 'house.scene.json', field: 'house/house.field.json' },
+  { stronghold: 'lightlab', folder: 'lightlab', scene: 'lightlab.scene.json', field: 'lightlab/lightlab.field.json' },
 ]
 const chosen = process.argv[3]
 const baked = chosen ? PLACES.filter(place => place.scene === `${chosen}.scene.json`) : PLACES
@@ -103,10 +106,22 @@ if (chosen && !baked.length) throw new Error(`demo_world3d's bake: no place is b
 // what pro-ng's build writes for a scene, each `<name><suffix>`
 const MADE = ['.glb', '.looks.json', '.clips.json', '.shapes3d.json', '.nav.json', '.terrain3d_layers.json', '.hollows.json', '.effects.json', '.crowd.json', '.hairs.json']
 
-export default async ({ blender, scratch, library, stack }: Tools) => {
-  // each place made into every file a game boots from by the library's pro-ng (`pro-ng/build.mjs`), on core's Blender
+export default async (tools: Tools) => {
+  for (const place of baked) await bakePlace(place, tools)
+  if (chosen) return
+  const file = path.join(here, 'player.rig.json'), table = tools.scratch('player.table.json')
+  const bodies = Object.keys(player.bodies).map(body => `${body}=${path.join(here, `${body}.glb`)}`)
+  await tools.blender(['--factory-startup', '--python-exit-code', '1', '--python', exporter, '--', file, table, ...bodies])
+  for (const body of Object.keys(player.bodies)) console.log('wrote', path.relative(root, path.join(here, `${body}.glb`)))
+  execFileSync(process.execPath, [merge, file, table, file], { stdio: 'inherit' })
+  console.log('wrote', path.relative(root, file), 'its table')
+}
+
+// one place made into every file a game boots from by the library's pro-ng (`pro-ng/build.mjs`), on core's Blender,
+// copied in, and named in its scene's catalogue and its field
+export const bakePlace = async (place: Place, { blender, scratch, library, stack }: Tools) => {
   const { build } = await import(pathToFileURL(path.join(library, 'pro-ng', 'build.mjs')).href)
-  for (const place of baked) {
+  {
     // a stronghold run's scene is named after its solver's last word, `<word>.art`
     const name = place.pro ? path.basename(place.pro) : `${path.basename(place.stronghold!)}.art`
     const out = scratch(name)
@@ -133,8 +148,9 @@ export default async ({ blender, scratch, library, stack }: Tools) => {
     }
     const into = path.join(here, place.folder)
     fs.mkdirSync(into, { recursive: true })
-    // a stronghold run also writes its refusals, every one of the run with the path to the solver that said it
-    for (const suffix of place.stronghold ? [...MADE, '.refusals.json'] : MADE) {
+    // a stronghold run also writes its refusals, every one of the run with the path to the solver that said it, and its
+    // light file, its rooms, openings and dark patches (stronghold's light-hints.mjs), world3d's `light`
+    for (const suffix of place.stronghold ? [...MADE, '.refusals.json', '.light.json'] : MADE) {
       fs.copyFileSync(path.join(out, name + suffix), path.join(into, name + suffix))
       console.log('wrote', path.relative(root, path.join(into, name + suffix)))
     }
@@ -188,6 +204,7 @@ export default async ({ blender, scratch, library, stack }: Tools) => {
       else catalogued[asset] = a
     }
     for (const part of Object.values(parts)) catalogued[part.name] ??= part.entry
+    if (place.stronghold) catalogued[`${name}.${LIGHT}`] = { type: 'json', url: `${folder}${name}.${LIGHT}.json`, preload: true } as any
     scene.world.loader.assets = catalogued
     // the pictures' stack in the scene's catalogue, the one entry supershader3d binds, in place of every earlier bake's
     // pictures and stack
@@ -204,11 +221,4 @@ export default async ({ blender, scratch, library, stack }: Tools) => {
     fs.writeFileSync(fieldFile, JSON.stringify(field, null, 2) + '\n')
     console.log('wrote', path.relative(root, fieldFile), 'its layers')
   }
-  if (chosen) return
-  const file = path.join(here, 'player.rig.json'), table = scratch('player.table.json')
-  const bodies = Object.keys(player.bodies).map(body => `${body}=${path.join(here, `${body}.glb`)}`)
-  await blender(['--factory-startup', '--python-exit-code', '1', '--python', exporter, '--', file, table, ...bodies])
-  for (const body of Object.keys(player.bodies)) console.log('wrote', path.relative(root, path.join(here, `${body}.glb`)))
-  execFileSync(process.execPath, [merge, file, table, file], { stdio: 'inherit' })
-  console.log('wrote', path.relative(root, file), 'its table')
 }
