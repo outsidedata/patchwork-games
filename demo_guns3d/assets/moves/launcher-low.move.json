@@ -1,0 +1,19 @@
+{
+  "length": 3,
+  "loop": true,
+  "done": 0,
+  "fade": [0.3, 0],
+  "hands": {
+    "left": [[0, { "gun": "support" }, "linear"]],
+    "right": [[0, { "gun": "grip" }, "linear"]]
+  },
+  "grips": {
+    "left": [[0, "launcher trigger", "linear"]],
+    "right": [[0, "grip", "linear"]]
+  },
+  "gun": [
+    [0, [0, -0.1, 0.04], [-24, 0, 0], "both"],
+    [1.5, [0, -0.097, 0.04], [-23.5, 0, 0], "both"],
+    [3, [0, -0.1, 0.04], [-24, 0, 0], "both"]
+  ]
+}

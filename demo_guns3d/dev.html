@@ -17,7 +17,7 @@
       // over a loopback, stepped on the page's clock. `?scene=<scene>` enters that scene. The truths are kept on
       // `window.__scenes` and the page on `window.__page` for the profilers (benchmarking-a-game). The frame rate is
       // the stats plugin's panel at the top left. The readout shows the scene and the step, the seat's gun (its mode,
-      // its rounds, the carry it is held in, the act it plays and how far in) and each hand's reach, and the last
+      // the rounds it holds, read through its feed word, the carry it is held in, the act it plays and how far in) and each hand's reach, and the last
       // five errors the page threw or wrote.
       //
       // `window.__hold`, set true, stops the truth stepping while the page goes on drawing, so a moment of a move can
@@ -29,6 +29,7 @@
       import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
       import { loopback } from '#addons/loopback/loopback.addon.ts'
       import { possessed } from '#plugins/player/player.plugin.ts'
+      import { reading } from '#plugins/guns3d/guns3d.sim.ts'
       import GUI from 'lil-gui'
       import { sim } from './demo_guns3d.sim.ts'
       import file from './demo_guns3d.scene.json'
@@ -118,7 +119,7 @@
         const me = plugins?.wire ? possessed(plugins.wire.rows) : undefined
         const g = me?.data.gun
         if (g?.mode !== undefined) {
-          lines.push(`gun ${g.name}  ${g.mode}  ${g.chambered}+${g.rounds}  carried ${g.carry}  ${g.move || '-'} ${g.moveT.toFixed(2)}s${g.act ? ' (act)' : ''}  shots ${g.shots}`)
+          lines.push(`gun ${g.name}  ${g.mode}  ${reading(plugins.wire, g).count} rounds  carried ${g.carry}  ${g.move || '-'} ${g.moveT.toFixed(2)}s${g.act ? ' (act)' : ''}  shots ${g.shots}`)
           const short = plugins.ik3d?.short(me.id)
           if (short) lines.push(`reach short  right ${(short[0] * 1000).toFixed(1)} mm  left ${(short[1] * 1000).toFixed(1)} mm`)
         }

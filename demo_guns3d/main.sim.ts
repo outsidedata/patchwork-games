@@ -5,11 +5,12 @@ import type { Scene, Sim } from '#engine/engine.ts'
 import { scenemanager } from '#plugins/scenemanager/scenemanager.sim.ts'
 import { loader } from '#plugins/loader/loader.sim.ts'
 import { particle3d } from '#plugins/particle3d/particle3d.sim.ts'
+import { volley3d } from '#plugins/volley3d/volley3d.sim.ts'
 import { player } from './player.sim.ts'
 import { start } from './start.sim.ts'
 import { plate } from './plate.sim.ts'
 import file from './main.scene.json' with { type: 'json' }
 
-export const sim: Sim = { scenemanager, loader, particle3d, player, start, plate }
+export const sim: Sim = { scenemanager, loader, particle3d, volley3d, player, start, plate }
 
 export const scene = file as Scene

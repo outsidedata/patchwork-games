@@ -46,6 +46,42 @@
     "case": [
       { "n": [1, 1], "life": [3, 3], "speed": [2.6, 3.4], "spread": 0.25, "g": 9.8, "spin": 22, "bounce": 0.35, "drag": 0.2, "size": [1, 1], "a0": 1, "a1": 1, "item": { "item": "case556" } }
     ],
+    "launch": [
+      { "n": [1, 1], "life": [0.06, 0.08], "shape": "glow", "size": [0.5, 0.6], "tint": 16773584, "gain": 3, "add": true, "alphas": [[0, 1], [1, 0]] },
+      { "n": [10, 14], "life": [0.05, 0.09], "shape": "glow", "spread": 0.35, "speed": [10, 18], "drag": 18, "size": [0.12, 0.2], "tints": [[0, 16767114], [1, 15234092]], "gain": 1.8, "add": true, "a1": 0 },
+      { "lamp": { "intensity": 6, "distance": 6, "decay": 2, "tint": 16760944 } }
+    ],
+    "launch smoke": [
+      { "n": [24, 36], "life": [0.8, 1.4], "shape": "puff", "spread": 0.5, "speed": [2, 6], "drag": 3, "g": -0.2, "size": [0.12, 0.2], "grows": [[0, 1], [1, 6]], "tint": 12105912, "alphas": [[0, 0], [0.05, 0.4], [1, 0]] }
+    ],
+    "backblast": [
+      { "n": [1, 1], "life": [0.08, 0.1], "shape": "glow", "size": [0.9, 1.1], "tint": 16771520, "gain": 3, "add": true, "alphas": [[0, 1], [1, 0]] },
+      { "n": [16, 24], "life": [0.12, 0.22], "shape": "glow", "spread": 0.3, "speed": [14, 26], "drag": 10, "size": [0.2, 0.35], "tints": [[0, 16767114], [1, 13789214]], "gain": 2, "add": true, "a1": 0 },
+      { "lamp": { "intensity": 8, "distance": 8, "decay": 2, "tint": 16760944 } }
+    ],
+    "backblast smoke": [
+      { "n": [40, 60], "life": [1.4, 2.4], "shape": "puff", "spread": 0.3, "speed": [8, 20], "drag": 4, "g": -0.3, "size": [0.15, 0.25], "grows": [[0, 1], [1, 6]], "tint": 13289414, "alphas": [[0, 0], [0.04, 0.3], [1, 0]] }
+    ],
+    "pg7v": [
+      { "n": [1, 1], "lasts": true, "follow": true, "size": [1, 1], "a0": 1, "a1": 1, "item": { "item": "pg7v" } },
+      { "n": [1, 1], "lasts": true, "follow": true, "shape": "glow", "size": [0.3, 0.3], "tint": 16767128, "gain": 3, "add": true },
+      { "lamp": { "intensity": 3, "distance": 5, "decay": 2, "tint": 16760944 } }
+    ],
+    "pg7v trail": [
+      { "every": 0.006, "n": [1, 1], "life": [1.2, 2], "shape": "puff", "speed": [0.2, 0.6], "spread": 1, "drag": 1.5, "g": -0.4, "size": [0.12, 0.18], "grows": [[0, 1], [1, 6]], "tint": 13421772, "alphas": [[0, 0.5], [1, 0]] },
+      { "every": 0.01, "n": [1, 1], "life": [0.04, 0.07], "shape": "glow", "size": [0.2, 0.3], "tint": 16752704, "gain": 2, "add": true, "a1": 0 }
+    ],
+    "pg7v burst": [
+      { "n": [1, 1], "life": [0.12, 0.12], "shape": "glow", "size": [5, 5], "tint": 16774880, "gain": 5, "add": true, "a1": 0 },
+      { "n": [14, 20], "life": [0.35, 0.7], "shape": "glow", "spread": 1.6, "speed": [3, 8], "drag": 3, "size": [1, 1.8], "grows": [[0, 1], [1, 1.8]], "tints": [[0, 16742944], [1, 7031056]], "gain": 2.5, "add": true, "a1": 0 },
+      { "n": [10, 14], "life": [2, 3.2], "shape": "puff", "spread": 1.6, "speed": [1.5, 4.5], "drag": 1.2, "g": -1.2, "size": [1, 1.6], "grows": [[0, 1], [1, 2.5]], "tint": 3815994, "alphas": [[0, 0.75], [1, 0]] },
+      { "n": [24, 36], "life": [0.6, 1.2], "shape": "spark", "spread": 1.6, "speed": [10, 24], "g": 9.8, "drag": 0.7, "bounce": 0.3, "size": [0.02, 0.035], "tints": [[0, 16774358], [1, 16747066]], "gain": 2, "add": true, "a1": 0 },
+      { "n": [1, 1], "life": [30, 30], "shape": "glow", "face": true, "size": [1.6, 1.8], "box": [0, 0.003, 0, 0, 0.003, 0], "tint": 1314570, "alphas": [[0, 0.9], [0.9, 0.9], [1, 0]] },
+      { "n": [1, 1], "life": [0.35, 0.35], "shape": "glow", "size": [0.01, 0.01], "a0": 0, "a1": 0, "carry": "pg7v light" }
+    ],
+    "pg7v light": [
+      { "lamp": { "intensity": 30, "distance": 18, "decay": 2, "tint": 16760944 } }
+    ],
     "magazine": [
       { "n": [1, 1], "life": [6, 6], "speed": [0.6, 0.9], "spread": 0.15, "g": 9.8, "spin": 5, "bounce": 0.2, "drag": 0.3, "size": [1, 1], "a0": 1, "a1": 1, "item": { "item": "mag556" } }
     ]

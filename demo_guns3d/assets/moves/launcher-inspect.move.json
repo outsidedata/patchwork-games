@@ -1,0 +1,35 @@
+{
+  "length": 2.2,
+  "loop": false,
+  "done": 2.2,
+  "fade": [0.2, 0.3],
+  "hands": {
+    "left": [
+      [0, { "gun": "support" }, "linear"],
+      [0.35, { "gun": "sight" }, "both"],
+      [1.75, { "gun": "sight" }, "linear"],
+      [2.05, { "gun": "support" }, "both"]
+    ]
+  },
+  "grips": {
+    "left": [
+      [0, "grip", "linear"],
+      [0.3, "pinch", "both"],
+      [1.8, "pinch", "linear"],
+      [2.05, "grip", "both"]
+    ]
+  },
+  "gun": [
+    [0, [0, 0, 0], [0, 0, 0], "linear"],
+    [0.4, [0.02, -0.05, 0.08], [6, 0, -25], "both"],
+    [1.8, [0.02, -0.05, 0.08], [6, 0, -25], "linear"],
+    [2.2, [0, 0, 0], [0, 0, 0], "both"]
+  ],
+  "body": [
+    [0, { "Head": [0, 0, 0] }, "linear"],
+    [0.4, { "Head": [16, 12, 0] }, "both"],
+    [1.8, { "Head": [16, 12, 0] }, "linear"],
+    [2.2, { "Head": [0, 0, 0] }, "both"]
+  ],
+  "clips": [[0.4, "inspect"]]
+}

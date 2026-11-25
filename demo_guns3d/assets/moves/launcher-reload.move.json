@@ -1,0 +1,51 @@
+{
+  "length": 3,
+  "loop": false,
+  "done": 1.95,
+  "fade": [0.2, 0.3],
+  "hands": {
+    "left": [
+      [0, { "gun": "support" }, "linear"],
+      [0.8, { "gun": "grenade" }, "both"],
+      [2.5, { "gun": "grenade" }, "linear"],
+      [2.95, { "gun": "support" }, "both"]
+    ],
+    "right": [
+      [0, { "gun": "grip" }, "linear"],
+      [2.25, { "gun": "grip" }, "linear"],
+      [2.3, { "gun": "hammer" }, "both"],
+      [2.45, { "gun": "hammer" }, "linear"],
+      [2.6, { "gun": "grip" }, "both"]
+    ]
+  },
+  "grips": {
+    "left": [
+      [0, "launcher trigger", "linear"],
+      [0.6, "open", "both"],
+      [0.9, "grip", "out"],
+      [2.5, "grip", "linear"],
+      [2.7, "open", "both"],
+      [2.95, "launcher trigger", "both"]
+    ],
+    "right": [
+      [0, "launcher trigger", "linear"],
+      [2.2, "grip", "both"],
+      [2.3, "thumb", "both"],
+      [2.45, "thumb", "linear"],
+      [2.6, "launcher trigger", "both"]
+    ]
+  },
+  "gun": [
+    [0, [0, 0, 0], [0, 0, 0], "linear"],
+    [0.5, [0.1, -0.3, 0.65], [15, 0, 0], "both"],
+    [2.5, [0.1, -0.3, 0.65], [15, 0, 0], "linear"],
+    [2.95, [0, 0, 0], [0, 0, 0], "both"]
+  ],
+  "body": [
+    [0, { "Head": [0, 0, 0], "Spine2": [0, 0, 0] }, "linear"],
+    [0.6, { "Head": [14, 4, 0], "Spine2": [4, 0, 0] }, "both"],
+    [2.5, { "Head": [14, 4, 0], "Spine2": [4, 0, 0] }, "linear"],
+    [2.95, { "Head": [0, 0, 0], "Spine2": [0, 0, 0] }, "both"]
+  ],
+  "clips": [[0, "reload_empty"]]
+}

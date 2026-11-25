@@ -1,0 +1,14 @@
+{
+  "patterns": {
+    "pg7v": {
+      "speed": 115,
+      "accel": 600,
+      "max": 295,
+      "g": 2,
+      "life": 4.5,
+      "radius": 0.04,
+      "splash": 5,
+      "look": { "body": "pg7v", "trail": "pg7v trail", "burst": "pg7v burst" }
+    }
+  }
+}

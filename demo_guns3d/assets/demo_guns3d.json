@@ -17,9 +17,11 @@
       "inspect": ["i", "Pad1"],
       "charge": ["c", "Pad5"],
       "check": ["v", "Pad8"],
+      "swap": ["q", "Pad11"],
       "nearer": ["Pad12"],
       "further": ["Pad13"]
     },
+    "guns": ["g95", "rpg7"],
     "carries": { "stand": "ready", "aim": "aim", "run": "sprint", "low": "low" },
     "acts": { "inspect": "inspect", "charge": "charge", "check": "check" },
     "controls": {
@@ -34,11 +36,12 @@
         { "key": "W A S D", "text": "walk" },
         { "key": "Shift", "text": "run" },
         { "key": "R", "text": "reload" },
-        { "key": "B", "text": "semi or auto" },
+        { "key": "B", "text": "fire mode" },
         { "key": "L", "text": "lower or raise the gun" },
         { "key": "I", "text": "inspect" },
         { "key": "C", "text": "charge" },
-        { "key": "V", "text": "check the magazine" },
+        { "key": "V", "text": "check the load" },
+        { "key": "Q", "text": "rifle or RPG-7" },
         { "key": "Space", "text": "jump" },
         { "key": "Esc", "text": "let go of the mouse" }
       ]

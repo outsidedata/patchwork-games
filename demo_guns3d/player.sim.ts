@@ -1,6 +1,7 @@
 // The row one seat possesses, and the body it plays: an X Bot (`as: "xbot"`) that walks on walker (its numbers
 // `world.walker.kinds.xbot`), is drawn and played by anim (`world.anim.kinds.xbot`, the Rifle 8-Way Locomotion
-// Pack's clips), and holds the G95, a gun of guns3d's sheet (`assets/demo_guns3d.guns.json`) whose state is its `gun`.
+// Pack's clips), and holds one of its definition's `guns` (the G95 and the RPG-7), each a gun of guns3d's sheet
+// (`assets/demo_guns3d.guns.json`), the one in its hands and its state its `gun`.
 // Every seat is sent every `player` row. Its own fields, beside walker's, anim's and guns3d's: `stick` [x, z], the
 // keys' way, right and forward; `fast`, the run key held; `aiming`, the aim key held; `lowered`, the gun lowered by
 // the lower key; `look` `{ yaw, pitch, dist, side }`, chasecamera3d's orbit about it, `lift` metres over its feet;
@@ -20,7 +21,8 @@
 //
 // The acts are the page's keys: `stick(x, y)` (y down, as a stick reads), `turn(x, y)` (the right stick, the same),
 // `fast(v)`, `fire(v)` and `aim(v)` (1 held, 0 let go), `jump`, `reload`, `select` (the gun's next mode), `lower`
-// (lowered or raised), `inspect`, `charge` and `check` (each the move its definition's `acts` names),
+// (lowered or raised), `inspect`, `charge` and `check` (each the move its definition's `acts` names), `swap` (the
+// next gun of its definition's `guns`, fresh in the hand, refused while an act plays),
 // `look(dyaw, dpitch)` and `zoom(by)`, the wheel's pixels. A seat's message arrives from outside the program, so each
 // refuses arguments of the wrong kind and writes nothing.
 import type { Kind, Row, W } from '#engine/engine.ts'
@@ -118,6 +120,13 @@ export const player: Kind = {
     },
     check(me, w) {
       guns3d.play(me, w, def(w, me.kind).acts.check)
+    },
+    swap(me, w) {
+      guns3d.arm(me, w)
+      if (me.data.gun.act) return
+      const guns: string[] = def(w, me.kind).guns
+      me.data.gun = { name: guns[(guns.indexOf(me.data.gun.name) + 1) % guns.length] }
+      guns3d.arm(me, w)
     },
     look(me, w, _seat, dyaw: unknown, dpitch: unknown) {
       if (!finite(dyaw, dpitch)) return

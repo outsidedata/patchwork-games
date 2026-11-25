@@ -8,7 +8,7 @@
 //             the view at the definition's `camera.turn` and `tilt` while it is held
 //   fast      held to run; `aim` held to aim down the gun; `fire` held to hold the trigger, heard only while the page
 //             holds the pointer lock, so the click that takes the lock fires nothing
-//   jump, reload, select, lower, inspect, charge, check   each pressed
+//   jump, reload, select, lower, inspect, charge, check, swap   each pressed
 //   nearer, further   the camera in and out by `camera.step` of the wheel's pixels a press
 // A click takes the pointer lock, and the mouse then sends `look` with its pixels times `sens`, right turning the
 // view right and down tilting it down; the wheel sends `zoom` with the pixels it turned. chasecamera3d follows the
@@ -27,7 +27,7 @@ export function setup(row: Row, plugins: Plugins) {
   const keys = k.keys
   const press: Record<string, Input> = {}
   const button = (list: string[], input: Input) => { for (const key of list) press[key] = input }
-  for (const act of ['jump', 'reload', 'select', 'lower', 'inspect', 'charge', 'check']) button(keys[act], [act])
+  for (const act of ['jump', 'reload', 'select', 'lower', 'inspect', 'charge', 'check', 'swap']) button(keys[act], [act])
   button(keys.nearer, ['zoom', -k.camera.step])
   button(keys.further, ['zoom', k.camera.step])
   // chasecamera3d looks along (sin yaw, cos yaw), so a larger yaw turns the view left: right on the mouse is less

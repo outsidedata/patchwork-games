@@ -1,0 +1,2921 @@
+{
+ "item": "rpg7",
+ "kind": "modern/firearms/launchers/rpg7/rpg7",
+ "keys": {
+  "Finish": "enamel",
+  "Furniture": "wood"
+ },
+ "materials": [
+  "firearm_laminate",
+  "ordnance_olive_enamel",
+  "ordnance_yellow_paint",
+  "ordnance_booster_paper",
+  "firearm_ak_enamel"
+ ],
+ "clips": {
+  "about": "Each kit thing that moves: its clips as its kind wrote them (what it is and how a player meets it, whether it plays at the start, whether it loops, its seconds). A clip of tracks is the glb's animation named in its `animation`, moving the bones of the kit mesh's skin. A clip of poses moves the parts it names: each pose a time and its morph target on the glb's kit mesh, null where the pose is the thing as it stands, each corner going in a straight line between two poses. Each joint is a bone a game may pose with no clip: `joint` its node among the skin's joints, `axis` in that node's own space, `range` the degrees from rest it may turn, and `couple` (where it has one) the joint whose turn drives it, `ratio` times over, as the thing's own linkage does.",
+  "things": [
+   {
+    "thing": "rpg7",
+    "kind": "modern/firearms/launchers/rpg7/rpg7",
+    "row": 0,
+    "clips": {
+     "fire": {
+      "about": "One shot: the trigger back, the hammer let go onto the firing pin, the booster lit, the grenade driven out of the muzzle with its fins springing open and handed to the game's physics.",
+      "how": "Each shot; the game then plays count 0.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.6,
+      "tracks": {
+       "trigger/trigger": {
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.01,
+           -12
+          ],
+          [
+           0.2,
+           -12
+          ],
+          [
+           0.26,
+           0
+          ],
+          [
+           0.6,
+           0
+          ]
+         ]
+        }
+       },
+       "hammer/hammer": {
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           30
+          ],
+          [
+           0.01,
+           30
+          ],
+          [
+           0.016,
+           -1.5
+          ],
+          [
+           0.022,
+           0
+          ],
+          [
+           0.6,
+           0
+          ]
+         ]
+        }
+       },
+       "grenade/grenade": {
+        "slide": {
+         "way": [
+          0,
+          1,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.018,
+           0
+          ],
+          [
+           0.02225,
+           0.11975000000000001
+          ],
+          [
+           0.0265,
+           0.47900000000000004
+          ],
+          [
+           0.0315,
+           1.054
+          ],
+          [
+           0.0365,
+           1.629
+          ],
+          [
+           0.0415,
+           2.204
+          ],
+          [
+           0.0465,
+           2.7790000000000004
+          ],
+          [
+           0.05,
+           3.1815000000000007
+          ],
+          [
+           0.6,
+           3.1815000000000007
+          ]
+         ]
+        },
+        "scale": {
+         "keys": [
+          [
+           0,
+           1
+          ],
+          [
+           0.05,
+           1
+          ],
+          [
+           0.0505,
+           0
+          ],
+          [
+           0.6,
+           0
+          ]
+         ]
+        }
+       },
+       "grenade/fin 1": {
+        "turn": {
+         "axis": [
+          -0.7071067811865475,
+          0,
+          0.7071067811865476
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.03,
+           0
+          ],
+          [
+           0.045,
+           80
+          ],
+          [
+           0.6,
+           80
+          ]
+         ]
+        }
+       },
+       "grenade/fin 2": {
+        "turn": {
+         "axis": [
+          -0.7071067811865476,
+          0,
+          -0.7071067811865475
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.03,
+           0
+          ],
+          [
+           0.045,
+           80
+          ],
+          [
+           0.6,
+           80
+          ]
+         ]
+        }
+       },
+       "grenade/fin 3": {
+        "turn": {
+         "axis": [
+          0.7071067811865475,
+          0,
+          -0.7071067811865477
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.03,
+           0
+          ],
+          [
+           0.045,
+           80
+          ],
+          [
+           0.6,
+           80
+          ]
+         ]
+        }
+       },
+       "grenade/fin 4": {
+        "turn": {
+         "axis": [
+          0.7071067811865477,
+          0,
+          0.7071067811865474
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.03,
+           0
+          ],
+          [
+           0.045,
+           80
+          ],
+          [
+           0.6,
+           80
+          ]
+         ]
+        }
+       }
+      },
+      "release": {
+       "seconds": 0.05,
+       "at": [
+        0,
+        3.6525000000000007,
+        0.165417
+       ],
+       "speed": [
+        0,
+        115,
+        0
+       ]
+      },
+      "animation": "rpg7 fire"
+     },
+     "reload": {
+      "about": "The loaded grenade drawn out of the muzzle, a fresh one pushed in and turned onto its notch, the hammer cocked.",
+      "how": "Reloading.",
+      "start": "off",
+      "loop": false,
+      "seconds": 3,
+      "tracks": {
+       "hammer/hammer": {
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           2.3,
+           0
+          ],
+          [
+           2.4499999999999997,
+           30
+          ],
+          [
+           3,
+           30
+          ]
+         ]
+        }
+       },
+       "grenade/grenade": {
+        "path": {
+         "keys": [
+          [
+           0,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0.25,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0.7,
+           [
+            0,
+            0.539,
+            0
+           ]
+          ],
+          [
+           0.85,
+           [
+            0,
+            0.539,
+            -0.05
+           ]
+          ],
+          [
+           0.8995000000000001,
+           [
+            0,
+            0.539,
+            -0.05
+           ]
+          ],
+          [
+           0.9,
+           [
+            0,
+            0.539,
+            -0.05
+           ]
+          ],
+          [
+           1.15,
+           [
+            0,
+            0.519,
+            0
+           ]
+          ],
+          [
+           1.7,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           3,
+           [
+            0,
+            0,
+            0
+           ]
+          ]
+         ]
+        },
+        "turn": {
+         "axis": [
+          0,
+          1,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.1,
+           0
+          ],
+          [
+           0.25,
+           -18
+          ],
+          [
+           0.8995000000000001,
+           -18
+          ],
+          [
+           0.9,
+           -18
+          ],
+          [
+           1.7,
+           -18
+          ],
+          [
+           1.95,
+           0
+          ],
+          [
+           3,
+           0
+          ]
+         ]
+        },
+        "scale": {
+         "keys": [
+          [
+           0,
+           1
+          ],
+          [
+           0.85,
+           1
+          ],
+          [
+           0.8505,
+           0
+          ],
+          [
+           0.8995000000000001,
+           0
+          ],
+          [
+           0.9,
+           1
+          ],
+          [
+           3,
+           1
+          ]
+         ]
+        }
+       },
+       "grenade/fin 1": {
+        "turn": {
+         "axis": [
+          -0.7071067811865475,
+          0,
+          0.7071067811865476
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "grenade/fin 2": {
+        "turn": {
+         "axis": [
+          -0.7071067811865476,
+          0,
+          -0.7071067811865475
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "grenade/fin 3": {
+        "turn": {
+         "axis": [
+          0.7071067811865475,
+          0,
+          -0.7071067811865477
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "grenade/fin 4": {
+        "turn": {
+         "axis": [
+          0.7071067811865477,
+          0,
+          0.7071067811865474
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7 reload"
+     },
+     "reload_empty": {
+      "about": "A fresh grenade pushed into the empty tube and turned onto its notch, the hammer cocked.",
+      "how": "Loading an empty launcher.",
+      "start": "off",
+      "loop": false,
+      "seconds": 3,
+      "tracks": {
+       "hammer/hammer": {
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           2.3,
+           0
+          ],
+          [
+           2.4499999999999997,
+           30
+          ],
+          [
+           3,
+           30
+          ]
+         ]
+        }
+       },
+       "grenade/grenade": {
+        "path": {
+         "keys": [
+          [
+           0,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0.8995000000000001,
+           [
+            0,
+            0.539,
+            -0.05
+           ]
+          ],
+          [
+           0.9,
+           [
+            0,
+            0.539,
+            -0.05
+           ]
+          ],
+          [
+           1.15,
+           [
+            0,
+            0.519,
+            0
+           ]
+          ],
+          [
+           1.7,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           3,
+           [
+            0,
+            0,
+            0
+           ]
+          ]
+         ]
+        },
+        "turn": {
+         "axis": [
+          0,
+          1,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.8995000000000001,
+           0
+          ],
+          [
+           0.9,
+           -18
+          ],
+          [
+           1.7,
+           -18
+          ],
+          [
+           1.95,
+           0
+          ],
+          [
+           3,
+           0
+          ]
+         ]
+        },
+        "scale": {
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.8995000000000001,
+           0
+          ],
+          [
+           0.9,
+           1
+          ],
+          [
+           3,
+           1
+          ]
+         ]
+        }
+       },
+       "grenade/fin 1": {
+        "turn": {
+         "axis": [
+          -0.7071067811865475,
+          0,
+          0.7071067811865476
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "grenade/fin 2": {
+        "turn": {
+         "axis": [
+          -0.7071067811865476,
+          0,
+          -0.7071067811865475
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "grenade/fin 3": {
+        "turn": {
+         "axis": [
+          0.7071067811865475,
+          0,
+          -0.7071067811865477
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "grenade/fin 4": {
+        "turn": {
+         "axis": [
+          0.7071067811865477,
+          0,
+          0.7071067811865474
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7 reload_empty"
+     },
+     "cock": {
+      "about": "The hammer thumbed back.",
+      "how": "Readying the launcher.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.4,
+      "tracks": {
+       "hammer/hammer": {
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.15,
+           30
+          ],
+          [
+           0.4,
+           30
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7 cock"
+     },
+     "inspect": {
+      "about": "The rear sight's range slide run up its leaf and back.",
+      "how": "Setting the range.",
+      "start": "off",
+      "loop": false,
+      "seconds": 1.6,
+      "tracks": {
+       "rear sight/slide": {
+        "slide": {
+         "way": [
+          0,
+          0,
+          1
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.4,
+           0
+          ],
+          [
+           0.8,
+           0.018
+          ],
+          [
+           1.1,
+           0.018
+          ],
+          [
+           1.45,
+           0
+          ],
+          [
+           1.6,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7 inspect"
+     },
+     "draw": {
+      "about": "The safety pushed through to fire.",
+      "how": "Bringing the launcher up.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.6,
+      "tracks": {
+       "safety/safety": {
+        "slide": {
+         "way": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0.003
+          ],
+          [
+           0.38,
+           0.003
+          ],
+          [
+           0.44,
+           0
+          ],
+          [
+           0.6,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7 draw"
+     },
+     "holster": {
+      "about": "The safety pushed back through to safe.",
+      "how": "Putting the launcher down.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.6,
+      "tracks": {
+       "safety/safety": {
+        "slide": {
+         "way": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.1,
+           0
+          ],
+          [
+           0.16,
+           0.003
+          ],
+          [
+           0.6,
+           0.003
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7 holster"
+     },
+     "safety_on": {
+      "about": "The safety pushed through to the right, safe.",
+      "how": "The safety key.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.12,
+      "tracks": {
+       "safety/safety": {
+        "slide": {
+         "way": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.08,
+           0.003
+          ],
+          [
+           0.12,
+           0.003
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7 safety_on"
+     },
+     "safety_off": {
+      "about": "The safety pushed through to the left, to fire.",
+      "how": "The safety key.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.12,
+      "tracks": {
+       "safety/safety": {
+        "slide": {
+         "way": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0.003
+          ],
+          [
+           0.08,
+           0
+          ],
+          [
+           0.12,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7 safety_off"
+     },
+     "sight_up": {
+      "about": "The rear sight's leaf raised to stand.",
+      "how": "Raising the sight to aim.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.35,
+      "tracks": {
+       "rear sight/leaf": {
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           -90
+          ],
+          [
+           0.25,
+           0
+          ],
+          [
+           0.35,
+           0
+          ]
+         ]
+        },
+        "slide": {
+         "way": [
+          0,
+          0,
+          1
+         ],
+         "keys": [
+          [
+           0,
+           0.0158
+          ],
+          [
+           0.25,
+           0
+          ],
+          [
+           0.35,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7 sight_up"
+     },
+     "sight_down": {
+      "about": "The rear sight's leaf folded forward flat.",
+      "how": "Folding the sight for carrying.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.35,
+      "tracks": {
+       "rear sight/leaf": {
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.25,
+           -90
+          ],
+          [
+           0.35,
+           -90
+          ]
+         ]
+        },
+        "slide": {
+         "way": [
+          0,
+          0,
+          1
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.25,
+           0.0158
+          ],
+          [
+           0.35,
+           0.0158
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7 sight_down"
+     },
+     "count 0": {
+      "about": "The tube empty.",
+      "how": "After each shot.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.012,
+      "tracks": {
+       "grenade/grenade": {
+        "scale": {
+         "keys": [
+          [
+           0,
+           1
+          ],
+          [
+           0.0005,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "grenade/fin 1": {
+        "turn": {
+         "axis": [
+          -0.7071067811865475,
+          0,
+          0.7071067811865476
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "grenade/fin 2": {
+        "turn": {
+         "axis": [
+          -0.7071067811865476,
+          0,
+          -0.7071067811865475
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "grenade/fin 3": {
+        "turn": {
+         "axis": [
+          0.7071067811865475,
+          0,
+          -0.7071067811865477
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "grenade/fin 4": {
+        "turn": {
+         "axis": [
+          0.7071067811865477,
+          0,
+          0.7071067811865474
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7 count 0"
+     },
+     "count 1": {
+      "about": "A grenade in the tube.",
+      "how": "After each reload.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.012,
+      "tracks": {
+       "grenade/grenade": {
+        "scale": {
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.0005,
+           1
+          ],
+          [
+           0.012,
+           1
+          ]
+         ]
+        }
+       },
+       "grenade/fin 1": {
+        "turn": {
+         "axis": [
+          -0.7071067811865475,
+          0,
+          0.7071067811865476
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "grenade/fin 2": {
+        "turn": {
+         "axis": [
+          -0.7071067811865476,
+          0,
+          -0.7071067811865475
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "grenade/fin 3": {
+        "turn": {
+         "axis": [
+          0.7071067811865475,
+          0,
+          -0.7071067811865477
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "grenade/fin 4": {
+        "turn": {
+         "axis": [
+          0.7071067811865477,
+          0,
+          0.7071067811865474
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7 count 1"
+     }
+    }
+   },
+   {
+    "thing": "rpg7/trigger",
+    "kind": "modern/firearms/launchers/rpg7/trigger",
+    "row": 4,
+    "clips": {
+     "fire": {
+      "about": "The trigger pressed back about its block until the sear lets the hammer go, and let forward.",
+      "how": "Each shot: the player's finger.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.6,
+      "tracks": {
+       "trigger": {
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.01,
+           -12
+          ],
+          [
+           0.2,
+           -12
+          ],
+          [
+           0.26,
+           0
+          ],
+          [
+           0.6,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/trigger fire"
+     }
+    }
+   },
+   {
+    "thing": "rpg7/hammer",
+    "kind": "modern/firearms/launchers/rpg7/hammer",
+    "row": 5,
+    "clips": {
+     "fire": {
+      "about": "Cocked, let go by the sear and swinging up onto the firing pin.",
+      "how": "Each shot.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.6,
+      "tracks": {
+       "hammer": {
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           30
+          ],
+          [
+           0.01,
+           30
+          ],
+          [
+           0.016,
+           -1.5
+          ],
+          [
+           0.022,
+           0
+          ],
+          [
+           0.6,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/hammer fire"
+     },
+     "reload": {
+      "about": "Down while the grenades are changed, then thumbed back to cock.",
+      "how": "Reloading.",
+      "start": "off",
+      "loop": false,
+      "seconds": 3,
+      "tracks": {
+       "hammer": {
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           2.3,
+           0
+          ],
+          [
+           2.4499999999999997,
+           30
+          ],
+          [
+           3,
+           30
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/hammer reload"
+     },
+     "reload_empty": {
+      "about": "Down while a grenade is pushed in, then thumbed back to cock.",
+      "how": "Loading an empty launcher.",
+      "start": "off",
+      "loop": false,
+      "seconds": 3,
+      "tracks": {
+       "hammer": {
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           2.3,
+           0
+          ],
+          [
+           2.4499999999999997,
+           30
+          ],
+          [
+           3,
+           30
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/hammer reload_empty"
+     },
+     "cock": {
+      "about": "Thumbed back to cock.",
+      "how": "Readying the launcher.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.4,
+      "tracks": {
+       "hammer": {
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.15,
+           30
+          ],
+          [
+           0.4,
+           30
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/hammer cock"
+     }
+    }
+   },
+   {
+    "thing": "rpg7/safety",
+    "kind": "modern/firearms/launchers/rpg7/safety",
+    "row": 6,
+    "clips": {
+     "draw": {
+      "about": "On safe as the launcher comes up, pushed through to the left to fire.",
+      "how": "Bringing the launcher up.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.6,
+      "tracks": {
+       "safety": {
+        "slide": {
+         "way": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0.003
+          ],
+          [
+           0.38,
+           0.003
+          ],
+          [
+           0.44,
+           0
+          ],
+          [
+           0.6,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/safety draw"
+     },
+     "holster": {
+      "about": "Pushed back through to the right, safe, before the launcher is put down.",
+      "how": "Putting the launcher down.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.6,
+      "tracks": {
+       "safety": {
+        "slide": {
+         "way": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.1,
+           0
+          ],
+          [
+           0.16,
+           0.003
+          ],
+          [
+           0.6,
+           0.003
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/safety holster"
+     },
+     "safety_on": {
+      "about": "Pushed through to the right: the trigger blocked.",
+      "how": "The safety key.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.12,
+      "tracks": {
+       "safety": {
+        "slide": {
+         "way": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.08,
+           0.003
+          ],
+          [
+           0.12,
+           0.003
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/safety safety_on"
+     },
+     "safety_off": {
+      "about": "Pushed through to the left: ready to fire.",
+      "how": "The safety key.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.12,
+      "tracks": {
+       "safety": {
+        "slide": {
+         "way": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0.003
+          ],
+          [
+           0.08,
+           0
+          ],
+          [
+           0.12,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/safety safety_off"
+     }
+    }
+   },
+   {
+    "thing": "rpg7/rear sight",
+    "kind": "modern/firearms/launchers/rpg7/rear_sight",
+    "row": 8,
+    "clips": {
+     "sight_down": {
+      "about": "The leaf folded forward flat onto its base.",
+      "how": "Folding the sight for carrying.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.35,
+      "tracks": {
+       "leaf": {
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.25,
+           -90
+          ],
+          [
+           0.35,
+           -90
+          ]
+         ]
+        },
+        "slide": {
+         "way": [
+          0,
+          0,
+          1
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.25,
+           0.0158
+          ],
+          [
+           0.35,
+           0.0158
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/rear sight sight_down"
+     },
+     "sight_up": {
+      "about": "The leaf raised from flat to stand.",
+      "how": "Raising the sight to aim.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.35,
+      "tracks": {
+       "leaf": {
+        "turn": {
+         "axis": [
+          1,
+          0,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           -90
+          ],
+          [
+           0.25,
+           0
+          ],
+          [
+           0.35,
+           0
+          ]
+         ]
+        },
+        "slide": {
+         "way": [
+          0,
+          0,
+          1
+         ],
+         "keys": [
+          [
+           0,
+           0.0158
+          ],
+          [
+           0.25,
+           0
+          ],
+          [
+           0.35,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/rear sight sight_up"
+     },
+     "inspect": {
+      "about": "The range slide run up the leaf and back down.",
+      "how": "Setting the range.",
+      "start": "off",
+      "loop": false,
+      "seconds": 1.6,
+      "tracks": {
+       "slide": {
+        "slide": {
+         "way": [
+          0,
+          0,
+          1
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.4,
+           0
+          ],
+          [
+           0.8,
+           0.018
+          ],
+          [
+           1.1,
+           0.018
+          ],
+          [
+           1.45,
+           0
+          ],
+          [
+           1.6,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/rear sight inspect"
+     }
+    }
+   },
+   {
+    "thing": "rpg7/grenade",
+    "kind": "modern/firearms/launchers/rpg7/grenade",
+    "row": 9,
+    "clips": {
+     "fire": {
+      "about": "Lit by the booster: driven out of the muzzle along the bore, its fins springing open as it leaves, then handed to the game's physics at 115 m/s.",
+      "how": "Each shot.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.6,
+      "tracks": {
+       "grenade": {
+        "slide": {
+         "way": [
+          0,
+          1,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.018,
+           0
+          ],
+          [
+           0.02225,
+           0.11975000000000001
+          ],
+          [
+           0.0265,
+           0.47900000000000004
+          ],
+          [
+           0.0315,
+           1.054
+          ],
+          [
+           0.0365,
+           1.629
+          ],
+          [
+           0.0415,
+           2.204
+          ],
+          [
+           0.0465,
+           2.7790000000000004
+          ],
+          [
+           0.05,
+           3.1815000000000007
+          ],
+          [
+           0.6,
+           3.1815000000000007
+          ]
+         ]
+        },
+        "scale": {
+         "keys": [
+          [
+           0,
+           1
+          ],
+          [
+           0.05,
+           1
+          ],
+          [
+           0.0505,
+           0
+          ],
+          [
+           0.6,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 1": {
+        "turn": {
+         "axis": [
+          -0.7071067811865475,
+          0,
+          0.7071067811865476
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.03,
+           0
+          ],
+          [
+           0.045,
+           80
+          ],
+          [
+           0.6,
+           80
+          ]
+         ]
+        }
+       },
+       "fin 2": {
+        "turn": {
+         "axis": [
+          -0.7071067811865476,
+          0,
+          -0.7071067811865475
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.03,
+           0
+          ],
+          [
+           0.045,
+           80
+          ],
+          [
+           0.6,
+           80
+          ]
+         ]
+        }
+       },
+       "fin 3": {
+        "turn": {
+         "axis": [
+          0.7071067811865475,
+          0,
+          -0.7071067811865477
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.03,
+           0
+          ],
+          [
+           0.045,
+           80
+          ],
+          [
+           0.6,
+           80
+          ]
+         ]
+        }
+       },
+       "fin 4": {
+        "turn": {
+         "axis": [
+          0.7071067811865477,
+          0,
+          0.7071067811865474
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.03,
+           0
+          ],
+          [
+           0.045,
+           80
+          ],
+          [
+           0.6,
+           80
+          ]
+         ]
+        }
+       }
+      },
+      "release": {
+       "seconds": 0.05,
+       "at": [
+        0,
+        3.1815000000000007,
+        0
+       ],
+       "speed": [
+        0,
+        115,
+        0
+       ]
+      },
+      "animation": "rpg7/grenade fire"
+     },
+     "reload": {
+      "about": "The loaded grenade turned off its notch, drawn out of the muzzle and put away; a fresh one pushed in from ahead of the muzzle and turned onto its notch.",
+      "how": "Reloading.",
+      "start": "off",
+      "loop": false,
+      "seconds": 3,
+      "tracks": {
+       "grenade": {
+        "path": {
+         "keys": [
+          [
+           0,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0.25,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0.7,
+           [
+            0,
+            0.539,
+            0
+           ]
+          ],
+          [
+           0.85,
+           [
+            0,
+            0.539,
+            -0.05
+           ]
+          ],
+          [
+           0.8995000000000001,
+           [
+            0,
+            0.539,
+            -0.05
+           ]
+          ],
+          [
+           0.9,
+           [
+            0,
+            0.539,
+            -0.05
+           ]
+          ],
+          [
+           1.15,
+           [
+            0,
+            0.519,
+            0
+           ]
+          ],
+          [
+           1.7,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           3,
+           [
+            0,
+            0,
+            0
+           ]
+          ]
+         ]
+        },
+        "turn": {
+         "axis": [
+          0,
+          1,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.1,
+           0
+          ],
+          [
+           0.25,
+           -18
+          ],
+          [
+           0.8995000000000001,
+           -18
+          ],
+          [
+           0.9,
+           -18
+          ],
+          [
+           1.7,
+           -18
+          ],
+          [
+           1.95,
+           0
+          ],
+          [
+           3,
+           0
+          ]
+         ]
+        },
+        "scale": {
+         "keys": [
+          [
+           0,
+           1
+          ],
+          [
+           0.85,
+           1
+          ],
+          [
+           0.8505,
+           0
+          ],
+          [
+           0.8995000000000001,
+           0
+          ],
+          [
+           0.9,
+           1
+          ],
+          [
+           3,
+           1
+          ]
+         ]
+        }
+       },
+       "fin 1": {
+        "turn": {
+         "axis": [
+          -0.7071067811865475,
+          0,
+          0.7071067811865476
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 2": {
+        "turn": {
+         "axis": [
+          -0.7071067811865476,
+          0,
+          -0.7071067811865475
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 3": {
+        "turn": {
+         "axis": [
+          0.7071067811865475,
+          0,
+          -0.7071067811865477
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 4": {
+        "turn": {
+         "axis": [
+          0.7071067811865477,
+          0,
+          0.7071067811865474
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/grenade reload"
+     },
+     "reload_empty": {
+      "about": "A fresh grenade pushed into the empty tube from ahead of the muzzle and turned onto its notch.",
+      "how": "Loading an empty launcher.",
+      "start": "off",
+      "loop": false,
+      "seconds": 3,
+      "tracks": {
+       "grenade": {
+        "path": {
+         "keys": [
+          [
+           0,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0.8995000000000001,
+           [
+            0,
+            0.539,
+            -0.05
+           ]
+          ],
+          [
+           0.9,
+           [
+            0,
+            0.539,
+            -0.05
+           ]
+          ],
+          [
+           1.15,
+           [
+            0,
+            0.519,
+            0
+           ]
+          ],
+          [
+           1.7,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           3,
+           [
+            0,
+            0,
+            0
+           ]
+          ]
+         ]
+        },
+        "turn": {
+         "axis": [
+          0,
+          1,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.8995000000000001,
+           0
+          ],
+          [
+           0.9,
+           -18
+          ],
+          [
+           1.7,
+           -18
+          ],
+          [
+           1.95,
+           0
+          ],
+          [
+           3,
+           0
+          ]
+         ]
+        },
+        "scale": {
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.8995000000000001,
+           0
+          ],
+          [
+           0.9,
+           1
+          ],
+          [
+           3,
+           1
+          ]
+         ]
+        }
+       },
+       "fin 1": {
+        "turn": {
+         "axis": [
+          -0.7071067811865475,
+          0,
+          0.7071067811865476
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 2": {
+        "turn": {
+         "axis": [
+          -0.7071067811865476,
+          0,
+          -0.7071067811865475
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 3": {
+        "turn": {
+         "axis": [
+          0.7071067811865475,
+          0,
+          -0.7071067811865477
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 4": {
+        "turn": {
+         "axis": [
+          0.7071067811865477,
+          0,
+          0.7071067811865474
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/grenade reload_empty"
+     },
+     "count 0": {
+      "about": "No grenade in the tube.",
+      "how": "Its launcher plays the count after each shot and reload.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.012,
+      "tracks": {
+       "grenade": {
+        "scale": {
+         "keys": [
+          [
+           0,
+           1
+          ],
+          [
+           0.0005,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 1": {
+        "turn": {
+         "axis": [
+          -0.7071067811865475,
+          0,
+          0.7071067811865476
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 2": {
+        "turn": {
+         "axis": [
+          -0.7071067811865476,
+          0,
+          -0.7071067811865475
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 3": {
+        "turn": {
+         "axis": [
+          0.7071067811865475,
+          0,
+          -0.7071067811865477
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 4": {
+        "turn": {
+         "axis": [
+          0.7071067811865477,
+          0,
+          0.7071067811865474
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/grenade count 0"
+     },
+     "count 1": {
+      "about": "A grenade in the tube, its fins folded.",
+      "how": "Its launcher plays the count after each shot and reload.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.012,
+      "tracks": {
+       "grenade": {
+        "scale": {
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.0005,
+           1
+          ],
+          [
+           0.012,
+           1
+          ]
+         ]
+        }
+       },
+       "fin 1": {
+        "turn": {
+         "axis": [
+          -0.7071067811865475,
+          0,
+          0.7071067811865476
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 2": {
+        "turn": {
+         "axis": [
+          -0.7071067811865476,
+          0,
+          -0.7071067811865475
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 3": {
+        "turn": {
+         "axis": [
+          0.7071067811865475,
+          0,
+          -0.7071067811865477
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 4": {
+        "turn": {
+         "axis": [
+          0.7071067811865477,
+          0,
+          0.7071067811865474
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "rpg7/grenade count 1"
+     }
+    }
+   }
+  ],
+  "joints": []
+ },
+ "spawns": [],
+ "grows": [],
+ "wears": [],
+ "guns": {
+  "about": "The RPG-7V as a gun a game fires (core's guns3d, through item3d's sidecar): its words for each stage it brings, its points and where a hand takes each part in each clip. Every point is in the kit's frame (x the launcher's right, y toward the muzzle, z up, metres, the launcher's zero as rpg7.py's header says), on the bone whose name ends with `bone` when a part carries it, else on the launcher itself; `turn` is degrees about the item's own x, y and z (y up, the muzzle toward -z) of the hand that takes it. Each clip of `hands` gives each hand that moves in it a list of [seconds, point]: the hand on that point at that moment, moving straight from each to the next; `rest` is where each hand is when no clip of `hands` plays. `left hand` and `right hand` are the empties a body's hands reach for, which guns3d moves along `hands` every frame; they stand where `rest` puts them as the gun is made.",
+  "words": {
+   "trigger": {
+    "select": {
+     "modes": [
+      "single"
+     ],
+     "clips": {
+      "single": "safety_off"
+     }
+    }
+   },
+   "feed": {
+    "tube": {
+     "size": 1
+    }
+   },
+   "flight": {
+    "volley": {
+     "speed": 115,
+     "max": 295,
+     "range": 500
+    }
+   }
+  },
+  "sources": {
+   "size": "one PG-7V loaded at the muzzle at a time (rpg7.py: the grenade in the muzzle)",
+   "speed": "the PG-7V's published muzzle velocity, 115 m/s (__init__.py SPEED)",
+   "max": "the PG-7V's published top speed once its sustainer motor has burnt, 295 m/s",
+   "range": "the RPG-7V's published effective range against a still target with the PG-7V, 500 m"
+  },
+  "points": {
+   "muzzle": {
+    "at": [
+     0,
+     0.95,
+     0.165417
+    ]
+   },
+   "venturi": {
+    "at": [
+     0,
+     0,
+     0.165417
+    ]
+   },
+   "sight": {
+    "at": [
+     -0.0312,
+     0.586,
+     0.2332
+    ]
+   },
+   "stock": {
+    "at": [
+     0,
+     0.3,
+     0.135
+    ]
+   },
+   "grip": {
+    "at": [
+     0,
+     0.725,
+     0.04
+    ],
+    "turn": [
+     0,
+     0,
+     90
+    ]
+   },
+   "support": {
+    "at": [
+     0,
+     0.6,
+     0.08
+    ],
+    "turn": [
+     0,
+     0,
+     90
+    ]
+   },
+   "grenade": {
+    "at": [
+     0,
+     0.7,
+     0.165417
+    ],
+    "bone": "grenade grenade",
+    "turn": [
+     0,
+     90,
+     -90
+    ]
+   },
+   "hammer": {
+    "at": [
+     0,
+     0.7,
+     0.105
+    ],
+    "bone": "hammer hammer",
+    "turn": [
+     0,
+     90,
+     -90
+    ]
+   },
+   "left hand": {
+    "at": [
+     0,
+     0.6,
+     0.08
+    ]
+   },
+   "right hand": {
+    "at": [
+     0,
+     0.725,
+     0.04
+    ]
+   }
+  },
+  "hands": {
+   "rest": {
+    "left": [
+     [
+      0,
+      "support"
+     ]
+    ],
+    "right": [
+     [
+      0,
+      "grip"
+     ]
+    ]
+   },
+   "reload": {
+    "left": [
+     [
+      0,
+      "support"
+     ],
+     [
+      0.1,
+      "grenade"
+     ],
+     [
+      0.85,
+      "grenade"
+     ],
+     [
+      0.9,
+      "grenade"
+     ],
+     [
+      1.95,
+      "grenade"
+     ],
+     [
+      2.2,
+      "support"
+     ]
+    ],
+    "right": [
+     [
+      0,
+      "grip"
+     ],
+     [
+      2.25,
+      "grip"
+     ],
+     [
+      2.3,
+      "hammer"
+     ],
+     [
+      2.45,
+      "hammer"
+     ],
+     [
+      2.6,
+      "grip"
+     ]
+    ]
+   },
+   "reload_empty": {
+    "left": [
+     [
+      0,
+      "support"
+     ],
+     [
+      0.8,
+      "grenade"
+     ],
+     [
+      0.9,
+      "grenade"
+     ],
+     [
+      1.95,
+      "grenade"
+     ],
+     [
+      2.2,
+      "support"
+     ]
+    ],
+    "right": [
+     [
+      0,
+      "grip"
+     ],
+     [
+      2.25,
+      "grip"
+     ],
+     [
+      2.3,
+      "hammer"
+     ],
+     [
+      2.45,
+      "hammer"
+     ],
+     [
+      2.6,
+      "grip"
+     ]
+    ]
+   },
+   "cock": {
+    "right": [
+     [
+      0,
+      "grip"
+     ],
+     [
+      0.05,
+      "hammer"
+     ],
+     [
+      0.2,
+      "hammer"
+     ],
+     [
+      0.35,
+      "grip"
+     ]
+    ]
+   }
+  }
+ }
+}

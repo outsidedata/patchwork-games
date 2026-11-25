@@ -75,9 +75,79 @@
           "url": "/games/demo_guns3d/assets/items/mag556.item.json",
           "preload": true
         },
+        "rpg7-glb": {
+          "type": "binary",
+          "url": "/games/demo_guns3d/assets/items/rpg7.glb",
+          "preload": true
+        },
+        "rpg7-item": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/items/rpg7.item.json",
+          "preload": true
+        },
+        "pg7v-glb": {
+          "type": "binary",
+          "url": "/games/demo_guns3d/assets/items/pg7v.glb",
+          "preload": true
+        },
+        "pg7v-item": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/items/pg7v.item.json",
+          "preload": true
+        },
+        "volleys": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/volleys.json",
+          "preload": true
+        },
         "guns": {
           "type": "json",
           "url": "/games/demo_guns3d/assets/demo_guns3d.guns.json",
+          "preload": true
+        },
+        "move-launcher-ready": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/launcher-ready.move.json",
+          "preload": true
+        },
+        "move-launcher-low": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/launcher-low.move.json",
+          "preload": true
+        },
+        "move-launcher-aim": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/launcher-aim.move.json",
+          "preload": true
+        },
+        "move-launcher-sprint": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/launcher-sprint.move.json",
+          "preload": true
+        },
+        "move-launcher-shot": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/launcher-shot.move.json",
+          "preload": true
+        },
+        "move-launcher-reload": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/launcher-reload.move.json",
+          "preload": true
+        },
+        "move-launcher-inspect": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/launcher-inspect.move.json",
+          "preload": true
+        },
+        "move-launcher-cock": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/launcher-cock.move.json",
+          "preload": true
+        },
+        "move-launcher-check": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/launcher-check.move.json",
           "preload": true
         },
         "move-rifle-ready": {
@@ -180,6 +250,14 @@
         "mag556": {
           "glb": "mag556-glb",
           "file": "mag556-item"
+        },
+        "rpg7": {
+          "glb": "rpg7-glb",
+          "file": "rpg7-item"
+        },
+        "pg7v": {
+          "glb": "pg7v-glb",
+          "file": "pg7v-item"
         }
       }
     },
@@ -265,16 +343,25 @@
     },
     "guns3d": {
       "sheet": "guns",
-      "hold": 0.5,
+      "hold": 0.6,
       "mods": {
         "holder": "anim",
         "body": "anim",
         "behaviors": [
           "guns3d",
           "hitscan3d",
+          "volley3d",
           "chasecamera3d",
           "particle3d"
         ]
+      }
+    },
+    "volley3d": {
+      "patterns": "volleys",
+      "hold": 0.5,
+      "mods": {
+        "shoot": "hitscan3d",
+        "bodies": "hitscan3d"
       }
     },
     "chasecamera3d": {
@@ -366,7 +453,7 @@
           ],
           "size": [
             300,
-            330
+            352
           ]
         },
         "ammo": {
@@ -443,6 +530,7 @@
     "anim",
     "guns3d",
     "ik3d",
+    "volley3d",
     "particle3d",
     "environment3d",
     "render3d",
@@ -527,6 +615,10 @@
       "next": 1,
       "live": []
     },
+    "volley3d": {
+      "next": 1,
+      "live": []
+    },
     "start": {
       "slot": 0,
       "pos": [
@@ -604,6 +696,9 @@
     },
     {
       "is": "particle3d"
+    },
+    {
+      "is": "volley3d"
     },
     {
       "is": "start",

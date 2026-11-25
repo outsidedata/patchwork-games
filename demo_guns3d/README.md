@@ -6,6 +6,14 @@ view, flashes and lights the ground, throws its spent case from the port onto th
 X Bot carries the gun ready, aimed, lowered or run with, and reloads by hand: the left hand takes the magazine out,
 drops it, fetches a fresh one from the pouch on its chest, seats it and goes back to the handguard.
 
+Q swaps to the RPG-7 (`modern/firearms/launchers/rpg7/rpg7`), carried on top of the right shoulder. Its tube holds one
+PG-7V (guns3d's `tube` feed). The trigger plays the kit's own fire clip, which drives the grenade up the tube and
+releases it; at that moment the grenade is handed to volley3d (its `volley` flight word), which flies it, drawn as the
+PG-7V item with a smoke trail, to what the reticle covers, where it bursts and knocks over every plate near it. The
+backblast blows out of the venturi. R reloads: the launcher comes off the shoulder, the left hand takes the fresh
+grenade in front of the muzzle and rides it in as the kit's reload clip pushes it home, and the right thumb cocks the
+hammer.
+
 - **The sheet**, `assets/demo_guns3d.guns.json` (`world.guns3d.sheet`), is everything about the gun and who holds
   it: the G95's item, damage, words (the `select` trigger and its modes, the `cycle` at 850 rounds a minute, the
   30-round `magazine`, the `eye` aim, the `cone` spread, the `hitscan` flight, the `kick`), its look (flash, smoke,
@@ -15,7 +23,8 @@ drops it, fetches a fresh one from the pouch on its chest, seats it and goes bac
 - **The moves**, `assets/moves/*.move.json`, each one thing done with the gun, as cues for each hand, its fingers,
   the gun, the body, the gun's own clips and its parts: the carries `ready`, `aim`, `low` and `sprint`; the shots
   `shot` and `shot last`; and the acts `reload`, `reload empty`, `select semi`, `select auto`, `inspect`, `charge`
-  and `check`. The same moves are kept in the library (`$PATCHWORK_LIBRARY/guns3d/moves/`).
+  and `check`; and the RPG-7's, `launcher-*`. The same moves are kept in the library
+  (`$PATCHWORK_LIBRARY/guns3d/moves/`).
 - **The body** is the player's `player` row, an X Bot walked by walker and drawn by anim with the Rifle 8-Way
   Locomotion Pack's clips (`assets/xbot.rig.json`). guns3d puts the gun at its shoulder and its hands where the moves
   say, and ik3d bends its arms there (`world.ik3d.mods.limbs: "guns3d"`).
@@ -26,7 +35,7 @@ drops it, fetches a fresh one from the pouch on its chest, seats it and goes bac
 
 Click the game to take the mouse. W A S D walk, Shift runs, the mouse looks, the left button fires, the right button
 aims down the gun, R reloads, B turns the selector between semi and auto, L lowers or raises the gun, I inspects, C
-charges, V checks the magazine, Space jumps.
+charges (the RPG-7 cocks its hammer), V checks the load, Q swaps between the G95 and the RPG-7, Space jumps.
 
 ## Files
 
@@ -36,11 +45,14 @@ charges, V checks the magazine, Space jumps.
   (`yarn workshop guns3d demo_guns3d`).
 - `assets/demo_guns3d.json`: the player's definition: its speeds, camera, keys, the carries it holds the gun in and
   the acts its keys play.
-- `assets/demo_guns3d.items.json`: the items sheet: the G95, the spent 5.56 case its port throws and the magazine a
-  reload drops.
+- `assets/demo_guns3d.items.json`: the items sheet: the G95, the spent 5.56 case its port throws, the magazine a
+  reload drops, the RPG-7 and the PG-7V a flying grenade is drawn as.
+- `assets/volleys.json`: volley3d's patterns: the PG-7V's speed, its sustainer's climb to 295 m/s, its fall, its
+  splash and its look (`world.volley3d`).
 - `assets/demo_guns3d.bake.ts`: the bake (`yarn bake demo_guns3d`): the X Bot and its clips, the items, and the
   scene's one looks file.
-- `assets/effects.json`: the flash, the smoke, the tracer, the impacts, the case and the dropped magazine.
+- `assets/effects.json`: the flash, the smoke, the tracer, the impacts, the case and the dropped magazine; the
+  RPG-7's launch flash and smoke, its backblast, the flying grenade, its trail and its burst.
 - `plugins/range/`: the plates.
 
 ## Pages

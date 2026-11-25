@@ -1,0 +1,23 @@
+{
+  "length": 0.8,
+  "loop": false,
+  "done": 0.8,
+  "fade": [0.1, 0.15],
+  "hands": {
+    "right": [
+      [0, { "gun": "grip" }, "linear"],
+      [0.2, { "gun": "hammer" }, "both"],
+      [0.4, { "gun": "hammer" }, "linear"],
+      [0.6, { "gun": "grip" }, "both"]
+    ]
+  },
+  "grips": {
+    "right": [
+      [0, "launcher trigger", "linear"],
+      [0.2, "thumb", "both"],
+      [0.4, "thumb", "linear"],
+      [0.6, "launcher trigger", "both"]
+    ]
+  },
+  "clips": [[0.2, "cock"]]
+}

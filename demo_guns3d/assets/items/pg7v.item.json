@@ -1,0 +1,864 @@
+{
+ "item": "pg7v",
+ "kind": "modern/firearms/launchers/rpg7/grenade",
+ "keys": {},
+ "materials": [
+  "ordnance_olive_enamel",
+  "ordnance_yellow_paint",
+  "ordnance_booster_paper",
+  "firearm_ak_enamel"
+ ],
+ "clips": {
+  "about": "Each kit thing that moves: its clips as its kind wrote them (what it is and how a player meets it, whether it plays at the start, whether it loops, its seconds). A clip of tracks is the glb's animation named in its `animation`, moving the bones of the kit mesh's skin. A clip of poses moves the parts it names: each pose a time and its morph target on the glb's kit mesh, null where the pose is the thing as it stands, each corner going in a straight line between two poses. Each joint is a bone a game may pose with no clip: `joint` its node among the skin's joints, `axis` in that node's own space, `range` the degrees from rest it may turn, and `couple` (where it has one) the joint whose turn drives it, `ratio` times over, as the thing's own linkage does.",
+  "things": [
+   {
+    "thing": "pg7v",
+    "kind": "modern/firearms/launchers/rpg7/grenade",
+    "row": 0,
+    "clips": {
+     "fire": {
+      "about": "Lit by the booster: driven out of the muzzle along the bore, its fins springing open as it leaves, then handed to the game's physics at 115 m/s.",
+      "how": "Each shot.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.6,
+      "tracks": {
+       "grenade": {
+        "slide": {
+         "way": [
+          0,
+          1,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.018,
+           0
+          ],
+          [
+           0.02225,
+           0.11975000000000001
+          ],
+          [
+           0.0265,
+           0.47900000000000004
+          ],
+          [
+           0.0315,
+           1.054
+          ],
+          [
+           0.0365,
+           1.629
+          ],
+          [
+           0.0415,
+           2.204
+          ],
+          [
+           0.0465,
+           2.7790000000000004
+          ],
+          [
+           0.05,
+           3.1815000000000007
+          ],
+          [
+           0.6,
+           3.1815000000000007
+          ]
+         ]
+        },
+        "scale": {
+         "keys": [
+          [
+           0,
+           1
+          ],
+          [
+           0.05,
+           1
+          ],
+          [
+           0.0505,
+           0
+          ],
+          [
+           0.6,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 1": {
+        "turn": {
+         "axis": [
+          -0.7071067811865475,
+          0,
+          0.7071067811865476
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.03,
+           0
+          ],
+          [
+           0.045,
+           80
+          ],
+          [
+           0.6,
+           80
+          ]
+         ]
+        }
+       },
+       "fin 2": {
+        "turn": {
+         "axis": [
+          -0.7071067811865476,
+          0,
+          -0.7071067811865475
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.03,
+           0
+          ],
+          [
+           0.045,
+           80
+          ],
+          [
+           0.6,
+           80
+          ]
+         ]
+        }
+       },
+       "fin 3": {
+        "turn": {
+         "axis": [
+          0.7071067811865475,
+          0,
+          -0.7071067811865477
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.03,
+           0
+          ],
+          [
+           0.045,
+           80
+          ],
+          [
+           0.6,
+           80
+          ]
+         ]
+        }
+       },
+       "fin 4": {
+        "turn": {
+         "axis": [
+          0.7071067811865477,
+          0,
+          0.7071067811865474
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.03,
+           0
+          ],
+          [
+           0.045,
+           80
+          ],
+          [
+           0.6,
+           80
+          ]
+         ]
+        }
+       }
+      },
+      "release": {
+       "seconds": 0.05,
+       "at": [
+        0,
+        3.1815000000000007,
+        0
+       ],
+       "speed": [
+        0,
+        115,
+        0
+       ]
+      },
+      "animation": "pg7v fire"
+     },
+     "reload": {
+      "about": "The loaded grenade turned off its notch, drawn out of the muzzle and put away; a fresh one pushed in from ahead of the muzzle and turned onto its notch.",
+      "how": "Reloading.",
+      "start": "off",
+      "loop": false,
+      "seconds": 3,
+      "tracks": {
+       "grenade": {
+        "path": {
+         "keys": [
+          [
+           0,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0.25,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0.7,
+           [
+            0,
+            0.539,
+            0
+           ]
+          ],
+          [
+           0.85,
+           [
+            0,
+            0.539,
+            -0.05
+           ]
+          ],
+          [
+           0.8995000000000001,
+           [
+            0,
+            0.539,
+            -0.05
+           ]
+          ],
+          [
+           0.9,
+           [
+            0,
+            0.539,
+            -0.05
+           ]
+          ],
+          [
+           1.15,
+           [
+            0,
+            0.519,
+            0
+           ]
+          ],
+          [
+           1.7,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           3,
+           [
+            0,
+            0,
+            0
+           ]
+          ]
+         ]
+        },
+        "turn": {
+         "axis": [
+          0,
+          1,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.1,
+           0
+          ],
+          [
+           0.25,
+           -18
+          ],
+          [
+           0.8995000000000001,
+           -18
+          ],
+          [
+           0.9,
+           -18
+          ],
+          [
+           1.7,
+           -18
+          ],
+          [
+           1.95,
+           0
+          ],
+          [
+           3,
+           0
+          ]
+         ]
+        },
+        "scale": {
+         "keys": [
+          [
+           0,
+           1
+          ],
+          [
+           0.85,
+           1
+          ],
+          [
+           0.8505,
+           0
+          ],
+          [
+           0.8995000000000001,
+           0
+          ],
+          [
+           0.9,
+           1
+          ],
+          [
+           3,
+           1
+          ]
+         ]
+        }
+       },
+       "fin 1": {
+        "turn": {
+         "axis": [
+          -0.7071067811865475,
+          0,
+          0.7071067811865476
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 2": {
+        "turn": {
+         "axis": [
+          -0.7071067811865476,
+          0,
+          -0.7071067811865475
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 3": {
+        "turn": {
+         "axis": [
+          0.7071067811865475,
+          0,
+          -0.7071067811865477
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 4": {
+        "turn": {
+         "axis": [
+          0.7071067811865477,
+          0,
+          0.7071067811865474
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "pg7v reload"
+     },
+     "reload_empty": {
+      "about": "A fresh grenade pushed into the empty tube from ahead of the muzzle and turned onto its notch.",
+      "how": "Loading an empty launcher.",
+      "start": "off",
+      "loop": false,
+      "seconds": 3,
+      "tracks": {
+       "grenade": {
+        "path": {
+         "keys": [
+          [
+           0,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           0.8995000000000001,
+           [
+            0,
+            0.539,
+            -0.05
+           ]
+          ],
+          [
+           0.9,
+           [
+            0,
+            0.539,
+            -0.05
+           ]
+          ],
+          [
+           1.15,
+           [
+            0,
+            0.519,
+            0
+           ]
+          ],
+          [
+           1.7,
+           [
+            0,
+            0,
+            0
+           ]
+          ],
+          [
+           3,
+           [
+            0,
+            0,
+            0
+           ]
+          ]
+         ]
+        },
+        "turn": {
+         "axis": [
+          0,
+          1,
+          0
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.8995000000000001,
+           0
+          ],
+          [
+           0.9,
+           -18
+          ],
+          [
+           1.7,
+           -18
+          ],
+          [
+           1.95,
+           0
+          ],
+          [
+           3,
+           0
+          ]
+         ]
+        },
+        "scale": {
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.8995000000000001,
+           0
+          ],
+          [
+           0.9,
+           1
+          ],
+          [
+           3,
+           1
+          ]
+         ]
+        }
+       },
+       "fin 1": {
+        "turn": {
+         "axis": [
+          -0.7071067811865475,
+          0,
+          0.7071067811865476
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 2": {
+        "turn": {
+         "axis": [
+          -0.7071067811865476,
+          0,
+          -0.7071067811865475
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 3": {
+        "turn": {
+         "axis": [
+          0.7071067811865475,
+          0,
+          -0.7071067811865477
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 4": {
+        "turn": {
+         "axis": [
+          0.7071067811865477,
+          0,
+          0.7071067811865474
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "pg7v reload_empty"
+     },
+     "count 0": {
+      "about": "No grenade in the tube.",
+      "how": "Its launcher plays the count after each shot and reload.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.012,
+      "tracks": {
+       "grenade": {
+        "scale": {
+         "keys": [
+          [
+           0,
+           1
+          ],
+          [
+           0.0005,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 1": {
+        "turn": {
+         "axis": [
+          -0.7071067811865475,
+          0,
+          0.7071067811865476
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 2": {
+        "turn": {
+         "axis": [
+          -0.7071067811865476,
+          0,
+          -0.7071067811865475
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 3": {
+        "turn": {
+         "axis": [
+          0.7071067811865475,
+          0,
+          -0.7071067811865477
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 4": {
+        "turn": {
+         "axis": [
+          0.7071067811865477,
+          0,
+          0.7071067811865474
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "pg7v count 0"
+     },
+     "count 1": {
+      "about": "A grenade in the tube, its fins folded.",
+      "how": "Its launcher plays the count after each shot and reload.",
+      "start": "off",
+      "loop": false,
+      "seconds": 0.012,
+      "tracks": {
+       "grenade": {
+        "scale": {
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.0005,
+           1
+          ],
+          [
+           0.012,
+           1
+          ]
+         ]
+        }
+       },
+       "fin 1": {
+        "turn": {
+         "axis": [
+          -0.7071067811865475,
+          0,
+          0.7071067811865476
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 2": {
+        "turn": {
+         "axis": [
+          -0.7071067811865476,
+          0,
+          -0.7071067811865475
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 3": {
+        "turn": {
+         "axis": [
+          0.7071067811865475,
+          0,
+          -0.7071067811865477
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       },
+       "fin 4": {
+        "turn": {
+         "axis": [
+          0.7071067811865477,
+          0,
+          0.7071067811865474
+         ],
+         "keys": [
+          [
+           0,
+           0
+          ],
+          [
+           0.012,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "animation": "pg7v count 1"
+     }
+    }
+   }
+  ],
+  "joints": []
+ },
+ "spawns": [],
+ "grows": [],
+ "wears": [],
+ "guns": null
+}

@@ -12,6 +12,12 @@
   },
   "mag556": {
    "kind": "modern/firearms/rifles/g95/magazine"
+  },
+  "rpg7": {
+   "kind": "modern/firearms/launchers/rpg7/rpg7"
+  },
+  "pg7v": {
+   "kind": "modern/firearms/launchers/rpg7/grenade"
   }
  }
 }
