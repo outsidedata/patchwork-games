@@ -453,7 +453,7 @@
           ],
           "size": [
             300,
-            352
+            374
           ]
         },
         "ammo": {
@@ -481,6 +481,21 @@
                 72
               ]
             }
+          }
+        },
+        "scope": {
+          "anchor": "center",
+          "size": [
+            200,
+            200
+          ],
+          "scope": {
+            "colour": 0,
+            "radius": 360,
+            "cover": 6000,
+            "edge": 24,
+            "line": 2,
+            "gap": 0
           }
         },
         "reticle": {

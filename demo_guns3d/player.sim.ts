@@ -22,7 +22,8 @@
 // The acts are the page's keys: `stick(x, y)` (y down, as a stick reads), `turn(x, y)` (the right stick, the same),
 // `fast(v)`, `fire(v)` and `aim(v)` (1 held, 0 let go), `jump`, `reload`, `select` (the gun's next mode), `lower`
 // (lowered or raised), `inspect`, `charge` and `check` (each the move its definition's `acts` names), `swap` (the
-// next gun of its definition's `guns`, fresh in the hand, refused while an act plays),
+// next gun of its definition's `guns`, fresh in the hand, refused while an act plays), `scope` (the gun's scope view
+// on or off, guns3d's `scope`),
 // `look(dyaw, dpitch)` and `zoom(by)`, the wheel's pixels. A seat's message arrives from outside the program, so each
 // refuses arguments of the wrong kind and writes nothing.
 import type { Kind, Row, W } from '#engine/engine.ts'
@@ -127,6 +128,9 @@ export const player: Kind = {
       const guns: string[] = def(w, me.kind).guns
       me.data.gun = { name: guns[(guns.indexOf(me.data.gun.name) + 1) % guns.length] }
       guns3d.arm(me, w)
+    },
+    scope(me, w) {
+      guns3d.scope(me, w)
     },
     look(me, w, _seat, dyaw: unknown, dpitch: unknown) {
       if (!finite(dyaw, dpitch)) return

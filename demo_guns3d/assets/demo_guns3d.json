@@ -18,6 +18,7 @@
       "charge": ["c", "Pad5"],
       "check": ["v", "Pad8"],
       "swap": ["q", "Pad11"],
+      "scope": ["z", "Pad9"],
       "nearer": ["Pad12"],
       "further": ["Pad13"]
     },
@@ -42,6 +43,7 @@
         { "key": "C", "text": "charge" },
         { "key": "V", "text": "check the load" },
         { "key": "Q", "text": "rifle or RPG-7" },
+        { "key": "Z", "text": "scope view" },
         { "key": "Space", "text": "jump" },
         { "key": "Esc", "text": "let go of the mouse" }
       ]

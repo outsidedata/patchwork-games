@@ -14,6 +14,10 @@
             "point": "sight",
             "fov": 40,
             "in": 0.12
+          },
+          "scope": {
+            "fov": 8,
+            "in": 0.15
           }
         },
         "trigger": {
