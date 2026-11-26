@@ -1,9 +1,7 @@
 // The kinds of lightlab and the lightlab.scene.json file next to this one: stronghold's light lab (the library's
 // `stronghold/solvers/lightlab`), a row of rooms each built to try one condition of light inside, built from its solver
 // by the bake, the place `lightlab.art` of world3d's (`world.world3d`). Every file of it is under `assets/lightlab/`.
-// Each room's light hints are places of its nav graph (`assets/lightlab/lightlab.art.nav.json`, the library's
-// `stronghold/src/lib/util/light.mjs`). Its definitions are main's (`assets/demo_world3d.json`). The seat's body starts
-// on the lab street before the sun room.
+// Its definitions are main's (`assets/demo_world3d.json`). The seat's body starts on the lab street before the sun room.
 import type { Scene, Sim } from '#engine/engine.ts'
 import { scenemanager } from '#plugins/scenemanager/scenemanager.sim.ts'
 import { loader } from '#plugins/loader/loader.sim.ts'

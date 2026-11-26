@@ -569,20 +569,6 @@
       "mods": {
         "land": "terrain3d"
       }
-    },
-    "lights3d": {
-      "grid": [
-        16,
-        9
-      ],
-      "slices": 24,
-      "shadows": {
-        "atlas": 4096,
-        "tile": 256,
-        "bias": 0.04,
-        "normalBias": 0.05,
-        "budget": 48
-      }
     }
   },
   "plugins": [
@@ -602,7 +588,6 @@
     "particle3d",
     "world3d",
     "render3d",
-    "lights3d",
     "chasecamera3d"
   ],
   "seats": 1,
@@ -621,7 +606,7 @@
       "live": []
     },
     "skydome3d": {
-      "t": 550,
+      "t": 1167.5,
       "rate": 0,
       "doy": 138,
       "lat": 45,

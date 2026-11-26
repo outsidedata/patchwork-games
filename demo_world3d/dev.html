@@ -48,7 +48,6 @@
       import { entry } from '#plugins/world3d/world3d.sim.ts'
       import { sim } from './demo_world3d.sim.ts'
       import { scene as main } from './main.sim.ts'
-      import { scene as lightlab } from './lightlab.sim.ts'
       import { visitor } from './visitor.sim.ts'
       import file from './demo_world3d.scene.json'
 
@@ -73,9 +72,6 @@
         main.plugins = main.plugins.filter(p => p !== 'lights3d')
         delete main.world.lights3d
       }
-
-      // `?indoors=0` takes the sky's `indoors` mod out of the light lab, so its rooms are drawn with no room switch
-      if (query.get('indoors') === '0') delete lightlab.world.skydome3d.mods.indoors
 
       // A visitor sent somewhere walks there on npc3d's `go` at its tour's pace, and, committed, stands
       // there until it is sent again or put back on its tour.
@@ -148,13 +144,10 @@
 
       // The place's rooms, a scene giving `world.world3d.rooms` (world3d's `world3d.rooms.ts`): `stand in` puts the
       // camera in the middle of the room picked, `outside` gives it back to the chase camera. `window.__stand(name)`
-      // does the same for a script.
-      // The readout names the room the camera is in, the sky's share of indoors and whether the sun's shadow map is
-      // drawn. `?indoors=0` takes the sky's `indoors` mod out of the scene before the boot, so the same place is drawn
-      // with no room switch.
+      // does the same for a script. The readout names the room the camera is in.
       const roomsOf = () => window.__page.client?.plugins.world3d?.rooms() ?? []
-      // The camera held by the page: render3d's camera claimed and stood in the room facing the wall of its first
-      // opening in a wall (the room's middle, looking along its longer side, for a room with none), until `window.__stand()` with no name lets it go back to the chase camera.
+      // The camera held by the page: render3d's camera claimed and stood in the room's middle, looking along its
+      // longer side, until `window.__stand()` with no name lets it go back to the chase camera.
       const standing = {}
       window.__stand = name => {
         const r3 = window.__page.client?.plugins.render3d
@@ -164,21 +157,9 @@
         if (!r || !r3.claim(standing)) return false
         const mid = [0, 1, 2].map(i => r.low[i] + r.u[i] * r.size[0] / 2 + r.w[i] * r.size[1] / 2)
         r3.camera.up.set(0, 1, 0)
-        // facing the wall of the room's first opening into it, from a metre short of the far wall, a little above
-        // head height and looking down onto the floor before that wall
-        // an opening out of the room, or one of the next room's opening into it, turned to face in
-        const found = window.__page.client.plugins.world3d.openings().find(q => (q.room === r.name || q.to === r.name) && q.inward[1] === 0)
-        const o = found && (found.room === r.name ? found : { ...found, inward: found.inward.map(v => -v) })
-        if (!o) {
-          r3.camera.position.set(mid[0], r.low[1] + 1.6, mid[2])
-          const along = r.size[0] >= r.size[1] ? r.u : r.w
-          r3.camera.lookAt(mid[0] + along[0], r.low[1] + 1.6, mid[2] + along[2])
-          return true
-        }
-        const deep = Math.abs(o.inward[0] * r.u[0] + o.inward[2] * r.u[2]) > 0.5 ? r.size[0] : r.size[1]
-        const back = [o.mid[0] + o.inward[0] * (deep - 1), r.low[1] + 2.2, o.mid[2] + o.inward[2] * (deep - 1)]
-        r3.camera.position.set(back[0], back[1], back[2])
-        r3.camera.lookAt(o.mid[0] + o.inward[0] * 1.5, r.low[1] + 0.6, o.mid[2] + o.inward[2] * 1.5)
+        r3.camera.position.set(mid[0], r.low[1] + 1.6, mid[2])
+        const along = r.size[0] >= r.size[1] ? r.u : r.w
+        r3.camera.lookAt(mid[0] + along[0], r.low[1] + 1.6, mid[2] + along[2])
         return true
       }
       // the folder is made once world3d has read the rooms, on its first tick
@@ -484,179 +465,6 @@
         } }, 'copy').name('copy lights JSON')
       }
 
-      // The tavern's light, faked by hand: nothing here is worked out or read from the sky. Every number is in
-      // `assets/tavern/tavern.hints.json`. A window's sky is a rectangle light, the sunbeams are glowing
-      // prisms from each opening to where the (aimed) sun lands, with dust in them, bounce is a warm light on
-      // each patch, the hearths are flickering lights that cast shadows, the ground under the tables and along
-      // the walls is darkened by hand-placed blobs, at night each front opening throws warm light outside, and
-      // the sky's ambient and the exposure dip while the player is inside. The panel's `faked light` folder has
-      // day, night and lightning, and a slider for each number. Tavern only, once per client.
-      const faked = {
-        client: null, built: false, spec: null, base: null, k: 0, lastA: -1, lastE: -1, time: 0, flash: 0,
-        skylight: [], beams: [], motes: [], bounce: [], lamps: [], outside: [],
-        knobs: { ambient: 1, exposure: 1, skylight: 0, beam: 0, bounce: 0, hearth: 0, outside: 0 },
-      }
-      const fake = async () => {
-        const client = window.__client
-        if (file.prefabs.scenemanager.entry !== 'tavern' || !client?.plugins.render3d?.scene || faked.client === client) return
-        faked.client = client
-        const r3 = client.plugins.render3d
-        const T = r3.THREE
-        const spec = await (await fetch(new URL('./assets/tavern/tavern.hints.json', import.meta.url))).json()
-        faked.spec = spec
-        faked.base = structuredClone(client.plugins.wire.scene.world.skydome3d.look)
-        client.plugins.skydome3d.aim(spec.sun)
-        const V = a => new T.Vector3(...a)
-        const ray = V(spec.sun).normalize().multiplyScalar(-1)
-        const floorY = spec.room.min[1]
-        const up = new T.Vector3(0, 1, 0)
-        const hit = c => c.clone().addScaledVector(ray, (c.y - floorY) / -ray.y)
-        const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]]
-        for (const w of spec.windows) {
-          const at = V(w.at), face = V(w.facing)
-          const right = new T.Vector3().crossVectors(up, face).normalize()
-          const [width, height] = w.size
-          const spot = (x, y) => at.clone().addScaledVector(right, x * width / 2).addScaledVector(up, y * height / 2)
-          const shine = (colour, from, to, list) => {
-            const l = new T.SpotLight(colour, 0, 16, Math.PI / 2.4, 1, 1.5)
-            l.position.copy(from)
-            l.target.position.copy(to)
-            r3.scene.add(l, l.target)
-            list.push(l)
-          }
-          if (w.sky !== false) shine('#fff0dc', at, at.clone().add(face), faked.skylight)
-          if (face.z === -1) shine('#ffb060', V([w.at[0], w.at[1], -0.85]), V([w.at[0], w.at[1], 5]), faked.outside)
-          if (!w.beam) continue
-          const top = corners.map(([x, y]) => spot(x, y))
-          const bottom = top.map(hit)
-          const geometry = new T.BufferGeometry()
-          geometry.setAttribute('position', new T.Float32BufferAttribute([...top, ...bottom].flatMap(p => [p.x, p.y, p.z]), 3))
-          geometry.setAttribute('color', new T.Float32BufferAttribute([...top.flatMap(() => [1, 0.92, 0.75]), ...bottom.flatMap(() => [0.35, 0.32, 0.26])], 3))
-          geometry.setIndex(corners.flatMap((_, i) => { const j = (i + 1) % 4; return [i, j, 4 + j, i, 4 + j, 4 + i] }))
-          const beam = new T.Mesh(geometry, new T.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0, blending: T.AdditiveBlending, side: T.DoubleSide, depthWrite: false }))
-          beam.frustumCulled = false
-          r3.scene.add(beam)
-          faked.beams.push(beam)
-          const middle = bottom.reduce((s, p) => s.add(p), new T.Vector3()).multiplyScalar(0.25)
-          const bounce = new T.PointLight('#ffd9a0', 0, 7, 2)
-          bounce.position.set(middle.x, floorY + 0.5, middle.z)
-          r3.scene.add(bounce)
-          faked.bounce.push(bounce)
-          const count = 50
-          const base = new Float32Array(count * 3), phase = new Float32Array(count)
-          for (let i = 0; i < count; i++) {
-            const c = spot(Math.random() - 0.5, Math.random() - 0.5)
-            const p = c.addScaledVector(ray, (c.y - floorY) / -ray.y * Math.random())
-            base.set([p.x, p.y, p.z], i * 3)
-            phase[i] = Math.random() * 6.28
-          }
-          const points = new T.Points(new T.BufferGeometry(), new T.PointsMaterial({ color: '#fff2d0', size: 0.035, transparent: true, opacity: 0, blending: T.AdditiveBlending, depthWrite: false }))
-          points.geometry.setAttribute('position', new T.BufferAttribute(base.slice(), 3))
-          points.frustumCulled = false
-          r3.scene.add(points)
-          faked.motes.push({ points, base, phase })
-        }
-        for (const a of spec.lamps) {
-          const l = new T.PointLight('#ff9a50', 0, 12, 2)
-          l.position.set(...a.at)
-          r3.scene.add(l)
-          faked.lamps.push(l)
-        }
-        const texture = draw => {
-          const c = document.createElement('canvas')
-          c.width = c.height = 64
-          draw(c.getContext('2d'))
-          return new T.CanvasTexture(c)
-        }
-        const radial = texture(g => {
-          const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32)
-          gr.addColorStop(0, '#fff')
-          gr.addColorStop(1, '#000')
-          g.fillStyle = gr
-          g.fillRect(0, 0, 64, 64)
-        })
-        const edge = texture(g => {
-          const gr = g.createLinearGradient(0, 0, 0, 64)
-          gr.addColorStop(0, '#000')
-          gr.addColorStop(1, '#fff')
-          g.fillStyle = gr
-          g.fillRect(0, 0, 64, 64)
-        })
-        const dark = map => new T.MeshBasicMaterial({ color: '#000', alphaMap: map, transparent: true, opacity: 0.5, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4 })
-        const blob = dark(radial), strip = dark(edge)
-        for (const b of spec.blobs) {
-          const m = new T.Mesh(new T.PlaneGeometry(...b.size).rotateX(-Math.PI / 2), blob)
-          m.position.set(b.at[0], floorY + 0.015, b.at[1])
-          r3.scene.add(m)
-        }
-        const { min, max } = spec.room
-        const long = max[0] - min[0], deep = max[2] - min[2]
-        for (const [length, x, z, turn] of [
-          [long, (min[0] + max[0]) / 2, max[2] - 0.4, 0],
-          [long, (min[0] + max[0]) / 2, min[2] + 0.4, Math.PI],
-          [-deep, min[0] + 0.4, (min[2] + max[2]) / 2, -Math.PI / 2],
-          [-deep, max[0] - 0.4, (min[2] + max[2]) / 2, Math.PI / 2],
-        ]) {
-          const m = new T.Mesh(new T.PlaneGeometry(Math.abs(length), 0.8).rotateX(-Math.PI / 2), strip)
-          m.position.set(x, floorY + 0.015, z)
-          m.rotation.y = turn
-          r3.scene.add(m)
-        }
-        const f = gui.addFolder('faked light')
-        const setMode = name => {
-          const m = spec[name]
-          Object.assign(faked.knobs, { ambient: m.ambient, exposure: m.exposure, skylight: m.skylight, beam: m.beam, bounce: m.bounce, hearth: m.hearth, outside: m.outside })
-          room.rows.find(r => r.kind === 'skydome3d').data.t = m.hour / 24 * client.plugins.wire.scene.world.skydome3d.day
-          f.controllersRecursive().forEach(c => c.updateDisplay())
-        }
-        f.add({ day: () => setMode('day') }, 'day')
-        f.add({ night: () => setMode('night') }, 'night')
-        f.add({ lightning: () => { faked.flash = 0.18 } }, 'lightning')
-        f.add(faked.knobs, 'ambient', 0, 1, 0.01).name('ambient left inside')
-        f.add(faked.knobs, 'exposure', 0.5, 2.5, 0.01).name('exposure inside')
-        f.add(faked.knobs, 'skylight', 0, 300, 1).name('window skylight')
-        f.add(faked.knobs, 'beam', 0, 0.5, 0.005).name('sunbeams')
-        f.add(faked.knobs, 'bounce', 0, 40, 0.5).name('bounce')
-        f.add(faked.knobs, 'hearth', 0, 120, 0.5).name('hearths')
-        f.add(faked.knobs, 'outside', 0, 120, 0.5).name('window glow outside')
-        setMode('day')
-        faked.built = true
-      }
-      const fakeUpdate = () => {
-        if (!faked.built) return
-        const client = faked.client, k = faked.knobs, spec = faked.spec
-        faked.time += dt
-        faked.flash = Math.max(0, faked.flash - dt)
-        const bolt = faked.flash / 0.18
-        const p = me()?.data.pos, r = spec.room
-        const inside = !!p && p[0] > r.min[0] && p[0] < r.max[0] && p[2] > r.min[2] && p[2] < r.max[2] && p[1] < r.max[1]
-        faked.k += ((inside ? 1 : 0) - faked.k) * (1 - Math.exp(-dt * 3))
-        const ambient = 1 + (k.ambient - 1) * faked.k
-        const exposure = 1 + (k.exposure - 1) * faked.k
-        if (Math.abs(ambient - faked.lastA) > 0.002 || Math.abs(exposure - faked.lastE) > 0.002) {
-          faked.lastA = ambient
-          faked.lastE = exposure
-          client.plugins.wire.scene.world.skydome3d.look = { ...faked.base, hemiDay: faked.base.hemiDay * ambient, envIntensity: faked.base.envIntensity * ambient, exposure: faked.base.exposure * exposure }
-        }
-        const flicker = 1 + 0.12 * Math.sin(faked.time * 7) + 0.08 * Math.sin(faked.time * 13.7 + 1) + 0.05 * Math.sin(faked.time * 31)
-        for (const l of faked.skylight) l.intensity = k.skylight + 300 * bolt
-        for (const m of faked.beams) m.material.opacity = k.beam * (1 + 3 * bolt)
-        for (const l of faked.bounce) l.intensity = k.bounce
-        for (const l of faked.lamps) l.intensity = k.hearth * flicker
-        for (const l of faked.outside) l.intensity = k.outside * flicker
-        for (const { points, base, phase } of faked.motes) {
-          points.material.opacity = Math.min(0.8, k.beam * 5)
-          const at = points.geometry.attributes.position
-          for (let i = 0; i < phase.length; i++) {
-            at.array[i * 3] = base[i * 3] + 0.06 * Math.sin(faked.time * 0.6 + phase[i])
-            at.array[i * 3 + 1] = base[i * 3 + 1] + 0.08 * Math.sin(faked.time * 0.45 + phase[i] * 2)
-            at.array[i * 3 + 2] = base[i * 3 + 2] + 0.06 * Math.cos(faked.time * 0.5 + phase[i])
-          }
-          at.needsUpdate = true
-        }
-      }
-
-
       const readout = document.getElementById('readout')
       const frames = []
       let last = performance.now(), owed = 0
@@ -676,8 +484,6 @@
           lighting()
           stick()
           lights()
-          fake()
-          fakeUpdate()
         } catch (e) { caught(e) }
         const p = me()
         const where = v => (v.data.doing === 'go' ? `sent to ${v.data.told.map(n => n.toFixed(1)).join(', ')}` : v.data.going)
@@ -685,7 +491,7 @@
           `${frames.length} fps  longest frame ${worst.toFixed(1)} ms  step ${truth.n}`,
           (l3 => l3 ? `lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} still tiles drawn this frame, ${l3.moving} moving tiles, ${l3.owed} faces owed` : '')(window.__client?.plugins.lights3d),
           p?.data.pos ? `you (${p.data.pos.map(v => v.toFixed(2)).join(', ')}) ${p.data.grounded ? 'on the ground' : 'in the air'}` : '',
-          ((c, sky) => c?.world3d?.rooms().length ? `camera in ${c.world3d.room(c)?.name ?? 'no room'}, the sky ${Math.round((sky?.indoors ?? 0) * 100)}% indoors, the sun's shadow map ${sky?.key.shadow.autoUpdate === false ? 'not drawn' : 'drawn'}` : '')(window.__client?.plugins, window.__client?.plugins.skydome3d?.sky()),
+          (c => c?.world3d?.rooms().length ? `camera in ${c.world3d.room(c)?.name ?? 'no room'}` : '')(window.__client?.plugins),
           ...visitors().map(v => `${v.id === picked.id ? '> ' : ''}visitor ${v.id} ${v.data.body}: ${v.data.speed > 0 ? `going to ${where(v)}, ${left(v)} places left` : `standing at ${where(v)}`} at y ${bodies.crowd3d.where(v, time())[1].toFixed(2)}, switched courses ${switches.get(v.id) ?? 0}`),
           ...errors,
         ].join('\n')

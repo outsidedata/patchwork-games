@@ -116,21 +116,13 @@
           "type": "texture",
           "url": "/games/demo_world3d/assets/house/looks/yard.art.pictures.ktx2",
           "preload": true
-        },
-        "yard.art.light": {
-          "type": "json",
-          "url": "/games/demo_world3d/assets/house/yard.art.light.json",
-          "preload": true
         }
       }
     },
     "world3d": {
       "place": "yard.art",
       "playerStart": "house/patio",
-      "people": "person",
-      "rooms": {
-        "through": 0.8
-      }
+      "people": "person"
     },
     "particle3d": {
       "effects": "effects"
@@ -570,20 +562,6 @@
       "mods": {
         "land": "terrain3d"
       }
-    },
-    "lights3d": {
-      "grid": [
-        16,
-        9
-      ],
-      "slices": 24,
-      "shadows": {
-        "atlas": 4096,
-        "tile": 256,
-        "bias": 0.04,
-        "normalBias": 0.05,
-        "budget": 48
-      }
     }
   },
   "plugins": [
@@ -603,7 +581,6 @@
     "particle3d",
     "world3d",
     "render3d",
-    "lights3d",
     "chasecamera3d"
   ],
   "seats": 1,
