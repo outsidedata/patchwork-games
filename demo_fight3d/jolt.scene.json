@@ -1,0 +1,205 @@
+{
+  "world": {
+    "defs": "demo_fight3d",
+    "seed": 7,
+    "loader": {
+      "assets": {
+        "demo_fight3d": { "type": "json", "url": "/games/demo_fight3d/assets/demo_fight3d.json", "preload": true },
+        "land": { "type": "json", "url": "/games/demo_fight3d/assets/land.json", "preload": true },
+        "checker": { "type": "texture", "url": "/games/demo_fight3d/assets/checker-1024.webp", "preload": true, "wrap": "repeat", "anisotropy": 8 },
+        "xbot-rig-baked": { "type": "json", "url": "/games/demo_fight3d/assets/xbot.rig.baked.json", "preload": true },
+        "xbot-anim": { "type": "json", "url": "/games/demo_fight3d/assets/xbot.anim.json", "preload": true },
+        "xbot": { "type": "model", "url": "/games/demo_fight3d/assets/xbot.glb", "preload": true },
+        "xbot-glb": { "type": "binary", "url": "/games/demo_fight3d/assets/xbot.glb", "preload": true },
+        "effects": { "type": "json", "url": "/games/demo_fight3d/assets/effects.json", "preload": true }
+      }
+    },
+    "terrain3d": {
+      "field": "land",
+      "rings": [{ "reach": 64, "seg": 256 }, { "reach": 320, "seg": 128 }, { "reach": 2000, "seg": 100 }],
+      "shadowReach": 64,
+      "budget": 8,
+      "preload": true
+    },
+    "shipped": { "plugins": ["punch"] },
+    "anim": {
+      "still": 0.05,
+      "shift": 0.75,
+      "leap": 0.5,
+      "landFall": 7.5,
+      "moves": 0.05,
+      "turns": 30,
+      "mods": { "bends": ["fight3d"] },
+      "kinds": {
+        "foe": {
+          "rig": "xbot-anim",
+          "measured": "xbot-rig-baked",
+          "model": "xbot",
+          "glb": "xbot-glb",
+          "fade": 0.06,
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
+        }
+      }
+    },
+    "walker": {
+      "kinds": {
+        "foe": {
+          "radius": 0.35,
+          "height": 1.7,
+          "accel": 14,
+          "turnRate": 12,
+          "gravity": 20,
+          "jumpH": 0.9,
+          "step": 0.55,
+          "maxSlope": 0.55,
+          "slopeBand": 0.05,
+          "slide": 2,
+          "wade": 0.6,
+          "span": 0.7,
+          "probe": 1.5,
+          "seekSpeed": 1.5
+        }
+      },
+      "mods": { "height": "terrain3d" }
+    },
+    "melee3d": {
+      "kinds": {
+        "hand": { "punch": {} },
+        "foe": { "anim": {} }
+      },
+      "limbs": {
+        "head": { "from": "Neck", "to": "HeadTop_End", "radius": 0.1 },
+        "torso": { "from": "Hips", "to": "Neck", "radius": 0.15 },
+        "armL": { "from": "LeftArm", "to": "LeftForeArm", "radius": 0.06 },
+        "forearmL": { "from": "LeftForeArm", "to": "LeftHand", "radius": 0.05 },
+        "handL": { "from": "LeftHand", "to": "LeftHandMiddle4", "radius": 0.045 },
+        "armR": { "from": "RightArm", "to": "RightForeArm", "radius": 0.06 },
+        "forearmR": { "from": "RightForeArm", "to": "RightHand", "radius": 0.05 },
+        "handR": { "from": "RightHand", "to": "RightHandMiddle4", "radius": 0.045 },
+        "uplegL": { "from": "LeftUpLeg", "to": "LeftLeg", "radius": 0.08 },
+        "legL": { "from": "LeftLeg", "to": "LeftFoot", "radius": 0.06 },
+        "footL": { "from": "LeftFoot", "to": "LeftToe_End", "radius": 0.05 },
+        "uplegR": { "from": "RightUpLeg", "to": "RightLeg", "radius": 0.08 },
+        "legR": { "from": "RightLeg", "to": "RightFoot", "radius": 0.06 },
+        "footR": { "from": "RightFoot", "to": "RightToe_End", "radius": 0.05 }
+      },
+      "spacing": 0.04,
+      "edge": 2.5,
+      "clash": 0.04,
+      "mods": { "behaviors": ["anim", "punch"] }
+    },
+    "fight3d": {
+      "kinds": {
+        "hand": {
+          "stop": 0.1,
+          "strikes": {
+            "uajab": { "damage": 8, "knock": 3, "stop": 0.07 },
+            "uacross": { "damage": 12, "knock": 4, "stop": 0.09 },
+            "uahook": { "damage": 15, "knock": 4.5, "stop": 0.1 },
+            "uauppercut": { "damage": 25, "knock": 5.5, "stop": 0.13 },
+            "uahurricane": { "damage": 28, "knock": 6.5, "stop": 0.14 },
+            "uakick": { "damage": 28, "knock": 6.5, "stop": 0.14 },
+            "uammakick": { "damage": 22, "knock": 6, "stop": 0.12 },
+            "uaflykick": { "damage": 30, "knock": 7, "stop": 0.15 }
+          }
+        },
+        "foe": {
+          "stop": 0.1,
+          "pace": 0.05,
+          "drag": 8,
+          "large": 25,
+          "low": ["uplegL", "legL", "footL", "uplegR", "legR", "footR"],
+          "blood": "blood",
+          "home": 0.1,
+          "recover": 0.35,
+          "jolt": {
+            "stiffness": 120,
+            "damping": 12,
+            "gain": 0.4,
+            "most": 0.7,
+            "limbs": {
+              "head": { "Spine1": 0.2, "Spine2": 0.35, "Neck": 0.6, "Head": 1 },
+              "torso": { "Hips": 0.3, "Spine": 0.6, "Spine1": 0.6, "Spine2": 0.5, "Neck": 0.3 },
+              "armL": { "Spine2": 0.3, "LeftShoulder": 0.6, "LeftArm": 1 },
+              "forearmL": { "LeftArm": 0.6, "LeftForeArm": 1 },
+              "handL": { "LeftForeArm": 0.6, "LeftHand": 1 },
+              "armR": { "Spine2": 0.3, "RightShoulder": 0.6, "RightArm": 1 },
+              "forearmR": { "RightArm": 0.6, "RightForeArm": 1 },
+              "handR": { "RightForeArm": 0.6, "RightHand": 1 },
+              "uplegL": { "Hips": 0.4, "LeftUpLeg": 0.8 },
+              "legL": { "LeftUpLeg": 0.6, "LeftLeg": 1 },
+              "footL": { "LeftLeg": 0.6, "LeftFoot": 1 },
+              "uplegR": { "Hips": 0.4, "RightUpLeg": 0.8 },
+              "legR": { "RightUpLeg": 0.6, "RightLeg": 1 },
+              "footR": { "RightLeg": 0.6, "RightFoot": 1 }
+            }
+          },
+          "anim": {},
+          "walker": {}
+        }
+      },
+      "mods": { "swing": "melee3d", "blood": "particle3d", "behaviors": ["anim", "walker"] }
+    },
+    "particle3d": { "effects": "effects", "hold": 0.3 }
+  },
+  "plugins": ["loader", "scenemanager", "terrain3d", "shipped", "anim", "melee3d", "particle3d", "environment3d", "render3d", "stats"],
+  "seats": 1,
+  "prefabs": {
+    "engine": { "dt": 0.016666666666666666, "width": 1280, "height": 720 },
+    "scenemanager": { "out": {} },
+    "loader": {},
+    "render3d": {
+      "camera": { "fov": 45, "near": 0.1, "far": 3000, "at": [0.8, 1.5, 3.4], "look": [0, 1.05, 0] },
+      "pixelRatio": 2,
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "background": "#bcd4e8",
+      "ao": { "on": false, "radius": 0.6, "thickness": 0.5, "falloff": 1, "scale": 1, "intensity": 1, "samples": 16 },
+      "bloom": { "strength": 0.15, "radius": 0.4, "threshold": 1.5 }
+    },
+    "environment3d": {
+      "sun": {
+        "color": "#fff3e0",
+        "power": 2.6,
+        "at": [-30, 60, 40],
+        "shadow": { "map": 4096, "half": 40, "near": 1, "far": 200, "distance": 100, "bias": -0.0002, "normalBias": 0.02 }
+      },
+      "sky": { "color": "#dbe8f5", "ground": "#6b6252", "power": 1.1 }
+    },
+    "hand": { "fist": null, "thrown": 0, "stop": 0, "edges": {}, "swing": null, "struck": [] },
+    "foe": {
+      "at": [0, 0],
+      "facing": 0,
+      "stood": false,
+      "pos": [0, 0, 0],
+      "yaw": 0,
+      "vel": [0, 0, 0],
+      "grounded": true,
+      "sliding": false,
+      "speed": 0,
+      "want": [0, 0],
+      "face": null,
+      "jump": false,
+      "side": 0,
+      "turned": 0,
+      "limp": false,
+      "stop": 0,
+      "hits": 0,
+      "since": 0,
+      "jolt": {},
+      "shove": [0, 0],
+      "edges": {},
+      "swing": null,
+      "struck": []
+    },
+    "particle3d": { "next": 1, "live": [] }
+  },
+  "actors": [
+    { "is": "scenemanager" },
+    { "is": "loader" },
+    { "is": "hand" },
+    { "is": "foe", "at": [0, 0], "facing": 0 },
+    { "is": "particle3d" }
+  ]
+}

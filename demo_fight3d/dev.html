@@ -14,31 +14,42 @@
     <div id="readout"></div>
     <script type="module">
       // The testbed: index.html, the manager truth and the scenes its row names all in this tab, one seat on them over
-      // a loopback, stepped on the page's clock. `?scene=<scene>` enters that scene. The truths are kept on
+      // a loopback, stepped on the page's clock. `?scene=<scene>` enters that scene: `main`, the fight, or `jolt`, one
+      // X Bot standing still and a hand with no body that throws a fist wherever it is aimed. The truths are kept on
       // `window.__scenes` and the page on `window.__page` for the profilers (benchmarking-a-game). The frame rate is the
       // stats plugin's panel at the top left. Time: ` pauses, . steps one on while paused, and `pause on a blow` stops
-      // the clock on the step a blow lands on the foe; `window.dev.clock` is the clock, and `window.dev.run(steps)` runs
-      // up to that many steps and draws, stopping on a blow as the clock does, for a driver in a tab given no frames.
+      // the clock on the step a blow lands on a struck body; `window.dev.clock` is the clock, and `window.dev.run(steps)`
+      // runs up to that many steps and draws, stopping on a blow as the clock does, for a driver in a tab given no frames.
       //
-      // The combat panel: fight3d's numbers (`world.fight3d.kinds`), the hitstop of each side and the share of a step
-      // the foe runs at while frozen, how fast its shove runs out, the damage from which a reaction is the large one
-      // and how far from its spot the foe walks back; motion3d's frozen pace of the X Bot, melee3d's `edge`, how fast a
-      // fist or a foot must move to land, the player's `lock`, how near the foe a strike warps onto it, and melee3d's
-      // striker and limb lines (off at first); each laid into the truth's world and the page's as it changes. The combo
-      // panel: the clip, time and warp of each of the three light hits, picked from every unarmed strike. `copy`
-      // copies a panel's numbers, `reset to the file` puts the file's back. The jolt panel: the foe's springs (fight3d's
-      // `jolt`), how long it stands before walking back (`recover`), and its reaction, the jolt alone, the X Bot's
-      // reaction clips alone (anim's `react`), or both.
+      // Joining a body. A left click on a body fight3d strikes (a kind of `world.fight3d.kinds` with no `strikes`), where
+      // the click's ray meets one of its limbs (melee3d's, as the page poses it), joins it: the `joined` panel shows
+      // every number of its kind's fight3d entry, each laid into the truth's world and the page's as it changes. Its
+      // reaction (the jolt alone, anim's reaction clips alone, or both); its freeze, frozen pace, knockback drag, large
+      // reaction, walk home and recover; which limbs a blow on is low; the jolt's springs; and for each of melee3d's
+      // limbs, the joints a blow on it turns, each joint's give, a joint taken off, and any joint of the skeleton put on.
+      // `copy` copies the whole entry as `world.fight3d.kinds.<kind>` of the scene file, `reset to the file` puts the
+      // file's back. A click on the joined body in a scene with a hand throws the hand's fist there, along the click's
+      // ray: the blow lands on the limb clicked, from the way the camera looks. The `hit` folder picks the strike thrown
+      // (fight3d's `strikes` of the hand: its damage, knock and hitstop, laid in as they change), and throws one at the
+      // middle of a limb from a side of the body, once or every so many seconds. With no seat body (jolt), the camera
+      // orbits the joined body: right drag turns it, the wheel brings it in and out.
       //
-      // The readout shows the keys, the scene and the step, the seat's swing, what it has met and its freeze, the
-      // foe's blows, the clip it plays, its freeze and each joint it is jolted at, and the last five errors the page threw
-      // or wrote.
+      // In main, the combat panel holds the striker's numbers (its hitstop, motion3d's frozen pace of the X Bot,
+      // melee3d's `edge` and its striker and limb lines, the player's `lock`), and the combo panel the clip, time and
+      // warp of each of the three light hits, picked from every unarmed strike.
+      //
+      // The readout shows the keys, the scene and the step, the seat's swing in main, the joined body's blows, clip,
+      // freeze and each joint it is jolted at, the hand's throws, and the last five errors the page threw or wrote.
       import { boot } from '#engine/engine.ts'
       import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
       import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import { possessed } from '#addons/player/player.addon.ts'
       import { clipOf, rigOf } from '#plugins/motion3d/motion3d.play.ts'
       import { json } from '#plugins/loader/loader.sim.ts'
+      import { limbs } from '#plugins/melee3d/melee3d.sim.ts'
+      import { skeletonOf } from '#plugins/anim/anim.sim.ts'
       import GUI from 'lil-gui'
+      import { aim } from './plugins/punch/punch.sim.ts'
       import { sim } from './demo_fight3d.sim.ts'
       import file from './demo_fight3d.scene.json'
 
@@ -55,19 +66,21 @@
       const written = console.error.bind(console)
       console.error = (...a) => { caught(a.map(x => x?.message ?? x).join(' ')); written(...a) }
 
-      file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
+      const scene = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
+      if (!(scene in file.prefabs.scenemanager.scenes)) throw new Error(`demo_fight3d has no scene ${scene}: ${Object.keys(file.prefabs.scenemanager.scenes).join(', ')}`)
+      file.prefabs.scenemanager.entry = scene
 
       const dt = file.prefabs.engine.dt
       const truth = boot(file, sim)
       window.__scenes = await load(truth, import.meta.url)
       let client
-      const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+      const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, s) => {
         client = me
         for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
           if (!surface) continue
           const canvas = document.createElement('canvas')
-          canvas.width = scene.prefabs.engine.width
-          canvas.height = scene.prefabs.engine.height
+          canvas.width = s.prefabs.engine.width
+          canvas.height = s.prefabs.engine.height
           document.body.appendChild(canvas)
           surface.mount(canvas)
         }
@@ -86,12 +99,14 @@
         if (gui.domElement.contains(at) && at.tagName !== 'SELECT' && !(at.tagName === 'INPUT' && (at.type === 'text' || at.type === 'number'))) at.blur()
       }))
       addEventListener('change', e => { if (gui.domElement.contains(e.target)) e.target.blur() })
+      const refresh = () => { for (const c of gui.controllersRecursive()) c.updateDisplay() }
 
       // The scene, chosen from the manager's table, the page loaded again on it.
-      const chosen = { scene: file.prefabs.scenemanager.entry }
+      const chosen = { scene }
       const reload = (key, value) => { const url = new URL(location.href); url.searchParams.set(key, value); location.href = url.href }
       gui.add(chosen, 'scene', Object.keys(file.prefabs.scenemanager.scenes)).onChange(s => reload('scene', s))
       const room = () => window.__scenes.get(chosen.scene)
+      const sceneFile = `games/demo_fight3d/${file.prefabs.scenemanager.scenes[chosen.scene].file}`
       // The worlds every change is laid into: the scene's truth's and this page's.
       const worlds = () => [room()?.world, client?.plugins.wire.scene.world].filter(Boolean)
       // The scene's rows as a rule's `w` reads them, one per truth, so what a plugin keeps per world is kept across reads.
@@ -106,15 +121,22 @@
       }
       const rowOf = kind => room()?.rows.find(r => r.kind === kind)
       const fixed = (v, n = 2) => (typeof v === 'number' ? v.toFixed(n) : String(v))
+      const fights = room().world.fight3d.kinds
+      // The kinds fight3d strikes: every kind of its `kinds` that gives no `strikes`.
+      const STRUCK = Object.keys(fights).filter(k => !fights[k].strikes)
+      const struckRows = () => (room()?.rows ?? []).filter(r => STRUCK.includes(r.kind))
+      const hand = () => rowOf('hand')
 
       // ---------- time ----------
 
-      // `pause on a blow` stops the clock on the step a blow lands on the foe, so the jolt is seen from its first step.
+      // `pause on a blow` stops the clock on the step a blow lands on a struck body, so the jolt is seen from its first
+      // step.
       const clock = { paused: false, step: false, onBlow: false, hits: 0 }
+      const hitsNow = () => struckRows().reduce((n, r) => n + r.data.hits, 0)
       // One step of the truth, stopping the clock on a blow when `onBlow` is on; true when it stopped.
       const stepOnce = () => {
         truth.step(dt)
-        const hits = rowOf('foe')?.data.hits ?? 0
+        const hits = hitsNow()
         const struck = hits > clock.hits
         clock.hits = hits
         if (clock.onBlow && struck) clock.paused = true
@@ -126,168 +148,362 @@
         page.input()
         let n = 0
         while (n < steps) { n++; if (stepOnce()) break }
+        place()
         await page.frame(1)
         return n
       }
-      window.dev = { clock, run }
       gui.add(clock, 'paused').name('paused').listen()
-      gui.add(clock, 'onBlow').name('pause on a blow')
+      gui.add(clock, 'onBlow').name('pause on a blow').listen()
       addEventListener('keydown', e => {
+        if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return
         if (e.key === '`') clock.paused = !clock.paused
         if (e.key === '.' && clock.paused) clock.step = true
       })
 
-      // ---------- combat ----------
+      // ---------- joining a body ----------
 
-      // fight3d's, motion3d's and melee3d's numbers of the fight, laid into every world as they change.
-      const fight = {}
-      const fightOf = world => ({
-        stop: world.fight3d.kinds.player.stop, foeStop: world.fight3d.kinds.foe.stop, foePace: world.fight3d.kinds.foe.pace,
-        drag: world.fight3d.kinds.foe.drag, large: world.fight3d.kinds.foe.large, home: world.fight3d.kinds.foe.home,
-        heroPace: world.motion3d.kinds.xbot.pace, edge: world.melee3d.edge, debug: !!world.melee3d.show,
-      })
-      const defsOf = () => [room() && json(readerOf(room()), room().world.defs), client && json(client.plugins.wire, room().world.defs)].filter(Boolean)
-      const layFight = () => {
-        for (const world of worlds()) {
-          Object.assign(world.fight3d.kinds.player, { stop: fight.stop })
-          Object.assign(world.fight3d.kinds.foe, { stop: fight.foeStop, pace: fight.foePace, drag: fight.drag, large: fight.large, home: fight.home })
-          world.motion3d.kinds.xbot.pace = fight.heroPace
-          world.melee3d.edge = fight.edge
-          if (fight.debug) world.melee3d.show = { colour: '#ffd040', radius: 0.012, limbs: '#60c0ff', struck: '#ff4040' }
-          else delete world.melee3d.show
-        }
-        for (const d of defsOf()) d.player.lock = fight.lock
+      // The body joined, by its row's id, and its panel.
+      const joined = { id: null }
+      let panel
+      const joinedRow = () => room()?.rows.find(r => r.id === joined.id)
+      // The page's ray through the pointer: from the camera, unit, as three's raycaster casts it.
+      const rayAt = e => {
+        const r3 = client?.plugins.render3d
+        const canvas = r3?.renderer?.domElement
+        if (!canvas) return undefined
+        const box = canvas.getBoundingClientRect()
+        const T = r3.THREE
+        const caster = new T.Raycaster()
+        caster.setFromCamera(new T.Vector2(((e.clientX - box.left) / box.width) * 2 - 1, -((e.clientY - box.top) / box.height) * 2 + 1), r3.camera)
+        return { from: caster.ray.origin.toArray(), way: caster.ray.direction.toArray() }
       }
-      const firstFight = { ...fightOf(room().world), lock: defsOf()[0].player.lock }
-      Object.assign(fight, firstFight)
-      const xf = gui.addFolder('combat')
-      xf.add(fight, 'stop', 0, 0.5, 0.01).name('hitstop, striker, s').onChange(layFight)
-      xf.add(fight, 'foeStop', 0, 0.5, 0.01).name('hitstop, foe, s').onChange(layFight)
-      xf.add(fight, 'heroPace', 0, 1, 0.01).name('frozen pace, X Bot').onChange(layFight)
-      xf.add(fight, 'foePace', 0, 1, 0.01).name('frozen pace, foe').onChange(layFight)
-      xf.add(fight, 'drag', 0.5, 40, 0.5).name('knockback drag, 1/s').onChange(layFight)
-      xf.add(fight, 'home', 0, 2, 0.05).name('walks home from, m').onChange(layFight)
-      xf.add(fight, 'lock', 0, 8, 0.1).name('warps onto foe within, m').onChange(layFight)
-      xf.add(fight, 'edge', 0, 10, 0.1).name('lands from, m/s').onChange(layFight)
-      xf.add(fight, 'large', 0, 100, 1).name('large reaction from, damage').onChange(layFight)
-      xf.add(fight, 'debug').name('striker and limb lines').onChange(layFight)
-      xf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify(fight, null, 2)) }, 'copy').name('copy combat JSON')
-      xf.add({ reset: () => { Object.assign(fight, firstFight); for (const c of gui.controllersRecursive()) c.updateDisplay(); layFight() } }, 'reset').name('reset to the file')
+      // The struck body the ray meets first, where and on which limb, as the page poses it.
+      const bodyAt = ray => {
+        let best
+        for (const row of client.plugins.wire.rows.filter(r => STRUCK.includes(r.kind))) {
+          const met = aim(limbs(client.plugins.wire, row), ray.from, ray.way)
+          if (met && (!best || met.t < best.met.t)) best = { row, met }
+        }
+        return best
+      }
+      // A left press on a struck body is the page's, caught before the player plugin hears it: it joins the body, or,
+      // on the body joined in a scene with a hand, throws the hand's fist there along the ray.
+      addEventListener('mousedown', e => {
+        if (e.button !== 0 || gui.domElement.contains(e.target) || !client) return
+        const ray = rayAt(e)
+        const at = ray && bodyAt(ray)
+        if (!at) return
+        e.stopImmediatePropagation()
+        e.preventDefault()
+        if (at.row.id !== joined.id) { join(at.row.id); return }
+        if (hand()) throwAt(at.met.point, ray.way)
+      }, true)
+      addEventListener('click', e => { if (e.button === 0 && client && !gui.domElement.contains(e.target)) { const ray = rayAt(e); if (ray && bodyAt(ray)) e.stopImmediatePropagation() } }, true)
 
-      // The foe's jolt (fight3d's `jolt` and `recover`): its springs, how far a blow turns a joint, and how long it
-      // stands before it walks back; and the reaction it takes, the jolt alone, the reaction clips alone (anim's `react`,
-      // the X Bot's Mixamo reactions), or both, to judge one against the other.
+      // The reaction clips a body takes in place of the jolt, or beside it: anim's `react`, the X Bot's Mixamo
+      // reactions, by the blow's weight and the side it came from.
       const REACT = {
         small: { front: 'reactsmallfront', back: 'reactsmallback', left: 'reactsmallleft', right: 'reactsmallright' },
         large: { front: 'reactlargefront', back: 'reactlargeback', left: 'reactlargeleft', right: 'reactlargeright' },
         low: 'reactlegs',
       }
-      const joltWas = clone(room().world.fight3d.kinds.foe.jolt)
-      const recoverWas = room().world.fight3d.kinds.foe.recover
-      const jolt = { ...joltWas, limbs: undefined, recover: recoverWas, reaction: 'jolt' }
-      const layJolt = () => {
-        for (const world of worlds()) {
-          const foe = world.fight3d.kinds.foe
-          foe.recover = jolt.recover
-          if (jolt.reaction === 'clips') delete foe.jolt
-          else foe.jolt = { stiffness: jolt.stiffness, damping: jolt.damping, gain: jolt.gain, most: jolt.most, limbs: joltWas.limbs }
-          foe.anim = jolt.reaction === 'jolt' ? {} : { react: REACT }
+      // Each struck kind's entry as the scene file gives it, kept before anything is changed.
+      const filed = Object.fromEntries(STRUCK.map(k => [k, clone(fights[k])]))
+      // The panel's own copy of each struck kind's entry, and its jolt, kept while the reaction is the clips alone.
+      const own = {}
+      const ownOf = kind => {
+        if (!own[kind]) {
+          const e = clone(filed[kind])
+          // A kind the file gives no jolt starts its springs and gives at nothing, its reaction the clips alone.
+          own[kind] = { entry: e, jolt: clone(e.jolt ?? { stiffness: 0, damping: 0, gain: 0, most: 0, limbs: {} }), reaction: !e.jolt ? 'clips' : e.anim?.react ? 'both' : 'jolt' }
         }
+        return own[kind]
       }
-      const jf = gui.addFolder('jolt')
-      jf.add(jolt, 'reaction', ['jolt', 'clips', 'both']).name('reaction').onChange(layJolt)
-      jf.add(jolt, 'stiffness', 10, 600, 1).name('stiffness, 1/s²').onChange(layJolt)
-      jf.add(jolt, 'damping', 0, 60, 0.5).name('damping, 1/s').onChange(layJolt)
-      jf.add(jolt, 'gain', 0, 2, 0.01).name('gain, rad per m·m/s').onChange(layJolt)
-      jf.add(jolt, 'most', 0, 1.5, 0.01).name('most, rad').onChange(layJolt)
-      jf.add(jolt, 'recover', 0, 2, 0.05).name('walks home after, s').onChange(layJolt)
-      jf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({ recover: jolt.recover, jolt: { stiffness: jolt.stiffness, damping: jolt.damping, gain: jolt.gain, most: jolt.most } }, null, 2)) }, 'copy').name('copy jolt JSON')
-      jf.add({ reset: () => { Object.assign(jolt, { ...joltWas, limbs: undefined, recover: recoverWas, reaction: 'jolt' }); for (const c of gui.controllersRecursive()) c.updateDisplay(); layJolt() } }, 'reset').name('reset to the file')
+      // The kind's entry as the panel holds it, laid into every world whole: the jolt unless the reaction is the clips
+      // alone, and anim's `react` (the file's, else REACT) unless it is the jolt alone.
+      const entryOf = kind => {
+        const o = ownOf(kind)
+        const { jolt: _, ...e } = clone(o.entry)
+        if (o.reaction !== 'clips') e.jolt = clone(o.jolt)
+        if (!('anim' in e)) return e
+        const { react, ...anim } = e.anim
+        e.anim = o.reaction === 'jolt' ? anim : { ...anim, react: react ?? REACT }
+        return e
+      }
+      const lay = kind => { for (const world of worlds()) world.fight3d.kinds[kind] = entryOf(kind) }
 
-      // The combo's three hits, J pressed again within each one: the clip each plays, picked from every unarmed strike
-      // the rig has baked (its file named beside it), and each one's warp. The pick is laid into the truth's and the
-      // page's motion file; a clip picked that fight3d's strikes give none for is given the slot's own. Each slot's
-      // `ms` is how long its clip plays (motion3d's Speed: the clip's `ms`, its ramp kept as its shape), 0 for the rig's
-      // own; `own speed` plays every pickable clip at the speed it was made at, its rig's `rate` ramp and `ms` off.
-      const MOTION = room().world.motion3d.kinds.xbot.motion
-      const SLOTS = ['light1', 'light2', 'light3']
-      // Every unarmed strike of one blow the rig has: the punches, elbows, knees and kicks.
-      const PICKS = ['uajab', 'uacross', 'uahook', 'uahook2', 'uauppercut', 'uasurprise', 'uaelbow',
-        'uaknee', 'uaillegalknee', 'uakick', 'uammakick', 'uasidekick', 'uacrescent', 'uasweep']
-      const motionsOf = () => [room() && json(readerOf(room()), MOTION), client && json(client.plugins.wire, MOTION)].filter(Boolean).map(f => f.activities.fight.motions)
-      const rigs = () => [room() && rigOf(readerOf(room()), 'xbot'), client && rigOf(client.plugins.wire, 'xbot')].filter(Boolean)
-      const fileName = clip => rigs()[0].clips[clip].file.split('/').pop().replace('.fbx', '')
-      const label = clip => `${clip} (${fileName(clip)})`
-      const byLabel = Object.fromEntries(PICKS.map(c => [label(c), c]))
-      // Each pickable clip's speed as the rig gives it, kept so `own speed` can be turned off again.
-      const speedWas = Object.fromEntries(PICKS.map(c => { const k = clipOf(rigs()[0], c); return [c, { rate: k.rate, ramp: k.ramp, ms: k.ms }] }))
-      const firstMotions = motionsOf()[0]
-      const firstStrikes = clone(room().world.fight3d.kinds.player.strikes)
-      const combo = { own: false }
-      const slotsWas = SLOTS.map(name => {
-        const m = firstMotions[name]
-        return { clip: label(m.clips[0]), ms: speedWas[m.clips[0]]?.ms ?? 0, reach: m.warp.reach, short: m.warp.short, accel: m.warp.accel, turn: m.warp.turn }
-      })
-      const slots = clone(slotsWas)
-      const laySlots = () => {
-        for (const motions of motionsOf()) SLOTS.forEach((name, i) => {
-          const s = slots[i]
-          motions[name].clips = [byLabel[s.clip]]
-          Object.assign(motions[name].warp, { reach: s.reach, short: s.short, accel: s.accel, turn: s.turn })
-        })
-        for (const world of worlds()) SLOTS.forEach((name, i) => {
-          const clip = byLabel[slots[i].clip]
-          world.fight3d.kinds.player.strikes[clip] ??= { ...firstStrikes[firstMotions[name].clips[0]] }
-        })
-        // Each clip in its slot's time, its rig's ramp kept as its shape (none with `own speed`); a slot's time of 0,
-        // or a clip in no slot, plays as its rig gives it.
-        const msOf = c => slots.find(s => byLabel[s.clip] === c)?.ms || null
-        for (const rig of rigs()) for (const c of PICKS) {
-          const base = combo.own ? { rate: 1, ramp: null, ms: null } : speedWas[c], k = clipOf(rig, c), ms = msOf(c) ?? base.ms
-          Object.assign(k, { ms, ramp: base.ramp, rate: base.ramp ? 1 : ms !== null ? k.dur / (ms / 1000) : base.rate })
+      // The joints of a kind's skeleton a give may name: each bone's name without the prefix every bone shares.
+      const jointsOf = kind => {
+        const names = Object.keys(skeletonOf(client.plugins.wire, kind).bones)
+        let prefix = names[0] ?? ''
+        for (const n of names) while (!n.startsWith(prefix)) prefix = prefix.slice(0, -1)
+        return names.map(n => n.slice(prefix.length)).sort()
+      }
+
+      function join(id) {
+        joined.id = id
+        build()
+      }
+      // The joined panel, built again whenever the body joined changes or a joint is put on or taken off.
+      function build() {
+        const open = panel ? Object.fromEntries(panel.foldersRecursive().map(f => [f._title, !f._closed])) : {}
+        panel?.destroy()
+        panel = undefined
+        const row = joinedRow()
+        if (!row) return
+        const kind = row.kind
+        const o = ownOf(kind)
+        const e = o.entry
+        panel = gui.addFolder(`joined: ${kind} #${row.id}`)
+        const changed = () => lay(kind)
+        panel.add(o, 'reaction', ['jolt', 'clips', 'both']).name('reaction').onChange(changed)
+
+        const sf = panel.addFolder('struck')
+        sf.add(e, 'stop', 0, 0.5, 0.01).name('hitstop, s').onChange(changed)
+        sf.add(e, 'pace', 0, 1, 0.01).name('frozen pace').onChange(changed)
+        sf.add(e, 'drag', 0.5, 40, 0.5).name('knockback drag, 1/s').onChange(changed)
+        sf.add(e, 'large', 0, 100, 1).name('large reaction from, damage').onChange(changed)
+        sf.add(e, 'home', 0, 2, 0.05).name('walks home from, m').onChange(changed)
+        e.recover ??= 0
+        sf.add(e, 'recover', 0, 2, 0.05).name('walks home after, s').onChange(changed)
+
+        const lf = panel.addFolder('low limbs')
+        const limbNames = Object.keys(room().world.melee3d.limbs)
+        for (const limb of limbNames) {
+          const flag = { get on() { return e.low.includes(limb) }, set on(v) { e.low = v ? [...e.low.filter(l => l !== limb), limb] : e.low.filter(l => l !== limb); changed() } }
+          lf.add(flag, 'on').name(limb)
         }
-      }
-      // A clip in two slots plays in one time: a slot's time set is the time of every slot playing its clip.
-      const sameSpeed = i => { slots.forEach(s => { if (s.clip === slots[i].clip) s.ms = slots[i].ms }); for (const c of gui.controllersRecursive()) c.updateDisplay(); laySlots() }
-      const comboFolder = gui.addFolder('combo')
-      slots.forEach((s, i) => {
-        const f = comboFolder.addFolder(`hit ${i + 1}`)
-        f.add(s, 'clip', Object.keys(byLabel)).name('clip').onChange(() => sameSpeed(i))
-        f.add(s, 'ms', 0, 2000, 5).name('plays in, ms (0 the rig\'s)').onChange(() => sameSpeed(i))
-        f.add(s, 'reach', 0, 3, 0.05).name('warp reach, m').onChange(laySlots)
-        f.add(s, 'short', 0, 2, 0.05).name('lands short of target, m').onChange(laySlots)
-        f.add(s, 'accel', 0, 200, 1).name('warp accel, m/s²').onChange(laySlots)
-        f.add(s, 'turn', 0, 180, 1).name('warp turn, °').onChange(laySlots)
-      })
-      comboFolder.add(combo, 'own').name('own speed (rig ramp off, slot time kept)').onChange(laySlots)
-      // The motions as the motion file gives them, and each slot's clip's `rate` and `ms` as the rig file gives them.
-      const rigRate = c => { const k = clipOf(rigs()[0], c); return { ...(k.ramp ? { rate: k.ramp.map(p => [p.at, p.rate]) } : k.ms === null ? { rate: Number(k.rate.toFixed(3)) } : {}), ...(k.ms !== null ? { ms: k.ms } : {}) } }
-      comboFolder.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({
-        motions: Object.fromEntries(SLOTS.map((name, i) => [name, { clips: [byLabel[slots[i].clip]], warp: { until: 'strike', reach: slots[i].reach, turn: slots[i].turn, accel: slots[i].accel, short: slots[i].short } }])),
-        rig: Object.fromEntries(slots.map(s => [byLabel[s.clip], rigRate(byLabel[s.clip])])),
-      }, null, 2)) }, 'copy').name('copy combo JSON')
-      comboFolder.add({ reset: () => { slots.forEach((s, i) => Object.assign(s, slotsWas[i])); combo.own = false; for (const c of gui.controllersRecursive()) c.updateDisplay(); laySlots() } }, 'reset').name('reset to the file')
 
-      // What the fight did, off the rows: the seat's swing, what it has met, its freeze; the foe's blows, reaction and
-      // freeze.
-      const fought = () => {
-        const me = rowOf('player'), foe = rowOf('foe')
-        if (!me || !foe) return []
-        const f = foe.data
+        const jf = panel.addFolder('jolt springs')
+        jf.add(o.jolt, 'stiffness', 10, 600, 1).name('stiffness, 1/s²').onChange(changed)
+        jf.add(o.jolt, 'damping', 0, 60, 0.5).name('damping, 1/s').onChange(changed)
+        jf.add(o.jolt, 'gain', 0, 2, 0.01).name('gain, rad per m·m/s').onChange(changed)
+        jf.add(o.jolt, 'most', 0, 1.5, 0.01).name('most, rad').onChange(changed)
+
+        const gf = panel.addFolder('jolt joints')
+        const joints = jointsOf(kind)
+        for (const limb of limbNames) {
+          const gives = (o.jolt.limbs[limb] ??= {})
+          const f = gf.addFolder(`${limb} (${Object.keys(gives).length})`)
+          for (const joint of Object.keys(gives)) {
+            f.add(gives, joint, 0, 2, 0.01).name(joint).onChange(changed)
+            f.add({ off: () => { delete gives[joint]; changed(); build() } }, 'off').name(`take ${joint} off`)
+          }
+          const put = { joint: joints.find(j => !(j in gives)) ?? joints[0] }
+          f.add(put, 'joint', joints).name('joint to put on')
+          f.add({ on: () => { if (!(put.joint in gives)) { gives[put.joint] = 0.5; changed(); build() } } }, 'on').name('put it on, give 0.5')
+          if (!open[f._title]) f.close()
+        }
+
+        panel.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({ [sceneFile]: { world: { fight3d: { kinds: { [kind]: entryOf(kind) } } } } }, null, 2)) }, 'copy').name(`copy ${kind}'s fight3d JSON`)
+        panel.add({ reset: () => { delete own[kind]; lay(kind); build() } }, 'reset').name('reset to the file')
+        for (const f of panel.foldersRecursive()) if (f._title in open && !open[f._title]) f.close()
+        if (hand()) hitFolder()
+      }
+
+      // ---------- the hand ----------
+
+      // The strike the hand throws, and where the panel's button throws it.
+      const STRIKES = hand() ? Object.keys(fights.hand.strikes) : []
+      const strikesFiled = hand() ? clone(fights.hand.strikes) : {}
+      const strikes = clone(strikesFiled)
+      const hit = { strike: STRIKES[0], side: 'front', limb: 'head', every: 0 }
+      let hitF
+      const layStrikes = () => { for (const world of worlds()) world.fight3d.kinds.hand.strikes = clone(strikes) }
+      // A throw of the picked strike through `point` along `way`.
+      const throwAt = (point, way) => client.plugins.wire.send(hand().id, 'throw', hit.strike, ...point, ...way)
+      // A throw at the middle of the picked limb, from the picked side of the body as it faces.
+      const SIDES = { front: 0, back: Math.PI, left: Math.PI / 2, right: -Math.PI / 2, above: null }
+      const throwFromSide = () => {
+        const row = client.plugins.wire.rows.find(r => r.id === joined.id)
+        if (!row) return
+        const l = limbs(client.plugins.wire, row).find(x => x.limb === hit.limb)
+        if (!l) return
+        const mid = l.a.map((v, i) => (v + l.b[i]) / 2)
+        const a = SIDES[hit.side]
+        // The way in: toward the body from in front of it, behind it, its left or its right (yaw θ faces (sin θ, cos θ)),
+        // or straight down.
+        const way = a === null ? [0, -1, 0] : [-Math.sin(row.data.yaw + a), 0, -Math.cos(row.data.yaw + a)]
+        throwAt(mid, way)
+      }
+      function hitFolder() {
+        hitF = panel.addFolder('hit')
+        let numbers
+        const show = () => {
+          numbers?.destroy()
+          numbers = hitF.addFolder(`${hit.strike}`)
+          const s = strikes[hit.strike]
+          s.stop ??= fights.hand.stop
+          numbers.add(s, 'damage', 0, 100, 1).name('damage').onChange(layStrikes)
+          numbers.add(s, 'knock', 0, 20, 0.1).name('knock, m/s').onChange(layStrikes)
+          numbers.add(s, 'stop', 0, 0.5, 0.01).name('hitstop, hand, s').onChange(layStrikes)
+        }
+        hitF.add(hit, 'strike', STRIKES).name('strike a click throws').onChange(show)
+        hitF.add(hit, 'limb', Object.keys(room().world.melee3d.limbs)).name('limb')
+        hitF.add(hit, 'side', Object.keys(SIDES)).name('from')
+        hitF.add({ go: throwFromSide }, 'go').name('throw at the limb')
+        hitF.add(hit, 'every', 0, 3, 0.05).name('again every, s (0 never)')
+        hitF.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({ [sceneFile]: { world: { fight3d: { kinds: { hand: { strikes } } } } } }, null, 2)) }, 'copy').name('copy the strikes JSON')
+        hitF.add({ reset: () => { Object.assign(strikes, clone(strikesFiled)); layStrikes(); show() } }, 'reset').name('strikes to the file')
+        show()
+      }
+
+      // ---------- the camera, with no seat body ----------
+
+      // The orbit about the joined body, or the first struck body, where it stands, while the seat plays no body.
+      const orbit = { yaw: 0.25, pitch: 0.12, dist: 3.4, dragging: false }
+      const OWNER = 'demo_fight3d dev'
+      const body = () => !possessed(client?.plugins.wire.rows ?? [])
+      addEventListener('mousedown', e => { if (e.button === 2 && body() && !gui.domElement.contains(e.target)) orbit.dragging = true })
+      addEventListener('mouseup', () => { orbit.dragging = false })
+      addEventListener('mousemove', e => {
+        if (!orbit.dragging) return
+        orbit.yaw -= e.movementX * 0.006
+        orbit.pitch = Math.min(1.4, Math.max(-0.3, orbit.pitch + e.movementY * 0.006))
+      })
+      addEventListener('contextmenu', e => { if (body()) e.preventDefault() })
+      addEventListener('wheel', e => { if (!body() || gui.domElement.contains(e.target)) return; e.preventDefault(); orbit.dist = Math.min(12, Math.max(0.8, orbit.dist * Math.exp(e.deltaY * 0.0015))) }, { passive: false })
+      const place = () => {
+        const r3 = client?.plugins.render3d
+        if (!r3?.camera || !body()) return
+        const row = joinedRow() ?? struckRows()[0]
+        if (!row || !r3.claim(OWNER)) return
+        // Where it stands (`at`) and not where a shove has carried it, so the camera holds still through the blow.
+        const [x, z] = row.data.at
+        const y = row.data.pos[1] + 1.05
+        const yaw = row.data.facing + orbit.yaw
+        r3.camera.position.set(x + Math.sin(yaw) * Math.cos(orbit.pitch) * orbit.dist, y + Math.sin(orbit.pitch) * orbit.dist, z + Math.cos(yaw) * Math.cos(orbit.pitch) * orbit.dist)
+        r3.camera.up.set(0, 1, 0)
+        r3.camera.lookAt(x, y, z)
+      }
+
+      // ---------- main: the striker ----------
+
+      const fought = []
+      if (room().world.motion3d) {
+        // fight3d's, motion3d's and melee3d's numbers of the striker, laid into every world as they change.
+        const fight = {}
+        const defsOf = () => [room() && json(readerOf(room()), room().world.defs), client && json(client.plugins.wire, room().world.defs)].filter(Boolean)
+        const layFight = () => {
+          for (const world of worlds()) {
+            world.fight3d.kinds.player.stop = fight.stop
+            world.motion3d.kinds.xbot.pace = fight.heroPace
+            world.melee3d.edge = fight.edge
+            if (fight.debug) world.melee3d.show = { colour: '#ffd040', radius: 0.012, limbs: '#60c0ff', struck: '#ff4040' }
+            else delete world.melee3d.show
+          }
+          for (const d of defsOf()) d.player.lock = fight.lock
+        }
+        const w0 = room().world
+        const firstFight = { stop: w0.fight3d.kinds.player.stop, heroPace: w0.motion3d.kinds.xbot.pace, edge: w0.melee3d.edge, debug: !!w0.melee3d.show, lock: defsOf()[0].player.lock }
+        Object.assign(fight, firstFight)
+        const xf = gui.addFolder('combat')
+        xf.add(fight, 'stop', 0, 0.5, 0.01).name('hitstop, striker, s').onChange(layFight)
+        xf.add(fight, 'heroPace', 0, 1, 0.01).name('frozen pace, X Bot').onChange(layFight)
+        xf.add(fight, 'lock', 0, 8, 0.1).name('warps onto foe within, m').onChange(layFight)
+        xf.add(fight, 'edge', 0, 10, 0.1).name('lands from, m/s').onChange(layFight)
+        xf.add(fight, 'debug').name('striker and limb lines').onChange(layFight)
+        xf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify(fight, null, 2)) }, 'copy').name('copy combat JSON')
+        xf.add({ reset: () => { Object.assign(fight, firstFight); refresh(); layFight() } }, 'reset').name('reset to the file')
+
+        // The combo's three hits, J pressed again within each one: the clip each plays, picked from every unarmed strike
+        // the rig has baked (its file named beside it), and each one's warp. The pick is laid into the truth's and the
+        // page's motion file; a clip picked that fight3d's strikes give none for is given the slot's own. Each slot's
+        // `ms` is how long its clip plays (motion3d's Speed: the clip's `ms`, its ramp kept as its shape), 0 for the
+        // rig's own; `own speed` plays every pickable clip at the speed it was made at, its rig's `rate` ramp and `ms`
+        // off.
+        const MOTION = room().world.motion3d.kinds.xbot.motion
+        const SLOTS = ['light1', 'light2', 'light3']
+        // Every unarmed strike of one blow the rig has: the punches, elbows, knees and kicks.
+        const PICKS = ['uajab', 'uacross', 'uahook', 'uahook2', 'uauppercut', 'uasurprise', 'uaelbow',
+          'uaknee', 'uaillegalknee', 'uakick', 'uammakick', 'uasidekick', 'uacrescent', 'uasweep']
+        const motionsOf = () => [room() && json(readerOf(room()), MOTION), client && json(client.plugins.wire, MOTION)].filter(Boolean).map(f => f.activities.fight.motions)
+        const rigs = () => [room() && rigOf(readerOf(room()), 'xbot'), client && rigOf(client.plugins.wire, 'xbot')].filter(Boolean)
+        const fileName = clip => rigs()[0].clips[clip].file.split('/').pop().replace('.fbx', '')
+        const label = clip => `${clip} (${fileName(clip)})`
+        const byLabel = Object.fromEntries(PICKS.map(c => [label(c), c]))
+        // Each pickable clip's speed as the rig gives it, kept so `own speed` can be turned off again.
+        const speedWas = Object.fromEntries(PICKS.map(c => { const k = clipOf(rigs()[0], c); return [c, { rate: k.rate, ramp: k.ramp, ms: k.ms }] }))
+        const firstMotions = motionsOf()[0]
+        const firstStrikes = clone(room().world.fight3d.kinds.player.strikes)
+        const combo = { own: false }
+        const slotsWas = SLOTS.map(name => {
+          const m = firstMotions[name]
+          return { clip: label(m.clips[0]), ms: speedWas[m.clips[0]]?.ms ?? 0, reach: m.warp.reach, short: m.warp.short, accel: m.warp.accel, turn: m.warp.turn }
+        })
+        const slots = clone(slotsWas)
+        const laySlots = () => {
+          for (const motions of motionsOf()) SLOTS.forEach((name, i) => {
+            const s = slots[i]
+            motions[name].clips = [byLabel[s.clip]]
+            Object.assign(motions[name].warp, { reach: s.reach, short: s.short, accel: s.accel, turn: s.turn })
+          })
+          for (const world of worlds()) SLOTS.forEach((name, i) => {
+            const clip = byLabel[slots[i].clip]
+            world.fight3d.kinds.player.strikes[clip] ??= { ...firstStrikes[firstMotions[name].clips[0]] }
+          })
+          // Each clip in its slot's time, its rig's ramp kept as its shape (none with `own speed`); a slot's time of 0,
+          // or a clip in no slot, plays as its rig gives it.
+          const msOf = c => slots.find(s => byLabel[s.clip] === c)?.ms || null
+          for (const rig of rigs()) for (const c of PICKS) {
+            const base = combo.own ? { rate: 1, ramp: null, ms: null } : speedWas[c], k = clipOf(rig, c), ms = msOf(c) ?? base.ms
+            Object.assign(k, { ms, ramp: base.ramp, rate: base.ramp ? 1 : ms !== null ? k.dur / (ms / 1000) : base.rate })
+          }
+        }
+        // A clip in two slots plays in one time: a slot's time set is the time of every slot playing its clip.
+        const sameSpeed = i => { slots.forEach(s => { if (s.clip === slots[i].clip) s.ms = slots[i].ms }); refresh(); laySlots() }
+        const comboFolder = gui.addFolder('combo')
+        slots.forEach((s, i) => {
+          const f = comboFolder.addFolder(`hit ${i + 1}`)
+          f.add(s, 'clip', Object.keys(byLabel)).name('clip').onChange(() => sameSpeed(i))
+          f.add(s, 'ms', 0, 2000, 5).name('plays in, ms (0 the rig\'s)').onChange(() => sameSpeed(i))
+          f.add(s, 'reach', 0, 3, 0.05).name('warp reach, m').onChange(laySlots)
+          f.add(s, 'short', 0, 2, 0.05).name('lands short of target, m').onChange(laySlots)
+          f.add(s, 'accel', 0, 200, 1).name('warp accel, m/s²').onChange(laySlots)
+          f.add(s, 'turn', 0, 180, 1).name('warp turn, °').onChange(laySlots)
+        })
+        comboFolder.add(combo, 'own').name('own speed (rig ramp off, slot time kept)').onChange(laySlots)
+        // The motions as the motion file gives them, and each slot's clip's `rate` and `ms` as the rig file gives them.
+        const rigRate = c => { const k = clipOf(rigs()[0], c); return { ...(k.ramp ? { rate: k.ramp.map(p => [p.at, p.rate]) } : k.ms === null ? { rate: Number(k.rate.toFixed(3)) } : {}), ...(k.ms !== null ? { ms: k.ms } : {}) } }
+        comboFolder.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({
+          motions: Object.fromEntries(SLOTS.map((name, i) => [name, { clips: [byLabel[slots[i].clip]], warp: { until: 'strike', reach: slots[i].reach, turn: slots[i].turn, accel: slots[i].accel, short: slots[i].short } }])),
+          rig: Object.fromEntries(slots.map(s => [byLabel[s.clip], rigRate(byLabel[s.clip])])),
+        }, null, 2)) }, 'copy').name('copy combo JSON')
+        comboFolder.add({ reset: () => { slots.forEach((s, i) => Object.assign(s, slotsWas[i])); combo.own = false; refresh(); laySlots() } }, 'reset').name('reset to the file')
+
+        // The seat's swing, what it has met and its freeze.
+        fought.push(() => {
+          const me = rowOf('player')
+          return me ? [`swing ${me.data.swing ?? 'none'}   met ${(me.data.struck ?? []).join(', ') || 'nothing'}   frozen ${fixed(me.data.stop ?? 0)} s`] : []
+        })
+      }
+
+      // The joined body's blows, the clip it plays, its freeze and each joint it is jolted at; and the hand's throws.
+      fought.push(() => {
+        const row = joinedRow()
+        if (!row) return [`click a body to join it`]
+        const f = row.data
         return [
-          `swing ${me.data.swing ?? 'none'}   met ${(me.data.struck ?? []).join(', ') || 'nothing'}   frozen ${fixed(me.data.stop ?? 0)} s`,
-          `foe blows ${f.hits}   ${f.clip ?? ''}   frozen ${fixed(f.stop ?? 0)} s`,
-          `foe jolted ${Object.entries(f.jolt ?? {}).map(([bone, v]) => `${bone} ${fixed(Math.hypot(v[0], v[1], v[2]))}`).join('  ') || 'nowhere'}`,
+          `joined ${row.kind} #${row.id}   blows ${f.hits}   ${f.clip ?? ''}   frozen ${fixed(f.stop ?? 0)} s`,
+          `jolted ${Object.entries(f.jolt ?? {}).map(([bone, v]) => `${bone} ${fixed(Math.hypot(v[0], v[1], v[2]))}`).join('  ') || 'nowhere'}`,
+          ...(hand() ? [`hand ${hit.strike}   thrown ${hand().data.thrown}   met ${(hand().data.struck ?? []).join(', ') || 'nothing'}   click the body to throw there`] : []),
         ]
-      }
+      })
 
-      let last = performance.now(), owed = 0
+      window.dev = { clock, run, join, joined, throwAt: (point, way) => throwAt(point, way), throwFromSide, hit }
+
+      let last = performance.now(), owed = 0, again = 0
       const loop = async now => {
-        owed += Math.min((now - last) / 1000, 0.25)
+        const spent = Math.min((now - last) / 1000, 0.25)
+        owed += spent
         last = now
         // A frame that throws is shown, and the next frame goes on.
         try {
           page.input()
+          if (hit.every > 0 && hand() && joinedRow() && !clock.paused) {
+            again += spent
+            if (again >= hit.every) { again = 0; throwFromSide() }
+          }
           if (clock.paused) {
             owed = 0
             if (clock.step) { truth.step(dt); clock.step = false }
@@ -296,14 +512,17 @@
             owed -= dt
             if (stepOnce()) owed = 0
           }
+          place()
           await page.frame(clock.paused ? 1 : owed / dt)
         } catch (e) { caught(e) }
         readout.textContent = [
-          'left stick / W A S D  walk     right stick / right drag  look     wheel  zoom',
-          'J  jab, cross, hook     K  roundhouse, or after a light the uppercut and hurricane kick     L  MMA kick',
+          ...(room().world.motion3d ? [
+            'left stick / W A S D  walk     right stick / right drag  look     wheel  zoom',
+            'J  jab, cross, hook     K  roundhouse, or after a light the uppercut and hurricane kick     L  MMA kick',
+          ] : ['left click  join the body, then throw where clicked     right drag  turn     wheel  in and out']),
           '`  pause     .  one step on',
           `${chosen.scene}  step ${truth.n}${clock.paused ? '  paused' : ''}`,
-          ...fought(),
+          ...fought.flatMap(f => f()),
           ...errors,
         ].join('\n')
         requestAnimationFrame(loop)

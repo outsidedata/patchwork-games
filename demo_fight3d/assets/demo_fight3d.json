@@ -20,5 +20,6 @@
     "lock": 4,
     "targets": ["foe"]
   },
-  "foe": {}
+  "foe": {},
+  "hand": { "speed": 8, "run": 0.6, "size": 0.09, "colour": "#e8c9a0" }
 }
