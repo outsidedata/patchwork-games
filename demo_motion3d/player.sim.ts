@@ -6,10 +6,9 @@
 // chasecamera3d's orbit about it, `lift` metres over its feet; `turning` [x, y], how far a gamepad's right
 // stick is pushed right and down; `aim`, the way the camera looks, which motion3d points a carried prop
 // along while an aim is up; `weapon`, the stance the draw key draws, one of the definition's `weapons`;
-// `target`, the middle of the nearest row of the definition's `targets` kinds (the yard's dummy, the combat
-// scene's foe) within its `lock` metres, or null, which motion3d bends an attack onto (its Warp); `stop`,
-// seconds left of the freeze a blow it landed put it in, which motion3d's `drive` honours (its Hitstop); and
-// `stood`, once it stands on its slot's start.
+// `target`, the middle of the nearest row of the definition's `targets` kinds (the yard's dummy)
+// within its `lock` metres, or null, which motion3d bends an attack onto (its Warp); and `stood`, once it
+// stands on its slot's start.
 //
 // Facing. With an aim up (the upper half playing one of the definition's `aimOf`, each weapon's aim by
 // its name) the legs keep the way
@@ -31,13 +30,11 @@
 // `weapon` follows. Whichever weapon's stance is up is `weapon`.
 //
 // `before` stands it once on the ground at its slot's start, facing the start's `yaw`, its look along
-// it, and when its definition gives `drawn` (the combat scene's), draws that weapon. Each step its look turns while `turning` is held, at the definition's `camera.turn` across and
+// it. Each step its look turns while `turning` is held, at the definition's `camera.turn` across and
 // `tilt` up and down a second at full push, the yaw less for a push right and the pitch more for a push
 // down, within `minPitch` and `maxPitch`. The stick is its want: kinematics3d's `want`, the way the stick
 // points from the camera's yaw, as hard as it is pushed (the clip it plays says how fast); and
-// motion3d's `drive`, which moves and plays the body by it. Then its blade is swept (the combat plugin's `blows`,
-// `plugins/combat`): in a scene that gives melee3d, a swing whose blow is open lands on every limb its sword
-// passes through, and freezes the body for the definition's `stop`.
+// motion3d's `drive`, which moves and plays the body by it.
 //
 // The acts are the page's keys: `stick(x, y)` (y down, as a stick reads), `turn(x, y)` (the right
 // stick, the same), `fast(v)`, `guard(v)` and `jumping(v)` (1 held, 0 let go; `jumping` is the jump key,
@@ -51,7 +48,6 @@ import { activityOf, drive, motionOf, press, queue } from '#plugins/motion3d/mot
 import { playKind, rigOf } from '#plugins/motion3d/motion3d.play.ts'
 import { nearest, relative } from '#plugins/kinematics3d/kinematics3d.sim.ts'
 import { pads } from './plugins/jumppad/jumppad.sim.ts'
-import { blows } from './plugins/combat/combat.sim.ts'
 
 const wrap = (a: number) => a - 2 * Math.PI * Math.ceil((a - Math.PI) / (2 * Math.PI))
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
@@ -76,12 +72,6 @@ function stood(me: Row, w: W) {
   d.yaw = start.yaw
   d.look = { ...d.look, yaw: start.yaw }
   d.stood = true
-  // A definition that gives `drawn` stands with that weapon drawing from the start.
-  const k = def(w, me.kind)
-  if (k.drawn) {
-    d.weapon = k.drawn
-    queue(me, w, `draw.${k.drawn}`)
-  }
 }
 
 // A key pressed (The keys, the header): the switch key with nothing drawn picks the next weapon; the draw
@@ -149,8 +139,6 @@ export const player: Kind = {
     // The target an attack is bent onto (motion3d's Warp): the nearest of `targets` within `lock` metres.
     d.target = targetOf(me, w, k.targets, k.lock)
     drive(me, w, dt, d.stick)
-    // The blade swept through what it meets.
-    blows(w, me, dt)
     // The jump pad the body has just come onto, if any, throws it (`plugins/jumppad`).
     pads(me, w)
   },
