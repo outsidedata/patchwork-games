@@ -112,6 +112,11 @@
           "url": "/games/demo_world3d/assets/village/village.art.hairs.json",
           "preload": true
         },
+        "village.art.light": {
+          "type": "json",
+          "url": "/games/demo_world3d/assets/village/village.art.light.json",
+          "preload": true
+        },
         "village.art_pictures": {
           "type": "texture",
           "url": "/games/demo_world3d/assets/village/looks/village.art.pictures.ktx2",
@@ -121,7 +126,24 @@
     },
     "world3d": {
       "place": "village.art",
-      "people": "person"
+      "people": "person",
+      "rooms": {
+        "ambient": 0.15,
+        "environment": 0.15,
+        "exposure": 2.5,
+        "ease": 0.4,
+        "window": 8,
+        "patch": 0.04,
+        "shaft": 0.004,
+        "reach": 12,
+        "cone": 150,
+        "under": 0.8,
+        "soft": 0.35,
+        "through": 0.8
+      },
+      "mods": {
+        "sky": "skydome3d"
+      }
     },
     "particle3d": {
       "effects": "effects"
@@ -568,7 +590,22 @@
         "normalBias": 0.03
       },
       "mods": {
-        "land": "terrain3d"
+        "land": "terrain3d",
+        "indoors": "world3d"
+      }
+    },
+    "lights3d": {
+      "grid": [
+        16,
+        9
+      ],
+      "slices": 24,
+      "shadows": {
+        "atlas": 4096,
+        "tile": 256,
+        "bias": 0.04,
+        "normalBias": 0.05,
+        "budget": 48
       }
     }
   },
@@ -590,6 +627,7 @@
     "particle3d",
     "world3d",
     "render3d",
+    "lights3d",
     "chasecamera3d"
   ],
   "seats": 1,
