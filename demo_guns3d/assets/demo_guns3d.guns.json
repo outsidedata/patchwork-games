@@ -90,6 +90,9 @@
         "impact": {
           "ground": "impact ground",
           "body": "impact plate"
+        },
+        "mark": {
+          "ground": "hole"
         }
       },
       "points": {
@@ -391,6 +394,9 @@
         "impact": {
           "ground": "laser ground",
           "body": "laser plate"
+        },
+        "mark": {
+          "ground": "burn"
         }
       },
       "points": {

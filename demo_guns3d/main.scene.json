@@ -35,6 +35,21 @@
           "url": "/games/demo_guns3d/assets/effects.json",
           "preload": true
         },
+        "marks": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/marks.decal3d.json",
+          "preload": true
+        },
+        "mark-hole": {
+          "type": "texture",
+          "url": "/games/demo_guns3d/assets/marks/hole.png",
+          "preload": true
+        },
+        "mark-scorch": {
+          "type": "texture",
+          "url": "/games/demo_guns3d/assets/marks/scorch.png",
+          "preload": true
+        },
         "xbot": {
           "type": "model",
           "url": "/games/demo_guns3d/assets/xbot.glb",
@@ -358,6 +373,7 @@
           "volley3d",
           "chasecamera3d",
           "particle3d",
+          "decal3d",
           "laser"
         ]
       }
@@ -367,7 +383,21 @@
       "hold": 0.5,
       "mods": {
         "shoot": "hitscan3d",
-        "bodies": "hitscan3d"
+        "bodies": "hitscan3d",
+        "mark": "decal3d"
+      }
+    },
+    "decal3d": {
+      "looks": "marks",
+      "most": 400,
+      "mods": {
+        "words": [
+          "render3d"
+        ],
+        "behaviors": [
+          "render3d",
+          "terrain3d"
+        ]
       }
     },
     "chasecamera3d": {
@@ -554,6 +584,7 @@
     "ik3d",
     "volley3d",
     "particle3d",
+    "decal3d",
     "environment3d",
     "render3d",
     "lights3d",

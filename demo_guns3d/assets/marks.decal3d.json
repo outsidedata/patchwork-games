@@ -1,0 +1,5 @@
+{
+  "hole": { "map": "mark-hole", "size": [0.05, 0.05], "scale": [0.85, 1.15], "deep": 0.1, "angle": 80, "spin": 180, "colour": "#ffffff", "roughness": 0.95, "life": 30, "fade": 3, "lift": 0.002 },
+  "burn": { "map": "mark-scorch", "size": [0.045, 0.045], "scale": [0.85, 1.15], "deep": 0.1, "angle": 80, "spin": 180, "colour": "#3a2a22", "roughness": 0.95, "life": 3, "fade": 0.6, "lift": 0.002 },
+  "scorch": { "map": "mark-scorch", "size": [1.7, 1.7], "scale": [0.9, 1.1], "deep": 0.6, "angle": 85, "spin": 180, "colour": "#ffffff", "roughness": 0.95, "life": 30, "fade": 3, "lift": 0.003 }
+}

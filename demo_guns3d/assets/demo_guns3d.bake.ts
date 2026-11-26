@@ -12,6 +12,9 @@
 //                        the scene's one looks file and its pictures, by the bake's `looks` tool: the ground's
 //                        material (GROUND), then every material the items are drawn in; its pictures' stack listed
 //                        in the scene's catalogue (`main.scene.json`), the entries of an earlier bake taken out first
+//   marks/hole.png, marks/scorch.png
+//                        the pictures decal3d presses where a round lands (`marks.decal3d.json`): `flipbooks`
+//                        renders each still `marks/marksConfig.json` lists from its node tree, in Blender
 // Change the sheet, a kind, a material or a look in the library and bake again.
 import { execFile } from 'node:child_process'
 import path from 'node:path'
@@ -28,7 +31,10 @@ const node = (args: string[]) =>
   new Promise<string>((done, fail) => execFile(process.execPath, args, (e, stdout, stderr) =>
     e ? fail(new Error(`node ${args.join(' ')} failed:\n${stdout}${stderr}`)) : done(`${stdout}${stderr}`)))
 
-export default async ({ blender, scratch, items, looks }: Tools) => {
+export default async ({ blender, scratch, items, looks, flipbooks }: Tools) => {
+  // the marks' pictures
+  console.log(await flipbooks(path.join(here, 'marks', 'marksConfig.json')))
+
   // the player's body and its rig's measures
   const rig = path.join(here, 'xbot.rig.json'), table = scratch('xbot.table.json')
   console.log(await blender(['--factory-startup', '--python-exit-code', '1', '--python', path.join(root, 'plugins', 'anim', 'anim.export.py'), '--', rig, table, `xbot=${path.join(here, 'xbot.glb')}`]))

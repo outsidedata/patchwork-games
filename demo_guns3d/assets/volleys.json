@@ -8,7 +8,7 @@
       "life": 4.5,
       "radius": 0.04,
       "splash": 5,
-      "look": { "body": "pg7v", "trail": "pg7v trail", "burst": "pg7v burst" }
+      "look": { "body": "pg7v", "trail": "pg7v trail", "burst": "pg7v burst", "mark": "scorch" }
     },
     "ion": {
       "speed": 140,

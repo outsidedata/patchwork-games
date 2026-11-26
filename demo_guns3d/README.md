@@ -19,7 +19,7 @@ minute from a 180-pulse cell (the laser plugin's `cell` feed); each pulse is a `
 met at once, so it burns whatever the reticle covers that step. The beam is drawn every frame from the muzzle to where
 the newest pulse landed (the laser plugin's `beam` look word), and the pulses come closer together than its `fade`, so
 it reads as one beam that stays on while the trigger is held and goes out the frame it is let go. Where it lands it
-sparks and scorches (`laser ground`, `laser plate`). R swaps the cell.
+sparks (`laser ground`, `laser plate`) and burns the land for a few seconds (decal3d's `burn`). R swaps the cell.
 
 Q again swaps to the G95-I, the ion blaster: the same G95 item, firing one bolt of ion a press, 240 a minute at most,
 from a 24-bolt cell. Each bolt is a volley3d round (the `volley` flight word, the `ion` pattern) that leaves the muzzle
@@ -31,7 +31,7 @@ muzzle flashes blue (`ion flash`, `ion haze`). R swaps the cell.
 - **The sheet**, `assets/demo_guns3d.guns.json` (`world.guns3d.sheet`), is everything about the gun and who holds
   it: the G95's item, damage, words (the `select` trigger and its modes, the `cycle` at 850 rounds a minute, the
   30-round `magazine`, the `eye` aim, the `cone` spread, the `hitscan` flight, the `kick`), its look (flash, smoke,
-  tracer, impacts), its points (`muzzle`, `port`, `stock`, `grip`, `support`, the magazine, the bolt catch, the
+  tracer, impacts, marks), its points (`muzzle`, `port`, `stock`, `grip`, `support`, the magazine, the bolt catch, the
   charging handle, the forward assist) and its moves; the X Bot's fit (its stock on the right shoulder, its elbows'
   poles, its pouch and chest points); and the grips its hands make.
 - **The moves**, `assets/moves/*.move.json`, each one thing done with the gun, as cues for each hand, its fingers,
@@ -44,6 +44,10 @@ muzzle flashes blue (`ion flash`, `ion haze`). R swaps the cell.
   say, and ik3d bends its arms there (`world.ik3d.mods.limbs: "guns3d"`).
 - **The plates** are the range plugin's (`plugins/range/`): a plate knocked down by a round lies over for a few
   seconds and stands again.
+- **The marks** are decal3d's (`plugins/decal3d/`), cut from the triangles of the land where a round meets it, so
+  they lie on its bumps: the G95's bullet holes (`hole`, through guns3d's `mark` look word), the G95-L's burns
+  (`burn`), and the PG-7V's scorch where it bursts (`scorch`, its pattern's look `mark`, through
+  `world.volley3d.mods.mark`). Their looks are `assets/marks.decal3d.json`, their pictures `assets/marks/`.
 
 ## Keys
 
@@ -62,9 +66,13 @@ charges (the RPG-7 cocks its hammer), V checks the load, Q swaps from the G95 to
 - `assets/demo_guns3d.items.json`: the items sheet: the G95, the spent 5.56 case its port throws, the magazine a
   reload drops, the RPG-7 and the PG-7V a flying grenade is drawn as.
 - `assets/volleys.json`: volley3d's patterns: the PG-7V's speed, its sustainer's climb to 295 m/s, its fall, its
-  splash and its look; and the ion bolt's, straight at 140 m/s (`world.volley3d`).
-- `assets/demo_guns3d.bake.ts`: the bake (`yarn bake demo_guns3d`): the X Bot and its clips, the items, and the
-  scene's one looks file.
+  splash and its look, the scorch it leaves; and the ion bolt's, straight at 140 m/s (`world.volley3d`).
+- `assets/marks.decal3d.json`: decal3d's looks, `hole`, `burn` and `scorch` (`world.decal3d`): each one's picture,
+  size, colour and how long it lasts.
+- `assets/marks/marksConfig.json`: the marks' pictures, `hole.png` and `scorch.png`, each a still drawn from the node
+  tree it writes out, rendered by the bake's `flipbooks` (`tools/workshop/flipbooks.py`).
+- `assets/demo_guns3d.bake.ts`: the bake (`yarn bake demo_guns3d`): the marks' pictures, the X Bot and its clips,
+  the items, and the scene's one looks file.
 - `assets/effects.json`: the flash, the smoke, the tracer, the impacts, the case and the dropped magazine; the
   RPG-7's launch flash and smoke, its backblast, the flying grenade, its trail and its burst; where the G95-L's
   beam lands; and the ion blaster's flash, haze, bolt, trail and blast.
