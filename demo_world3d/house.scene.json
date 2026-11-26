@@ -129,21 +129,7 @@
       "playerStart": "house/patio",
       "people": "person",
       "rooms": {
-        "ambient": 0.15,
-        "environment": 0.15,
-        "exposure": 2.5,
-        "ease": 0.4,
-        "window": 8,
-        "patch": 0.04,
-        "shaft": 0.004,
-        "reach": 12,
-        "cone": 150,
-        "under": 0.8,
-        "soft": 0.35,
         "through": 0.8
-      },
-      "mods": {
-        "sky": "skydome3d"
       }
     },
     "particle3d": {
@@ -582,8 +568,7 @@
         "normalBias": 0.03
       },
       "mods": {
-        "land": "terrain3d",
-        "indoors": "world3d"
+        "land": "terrain3d"
       }
     },
     "lights3d": {
