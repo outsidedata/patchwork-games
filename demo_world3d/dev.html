@@ -155,10 +155,10 @@
         if (name === undefined) { r3.release(standing); return true }
         const r = roomsOf().find(q => q.name === name)
         if (!r || !r3.claim(standing)) return false
-        const mid = [0, 1, 2].map(i => r.low[i] + r.u[i] * r.size[0] / 2 + r.w[i] * r.size[1] / 2)
+        const mid = [0, 1, 2].map(i => (r.low[i] + r.high[i]) / 2)
         r3.camera.up.set(0, 1, 0)
         r3.camera.position.set(mid[0], r.low[1] + 1.6, mid[2])
-        const along = r.size[0] >= r.size[1] ? r.u : r.w
+        const along = r.high[0] - r.low[0] >= r.high[2] - r.low[2] ? [1, 0, 0] : [0, 0, 1]
         r3.camera.lookAt(mid[0] + along[0], r.low[1] + 1.6, mid[2] + along[2])
         return true
       }

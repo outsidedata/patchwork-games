@@ -70,7 +70,7 @@ import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 import type { Looks, Tools } from '#scripts/bake.ts'
 import { packLooks } from '#scripts/pack-looks.ts'
-import { LIGHT, PARTS } from '#plugins/world3d/world3d.sim.ts'
+import { PARTS, ROOMS } from '#plugins/world3d/world3d.sim.ts'
 import player from './player.rig.json' with { type: 'json' }
 
 const here = import.meta.dirname
@@ -149,8 +149,8 @@ export const bakePlace = async (place: Place, { blender, scratch, library, stack
     const into = path.join(here, place.folder)
     fs.mkdirSync(into, { recursive: true })
     // a stronghold run also writes its refusals, every one of the run with the path to the solver that said it, and its
-    // light file, its rooms and openings (stronghold's light-hints.mjs), world3d's `light`
-    for (const suffix of place.stronghold ? [...MADE, '.refusals.json', '.light.json'] : MADE) {
+    // rooms file, each room's box and the rooms it opens into (stronghold's room-hints.mjs), world3d's `rooms`
+    for (const suffix of place.stronghold ? [...MADE, '.refusals.json', '.rooms.json'] : MADE) {
       fs.copyFileSync(path.join(out, name + suffix), path.join(into, name + suffix))
       console.log('wrote', path.relative(root, path.join(into, name + suffix)))
     }
@@ -204,7 +204,7 @@ export const bakePlace = async (place: Place, { blender, scratch, library, stack
       else catalogued[asset] = a
     }
     for (const part of Object.values(parts)) catalogued[part.name] ??= part.entry
-    if (place.stronghold) catalogued[`${name}.${LIGHT}`] = { type: 'json', url: `${folder}${name}.${LIGHT}.json`, preload: true } as any
+    if (place.stronghold) catalogued[`${name}.${ROOMS}`] = { type: 'json', url: `${folder}${name}.${ROOMS}.json`, preload: true } as any
     scene.world.loader.assets = catalogued
     // the pictures' stack in the scene's catalogue, the one entry supershader3d binds, in place of every earlier bake's
     // pictures and stack

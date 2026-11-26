@@ -112,9 +112,9 @@
           "url": "/games/demo_world3d/assets/lightlab/lightlab.art.hairs.json",
           "preload": true
         },
-        "lightlab.art.light": {
+        "lightlab.art.rooms": {
           "type": "json",
-          "url": "/games/demo_world3d/assets/lightlab/lightlab.art.light.json",
+          "url": "/games/demo_world3d/assets/lightlab/lightlab.art.rooms.json",
           "preload": true
         },
         "lightlab.art_pictures": {
@@ -127,9 +127,7 @@
     "world3d": {
       "place": "lightlab.art",
       "people": "person",
-      "rooms": {
-        "through": 0.8
-      }
+      "rooms": true
     },
     "particle3d": {
       "effects": "effects"
