@@ -1,0 +1,24 @@
+{
+  "player": {
+    "sens": 0.004,
+    "camera": { "minPitch": -0.5, "maxPitch": 1.3, "minDist": 2, "maxDist": 14, "zoom": 0.0015, "turn": 2.6, "tilt": 1.6, "step": 120 },
+    "keys": {
+      "stick": [["a", "PadStickLeft"], ["d", "PadStickRight"], ["w", "PadStickUp"], ["s", "PadStickDown"]],
+      "look": ["PadRightStickLeft", "PadRightStickRight", "PadRightStickUp", "PadRightStickDown"],
+      "fast": [],
+      "guard": [],
+      "motions": {
+        "jump": [],
+        "light": ["j", "Pad5"],
+        "heavy": ["k", "Pad10"],
+        "special": ["l", "Pad1"]
+      },
+      "nearer": [],
+      "further": [],
+      "drag": "Mouse2"
+    },
+    "lock": 4,
+    "targets": ["foe"]
+  },
+  "foe": {}
+}

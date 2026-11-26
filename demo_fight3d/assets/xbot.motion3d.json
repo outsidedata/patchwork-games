@@ -1,0 +1,730 @@
+{
+ "rig": "xbot.rig.json",
+ "moves": 0.05,
+ "turns": 30,
+ "down": 0.02,
+ "buffer": {
+  "hold": 0.4,
+  "cancel": {
+   "*": {
+    "*": "85%"
+   },
+   "light": {
+    "light": "strike+0.1",
+    "heavy": "strike+0.1",
+    "use": "30%",
+    "stick": "strike+0.25",
+    "*": "70%"
+   },
+   "heavy": {
+    "light": "strike",
+    "heavy": "strike",
+    "use": "40%",
+    "*": "80%"
+   },
+   "special": {
+    "use": "40%",
+    "*": "75%"
+   },
+   "use": {
+    "light": "60%",
+    "heavy": "60%",
+    "use": "65%",
+    "*": "75%"
+   },
+   "hit": {
+    "use": "50%",
+    "*": "80%"
+   },
+   "die": {
+    "*": "100%"
+   }
+  }
+ },
+ "activities": {
+  "walk": {
+   "normal": [
+    0,
+    1,
+    0
+   ],
+   "motions": {
+    "fall": {
+     "target": "triangles",
+     "clips": [
+      "fall"
+     ],
+     "when": [
+      "falling"
+     ]
+    },
+    "turnwalk": {
+     "target": "triangles",
+     "clips": [
+      "walkturn"
+     ],
+     "when": [
+      "ground",
+      "pushed",
+      "reversed",
+      "!fast",
+      "!guard"
+     ],
+     "from": [
+      "walk",
+      "start"
+     ],
+     "then": "walk"
+    },
+    "turnrun": {
+     "target": "triangles",
+     "clips": [
+      "runturn"
+     ],
+     "when": [
+      "ground",
+      "pushed",
+      "reversed",
+      "fast",
+      "!guard"
+     ],
+     "from": [
+      "run"
+     ],
+     "then": "run"
+    },
+    "start": {
+     "target": "triangles",
+     "clips": [
+      "walkstart"
+     ],
+     "when": [
+      "ground",
+      "pushed",
+      "!fast",
+      "!guard"
+     ],
+     "from": [
+      "stand"
+     ],
+     "then": "walk",
+     "steer": true,
+     "end": "landing",
+     "yields": true
+    },
+    "stopwalk": {
+     "target": "triangles",
+     "clips": [
+      "walkstop"
+     ],
+     "when": [
+      "ground",
+      "!pushed",
+      "!guard"
+     ],
+     "from": [
+      "walk",
+      "start"
+     ],
+     "then": "stand",
+     "begin": 1.3,
+     "yields": true
+    },
+    "stoprun": {
+     "target": "triangles",
+     "clips": [
+      "runstop"
+     ],
+     "when": [
+      "ground",
+      "!pushed",
+      "!guard"
+     ],
+     "from": [
+      "run"
+     ],
+     "then": "stand",
+     "yields": true
+    },
+    "stand": {
+     "target": "triangles",
+     "clips": [
+      "idle"
+     ],
+     "when": [
+      "ground",
+      "!pushed",
+      "!guard"
+     ]
+    },
+    "walk": {
+     "target": "triangles",
+     "clips": [
+      "walk"
+     ],
+     "when": [
+      "ground",
+      "pushed",
+      "!reversed",
+      "!fast",
+      "!guard"
+     ],
+     "gait": "run"
+    },
+    "run": {
+     "target": "triangles",
+     "clips": [
+      "run"
+     ],
+     "when": [
+      "ground",
+      "pushed",
+      "!reversed",
+      "fast",
+      "!guard"
+     ],
+     "gait": "walk"
+    },
+    "guardwalk": {
+     "target": "triangles",
+     "clips": [
+      "walk",
+      "uawalkleft",
+      "uawalkright",
+      "uawalkback"
+     ],
+     "when": [
+      "ground",
+      "pushed",
+      "guard",
+      "!fast"
+     ],
+     "mix": "way",
+     "gait": "guardrun"
+    },
+    "guardrun": {
+     "target": "triangles",
+     "clips": [
+      "run",
+      "uarunleft",
+      "uarunright",
+      "uarunback"
+     ],
+     "when": [
+      "ground",
+      "pushed",
+      "guard",
+      "fast"
+     ],
+     "mix": "way",
+     "gait": "guardwalk"
+    },
+    "block": {
+     "target": "triangles",
+     "clips": [
+      "uaguard"
+     ],
+     "when": [
+      "ground",
+      "!pushed",
+      "guard"
+     ]
+    },
+    "jump": {
+     "target": "triangles",
+     "behavior": "jump",
+     "clips": [
+      "jump"
+     ],
+     "press": "jump",
+     "from": [
+      "stand",
+      "walk",
+      "run",
+      "guardwalk",
+      "guardrun",
+      "block",
+      "start",
+      "stopwalk",
+      "turnwalk",
+      "stoprun",
+      "turnrun"
+     ],
+     "then": "fall"
+    }
+   }
+  },
+  "roll": {
+   "normal": [
+    0,
+    1,
+    0
+   ],
+   "motions": {
+    "dive": {
+     "target": "triangles",
+     "clips": [
+      "uadive"
+     ],
+     "press": "use",
+     "when": [
+      "ground",
+      "fast",
+      "pushed"
+     ],
+     "from": [
+      "stand",
+      "walk",
+      "run",
+      "guardwalk",
+      "guardrun",
+      "block",
+      "start",
+      "stopwalk",
+      "turnwalk",
+      "stoprun",
+      "turnrun"
+     ]
+    },
+    "dodge": {
+     "target": "triangles",
+     "clips": [
+      "uastepback",
+      "uastepforward",
+      "uastepleft",
+      "uastepright"
+     ],
+     "press": "use",
+     "when": [
+      "ground",
+      "guard"
+     ],
+     "from": [
+      "stand",
+      "walk",
+      "run",
+      "guardwalk",
+      "guardrun",
+      "block",
+      "start",
+      "stopwalk",
+      "turnwalk",
+      "stoprun",
+      "turnrun"
+     ]
+    },
+    "roll": {
+     "target": "triangles",
+     "clips": [
+      "uaroll"
+     ],
+     "press": "use",
+     "when": [
+      "ground",
+      "pushed"
+     ],
+     "from": [
+      "stand",
+      "walk",
+      "run",
+      "guardwalk",
+      "guardrun",
+      "block",
+      "start",
+      "stopwalk",
+      "turnwalk",
+      "stoprun",
+      "turnrun"
+     ]
+    },
+    "backstep": {
+     "target": "triangles",
+     "clips": [
+      "uastepback"
+     ],
+     "press": "use",
+     "when": [
+      "ground"
+     ],
+     "from": [
+      "stand",
+      "walk",
+      "run",
+      "guardwalk",
+      "guardrun",
+      "block",
+      "start",
+      "stopwalk",
+      "turnwalk",
+      "stoprun",
+      "turnrun"
+     ]
+    }
+   }
+  },
+  "fight": {
+   "normal": [
+    0,
+    1,
+    0
+   ],
+   "motions": {
+    "light1": {
+     "target": "triangles",
+     "clips": [
+      "uajab"
+     ],
+     "press": "light",
+     "when": [
+      "ground"
+     ],
+     "from": [
+      "stand",
+      "walk",
+      "run",
+      "guardwalk",
+      "guardrun",
+      "block",
+      "start",
+      "stopwalk",
+      "turnwalk",
+      "stoprun",
+      "turnrun"
+     ],
+     "warp": {
+      "until": "strike",
+      "reach": 0.5,
+      "turn": 60,
+      "accel": 60,
+      "short": 0.15
+     }
+    },
+    "light2": {
+     "target": "triangles",
+     "clips": [
+      "uacross"
+     ],
+     "press": "light",
+     "when": [
+      "ground"
+     ],
+     "from": [
+      "light1"
+     ],
+     "warp": {
+      "until": "strike",
+      "reach": 0.5,
+      "turn": 60,
+      "accel": 60,
+      "short": 0.15
+     }
+    },
+    "light3": {
+     "target": "triangles",
+     "clips": [
+      "uahook"
+     ],
+     "press": "light",
+     "when": [
+      "ground"
+     ],
+     "from": [
+      "light2"
+     ],
+     "warp": {
+      "until": "strike",
+      "reach": 0.5,
+      "turn": 60,
+      "accel": 60,
+      "short": 0.15
+     }
+    },
+    "finisher": {
+     "target": "triangles",
+     "clips": [
+      "uauppercut"
+     ],
+     "press": "heavy",
+     "when": [
+      "ground"
+     ],
+     "from": [
+      "light1",
+      "light2",
+      "light3"
+     ],
+     "warp": {
+      "until": "strike",
+      "reach": 0.8,
+      "turn": 60,
+      "accel": 60,
+      "short": 0.15
+     }
+    },
+    "finisher2": {
+     "target": "triangles",
+     "clips": [
+      "uahurricane"
+     ],
+     "press": "heavy",
+     "when": [
+      "ground"
+     ],
+     "from": [
+      "finisher"
+     ],
+     "warp": {
+      "until": "strike",
+      "reach": 0.8,
+      "turn": 60,
+      "accel": 60,
+      "short": 0.35
+     }
+    },
+    "heavy": {
+     "target": "triangles",
+     "clips": [
+      "uakick"
+     ],
+     "press": "heavy",
+     "when": [
+      "ground"
+     ],
+     "from": [
+      "stand",
+      "walk",
+      "run",
+      "guardwalk",
+      "guardrun",
+      "block",
+      "start",
+      "stopwalk",
+      "turnwalk",
+      "stoprun",
+      "turnrun"
+     ],
+     "warp": {
+      "until": "strike",
+      "reach": 0.8,
+      "turn": 60,
+      "accel": 60,
+      "short": 0.35
+     }
+    },
+    "runspecial": {
+     "target": "triangles",
+     "clips": [
+      "uaflykick"
+     ],
+     "press": "special",
+     "when": [
+      "ground",
+      "pushed"
+     ],
+     "from": [
+      "stand",
+      "walk",
+      "run",
+      "guardwalk",
+      "guardrun",
+      "block",
+      "start",
+      "stopwalk",
+      "turnwalk",
+      "stoprun",
+      "turnrun"
+     ],
+     "warp": {
+      "until": "strike",
+      "reach": 1.5,
+      "turn": 60,
+      "accel": 60,
+      "short": 0.35
+     }
+    },
+    "special": {
+     "target": "triangles",
+     "clips": [
+      "uammakick"
+     ],
+     "press": "special",
+     "when": [
+      "ground"
+     ],
+     "from": [
+      "stand",
+      "walk",
+      "run",
+      "guardwalk",
+      "guardrun",
+      "block",
+      "start",
+      "stopwalk",
+      "turnwalk",
+      "stoprun",
+      "turnrun"
+     ],
+     "warp": {
+      "until": "strike",
+      "reach": 0.8,
+      "turn": 60,
+      "accel": 60,
+      "short": 0.35
+     }
+    },
+    "skill": {
+     "target": "triangles",
+     "clips": [
+      "uafireball"
+     ],
+     "press": "skill",
+     "when": [
+      "ground"
+     ],
+     "from": [
+      "stand",
+      "walk",
+      "run",
+      "guardwalk",
+      "guardrun",
+      "block",
+      "start",
+      "stopwalk",
+      "turnwalk",
+      "stoprun",
+      "turnrun"
+     ]
+    },
+    "taunt": {
+     "target": "triangles",
+     "clips": [
+      "uataunt"
+     ],
+     "press": "taunt",
+     "when": [
+      "ground"
+     ],
+     "from": [
+      "stand",
+      "walk",
+      "run",
+      "guardwalk",
+      "guardrun",
+      "block",
+      "start",
+      "stopwalk",
+      "turnwalk",
+      "stoprun",
+      "turnrun"
+     ]
+    }
+   }
+  },
+  "hurt": {
+   "normal": [
+    0,
+    1,
+    0
+   ],
+   "motions": {
+    "flinch": {
+     "clips": [
+      "uahit"
+     ],
+     "over": "Spine",
+     "add": true,
+     "weight": 0.8,
+     "press": "hit",
+     "when": [
+      "ground",
+      "pushed"
+     ]
+    },
+    "hit": {
+     "target": "triangles",
+     "clips": [
+      "uahit"
+     ],
+     "press": "hit",
+     "when": [
+      "ground"
+     ],
+     "from": [
+      "stand",
+      "walk",
+      "run",
+      "guardwalk",
+      "guardrun",
+      "block",
+      "dive",
+      "dodge",
+      "roll",
+      "backstep",
+      "light1",
+      "light2",
+      "light3",
+      "finisher",
+      "finisher2",
+      "heavy",
+      "runspecial",
+      "special",
+      "skill",
+      "taunt",
+      "start",
+      "stopwalk",
+      "turnwalk",
+      "stoprun",
+      "turnrun"
+     ]
+    },
+    "death": {
+     "target": "triangles",
+     "clips": [
+      "uadeath"
+     ],
+     "press": "die",
+     "when": [
+      "ground"
+     ],
+     "from": [
+      "stand",
+      "walk",
+      "run",
+      "guardwalk",
+      "guardrun",
+      "block",
+      "dive",
+      "dodge",
+      "roll",
+      "backstep",
+      "light1",
+      "light2",
+      "light3",
+      "finisher",
+      "finisher2",
+      "heavy",
+      "runspecial",
+      "special",
+      "skill",
+      "taunt",
+      "start",
+      "stopwalk",
+      "turnwalk",
+      "stoprun",
+      "turnrun"
+     ],
+     "then": "getup"
+    },
+    "getup": {
+     "target": "triangles",
+     "clips": [
+      "uagetup"
+     ],
+     "from": [
+      "death"
+     ]
+    }
+   }
+  }
+ }
+}

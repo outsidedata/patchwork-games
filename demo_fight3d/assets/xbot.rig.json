@@ -1,0 +1,302 @@
+{
+ "bodies": {
+  "xbot": "characters/xbot/xbot.fbx"
+ },
+ "clips": {
+  "idle": {
+   "file": "packs/Male Locomotion Pack 30FPS/idle.fbx",
+   "loop": true
+  },
+  "walk": {
+   "file": "packs/Male Locomotion Pack 30FPS/walking.fbx",
+   "loop": true,
+   "gear": 0,
+   "stance": "stand"
+  },
+  "run": {
+   "file": "packs/Male Locomotion Pack 30FPS/standard run.fbx",
+   "loop": true,
+   "gear": 0,
+   "stance": "stand"
+  },
+  "walkstart": {
+   "file": "packs/mixamo-motions/Start Walking (2).fbx"
+  },
+  "walkstop": {
+   "file": "packs/mixamo-motions/Stop Walking.fbx"
+  },
+  "runstop": {
+   "file": "packs/mixamo-motions/Run To Stop.fbx"
+  },
+  "walkturn": {
+   "file": "packs/mixamo-motions/Walking Turn 180.fbx"
+  },
+  "runturn": {
+   "file": "packs/mixamo-motions/Running Turn 180.fbx"
+  },
+  "jump": {
+   "file": "packs/mixamo-motions/Jumping Up (2).fbx"
+  },
+  "fall": {
+   "file": "packs/mixamo-motions/Falling Idle.fbx",
+   "loop": true
+  },
+  "land": {
+   "file": "packs/mixamo-motions/Falling To Landing.fbx"
+  },
+  "uawalkleft": {
+   "file": "packs/Male Locomotion Pack 30FPS/left strafe walking.fbx",
+   "loop": true
+  },
+  "uawalkright": {
+   "file": "packs/Male Locomotion Pack 30FPS/right strafe walking.fbx",
+   "loop": true
+  },
+  "uawalkback": {
+   "file": "packs/Pro Melee Axe Pack 30FPS/unarmed walk back.fbx",
+   "loop": true
+  },
+  "uarunleft": {
+   "file": "packs/Male Locomotion Pack 30FPS/left strafe.fbx",
+   "loop": true
+  },
+  "uarunright": {
+   "file": "packs/Male Locomotion Pack 30FPS/right strafe.fbx",
+   "loop": true
+  },
+  "uarunback": {
+   "file": "packs/Pro Melee Axe Pack 30FPS/unarmed run back.fbx",
+   "loop": true
+  },
+  "uaguard": {
+   "file": "packs/mixamo-motions/Center Block.fbx",
+   "loop": true
+  },
+  "uaroll": {
+   "file": "packs/mixamo-motions/Quick Roll To Run.fbx"
+  },
+  "uadive": {
+   "file": "packs/mixamo-motions/Sprinting Forward Roll.fbx"
+  },
+  "uastepforward": {
+   "file": "packs/Boxing/Long Step Forward.fbx"
+  },
+  "uastepback": {
+   "file": "packs/mixamo-motions/Step Backward (2).fbx"
+  },
+  "uastepleft": {
+   "file": "packs/mixamo-motions/Long Left Side Step.fbx"
+  },
+  "uastepright": {
+   "file": "packs/mixamo-motions/Long Right Side Step.fbx"
+  },
+  "uajab": {
+   "file": "packs/mixamo-motions/Lead Jab (4).fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uacross": {
+   "file": "packs/mixamo-motions/Cross Punch.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uahook": {
+   "file": "packs/mixamo-motions/Hook Punch.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uauppercut": {
+   "file": "packs/mixamo-motions/Uppercut.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uakick": {
+   "file": "packs/mixamo-motions/Roundhouse Kick.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uahurricane": {
+   "file": "packs/mixamo-motions/Hurricane Kick.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uaflykick": {
+   "file": "packs/mixamo-motions/Flying Kick.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uammakick": {
+   "file": "packs/mixamo-motions/Mma Kick.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uafireball": {
+   "file": "packs/mixamo-motions/Fireball.fbx"
+  },
+  "uataunt": {
+   "file": "packs/mixamo-motions/Taunt.fbx"
+  },
+  "uahit": {
+   "file": "packs/Boxing/Head Hit.fbx"
+  },
+  "uadeath": {
+   "file": "packs/mixamo-motions/Dying Backwards.fbx"
+  },
+  "uadeathfront": {
+   "file": "packs/mixamo-motions/Dying.fbx"
+  },
+  "uagetup": {
+   "file": "packs/mixamo-motions/Getting Up (3).fbx"
+  },
+  "uagetupfront": {
+   "file": "packs/mixamo-motions/Getting Up (4).fbx"
+  },
+  "uakneelup": {
+   "file": "packs/mixamo-motions/Kneeling.fbx"
+  },
+  "reactsmallfront": {
+   "file": "packs/mixamo-motions/Standing React Small From Front.fbx"
+  },
+  "reactsmallback": {
+   "file": "packs/mixamo-motions/Standing React Small From Back.fbx"
+  },
+  "reactsmallleft": {
+   "file": "packs/mixamo-motions/Standing React Small From Left.fbx"
+  },
+  "reactsmallright": {
+   "file": "packs/mixamo-motions/Standing React Small From Right.fbx"
+  },
+  "reactlargefront": {
+   "file": "packs/mixamo-motions/Standing React Large From Front.fbx"
+  },
+  "reactlargeback": {
+   "file": "packs/mixamo-motions/Standing React Large From Back.fbx"
+  },
+  "reactlargeleft": {
+   "file": "packs/mixamo-motions/Standing React Large From Left.fbx"
+  },
+  "reactlargeright": {
+   "file": "packs/mixamo-motions/Standing React Large From Right.fbx"
+  },
+  "reactlegs": {
+   "file": "packs/mixamo-motions/Hit On Legs.fbx"
+  },
+  "uaelbow": {
+   "file": "packs/mixamo-motions/Elbow Punch.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uahook2": {
+   "file": "packs/mixamo-motions/Hook (2).fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uasurprise": {
+   "file": "packs/mixamo-motions/Surprise Uppercut.fbx",
+   "strike": "handL",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uaknee": {
+   "file": "packs/mixamo-motions/Knee Jab.fbx",
+   "strike": "footR",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uaillegalknee": {
+   "file": "packs/mixamo-motions/Illegal Knee.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uasidekick": {
+   "file": "packs/mixamo-motions/Side Kick.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uasweep": {
+   "file": "packs/mixamo-motions/Leg Sweep.fbx",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  },
+  "uacrescent": {
+   "file": "packs/mixamo-motions/Inside Crescent Kick.fbx",
+   "strike": "footR",
+   "markers": {
+    "blow": [
+     "strike-0.08",
+     "strike+0.08"
+    ]
+   }
+  }
+ },
+ "roles": {
+  "still": "idle",
+  "jump": "jump",
+  "leap": "jump",
+  "fall": "fall",
+  "land": "land"
+ },
+ "stances": {
+  "stand": {}
+ }
+}

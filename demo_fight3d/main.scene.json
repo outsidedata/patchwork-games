@@ -1,33 +1,21 @@
 {
   "world": {
-    "defs": "combat",
+    "defs": "demo_fight3d",
     "seed": 7,
     "player": { "deadzone": 0.2, "resolution": 32 },
     "loader": {
       "assets": {
-        "combat": { "type": "json", "url": "/games/demo_motion3d/assets/combat.json", "preload": true },
-        "land": { "type": "json", "url": "/games/demo_motion3d/assets/land.json", "preload": true },
-        "checker": { "type": "texture", "url": "/games/demo_motion3d/assets/checker-1024.webp", "preload": true, "wrap": "repeat", "anisotropy": 8 },
-        "xbot-rig": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.rig.json", "preload": true },
-        "xbot-rig-baked": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.rig.baked.json", "preload": true },
-        "xbot-anim": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.anim.json", "preload": true },
-        "xbot": { "type": "model", "url": "/games/demo_motion3d/assets/xbot.glb", "preload": true },
-        "xbot-glb": { "type": "binary", "url": "/games/demo_motion3d/assets/xbot.glb", "preload": true },
-        "greatsword": { "type": "model", "url": "/games/demo_motion3d/assets/greatsword.glb", "preload": true },
-        "greatsword-glb": { "type": "binary", "url": "/games/demo_motion3d/assets/greatsword.glb", "preload": true },
-        "sword": { "type": "model", "url": "/games/demo_motion3d/assets/sword.glb", "preload": true },
-        "sword-glb": { "type": "binary", "url": "/games/demo_motion3d/assets/sword.glb", "preload": true },
-        "axe": { "type": "model", "url": "/games/demo_motion3d/assets/axe.glb", "preload": true },
-        "axe-glb": { "type": "binary", "url": "/games/demo_motion3d/assets/axe.glb", "preload": true },
-        "rifle": { "type": "model", "url": "/games/demo_motion3d/assets/rifle.glb", "preload": true },
-        "cup": { "type": "model", "url": "/games/demo_motion3d/assets/cup.glb", "preload": true },
-        "pistol": { "type": "model", "url": "/games/demo_motion3d/assets/pistol.glb", "preload": true },
-        "bow": { "type": "model", "url": "/games/demo_motion3d/assets/bow.glb", "preload": true },
-        "torch": { "type": "model", "url": "/games/demo_motion3d/assets/torch.glb", "preload": true },
-        "wand": { "type": "model", "url": "/games/demo_motion3d/assets/wand.glb", "preload": true },
-        "xbot-motion3d": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.motion3d.json", "preload": true },
-        "xbot-motion3d-baked": { "type": "json", "url": "/games/demo_motion3d/assets/xbot.motion3d.baked.json", "preload": true },
-        "effects": { "type": "json", "url": "/games/demo_motion3d/assets/effects.json", "preload": true }
+        "demo_fight3d": { "type": "json", "url": "/games/demo_fight3d/assets/demo_fight3d.json", "preload": true },
+        "land": { "type": "json", "url": "/games/demo_fight3d/assets/land.json", "preload": true },
+        "checker": { "type": "texture", "url": "/games/demo_fight3d/assets/checker-1024.webp", "preload": true, "wrap": "repeat", "anisotropy": 8 },
+        "xbot-rig": { "type": "json", "url": "/games/demo_fight3d/assets/xbot.rig.json", "preload": true },
+        "xbot-rig-baked": { "type": "json", "url": "/games/demo_fight3d/assets/xbot.rig.baked.json", "preload": true },
+        "xbot-anim": { "type": "json", "url": "/games/demo_fight3d/assets/xbot.anim.json", "preload": true },
+        "xbot": { "type": "model", "url": "/games/demo_fight3d/assets/xbot.glb", "preload": true },
+        "xbot-glb": { "type": "binary", "url": "/games/demo_fight3d/assets/xbot.glb", "preload": true },
+        "xbot-motion3d": { "type": "json", "url": "/games/demo_fight3d/assets/xbot.motion3d.json", "preload": true },
+        "xbot-motion3d-baked": { "type": "json", "url": "/games/demo_fight3d/assets/xbot.motion3d.baked.json", "preload": true },
+        "effects": { "type": "json", "url": "/games/demo_fight3d/assets/effects.json", "preload": true }
       }
     },
     "terrain3d": {
@@ -51,30 +39,19 @@
           "blend": "inertial",
           "lean": { "most": 0.25, "ease": 0.12 },
           "pace": 0.05,
-          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" },
-          "props": [
-            { "model": "rifle", "bone": "RightHand", "at": [0.0033, 0.1072, 0.0122], "turn": [91.56, 27.38, -95.79] },
-            { "model": "cup", "bone": "LeftHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
-            { "model": "greatsword", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
-            { "model": "sword", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
-            { "model": "axe", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
-            { "model": "pistol", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
-            { "model": "bow", "bone": "LeftHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
-            { "model": "torch", "bone": "LeftHand", "at": [0, 0, 0], "turn": [0, 0, 0] },
-            { "model": "wand", "bone": "RightHand", "at": [0, 0, 0], "turn": [0, 0, 0] }
-          ]
+          "reads": { "pos": "pos", "yaw": "yaw", "vel": "vel", "grounded": "grounded", "limp": "limp" }
         }
       },
       "anywhere": {
         "shape": { "box": { "size": [1000000000, 1000000000, 1000000000] } },
-        "activities": ["walk", "roll", "fight", "hurt", "cup", "greatsword", "swordshield", "sword", "axe", "rifle", "pistol", "bow", "torch", "magic"],
+        "activities": ["walk", "roll", "fight", "hurt"],
         "priority": 0,
         "data": { "motion3d": { "autoChange": true } }
       },
       "ease": 0.15,
       "mods": { "spaces": "shapes3d", "faces": "shapes3d" }
     },
-    "shipped": { "plugins": ["yard"] },
+    "shipped": { "plugins": ["stance"] },
     "kinematics3d": {
       "kinds": {
         "xbot": {
@@ -88,7 +65,7 @@
         "behaviors": ["shapes3d", "terrain3d", "motion3d"],
         "solids": ["shapes3d"],
         "footprints": ["shapes3d"],
-        "states": ["motion3d", "yard"]
+        "states": ["motion3d", "stance"]
       }
     },
     "anim": {
@@ -98,6 +75,7 @@
       "landFall": 7.5,
       "moves": 0.05,
       "turns": 30,
+      "mods": { "bends": ["fight3d"] },
       "kinds": {
         "foe": {
           "rig": "xbot-anim",
@@ -134,7 +112,6 @@
       "kinds": {
         "player": {
           "motion3d": {
-            "blades": { "sword": { "glb": "sword-glb" }, "greatsword": { "glb": "greatsword-glb" }, "axe": { "glb": "axe-glb" } },
             "strikers": {
               "fistL": { "limb": "handL", "from": "LeftForeArm", "to": "LeftHandMiddle4" },
               "fistR": { "limb": "handR", "from": "RightForeArm", "to": "RightHandMiddle4" },
@@ -165,6 +142,66 @@
       "edge": 2.5,
       "clash": 0.04,
       "mods": { "behaviors": ["anim", "motion3d"] }
+    },
+    "fight3d": {
+      "kinds": {
+        "player": {
+          "stop": 0.1,
+          "strikes": {
+            "uajab": { "damage": 8, "knock": 3, "stop": 0.07 },
+            "uacross": { "damage": 12, "knock": 4, "stop": 0.09 },
+            "uahook": { "damage": 15, "knock": 4.5, "stop": 0.1 },
+            "uauppercut": { "damage": 25, "knock": 5.5, "stop": 0.13 },
+            "uahurricane": { "damage": 28, "knock": 6.5, "stop": 0.14 },
+            "uakick": { "damage": 28, "knock": 6.5, "stop": 0.14 },
+            "uammakick": { "damage": 22, "knock": 6, "stop": 0.12 },
+            "uaflykick": { "damage": 30, "knock": 7, "stop": 0.15 },
+            "uahook2": { "damage": 15, "knock": 4.5, "stop": 0.1 },
+            "uasurprise": { "damage": 25, "knock": 5.5, "stop": 0.13 },
+            "uaelbow": { "damage": 14, "knock": 3.5, "stop": 0.1 },
+            "uaknee": { "damage": 16, "knock": 4, "stop": 0.1 },
+            "uaillegalknee": { "damage": 20, "knock": 4.5, "stop": 0.12 },
+            "uasidekick": { "damage": 26, "knock": 7, "stop": 0.13 },
+            "uacrescent": { "damage": 24, "knock": 6, "stop": 0.12 },
+            "uasweep": { "damage": 18, "knock": 3, "stop": 0.1 }
+          }
+        },
+        "foe": {
+          "stop": 0.1,
+          "pace": 0.05,
+          "drag": 8,
+          "large": 25,
+          "low": ["uplegL", "legL", "footL", "uplegR", "legR", "footR"],
+          "blood": "blood",
+          "home": 0.1,
+          "recover": 0.35,
+          "jolt": {
+            "stiffness": 120,
+            "damping": 12,
+            "gain": 0.4,
+            "most": 0.7,
+            "limbs": {
+              "head": { "Spine1": 0.2, "Spine2": 0.35, "Neck": 0.6, "Head": 1 },
+              "torso": { "Hips": 0.3, "Spine": 0.6, "Spine1": 0.6, "Spine2": 0.5, "Neck": 0.3 },
+              "armL": { "Spine2": 0.3, "LeftShoulder": 0.6, "LeftArm": 1 },
+              "forearmL": { "LeftArm": 0.6, "LeftForeArm": 1 },
+              "handL": { "LeftForeArm": 0.6, "LeftHand": 1 },
+              "armR": { "Spine2": 0.3, "RightShoulder": 0.6, "RightArm": 1 },
+              "forearmR": { "RightArm": 0.6, "RightForeArm": 1 },
+              "handR": { "RightForeArm": 0.6, "RightHand": 1 },
+              "uplegL": { "Hips": 0.4, "LeftUpLeg": 0.8 },
+              "legL": { "LeftUpLeg": 0.6, "LeftLeg": 1 },
+              "footL": { "LeftLeg": 0.6, "LeftFoot": 1 },
+              "uplegR": { "Hips": 0.4, "RightUpLeg": 0.8 },
+              "legR": { "RightUpLeg": 0.6, "RightLeg": 1 },
+              "footR": { "RightLeg": 0.6, "RightFoot": 1 }
+            }
+          },
+          "anim": {},
+          "walker": {}
+        }
+      },
+      "mods": { "swing": "melee3d", "blood": "particle3d", "behaviors": ["anim", "walker"] }
     },
     "particle3d": { "effects": "effects", "hold": 0.3 }
   },
@@ -204,7 +241,6 @@
       "guard": false,
       "jumpHeld": true,
       "target": null,
-      "weapon": "swordshield",
       "queued": [],
       "look": { "yaw": 0, "pitch": 0.35, "dist": 5 },
       "lift": 1.4,
@@ -231,6 +267,8 @@
       "limp": false,
       "stop": 0,
       "hits": 0,
+      "since": 0,
+      "jolt": {},
       "shove": [0, 0],
       "edges": {},
       "swing": null,

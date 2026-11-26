@@ -1,0 +1,314 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demo_fight3d dev</title>
+    <style>
+      body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      canvas { grid-area: 1 / 1 }
+      .lil-gui.root { max-height: 100vh; overflow-y: auto }
+      #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 13px monospace; white-space: pre; background: #000a; padding: 6px 8px; pointer-events: none }
+    </style>
+  </head>
+  <body>
+    <div id="readout"></div>
+    <script type="module">
+      // The testbed: index.html, the manager truth and the scenes its row names all in this tab, one seat on them over
+      // a loopback, stepped on the page's clock. `?scene=<scene>` enters that scene. The truths are kept on
+      // `window.__scenes` and the page on `window.__page` for the profilers (benchmarking-a-game). The frame rate is the
+      // stats plugin's panel at the top left. Time: ` pauses, . steps one on while paused, and `pause on a blow` stops
+      // the clock on the step a blow lands on the foe; `window.dev.clock` is the clock, and `window.dev.run(steps)` runs
+      // up to that many steps and draws, stopping on a blow as the clock does, for a driver in a tab given no frames.
+      //
+      // The combat panel: fight3d's numbers (`world.fight3d.kinds`), the hitstop of each side and the share of a step
+      // the foe runs at while frozen, how fast its shove runs out, the damage from which a reaction is the large one
+      // and how far from its spot the foe walks back; motion3d's frozen pace of the X Bot, melee3d's `edge`, how fast a
+      // fist or a foot must move to land, the player's `lock`, how near the foe a strike warps onto it, and melee3d's
+      // striker and limb lines (off at first); each laid into the truth's world and the page's as it changes. The combo
+      // panel: the clip, time and warp of each of the three light hits, picked from every unarmed strike. `copy`
+      // copies a panel's numbers, `reset to the file` puts the file's back. The jolt panel: the foe's springs (fight3d's
+      // `jolt`), how long it stands before walking back (`recover`), and its reaction, the jolt alone, the X Bot's
+      // reaction clips alone (anim's `react`), or both.
+      //
+      // The readout shows the keys, the scene and the step, the seat's swing, what it has met and its freeze, the
+      // foe's blows, the clip it plays, its freeze and each joint it is jolted at, and the last five errors the page threw
+      // or wrote.
+      import { boot } from '#engine/engine.ts'
+      import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
+      import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import { clipOf, rigOf } from '#plugins/motion3d/motion3d.play.ts'
+      import { json } from '#plugins/loader/loader.sim.ts'
+      import GUI from 'lil-gui'
+      import { sim } from './demo_fight3d.sim.ts'
+      import file from './demo_fight3d.scene.json'
+
+      const clone = v => JSON.parse(JSON.stringify(v))
+
+      // Every error the page throws or writes, the last five, shown under the readout.
+      const errors = []
+      const caught = e => {
+        errors.push(String(e?.message ?? e))
+        if (errors.length > 5) errors.shift()
+      }
+      addEventListener('error', e => caught(e.error ?? e.message))
+      addEventListener('unhandledrejection', e => caught(e.reason))
+      const written = console.error.bind(console)
+      console.error = (...a) => { caught(a.map(x => x?.message ?? x).join(' ')); written(...a) }
+
+      file.prefabs.scenemanager.entry = new URLSearchParams(location.search).get('scene') ?? file.prefabs.scenemanager.entry
+
+      const dt = file.prefabs.engine.dt
+      const truth = boot(file, sim)
+      window.__scenes = await load(truth, import.meta.url)
+      let client
+      const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+        client = me
+        for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
+          if (!surface) continue
+          const canvas = document.createElement('canvas')
+          canvas.width = scene.prefabs.engine.width
+          canvas.height = scene.prefabs.engine.height
+          document.body.appendChild(canvas)
+          surface.mount(canvas)
+        }
+        me.plugins.stats?.mount(document.body)
+      })
+      window.__page = page
+      const readout = document.getElementById('readout')
+
+      // The panel. A press on it stops at it, a release never does, and after a click the focus goes back to the page
+      // unless it went into a number to type or a list to pick from.
+      const gui = new GUI({ title: 'demo_fight3d dev' })
+      for (const type of ['keydown', 'keyup', 'click', 'mousedown', 'contextmenu', 'wheel'])
+        gui.domElement.addEventListener(type, e => e.stopPropagation())
+      gui.domElement.addEventListener('pointerup', () => requestAnimationFrame(() => {
+        const at = document.activeElement
+        if (gui.domElement.contains(at) && at.tagName !== 'SELECT' && !(at.tagName === 'INPUT' && (at.type === 'text' || at.type === 'number'))) at.blur()
+      }))
+      addEventListener('change', e => { if (gui.domElement.contains(e.target)) e.target.blur() })
+
+      // The scene, chosen from the manager's table, the page loaded again on it.
+      const chosen = { scene: file.prefabs.scenemanager.entry }
+      const reload = (key, value) => { const url = new URL(location.href); url.searchParams.set(key, value); location.href = url.href }
+      gui.add(chosen, 'scene', Object.keys(file.prefabs.scenemanager.scenes)).onChange(s => reload('scene', s))
+      const room = () => window.__scenes.get(chosen.scene)
+      // The worlds every change is laid into: the scene's truth's and this page's.
+      const worlds = () => [room()?.world, client?.plugins.wire.scene.world].filter(Boolean)
+      // The scene's rows as a rule's `w` reads them, one per truth, so what a plugin keeps per world is kept across reads.
+      const readers = new WeakMap()
+      const readerOf = t => {
+        let w = readers.get(t)
+        if (!w) {
+          w = { world: t.world, all: kind => t.rows.filter(r => r.kind === kind), find: (kind, pred = () => true) => t.rows.find(r => r.kind === kind && pred(r)), get: id => t.rows.find(r => r.id === id) }
+          readers.set(t, w)
+        }
+        return w
+      }
+      const rowOf = kind => room()?.rows.find(r => r.kind === kind)
+      const fixed = (v, n = 2) => (typeof v === 'number' ? v.toFixed(n) : String(v))
+
+      // ---------- time ----------
+
+      // `pause on a blow` stops the clock on the step a blow lands on the foe, so the jolt is seen from its first step.
+      const clock = { paused: false, step: false, onBlow: false, hits: 0 }
+      // One step of the truth, stopping the clock on a blow when `onBlow` is on; true when it stopped.
+      const stepOnce = () => {
+        truth.step(dt)
+        const hits = rowOf('foe')?.data.hits ?? 0
+        const struck = hits > clock.hits
+        clock.hits = hits
+        if (clock.onBlow && struck) clock.paused = true
+        return clock.onBlow && struck
+      }
+      // A driver's run, for a tab Chrome gives no frames: up to `steps` steps, stopped by a blow when `onBlow` is on,
+      // the page's input read before and the frame drawn after, as the loop would; the steps it ran.
+      const run = async steps => {
+        page.input()
+        let n = 0
+        while (n < steps) { n++; if (stepOnce()) break }
+        await page.frame(1)
+        return n
+      }
+      window.dev = { clock, run }
+      gui.add(clock, 'paused').name('paused').listen()
+      gui.add(clock, 'onBlow').name('pause on a blow')
+      addEventListener('keydown', e => {
+        if (e.key === '`') clock.paused = !clock.paused
+        if (e.key === '.' && clock.paused) clock.step = true
+      })
+
+      // ---------- combat ----------
+
+      // fight3d's, motion3d's and melee3d's numbers of the fight, laid into every world as they change.
+      const fight = {}
+      const fightOf = world => ({
+        stop: world.fight3d.kinds.player.stop, foeStop: world.fight3d.kinds.foe.stop, foePace: world.fight3d.kinds.foe.pace,
+        drag: world.fight3d.kinds.foe.drag, large: world.fight3d.kinds.foe.large, home: world.fight3d.kinds.foe.home,
+        heroPace: world.motion3d.kinds.xbot.pace, edge: world.melee3d.edge, debug: !!world.melee3d.show,
+      })
+      const defsOf = () => [room() && json(readerOf(room()), room().world.defs), client && json(client.plugins.wire, room().world.defs)].filter(Boolean)
+      const layFight = () => {
+        for (const world of worlds()) {
+          Object.assign(world.fight3d.kinds.player, { stop: fight.stop })
+          Object.assign(world.fight3d.kinds.foe, { stop: fight.foeStop, pace: fight.foePace, drag: fight.drag, large: fight.large, home: fight.home })
+          world.motion3d.kinds.xbot.pace = fight.heroPace
+          world.melee3d.edge = fight.edge
+          if (fight.debug) world.melee3d.show = { colour: '#ffd040', radius: 0.012, limbs: '#60c0ff', struck: '#ff4040' }
+          else delete world.melee3d.show
+        }
+        for (const d of defsOf()) d.player.lock = fight.lock
+      }
+      const firstFight = { ...fightOf(room().world), lock: defsOf()[0].player.lock }
+      Object.assign(fight, firstFight)
+      const xf = gui.addFolder('combat')
+      xf.add(fight, 'stop', 0, 0.5, 0.01).name('hitstop, striker, s').onChange(layFight)
+      xf.add(fight, 'foeStop', 0, 0.5, 0.01).name('hitstop, foe, s').onChange(layFight)
+      xf.add(fight, 'heroPace', 0, 1, 0.01).name('frozen pace, X Bot').onChange(layFight)
+      xf.add(fight, 'foePace', 0, 1, 0.01).name('frozen pace, foe').onChange(layFight)
+      xf.add(fight, 'drag', 0.5, 40, 0.5).name('knockback drag, 1/s').onChange(layFight)
+      xf.add(fight, 'home', 0, 2, 0.05).name('walks home from, m').onChange(layFight)
+      xf.add(fight, 'lock', 0, 8, 0.1).name('warps onto foe within, m').onChange(layFight)
+      xf.add(fight, 'edge', 0, 10, 0.1).name('lands from, m/s').onChange(layFight)
+      xf.add(fight, 'large', 0, 100, 1).name('large reaction from, damage').onChange(layFight)
+      xf.add(fight, 'debug').name('striker and limb lines').onChange(layFight)
+      xf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify(fight, null, 2)) }, 'copy').name('copy combat JSON')
+      xf.add({ reset: () => { Object.assign(fight, firstFight); for (const c of gui.controllersRecursive()) c.updateDisplay(); layFight() } }, 'reset').name('reset to the file')
+
+      // The foe's jolt (fight3d's `jolt` and `recover`): its springs, how far a blow turns a joint, and how long it
+      // stands before it walks back; and the reaction it takes, the jolt alone, the reaction clips alone (anim's `react`,
+      // the X Bot's Mixamo reactions), or both, to judge one against the other.
+      const REACT = {
+        small: { front: 'reactsmallfront', back: 'reactsmallback', left: 'reactsmallleft', right: 'reactsmallright' },
+        large: { front: 'reactlargefront', back: 'reactlargeback', left: 'reactlargeleft', right: 'reactlargeright' },
+        low: 'reactlegs',
+      }
+      const joltWas = clone(room().world.fight3d.kinds.foe.jolt)
+      const recoverWas = room().world.fight3d.kinds.foe.recover
+      const jolt = { ...joltWas, limbs: undefined, recover: recoverWas, reaction: 'jolt' }
+      const layJolt = () => {
+        for (const world of worlds()) {
+          const foe = world.fight3d.kinds.foe
+          foe.recover = jolt.recover
+          if (jolt.reaction === 'clips') delete foe.jolt
+          else foe.jolt = { stiffness: jolt.stiffness, damping: jolt.damping, gain: jolt.gain, most: jolt.most, limbs: joltWas.limbs }
+          foe.anim = jolt.reaction === 'jolt' ? {} : { react: REACT }
+        }
+      }
+      const jf = gui.addFolder('jolt')
+      jf.add(jolt, 'reaction', ['jolt', 'clips', 'both']).name('reaction').onChange(layJolt)
+      jf.add(jolt, 'stiffness', 10, 600, 1).name('stiffness, 1/s²').onChange(layJolt)
+      jf.add(jolt, 'damping', 0, 60, 0.5).name('damping, 1/s').onChange(layJolt)
+      jf.add(jolt, 'gain', 0, 2, 0.01).name('gain, rad per m·m/s').onChange(layJolt)
+      jf.add(jolt, 'most', 0, 1.5, 0.01).name('most, rad').onChange(layJolt)
+      jf.add(jolt, 'recover', 0, 2, 0.05).name('walks home after, s').onChange(layJolt)
+      jf.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({ recover: jolt.recover, jolt: { stiffness: jolt.stiffness, damping: jolt.damping, gain: jolt.gain, most: jolt.most } }, null, 2)) }, 'copy').name('copy jolt JSON')
+      jf.add({ reset: () => { Object.assign(jolt, { ...joltWas, limbs: undefined, recover: recoverWas, reaction: 'jolt' }); for (const c of gui.controllersRecursive()) c.updateDisplay(); layJolt() } }, 'reset').name('reset to the file')
+
+      // The combo's three hits, J pressed again within each one: the clip each plays, picked from every unarmed strike
+      // the rig has baked (its file named beside it), and each one's warp. The pick is laid into the truth's and the
+      // page's motion file; a clip picked that fight3d's strikes give none for is given the slot's own. Each slot's
+      // `ms` is how long its clip plays (motion3d's Speed: the clip's `ms`, its ramp kept as its shape), 0 for the rig's
+      // own; `own speed` plays every pickable clip at the speed it was made at, its rig's `rate` ramp and `ms` off.
+      const MOTION = room().world.motion3d.kinds.xbot.motion
+      const SLOTS = ['light1', 'light2', 'light3']
+      // Every unarmed strike of one blow the rig has: the punches, elbows, knees and kicks.
+      const PICKS = ['uajab', 'uacross', 'uahook', 'uahook2', 'uauppercut', 'uasurprise', 'uaelbow',
+        'uaknee', 'uaillegalknee', 'uakick', 'uammakick', 'uasidekick', 'uacrescent', 'uasweep']
+      const motionsOf = () => [room() && json(readerOf(room()), MOTION), client && json(client.plugins.wire, MOTION)].filter(Boolean).map(f => f.activities.fight.motions)
+      const rigs = () => [room() && rigOf(readerOf(room()), 'xbot'), client && rigOf(client.plugins.wire, 'xbot')].filter(Boolean)
+      const fileName = clip => rigs()[0].clips[clip].file.split('/').pop().replace('.fbx', '')
+      const label = clip => `${clip} (${fileName(clip)})`
+      const byLabel = Object.fromEntries(PICKS.map(c => [label(c), c]))
+      // Each pickable clip's speed as the rig gives it, kept so `own speed` can be turned off again.
+      const speedWas = Object.fromEntries(PICKS.map(c => { const k = clipOf(rigs()[0], c); return [c, { rate: k.rate, ramp: k.ramp, ms: k.ms }] }))
+      const firstMotions = motionsOf()[0]
+      const firstStrikes = clone(room().world.fight3d.kinds.player.strikes)
+      const combo = { own: false }
+      const slotsWas = SLOTS.map(name => {
+        const m = firstMotions[name]
+        return { clip: label(m.clips[0]), ms: speedWas[m.clips[0]]?.ms ?? 0, reach: m.warp.reach, short: m.warp.short, accel: m.warp.accel, turn: m.warp.turn }
+      })
+      const slots = clone(slotsWas)
+      const laySlots = () => {
+        for (const motions of motionsOf()) SLOTS.forEach((name, i) => {
+          const s = slots[i]
+          motions[name].clips = [byLabel[s.clip]]
+          Object.assign(motions[name].warp, { reach: s.reach, short: s.short, accel: s.accel, turn: s.turn })
+        })
+        for (const world of worlds()) SLOTS.forEach((name, i) => {
+          const clip = byLabel[slots[i].clip]
+          world.fight3d.kinds.player.strikes[clip] ??= { ...firstStrikes[firstMotions[name].clips[0]] }
+        })
+        // Each clip in its slot's time, its rig's ramp kept as its shape (none with `own speed`); a slot's time of 0,
+        // or a clip in no slot, plays as its rig gives it.
+        const msOf = c => slots.find(s => byLabel[s.clip] === c)?.ms || null
+        for (const rig of rigs()) for (const c of PICKS) {
+          const base = combo.own ? { rate: 1, ramp: null, ms: null } : speedWas[c], k = clipOf(rig, c), ms = msOf(c) ?? base.ms
+          Object.assign(k, { ms, ramp: base.ramp, rate: base.ramp ? 1 : ms !== null ? k.dur / (ms / 1000) : base.rate })
+        }
+      }
+      // A clip in two slots plays in one time: a slot's time set is the time of every slot playing its clip.
+      const sameSpeed = i => { slots.forEach(s => { if (s.clip === slots[i].clip) s.ms = slots[i].ms }); for (const c of gui.controllersRecursive()) c.updateDisplay(); laySlots() }
+      const comboFolder = gui.addFolder('combo')
+      slots.forEach((s, i) => {
+        const f = comboFolder.addFolder(`hit ${i + 1}`)
+        f.add(s, 'clip', Object.keys(byLabel)).name('clip').onChange(() => sameSpeed(i))
+        f.add(s, 'ms', 0, 2000, 5).name('plays in, ms (0 the rig\'s)').onChange(() => sameSpeed(i))
+        f.add(s, 'reach', 0, 3, 0.05).name('warp reach, m').onChange(laySlots)
+        f.add(s, 'short', 0, 2, 0.05).name('lands short of target, m').onChange(laySlots)
+        f.add(s, 'accel', 0, 200, 1).name('warp accel, m/s²').onChange(laySlots)
+        f.add(s, 'turn', 0, 180, 1).name('warp turn, °').onChange(laySlots)
+      })
+      comboFolder.add(combo, 'own').name('own speed (rig ramp off, slot time kept)').onChange(laySlots)
+      // The motions as the motion file gives them, and each slot's clip's `rate` and `ms` as the rig file gives them.
+      const rigRate = c => { const k = clipOf(rigs()[0], c); return { ...(k.ramp ? { rate: k.ramp.map(p => [p.at, p.rate]) } : k.ms === null ? { rate: Number(k.rate.toFixed(3)) } : {}), ...(k.ms !== null ? { ms: k.ms } : {}) } }
+      comboFolder.add({ copy: () => navigator.clipboard?.writeText(JSON.stringify({
+        motions: Object.fromEntries(SLOTS.map((name, i) => [name, { clips: [byLabel[slots[i].clip]], warp: { until: 'strike', reach: slots[i].reach, turn: slots[i].turn, accel: slots[i].accel, short: slots[i].short } }])),
+        rig: Object.fromEntries(slots.map(s => [byLabel[s.clip], rigRate(byLabel[s.clip])])),
+      }, null, 2)) }, 'copy').name('copy combo JSON')
+      comboFolder.add({ reset: () => { slots.forEach((s, i) => Object.assign(s, slotsWas[i])); combo.own = false; for (const c of gui.controllersRecursive()) c.updateDisplay(); laySlots() } }, 'reset').name('reset to the file')
+
+      // What the fight did, off the rows: the seat's swing, what it has met, its freeze; the foe's blows, reaction and
+      // freeze.
+      const fought = () => {
+        const me = rowOf('player'), foe = rowOf('foe')
+        if (!me || !foe) return []
+        const f = foe.data
+        return [
+          `swing ${me.data.swing ?? 'none'}   met ${(me.data.struck ?? []).join(', ') || 'nothing'}   frozen ${fixed(me.data.stop ?? 0)} s`,
+          `foe blows ${f.hits}   ${f.clip ?? ''}   frozen ${fixed(f.stop ?? 0)} s`,
+          `foe jolted ${Object.entries(f.jolt ?? {}).map(([bone, v]) => `${bone} ${fixed(Math.hypot(v[0], v[1], v[2]))}`).join('  ') || 'nowhere'}`,
+        ]
+      }
+
+      let last = performance.now(), owed = 0
+      const loop = async now => {
+        owed += Math.min((now - last) / 1000, 0.25)
+        last = now
+        // A frame that throws is shown, and the next frame goes on.
+        try {
+          page.input()
+          if (clock.paused) {
+            owed = 0
+            if (clock.step) { truth.step(dt); clock.step = false }
+          }
+          while (owed >= dt && !clock.paused) {
+            owed -= dt
+            if (stepOnce()) owed = 0
+          }
+          await page.frame(clock.paused ? 1 : owed / dt)
+        } catch (e) { caught(e) }
+        readout.textContent = [
+          'left stick / W A S D  walk     right stick / right drag  look     wheel  zoom',
+          'J  jab, cross, hook     K  roundhouse, or after a light the uppercut and hurricane kick     L  MMA kick',
+          '`  pause     .  one step on',
+          `${chosen.scene}  step ${truth.n}${clock.paused ? '  paused' : ''}`,
+          ...fought(),
+          ...errors,
+        ].join('\n')
+        requestAnimationFrame(loop)
+      }
+      requestAnimationFrame(loop)
+    </script>
+  </body>
+</html>

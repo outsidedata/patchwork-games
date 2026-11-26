@@ -1,0 +1,521 @@
+{
+ "held": {
+  "idle": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "walk": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "run": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "walkstart": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "walkstop": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "runstop": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "walkturn": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "runturn": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "jump": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "fall": {
+   "spot": ["Hips"],
+   "on": "both"
+  },
+  "land": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "end"
+  },
+  "uawalkleft": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "uawalkright": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "uawalkback": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "uarunleft": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "uarunright": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "uarunback": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "uaguard": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "both"
+  },
+  "uaroll": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uadive": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uastepforward": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uastepback": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uastepleft": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uastepright": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uajab": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uacross": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uahook": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uauppercut": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uakick": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uahurricane": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uaflykick": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uammakick": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uafireball": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uataunt": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uahit": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uadeath": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uadeathfront": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uagetup": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uagetupfront": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uakneelup": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactsmallfront": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactsmallback": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactsmallleft": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactsmallright": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactlargefront": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactlargeback": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactlargeleft": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactlargeright": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "reactlegs": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uaelbow": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uahook2": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uasurprise": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uaknee": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uaillegalknee": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uasidekick": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uasweep": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "uacrescent": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  }
+ },
+ "offsets": {
+  "xbot": {
+   "idle": {
+    "beginOffset": [0, 0.066, 0],
+    "endOffset": [0, 0.066, 0],
+    "beginTurn": 0
+   },
+   "walk": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "run": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "walkstart": {
+    "beginOffset": [0, 0.075, 0],
+    "endOffset": [-0.043, 0.132, 0.824],
+    "beginTurn": 0
+   },
+   "walkstop": {
+    "beginOffset": [0, 0.162, 0],
+    "endOffset": [0.02, 0.137, 1.61],
+    "beginTurn": 0
+   },
+   "runstop": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0.022, -0.099, 2.863],
+    "beginTurn": 0
+   },
+   "walkturn": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [-0.041, 0, 0.025],
+    "beginTurn": 0
+   },
+   "runturn": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0.036, 0.004, 0.31],
+    "beginTurn": 0
+   },
+   "jump": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0.009, 0.405, 0.116],
+    "beginTurn": 0
+   },
+   "fall": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "land": {
+    "beginOffset": [-0.085, 1.114, 0.099],
+    "endOffset": [0, 0.078, 0],
+    "beginTurn": 0
+   },
+   "uawalkleft": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "uawalkright": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "uawalkback": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "uarunleft": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "uarunright": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "uarunback": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0, 0, 0],
+    "beginTurn": 0
+   },
+   "uaguard": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [0, 0.083, 0],
+    "beginTurn": 0
+   },
+   "uaroll": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0.066, 0.103, 5.463],
+    "beginTurn": 0
+   },
+   "uadive": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0.022, 0.092, 5.781],
+    "beginTurn": 0
+   },
+   "uastepforward": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [0, 0.098, 1.137],
+    "beginTurn": 0
+   },
+   "uastepback": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [0, 0.074, -0.722],
+    "beginTurn": 0
+   },
+   "uastepleft": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [0.545, 0.083, 0],
+    "beginTurn": 0
+   },
+   "uastepright": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [-0.723, 0.083, 0],
+    "beginTurn": 0
+   },
+   "uajab": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [0, 0.083, 0],
+    "beginTurn": 0
+   },
+   "uacross": {
+    "beginOffset": [0, 0.085, 0],
+    "endOffset": [0, 0.085, 0],
+    "beginTurn": 0
+   },
+   "uahook": {
+    "beginOffset": [0, 0.079, 0],
+    "endOffset": [0, 0.079, 0],
+    "beginTurn": 0
+   },
+   "uauppercut": {
+    "beginOffset": [0, 0.076, 0],
+    "endOffset": [0, 0.076, 0],
+    "beginTurn": 0
+   },
+   "uakick": {
+    "beginOffset": [0, 0.082, 0],
+    "endOffset": [0, 0.09, 0.652],
+    "beginTurn": 0
+   },
+   "uahurricane": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [-0.002, 0.044, 3.44],
+    "beginTurn": 0
+   },
+   "uaflykick": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [-0.05, -0.105, 2.369],
+    "beginTurn": 0
+   },
+   "uammakick": {
+    "beginOffset": [0, 0.096, 0],
+    "endOffset": [0, 0.096, 0],
+    "beginTurn": 0
+   },
+   "uafireball": {
+    "beginOffset": [0, 0.092, 0],
+    "endOffset": [0, 0.092, 0],
+    "beginTurn": 0
+   },
+   "uataunt": {
+    "beginOffset": [0, 0.079, 0],
+    "endOffset": [0, 0.079, 0],
+    "beginTurn": 0
+   },
+   "uahit": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [0, 0.083, 0],
+    "beginTurn": 0
+   },
+   "uadeath": {
+    "beginOffset": [0, 0.075, 0],
+    "endOffset": [0.009, 0.021, -0.057],
+    "beginTurn": 0
+   },
+   "uadeathfront": {
+    "beginOffset": [0, 0.081, 0],
+    "endOffset": [0.123, 0.064, 0.819],
+    "beginTurn": 0
+   },
+   "uagetup": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0.02, 0.057, 0.022],
+    "beginTurn": 0
+   },
+   "uagetupfront": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [0.052, 0.055, 0.623],
+    "beginTurn": 0
+   },
+   "uakneelup": {
+    "beginOffset": [0, 0.109, 0],
+    "endOffset": [0, 0.109, 0],
+    "beginTurn": 0
+   },
+   "reactsmallfront": {
+    "beginOffset": [0, 0.085, 0],
+    "endOffset": [0, 0.085, 0],
+    "beginTurn": 0
+   },
+   "reactsmallback": {
+    "beginOffset": [0, 0.085, 0],
+    "endOffset": [0, 0.085, 0],
+    "beginTurn": 0
+   },
+   "reactsmallleft": {
+    "beginOffset": [0, 0.084, 0],
+    "endOffset": [0, 0.084, 0],
+    "beginTurn": 0
+   },
+   "reactsmallright": {
+    "beginOffset": [0, 0.085, 0],
+    "endOffset": [0, 0.085, 0],
+    "beginTurn": 0
+   },
+   "reactlargefront": {
+    "beginOffset": [0, 0.084, 0],
+    "endOffset": [0, 0.067, -1.371],
+    "beginTurn": 0
+   },
+   "reactlargeback": {
+    "beginOffset": [0, 0.085, 0],
+    "endOffset": [0, 0.106, 1.624],
+    "beginTurn": 0
+   },
+   "reactlargeleft": {
+    "beginOffset": [0, 0.084, 0],
+    "endOffset": [0, 0.084, 0],
+    "beginTurn": 0
+   },
+   "reactlargeright": {
+    "beginOffset": [0, 0.084, 0],
+    "endOffset": [0.888, 0.084, 0],
+    "beginTurn": 0
+   },
+   "reactlegs": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [-0.023, -0.213, 2.533],
+    "beginTurn": 0
+   },
+   "uaelbow": {
+    "beginOffset": [0, 0.082, 0],
+    "endOffset": [0, 0.082, 0],
+    "beginTurn": 0
+   },
+   "uahook2": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [0, 0.083, 0],
+    "beginTurn": 0
+   },
+   "uasurprise": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [-0.637, -0.122, 1.863],
+    "beginTurn": 0
+   },
+   "uaknee": {
+    "beginOffset": [0, 0.078, 0],
+    "endOffset": [0, 0.078, 0],
+    "beginTurn": 0
+   },
+   "uaillegalknee": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [0, 0.083, 0],
+    "beginTurn": 0
+   },
+   "uasidekick": {
+    "beginOffset": [0, 0.088, 0],
+    "endOffset": [0, 0.088, 0],
+    "beginTurn": 0
+   },
+   "uasweep": {
+    "beginOffset": [0, 0.089, 0],
+    "endOffset": [0.069, 0.104, 1.127],
+    "beginTurn": 0
+   },
+   "uacrescent": {
+    "beginOffset": [0, 0.081, 0],
+    "endOffset": [0, 0.081, 0],
+    "beginTurn": 0
+   }
+  }
+ }
+}
