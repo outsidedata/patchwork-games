@@ -22,7 +22,7 @@
       "nearer": ["Pad12"],
       "further": ["Pad13"]
     },
-    "guns": ["g95", "rpg7", "g95-L"],
+    "guns": ["g95", "rpg7", "g95-L", "g95-I"],
     "carries": { "stand": "ready", "aim": "aim", "run": "sprint", "low": "low" },
     "acts": { "inspect": "inspect", "charge": "charge", "check": "check" },
     "controls": {
@@ -42,7 +42,7 @@
         { "key": "I", "text": "inspect" },
         { "key": "C", "text": "charge" },
         { "key": "V", "text": "check the load" },
-        { "key": "Q", "text": "rifle, RPG-7 or laser" },
+        { "key": "Q", "text": "rifle, RPG-7, laser or ion blaster" },
         { "key": "Z", "text": "scope view" },
         { "key": "Space", "text": "jump" },
         { "key": "Esc", "text": "let go of the mouse" }

@@ -9,6 +9,14 @@
       "radius": 0.04,
       "splash": 5,
       "look": { "body": "pg7v", "trail": "pg7v trail", "burst": "pg7v burst" }
+    },
+    "ion": {
+      "speed": 140,
+      "g": 0,
+      "life": 4.5,
+      "radius": 0.08,
+      "splash": 2.5,
+      "look": { "body": "ion bolt", "trail": "ion trail", "burst": "ion blast" }
     }
   }
 }

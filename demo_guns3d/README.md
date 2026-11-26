@@ -21,6 +21,13 @@ the newest pulse landed (the laser plugin's `beam` look word), and the pulses co
 it reads as one beam that stays on while the trigger is held and goes out the frame it is let go. Where it lands it
 sparks and scorches (`laser ground`, `laser plate`). R swaps the cell.
 
+Q again swaps to the G95-I, the ion blaster: the same G95 item, firing one bolt of ion a press, 240 a minute at most,
+from a 24-bolt cell. Each bolt is a volley3d round (the `volley` flight word, the `ion` pattern) that leaves the muzzle
+at once and flies straight at 140 m/s with no fall to what the reticle covers. It is all particles, with no model: a
+white-hot core in a blue glow with its own light (`ion bolt`), a streak of blue sparks behind it (`ion trail`), and,
+where it meets something, a blue blast that knocks over every plate within 2.5 m (`ion blast`). The
+muzzle flashes blue (`ion flash`, `ion haze`). R swaps the cell.
+
 - **The sheet**, `assets/demo_guns3d.guns.json` (`world.guns3d.sheet`), is everything about the gun and who holds
   it: the G95's item, damage, words (the `select` trigger and its modes, the `cycle` at 850 rounds a minute, the
   30-round `magazine`, the `eye` aim, the `cone` spread, the `hitscan` flight, the `kick`), its look (flash, smoke,
@@ -42,7 +49,7 @@ sparks and scorches (`laser ground`, `laser plate`). R swaps the cell.
 
 Click the game to take the mouse. W A S D walk, Shift runs, the mouse looks, the left button fires, the right button
 aims down the gun, R reloads, B turns the selector between semi and auto, L lowers or raises the gun, I inspects, C
-charges (the RPG-7 cocks its hammer), V checks the load, Q swaps from the G95 to the RPG-7 to the G95-L and round, Space jumps.
+charges (the RPG-7 cocks its hammer), V checks the load, Q swaps from the G95 to the RPG-7 to the G95-L to the G95-I and round, Space jumps.
 
 ## Files
 
@@ -55,12 +62,12 @@ charges (the RPG-7 cocks its hammer), V checks the load, Q swaps from the G95 to
 - `assets/demo_guns3d.items.json`: the items sheet: the G95, the spent 5.56 case its port throws, the magazine a
   reload drops, the RPG-7 and the PG-7V a flying grenade is drawn as.
 - `assets/volleys.json`: volley3d's patterns: the PG-7V's speed, its sustainer's climb to 295 m/s, its fall, its
-  splash and its look (`world.volley3d`).
+  splash and its look; and the ion bolt's, straight at 140 m/s (`world.volley3d`).
 - `assets/demo_guns3d.bake.ts`: the bake (`yarn bake demo_guns3d`): the X Bot and its clips, the items, and the
   scene's one looks file.
 - `assets/effects.json`: the flash, the smoke, the tracer, the impacts, the case and the dropped magazine; the
-  RPG-7's launch flash and smoke, its backblast, the flying grenade, its trail and its burst; and where the G95-L's
-  beam lands.
+  RPG-7's launch flash and smoke, its backblast, the flying grenade, its trail and its burst; where the G95-L's
+  beam lands; and the ion blaster's flash, haze, bolt, trail and blast.
 - `plugins/range/`: the plates.
 - `plugins/laser/`: the G95-L's `cell` and `beam` words (`laser.guns3d.ts`) and the beams drawn (`laser.plugin.ts`).
 

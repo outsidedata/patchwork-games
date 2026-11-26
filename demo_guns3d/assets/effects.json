@@ -94,6 +94,32 @@
     "pg7v light": [
       { "lamp": { "intensity": 30, "distance": 18, "decay": 2, "tint": 16760944 } }
     ],
+    "ion flash": [
+      { "n": [1, 1], "life": [0.05, 0.06], "shape": "glow", "size": [0.3, 0.36], "tint": 14481663, "gain": 3.5, "add": true, "alphas": [[0, 1], [1, 0]] },
+      { "n": [8, 12], "life": [0.05, 0.09], "shape": "spark", "spread": 0.5, "speed": [6, 12], "drag": 12, "size": [0.012, 0.02], "tints": [[0, 15138815], [1, 3381759]], "gain": 2.4, "add": true, "a1": 0 },
+      { "lamp": { "intensity": 4, "distance": 4, "decay": 2, "tint": 6737151 } }
+    ],
+    "ion haze": [
+      { "n": [6, 10], "life": [0.25, 0.45], "shape": "glow", "spread": 0.4, "speed": [0.6, 1.6], "drag": 4, "size": [0.04, 0.07], "grows": [[0, 1], [1, 3]], "tints": [[0, 8969215], [1, 2245802]], "gain": 1.2, "add": true, "a1": 0 }
+    ],
+    "ion bolt": [
+      { "n": [1, 1], "lasts": true, "follow": true, "shape": "glow", "size": [0.16, 0.16], "tint": 15400959, "gain": 4, "add": true },
+      { "n": [1, 1], "lasts": true, "follow": true, "shape": "glow", "size": [0.5, 0.5], "tint": 3390463, "gain": 2.2, "add": true },
+      { "lamp": { "intensity": 4, "distance": 6, "decay": 2, "tint": 6737151 } }
+    ],
+    "ion trail": [
+      { "every": 0.002, "n": [1, 1], "life": [0.12, 0.2], "shape": "glow", "size": [0.12, 0.18], "grows": [[0, 1], [1, 0.3]], "tints": [[0, 11206655], [1, 1131983]], "gain": 2.4, "add": true, "a1": 0 },
+      { "every": 0.006, "n": [1, 2], "life": [0.2, 0.4], "shape": "spark", "spread": 1, "speed": [0.5, 2], "drag": 2, "size": [0.008, 0.014], "tints": [[0, 15138815], [1, 3381759]], "gain": 2, "add": true, "a1": 0 }
+    ],
+    "ion blast": [
+      { "n": [1, 1], "life": [0.15, 0.15], "shape": "glow", "size": [3.5, 3.5], "tint": 14481663, "gain": 5, "add": true, "a1": 0 },
+      { "n": [18, 26], "life": [0.3, 0.6], "shape": "glow", "spread": 1.6, "speed": [3, 9], "drag": 4, "size": [0.5, 0.9], "grows": [[0, 1], [1, 1.6]], "tints": [[0, 8969215], [1, 1131983]], "gain": 3, "add": true, "a1": 0 },
+      { "n": [30, 44], "life": [0.4, 0.9], "shape": "spark", "spread": 1.6, "speed": [8, 20], "g": 4, "drag": 1, "bounce": 0.3, "size": [0.015, 0.03], "tints": [[0, 15138815], [1, 3381759]], "gain": 2.5, "add": true, "a1": 0 },
+      { "n": [1, 1], "life": [0.3, 0.3], "shape": "glow", "size": [0.01, 0.01], "a0": 0, "a1": 0, "carry": "ion light" }
+    ],
+    "ion light": [
+      { "lamp": { "intensity": 20, "distance": 12, "decay": 2, "tint": 6737151 } }
+    ],
     "magazine": [
       { "n": [1, 1], "life": [6, 6], "speed": [0.6, 0.9], "spread": 0.15, "g": 9.8, "spin": 5, "bounce": 0.2, "drag": 0.3, "size": [1, 1], "a0": 1, "a1": 1, "item": { "item": "mag556" } }
     ]

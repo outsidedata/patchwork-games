@@ -1,7 +1,7 @@
 // demo_guns3d: the manager booted as its page boots it and main loaded; a seat joins holding the G95, turns its view
 // onto a plate, fires, knocks the plate down, reloads, and aims; and a seat swaps to the RPG-7, launches a rocket
 // that knocks a plate down, reloads the tube and swaps on to the G95-L and round; and a seat holds the G95-L's beam
-// on a plate, knocks it down, drains its cell and recharges it.
+// on a plate, knocks it down, drains its cell and recharges it; and a seat fires the ion blaster's bolt into a plate.
 import { expect, test } from 'vitest'
 import { boot, type Arg, type Row, type Scene } from '#engine/engine.ts'
 import { connection, load, manager, type Down } from '#addons/scenemanager/scenemanager.addon.ts'
@@ -149,11 +149,15 @@ test('a seat swaps to the RPG-7, launches a rocket that flies to a plate and kno
   steps(Math.ceil((move.length - move.done) / DT) + 1)
   expect(gun().act).toBe(false)
 
-  // on to the G95-L, its cell full, and round to the G95, fresh in the hand
+  // on to the G95-L, its cell full, the ion blaster, its cell full, and round to the G95, fresh in the hand
   press('swap')
   steps(1)
   expect(gun().name).toBe('g95-L')
   expect(gun().charge).toBe(sheet.guns['g95-L'].words.feed.cell.size)
+  press('swap')
+  steps(1)
+  expect(gun().name).toBe('g95-I')
+  expect(gun().charge).toBe(sheet.guns['g95-I'].words.feed.cell.size)
   press('swap')
   steps(1)
   expect(gun().name).toBe('g95')
@@ -245,3 +249,57 @@ test('a seat swaps to the G95-L, holds its beam on a plate, knocks it down, drai
   steps(1)
   expect(gun().move).toBe('')
 }, 20000)
+
+test('a seat swaps to the ion blaster, fires a bolt that flies to a plate and knocks it down, and one press is one bolt', async () => {
+  const truth = boot(file as Scene, sim)
+  const room = (await load(truth, import.meta.url)).get('main')!
+  const heard: Down[] = []
+  const seat = connection(manager(truth), d => heard.push(d))
+  let seq = 0
+  const press = (action: string, ...args: Arg[]) => {
+    const last = heard[heard.length - 1]
+    const me = possessed(last.packet.rows)!
+    seat.take({ scene: last.scene, seat: last.seat, msg: { seq: ++seq, n: last.packet.n, id: me.id, action, args } })
+  }
+  const steps = (n: number) => { for (let i = 0; i < n; i++) truth.step(DT) }
+  steps(2)
+  const me = () => room.rows.find((r: Row) => r.kind === 'player')!
+  const gun = () => me().data.gun
+  const live = () => room.rows.find((r: Row) => r.kind === 'volley3d')!.data.live
+  const size = sheet.guns['g95-I'].words.feed.cell.size
+
+  for (let i = 0; i < 3; i++) {
+    press('swap')
+    steps(1)
+  }
+  expect(gun().name).toBe('g95-I')
+  expect(gun().charge).toBe(size)
+
+  const plate = room.rows.find((r: Row) => r.kind === 'plate' && r.data.pos[2] === 20 && r.data.pos[0] === 0)!
+  const middle = [plate.data.pos[0], plate.data.pos[1] + defs.plate.post, plate.data.pos[2]]
+  for (let i = 0; i < 4; i++) {
+    const d = me().data
+    const { yaw, pitch, dist, side } = d.look
+    const pivot = [d.pos[0] - Math.cos(yaw) * side, d.pos[1] + d.lift, d.pos[2] + Math.sin(yaw) * side]
+    const eye = [pivot[0] - Math.sin(yaw) * Math.cos(pitch) * dist, pivot[1] + Math.sin(pitch) * dist, pivot[2] - Math.cos(yaw) * Math.cos(pitch) * dist]
+    const to = middle.map((v, k) => v - eye[k])
+    press('look', Math.atan2(to[0], to[2]) - yaw, -Math.atan2(to[1], Math.hypot(to[0], to[2])) - pitch)
+    steps(1)
+  }
+
+  // one press: one ion bolt on volley3d's ledger, one charge spent
+  press('fire', 1)
+  steps(2)
+  press('fire', 0)
+  steps(1)
+  expect(gun().shots).toBe(1)
+  expect(gun().charge).toBe(size - 1)
+  expect(live()).toHaveLength(1)
+  expect(live()[0].pattern).toBe('ion')
+  expect(live()[0].from).toBe(me().id)
+
+  // it flies the 20 m and knocks the plate down
+  steps(20)
+  expect(live()[0].hit?.id).toBe(plate.id)
+  expect(plate.data.down).toBeGreaterThan(0)
+}, 10000)
