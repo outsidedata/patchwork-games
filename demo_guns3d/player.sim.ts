@@ -96,7 +96,7 @@ export const player: Kind = {
     fire(me, w, _seat, v: unknown) {
       if (!held(v)) return
       guns3d.arm(me, w)
-      guns3d.pull(me, v === 1)
+      guns3d.pull(me, v === 1, null)
     },
     jump(me) {
       me.data.jump = true
