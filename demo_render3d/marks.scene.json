@@ -1,0 +1,104 @@
+{
+  "world": {
+    "defs": "demo_render3d",
+    "loader": {
+      "assets": {
+        "demo_render3d": {
+          "type": "json",
+          "url": "/games/demo_render3d/assets/demo_render3d.json",
+          "preload": true
+        },
+        "marks": {
+          "type": "json",
+          "url": "/games/demo_render3d/assets/marks.decal3d.json",
+          "preload": true
+        },
+        "mark-hole": {
+          "type": "texture",
+          "url": "/games/demo_render3d/assets/marks/hole.png",
+          "preload": true
+        },
+        "mark-scorch": {
+          "type": "texture",
+          "url": "/games/demo_render3d/assets/marks/scorch.png",
+          "preload": true
+        },
+        "mark-splat": {
+          "type": "texture",
+          "url": "/games/demo_render3d/assets/marks/splat.png",
+          "preload": true
+        },
+        "mark-crack": {
+          "type": "texture",
+          "url": "/games/demo_render3d/assets/marks/crack.png",
+          "preload": true
+        }
+      }
+    },
+    "decal3d": {
+      "looks": "marks",
+      "most": 500,
+      "mods": {
+        "words": ["render3d"],
+        "behaviors": ["render3d"]
+      }
+    }
+  },
+  "plugins": [
+    "loader",
+    "scenemanager",
+    "player",
+    "decal3d",
+    "render3d",
+    "stats"
+  ],
+  "seats": 1,
+  "prefabs": {
+    "engine": {
+      "dt": 0.016666666666666666,
+      "width": 1280,
+      "height": 720
+    },
+    "scenemanager": {
+      "out": {}
+    },
+    "loader": {},
+    "player": {
+      "seat": 0
+    },
+    "render3d": {
+      "camera": {
+        "fov": 55,
+        "near": 0.1,
+        "far": 200,
+        "at": [0, 5, 14],
+        "look": [0, 1.6, -1.5]
+      },
+      "pixelRatio": 1,
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "background": "#0a0b10"
+    },
+    "stage": {
+      "set": "marks"
+    },
+    "shooters": {
+      "set": "marks"
+    }
+  },
+  "actors": [
+    {
+      "is": "scenemanager"
+    },
+    {
+      "is": "loader"
+    },
+    {
+      "is": "stage"
+    },
+    {
+      "is": "shooters"
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "flipbooks": [
+    {
+      "name": "hole",
+      "clip": "still",
+      "frames": 1,
+      "loop": 0,
+      "across": 1,
+      "cell": [256, 256],
+      "plane": 2,
+      "samples": 8,
+      "fps": 30,
+      "pivot": [0.5, 0.5],
+      "nodes": [
+        {"id": "coord", "type": "ShaderNodeTexCoord"},
+        {"id": "len", "type": "ShaderNodeVectorMath", "props": {"operation": "LENGTH"}, "inputs": {"0": {"link": "coord.Object"}}},
+        {"id": "wob", "type": "ShaderNodeTexNoise", "props": {"noise_dimensions": "3D", "noise_type": "FBM"}, "inputs": {"Vector": {"link": "coord.Object"}, "Scale": 3.5, "Detail": 6, "Roughness": 0.6, "Lacunarity": 2, "Distortion": 0.2}},
+        {"id": "off", "type": "ShaderNodeMath", "props": {"operation": "MULTIPLY_ADD"}, "inputs": {"0": {"link": "wob.Fac"}, "1": 0.3, "2": -0.15}},
+        {"id": "r", "type": "ShaderNodeMath", "props": {"operation": "ADD"}, "inputs": {"0": {"link": "len.Value"}, "1": {"link": "off.Value"}}},
+        {"id": "core", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "SMOOTHSTEP", "clamp": true}, "inputs": {"Value": {"link": "r.Value"}, "From Min": 0.14, "From Max": 0.22, "To Min": 1, "To Max": 0}},
+        {"id": "chip", "type": "ShaderNodeTexNoise", "props": {"noise_dimensions": "3D", "noise_type": "FBM"}, "inputs": {"Vector": {"link": "coord.Object"}, "Scale": 9, "Detail": 8, "Roughness": 0.65, "Lacunarity": 2.2, "Distortion": 0.4}},
+        {"id": "fall", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "SMOOTHSTEP", "clamp": true}, "inputs": {"Value": {"link": "r.Value"}, "From Min": 0.2, "From Max": 0.75, "To Min": 1, "To Max": 0}},
+        {"id": "grain", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "LINEAR", "clamp": true}, "inputs": {"Value": {"link": "chip.Fac"}, "From Min": 0.35, "From Max": 0.6, "To Min": 0, "To Max": 1}},
+        {"id": "ring", "type": "ShaderNodeMath", "props": {"operation": "MULTIPLY", "use_clamp": true}, "inputs": {"0": {"link": "fall.Result"}, "1": {"link": "grain.Result"}}},
+        {"id": "ringa", "type": "ShaderNodeMath", "props": {"operation": "MULTIPLY"}, "inputs": {"0": {"link": "ring.Value"}, "1": 0.85}},
+        {"id": "alpha", "type": "ShaderNodeMath", "props": {"operation": "MAXIMUM"}, "inputs": {"0": {"link": "core.Result"}, "1": {"link": "ringa.Value"}}},
+        {"id": "tone", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "SMOOTHSTEP", "clamp": true}, "inputs": {"Value": {"link": "r.Value"}, "From Min": 0.12, "From Max": 0.6, "To Min": 0.03, "To Max": 0.42}}
+      ],
+      "images": [
+        {
+          "file": "hole.png",
+          "channels": [
+            {"field": "tone.Result", "op": "value"},
+            {"field": "tone.Result", "op": "value"},
+            {"field": "tone.Result", "op": "value"},
+            {"field": "alpha.Value", "op": "value"}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "scorch",
+      "clip": "still",
+      "frames": 1,
+      "loop": 0,
+      "across": 1,
+      "cell": [512, 512],
+      "plane": 2,
+      "samples": 8,
+      "fps": 30,
+      "pivot": [0.5, 0.5],
+      "nodes": [
+        {"id": "coord", "type": "ShaderNodeTexCoord"},
+        {"id": "len", "type": "ShaderNodeVectorMath", "props": {"operation": "LENGTH"}, "inputs": {"0": {"link": "coord.Object"}}},
+        {"id": "wob", "type": "ShaderNodeTexNoise", "props": {"noise_dimensions": "3D", "noise_type": "FBM"}, "inputs": {"Vector": {"link": "coord.Object"}, "Scale": 2.2, "Detail": 6, "Roughness": 0.6, "Lacunarity": 2, "Distortion": 0.5}},
+        {"id": "off", "type": "ShaderNodeMath", "props": {"operation": "MULTIPLY_ADD"}, "inputs": {"0": {"link": "wob.Fac"}, "1": 0.6, "2": -0.3}},
+        {"id": "r", "type": "ShaderNodeMath", "props": {"operation": "ADD"}, "inputs": {"0": {"link": "len.Value"}, "1": {"link": "off.Value"}}},
+        {"id": "fall", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "SMOOTHSTEP", "clamp": true}, "inputs": {"Value": {"link": "r.Value"}, "From Min": 0.15, "From Max": 0.9, "To Min": 1, "To Max": 0}},
+        {"id": "soot", "type": "ShaderNodeTexNoise", "props": {"noise_dimensions": "3D", "noise_type": "FBM"}, "inputs": {"Vector": {"link": "coord.Object"}, "Scale": 7, "Detail": 8, "Roughness": 0.6, "Lacunarity": 2.2, "Distortion": 0.3}},
+        {"id": "patch", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "LINEAR", "clamp": true}, "inputs": {"Value": {"link": "soot.Fac"}, "From Min": 0.3, "From Max": 0.65, "To Min": 0.45, "To Max": 1}},
+        {"id": "alpha", "type": "ShaderNodeMath", "props": {"operation": "MULTIPLY", "use_clamp": true}, "inputs": {"0": {"link": "fall.Result"}, "1": {"link": "patch.Result"}}},
+        {"id": "tone", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "SMOOTHSTEP", "clamp": true}, "inputs": {"Value": {"link": "r.Value"}, "From Min": 0.05, "From Max": 0.85, "To Min": 0.04, "To Max": 0.3}}
+      ],
+      "images": [
+        {
+          "file": "scorch.png",
+          "channels": [
+            {"field": "tone.Result", "op": "value"},
+            {"field": "tone.Result", "op": "value"},
+            {"field": "tone.Result", "op": "value"},
+            {"field": "alpha.Value", "op": "value"}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "splat",
+      "clip": "still",
+      "frames": 1,
+      "loop": 0,
+      "across": 1,
+      "cell": [512, 512],
+      "plane": 2,
+      "samples": 8,
+      "fps": 30,
+      "pivot": [0.5, 0.5],
+      "nodes": [
+        {"id": "coord", "type": "ShaderNodeTexCoord"},
+        {"id": "len", "type": "ShaderNodeVectorMath", "props": {"operation": "LENGTH"}, "inputs": {"0": {"link": "coord.Object"}}},
+        {"id": "wob", "type": "ShaderNodeTexNoise", "props": {"noise_dimensions": "3D", "noise_type": "FBM"}, "inputs": {"Vector": {"link": "coord.Object"}, "Scale": 2.4, "Detail": 4, "Roughness": 0.55, "Lacunarity": 2, "Distortion": 0.5}},
+        {"id": "off", "type": "ShaderNodeMath", "props": {"operation": "MULTIPLY_ADD"}, "inputs": {"0": {"link": "wob.Fac"}, "1": 0.7, "2": -0.35}},
+        {"id": "r", "type": "ShaderNodeMath", "props": {"operation": "ADD"}, "inputs": {"0": {"link": "len.Value"}, "1": {"link": "off.Value"}}},
+        {"id": "blob", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "SMOOTHSTEP", "clamp": true}, "inputs": {"Value": {"link": "r.Value"}, "From Min": 0.5, "From Max": 0.55, "To Min": 1, "To Max": 0}},
+        {"id": "drops", "type": "ShaderNodeTexVoronoi", "props": {"voronoi_dimensions": "3D", "feature": "F1", "distance": "EUCLIDEAN"}, "inputs": {"Vector": {"link": "coord.Object"}, "Scale": 6, "Randomness": 1}},
+        {"id": "drop", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "SMOOTHSTEP", "clamp": true}, "inputs": {"Value": {"link": "drops.Distance"}, "From Min": 0.2, "From Max": 0.26, "To Min": 1, "To Max": 0}},
+        {"id": "band", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "SMOOTHSTEP", "clamp": true}, "inputs": {"Value": {"link": "len.Value"}, "From Min": 0.6, "From Max": 0.95, "To Min": 1, "To Max": 0}},
+        {"id": "spray", "type": "ShaderNodeMath", "props": {"operation": "MULTIPLY", "use_clamp": true}, "inputs": {"0": {"link": "drop.Result"}, "1": {"link": "band.Result"}}},
+        {"id": "alpha", "type": "ShaderNodeMath", "props": {"operation": "MAXIMUM"}, "inputs": {"0": {"link": "blob.Result"}, "1": {"link": "spray.Value"}}}
+      ],
+      "images": [
+        {
+          "file": "splat.png",
+          "channels": [
+            {"field": "alpha.Value", "op": "shade", "smooth": 15, "height": 40, "dir": "+z", "wrap": 0.3, "through": "alpha.Value", "absorb": 0, "soften": 1},
+            {"field": "alpha.Value", "op": "shade", "smooth": 15, "height": 40, "dir": "+z", "wrap": 0.3, "through": "alpha.Value", "absorb": 0, "soften": 1},
+            {"field": "alpha.Value", "op": "shade", "smooth": 15, "height": 40, "dir": "+z", "wrap": 0.3, "through": "alpha.Value", "absorb": 0, "soften": 1},
+            {"field": "alpha.Value", "op": "value"}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "crack",
+      "clip": "still",
+      "frames": 1,
+      "loop": 0,
+      "across": 1,
+      "cell": [512, 512],
+      "plane": 2,
+      "samples": 8,
+      "fps": 30,
+      "pivot": [0.5, 0.5],
+      "nodes": [
+        {"id": "coord", "type": "ShaderNodeTexCoord"},
+        {"id": "len", "type": "ShaderNodeVectorMath", "props": {"operation": "LENGTH"}, "inputs": {"0": {"link": "coord.Object"}}},
+        {"id": "warp", "type": "ShaderNodeTexNoise", "props": {"noise_dimensions": "3D", "noise_type": "FBM"}, "inputs": {"Vector": {"link": "coord.Object"}, "Scale": 3, "Detail": 3, "Roughness": 0.5, "Lacunarity": 2, "Distortion": 0}},
+        {"id": "bent", "type": "ShaderNodeVectorMath", "props": {"operation": "MULTIPLY_ADD"}, "inputs": {"0": {"link": "warp.Color"}, "1": [0.18, 0.18, 0.18], "2": {"link": "coord.Object"}}},
+        {"id": "big", "type": "ShaderNodeTexVoronoi", "props": {"voronoi_dimensions": "3D", "feature": "DISTANCE_TO_EDGE", "distance": "EUCLIDEAN"}, "inputs": {"Vector": {"link": "bent.Vector"}, "Scale": 3.2, "Randomness": 1}},
+        {"id": "bigline", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "SMOOTHSTEP", "clamp": true}, "inputs": {"Value": {"link": "big.Distance"}, "From Min": 0.008, "From Max": 0.03, "To Min": 1, "To Max": 0}},
+        {"id": "bigfall", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "SMOOTHSTEP", "clamp": true}, "inputs": {"Value": {"link": "len.Value"}, "From Min": 0.25, "From Max": 0.95, "To Min": 1, "To Max": 0}},
+        {"id": "bigcrack", "type": "ShaderNodeMath", "props": {"operation": "MULTIPLY", "use_clamp": true}, "inputs": {"0": {"link": "bigline.Result"}, "1": {"link": "bigfall.Result"}}},
+        {"id": "fine", "type": "ShaderNodeTexVoronoi", "props": {"voronoi_dimensions": "3D", "feature": "DISTANCE_TO_EDGE", "distance": "EUCLIDEAN"}, "inputs": {"Vector": {"link": "bent.Vector"}, "Scale": 11, "Randomness": 1}},
+        {"id": "fineline", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "SMOOTHSTEP", "clamp": true}, "inputs": {"Value": {"link": "fine.Distance"}, "From Min": 0.006, "From Max": 0.025, "To Min": 1, "To Max": 0}},
+        {"id": "finefall", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "SMOOTHSTEP", "clamp": true}, "inputs": {"Value": {"link": "len.Value"}, "From Min": 0.08, "From Max": 0.45, "To Min": 1, "To Max": 0}},
+        {"id": "finecrack", "type": "ShaderNodeMath", "props": {"operation": "MULTIPLY", "use_clamp": true}, "inputs": {"0": {"link": "fineline.Result"}, "1": {"link": "finefall.Result"}}},
+        {"id": "pit", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "SMOOTHSTEP", "clamp": true}, "inputs": {"Value": {"link": "len.Value"}, "From Min": 0.04, "From Max": 0.09, "To Min": 1, "To Max": 0}},
+        {"id": "lines", "type": "ShaderNodeMath", "props": {"operation": "MAXIMUM"}, "inputs": {"0": {"link": "bigcrack.Value"}, "1": {"link": "finecrack.Value"}}},
+        {"id": "alpha", "type": "ShaderNodeMath", "props": {"operation": "MAXIMUM"}, "inputs": {"0": {"link": "lines.Value"}, "1": {"link": "pit.Result"}}},
+        {"id": "tone", "type": "ShaderNodeMapRange", "props": {"interpolation_type": "LINEAR", "clamp": true}, "inputs": {"Value": {"link": "len.Value"}, "From Min": 0, "From Max": 0.9, "To Min": 0.02, "To Max": 0.12}}
+      ],
+      "images": [
+        {
+          "file": "crack.png",
+          "channels": [
+            {"field": "tone.Result", "op": "value"},
+            {"field": "tone.Result", "op": "value"},
+            {"field": "tone.Result", "op": "value"},
+            {"field": "alpha.Value", "op": "value"}
+          ]
+        }
+      ]
+    }
+  ]
+}

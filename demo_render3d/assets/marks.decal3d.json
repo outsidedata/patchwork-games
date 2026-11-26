@@ -1,0 +1,8 @@
+{
+  "hole": { "map": "mark-hole", "size": [0.14, 0.14], "scale": [0.8, 1.2], "deep": 0.15, "angle": 80, "spin": 180, "colour": "#ffffff", "roughness": 0.95, "life": 25, "fade": 3, "lift": 0.002 },
+  "scorch": { "map": "mark-scorch", "size": [1.4, 1.4], "scale": [0.8, 1.2], "deep": 0.5, "angle": 85, "spin": 180, "colour": "#ffffff", "roughness": 0.95, "life": 30, "fade": 4, "lift": 0.003 },
+  "splat-pink": { "map": "mark-splat", "size": [0.7, 0.7], "scale": [0.7, 1.3], "deep": 0.4, "angle": 85, "spin": 180, "colour": "#ff3d8b", "roughness": 0.25, "life": 40, "fade": 5, "lift": 0.002 },
+  "splat-cyan": { "map": "mark-splat", "size": [0.7, 0.7], "scale": [0.7, 1.3], "deep": 0.4, "angle": 85, "spin": 180, "colour": "#2fd6ff", "roughness": 0.25, "life": 40, "fade": 5, "lift": 0.002 },
+  "splat-lime": { "map": "mark-splat", "size": [0.5, 0.5], "scale": [0.7, 1.3], "deep": 0.4, "angle": 85, "spin": 180, "colour": "#a6ff2f", "roughness": 0.25, "life": 40, "fade": 5, "lift": 0.002 },
+  "crack": { "map": "mark-crack", "size": [1.1, 1.1], "scale": [0.8, 1.2], "deep": 0.3, "angle": 70, "spin": 180, "colour": "#ffffff", "roughness": 0.9, "life": 30, "fade": 4, "lift": 0.002 }
+}
