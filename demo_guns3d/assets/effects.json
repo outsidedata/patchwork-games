@@ -30,8 +30,8 @@
       }
     ],
     "tracer": [
-      { "n": [1, 1], "lasts": true, "follow": true, "shape": "glow", "size": [0.07, 0.07], "tint": 16756838, "gain": 2.4, "add": true },
-      { "every": 0.0008, "life": [0.025, 0.035], "shape": "glow", "size": [0.03, 0.04], "tints": [[0, 16761466], [1, 13789214]], "gain": 1.4, "add": true, "a1": 0 }
+      { "n": [1, 1], "lasts": true, "follow": true, "shape": "glow", "size": [0.16, 0.16], "tint": 16756838, "gain": 2.4, "add": true },
+      { "every": 0.0008, "life": [0.06, 0.08], "shape": "glow", "size": [0.08, 0.1], "tints": [[0, 16761466], [1, 13789214]], "gain": 1.4, "add": true, "a1": 0 }
     ],
     "impact ground": [
       { "n": [6, 9], "life": [0.5, 1], "shape": "puff2", "spread": 0.6, "speed": [0.6, 1.6], "drag": 3, "g": 0.6, "size": [0.05, 0.09], "grows": [[0, 1], [1, 4]], "tint": 9337440, "alphas": [[0, 0.55], [1, 0]] },
