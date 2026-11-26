@@ -175,6 +175,11 @@
           "url": "/games/demo_guns3d/assets/moves/rifle-shot.move.json",
           "preload": true
         },
+        "move-laser-pulse": {
+          "type": "json",
+          "url": "/games/demo_guns3d/assets/moves/laser-pulse.move.json",
+          "preload": true
+        },
         "move-rifle-shot-last": {
           "type": "json",
           "url": "/games/demo_guns3d/assets/moves/rifle-shot-last.move.json",
@@ -352,7 +357,8 @@
           "hitscan3d",
           "volley3d",
           "chasecamera3d",
-          "particle3d"
+          "particle3d",
+          "laser"
         ]
       }
     },
@@ -396,7 +402,8 @@
     },
     "shipped": {
       "plugins": [
-        "range"
+        "range",
+        "laser"
       ]
     },
     "ui": {

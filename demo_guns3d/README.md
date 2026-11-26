@@ -14,6 +14,13 @@ backblast blows out of the venturi. R reloads: the launcher comes off the should
 grenade in front of the muzzle and rides it in as the kit's reload clip pushes it home, and the right thumb cocks the
 hammer.
 
+Q again swaps to the G95-L, the same G95 item throwing a beam of light. Held, the trigger lets go 1800 pulses a
+minute from a 180-pulse cell (the laser plugin's `cell` feed); each pulse is a `hitscan` line at the speed of light,
+met at once, so it burns whatever the reticle covers that step. The beam is drawn every frame from the muzzle to where
+the newest pulse landed (the laser plugin's `beam` look word), and the pulses come closer together than its `fade`, so
+it reads as one beam that stays on while the trigger is held and goes out the frame it is let go. Where it lands it
+sparks and scorches (`laser ground`, `laser plate`). R swaps the cell.
+
 - **The sheet**, `assets/demo_guns3d.guns.json` (`world.guns3d.sheet`), is everything about the gun and who holds
   it: the G95's item, damage, words (the `select` trigger and its modes, the `cycle` at 850 rounds a minute, the
   30-round `magazine`, the `eye` aim, the `cone` spread, the `hitscan` flight, the `kick`), its look (flash, smoke,
@@ -23,7 +30,7 @@ hammer.
 - **The moves**, `assets/moves/*.move.json`, each one thing done with the gun, as cues for each hand, its fingers,
   the gun, the body, the gun's own clips and its parts: the carries `ready`, `aim`, `low` and `sprint`; the shots
   `shot` and `shot last`; and the acts `reload`, `reload empty`, `select semi`, `select auto`, `inspect`, `charge`
-  and `check`; and the RPG-7's, `launcher-*`. The same moves are kept in the library
+  and `check`; the RPG-7's, `launcher-*`; and the G95-L's pulse, `laser-pulse`, a shiver of the gun. The same moves are kept in the library
   (`$PATCHWORK_LIBRARY/guns3d/moves/`).
 - **The body** is the player's `player` row, an X Bot walked by walker and drawn by anim with the Rifle 8-Way
   Locomotion Pack's clips (`assets/xbot.rig.json`). guns3d puts the gun at its shoulder and its hands where the moves
@@ -35,7 +42,7 @@ hammer.
 
 Click the game to take the mouse. W A S D walk, Shift runs, the mouse looks, the left button fires, the right button
 aims down the gun, R reloads, B turns the selector between semi and auto, L lowers or raises the gun, I inspects, C
-charges (the RPG-7 cocks its hammer), V checks the load, Q swaps between the G95 and the RPG-7, Space jumps.
+charges (the RPG-7 cocks its hammer), V checks the load, Q swaps from the G95 to the RPG-7 to the G95-L and round, Space jumps.
 
 ## Files
 
@@ -52,8 +59,10 @@ charges (the RPG-7 cocks its hammer), V checks the load, Q swaps between the G95
 - `assets/demo_guns3d.bake.ts`: the bake (`yarn bake demo_guns3d`): the X Bot and its clips, the items, and the
   scene's one looks file.
 - `assets/effects.json`: the flash, the smoke, the tracer, the impacts, the case and the dropped magazine; the
-  RPG-7's launch flash and smoke, its backblast, the flying grenade, its trail and its burst.
+  RPG-7's launch flash and smoke, its backblast, the flying grenade, its trail and its burst; and where the G95-L's
+  beam lands.
 - `plugins/range/`: the plates.
+- `plugins/laser/`: the G95-L's `cell` and `beam` words (`laser.guns3d.ts`) and the beams drawn (`laser.plugin.ts`).
 
 ## Pages
 

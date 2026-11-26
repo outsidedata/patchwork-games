@@ -1,6 +1,6 @@
 // The row one seat possesses, and the body it plays: an X Bot (`as: "xbot"`) that walks on walker (its numbers
 // `world.walker.kinds.xbot`), is drawn and played by anim (`world.anim.kinds.xbot`, the Rifle 8-Way Locomotion
-// Pack's clips), and holds one of its definition's `guns` (the G95 and the RPG-7), each a gun of guns3d's sheet
+// Pack's clips), and holds one of its definition's `guns` (the G95, the RPG-7 and the G95-L), each a gun of guns3d's sheet
 // (`assets/demo_guns3d.guns.json`), the one in its hands and its state its `gun`.
 // Every seat is sent every `player` row. Its own fields, beside walker's, anim's and guns3d's: `stick` [x, z], the
 // keys' way, right and forward; `fast`, the run key held; `aiming`, the aim key held; `lowered`, the gun lowered by
