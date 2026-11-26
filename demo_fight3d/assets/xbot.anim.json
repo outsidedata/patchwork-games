@@ -11,7 +11,12 @@
   "reactlargeback": { "rate": 1.3 },
   "reactlargeleft": { "rate": 1.3 },
   "reactlargeright": { "rate": 1.3 },
-  "reactlegs": { "rate": 1.4 }
+  "reactlegs": { "rate": 1.4 },
+  "downback": {},
+  "downfront": {},
+  "downside": {},
+  "upfromback": {},
+  "uagetupfront": { "rate": 2.2 }
  },
  "roles": { "still": "idle" },
  "stances": { "stand": {} }

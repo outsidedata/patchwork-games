@@ -5,7 +5,8 @@
 // strikes by, a fist from the forearm to the knuckles or a shin from the knee to the toes (motion3d's mod for melee3d,
 // its `strikers`), on the foe's limbs (anim's); fight3d (`world.fight3d`) freezes both, throws blood where it lands
 // (particle3d's), shoves the foe the way the strike went and plays its reaction by the way the strike came and the
-// blow's weight (anim's), then walks it back to its spot (walker's). Every number that never changes is the scene's
+// blow's weight (anim's), then walks it back to its spot (walker's); a blow of a kick's weight or an uppercut's throws
+// it across the ground and lays it down, and it gets up before it walks back. Every number that never changes is the scene's
 // `world` or a definition in `assets/demo_fight3d.json`.
 import type { Scene, Sim } from '#engine/engine.ts'
 import { scenemanager } from '#plugins/scenemanager/scenemanager.sim.ts'

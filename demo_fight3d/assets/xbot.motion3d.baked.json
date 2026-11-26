@@ -196,6 +196,22 @@
    "spot": ["LeftFoot", "RightFoot"],
    "on": "begin"
   },
+  "downback": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "downfront": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "downside": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
+  "upfromback": {
+   "spot": ["LeftFoot", "RightFoot"],
+   "on": "begin"
+  },
   "uaelbow": {
    "spot": ["LeftFoot", "RightFoot"],
    "on": "begin"
@@ -474,6 +490,26 @@
    "reactlegs": {
     "beginOffset": [0, 0, 0],
     "endOffset": [-0.023, -0.213, 2.533],
+    "beginTurn": 0
+   },
+   "downback": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [0.38, 0.027, -1.021],
+    "beginTurn": 0
+   },
+   "downfront": {
+    "beginOffset": [0, 0.083, 0],
+    "endOffset": [0, 0.083, 0],
+    "beginTurn": 0
+   },
+   "downside": {
+    "beginOffset": [0, 0.078, 0],
+    "endOffset": [-0.633, 0.1, -0.831],
+    "beginTurn": 0
+   },
+   "upfromback": {
+    "beginOffset": [0, 0, 0],
+    "endOffset": [-0.102, 0.028, -0.698],
     "beginTurn": 0
    },
    "uaelbow": {

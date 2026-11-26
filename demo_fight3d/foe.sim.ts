@@ -1,14 +1,16 @@
 // A foe the seat's X Bot strikes: a walker body (`world.walker.kinds.foe`) played and drawn by anim
 // (`world.anim.kinds.foe`: the same X Bot and the same baked clips as the seat's, by the anim rig `assets/xbot.anim.json`),
 // standing where its actor puts it. melee3d knows it by anim's word, so the seat's fist and shin meet its limbs; a
-// blow is fight3d's `wound` (`world.fight3d.kinds.foe`): it is frozen, shoved, bleeds, and jolted, the joints about
-// where the blow met it turned at once and springing back onto the clip it stands in (anim draws the jolt through
+// blow is fight3d's `wound` (`world.fight3d.kinds.foe`): it is frozen, shoved, bleeds, plays a reaction clip and is
+// jolted, the joints about where the blow met it, and the whole body about its feet, turned at once and springing back
+// onto the clip it plays; a big enough blow (`knockdown`) throws it across the ground, lays it down in a clip that
+// holds, and gets it up again before it walks home (anim draws the jolt through
 // fight3d's `bends`).
 //
 // The row: walker's body (`pos`, `yaw`, `vel`, `grounded`, `sliding`, `speed`, `want`, `face`, `jump`, `side`,
-// `turned`), anim's fields, melee3d's `edges`, `swing` and `struck`, fight3d's `stop`, `shove`, `hits`, `since` and
-// `jolt`, and its own: `at` [x, z] and `facing`, where it stands and the yaw it stands at, from its actor entry,
-// which fight3d walks it back to; `stood`, once it stands there.
+// `turned`), anim's fields, melee3d's `edges`, `swing` and `struck`, fight3d's `stop`, `shove`, `hits`, `since`,
+// `down`, `fell` and `jolt`, and its own: `at` [x, z] and `facing`, where it stands and the yaw it stands at, from
+// its actor entry, which fight3d walks it back to; `stood`, once it stands there.
 //
 // Its `before`, the first time: it stands at `at` on walker's ground, turned to `facing`. Its `tick`: fight3d's
 // `home`, which walks it back to `at` once it has recovered from a blow, and there it turns to `facing`; walker's

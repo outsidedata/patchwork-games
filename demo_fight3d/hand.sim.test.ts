@@ -1,7 +1,8 @@
 // The hand: the manager booted into jolt as dev.html?scene=jolt boots it, and a seat throwing its fist at points of
 // the standing X Bot, aimed as the page aims a click (punch's `aim` along a ray, through melee3d's limbs). A jab aimed
 // at the face lands on the head, jolting the head's joints and shoving the body back the way it flew; a jab at the
-// side of the left thigh lands on it and turns its hip; a throw the hand refuses lands nothing.
+// side of the left thigh lands on it and turns its hip; a hurricane kick at the chest knocks the body down, and it
+// gets up and walks back; a throw the hand refuses lands nothing.
 import { expect, test } from 'vitest'
 import { boot, type Arg, type Row, type Scene } from '#engine/engine.ts'
 import { connection, load, manager, type Down } from '#addons/scenemanager/scenemanager.addon.ts'
@@ -9,6 +10,7 @@ import { limbs } from '#plugins/melee3d/melee3d.sim.ts'
 import { aim } from './plugins/punch/punch.sim.ts'
 import { sim } from './demo_fight3d.sim.ts'
 import manifest from './demo_fight3d.scene.json' with { type: 'json' }
+import joltScene from './jolt.scene.json' with { type: 'json' }
 
 const DT = manifest.prefabs.engine.dt
 
@@ -66,6 +68,30 @@ test('a jab at the side of the left thigh lands on it and turns the hip', async 
   expect(of('hand').data.struck).toEqual([`${of('foe').id}:uplegL`])
   expect(Object.keys(of('foe').data.jolt)).toEqual(expect.arrayContaining(['Hips', 'LeftUpLeg']))
   expect(of('foe').data.shove[0]).toBeLessThan(0)
+})
+
+test('a hurricane kick at the chest knocks the foe down: thrown back, lying in its clip, got up and walked back to its spot', async () => {
+  const { truth, of, w, throwAt, until } = await jolt()
+  const torso = limbs(w, of('foe')).find(l => l.limb === 'torso')!
+  const y = (torso.a[1] + torso.b[1]) / 2
+  expect(throwAt('uahurricane', [0, y, 3], [0, 0, -1]).limb).toBe('torso')
+  until(() => of('foe').data.hits > 0)
+  const foe = () => of('foe')
+  // Thrown at the knockdown's launch the way the kick flew, down in the clip that lies, and not jolted.
+  // (the kick's own knock is 6.5, and a step of the slide has run).
+  expect(foe().data.shove[1]).toBeLessThan(-joltScene.world.fight3d.kinds.foe.knockdown.knock + 0.5)
+  expect(foe().data.down).toBeGreaterThan(2)
+  expect(foe().data.clip).toBe('downback')
+  expect(foe().data.jolt).toEqual({})
+  // It slides back and lies where it lands, several metres from where it stood.
+  const lies = () => foe().data.down === 0
+  for (let i = 0; i < 60 * 4 && !lies(); i++) truth.step(DT)
+  expect(foe().data.pos[2]).toBeLessThan(-1.5)
+  // Then it gets up in its clip, and walks back to its spot.
+  expect(foe().data.clip).toBe('upfromback')
+  const home = () => Math.hypot(foe().data.pos[0] - foe().data.at[0], foe().data.pos[2] - foe().data.at[1]) <= 0.1 && foe().data.clip !== 'upfromback'
+  for (let i = 0; i < 60 * 15 && !home(); i++) truth.step(DT)
+  expect(home()).toBe(true)
 })
 
 test('a throw of a strike the hand has none of, a number not finite, or a way of no length is refused', async () => {

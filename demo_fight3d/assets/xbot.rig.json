@@ -213,6 +213,18 @@
   "reactlegs": {
    "file": "packs/mixamo-motions/Hit On Legs.fbx"
   },
+  "downback": {
+   "file": "packs/mixamo-motions/Flying Back Death.fbx"
+  },
+  "downfront": {
+   "file": "packs/mixamo-motions/Livershot Knockdown.fbx"
+  },
+  "downside": {
+   "file": "packs/mixamo-motions/Knocked Down.fbx"
+  },
+  "upfromback": {
+   "file": "packs/mixamo-motions/Getting Up.fbx"
+  },
   "uaelbow": {
    "file": "packs/mixamo-motions/Elbow Punch.fbx",
    "markers": {

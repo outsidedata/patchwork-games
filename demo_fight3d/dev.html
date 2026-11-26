@@ -25,8 +25,10 @@
       // the click's ray meets one of its limbs (melee3d's, as the page poses it), joins it: the `joined` panel shows
       // every number of its kind's fight3d entry, each laid into the truth's world and the page's as it changes. Its
       // reaction (the jolt alone, anim's reaction clips alone, or both); its freeze, frozen pace, knockback drag, large
-      // reaction, walk home and recover; which limbs a blow on is low; the jolt's springs; and for each of melee3d's
-      // limbs, the joints a blow on it turns, each joint's give, a joint taken off, and any joint of the skeleton put on.
+      // reaction, walk home and recover; which limbs a blow on is low; the knockdown (the damage it is from, its launch,
+      // slide, time lying and hitstop); the jolt's springs; the joints a blow on any limb turns about the body's feet (the
+      // whole-body lean); and for each of melee3d's limbs, the joints a blow on it turns, each joint's give, a joint taken
+      // off, and any joint of the skeleton put on.
       // `copy` copies the whole entry as `world.fight3d.kinds.<kind>` of the scene file, `reset to the file` puts the
       // file's back. A click on the joined body in a scene with a hand throws the hand's fist there, along the click's
       // ray: the blow lands on the limb clicked, from the way the camera looks. The `hit` folder picks the strike thrown
@@ -39,7 +41,7 @@
       // warp of each of the three light hits, picked from every unarmed strike.
       //
       // The readout shows the keys, the scene and the step, the seat's swing in main, the joined body's blows, clip,
-      // freeze and each joint it is jolted at, the hand's throws, and the last five errors the page threw or wrote.
+      // freeze, the seconds it has left lying, and each joint it is jolted at, the hand's throws, and the last five errors the page threw or wrote.
       import { boot } from '#engine/engine.ts'
       import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
       import { loopback } from '#addons/loopback/loopback.addon.ts'
@@ -200,13 +202,6 @@
       }, true)
       addEventListener('click', e => { if (e.button === 0 && client && !gui.domElement.contains(e.target)) { const ray = rayAt(e); if (ray && bodyAt(ray)) e.stopImmediatePropagation() } }, true)
 
-      // The reaction clips a body takes in place of the jolt, or beside it: anim's `react`, the X Bot's Mixamo
-      // reactions, by the blow's weight and the side it came from.
-      const REACT = {
-        small: { front: 'reactsmallfront', back: 'reactsmallback', left: 'reactsmallleft', right: 'reactsmallright' },
-        large: { front: 'reactlargefront', back: 'reactlargeback', left: 'reactlargeleft', right: 'reactlargeright' },
-        low: 'reactlegs',
-      }
       // Each struck kind's entry as the scene file gives it, kept before anything is changed.
       const filed = Object.fromEntries(STRUCK.map(k => [k, clone(fights[k])]))
       // The panel's own copy of each struck kind's entry, and its jolt, kept while the reaction is the clips alone.
@@ -215,19 +210,19 @@
         if (!own[kind]) {
           const e = clone(filed[kind])
           // A kind the file gives no jolt starts its springs and gives at nothing, its reaction the clips alone.
-          own[kind] = { entry: e, jolt: clone(e.jolt ?? { stiffness: 0, damping: 0, gain: 0, most: 0, limbs: {} }), reaction: !e.jolt ? 'clips' : e.anim?.react ? 'both' : 'jolt' }
+          own[kind] = { entry: e, jolt: clone(e.jolt ?? { stiffness: 0, damping: 0, gain: 0, most: 0, limbs: {}, body: {} }), reaction: !e.jolt ? 'clips' : e.anim?.react ? 'both' : 'jolt' }
         }
         return own[kind]
       }
       // The kind's entry as the panel holds it, laid into every world whole: the jolt unless the reaction is the clips
-      // alone, and anim's `react` (the file's, else REACT) unless it is the jolt alone.
+      // alone, and anim's `react` (the file's) unless it is the jolt alone.
       const entryOf = kind => {
         const o = ownOf(kind)
         const { jolt: _, ...e } = clone(o.entry)
         if (o.reaction !== 'clips') e.jolt = clone(o.jolt)
         if (!('anim' in e)) return e
         const { react, ...anim } = e.anim
-        e.anim = o.reaction === 'jolt' ? anim : { ...anim, react: react ?? REACT }
+        e.anim = o.reaction === 'jolt' || !react ? anim : { ...anim, react }
         return e
       }
       const lay = kind => { for (const world of worlds()) world.fight3d.kinds[kind] = entryOf(kind) }
@@ -280,13 +275,35 @@
         jf.add(o.jolt, 'gain', 0, 2, 0.01).name('gain, rad per m·m/s').onChange(changed)
         jf.add(o.jolt, 'most', 0, 1.5, 0.01).name('most, rad').onChange(changed)
 
-        const gf = panel.addFolder('jolt joints')
+        if (e.knockdown) {
+          const kf = panel.addFolder('knockdown')
+          kf.add(e.knockdown, 'from', 0, 100, 1).name('knocked down from, damage').onChange(changed)
+          kf.add(e.knockdown, 'knock', 0, 30, 0.1).name('launch, m/s').onChange(changed)
+          kf.add(e.knockdown, 'drag', 0.5, 40, 0.5).name('slide drag, 1/s').onChange(changed)
+          kf.add(e.knockdown, 'lie', 0, 10, 0.1).name('lies for, s').onChange(changed)
+          e.knockdown.stop ??= e.stop
+          kf.add(e.knockdown, 'stop', 0, 0.5, 0.01).name('hitstop, s').onChange(changed)
+        }
+
         const joints = jointsOf(kind)
+        // The joints a blow on any limb turns about the body's feet: the lean of the whole body.
+        const bf = panel.addFolder('jolt body (whole-body lean)')
+        const lean = (o.jolt.body ??= {})
+        for (const joint of Object.keys(lean)) {
+          bf.add(lean, joint, -2, 2, 0.01).name(joint).onChange(changed)
+          bf.add({ off: () => { delete lean[joint]; changed(); build() } }, 'off').name(`take ${joint} off`)
+        }
+        const leanPut = { joint: joints.find(j => !(j in lean)) ?? joints[0] }
+        bf.add(leanPut, 'joint', joints).name('joint to put on')
+        bf.add({ on: () => { if (!(leanPut.joint in lean)) { lean[leanPut.joint] = 0.1; changed(); build() } } }, 'on').name('put it on, give 0.1')
+        if (!open[bf._title]) bf.close()
+
+        const gf = panel.addFolder('jolt joints')
         for (const limb of limbNames) {
           const gives = (o.jolt.limbs[limb] ??= {})
           const f = gf.addFolder(`${limb} (${Object.keys(gives).length})`)
           for (const joint of Object.keys(gives)) {
-            f.add(gives, joint, 0, 2, 0.01).name(joint).onChange(changed)
+            f.add(gives, joint, -2, 2, 0.01).name(joint).onChange(changed)
             f.add({ off: () => { delete gives[joint]; changed(); build() } }, 'off').name(`take ${joint} off`)
           }
           const put = { joint: joints.find(j => !(j in gives)) ?? joints[0] }
@@ -484,7 +501,7 @@
         if (!row) return [`click a body to join it`]
         const f = row.data
         return [
-          `joined ${row.kind} #${row.id}   blows ${f.hits}   ${f.clip ?? ''}   frozen ${fixed(f.stop ?? 0)} s`,
+          `joined ${row.kind} #${row.id}   blows ${f.hits}   ${f.clip ?? ''}   frozen ${fixed(f.stop ?? 0)} s${f.down > 0 ? `   down ${fixed(f.down)} s` : ''}`,
           `jolted ${Object.entries(f.jolt ?? {}).map(([bone, v]) => `${bone} ${fixed(Math.hypot(v[0], v[1], v[2]))}`).join('  ') || 'nowhere'}`,
           ...(hand() ? [`hand ${hit.strike}   thrown ${hand().data.thrown}   met ${(hand().data.struck ?? []).join(', ') || 'nothing'}   click the body to throw there`] : []),
         ]

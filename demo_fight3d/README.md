@@ -3,8 +3,9 @@
 A hand-to-hand fight, and its one question: does a hit feel right. On a level checkerboard, an X Bot (played by
 motion3d, unarmed) faces a foe 1.4 metres ahead (an X Bot played by anim on walker). Every strike lands through
 fight3d (`plugins/fight3d`): both bodies freeze, the foe is shoved the way the strike went, bleeds where it was met,
-and is jolted, the joints about the blow bent at once and springing back onto the clip it stands in. Once it has
-recovered it walks back to its spot.
+plays a reaction clip and is jolted, the joints about the blow and the whole body about its feet bent at once and
+springing back onto the clip it plays. A heavy blow (the uppercut, the kicks) knocks it down: thrown across the
+ground, it lies where it lands, gets up, and only then walks back to its spot.
 
 ## Playing it
 
@@ -16,8 +17,9 @@ recovered it walks back to its spot.
 - L: the MMA kick, or the flying kick while running.
 
 `dev.html` adds panels. A left click on the foe joins it: the joined panel holds every number of its fight3d entry
-(its reaction, the jolt, the clips or both; hitstop, frozen pace, knockback, walking home; its low limbs; the jolt's
-springs; and each limb's joints and how far a blow turns each, any joint taken off or put on), each copied as the
+(its reaction, the jolt, the clips or both; hitstop, frozen pace, knockback, walking home; its low limbs; the
+knockdown's damage, launch, slide, time lying and hitstop; the jolt's springs; the joints the whole body leans by; and
+each limb's joints and how far a blow turns each, any joint taken off or put on), each copied as the
 scene file's JSON. In main the combat panel holds the striker's numbers and the combo panel its three hits. `pause on
 a blow` stops the clock on the step a blow lands; ` pauses and . steps.
 
