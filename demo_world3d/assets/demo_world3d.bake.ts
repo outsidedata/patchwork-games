@@ -98,7 +98,7 @@ export const PLACES: Place[] = [
   { stronghold: 'winterfell/tavern', folder: 'tavern', scene: 'tavern.scene.json', field: 'tavern/tavern.field.json' },
   { stronghold: 'winterfell/spire', folder: 'spire', scene: 'spire.scene.json', field: 'spire/spire.field.json' },
   { stronghold: 'colonial/yard', folder: 'house', scene: 'house.scene.json', field: 'house/house.field.json' },
-  { stronghold: 'lightlab', folder: 'lightlab', scene: 'lightlab.scene.json', field: 'lightlab/lightlab.field.json' },
+  { stronghold: 'lightlab', folder: 'lightlab', scene: 'lightlab.scene.json', field: 'lightlab/lightlab.field.json', overrides: 'lightlab/lightlab.overrides.json' },
 ]
 const chosen = process.argv[3]
 const baked = chosen ? PLACES.filter(place => place.scene === `${chosen}.scene.json`) : PLACES
