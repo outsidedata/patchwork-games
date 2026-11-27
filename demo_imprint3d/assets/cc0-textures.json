@@ -1,0 +1,10 @@
+{
+  "folder": "ground",
+  "sizes": [1024],
+  "sets": {
+    "grass": { "set": "Grass004_4K-JPG", "maps": ["color", "normal"] },
+    "snow": { "set": "snow_02_4K-JPG", "maps": ["color", "normal"] },
+    "sand": { "set": "coast_sand_03_4K-JPG", "maps": ["color", "normal"] },
+    "mud": { "set": "brown_mud_4K-JPG", "maps": ["color", "normal"] }
+  }
+}

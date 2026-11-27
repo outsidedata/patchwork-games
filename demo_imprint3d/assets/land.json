@@ -1,0 +1,254 @@
+{
+  "program": {
+    "world": 4000,
+    "hscale": 30,
+    "sea": 0.2,
+    "flood": false,
+    "out": "ground",
+    "nodes": [
+      {
+        "id": "hills",
+        "op": "noise",
+        "kind": "simplex",
+        "freq": 9,
+        "seed": 3
+      },
+      {
+        "id": "swells",
+        "op": "noise",
+        "kind": "simplex",
+        "freq": 40,
+        "seed": 5
+      },
+      {
+        "id": "rolled",
+        "op": "combine",
+        "mode": "lerp",
+        "a": "hills",
+        "b": "swells",
+        "t": 0.18
+      },
+      {
+        "id": "shaped",
+        "op": "remap",
+        "input": "rolled",
+        "inLo": 0,
+        "inHi": 1,
+        "outLo": 0,
+        "outHi": 1,
+        "ease": "smooth"
+      },
+      {
+        "id": "ground",
+        "op": "clearing",
+        "input": "shaped",
+        "flat": 24,
+        "floor": 0
+      }
+    ]
+  },
+  "analysis": {
+    "slopeStep": 1,
+    "curveStep": 4,
+    "positionRadius": 20,
+    "occlusionRadius": 40,
+    "occlusionSteps": 6,
+    "cliffProbe": 10,
+    "cliffSlope": 0.6,
+    "cliffDrop": 10,
+    "flatAngle": 0.03,
+    "records": 50000
+  },
+  "ground": {
+    "compose": "stack",
+    "layers": [
+      {
+        "name": "grass",
+        "map": "grass-color",
+        "normal": "grass-normal",
+        "scale": 18,
+        "warp": [
+          {
+            "freq": 0.005,
+            "amp": 30,
+            "stretch": [
+              1,
+              1,
+              1
+            ],
+            "rotate": 0
+          },
+          {
+            "freq": 0.035,
+            "amp": 3,
+            "stretch": [
+              1,
+              1,
+              1
+            ],
+            "rotate": 0.7
+          },
+          {
+            "freq": 0.18,
+            "amp": 0.5,
+            "stretch": [
+              1,
+              1,
+              1
+            ],
+            "rotate": 1.9
+          }
+        ]
+      },
+      {
+        "name": "snow",
+        "map": "snow-color",
+        "normal": "snow-normal",
+        "scale": 6,
+        "where": [
+          {
+            "q": "height",
+            "lo": 37.6,
+            "hi": 38.4
+          }
+        ],
+        "edge": 1,
+        "warp": [
+          {
+            "freq": 0.005,
+            "amp": 6,
+            "stretch": [
+              1,
+              1,
+              1
+            ],
+            "rotate": 1.1
+          },
+          {
+            "freq": 0.035,
+            "amp": 3,
+            "stretch": [
+              1,
+              1,
+              1
+            ],
+            "rotate": 1.8
+          },
+          {
+            "freq": 0.18,
+            "amp": 0.5,
+            "stretch": [
+              1,
+              1,
+              1
+            ],
+            "rotate": 3
+          }
+        ]
+      },
+      {
+        "name": "sand",
+        "map": "sand-color",
+        "normal": "sand-normal",
+        "scale": 6,
+        "where": [
+          {
+            "q": "height",
+            "lo": 32.5,
+            "hi": 31.5
+          }
+        ],
+        "edge": 1,
+        "warp": [
+          {
+            "freq": 0.005,
+            "amp": 6,
+            "stretch": [
+              1,
+              1,
+              1
+            ],
+            "rotate": 2.1
+          },
+          {
+            "freq": 0.035,
+            "amp": 3,
+            "stretch": [
+              1,
+              1,
+              1
+            ],
+            "rotate": 2.8
+          },
+          {
+            "freq": 0.18,
+            "amp": 0.5,
+            "stretch": [
+              1,
+              1,
+              1
+            ],
+            "rotate": 4
+          }
+        ]
+      },
+      {
+        "name": "mud",
+        "map": "mud-color",
+        "normal": "mud-normal",
+        "scale": 6,
+        "where": [
+          {
+            "q": "wet",
+            "lo": 0.1,
+            "hi": 0.22
+          }
+        ],
+        "edge": 1,
+        "warp": [
+          {
+            "freq": 0.005,
+            "amp": 6,
+            "stretch": [
+              1,
+              1,
+              1
+            ],
+            "rotate": 3.1
+          },
+          {
+            "freq": 0.035,
+            "amp": 3,
+            "stretch": [
+              1,
+              1,
+              1
+            ],
+            "rotate": 3.8
+          },
+          {
+            "freq": 0.18,
+            "amp": 0.5,
+            "stretch": [
+              1,
+              1,
+              1
+            ],
+            "rotate": 5
+          }
+        ]
+      }
+    ],
+    "heightBlend": {
+      "amount": 2,
+      "depth": 0.1
+    },
+    "far": {
+      "amount": 0.7,
+      "scale": 7.3
+    },
+    "roughness": 0.9
+  },
+  "surfaces": {},
+  "layers": []
+}

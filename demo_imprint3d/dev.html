@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>demo_imprint3d dev</title>
+    <style>
+      body { margin: 0; background: #0b0b0e; display: grid; place-items: center; height: 100vh }
+      canvas { grid-area: 1 / 1 }
+      .lil-gui.root { max-height: 100vh; overflow-y: auto }
+      #readout { position: fixed; left: 8px; bottom: 8px; color: #e8e8e8; font: 12px monospace; background: #0008; padding: 4px 6px; pointer-events: none; white-space: pre }
+    </style>
+  </head>
+  <body>
+    <div id="readout"></div>
+    <script type="module">
+      // The demo: index.html with three's lil-gui at the top right and a readout at the bottom left.
+      //
+      // The imprint folder is imprint3d's panel (`plugins/imprint3d/imprint3d.panel.ts`): the debug view the soft
+      // ground is drawn in (`look`; `share`, the snow's, sand's and mud's shares as red, green and blue;
+      // `opacity`; `pressed`; `hidden`, the points with no land yet), and every number of this page's copy of the
+      // grounds file, laid again as it changes; `copy grounds JSON` copies it for `assets/grounds.json`.
+      //
+      // The view folder holds render3d's camera at a place of its own instead of behind the car: `drive` gives it
+      // back; `over` looks straight down on the window round the car from over it, following it, so a debug view
+      // shows the whole window at once; `snow`, `sand` and `mud` look down at each from over its edge. `?view=<name>`
+      // and `?debug=<name>` start in one.
+      //
+      // The readout: frames a second over the last second, the blocks imprint3d holds of its window, those asked of
+      // its workers and those queued, the car's speed, and the lattice point under the car: its height, each
+      // ground's share, and how far it was pressed.
+      //
+      // The truths this tab holds are on `window.__scenes`, the page on `window.__page`, its client on
+      // `window.__client`, and `window.__view(name)` sets a view.
+      import { boot } from '#engine/engine.ts'
+      import { accept, load, manager, link, view } from '#addons/scenemanager/scenemanager.addon.ts'
+      import { loopback } from '#addons/loopback/loopback.addon.ts'
+      import GUI from 'lil-gui'
+      import { panel as imprintPanel } from '#plugins/imprint3d/imprint3d.panel.ts'
+      import { sim } from './demo_imprint3d.sim.ts'
+      import file from './demo_imprint3d.scene.json'
+      const params = new URLSearchParams(location.search)
+
+      const dt = file.prefabs.engine.dt
+      const truth = boot(file, sim)
+      window.__scenes = await load(truth, import.meta.url)
+      let client
+      const page = view(link(loopback(accept(manager(truth)))), file, import.meta.url, (me, scene) => {
+        client = me
+        window.__client = me
+        for (const surface of [me.plugins.render3d ?? me.plugins.render2d, me.plugins.ui]) {
+          if (!surface) continue
+          const canvas = document.createElement('canvas')
+          canvas.width = scene.prefabs.engine.width
+          canvas.height = scene.prefabs.engine.height
+          document.body.appendChild(canvas)
+          surface.mount(canvas)
+        }
+      })
+      window.__page = page
+
+      const car = () => window.__scenes.get('main')?.rows.find(r => r.kind === 'car')
+      // The views: where the camera stands and what it looks at, in metres over the land; `drive` is the car's own
+      // camera, and `over` stands over the car.
+      const VIEWS = {
+        drive: null,
+        over: () => { const p = car()?.data.pos ?? [0, 0, 0]; return { at: [p[0], 34, p[2] + 0.01], look: [p[0], 0, p[2]] } },
+        snow: () => ({ at: [16, 5, -24], look: [24, 0, -34] }),
+        sand: () => ({ at: [-20, 5, 22], look: [-32, 0, 34] }),
+        mud: () => ({ at: [30, 5, 16], look: [40, 0, 26] }),
+      }
+      const OWNER = 'dev.html view'
+      let held = params.get('view') ?? 'drive'
+      const place = () => {
+        const r3 = client?.plugins.render3d, ground = client?.plugins.terrain3d?.ground
+        if (!r3?.camera || !ground) return
+        const v = VIEWS[held]?.()
+        if (!v) { r3.release(OWNER); return }
+        r3.claim(OWNER)
+        const up = (p) => [p[0], p[1] + ground.height(p[0], p[2]), p[2]]
+        r3.camera.position.set(...up(v.at))
+        r3.camera.lookAt(...up(v.look))
+      }
+      window.__view = name => { held = name; place() }
+
+      const gui = new GUI({ title: 'demo_imprint3d' })
+      for (const type of ['keydown', 'keyup']) gui.domElement.addEventListener(type, e => e.stopPropagation())
+      gui.add({ get view() { return held }, set view(v) { held = v } }, 'view', Object.keys(VIEWS)).listen()
+      const imprint = imprintPanel(gui)
+      let debugged = false
+
+      const readout = document.getElementById('readout')
+      let frames = 0, since = performance.now(), fps = 0
+      const read = () => {
+        frames++
+        const now = performance.now()
+        if (now - since >= 1000) { fps = (frames * 1000) / (now - since); frames = 0; since = now }
+        const p = client?.plugins.imprint3d
+        const c = car()
+        const speed = c ? Math.hypot(c.data.vel[0], c.data.vel[2]) * 3.6 : 0
+        const lines = [`${fps.toFixed(0)} fps   car ${speed.toFixed(0)} km/h`]
+        if (p) {
+          const b = p.blocks()
+          lines.push(`blocks ${b.held}/${b.of} held, ${b.asked} asked, ${b.queued} queued`)
+          const cell = client.plugins.wire.scene.world.terrain3d.rings[0]
+          const step = (2 * cell.reach) / cell.seg
+          const at = c && p.at(Math.round(c.data.pos[0] / step), Math.round(c.data.pos[2] / step))
+          if (at) lines.push(`under the car: height ${at.height.toFixed(2)}   shares ${at.keeps.map(k => k.toFixed(2)).join(' ')}   pressed ${at.pressed.toFixed(3)} m`)
+        }
+        readout.textContent = lines.join('\n')
+      }
+
+      // An error stops the loop and is written over the readout, whole, and kept on `window.__error`.
+      const fail = e => {
+        window.__error = String(e?.stack ?? e)
+        readout.style.color = '#ff8a80'
+        readout.textContent = window.__error
+      }
+      addEventListener('error', e => fail(e.error ?? e.message))
+      addEventListener('unhandledrejection', e => fail(e.reason))
+
+      let last = performance.now(), owed = 0
+      const loop = async now => {
+        try {
+          owed += Math.min((now - last) / 1000, 0.25)
+          last = now
+          page.input()
+          while (owed >= dt) { truth.step(dt); owed -= dt }
+          place()
+          await page.frame(owed / dt)
+          imprint(client?.plugins)
+          if (!debugged && params.get('debug') && client?.plugins.imprint3d) { client.plugins.imprint3d.debug(params.get('debug')); debugged = true }
+          read()
+        } catch (e) { fail(e); return }
+        requestAnimationFrame(loop)
+      }
+      requestAnimationFrame(loop)
+    </script>
+  </body>
+</html>

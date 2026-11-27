@@ -1,0 +1,963 @@
+{
+  "world": {
+    "defs": "demo_imprint3d",
+    "player": {
+      "actions": {
+        "pedal": {
+          "label": "Throttle and brake",
+          "keys": [
+            [
+              "ArrowDown",
+              "s",
+              "Pad6"
+            ],
+            [
+              "ArrowUp",
+              "w",
+              "Pad7"
+            ]
+          ]
+        },
+        "steer": {
+          "label": "Steer",
+          "keys": [
+            [
+              "ArrowRight",
+              "d",
+              "Pad15",
+              "PadStickRight"
+            ],
+            [
+              "ArrowLeft",
+              "a",
+              "Pad14",
+              "PadStickLeft"
+            ]
+          ]
+        },
+        "brake": {
+          "label": "Brake",
+          "keys": [
+            " ",
+            "Pad0"
+          ]
+        }
+      },
+      "deadzone": 0.15,
+      "resolution": 64
+    },
+    "loader": {
+      "assets": {
+        "grounds": {
+          "type": "json",
+          "url": "/games/demo_imprint3d/assets/grounds.json",
+          "preload": true
+        },
+        "demo_imprint3d": {
+          "type": "json",
+          "url": "/games/demo_imprint3d/assets/demo_imprint3d.json",
+          "preload": true
+        },
+        "land": {
+          "type": "json",
+          "url": "/games/demo_imprint3d/assets/land.json",
+          "preload": true
+        },
+        "xbot-rig": {
+          "type": "json",
+          "url": "/games/demo_imprint3d/assets/xbot.rig.json",
+          "preload": true
+        },
+        "xbot": {
+          "type": "model",
+          "url": "/games/demo_imprint3d/assets/xbot.glb",
+          "preload": true
+        },
+        "grass-color": {
+          "type": "texture",
+          "url": "/games/demo_imprint3d/assets/ground/grass-color-1024.webp",
+          "wrap": "repeat",
+          "anisotropy": 8
+        },
+        "grass-normal": {
+          "type": "texture",
+          "url": "/games/demo_imprint3d/assets/ground/grass-normal-1024.webp",
+          "space": "linear",
+          "wrap": "repeat",
+          "anisotropy": 8
+        },
+        "snow-color": {
+          "type": "texture",
+          "url": "/games/demo_imprint3d/assets/ground/snow-color-1024.webp",
+          "wrap": "repeat",
+          "anisotropy": 8
+        },
+        "snow-normal": {
+          "type": "texture",
+          "url": "/games/demo_imprint3d/assets/ground/snow-normal-1024.webp",
+          "space": "linear",
+          "wrap": "repeat",
+          "anisotropy": 8
+        },
+        "sand-color": {
+          "type": "texture",
+          "url": "/games/demo_imprint3d/assets/ground/sand-color-1024.webp",
+          "wrap": "repeat",
+          "anisotropy": 8
+        },
+        "sand-normal": {
+          "type": "texture",
+          "url": "/games/demo_imprint3d/assets/ground/sand-normal-1024.webp",
+          "space": "linear",
+          "wrap": "repeat",
+          "anisotropy": 8
+        },
+        "mud-color": {
+          "type": "texture",
+          "url": "/games/demo_imprint3d/assets/ground/mud-color-1024.webp",
+          "wrap": "repeat",
+          "anisotropy": 8
+        },
+        "mud-normal": {
+          "type": "texture",
+          "url": "/games/demo_imprint3d/assets/ground/mud-normal-1024.webp",
+          "space": "linear",
+          "wrap": "repeat",
+          "anisotropy": 8
+        }
+      }
+    },
+    "terrain3d": {
+      "field": "land",
+      "rings": [
+        {
+          "reach": 16,
+          "seg": 512
+        },
+        {
+          "reach": 64,
+          "seg": 256
+        },
+        {
+          "reach": 320,
+          "seg": 160
+        },
+        {
+          "reach": 2000,
+          "seg": 100
+        }
+      ],
+      "shadowReach": 64,
+      "budget": 8,
+      "seabed": false,
+      "preload": true,
+      "mods": {
+        "ready": [
+          "imprint3d"
+        ]
+      }
+    },
+    "box3d": {
+      "gravity": [
+        0,
+        -9.8,
+        0
+      ],
+      "subStepCount": 4,
+      "enableSleep": true,
+      "enableContinuous": true,
+      "enableWarmStarting": false,
+      "static": [],
+      "kinds": {},
+      "chunk": {
+        "count": 65,
+        "cell": 0.5
+      },
+      "mods": {
+        "kinds": [
+          "box3dvehicle"
+        ],
+        "ground": "terrain3d"
+      }
+    },
+    "box3dvehicle": {
+      "chassis": "car",
+      "wheel": "wheel",
+      "joint": "axle",
+      "vehicles": {
+        "hatch": {
+          "body": {
+            "length": 3.6,
+            "width": 1.3,
+            "height": 0.7,
+            "mass": 600,
+            "center": [
+              0.1,
+              -0.1,
+              0
+            ],
+            "friction": 0.9,
+            "cabin": {
+              "at": -0.35,
+              "length": 1.7,
+              "width": 1.2,
+              "top": 1.3,
+              "topWidth": 1.1,
+              "height": 0.55
+            }
+          },
+          "bodies": {
+            "enableContactRecycling": false
+          },
+          "axles": [
+            {
+              "at": 1.25,
+              "track": 1.7,
+              "mount": 0.2,
+              "wheel": {
+                "radius": 0.42,
+                "width": 0.32,
+                "mass": 20,
+                "friction": 0.9,
+                "rollingResistance": 0
+              },
+              "spring": {
+                "stiffness": 16000,
+                "length": 0.55,
+                "travel": 0.3,
+                "sag": 0.1
+              },
+              "damper": {
+                "bump": 800,
+                "rebound": 2200
+              },
+              "bumpStop": {
+                "length": 0.06,
+                "stiffness": 30000
+              },
+              "antiRoll": 8000,
+              "driven": true,
+              "steered": true
+            },
+            {
+              "at": -1.25,
+              "track": 1.7,
+              "mount": 0.2,
+              "wheel": {
+                "radius": 0.42,
+                "width": 0.32,
+                "mass": 20,
+                "friction": 0.9,
+                "rollingResistance": 0
+              },
+              "spring": {
+                "stiffness": 15000,
+                "length": 0.55,
+                "travel": 0.3,
+                "sag": 0.1
+              },
+              "damper": {
+                "bump": 800,
+                "rebound": 2200
+              },
+              "bumpStop": {
+                "length": 0.06,
+                "stiffness": 30000
+              },
+              "antiRoll": 5000,
+              "driven": true,
+              "steered": false
+            }
+          ],
+          "engine": {
+            "curve": [
+              [
+                800,
+                70
+              ],
+              [
+                2000,
+                95
+              ],
+              [
+                3500,
+                115
+              ],
+              [
+                4500,
+                110
+              ],
+              [
+                5800,
+                92
+              ],
+              [
+                6500,
+                78
+              ]
+            ],
+            "idle": 850,
+            "launch": 2200,
+            "redline": 6500,
+            "revRate": 9000,
+            "friction": [
+              8,
+              3
+            ],
+            "gears": [
+              3.6,
+              2.65,
+              2.05,
+              1.7,
+              1.45
+            ],
+            "reverse": 3.4,
+            "final": 5.2,
+            "efficiency": 0.88,
+            "brakeTorque": 600,
+            "automatic": {
+              "up": [
+                2500,
+                6000
+              ],
+              "down": [
+                1300,
+                3500
+              ]
+            }
+          },
+          "steering": {
+            "angle": 0.5,
+            "hertz": 5,
+            "dampingRatio": 1,
+            "maxTorque": 10000
+          },
+          "pedal": {
+            "stop": 0.5
+          },
+          "look": {
+            "lock": 2,
+            "paint": {
+              "body": 4161488,
+              "cabin": 15905331,
+              "trim": 1842204,
+              "glass": 10471126,
+              "light": 16774338,
+              "tail": 13707807,
+              "tyre": 1710618,
+              "rim": 2829099,
+              "spring": 14826539,
+              "damper": 12105912,
+              "arm": 2763306,
+              "chrome": 14211804,
+              "seat": 8017462,
+              "amber": 16751135,
+              "hook": 12592669
+            },
+            "finish": {
+              "body": {
+                "roughness": 0.38,
+                "metalness": 0.15,
+                "clearcoat": 1,
+                "clearcoatRoughness": 0.06
+              },
+              "cabin": {
+                "roughness": 0.38,
+                "metalness": 0.15,
+                "clearcoat": 1,
+                "clearcoatRoughness": 0.06
+              },
+              "trim": {
+                "roughness": 0.8,
+                "metalness": 0
+              },
+              "glass": {
+                "roughness": 0.02,
+                "metalness": 0,
+                "opacity": 0.22
+              },
+              "light": {
+                "roughness": 0.05,
+                "metalness": 0,
+                "opacity": 0.75
+              },
+              "tail": {
+                "roughness": 0.1,
+                "metalness": 0,
+                "opacity": 0.9
+              },
+              "amber": {
+                "roughness": 0.1,
+                "metalness": 0,
+                "opacity": 0.9
+              },
+              "chrome": {
+                "roughness": 0.1,
+                "metalness": 1
+              },
+              "seat": {
+                "roughness": 0.55,
+                "metalness": 0,
+                "sheen": 0.5,
+                "sheenRoughness": 0.45
+              },
+              "hook": {
+                "roughness": 0.35,
+                "metalness": 0.1,
+                "clearcoat": 0.8,
+                "clearcoatRoughness": 0.1
+              },
+              "tyre": {
+                "roughness": 0.92,
+                "metalness": 0
+              },
+              "rim": {
+                "roughness": 0.35,
+                "metalness": 0.5,
+                "clearcoat": 0.4,
+                "clearcoatRoughness": 0.2
+              },
+              "spring": {
+                "roughness": 0.4,
+                "metalness": 0.7
+              },
+              "damper": {
+                "roughness": 0.3,
+                "metalness": 0.9
+              },
+              "arm": {
+                "roughness": 0.5,
+                "metalness": 0.6
+              }
+            },
+            "segments": 32,
+            "spokes": 5,
+            "rim": 0.55,
+            "coils": 7,
+            "coilRadius": 0.07,
+            "wire": 0.014,
+            "arm": 0.035,
+            "tread": {
+              "blocks": 22,
+              "depth": 0.032,
+              "angle": 0.4
+            },
+            "bumpers": {
+              "depth": 0.15,
+              "height": 0.2,
+              "overhang": 0.3,
+              "round": 0.03,
+              "bolts": 4,
+              "hooks": 0.45
+            },
+            "grille": {
+              "slots": 7,
+              "width": 0.6,
+              "height": 0.3,
+              "depth": 0.06,
+              "paint": "body"
+            },
+            "spare": {
+              "lift": 0.1
+            },
+            "open": {
+              "windshield": {
+                "height": 0.5,
+                "lean": 0.35,
+                "frame": 0.05,
+                "wiper": 0.3
+              },
+              "cage": {
+                "height": 0.6,
+                "tube": 0.035,
+                "bend": 0.12,
+                "pad": 0.05
+              },
+              "wall": 0.06,
+              "floor": 0.08,
+              "corner": 0.14,
+              "door": {
+                "from": -1,
+                "to": 0.4,
+                "drop": 0.26,
+                "ease": 0.18
+              },
+              "rib": {
+                "at": -0.1,
+                "depth": 0.012,
+                "height": 0.04
+              },
+              "seat": {
+                "width": 0.45,
+                "depth": 0.45,
+                "base": 0.14,
+                "back": 0.5,
+                "round": 0.04,
+                "tilt": 0.18,
+                "head": 0.16
+              },
+              "bench": true,
+              "steer": 0.17,
+              "dash": {
+                "depth": 0.12,
+                "height": 0.2
+              },
+              "tunnel": {
+                "width": 0.26,
+                "height": 0.1
+              },
+              "stick": 0.28,
+              "hood": {
+                "drop": 0.04,
+                "round": 0.035,
+                "dome": {
+                  "inset": 0.14,
+                  "height": 0.02
+                }
+              },
+              "rocker": {
+                "height": 0.1,
+                "depth": 0.05
+              },
+              "mirror": {
+                "size": 0.12,
+                "arm": 0.1
+              }
+            },
+            "fenders": {
+              "gap": 0.04,
+              "thickness": 0.025,
+              "flare": 0.01,
+              "round": 0.01,
+              "ease": 0.15,
+              "square": 2.4
+            }
+          }
+        }
+      },
+      "mods": {
+        "gravity": "box3d",
+        "grip": "terrain3d",
+        "drag": "terrain3d"
+      }
+    },
+    "walker": {
+      "kinds": {
+        "wanderer": {
+          "radius": 0.3,
+          "height": 1.8,
+          "accel": 8,
+          "turnRate": 6,
+          "gravity": 20,
+          "jumpH": 1.1,
+          "step": 0.45,
+          "maxSlope": 0.9,
+          "slopeBand": 0.2,
+          "slide": 4,
+          "wade": 0.8,
+          "span": 0.3,
+          "probe": 0.5,
+          "seekSpeed": 1.4,
+          "bodies": [
+            "player",
+            "wanderer"
+          ],
+          "agent": 0.25
+        }
+      },
+      "mods": {
+        "height": "terrain3d"
+      }
+    },
+    "anim": {
+      "still": 0.05,
+      "shift": 0.75,
+      "leap": 0.5,
+      "landFall": 7.5,
+      "moves": 0.05,
+      "turns": 30,
+      "kinds": {
+        "wanderer": {
+          "rig": "xbot-rig",
+          "model": "xbot",
+          "fade": 0.25,
+          "falls": [
+            {
+              "above": 4.3,
+              "role": "fall"
+            }
+          ],
+          "reads": {
+            "pos": "pos",
+            "yaw": "yaw",
+            "vel": "vel",
+            "grounded": "grounded",
+            "limp": "limp"
+          },
+          "capsules": [
+            {
+              "from": "LeftLeg",
+              "to": "LeftFoot",
+              "radius": 0.06
+            },
+            {
+              "from": "LeftFoot",
+              "to": "LeftToeBase",
+              "radius": 0.05
+            },
+            {
+              "from": "RightLeg",
+              "to": "RightFoot",
+              "radius": 0.06
+            },
+            {
+              "from": "RightFoot",
+              "to": "RightToeBase",
+              "radius": 0.05
+            }
+          ]
+        }
+      }
+    },
+    "gpgpu3d": {
+      "reach": 60,
+      "mods": {
+        "things": [
+          "box3dvehicle",
+          "anim"
+        ],
+        "behaviors": [
+          "box3dvehicle",
+          "anim"
+        ]
+      }
+    },
+    "imprint3d": {
+      "grounds": "grounds",
+      "mods": {
+        "land": "terrain3d",
+        "pressed": "gpgpu3d",
+        "behaviors": [
+          "box3dvehicle",
+          "anim"
+        ]
+      }
+    },
+    "seed": 1
+  },
+  "plugins": [
+    "loader",
+    "scenemanager",
+    "player",
+    "terrain3d",
+    "anim",
+    "box3d",
+    "box3dvehicle",
+    "gpgpu3d",
+    "imprint3d",
+    "environment3d",
+    "render3d",
+    "stats"
+  ],
+  "seats": 1,
+  "prefabs": {
+    "engine": {
+      "dt": 0.016666666666666666,
+      "width": 1280,
+      "height": 720
+    },
+    "scenemanager": {
+      "out": {}
+    },
+    "loader": {},
+    "render3d": {
+      "camera": {
+        "at": [
+          0,
+          4,
+          -8
+        ],
+        "look": [
+          0,
+          1,
+          0
+        ],
+        "fov": 60,
+        "near": 0.1,
+        "far": 9000
+      },
+      "tone": "neutral",
+      "exposure": 1,
+      "shadows": "soft",
+      "pixelRatio": 2,
+      "background": "#bcd4e8"
+    },
+    "environment3d": {
+      "sun": {
+        "color": "#fff3e0",
+        "power": 2.6,
+        "at": [
+          -30,
+          60,
+          -40
+        ],
+        "shadow": {
+          "map": 4096,
+          "half": 40,
+          "near": 1,
+          "far": 200,
+          "distance": 100,
+          "bias": -0.0002,
+          "normalBias": 0.02
+        }
+      },
+      "sky": {
+        "color": "#dbe8f5",
+        "ground": "#6b6252",
+        "power": 1.1
+      }
+    },
+    "box3d": {},
+    "box3dvehicle": {
+      "throttle": 0,
+      "brake": 0,
+      "steer": 0,
+      "gear": 1,
+      "rpm": 0,
+      "torque": 0
+    },
+    "car": {
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "rot": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "vel": [
+        0,
+        0,
+        0
+      ],
+      "spin": [
+        0,
+        0,
+        0
+      ],
+      "awake": true
+    },
+    "wheel": {
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "rot": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "vel": [
+        0,
+        0,
+        0
+      ],
+      "spin": [
+        0,
+        0,
+        0
+      ],
+      "awake": true
+    },
+    "axle": {},
+    "ground": {
+      "around": 1
+    },
+    "player": {
+      "seat": 0,
+      "held": null,
+      "controls": {
+        "pedal": 0,
+        "steer": 0,
+        "brake": 0
+      }
+    },
+    "start": {
+      "slot": 0,
+      "spot": ""
+    },
+    "spot": {
+      "name": "",
+      "vehicle": "",
+      "x": 0,
+      "z": 0,
+      "yaw": 0,
+      "made": 0
+    },
+    "walker": {},
+    "wanderer": {
+      "pos": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0,
+      "vel": [
+        0,
+        0,
+        0
+      ],
+      "grounded": true,
+      "sliding": false,
+      "speed": 0,
+      "side": 0,
+      "turned": 0,
+      "want": [
+        0,
+        0
+      ],
+      "face": null,
+      "jump": false,
+      "wait": 0,
+      "post": 0
+    },
+    "post": {
+      "pos": [
+        0,
+        0
+      ]
+    }
+  },
+  "actors": [
+    {
+      "is": "scenemanager"
+    },
+    {
+      "is": "loader"
+    },
+    {
+      "is": "box3d"
+    },
+    {
+      "is": "walker"
+    },
+    {
+      "is": "ground"
+    },
+    {
+      "is": "spot",
+      "name": "hatch",
+      "vehicle": "hatch",
+      "x": 0,
+      "z": 0,
+      "yaw": 0
+    },
+    {
+      "is": "start",
+      "slot": 0,
+      "spot": "hatch"
+    },
+    {
+      "is": "post",
+      "pos": [
+        16,
+        -40
+      ]
+    },
+    {
+      "is": "post",
+      "pos": [
+        32,
+        -36
+      ]
+    },
+    {
+      "is": "post",
+      "pos": [
+        28,
+        -28
+      ]
+    },
+    {
+      "is": "post",
+      "pos": [
+        -36,
+        36
+      ]
+    },
+    {
+      "is": "post",
+      "pos": [
+        -20,
+        44
+      ]
+    },
+    {
+      "is": "post",
+      "pos": [
+        -44,
+        8
+      ]
+    },
+    {
+      "is": "post",
+      "pos": [
+        -36,
+        -24
+      ]
+    },
+    {
+      "is": "post",
+      "pos": [
+        40,
+        24
+      ]
+    },
+    {
+      "is": "post",
+      "pos": [
+        40,
+        32
+      ]
+    },
+    {
+      "is": "post",
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "is": "wanderer",
+      "pos": [
+        24,
+        0,
+        -36
+      ],
+      "yaw": 1.2
+    },
+    {
+      "is": "wanderer",
+      "pos": [
+        -32,
+        0,
+        32
+      ],
+      "yaw": -2
+    },
+    {
+      "is": "wanderer",
+      "pos": [
+        40,
+        0,
+        20
+      ],
+      "yaw": 0.5
+    }
+  ]
+}
