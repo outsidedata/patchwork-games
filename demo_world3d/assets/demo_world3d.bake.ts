@@ -149,7 +149,8 @@ export const bakePlace = async (place: Place, { blender, scratch, library, stack
     const into = path.join(here, place.folder)
     fs.mkdirSync(into, { recursive: true })
     // a stronghold run also writes its refusals, every one of the run with the path to the solver that said it, and its
-    // rooms file, each room's box and the rooms it opens into (stronghold's room-hints.mjs), world3d's `rooms`
+    // rooms file, each room's shape, its parent, the rooms it is connected to and its look (stronghold's
+    // build-visibility-tree.mjs), world3d's `rooms`
     for (const suffix of place.stronghold ? [...MADE, '.refusals.json', '.rooms.json'] : MADE) {
       fs.copyFileSync(path.join(out, name + suffix), path.join(into, name + suffix))
       console.log('wrote', path.relative(root, path.join(into, name + suffix)))

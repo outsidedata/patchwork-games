@@ -155,11 +155,12 @@
         if (name === undefined) { r3.release(standing); return true }
         const r = roomsOf().find(q => q.name === name)
         if (!r || !r3.claim(standing)) return false
-        const mid = [0, 1, 2].map(i => (r.low[i] + r.high[i]) / 2)
+        // its foot, and its longer side turned by its turn about up
+        const foot = r.centre[1] - r.size[1] / 2
+        const way = r.size[0] >= r.size[2] ? [Math.cos(r.turn), -Math.sin(r.turn)] : [Math.sin(r.turn), Math.cos(r.turn)]
         r3.camera.up.set(0, 1, 0)
-        r3.camera.position.set(mid[0], r.low[1] + 1.6, mid[2])
-        const along = r.high[0] - r.low[0] >= r.high[2] - r.low[2] ? [1, 0, 0] : [0, 0, 1]
-        r3.camera.lookAt(mid[0] + along[0], r.low[1] + 1.6, mid[2] + along[2])
+        r3.camera.position.set(r.centre[0], foot + 1.6, r.centre[2])
+        r3.camera.lookAt(r.centre[0] + way[0], foot + 1.6, r.centre[2] + way[1])
         return true
       }
       // the folder is made once world3d has read the rooms, on its first tick
