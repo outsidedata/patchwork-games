@@ -18,7 +18,7 @@
       // on `window.__scenes`, the page on `window.__page` and the scene's client (its plugins) on
       // `window.__client`. The panel turns nav3d's drawing of the scene's graph on and off (`graphs`,
       // `?graphs=1` on at first), and puts the seat's body on any place of the graph, standing on
-      // whatever is there (`go to`). Its `carry` folder sets the hand and the offset of what the
+      // whatever is there (`go to`). Its `carry` folder has a `toggle torch` button that puts the carried light out and back, and sets the hand and the offset of what the
       // body carries, and its `stick` folder the hand, offset and turn of the stick it holds. Its `sky` folder sets skydome3d's clock on the truth's row and
       // its look and shadow on the page's world, copies them as JSON and resets them to the file. Its `lights` folder,
       // in main, keeps the first `?people=n` visitors (1 at first),
@@ -27,7 +27,9 @@
       // carried light, the exposure, the fog and the castle's flat material live (Lights,
       // below). The readout shows lights3d's lights, shadows, tiles, the still and moving tiles drawn this
       // frame and the still ones owed, and shows the frames drawn in
-      // the last second and the longest of them, the step, where the seat's body stands and what it
+      // the last second and the longest of them, the step, in a scene with rooms what world3d's culling draws (the room the
+      // camera is in, the triangles and vertices drawn against the place's, each run of the kit drawn with its triangles and
+      // how many it leaves out; `window.__culled()` hands them to a script), where the seat's body stands and what it
       // stands on, each visitor's place it is going to and how many places of its route it has still to
       // get to, or the place it stands at, with the height its feet stand at now and how many times it has
       // switched courses (the place it is going to changed), and the last five errors
@@ -192,6 +194,12 @@
       carry.add(held.light.shadow, 'near', 0.01, 1, 0.01).name('light shadow near (m)')
       carry.add(held.light.shadow, 'bias', -0.02, 0.02, 0.0001).name('light shadow bias')
       carry.add(held.light.shadow, 'normalBias', 0, 0.2, 0.001).name('light shadow normalBias')
+      const torch = { strength: held.light.intensity }
+      carry.add({ torch: () => {
+        if (held.light.intensity > 0) { torch.strength = held.light.intensity; held.light.intensity = 0 }
+        else held.light.intensity = torch.strength
+        carry.controllersRecursive().forEach(c => c.updateDisplay())
+      } }, 'torch').name('toggle torch')
       carry.add({ copy: () => {
         const out = JSON.stringify({ 'games/demo_world3d/assets/demo_world3d.json': { player: { carry: held } } }, null, 2)
         console.log(out)
@@ -466,6 +474,23 @@
         } }, 'copy').name('copy lights JSON')
       }
 
+      // What world3d's culling draws, live: the room the camera is in, the triangles and the distinct vertices its draw
+      // reaches against the whole place's, and each run of the kit it draws (the shell, the outdoors, each room it
+      // draws, with its triangles) and how many rooms it leaves out. `window.__culled()` hands the same numbers to a script.
+      const culling = w => {
+        const s = w?.culled()
+        if (!s) return []
+        const share = (n, of) => `${n} of ${of} (${of ? Math.round((100 * n) / of) : 0}%)`
+        const drawn = s.runs.filter(r => r.drawn)
+        const left = s.runs.length - drawn.length
+        return [
+          `culling, camera in ${s.room ?? 'no room: everything drawn'}`,
+          `  triangles drawn ${share(s.tris, s.total.tris)}, vertices reached ${share(s.verts, s.total.verts)}`,
+          `  draws ${drawn.map(r => `${r.name} ${r.tris}`).join(', ')}`,
+          `  leaves out ${left} of ${s.runs.length} runs`,
+        ]
+      }
+      window.__culled = () => window.__client?.plugins.world3d?.culled()
       const readout = document.getElementById('readout')
       const frames = []
       let last = performance.now(), owed = 0
@@ -493,6 +518,7 @@
           (l3 => l3 ? `lights3d: ${l3.count} lights, ${l3.shadowed} with shadows in ${l3.tiles} tiles, ${l3.redrawn} still tiles drawn this frame, ${l3.moving} moving tiles, ${l3.owed} faces owed` : '')(window.__client?.plugins.lights3d),
           p?.data.pos ? `you (${p.data.pos.map(v => v.toFixed(2)).join(', ')}) ${p.data.grounded ? 'on the ground' : 'in the air'}` : '',
           (c => c?.world3d?.rooms().length ? `camera in ${c.world3d.room(c)?.name ?? 'no room'}` : '')(window.__client?.plugins),
+          ...culling(window.__client?.plugins.world3d),
           ...visitors().map(v => `${v.id === picked.id ? '> ' : ''}visitor ${v.id} ${v.data.body}: ${v.data.speed > 0 ? `going to ${where(v)}, ${left(v)} places left` : `standing at ${where(v)}`} at y ${bodies.crowd3d.where(v, time())[1].toFixed(2)}, switched courses ${switches.get(v.id) ?? 0}`),
           ...errors,
         ].join('\n')

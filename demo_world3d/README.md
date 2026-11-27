@@ -35,7 +35,10 @@ the stone stairs to the walls) and onto every roof that is stood on.
 
 `dev.html` is the testbed: `?graphs=1` draws the town's graph, the panel puts you on any of its places, and the readout
 shows where you stand and where each visitor is going, and lights3d's lights and the still and moving shadow tiles it
-drew this frame. Its `lights` folder starts main cut down, to be built back a piece at a time: one visitor
+drew this frame. In a scene with rooms (`?scene=lightlab`) it also shows world3d's culling live: the room the camera
+is in, the triangles and the distinct vertices drawn against the place's whole count, the runs of the kit drawn (the
+shell, the outdoors, each room, with its triangles) and how many runs are left out; `window.__culled()` hands the same
+numbers to a script. Its `lights` folder starts main cut down, to be built back a piece at a time: one visitor
 (`?people=n`, `all` every one), no fog (`?fog=1` keeps it); `?atlas=` and `?tile=` set the shadow atlases' size and
 `?lights3d=0` takes lights3d out. Live, it sets the carried light on and off, the exposure, the fog's numbers, and the
 castle drawn in one flat grey material in place of its relief looks; "copy lights JSON" copies the fog for the files.
