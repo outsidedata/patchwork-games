@@ -15,19 +15,24 @@
     <script type="module">
       // The demo: index.html with three's lil-gui at the top right and a readout at the bottom left.
       //
-      // The imprint folder is imprint3d's panel (`plugins/imprint3d/imprint3d.panel.ts`): the debug view the soft
-      // ground is drawn in (`look`; `share`, the snow's, sand's and mud's shares as red, green and blue;
-      // `opacity`; `pressed`; `hidden`, the points with no land yet), and every number of this page's copy of the
-      // grounds file, laid again as it changes; `copy grounds JSON` copies it for `assets/grounds.json`.
+      // The imprint folder is imprint3d's panel (`plugins/imprint3d/imprint3d.panel.ts`): every number of this
+      // page's copy of the grounds file, made again as it changes; `copy grounds JSON` copies it for
+      // `assets/grounds.json`.
       //
       // The view folder holds render3d's camera at a place of its own instead of behind the car: `drive` gives it
-      // back; `over` looks straight down on the window round the car from over it, following it, so a debug view
-      // shows the whole window at once; `snow`, `sand` and `mud` look down at each from over its edge. `?view=<name>`
-      // and `?debug=<name>` start in one.
+      // back; `over` looks straight down on the ground round the car from over it, following it; `snow`, `sand`
+      // and `mud` look down at each. `?view=<name>` starts in one.
+      //
+      // `terrain view` is terrain3d's view of the ground: `look`, or `bends`, grey by how far imprint3d moves the
+      // surface, black none to white 0.25 m, and red by how steep it makes it. `?terrain=bends` starts in it.
+      //
+      // `find seams` asks imprint3d for every place in its window where the lift steps between two neighbouring
+      // points by more than `step over` metres, and why (`unfilled`, `fade`, `share`, `press`), shown in the
+      // readout and kept on `window.__seams`.
       //
       // The readout: frames a second over the last second, the blocks imprint3d holds of its window, those asked of
-      // its workers and those queued, the car's speed, and the lattice point under the car: its height, each
-      // ground's share, and how far it was pressed.
+      // its workers and those queued, the car's speed, the lattice point under the car: its height, each ground's
+      // share, and how far it was pressed, and the last seams found.
       //
       // The truths this tab holds are on `window.__scenes`, the page on `window.__page`, its client on
       // `window.__client`, and `window.__view(name)` sets a view.
@@ -86,7 +91,30 @@
       for (const type of ['keydown', 'keyup']) gui.domElement.addEventListener(type, e => e.stopPropagation())
       gui.add({ get view() { return held }, set view(v) { held = v } }, 'view', Object.keys(VIEWS)).listen()
       const imprint = imprintPanel(gui)
-      let debugged = false
+      // terrain3d's view of the ground (its Views): `look` as it is, `bends` grey by how far imprint3d moves the
+      // surface up and red by how steep it makes it (view 12)
+      const TERRAIN = { look: 0, bends: 12 }
+      let terrainView = params.get('terrain') ?? 'look'
+      const debugGround = () => {
+        const m = client?.plugins.terrain3d?.rings?.[0]?.mesh?.material
+        if (m?.userData.terrain3d) m.userData.terrain3d.tdDebug.value = TERRAIN[terrainView]
+      }
+      gui.add({ get view() { return terrainView }, set view(v) { terrainView = v } }, 'view', Object.keys(TERRAIN)).name('terrain view').listen()
+      // imprint3d's seams: every place in its window where the lift steps between two neighbouring points by more
+      // than `more` metres, counted by why, and the worst, kept on `window.__seams`
+      let seamed = ''
+      const seamCheck = { more: 0.03, find() {
+        const s = client?.plugins.imprint3d?.seams(seamCheck.more) ?? []
+        window.__seams = s
+        const by = {}
+        for (const x of s) by[x.why] = (by[x.why] ?? 0) + 1
+        const w = s[0]
+        const ring = client.plugins.wire.scene.world.terrain3d.rings[0], cell = (2 * ring.reach) / ring.seg
+        seamed = `seams over ${seamCheck.more} m: ${s.length} ${JSON.stringify(by)}${w ? `   worst ${w.step.toFixed(3)} m at x ${(w.i * cell).toFixed(2)} z ${(w.j * cell).toFixed(2)}, ${w.why}` : ''}`
+      } }
+      const sf = gui.addFolder('seams')
+      sf.add(seamCheck, 'more', 0.005, 0.2, 0.005).name('step over (m)')
+      sf.add(seamCheck, 'find').name('find seams')
 
       const readout = document.getElementById('readout')
       let frames = 0, since = performance.now(), fps = 0
@@ -106,6 +134,7 @@
           const at = c && p.at(Math.round(c.data.pos[0] / step), Math.round(c.data.pos[2] / step))
           if (at) lines.push(`under the car: height ${at.height.toFixed(2)}   shares ${at.keeps.map(k => k.toFixed(2)).join(' ')}   pressed ${at.pressed.toFixed(3)} m`)
         }
+        if (seamed) lines.push(seamed)
         readout.textContent = lines.join('\n')
       }
 
@@ -128,7 +157,7 @@
           place()
           await page.frame(owed / dt)
           imprint(client?.plugins)
-          if (!debugged && params.get('debug') && client?.plugins.imprint3d) { client.plugins.imprint3d.debug(params.get('debug')); debugged = true }
+          debugGround()
           read()
         } catch (e) { fail(e); return }
         requestAnimationFrame(loop)

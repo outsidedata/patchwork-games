@@ -1,7 +1,7 @@
 # demo_imprint3d
 
 A hatch driven over land that has snow on its high ground, mud where it is wet and sand on its low ground, all
-imprint3d's soft ground, and X Bots walking between them. The hatch's wheels leave ruts and the bodies' feet
+imprint3d's soft ground, which terrain3d draws as the land itself, and X Bots walking between them. The hatch's wheels leave ruts and the bodies' feet
 leave prints, each filling back in at its ground's own pace: snow in two minutes, sand in forty seconds, mud
 in ten.
 
@@ -18,10 +18,9 @@ w and s or the triggers are the pedal (s from a stop reverses), a and d or the s
 - `yarn dev`, then `localhost:5173/games/demo_imprint3d/index.html`.
 - `yarn serve demo_imprint3d`, then `localhost:5173/games/demo_imprint3d/client.html`, drives it against the
   game's server.
-- `dev.html` has imprint3d's panel: its debug views (`share`, `opacity`, `pressed`, `hidden`, each what the
-  shader worked out at every point, drawn unlit) and every number of the grounds file; views that hold the camera
-  (`over`, straight down on the window round the car; `snow`, `sand`, `mud`); and a readout of the blocks held
-  and the ground under the car. `?view=<name>` and `?debug=<name>` start in one.
+- `dev.html` has imprint3d's panel, every number of the grounds file; views that hold the camera (`over`,
+  straight down on the ground round the car; `snow`, `sand`, `mud`); and a readout of the blocks held and the
+  ground under the car. `?view=<name>` starts in one.
 
 ## Remaking the art
 
