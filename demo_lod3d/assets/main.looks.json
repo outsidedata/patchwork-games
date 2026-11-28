@@ -1,0 +1,377 @@
+{
+ "about": "the shader of main.looks.json, put together from its materials' looks by the library's pro-ng/material/compose.js",
+ "picture": 1024,
+ "materials": [
+  {
+   "name": "juniper_bark",
+   "look": "desert_bark",
+   "call": "solid",
+   "colour": [
+    0.1559264637078274,
+    0.10224173308810132,
+    0.06480326669290577
+   ]
+  },
+  {
+   "name": "juniper_snag",
+   "look": "desert_bark",
+   "call": "solid",
+   "colour": [
+    0.4019777798321958,
+    0.3613067797835095,
+    0.2961382707983211
+   ]
+  },
+  {
+   "name": "juniper_foliage",
+   "look": "desert_foliage",
+   "call": "solid",
+   "colour": [
+    0.06847816984440017,
+    0.11697066775851084,
+    0.03954623527673284
+   ]
+  },
+  {
+   "name": "juniper_card",
+   "look": "lod_card",
+   "call": "seeThrough",
+   "colour": [
+    1,
+    1,
+    1
+   ]
+  }
+ ],
+ "vertexPars": "uniform highp sampler2D lookSettings;\n\nattribute float lookId;\nattribute vec3 lookInfo;\nattribute vec3 s0;\nattribute vec3 s1;\nattribute vec4 s2;\nattribute vec2 s3;\nflat varying float vLookId;\nvarying vec3 vLookInfo;\nvarying vec2 vLookUv;\nvarying vec3 vLookWorld;\nvarying vec3 vLookWN;\nvarying vec3 vS0;\nvarying vec3 vS1;\nvarying vec4 vS2;\nvarying vec2 vS3;\nvec3 p_dbBark;\nvec3 p_dbUnder;\nvec3 p_dbDeep;\nvec3 p_dbSilverC;\nfloat p_dbScale;\nfloat p_dbStretch;\nfloat p_dbTwist;\nfloat p_dbStrip;\nfloat p_dbFurrow;\nfloat p_dbPlates;\nfloat p_dbSilver;\nfloat p_dbRelief;\nvoid lookVertex_0() {\n  p_dbBark = texelFetch(lookSettings, ivec2(0, 0), 0).rgb;\n  p_dbUnder = texelFetch(lookSettings, ivec2(1, 0), 0).rgb;\n  p_dbDeep = texelFetch(lookSettings, ivec2(2, 0), 0).rgb;\n  p_dbSilverC = texelFetch(lookSettings, ivec2(3, 0), 0).rgb;\n  p_dbScale = texelFetch(lookSettings, ivec2(4, 0), 0).r;\n  p_dbStretch = texelFetch(lookSettings, ivec2(5, 0), 0).r;\n  p_dbTwist = texelFetch(lookSettings, ivec2(6, 0), 0).r;\n  p_dbStrip = texelFetch(lookSettings, ivec2(7, 0), 0).r;\n  p_dbFurrow = texelFetch(lookSettings, ivec2(8, 0), 0).r;\n  p_dbPlates = texelFetch(lookSettings, ivec2(9, 0), 0).r;\n  p_dbSilver = texelFetch(lookSettings, ivec2(10, 0), 0).r;\n  p_dbRelief = texelFetch(lookSettings, ivec2(11, 0), 0).r;\n\n    vS0 = (modelMatrix * vec4(s0.x, s0.z, -s0.y, 0.0)).xyz;\n  \n}\n\nvoid lookVertex_1() {\n  p_dbBark = texelFetch(lookSettings, ivec2(0, 1), 0).rgb;\n  p_dbUnder = texelFetch(lookSettings, ivec2(1, 1), 0).rgb;\n  p_dbDeep = texelFetch(lookSettings, ivec2(2, 1), 0).rgb;\n  p_dbSilverC = texelFetch(lookSettings, ivec2(3, 1), 0).rgb;\n  p_dbScale = texelFetch(lookSettings, ivec2(4, 1), 0).r;\n  p_dbStretch = texelFetch(lookSettings, ivec2(5, 1), 0).r;\n  p_dbTwist = texelFetch(lookSettings, ivec2(6, 1), 0).r;\n  p_dbStrip = texelFetch(lookSettings, ivec2(7, 1), 0).r;\n  p_dbFurrow = texelFetch(lookSettings, ivec2(8, 1), 0).r;\n  p_dbPlates = texelFetch(lookSettings, ivec2(9, 1), 0).r;\n  p_dbSilver = texelFetch(lookSettings, ivec2(10, 1), 0).r;\n  p_dbRelief = texelFetch(lookSettings, ivec2(11, 1), 0).r;\n\n    vS0 = (modelMatrix * vec4(s0.x, s0.z, -s0.y, 0.0)).xyz;\n  \n}\n",
+ "vertexMain": "\nvLookId = lookId;\nvLookInfo = lookInfo;\nvLookUv = uv;\nvLookWorld = (modelMatrix * vec4(position, 1.0)).xyz;\nvLookWN = normalize(mat3(modelMatrix) * normal);\nvS0 = s0;\nvS1 = s1;\nvS2 = s2;\nvS3 = s3;\nswitch (int(lookId + 0.5)) {\n  case 0: lookVertex_0(); break;\n  case 1: lookVertex_1(); break;\n}\n",
+ "calls": {
+  "solid": {
+   "ids": [
+    0,
+    1,
+    2
+   ],
+   "fragmentPars": "uniform highp sampler2D lookSettings;\n\nflat varying float vLookId;\nvarying vec3 vLookInfo;\nvarying vec2 vLookUv;\nvarying vec3 vLookWorld;\nvarying vec3 vLookWN;\nvarying vec3 vS0;\nvarying vec3 vS1;\nvarying vec4 vS2;\nvarying vec2 vS3;\n#define s0 vS0\n#define s1 vS1\n#define s2 vS2\n#define s3 vS3\nuniform float lookView;\nuniform float lookDebug;\n// the looks' clock: seconds, one for every look of the scene, set each frame by the page (install.js's `time`) or the\n// game (core's supershader3d). It grows without end, and a hash of a large number is no longer random, so a look never\n// feeds it to its noise as it is: it takes it through kcycle or kloop, whose numbers stay inside one period.\nuniform float lookTime;\n// the uv's change across the pixel, worked out once where every pixel of the quad runs it, so a picture read inside a\n// look's branch still knows its sharpness\nvec2 lookGx, lookGy;\n// the slot s3's change across the pixel, worked out beside them, for a picture laid by a place the geometry gives in s3\nvec2 lookS3x, lookS3y;\n\nfloat kh(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }\nfloat kh1(float x) { return fract(sin(x * 91.7) * 43758.5453); }\nfloat kn(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  vec2 u = f * f * (3.0 - 2.0 * f);\n  return mix(mix(kh(i), kh(i + vec2(1, 0)), u.x), mix(kh(i + vec2(0, 1)), kh(i + vec2(1, 1)), u.x), u.y);\n}\nfloat kfbm(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 5; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s / 0.97;\n}\nfloat kfbm4(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 4; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s;\n}\n// a feature f metres across fades to its mean where it is finer than a pixel\nfloat kfade(float f) { vec2 fw = abs(lookGx) + abs(lookGy); return clamp(1.5 - (fw.x + fw.y) / f, 0.0, 1.0); }\n// cells of jittered seeds: the distance to the nearest, its number (0 to 1), and how far the second is past it\nfloat kvor(vec2 p, out float id, out float edge) {\n  vec2 i = floor(p), f = fract(p);\n  float d1 = 8.0, d2 = 8.0;\n  vec2 best = vec2(0.0);\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 c = i + o;\n    vec2 r = o + vec2(kh(c), kh(c + 7.3)) - f;\n    float d = dot(r, r);\n    if (d < d1) { d2 = d1; d1 = d; best = c; } else if (d < d2) { d2 = d; }\n  }\n  id = kh(best + 3.7);\n  edge = sqrt(d2) - sqrt(d1);\n  return sqrt(d1);\n}\n// a dimple field: the distance to the nearest of jittered cells' seeds\nfloat kcell(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  float d = 8.0;\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 r = o + vec2(kh(i + o), kh(i + o + 7.3)) - f;\n    d = min(d, dot(r, r));\n  }\n  return sqrt(d);\n}\n// courses: the row along v, the piece in it along u (each row offset), where in the piece (0 to 1 each way)\nvec4 kcourse(vec2 uv, float row, float wide, float jitter, float seed, out vec2 id) {\n  float r = floor(uv.y / row);\n  float shift = kh1(r + seed) * wide;\n  float w = wide * (1.0 - jitter * 0.5 + jitter * kh(vec2(r, floor((uv.x + shift) / wide) + seed)));\n  float x = (uv.x + shift) / w;\n  id = vec2(r, floor(x));\n  return vec4(fract(x), fract(uv.y / row), r, w);\n}\n// marble's veins: thin lines wandering through a warped field, the main ones and finer ones across them\nfloat kveins(vec2 p, float seed) {\n  float w = kfbm(p * 1.3 + seed) * 4.0;\n  float a = pow(1.0 - abs(sin((p.x * 1.6 + p.y * 0.6 + w) * 3.14159)), 22.0);\n  float b = pow(1.0 - abs(sin((p.y * 2.7 - p.x * 1.1 + kfbm(p * 2.6 + seed + 7.0) * 3.0) * 3.14159)), 50.0);\n  return clamp(a + 0.6 * b, 0.0, 1.0);\n}\n// wood's grain along u: its rings' lines (late wood 1, early 0) wandering across v, and its fibres\nfloat kring(vec2 uv, float seed, float rings) {\n  float w = kfbm(vec2(uv.x * 0.35, uv.y * 2.0) + seed) * 1.6;\n  return smoothstep(0.5, 0.95, fract(uv.y * rings + w + uv.x * 0.04));\n}\nfloat kfibre(vec2 uv, float seed) { return kn(vec2(uv.x * 3.0, uv.y * 420.0) + seed) * kfade(0.003); }\n// how strongly a cloth's weave shows: a plain weave of threads t metres across, over and under\nfloat kweave(vec2 uv, float t) {\n  vec2 q = uv / t;\n  float warp = sin(q.x * 3.14159), weft = sin(q.y * 3.14159);\n  float over = step(0.0, warp * weft);\n  return mix(0.5, mix(0.8, 1.08, over) * (0.85 + 0.15 * abs(over > 0.5 ? weft : warp)), kfade(t * 2.0));\n}\n// a cycle of `period` seconds: how far through it the clock is, 0 to 1, for a look that pulses or goes round (anything\n// of 6.28318 times it, a sin or a turn, comes back to where it began with no seam)\nfloat kcycle(float period) { return fract(lookTime / period); }\n// a drift that never repeats, for a look that flows, boils or creeps: two phases of one cycle of `period` seconds, half\n// a cycle apart, each 0 to 1 (x and y), and the share of the first (z). A look moves its pattern on by each phase, reads\n// it at both and mixes them by z; each phase jumps back to 0 only where its share is 0, so the drift shows no seam\nvec3 kloop(float period) { float a = fract(lookTime / period); return vec3(a, fract(a + 0.5), 1.0 - abs(2.0 * a - 1.0)); }\n// value noise in three numbers whose third repeats every `n` cells (a whole number): a pattern that churns in place,\n// for what boils, breathes or glows and fades, never sliding as a drift does. Given p.z = kcycle(period) * n it changes\n// n cells' worth over the period and comes back to where it began at its end with no seam, so nothing is mixed and\n// nothing shows twice\nfloat kh3(vec3 c) { return fract(sin(dot(c, vec3(127.1, 311.7, 74.7))) * 43758.5453123); }\nfloat kn3(vec3 p, float n) {\n  vec3 i = floor(p), f = fract(p);\n  vec3 u = f * f * (3.0 - 2.0 * f);\n  float z0 = mod(i.z, n), z1 = mod(i.z + 1.0, n);\n  float a0 = mix(mix(kh3(vec3(i.xy, z0)), kh3(vec3(i.xy + vec2(1, 0), z0)), u.x),\n                 mix(kh3(vec3(i.xy + vec2(0, 1), z0)), kh3(vec3(i.xy + vec2(1, 1), z0)), u.x), u.y);\n  float a1 = mix(mix(kh3(vec3(i.xy, z1)), kh3(vec3(i.xy + vec2(1, 0), z1)), u.x),\n                 mix(kh3(vec3(i.xy + vec2(0, 1), z1)), kh3(vec3(i.xy + vec2(1, 1), z1)), u.x), u.y);\n  return mix(a0, a1, u.z);\n}\n// four sizes of it, each finer one churning twice as fast and still repeating on the same cycle\nfloat kfbm3(vec3 p, float n) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 4; i++) { s += a * kn3(p, n); p = vec3(p.xy * 2.03 + 17.1, p.z * 2.0); n *= 2.0; a *= 0.5; }\n  return s / 0.9375;\n}\n// the normal bent by a height field, as three's bump map bends it (perturbNormalArb)\nvec3 kitBump(vec3 pos, vec3 n, float h, float faceDirection) {\n  vec3 sx = dFdx(pos), sy = dFdy(pos);\n  vec3 r1 = cross(sy, n), r2 = cross(n, sx);\n  float det = dot(sx, r1) * faceDirection;\n  vec2 dh = vec2(dFdx(h), dFdy(h));\n  vec3 grad = sign(det) * (dh.x * r1 + dh.y * r2);\n  return normalize(abs(det) * n - grad);\n}\n// a normal in the surface's own ways (u, v, out) turned into the view's, the ways found from the uv's change across\n// the pixel, as three's normal map without tangents finds them (getTangentFrame)\nvec3 lookPerturb(vec3 n, vec3 nts, float faceDirection) {\n  vec3 q0 = dFdx(-vViewPosition), q1 = dFdy(-vViewPosition);\n  vec3 q1perp = cross(q1, n), q0perp = cross(n, q0);\n  vec3 T = q1perp * lookGx.x + q0perp * lookGy.x;\n  vec3 B = q1perp * lookGx.y + q0perp * lookGy.y;\n  float det = max(dot(T, T), dot(B, B));\n  float scale = det == 0.0 ? 0.0 : faceDirection * inversesqrt(det);\n  return normalize(T * (nts.x * scale) + B * (nts.y * scale) + n * nts.z);\n}\n\nstruct Look {\n  vec3 colour; float rough; float metal; float height; vec3 nts; vec3 normal; bool ownNormal;\n  float ao; float aoDirect; float alpha; vec3 glow;\n  float clearcoat; float clearcoatRough; vec3 sheen; float sheenRough; float iridescence; float iridIor; float iridThick;\n  float transmission; float thickness; vec3 attColour; float attDist; float ior; float dispersion;\n};\nLook lookStart() {\n  Look k;\n  k.colour = vec3(0.5); k.rough = 0.8; k.metal = 0.0; k.height = 0.0; k.nts = vec3(0.0, 0.0, 1.0);\n  k.normal = vec3(0.0, 0.0, 1.0); k.ownNormal = false; k.ao = 1.0; k.aoDirect = 0.0; k.alpha = 1.0; k.glow = vec3(0.0);\n  k.clearcoat = 0.0; k.clearcoatRough = 0.1; k.sheen = vec3(0.0); k.sheenRough = 0.5;\n  k.iridescence = 0.0; k.iridIor = 1.3; k.iridThick = 400.0;\n  k.transmission = 0.0; k.thickness = 0.0; k.attColour = vec3(1.0); k.attDist = 1e9; k.ior = 1.5; k.dispersion = 0.0;\n  return k;\n}\n\n\nuniform highp sampler2DArray lookPictures;\nuniform float lookMeans[1];\nvec3 lookSrgb(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }\nvec4 picData(int t, vec2 uv, float scale) { return textureGrad(lookPictures, vec3(uv, float(t)), lookGx * scale, lookGy * scale); }\nvec3 picColour(int t, vec2 uv, float scale) { return lookSrgb(picData(t, uv, scale).rgb); }\nvec4 picDataLod(int t, vec2 uv, float lod) { return textureLod(lookPictures, vec3(uv, float(t)), lod); }\nvec3 picColourLod(int t, vec2 uv, float lod) { return lookSrgb(picDataLod(t, uv, lod).rgb); }\nfloat picMean(int t) { return lookMeans[t]; }\n// a picture laid once over a piece by the place its geometry gives in s3 (0 to 1 each way): `at` is that place\nvec4 picDataS3(int t, vec2 at) { return textureGrad(lookPictures, vec3(at, float(t)), lookS3x, lookS3y); }\n\nvec3 p_dbBark;\nvec3 p_dbUnder;\nvec3 p_dbDeep;\nvec3 p_dbSilverC;\nfloat p_dbScale;\nfloat p_dbStretch;\nfloat p_dbTwist;\nfloat p_dbStrip;\nfloat p_dbFurrow;\nfloat p_dbPlates;\nfloat p_dbSilver;\nfloat p_dbRelief;\nvec3 p_dfLeafA;\nvec3 p_dfLeafB;\nvec3 p_dfTip;\nvec3 p_dfDeep;\nfloat p_dfLeaves;\nfloat p_dfLength;\nfloat p_dfCover;\nfloat p_dfTufts;\nfloat p_dfBerry;\nvec3 p_dfBerryC;\nfloat p_dfBerrySize;\nfloat p_dfFelt;\nfloat p_dfGloss;\nfloat p_dfDepth;\nfloat p_lcCut;\nfloat p_lcRough;\nint t_lcPic;\n\n\n\n    // the bark on one upright plane: p.x across, p.y up. Returns (colour mix toward the under-bark, deep, silver\n    // grain), the relief in .w\n    vec4 dbUp(vec2 p, float scale, float stretch, float twist, float strip, float furrow, float plates, float silver) {\n      // the twist: the features lean across as they go up, twist metres across for every metre up\n      p.x += p.y * twist;\n      vec2 q = vec2(p.x * scale, p.y * scale / stretch);\n      float n = kfbm(q + vec2(0.0, kn(q * 0.3) * 2.0));\n      // strips: long fibres, each its own tone, their edges lifting; the red under-bark where one has peeled\n      float fib = kn(vec2(q.x * 3.0, q.y * 0.6));\n      float peel = smoothstep(0.66, 0.82, kfbm(q * vec2(0.6, 0.2) + 5.0)) * strip;\n      // a strip's edge: a ragged dark seam where one strip lifts off the next, each seam its own course\n      float seamAt = fract(q.x + 0.9 * n + 0.4 * kn(vec2(q.x * 0.5, q.y * 0.15)));\n      float stripEdge = (1.0 - smoothstep(0.0, 0.06, abs(seamAt - 0.5))) * smoothstep(0.35, 0.6, kn(q * vec2(1.0, 0.3) + 2.0)) * strip;\n      // furrows: deep valleys between ridges, the ridges flat-topped and broken across\n      float ridge = smoothstep(0.15, 0.45, abs(fract(q.x * 0.5 + 0.6 * n) - 0.5) * 2.0);\n      float ridgeBreak = smoothstep(0.0, 0.08, abs(fract(q.y * 0.3 + n) - 0.5) - 0.42);\n      float furrowDeep = (1.0 - ridge * (1.0 - ridgeBreak * 0.5)) * furrow;\n      // plates: cells stretched up, dark between them, orange where one has flaked\n      float pid, pe;\n      // q is already stretched up the trunk by the stretch setting: the plates come out long that way\n      kvor(q + vec2(0.3 * kn(q * 2.0), 0.0), pid, pe);\n      float plateGap = (1.0 - smoothstep(0.01, 0.06, pe)) * plates;\n      float flake = step(0.9, pid) * smoothstep(0.03, 0.12, pe) * plates;\n      // the silvered wood: its grain lines, cracks along it\n      float grain = kn(vec2(q.x * 6.0, q.y * 0.4));\n      float crack = (1.0 - smoothstep(0.0, 0.03, abs(kfbm(vec2(q.x * 1.3, q.y * 0.15) + 9.0) - 0.5))) * silver;\n      float under = clamp(peel + flake, 0.0, 1.0);\n      float deep = clamp(stripEdge * 0.6 + furrowDeep + plateGap + crack, 0.0, 1.0);\n      float relief = (fib - 0.5) * 0.3 * strip + ridge * furrow - plateGap * 0.5 - crack * 0.6 + (grain - 0.5) * 0.2 * silver;\n      // its tone: the fibres of a strip each their own, the grain of silvered wood\n      float tone = mix(mix(0.5, fib, strip), grain, silver);\n      return vec4(under, deep, tone, relief);\n    }\n  \n\n    // one layer of leaf elements at p (cells of 1): how much of an element covers it (0 to 1), its number, and where\n    // along it (0 its stalk, 1 its tip)\n    float dfLayer(vec2 p, float size, float len, out float id, out float along) {\n      vec2 i = floor(p), f = fract(p);\n      float best = 0.0;\n      id = 0.0; along = 0.5;\n      for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n        vec2 o = vec2(x, y);\n        vec2 c = i + o;\n        float h = kh(c + 1.3);\n        vec2 r = f - o - vec2(kh(c), kh(c + 7.3));\n        float a = h * 6.2832;\n        vec2 ax = vec2(cos(a), sin(a));\n        float u = dot(r, ax), v = dot(r, vec2(-ax.y, ax.x));\n        float l = size * (0.8 + 0.45 * kh(c + 2.9));\n        float d = length(vec2(u / l, v * len / l));\n        float cov = 1.0 - smoothstep(0.8, 1.0, d);\n        if (cov > best) { best = cov; id = h; along = clamp(u / l * 0.5 + 0.5, 0.0, 1.0); }\n      }\n      return best;\n    }\n    // the two layers and the tufts on one plane: (top layer, under layer, tuft crown) and the top layer's id and along\n    vec3 dfPlane(vec2 p, float leaves, float cover, float len, float tufts, out float id0, out float al0, out float id1) {\n      float al1;\n      float l0 = dfLayer(p * leaves, cover, len, id0, al0);\n      float l1 = dfLayer(p * leaves * 1.17 + 17.0, cover, len, id1, al1);\n      float sid, se;\n      float sd = kvor(p * tufts + vec2(kn(p * 12.0), kn(p * 12.0 + 3.0)) * 0.35, sid, se);\n      float rag = (kfbm4(p * tufts * 3.0 + 11.0) - 0.5) * 0.35;\n      float crown = smoothstep(0.85, 0.3, sd + rag) * (0.85 + 0.3 * kh1(sid * 23.0));\n      return vec3(l0, l1, crown);\n    }\n  \nvoid look_0(inout Look k, int lookRow) {\n  p_dbBark = texelFetch(lookSettings, ivec2(0, lookRow), 0).rgb;\n  p_dbUnder = texelFetch(lookSettings, ivec2(1, lookRow), 0).rgb;\n  p_dbDeep = texelFetch(lookSettings, ivec2(2, lookRow), 0).rgb;\n  p_dbSilverC = texelFetch(lookSettings, ivec2(3, lookRow), 0).rgb;\n  p_dbScale = texelFetch(lookSettings, ivec2(4, lookRow), 0).r;\n  p_dbStretch = texelFetch(lookSettings, ivec2(5, lookRow), 0).r;\n  p_dbTwist = texelFetch(lookSettings, ivec2(6, lookRow), 0).r;\n  p_dbStrip = texelFetch(lookSettings, ivec2(7, lookRow), 0).r;\n  p_dbFurrow = texelFetch(lookSettings, ivec2(8, lookRow), 0).r;\n  p_dbPlates = texelFetch(lookSettings, ivec2(9, lookRow), 0).r;\n  p_dbSilver = texelFetch(lookSettings, ivec2(10, lookRow), 0).r;\n  p_dbRelief = texelFetch(lookSettings, ivec2(11, lookRow), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    // the frame the features are laid in: along the limb's way where the kind gave it, else up the world\n    vec3 dbAx = length(s0) > 0.5 ? normalize(s0) : vec3(0.0, 1.0, 0.0);\n    vec3 dbRef = abs(dbAx.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);\n    vec3 dbE1 = normalize(cross(dbAx, dbRef));\n    vec3 dbE2 = cross(dbAx, dbE1);\n    vec3 dbW = pow(abs(vec3(dot(wn, dbE1), dot(wn, dbAx), dot(wn, dbE2))), vec3(4.0));\n    dbW /= dbW.x + dbW.y + dbW.z;\n    vec2 dbO = vec2(seed * 3.7, seed * 1.3);\n    float dbAlong = dot(wp, dbAx);\n    // facing e1: laid on the plane of e2 and the way; facing e2: on the plane of e1 and the way\n    vec4 dbX = dbUp(vec2(dot(wp, dbE2), dbAlong) + dbO, p_dbScale, p_dbStretch, p_dbTwist, p_dbStrip, p_dbFurrow, p_dbPlates, p_dbSilver);\n    vec4 dbZ = dbUp(vec2(dot(wp, dbE1), dbAlong) + dbO.yx, p_dbScale, p_dbStretch, p_dbTwist, p_dbStrip, p_dbFurrow, p_dbPlates, p_dbSilver);\n    // facing along the way: a cut end or a level top, its rings\n    float dbRing = kring(vec2(dot(wp, dbE1), dot(wp, dbE2)) * 2.0, seed, 14.0);\n    vec4 dbY = vec4(0.0, 0.2 * smoothstep(0.6, 0.9, dbRing), dbRing, (dbRing - 0.5) * 0.3);\n    float dbSide = dbW.x + dbW.z;\n    vec4 dbV = (dbX * dbW.x + dbZ * dbW.z) + dbY * dbW.y;\n    float dbF = kfade(1.5 / p_dbScale);\n    vec3 dbC = mix(p_dbBark, p_dbUnder, dbV.x * dbF);\n    dbC *= (0.85 + 0.3 * kfbm(wp.xz * 3.0 + wp.y * 0.5 + seed)) * mix(1.0, 0.7 + 0.6 * dbV.z, dbF);\n    // silvered: grey wood, its grain's tones, warm in the cracks\n    vec3 dbSilverWood = p_dbSilverC * (0.82 + 0.3 * dbV.z * dbF);\n    dbC = mix(dbC, dbSilverWood, p_dbSilver);\n    dbC = mix(dbC, p_dbDeep, dbV.y * dbF * 0.85);\n    k.colour = dbC;\n    k.rough = mix(0.92, 0.8, p_dbSilver);\n    k.height = p_dbRelief * dbV.w * dbF;\n    k.ao = 1.0 - 0.5 * dbV.y * dbF;\n    if (lookView > 0.5 && lookView < 1.5) k.colour = vec3(dbV.x, dbV.y, dbSide);\n\n}\n\n\nvoid look_2(inout Look k, int lookRow) {\n  p_dfLeafA = texelFetch(lookSettings, ivec2(0, lookRow), 0).rgb;\n  p_dfLeafB = texelFetch(lookSettings, ivec2(1, lookRow), 0).rgb;\n  p_dfTip = texelFetch(lookSettings, ivec2(2, lookRow), 0).rgb;\n  p_dfDeep = texelFetch(lookSettings, ivec2(3, lookRow), 0).rgb;\n  p_dfLeaves = texelFetch(lookSettings, ivec2(4, lookRow), 0).r;\n  p_dfLength = texelFetch(lookSettings, ivec2(5, lookRow), 0).r;\n  p_dfCover = texelFetch(lookSettings, ivec2(6, lookRow), 0).r;\n  p_dfTufts = texelFetch(lookSettings, ivec2(7, lookRow), 0).r;\n  p_dfBerry = texelFetch(lookSettings, ivec2(8, lookRow), 0).r;\n  p_dfBerryC = texelFetch(lookSettings, ivec2(9, lookRow), 0).rgb;\n  p_dfBerrySize = texelFetch(lookSettings, ivec2(10, lookRow), 0).r;\n  p_dfFelt = texelFetch(lookSettings, ivec2(11, lookRow), 0).r;\n  p_dfGloss = texelFetch(lookSettings, ivec2(12, lookRow), 0).r;\n  p_dfDepth = texelFetch(lookSettings, ivec2(13, lookRow), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    vec3 dfW = pow(abs(wn), vec3(4.0));\n    dfW /= dfW.x + dfW.y + dfW.z;\n    vec3 dfO = vec3(seed * 3.1, seed * 1.7, seed * 2.3);\n    float dfI0x, dfA0x, dfI1x, dfI0y, dfA0y, dfI1y, dfI0z, dfA0z, dfI1z;\n    vec3 dfX = dfPlane(wp.zy + dfO.xy, p_dfLeaves, p_dfCover, p_dfLength, p_dfTufts, dfI0x, dfA0x, dfI1x);\n    vec3 dfY = dfPlane(wp.xz + dfO.yz, p_dfLeaves, p_dfCover, p_dfLength, p_dfTufts, dfI0y, dfA0y, dfI1y);\n    vec3 dfZ = dfPlane(wp.xy + dfO.zx, p_dfLeaves, p_dfCover, p_dfLength, p_dfTufts, dfI0z, dfA0z, dfI1z);\n    // the plane that faces the surface most squarely gives each element's number (a blend of numbers means nothing)\n    float dfPick = dfW.x > dfW.y ? (dfW.x > dfW.z ? 0.0 : 2.0) : (dfW.y > dfW.z ? 1.0 : 2.0);\n    float dfId0 = dfPick < 0.5 ? dfI0x : dfPick < 1.5 ? dfI0y : dfI0z;\n    float dfAl0 = dfPick < 0.5 ? dfA0x : dfPick < 1.5 ? dfA0y : dfA0z;\n    float dfId1 = dfPick < 0.5 ? dfI1x : dfPick < 1.5 ? dfI1y : dfI1z;\n    vec3 dfL = dfX * dfW.x + dfY * dfW.y + dfZ * dfW.z;\n    float dfF = kfade(1.5 / p_dfLeaves);\n    float dfTuftF = kfade(1.0 / p_dfTufts);\n    float dfCrown = mix(0.7, dfL.z, dfTuftF);\n    // the top layer thins toward a tuft's edge, so the layer under it and the shade show there\n    float dfL0 = dfL.x * smoothstep(0.15, 0.55, dfCrown);\n    float dfL1 = dfL.y * smoothstep(0.0, 0.3, dfCrown);\n    vec3 dfC0 = mix(p_dfLeafA, p_dfLeafB, dfId0);\n    dfC0 = mix(dfC0, p_dfTip, smoothstep(0.5, 1.0, dfAl0) * 0.6 * kh1(dfId0 * 13.0));\n    vec3 dfC1 = mix(p_dfLeafA, p_dfLeafB, dfId1) * 0.5;\n    vec3 dfC = mix(p_dfDeep, dfC1, dfL1);\n    dfC = mix(dfC, dfC0, dfL0);\n    vec3 dfMean = mix(p_dfLeafA, p_dfLeafB, 0.5) * 0.7;\n    dfC = mix(dfMean, dfC, dfF) * mix(0.4, 1.1, dfCrown);\n    // berries or flower heads: small rounds sitting on the top layer, where a cell has one\n    float dfBid, dfBe;\n    vec2 dfBp = (dfPick < 0.5 ? wp.zy : dfPick < 1.5 ? wp.xz : wp.xy) + dfO.xy;\n    float dfBd = kvor(dfBp / (p_dfBerrySize * 5.0), dfBid, dfBe);\n    float dfB = step(1.0 - p_dfBerry, dfBid) * (1.0 - smoothstep(0.16, 0.2, dfBd)) * smoothstep(0.3, 0.6, dfCrown)\n      * kfade(p_dfBerrySize * 2.0);\n    float dfBmean = p_dfBerry * 0.1 * (1.0 - kfade(p_dfBerrySize * 2.0));\n    dfC = mix(dfC, p_dfBerryC * (0.8 + 0.4 * fract(dfBid * 31.0)), max(dfB, dfBmean));\n    // the felt: a silver film of hairs over the leaves, paler and sheened\n    dfC = mix(dfC, dfC * 1.6 + vec3(0.05, 0.055, 0.05), p_dfFelt * dfL0);\n    float dfDepthAt = max(dfL0, dfL1 * 0.6);\n    k.colour = dfC;\n    k.rough = mix(0.85, mix(0.75, 0.35, p_dfGloss), dfL0 * dfF);\n    k.height = p_dfDepth * (0.35 * mix(0.6, dfDepthAt, dfF) + 0.65 * dfCrown) + 0.004 * dfB;\n    k.ao = mix(0.75, mix(0.35, 1.0, dfDepthAt), dfF) * mix(0.5, 1.0, dfCrown);\n    k.aoDirect = 0.6;\n    k.sheen = mix(p_dfTip * 0.35, vec3(0.5), p_dfFelt * 0.6);\n    k.sheenRough = 0.5;\n    if (lookView > 0.5 && lookView < 1.5) k.colour = vec3(dfL0, dfB, dfCrown);\n\n}\n\n\n\n\nLook lookRun(int id) {\n  Look k = lookStart();\n  switch (id) {\n    case 0: look_0(k, 0); break;\n    case 1: look_0(k, 1); break;\n    case 2: look_2(k, 2); break;\n  }\n  if (lookDebug > 0.5) {\n    switch (id) {\n      case 0: k.colour = vec3(0.1559264637078274, 0.10224173308810132, 0.06480326669290577); break;\n      case 1: k.colour = vec3(0.4019777798321958, 0.3613067797835095, 0.2961382707983211); break;\n      case 2: k.colour = vec3(0.06847816984440017, 0.11697066775851084, 0.03954623527673284); break;\n    }\n  }\n  return k;\n}\nfloat lookShadow(int id, vec3 Lview) {\n  \n  return 1.0;\n}\n",
+   "features": {
+    "clearcoat": false,
+    "sheen": true,
+    "iridescence": false,
+    "dispersion": false,
+    "transmission": false
+   }
+  },
+  "relief": null,
+  "seeThrough": {
+   "ids": [
+    3
+   ],
+   "fragmentPars": "uniform highp sampler2D lookSettings;\n\nflat varying float vLookId;\nvarying vec3 vLookInfo;\nvarying vec2 vLookUv;\nvarying vec3 vLookWorld;\nvarying vec3 vLookWN;\nvarying vec3 vS0;\nvarying vec3 vS1;\nvarying vec4 vS2;\nvarying vec2 vS3;\n#define s0 vS0\n#define s1 vS1\n#define s2 vS2\n#define s3 vS3\nuniform float lookView;\nuniform float lookDebug;\n// the looks' clock: seconds, one for every look of the scene, set each frame by the page (install.js's `time`) or the\n// game (core's supershader3d). It grows without end, and a hash of a large number is no longer random, so a look never\n// feeds it to its noise as it is: it takes it through kcycle or kloop, whose numbers stay inside one period.\nuniform float lookTime;\n// the uv's change across the pixel, worked out once where every pixel of the quad runs it, so a picture read inside a\n// look's branch still knows its sharpness\nvec2 lookGx, lookGy;\n// the slot s3's change across the pixel, worked out beside them, for a picture laid by a place the geometry gives in s3\nvec2 lookS3x, lookS3y;\n\nfloat kh(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }\nfloat kh1(float x) { return fract(sin(x * 91.7) * 43758.5453); }\nfloat kn(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  vec2 u = f * f * (3.0 - 2.0 * f);\n  return mix(mix(kh(i), kh(i + vec2(1, 0)), u.x), mix(kh(i + vec2(0, 1)), kh(i + vec2(1, 1)), u.x), u.y);\n}\nfloat kfbm(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 5; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s / 0.97;\n}\nfloat kfbm4(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 4; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s;\n}\n// a feature f metres across fades to its mean where it is finer than a pixel\nfloat kfade(float f) { vec2 fw = abs(lookGx) + abs(lookGy); return clamp(1.5 - (fw.x + fw.y) / f, 0.0, 1.0); }\n// cells of jittered seeds: the distance to the nearest, its number (0 to 1), and how far the second is past it\nfloat kvor(vec2 p, out float id, out float edge) {\n  vec2 i = floor(p), f = fract(p);\n  float d1 = 8.0, d2 = 8.0;\n  vec2 best = vec2(0.0);\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 c = i + o;\n    vec2 r = o + vec2(kh(c), kh(c + 7.3)) - f;\n    float d = dot(r, r);\n    if (d < d1) { d2 = d1; d1 = d; best = c; } else if (d < d2) { d2 = d; }\n  }\n  id = kh(best + 3.7);\n  edge = sqrt(d2) - sqrt(d1);\n  return sqrt(d1);\n}\n// a dimple field: the distance to the nearest of jittered cells' seeds\nfloat kcell(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  float d = 8.0;\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 r = o + vec2(kh(i + o), kh(i + o + 7.3)) - f;\n    d = min(d, dot(r, r));\n  }\n  return sqrt(d);\n}\n// courses: the row along v, the piece in it along u (each row offset), where in the piece (0 to 1 each way)\nvec4 kcourse(vec2 uv, float row, float wide, float jitter, float seed, out vec2 id) {\n  float r = floor(uv.y / row);\n  float shift = kh1(r + seed) * wide;\n  float w = wide * (1.0 - jitter * 0.5 + jitter * kh(vec2(r, floor((uv.x + shift) / wide) + seed)));\n  float x = (uv.x + shift) / w;\n  id = vec2(r, floor(x));\n  return vec4(fract(x), fract(uv.y / row), r, w);\n}\n// marble's veins: thin lines wandering through a warped field, the main ones and finer ones across them\nfloat kveins(vec2 p, float seed) {\n  float w = kfbm(p * 1.3 + seed) * 4.0;\n  float a = pow(1.0 - abs(sin((p.x * 1.6 + p.y * 0.6 + w) * 3.14159)), 22.0);\n  float b = pow(1.0 - abs(sin((p.y * 2.7 - p.x * 1.1 + kfbm(p * 2.6 + seed + 7.0) * 3.0) * 3.14159)), 50.0);\n  return clamp(a + 0.6 * b, 0.0, 1.0);\n}\n// wood's grain along u: its rings' lines (late wood 1, early 0) wandering across v, and its fibres\nfloat kring(vec2 uv, float seed, float rings) {\n  float w = kfbm(vec2(uv.x * 0.35, uv.y * 2.0) + seed) * 1.6;\n  return smoothstep(0.5, 0.95, fract(uv.y * rings + w + uv.x * 0.04));\n}\nfloat kfibre(vec2 uv, float seed) { return kn(vec2(uv.x * 3.0, uv.y * 420.0) + seed) * kfade(0.003); }\n// how strongly a cloth's weave shows: a plain weave of threads t metres across, over and under\nfloat kweave(vec2 uv, float t) {\n  vec2 q = uv / t;\n  float warp = sin(q.x * 3.14159), weft = sin(q.y * 3.14159);\n  float over = step(0.0, warp * weft);\n  return mix(0.5, mix(0.8, 1.08, over) * (0.85 + 0.15 * abs(over > 0.5 ? weft : warp)), kfade(t * 2.0));\n}\n// a cycle of `period` seconds: how far through it the clock is, 0 to 1, for a look that pulses or goes round (anything\n// of 6.28318 times it, a sin or a turn, comes back to where it began with no seam)\nfloat kcycle(float period) { return fract(lookTime / period); }\n// a drift that never repeats, for a look that flows, boils or creeps: two phases of one cycle of `period` seconds, half\n// a cycle apart, each 0 to 1 (x and y), and the share of the first (z). A look moves its pattern on by each phase, reads\n// it at both and mixes them by z; each phase jumps back to 0 only where its share is 0, so the drift shows no seam\nvec3 kloop(float period) { float a = fract(lookTime / period); return vec3(a, fract(a + 0.5), 1.0 - abs(2.0 * a - 1.0)); }\n// value noise in three numbers whose third repeats every `n` cells (a whole number): a pattern that churns in place,\n// for what boils, breathes or glows and fades, never sliding as a drift does. Given p.z = kcycle(period) * n it changes\n// n cells' worth over the period and comes back to where it began at its end with no seam, so nothing is mixed and\n// nothing shows twice\nfloat kh3(vec3 c) { return fract(sin(dot(c, vec3(127.1, 311.7, 74.7))) * 43758.5453123); }\nfloat kn3(vec3 p, float n) {\n  vec3 i = floor(p), f = fract(p);\n  vec3 u = f * f * (3.0 - 2.0 * f);\n  float z0 = mod(i.z, n), z1 = mod(i.z + 1.0, n);\n  float a0 = mix(mix(kh3(vec3(i.xy, z0)), kh3(vec3(i.xy + vec2(1, 0), z0)), u.x),\n                 mix(kh3(vec3(i.xy + vec2(0, 1), z0)), kh3(vec3(i.xy + vec2(1, 1), z0)), u.x), u.y);\n  float a1 = mix(mix(kh3(vec3(i.xy, z1)), kh3(vec3(i.xy + vec2(1, 0), z1)), u.x),\n                 mix(kh3(vec3(i.xy + vec2(0, 1), z1)), kh3(vec3(i.xy + vec2(1, 1), z1)), u.x), u.y);\n  return mix(a0, a1, u.z);\n}\n// four sizes of it, each finer one churning twice as fast and still repeating on the same cycle\nfloat kfbm3(vec3 p, float n) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 4; i++) { s += a * kn3(p, n); p = vec3(p.xy * 2.03 + 17.1, p.z * 2.0); n *= 2.0; a *= 0.5; }\n  return s / 0.9375;\n}\n// the normal bent by a height field, as three's bump map bends it (perturbNormalArb)\nvec3 kitBump(vec3 pos, vec3 n, float h, float faceDirection) {\n  vec3 sx = dFdx(pos), sy = dFdy(pos);\n  vec3 r1 = cross(sy, n), r2 = cross(n, sx);\n  float det = dot(sx, r1) * faceDirection;\n  vec2 dh = vec2(dFdx(h), dFdy(h));\n  vec3 grad = sign(det) * (dh.x * r1 + dh.y * r2);\n  return normalize(abs(det) * n - grad);\n}\n// a normal in the surface's own ways (u, v, out) turned into the view's, the ways found from the uv's change across\n// the pixel, as three's normal map without tangents finds them (getTangentFrame)\nvec3 lookPerturb(vec3 n, vec3 nts, float faceDirection) {\n  vec3 q0 = dFdx(-vViewPosition), q1 = dFdy(-vViewPosition);\n  vec3 q1perp = cross(q1, n), q0perp = cross(n, q0);\n  vec3 T = q1perp * lookGx.x + q0perp * lookGy.x;\n  vec3 B = q1perp * lookGx.y + q0perp * lookGy.y;\n  float det = max(dot(T, T), dot(B, B));\n  float scale = det == 0.0 ? 0.0 : faceDirection * inversesqrt(det);\n  return normalize(T * (nts.x * scale) + B * (nts.y * scale) + n * nts.z);\n}\n\nstruct Look {\n  vec3 colour; float rough; float metal; float height; vec3 nts; vec3 normal; bool ownNormal;\n  float ao; float aoDirect; float alpha; vec3 glow;\n  float clearcoat; float clearcoatRough; vec3 sheen; float sheenRough; float iridescence; float iridIor; float iridThick;\n  float transmission; float thickness; vec3 attColour; float attDist; float ior; float dispersion;\n};\nLook lookStart() {\n  Look k;\n  k.colour = vec3(0.5); k.rough = 0.8; k.metal = 0.0; k.height = 0.0; k.nts = vec3(0.0, 0.0, 1.0);\n  k.normal = vec3(0.0, 0.0, 1.0); k.ownNormal = false; k.ao = 1.0; k.aoDirect = 0.0; k.alpha = 1.0; k.glow = vec3(0.0);\n  k.clearcoat = 0.0; k.clearcoatRough = 0.1; k.sheen = vec3(0.0); k.sheenRough = 0.5;\n  k.iridescence = 0.0; k.iridIor = 1.3; k.iridThick = 400.0;\n  k.transmission = 0.0; k.thickness = 0.0; k.attColour = vec3(1.0); k.attDist = 1e9; k.ior = 1.5; k.dispersion = 0.0;\n  return k;\n}\n\n\nuniform highp sampler2DArray lookPictures;\nuniform float lookMeans[1];\nvec3 lookSrgb(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }\nvec4 picData(int t, vec2 uv, float scale) { return textureGrad(lookPictures, vec3(uv, float(t)), lookGx * scale, lookGy * scale); }\nvec3 picColour(int t, vec2 uv, float scale) { return lookSrgb(picData(t, uv, scale).rgb); }\nvec4 picDataLod(int t, vec2 uv, float lod) { return textureLod(lookPictures, vec3(uv, float(t)), lod); }\nvec3 picColourLod(int t, vec2 uv, float lod) { return lookSrgb(picDataLod(t, uv, lod).rgb); }\nfloat picMean(int t) { return lookMeans[t]; }\n// a picture laid once over a piece by the place its geometry gives in s3 (0 to 1 each way): `at` is that place\nvec4 picDataS3(int t, vec2 at) { return textureGrad(lookPictures, vec3(at, float(t)), lookS3x, lookS3y); }\n\nvec3 p_dbBark;\nvec3 p_dbUnder;\nvec3 p_dbDeep;\nvec3 p_dbSilverC;\nfloat p_dbScale;\nfloat p_dbStretch;\nfloat p_dbTwist;\nfloat p_dbStrip;\nfloat p_dbFurrow;\nfloat p_dbPlates;\nfloat p_dbSilver;\nfloat p_dbRelief;\nvec3 p_dfLeafA;\nvec3 p_dfLeafB;\nvec3 p_dfTip;\nvec3 p_dfDeep;\nfloat p_dfLeaves;\nfloat p_dfLength;\nfloat p_dfCover;\nfloat p_dfTufts;\nfloat p_dfBerry;\nvec3 p_dfBerryC;\nfloat p_dfBerrySize;\nfloat p_dfFelt;\nfloat p_dfGloss;\nfloat p_dfDepth;\nfloat p_lcCut;\nfloat p_lcRough;\nint t_lcPic;\n\n\n\nvoid look_3(inout Look k, int lookRow) {\n  p_lcCut = texelFetch(lookSettings, ivec2(0, lookRow), 0).r;\n  p_lcRough = texelFetch(lookSettings, ivec2(1, lookRow), 0).r;\n  t_lcPic = 0;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    vec4 lcD = picDataS3(t_lcPic, s3);\n    // the picture's colour is stored times its alpha: divided out, then made linear\n    vec3 lcC = clamp(lcD.rgb / max(lcD.a, 0.02), 0.0, 1.0);\n    lcC = mix(lcC / 12.92, pow((lcC + 0.055) / 1.055, vec3(2.4)), step(0.04045, lcC));\n    k.colour = lcC;\n    k.alpha = lcD.a >= p_lcCut ? 1.0 : 0.0;\n    k.rough = p_lcRough;\n    k.metal = 0.0;\n\n}\n\n\nLook lookRun(int id) {\n  Look k = lookStart();\n  switch (id) {\n    case 3: look_3(k, 3); break;\n  }\n  if (lookDebug > 0.5) {\n    switch (id) {\n      case 3: k.colour = vec3(1.0, 1.0, 1.0); break;\n    }\n  }\n  return k;\n}\nfloat lookShadow(int id, vec3 Lview) {\n  \n  return 1.0;\n}\n",
+   "features": {
+    "clearcoat": false,
+    "sheen": false,
+    "iridescence": false,
+    "dispersion": false,
+    "transmission": false
+   }
+  },
+  "all": {
+   "ids": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "fragmentPars": "uniform highp sampler2D lookSettings;\n\nflat varying float vLookId;\nvarying vec3 vLookInfo;\nvarying vec2 vLookUv;\nvarying vec3 vLookWorld;\nvarying vec3 vLookWN;\nvarying vec3 vS0;\nvarying vec3 vS1;\nvarying vec4 vS2;\nvarying vec2 vS3;\n#define s0 vS0\n#define s1 vS1\n#define s2 vS2\n#define s3 vS3\nuniform float lookView;\nuniform float lookDebug;\n// the looks' clock: seconds, one for every look of the scene, set each frame by the page (install.js's `time`) or the\n// game (core's supershader3d). It grows without end, and a hash of a large number is no longer random, so a look never\n// feeds it to its noise as it is: it takes it through kcycle or kloop, whose numbers stay inside one period.\nuniform float lookTime;\n// the uv's change across the pixel, worked out once where every pixel of the quad runs it, so a picture read inside a\n// look's branch still knows its sharpness\nvec2 lookGx, lookGy;\n// the slot s3's change across the pixel, worked out beside them, for a picture laid by a place the geometry gives in s3\nvec2 lookS3x, lookS3y;\n\nfloat kh(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }\nfloat kh1(float x) { return fract(sin(x * 91.7) * 43758.5453); }\nfloat kn(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  vec2 u = f * f * (3.0 - 2.0 * f);\n  return mix(mix(kh(i), kh(i + vec2(1, 0)), u.x), mix(kh(i + vec2(0, 1)), kh(i + vec2(1, 1)), u.x), u.y);\n}\nfloat kfbm(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 5; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s / 0.97;\n}\nfloat kfbm4(vec2 p) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 4; i++) { s += a * kn(p); p = p * 2.03 + 17.1; a *= 0.5; }\n  return s;\n}\n// a feature f metres across fades to its mean where it is finer than a pixel\nfloat kfade(float f) { vec2 fw = abs(lookGx) + abs(lookGy); return clamp(1.5 - (fw.x + fw.y) / f, 0.0, 1.0); }\n// cells of jittered seeds: the distance to the nearest, its number (0 to 1), and how far the second is past it\nfloat kvor(vec2 p, out float id, out float edge) {\n  vec2 i = floor(p), f = fract(p);\n  float d1 = 8.0, d2 = 8.0;\n  vec2 best = vec2(0.0);\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 c = i + o;\n    vec2 r = o + vec2(kh(c), kh(c + 7.3)) - f;\n    float d = dot(r, r);\n    if (d < d1) { d2 = d1; d1 = d; best = c; } else if (d < d2) { d2 = d; }\n  }\n  id = kh(best + 3.7);\n  edge = sqrt(d2) - sqrt(d1);\n  return sqrt(d1);\n}\n// a dimple field: the distance to the nearest of jittered cells' seeds\nfloat kcell(vec2 p) {\n  vec2 i = floor(p), f = fract(p);\n  float d = 8.0;\n  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n    vec2 o = vec2(x, y);\n    vec2 r = o + vec2(kh(i + o), kh(i + o + 7.3)) - f;\n    d = min(d, dot(r, r));\n  }\n  return sqrt(d);\n}\n// courses: the row along v, the piece in it along u (each row offset), where in the piece (0 to 1 each way)\nvec4 kcourse(vec2 uv, float row, float wide, float jitter, float seed, out vec2 id) {\n  float r = floor(uv.y / row);\n  float shift = kh1(r + seed) * wide;\n  float w = wide * (1.0 - jitter * 0.5 + jitter * kh(vec2(r, floor((uv.x + shift) / wide) + seed)));\n  float x = (uv.x + shift) / w;\n  id = vec2(r, floor(x));\n  return vec4(fract(x), fract(uv.y / row), r, w);\n}\n// marble's veins: thin lines wandering through a warped field, the main ones and finer ones across them\nfloat kveins(vec2 p, float seed) {\n  float w = kfbm(p * 1.3 + seed) * 4.0;\n  float a = pow(1.0 - abs(sin((p.x * 1.6 + p.y * 0.6 + w) * 3.14159)), 22.0);\n  float b = pow(1.0 - abs(sin((p.y * 2.7 - p.x * 1.1 + kfbm(p * 2.6 + seed + 7.0) * 3.0) * 3.14159)), 50.0);\n  return clamp(a + 0.6 * b, 0.0, 1.0);\n}\n// wood's grain along u: its rings' lines (late wood 1, early 0) wandering across v, and its fibres\nfloat kring(vec2 uv, float seed, float rings) {\n  float w = kfbm(vec2(uv.x * 0.35, uv.y * 2.0) + seed) * 1.6;\n  return smoothstep(0.5, 0.95, fract(uv.y * rings + w + uv.x * 0.04));\n}\nfloat kfibre(vec2 uv, float seed) { return kn(vec2(uv.x * 3.0, uv.y * 420.0) + seed) * kfade(0.003); }\n// how strongly a cloth's weave shows: a plain weave of threads t metres across, over and under\nfloat kweave(vec2 uv, float t) {\n  vec2 q = uv / t;\n  float warp = sin(q.x * 3.14159), weft = sin(q.y * 3.14159);\n  float over = step(0.0, warp * weft);\n  return mix(0.5, mix(0.8, 1.08, over) * (0.85 + 0.15 * abs(over > 0.5 ? weft : warp)), kfade(t * 2.0));\n}\n// a cycle of `period` seconds: how far through it the clock is, 0 to 1, for a look that pulses or goes round (anything\n// of 6.28318 times it, a sin or a turn, comes back to where it began with no seam)\nfloat kcycle(float period) { return fract(lookTime / period); }\n// a drift that never repeats, for a look that flows, boils or creeps: two phases of one cycle of `period` seconds, half\n// a cycle apart, each 0 to 1 (x and y), and the share of the first (z). A look moves its pattern on by each phase, reads\n// it at both and mixes them by z; each phase jumps back to 0 only where its share is 0, so the drift shows no seam\nvec3 kloop(float period) { float a = fract(lookTime / period); return vec3(a, fract(a + 0.5), 1.0 - abs(2.0 * a - 1.0)); }\n// value noise in three numbers whose third repeats every `n` cells (a whole number): a pattern that churns in place,\n// for what boils, breathes or glows and fades, never sliding as a drift does. Given p.z = kcycle(period) * n it changes\n// n cells' worth over the period and comes back to where it began at its end with no seam, so nothing is mixed and\n// nothing shows twice\nfloat kh3(vec3 c) { return fract(sin(dot(c, vec3(127.1, 311.7, 74.7))) * 43758.5453123); }\nfloat kn3(vec3 p, float n) {\n  vec3 i = floor(p), f = fract(p);\n  vec3 u = f * f * (3.0 - 2.0 * f);\n  float z0 = mod(i.z, n), z1 = mod(i.z + 1.0, n);\n  float a0 = mix(mix(kh3(vec3(i.xy, z0)), kh3(vec3(i.xy + vec2(1, 0), z0)), u.x),\n                 mix(kh3(vec3(i.xy + vec2(0, 1), z0)), kh3(vec3(i.xy + vec2(1, 1), z0)), u.x), u.y);\n  float a1 = mix(mix(kh3(vec3(i.xy, z1)), kh3(vec3(i.xy + vec2(1, 0), z1)), u.x),\n                 mix(kh3(vec3(i.xy + vec2(0, 1), z1)), kh3(vec3(i.xy + vec2(1, 1), z1)), u.x), u.y);\n  return mix(a0, a1, u.z);\n}\n// four sizes of it, each finer one churning twice as fast and still repeating on the same cycle\nfloat kfbm3(vec3 p, float n) {\n  float a = 0.5, s = 0.0;\n  for (int i = 0; i < 4; i++) { s += a * kn3(p, n); p = vec3(p.xy * 2.03 + 17.1, p.z * 2.0); n *= 2.0; a *= 0.5; }\n  return s / 0.9375;\n}\n// the normal bent by a height field, as three's bump map bends it (perturbNormalArb)\nvec3 kitBump(vec3 pos, vec3 n, float h, float faceDirection) {\n  vec3 sx = dFdx(pos), sy = dFdy(pos);\n  vec3 r1 = cross(sy, n), r2 = cross(n, sx);\n  float det = dot(sx, r1) * faceDirection;\n  vec2 dh = vec2(dFdx(h), dFdy(h));\n  vec3 grad = sign(det) * (dh.x * r1 + dh.y * r2);\n  return normalize(abs(det) * n - grad);\n}\n// a normal in the surface's own ways (u, v, out) turned into the view's, the ways found from the uv's change across\n// the pixel, as three's normal map without tangents finds them (getTangentFrame)\nvec3 lookPerturb(vec3 n, vec3 nts, float faceDirection) {\n  vec3 q0 = dFdx(-vViewPosition), q1 = dFdy(-vViewPosition);\n  vec3 q1perp = cross(q1, n), q0perp = cross(n, q0);\n  vec3 T = q1perp * lookGx.x + q0perp * lookGy.x;\n  vec3 B = q1perp * lookGx.y + q0perp * lookGy.y;\n  float det = max(dot(T, T), dot(B, B));\n  float scale = det == 0.0 ? 0.0 : faceDirection * inversesqrt(det);\n  return normalize(T * (nts.x * scale) + B * (nts.y * scale) + n * nts.z);\n}\n\nstruct Look {\n  vec3 colour; float rough; float metal; float height; vec3 nts; vec3 normal; bool ownNormal;\n  float ao; float aoDirect; float alpha; vec3 glow;\n  float clearcoat; float clearcoatRough; vec3 sheen; float sheenRough; float iridescence; float iridIor; float iridThick;\n  float transmission; float thickness; vec3 attColour; float attDist; float ior; float dispersion;\n};\nLook lookStart() {\n  Look k;\n  k.colour = vec3(0.5); k.rough = 0.8; k.metal = 0.0; k.height = 0.0; k.nts = vec3(0.0, 0.0, 1.0);\n  k.normal = vec3(0.0, 0.0, 1.0); k.ownNormal = false; k.ao = 1.0; k.aoDirect = 0.0; k.alpha = 1.0; k.glow = vec3(0.0);\n  k.clearcoat = 0.0; k.clearcoatRough = 0.1; k.sheen = vec3(0.0); k.sheenRough = 0.5;\n  k.iridescence = 0.0; k.iridIor = 1.3; k.iridThick = 400.0;\n  k.transmission = 0.0; k.thickness = 0.0; k.attColour = vec3(1.0); k.attDist = 1e9; k.ior = 1.5; k.dispersion = 0.0;\n  return k;\n}\n\n\nuniform highp sampler2DArray lookPictures;\nuniform float lookMeans[1];\nvec3 lookSrgb(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }\nvec4 picData(int t, vec2 uv, float scale) { return textureGrad(lookPictures, vec3(uv, float(t)), lookGx * scale, lookGy * scale); }\nvec3 picColour(int t, vec2 uv, float scale) { return lookSrgb(picData(t, uv, scale).rgb); }\nvec4 picDataLod(int t, vec2 uv, float lod) { return textureLod(lookPictures, vec3(uv, float(t)), lod); }\nvec3 picColourLod(int t, vec2 uv, float lod) { return lookSrgb(picDataLod(t, uv, lod).rgb); }\nfloat picMean(int t) { return lookMeans[t]; }\n// a picture laid once over a piece by the place its geometry gives in s3 (0 to 1 each way): `at` is that place\nvec4 picDataS3(int t, vec2 at) { return textureGrad(lookPictures, vec3(at, float(t)), lookS3x, lookS3y); }\n\nvec3 p_dbBark;\nvec3 p_dbUnder;\nvec3 p_dbDeep;\nvec3 p_dbSilverC;\nfloat p_dbScale;\nfloat p_dbStretch;\nfloat p_dbTwist;\nfloat p_dbStrip;\nfloat p_dbFurrow;\nfloat p_dbPlates;\nfloat p_dbSilver;\nfloat p_dbRelief;\nvec3 p_dfLeafA;\nvec3 p_dfLeafB;\nvec3 p_dfTip;\nvec3 p_dfDeep;\nfloat p_dfLeaves;\nfloat p_dfLength;\nfloat p_dfCover;\nfloat p_dfTufts;\nfloat p_dfBerry;\nvec3 p_dfBerryC;\nfloat p_dfBerrySize;\nfloat p_dfFelt;\nfloat p_dfGloss;\nfloat p_dfDepth;\nfloat p_lcCut;\nfloat p_lcRough;\nint t_lcPic;\n\n\n\n    // the bark on one upright plane: p.x across, p.y up. Returns (colour mix toward the under-bark, deep, silver\n    // grain), the relief in .w\n    vec4 dbUp(vec2 p, float scale, float stretch, float twist, float strip, float furrow, float plates, float silver) {\n      // the twist: the features lean across as they go up, twist metres across for every metre up\n      p.x += p.y * twist;\n      vec2 q = vec2(p.x * scale, p.y * scale / stretch);\n      float n = kfbm(q + vec2(0.0, kn(q * 0.3) * 2.0));\n      // strips: long fibres, each its own tone, their edges lifting; the red under-bark where one has peeled\n      float fib = kn(vec2(q.x * 3.0, q.y * 0.6));\n      float peel = smoothstep(0.66, 0.82, kfbm(q * vec2(0.6, 0.2) + 5.0)) * strip;\n      // a strip's edge: a ragged dark seam where one strip lifts off the next, each seam its own course\n      float seamAt = fract(q.x + 0.9 * n + 0.4 * kn(vec2(q.x * 0.5, q.y * 0.15)));\n      float stripEdge = (1.0 - smoothstep(0.0, 0.06, abs(seamAt - 0.5))) * smoothstep(0.35, 0.6, kn(q * vec2(1.0, 0.3) + 2.0)) * strip;\n      // furrows: deep valleys between ridges, the ridges flat-topped and broken across\n      float ridge = smoothstep(0.15, 0.45, abs(fract(q.x * 0.5 + 0.6 * n) - 0.5) * 2.0);\n      float ridgeBreak = smoothstep(0.0, 0.08, abs(fract(q.y * 0.3 + n) - 0.5) - 0.42);\n      float furrowDeep = (1.0 - ridge * (1.0 - ridgeBreak * 0.5)) * furrow;\n      // plates: cells stretched up, dark between them, orange where one has flaked\n      float pid, pe;\n      // q is already stretched up the trunk by the stretch setting: the plates come out long that way\n      kvor(q + vec2(0.3 * kn(q * 2.0), 0.0), pid, pe);\n      float plateGap = (1.0 - smoothstep(0.01, 0.06, pe)) * plates;\n      float flake = step(0.9, pid) * smoothstep(0.03, 0.12, pe) * plates;\n      // the silvered wood: its grain lines, cracks along it\n      float grain = kn(vec2(q.x * 6.0, q.y * 0.4));\n      float crack = (1.0 - smoothstep(0.0, 0.03, abs(kfbm(vec2(q.x * 1.3, q.y * 0.15) + 9.0) - 0.5))) * silver;\n      float under = clamp(peel + flake, 0.0, 1.0);\n      float deep = clamp(stripEdge * 0.6 + furrowDeep + plateGap + crack, 0.0, 1.0);\n      float relief = (fib - 0.5) * 0.3 * strip + ridge * furrow - plateGap * 0.5 - crack * 0.6 + (grain - 0.5) * 0.2 * silver;\n      // its tone: the fibres of a strip each their own, the grain of silvered wood\n      float tone = mix(mix(0.5, fib, strip), grain, silver);\n      return vec4(under, deep, tone, relief);\n    }\n  \n\n    // one layer of leaf elements at p (cells of 1): how much of an element covers it (0 to 1), its number, and where\n    // along it (0 its stalk, 1 its tip)\n    float dfLayer(vec2 p, float size, float len, out float id, out float along) {\n      vec2 i = floor(p), f = fract(p);\n      float best = 0.0;\n      id = 0.0; along = 0.5;\n      for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {\n        vec2 o = vec2(x, y);\n        vec2 c = i + o;\n        float h = kh(c + 1.3);\n        vec2 r = f - o - vec2(kh(c), kh(c + 7.3));\n        float a = h * 6.2832;\n        vec2 ax = vec2(cos(a), sin(a));\n        float u = dot(r, ax), v = dot(r, vec2(-ax.y, ax.x));\n        float l = size * (0.8 + 0.45 * kh(c + 2.9));\n        float d = length(vec2(u / l, v * len / l));\n        float cov = 1.0 - smoothstep(0.8, 1.0, d);\n        if (cov > best) { best = cov; id = h; along = clamp(u / l * 0.5 + 0.5, 0.0, 1.0); }\n      }\n      return best;\n    }\n    // the two layers and the tufts on one plane: (top layer, under layer, tuft crown) and the top layer's id and along\n    vec3 dfPlane(vec2 p, float leaves, float cover, float len, float tufts, out float id0, out float al0, out float id1) {\n      float al1;\n      float l0 = dfLayer(p * leaves, cover, len, id0, al0);\n      float l1 = dfLayer(p * leaves * 1.17 + 17.0, cover, len, id1, al1);\n      float sid, se;\n      float sd = kvor(p * tufts + vec2(kn(p * 12.0), kn(p * 12.0 + 3.0)) * 0.35, sid, se);\n      float rag = (kfbm4(p * tufts * 3.0 + 11.0) - 0.5) * 0.35;\n      float crown = smoothstep(0.85, 0.3, sd + rag) * (0.85 + 0.3 * kh1(sid * 23.0));\n      return vec3(l0, l1, crown);\n    }\n  \n\nvoid look_0(inout Look k, int lookRow) {\n  p_dbBark = texelFetch(lookSettings, ivec2(0, lookRow), 0).rgb;\n  p_dbUnder = texelFetch(lookSettings, ivec2(1, lookRow), 0).rgb;\n  p_dbDeep = texelFetch(lookSettings, ivec2(2, lookRow), 0).rgb;\n  p_dbSilverC = texelFetch(lookSettings, ivec2(3, lookRow), 0).rgb;\n  p_dbScale = texelFetch(lookSettings, ivec2(4, lookRow), 0).r;\n  p_dbStretch = texelFetch(lookSettings, ivec2(5, lookRow), 0).r;\n  p_dbTwist = texelFetch(lookSettings, ivec2(6, lookRow), 0).r;\n  p_dbStrip = texelFetch(lookSettings, ivec2(7, lookRow), 0).r;\n  p_dbFurrow = texelFetch(lookSettings, ivec2(8, lookRow), 0).r;\n  p_dbPlates = texelFetch(lookSettings, ivec2(9, lookRow), 0).r;\n  p_dbSilver = texelFetch(lookSettings, ivec2(10, lookRow), 0).r;\n  p_dbRelief = texelFetch(lookSettings, ivec2(11, lookRow), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    // the frame the features are laid in: along the limb's way where the kind gave it, else up the world\n    vec3 dbAx = length(s0) > 0.5 ? normalize(s0) : vec3(0.0, 1.0, 0.0);\n    vec3 dbRef = abs(dbAx.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);\n    vec3 dbE1 = normalize(cross(dbAx, dbRef));\n    vec3 dbE2 = cross(dbAx, dbE1);\n    vec3 dbW = pow(abs(vec3(dot(wn, dbE1), dot(wn, dbAx), dot(wn, dbE2))), vec3(4.0));\n    dbW /= dbW.x + dbW.y + dbW.z;\n    vec2 dbO = vec2(seed * 3.7, seed * 1.3);\n    float dbAlong = dot(wp, dbAx);\n    // facing e1: laid on the plane of e2 and the way; facing e2: on the plane of e1 and the way\n    vec4 dbX = dbUp(vec2(dot(wp, dbE2), dbAlong) + dbO, p_dbScale, p_dbStretch, p_dbTwist, p_dbStrip, p_dbFurrow, p_dbPlates, p_dbSilver);\n    vec4 dbZ = dbUp(vec2(dot(wp, dbE1), dbAlong) + dbO.yx, p_dbScale, p_dbStretch, p_dbTwist, p_dbStrip, p_dbFurrow, p_dbPlates, p_dbSilver);\n    // facing along the way: a cut end or a level top, its rings\n    float dbRing = kring(vec2(dot(wp, dbE1), dot(wp, dbE2)) * 2.0, seed, 14.0);\n    vec4 dbY = vec4(0.0, 0.2 * smoothstep(0.6, 0.9, dbRing), dbRing, (dbRing - 0.5) * 0.3);\n    float dbSide = dbW.x + dbW.z;\n    vec4 dbV = (dbX * dbW.x + dbZ * dbW.z) + dbY * dbW.y;\n    float dbF = kfade(1.5 / p_dbScale);\n    vec3 dbC = mix(p_dbBark, p_dbUnder, dbV.x * dbF);\n    dbC *= (0.85 + 0.3 * kfbm(wp.xz * 3.0 + wp.y * 0.5 + seed)) * mix(1.0, 0.7 + 0.6 * dbV.z, dbF);\n    // silvered: grey wood, its grain's tones, warm in the cracks\n    vec3 dbSilverWood = p_dbSilverC * (0.82 + 0.3 * dbV.z * dbF);\n    dbC = mix(dbC, dbSilverWood, p_dbSilver);\n    dbC = mix(dbC, p_dbDeep, dbV.y * dbF * 0.85);\n    k.colour = dbC;\n    k.rough = mix(0.92, 0.8, p_dbSilver);\n    k.height = p_dbRelief * dbV.w * dbF;\n    k.ao = 1.0 - 0.5 * dbV.y * dbF;\n    if (lookView > 0.5 && lookView < 1.5) k.colour = vec3(dbV.x, dbV.y, dbSide);\n\n}\n\n\nvoid look_2(inout Look k, int lookRow) {\n  p_dfLeafA = texelFetch(lookSettings, ivec2(0, lookRow), 0).rgb;\n  p_dfLeafB = texelFetch(lookSettings, ivec2(1, lookRow), 0).rgb;\n  p_dfTip = texelFetch(lookSettings, ivec2(2, lookRow), 0).rgb;\n  p_dfDeep = texelFetch(lookSettings, ivec2(3, lookRow), 0).rgb;\n  p_dfLeaves = texelFetch(lookSettings, ivec2(4, lookRow), 0).r;\n  p_dfLength = texelFetch(lookSettings, ivec2(5, lookRow), 0).r;\n  p_dfCover = texelFetch(lookSettings, ivec2(6, lookRow), 0).r;\n  p_dfTufts = texelFetch(lookSettings, ivec2(7, lookRow), 0).r;\n  p_dfBerry = texelFetch(lookSettings, ivec2(8, lookRow), 0).r;\n  p_dfBerryC = texelFetch(lookSettings, ivec2(9, lookRow), 0).rgb;\n  p_dfBerrySize = texelFetch(lookSettings, ivec2(10, lookRow), 0).r;\n  p_dfFelt = texelFetch(lookSettings, ivec2(11, lookRow), 0).r;\n  p_dfGloss = texelFetch(lookSettings, ivec2(12, lookRow), 0).r;\n  p_dfDepth = texelFetch(lookSettings, ivec2(13, lookRow), 0).r;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    vec3 dfW = pow(abs(wn), vec3(4.0));\n    dfW /= dfW.x + dfW.y + dfW.z;\n    vec3 dfO = vec3(seed * 3.1, seed * 1.7, seed * 2.3);\n    float dfI0x, dfA0x, dfI1x, dfI0y, dfA0y, dfI1y, dfI0z, dfA0z, dfI1z;\n    vec3 dfX = dfPlane(wp.zy + dfO.xy, p_dfLeaves, p_dfCover, p_dfLength, p_dfTufts, dfI0x, dfA0x, dfI1x);\n    vec3 dfY = dfPlane(wp.xz + dfO.yz, p_dfLeaves, p_dfCover, p_dfLength, p_dfTufts, dfI0y, dfA0y, dfI1y);\n    vec3 dfZ = dfPlane(wp.xy + dfO.zx, p_dfLeaves, p_dfCover, p_dfLength, p_dfTufts, dfI0z, dfA0z, dfI1z);\n    // the plane that faces the surface most squarely gives each element's number (a blend of numbers means nothing)\n    float dfPick = dfW.x > dfW.y ? (dfW.x > dfW.z ? 0.0 : 2.0) : (dfW.y > dfW.z ? 1.0 : 2.0);\n    float dfId0 = dfPick < 0.5 ? dfI0x : dfPick < 1.5 ? dfI0y : dfI0z;\n    float dfAl0 = dfPick < 0.5 ? dfA0x : dfPick < 1.5 ? dfA0y : dfA0z;\n    float dfId1 = dfPick < 0.5 ? dfI1x : dfPick < 1.5 ? dfI1y : dfI1z;\n    vec3 dfL = dfX * dfW.x + dfY * dfW.y + dfZ * dfW.z;\n    float dfF = kfade(1.5 / p_dfLeaves);\n    float dfTuftF = kfade(1.0 / p_dfTufts);\n    float dfCrown = mix(0.7, dfL.z, dfTuftF);\n    // the top layer thins toward a tuft's edge, so the layer under it and the shade show there\n    float dfL0 = dfL.x * smoothstep(0.15, 0.55, dfCrown);\n    float dfL1 = dfL.y * smoothstep(0.0, 0.3, dfCrown);\n    vec3 dfC0 = mix(p_dfLeafA, p_dfLeafB, dfId0);\n    dfC0 = mix(dfC0, p_dfTip, smoothstep(0.5, 1.0, dfAl0) * 0.6 * kh1(dfId0 * 13.0));\n    vec3 dfC1 = mix(p_dfLeafA, p_dfLeafB, dfId1) * 0.5;\n    vec3 dfC = mix(p_dfDeep, dfC1, dfL1);\n    dfC = mix(dfC, dfC0, dfL0);\n    vec3 dfMean = mix(p_dfLeafA, p_dfLeafB, 0.5) * 0.7;\n    dfC = mix(dfMean, dfC, dfF) * mix(0.4, 1.1, dfCrown);\n    // berries or flower heads: small rounds sitting on the top layer, where a cell has one\n    float dfBid, dfBe;\n    vec2 dfBp = (dfPick < 0.5 ? wp.zy : dfPick < 1.5 ? wp.xz : wp.xy) + dfO.xy;\n    float dfBd = kvor(dfBp / (p_dfBerrySize * 5.0), dfBid, dfBe);\n    float dfB = step(1.0 - p_dfBerry, dfBid) * (1.0 - smoothstep(0.16, 0.2, dfBd)) * smoothstep(0.3, 0.6, dfCrown)\n      * kfade(p_dfBerrySize * 2.0);\n    float dfBmean = p_dfBerry * 0.1 * (1.0 - kfade(p_dfBerrySize * 2.0));\n    dfC = mix(dfC, p_dfBerryC * (0.8 + 0.4 * fract(dfBid * 31.0)), max(dfB, dfBmean));\n    // the felt: a silver film of hairs over the leaves, paler and sheened\n    dfC = mix(dfC, dfC * 1.6 + vec3(0.05, 0.055, 0.05), p_dfFelt * dfL0);\n    float dfDepthAt = max(dfL0, dfL1 * 0.6);\n    k.colour = dfC;\n    k.rough = mix(0.85, mix(0.75, 0.35, p_dfGloss), dfL0 * dfF);\n    k.height = p_dfDepth * (0.35 * mix(0.6, dfDepthAt, dfF) + 0.65 * dfCrown) + 0.004 * dfB;\n    k.ao = mix(0.75, mix(0.35, 1.0, dfDepthAt), dfF) * mix(0.5, 1.0, dfCrown);\n    k.aoDirect = 0.6;\n    k.sheen = mix(p_dfTip * 0.35, vec3(0.5), p_dfFelt * 0.6);\n    k.sheenRough = 0.5;\n    if (lookView > 0.5 && lookView < 1.5) k.colour = vec3(dfL0, dfB, dfCrown);\n\n}\n\nvoid look_3(inout Look k, int lookRow) {\n  p_lcCut = texelFetch(lookSettings, ivec2(0, lookRow), 0).r;\n  p_lcRough = texelFetch(lookSettings, ivec2(1, lookRow), 0).r;\n  t_lcPic = 0;\n  vec2 uv = vLookUv;\n  float seed = vLookInfo.y * 7.13 + vLookInfo.z * 1.71;\n  vec3 wp = vLookWorld;\n  vec3 wn = normalize(vLookWN);\n\n    vec4 lcD = picDataS3(t_lcPic, s3);\n    // the picture's colour is stored times its alpha: divided out, then made linear\n    vec3 lcC = clamp(lcD.rgb / max(lcD.a, 0.02), 0.0, 1.0);\n    lcC = mix(lcC / 12.92, pow((lcC + 0.055) / 1.055, vec3(2.4)), step(0.04045, lcC));\n    k.colour = lcC;\n    k.alpha = lcD.a >= p_lcCut ? 1.0 : 0.0;\n    k.rough = p_lcRough;\n    k.metal = 0.0;\n\n}\n\n\n\n\n\nLook lookRun(int id) {\n  Look k = lookStart();\n  switch (id) {\n    case 0: look_0(k, 0); break;\n    case 1: look_0(k, 1); break;\n    case 2: look_2(k, 2); break;\n    case 3: look_3(k, 3); break;\n  }\n  if (lookDebug > 0.5) {\n    switch (id) {\n      case 0: k.colour = vec3(0.1559264637078274, 0.10224173308810132, 0.06480326669290577); break;\n      case 1: k.colour = vec3(0.4019777798321958, 0.3613067797835095, 0.2961382707983211); break;\n      case 2: k.colour = vec3(0.06847816984440017, 0.11697066775851084, 0.03954623527673284); break;\n      case 3: k.colour = vec3(1.0, 1.0, 1.0); break;\n    }\n  }\n  return k;\n}\nfloat lookShadow(int id, vec3 Lview) {\n  \n  return 1.0;\n}\n",
+   "features": {
+    "clearcoat": false,
+    "sheen": true,
+    "iridescence": false,
+    "dispersion": false,
+    "transmission": false
+   }
+  }
+ },
+ "needs": [],
+ "pictures": [
+  {
+   "asset": "juniper_card",
+   "file": "juniper_card.webp",
+   "set": "card",
+   "source": "juniper_card.webp",
+   "colour": true
+  }
+ ],
+ "settings": {
+  "width": 14,
+  "materials": [
+   [
+    {
+     "name": "dbBark",
+     "type": "vec3",
+     "value": [
+      0.28,
+      0.24,
+      0.19
+     ]
+    },
+    {
+     "name": "dbUnder",
+     "type": "vec3",
+     "value": [
+      0.3,
+      0.12,
+      0.06
+     ]
+    },
+    {
+     "name": "dbDeep",
+     "type": "vec3",
+     "value": [
+      0.04,
+      0.03,
+      0.025
+     ]
+    },
+    {
+     "name": "dbSilverC",
+     "type": "vec3",
+     "value": [
+      0.42,
+      0.4,
+      0.36
+     ]
+    },
+    {
+     "name": "dbScale",
+     "type": "float",
+     "value": 18
+    },
+    {
+     "name": "dbStretch",
+     "type": "float",
+     "value": 10
+    },
+    {
+     "name": "dbTwist",
+     "type": "float",
+     "value": 0.2
+    },
+    {
+     "name": "dbStrip",
+     "type": "float",
+     "value": 1
+    },
+    {
+     "name": "dbFurrow",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "dbPlates",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "dbSilver",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "dbRelief",
+     "type": "float",
+     "value": 0.008
+    }
+   ],
+   [
+    {
+     "name": "dbBark",
+     "type": "vec3",
+     "value": [
+      0.2,
+      0.16,
+      0.12
+     ]
+    },
+    {
+     "name": "dbUnder",
+     "type": "vec3",
+     "value": [
+      0.3,
+      0.12,
+      0.06
+     ]
+    },
+    {
+     "name": "dbDeep",
+     "type": "vec3",
+     "value": [
+      0.04,
+      0.03,
+      0.025
+     ]
+    },
+    {
+     "name": "dbSilverC",
+     "type": "vec3",
+     "value": [
+      0.45,
+      0.42,
+      0.36
+     ]
+    },
+    {
+     "name": "dbScale",
+     "type": "float",
+     "value": 10
+    },
+    {
+     "name": "dbStretch",
+     "type": "float",
+     "value": 12
+    },
+    {
+     "name": "dbTwist",
+     "type": "float",
+     "value": 0.3
+    },
+    {
+     "name": "dbStrip",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "dbFurrow",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "dbPlates",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "dbSilver",
+     "type": "float",
+     "value": 1
+    },
+    {
+     "name": "dbRelief",
+     "type": "float",
+     "value": 0.004
+    }
+   ],
+   [
+    {
+     "name": "dfLeafA",
+     "type": "vec3",
+     "value": [
+      0.08,
+      0.13,
+      0.065
+     ]
+    },
+    {
+     "name": "dfLeafB",
+     "type": "vec3",
+     "value": [
+      0.15,
+      0.2,
+      0.08
+     ]
+    },
+    {
+     "name": "dfTip",
+     "type": "vec3",
+     "value": [
+      0.24,
+      0.27,
+      0.11
+     ]
+    },
+    {
+     "name": "dfDeep",
+     "type": "vec3",
+     "value": [
+      0.008,
+      0.012,
+      0.006
+     ]
+    },
+    {
+     "name": "dfLeaves",
+     "type": "float",
+     "value": 45
+    },
+    {
+     "name": "dfLength",
+     "type": "float",
+     "value": 3.5
+    },
+    {
+     "name": "dfCover",
+     "type": "float",
+     "value": 0.5
+    },
+    {
+     "name": "dfTufts",
+     "type": "float",
+     "value": 4
+    },
+    {
+     "name": "dfBerry",
+     "type": "float",
+     "value": 0.12
+    },
+    {
+     "name": "dfBerryC",
+     "type": "vec3",
+     "value": [
+      0.22,
+      0.28,
+      0.4
+     ]
+    },
+    {
+     "name": "dfBerrySize",
+     "type": "float",
+     "value": 0.004
+    },
+    {
+     "name": "dfFelt",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "dfGloss",
+     "type": "float",
+     "value": 0
+    },
+    {
+     "name": "dfDepth",
+     "type": "float",
+     "value": 0.03
+    }
+   ],
+   [
+    {
+     "name": "lcCut",
+     "type": "float",
+     "value": 0.5
+    },
+    {
+     "name": "lcRough",
+     "type": "float",
+     "value": 0.8
+    }
+   ]
+  ]
+ },
+ "stack": {
+  "asset": "main_pictures",
+  "file": "main.pictures.ktx2",
+  "means": [
+   0.224219
+  ]
+ }
+}

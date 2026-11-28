@@ -47,6 +47,37 @@
           "type": "json",
           "url": "/games/demo_lod3d/assets/effects.json",
           "preload": true
+        },
+        "looks": {
+          "type": "json",
+          "url": "/games/demo_lod3d/assets/main.looks.json",
+          "preload": true
+        },
+        "juniper-glb": {
+          "type": "binary",
+          "url": "/games/demo_lod3d/assets/items/juniper.glb",
+          "preload": true
+        },
+        "juniper-item": {
+          "type": "json",
+          "url": "/games/demo_lod3d/assets/items/juniper.item.json",
+          "preload": true
+        },
+        "main_pictures": {
+          "type": "texture",
+          "url": "/games/demo_lod3d/assets/looks/main.pictures.ktx2",
+          "preload": true
+        }
+      }
+    },
+    "supershader3d": {
+      "looks": "looks"
+    },
+    "item3d": {
+      "items": {
+        "juniper": {
+          "glb": "juniper-glb",
+          "file": "juniper-item"
         }
       }
     },
@@ -213,7 +244,8 @@
           "terrain3d",
           "shapes3d",
           "instances3d",
-          "particle3d"
+          "particle3d",
+          "item3d"
         ]
       },
       "rings": [
@@ -887,6 +919,27 @@
             "leaf": 0
           }
         },
+        "junipers": {
+          "on": [
+            "land"
+          ],
+          "cell": 30,
+          "rows": {
+            "juniper": {}
+          },
+          "seed": 601,
+          "density": 0.5,
+          "size": [
+            1,
+            0.25
+          ],
+          "spacing": 30,
+          "item": {
+            "shells": 3,
+            "card": 1,
+            "shadow": 140
+          }
+        },
         "fireflies": {
           "on": [
             "firs"
@@ -922,7 +975,9 @@
     "loader",
     "scenemanager",
     "player",
+    "supershader3d",
     "terrain3d",
+    "item3d",
     "instances3d",
     "particle3d",
     "lod3d",
